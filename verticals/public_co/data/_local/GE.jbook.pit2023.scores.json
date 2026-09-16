@@ -1,0 +1,113 @@
+{
+  "ticker": "GE",
+  "cutoff": "2023-01-15",
+  "filing": "0000040545-22-000008_10-K.txt",
+  "cohort": "jbook_exposure_divergence",
+  "framework_note": "All pentagon_jbook queries against GE's military engine programs (F404/F414/F110/XA100/AETP and contractor='General Electric'/'GE Aviation') returned NOT_FOUND. Per J-Book Calibration Heuristic #7, NOT_FOUND is UNVERIFIABLE due to corpus coverage (~410 PEs, heavily weighted toward smaller-cap defense names — IonQ, Kratos, Mercury, etc.). GE Aerospace is a defense prime whose programs (combat fighter engines, helicopter engines, tanker engines) likely sit in Air Force / Navy procurement P-40 line items not seeded into this hand-curated corpus. This filing's own narrative is the limiting factor: GE does NOT name any specific Program Element, named program, or PE number — it describes military exposure only as 'fighters, bombers, tankers, helicopters' aggregate. Without named programs, the J-Book divergence pattern cannot be tested against this issuer. Cohort PASS for blinded-test purposes: no false-positive flags raised, and the framework correctly identifies that GE's 10-K is opaque on a per-program basis (which is itself a finding — limits the ability of public-disclosure-only analysts to test forward defense exposure).",
+  "scores": [
+    {
+      "claim_id": "GE-001",
+      "claim_text": "GE Aviation Military business unit revenue: $4,136M (2021), $4,572M (2020), $4,389M (2019).",
+      "severity": "UNVERIFIABLE",
+      "supports": ["filing-disclosed segment revenue table; pentagon_jbook returned NOT_FOUND for contractor='General Electric' / 'GE Aviation'"],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": {"signal": "NOT_FOUND", "n_matches": 0, "note": "Corpus coverage gap — GE Aviation programs not seeded in 410-PE J-Book corpus"},
+      "interpretation": "Military unit revenue is real (decline of ~10% YoY 2020→2021 and ~6% vs 2019), but cannot be tested for forward-divergence at the program level because GE does not name programs and the J-Book corpus does not enumerate GE programs. Coverage gap, not a red flag."
+    },
+    {
+      "claim_id": "GE-002",
+      "claim_text": "USG = 6% of total revenue 2021 (~$4.45B); Aviation defense = 5% of total revenue 2021 (~$3.7B).",
+      "severity": "PASS",
+      "supports": ["GE explicitly discloses % concentration in segment-revenue footnote; concentration is low (5-7% of total) — not existential"],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": {"signal": "NOT_FOUND", "n_matches": 0},
+      "interpretation": "5-7% defense concentration on a $74B revenue base is well-diversified — no single program's J-Book status can be existential. Even a catastrophic 50% defense-revenue cut would impact <3% of total revenue. Defense exposure is REAL but NOT MATERIAL enough for the J-Book divergence pattern to be load-bearing. Materiality test (Heuristic #2): low rank, low concentration → PASS regardless of J-Book finding."
+    },
+    {
+      "claim_id": "GE-003",
+      "claim_text": "Aviation forecasts strong military demand creating future growth opportunities.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["Forward-looking claim with no specific PE or program attached; F404/F414/F110/XA100/AETP all NOT_FOUND in corpus"],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": {"signal": "NOT_FOUND", "queries_run": ["contractor=General Electric", "program=F404", "program=F414", "program=F110"], "all_results": "NOT_FOUND"},
+      "interpretation": "Claim is hedged enough ('strong demand', 'modernize fleets') and unattributed to specific programs that it cannot be falsified by J-Book. Note: the absence of named PEs is itself a disclosure gap; an investigator with corpus coverage of Air Force aircraft procurement (P-40 lines for F-15EX, F/A-18E/F, B-52 re-engine, KC-46) could test specific exposures. As-is: UNVERIFIABLE."
+    },
+    {
+      "claim_id": "GE-004",
+      "claim_text": "Military Engine unit deliveries fell 553 (2021) vs 717 (2019) — ~23% drop.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["Unit decline is self-reported and verifiable; J-Book corpus doesn't cover the underlying programs"],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": {"signal": "NOT_FOUND", "n_matches": 0},
+      "interpretation": "A 23% drop in military unit deliveries over 2 years is itself a yellow flag (GE attributes to 'supply chain challenges' rather than program cancellation). But without J-Book coverage of GE's specific engine lines, cannot determine if forward outlook diverges from Pentagon's. The decline is consistent with supply-chain headwinds rather than demand collapse (military RPO orders grew in 2021)."
+    },
+    {
+      "claim_id": "GE-005",
+      "claim_text": "Military engine installed base ~26,200 units (services tail).",
+      "severity": "PASS",
+      "supports": ["Large installed base provides services revenue that is largely PE-agnostic (sustainment, parts, MRO); J-Book divergence pattern is weakest against sustainment revenue"],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": {"signal": "NOT_FOUND"},
+      "interpretation": "Installed-base aftermarket is highly resilient to J-Book PE cancellations — even if a new-build PE is zeroed, the ~26.2K already-fielded engines generate parts/MRO for years. J-Book divergence pattern is the WRONG lens for this claim. PASS on materiality."
+    },
+    {
+      "claim_id": "GE-006",
+      "claim_text": "Customer-funded R&D in Aviation = $972M (2021), principally USG-funded — implies RDT&E PE exposure.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["XA100/AETP queries all returned NOT_FOUND; the implied PE exposure is genuine but not covered"],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": {"signal": "NOT_FOUND", "queries_run": ["contractor=General Electric", "program=XA100", "program=AETP"], "all_results": "NOT_FOUND"},
+      "interpretation": "$972M of customer-funded R&D in Aviation, mostly USG, is a meaningful R-2-funded book of work (likely includes Adaptive Engine Transition Program / XA100, T901 Improved Turbine Engine Program, NGAP propulsion, hypersonic propulsion). Each is a specific PE that could be tested in J-Book — but none are in this corpus. Coverage gap. NOTE: This is the highest-leverage UNVERIFIABLE in the report — a richer corpus would let an analyst test whether AETP / NGAP funding is FUNDED_GROWING or FUNDED_SHRINKING, which would directly speak to the forward defense pipeline."
+    },
+    {
+      "claim_id": "GE-007",
+      "claim_text": "Military engine portfolio described only generically — no named PEs disclosed.",
+      "severity": "PASS",
+      "supports": ["This is a meta-claim about disclosure quality; pentagon_jbook returning NOT_FOUND on contractor='General Electric' is consistent with GE's own pattern of NOT naming PEs"],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": {"signal": "NOT_FOUND", "n_matches": 0},
+      "interpretation": "Important framework finding: GE's 10-K does not provide the granular disclosure that the J-Book divergence pattern is designed to exploit. This is COMMON for defense primes (LMT, NOC, RTX 10-Ks also don't enumerate every PE) — they aggregate to platform / segment level. The J-Book cohort is structurally a poor fit for primes; it is well-fit for small-cap names with single-PE concentration (IonQ, Kratos sub-programs, etc.). Cohort-design observation, not a security flag."
+    },
+    {
+      "claim_id": "GE-008",
+      "claim_text": "Nov 2021 announced 3-way split into Aviation / Healthcare / (Power+Renewables+Digital).",
+      "severity": "PASS",
+      "supports": ["Self-disclosed structural plan, publicly announced 4 months before filing"],
+      "M_check": "no_M_query",
+      "M_value": null,
+      "interpretation": "Pre-cutoff disclosed structural plan. Cohort metadata confirmed the Aviation spinoff happens post-cutoff (2024). At this PIT, Aviation is still inside GE Co. Not a J-Book claim. PASS."
+    },
+    {
+      "claim_id": "GE-009",
+      "claim_text": "RISE program (with Safran) — 20%+ fuel/CO2 reduction target.",
+      "severity": "PASS",
+      "supports": ["Commercial R&D program — joint with Safran, public announcement June 2021"],
+      "M_check": "no_M_query",
+      "M_value": null,
+      "interpretation": "Commercial-aviation R&D, not defense. Not in scope for J-Book cohort. Disclosure is consistent with public Safran communications. PASS (control claim)."
+    },
+    {
+      "claim_id": "GE-010",
+      "claim_text": "Catalyst engine first flight Sept 2021.",
+      "severity": "PASS",
+      "supports": ["Specific, dated, verifiable product milestone — commercial business/GA turboprop"],
+      "M_check": "no_M_query",
+      "M_value": null,
+      "interpretation": "Commercial product milestone. Not in scope for J-Book cohort. PASS (control claim)."
+    }
+  ],
+  "summary": {
+    "n_claims": 10,
+    "n_jbook_grounded_claims": 7,
+    "n_pentagon_jbook_fires": 0,
+    "n_pentagon_jbook_queries_run": 10,
+    "severity_counts": {
+      "PASS": 5,
+      "MODERATE_UNDERDELIVERY": 0,
+      "SEVERE_UNDERDELIVERY": 0,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 5
+    },
+    "framework_observation": "J-Book cohort is structurally a poor fit for diversified defense primes whose 10-Ks aggregate to segment level and whose programs (large-prime engine lines: F404/F414/F110, AETP/XA100, T901 ITEP) are not in the hand-curated 410-PE corpus. The Signal OS framework correctly REFRAINED from raising false-positive flags on GE. Cohort design implication: J-Book pattern is best deployed against small-cap names with single-program concentration where (a) the company names the PE, and (b) the PE is in our seed corpus."
+  }
+}

@@ -1,0 +1,27 @@
+All checks complete. The deliverable blue-bench filing follows.
+
+## BLUE BENCH — SBET — RED CASE: PARTIALLY OVERTURNED
+
+PACK: acknowledged. Superseded: px — IBKR `search_contracts` permission-denied for this bench too (third consecutive; flag for the runner), so pack Yahoo $6.075 governs. Both SEC fetches 403'd direct; PROXY-FETCHED per doctrine.
+
+**Per-finding rulings:**
+
+1. {red: "willingness already answered negatively — zero net buyback into the deepest discount" | my check: PROXY-FETCHED [Ex-99.1](https://www.sec.gov/Archives/edgar/data/1981535/000149315226036741/ex99-1.htm) + [10-Q](https://www.sec.gov/Archives/edgar/data/1981535/000149315226036620/form10-q.htm) | result: **Q2-2026 repurchases = 2,132,773 sh for $10.0M ≈ $4.69 avg** — below today's tape, near the $4.46 low, i.e. *at the deepest discount*; Q1 = zero; post-6/30 shares +240k with no disclosed repurchases; Lido PR confirmed "stake $200M of ETH through Lido… receive wstETH," buybacks only boilerplate | **OVERTURNED as stated, REDUCED to a scale finding**: willingness exists and fired at ~0.6× mNAV, but at $10M/qtr (0.67% of authorization, ~1%/yr of float) it is not a closure catalyst, and the trigger appears to be extreme discount, not today's 0.77–0.80.}
+2. {red: "$10.24 avg — every repurchase above today's price; none at the discount" | check: 10-Q period tables | result: cumulative avg is a **blend artifact** — 2025: 1,938,450 sh @ ~$16.35; Q2-2026: 2.13M @ ~$4.69. The III precedent exactly: red's killer fact is an aggregation artifact | **OVERTURNED**.}
+3. {red: LST sleeve growing toward ~40%, explains BMNR gap | check: PR body — "will stake $200M of ETH," wstETH received, no rotation language, source unspecified | result: native-ETH-funded reading confirmed; sleeve → ~40.6% pro forma | **SUSTAINED**, now primary-sourced.}
+4. {red: mNAV ~0.80 confirmed but no margin vs β | check: arithmetic re-run at pack px: $7.89 NAV, 0.77 | **SUSTAINED**.}
+5. {red: cap structure unverified | my check **closes the gap**: 10-Q — 16,312,635 warrants, WAEP $7.77 (10.01M @ $8.15 from the June RDO; 3.46M Consensys @ $6.15–8.00; 80k pre-funded @ $0.0001) | result: treasury-method dilution at $6.08 ≈ nil; NAV/share stands | **RESOLVED — benign at tape**, but see new finding below.}
+6. {red: tax mechanism garbled | check: ~$3.3bn basis ÷ 889k ≈ $3,710/ETH vs $1,871 spot = embedded loss | **SUSTAINED** — red right.}
+7. {red: hi52 was premium-unwind | **SUSTAINED**.}
+
+**Selection audit:** red attacked the strongest leg (closure willingness) — correct target, but under-read its own primary doc and built the "revealed preference" kill on a blend average its cited exhibit itself decomposes.
+
+**NEW FINDINGS RED MISSED:** (a) Management is *two-sided around NAV*: bought 2.1M @ $4.69 and issued $75M @ $7.49 in the same quarter — per-share-accretive both directions; "institutionally incapable of buybacks" is wrong. (b) **Discount-persistence mechanism**: 10M warrants struck at $8.15 sit just above NAV $7.89 — structural supply capping any mNAV recovery; supports discount persistence independent of red's reasoning. (c) Q1-zero/Q2-heavy pattern implies a ~0.6× mNAV repurchase trigger — at 0.77, expect staking, not buybacks.
+
+**DETECTORS CONSULTED:** fdic_call_reports / clinical_trial_referral_quality / clinicaltrials_lookup / competitor_trial_omission / albuquerque_permits / austin_permits / bozeman_permits / beauty_velocity_poll / beauty_virality / census_acs / customer_id / crop_yield_ndvi / upc_tra_value_extraction — NOT-FIRED (no matching business; spurious SIC/feature matches, concur red). lockup_expiration_calendar — NOT-FIRED, but note the June RDO carried 10M warrants (overhang lives in strikes, not lockups). Red's `dat_capital_allocation_revealed_preference` kg_candidate: ENDORSE with amendment — it must use **period repurchase tables, never cumulative averages** (this court's own artifact), and encode a discount-depth trigger threshold.
+
+**NET POSITION AFTER BOTH BENCHES:** REJECT survives, on corrected grounds: not "management won't buy" (they did, at $4.69) but (i) closure pace immaterial vs a 20%+ discount, (ii) LST sleeve → ~40% unbounded tail, (iii) warrant wall at $8.15 caps recovery, (iv) dominant term is unhedged ETH beta the desk doesn't want and which fails the bounded-tail bar of fairly-paid-risk regardless of fairness. Orphan discipline checked: SBET is not an uncovered orphan (13Gs, DAT-cohort coverage), so RP_FAIR rescue doesn't apply. FLAT, no instrument — including ETHA/spot, which solve beta hygiene but not the absence of any desk mandate for crypto beta. Re-court trigger: a disclosed repurchase ≥$50M/qtr or shares-out falling while mNAV <0.85.
+
+**CONVICTION: 8/10.**
+
+Sources: [Ex-99.1 (PROXY-FETCHED)](https://www.sec.gov/Archives/edgar/data/1981535/000149315226036741/ex99-1.htm) · [10-Q (PROXY-FETCHED)](https://www.sec.gov/Archives/edgar/data/1981535/000149315226036620/form10-q.htm) · [Lido PR (PROXY-FETCHED)](https://www.globenewswire.com/news-release/2026/08/13/3344459/0/en/sharplink-to-deploy-200m-eth-staking-allocation-with-lido.html) · pack tape (Yahoo). UNVERIFIED: live IBKR quote (permission-denied), option/RSU unvested balance (not disclosed in 10-Q extract).

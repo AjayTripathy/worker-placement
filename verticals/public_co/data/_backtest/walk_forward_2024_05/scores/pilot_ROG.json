@@ -1,0 +1,114 @@
+{
+  "ticker": "ROG",
+  "company": "Rogers Corporation",
+  "cutoff": "2024-05-15",
+  "filing": "0000084748-24-000018_10K.txt",
+  "filing_date": "2024-02-27",
+  "cik": "0000084748",
+  "sector": "Technology",
+  "industry": "Electronic Components",
+  "group": "walk_forward_2024",
+  "rfm_tuples": [
+    {
+      "claim_id": "C1",
+      "R": "'Net sales decreased by 6.5% in 2023 compared to 2022' to $908.4M; gross margin improved 70 bps to 33.8%; operating income margin fell 550 bps to 9.4% from 14.9%.",
+      "f": "Mode A: verify FY2023 revenue decline disclosure vs FY2022 audited base; Mode B: derive whether deterioration accelerated in Q1 2024 via fresh 10-Q (filed 2024-04-26).",
+      "M_source": "edgar.fetch_filing_text(10-Q 0000084748-24-000028 filed 2024-04-26)",
+      "M_value": "Q1 2024 net sales = $213.4M, -12.5% YoY vs Q1 2023 $243.8M; gross margin compressed to 32.0% from 32.7%; but operating income margin RECOVERED to +5.5% from -0.1% loss in prior-year quarter (restructuring benefits).",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Topline deterioration accelerated post-10-K (-6.5% FY23 to -12.5% Q1 2024) — Mode B catch. Honestly disclosed in Q1 10-Q; not concealed. Margin recovery from restructuring is real (op income swung positive). Mixed signal, not lying."
+    },
+    {
+      "claim_id": "C2",
+      "R": "'our terminated merger with DuPont, which may cause us to incur substantial costs that may adversely affect our financial results' — November 1, 2022, DuPont issued notice of termination after failing to receive SAMR (China) approval; Rogers received $162.5M regulatory termination fee.",
+      "f": "Mode A: confirm merger terminated and fee received; Mode B: derive whether the $162.5M was deployed prudently and whether residual litigation/exposure exists.",
+      "M_source": "10-K text; cross-check with balance sheet movement: revolver balance fell from $215.0M (2022-12-31) to $30.0M (2023-12-31); further $30M discretionary paydown in Q1 2024 disclosed.",
+      "M_value": "Confirmed: $185M revolver paydown in 2023 + $30M more in Q1 2024 — DuPont fee was used to deleverage, not buybacks or M&A. Litigation risk noted but no active class actions disclosed.",
+      "severity": "PASS",
+      "interpretation": "Strong capital discipline. Company received windfall, used it to deleverage. Mode B does not surface dishonesty."
+    },
+    {
+      "claim_id": "C3",
+      "R": "Auditor: 'PricewaterhouseCoopers, LLP, has audited the effectiveness of the Company's internal control over financial reporting as of December 31, 2023... our internal control over financial reporting was effective.'",
+      "f": "Mode A: verify Big 4 auditor identity; Mode B: scan for material weakness language, auditor resignation, restatements.",
+      "M_source": "going_concern_local.auditor_change_from_text",
+      "M_value": "signal=CLEAN_BIG4_TENURE; firms=['PricewaterhouseCoopers']; n_resignation_lang=0; n_disagreement_lang=0; is_big4=True. Only one 'material weakness' mention is a generic ICFR audit standard reference, not a finding.",
+      "severity": "PASS",
+      "interpretation": "Big 4 PwC, clean opinion, no auditor turnover, no material weakness. Top-tier governance signal."
+    },
+    {
+      "claim_id": "C4",
+      "R": "'No individual customer represented more than 10% of our total net sales for 2023; however, there are concentrations of OEM customers in our AES operating segment (semiconductor and automotive manufacturers).'",
+      "f": "Mode A: verify the no-10%-customer claim; Mode B: derive whether AES segment shows hidden concentration (sales fell 3.9% in AES vs 9.8% in EMS — milder, but power interconnects EV/HEV, aerospace/defense, wireless infra, portable electronics all weakened).",
+      "M_source": "10-K segment narrative; revenue concentration m-source not applicable to component vendors with diffuse OEM base.",
+      "M_value": "Single end-market exposure: 22% of FY23 sales from 'significant growth markets (EV/HEV)' + 31% from 'high growth markets (ADAS, portable electronics, renewable energy, aerospace/defense)' = ~53% cyclical/secular growth-dependent.",
+      "severity": "UNVERIFIABLE",
+      "interpretation": "Customer-level claim cannot be directly tested without OEM disclosures, but end-market concentration is acknowledged. No evidence of evasion."
+    },
+    {
+      "claim_id": "C5",
+      "R": "'Our credit agreement with JPMorgan Chase contains... certain financial ratios... Our total net leverage ratio did not exceed 2.75 to 1.00 as of December 31, 2023... we may nonetheless make up to $20.0 million in restricted payments... If our total net leverage ratio exceeds 2.75 to 1.00.'",
+      "f": "Mode A: verify covenant compliance; Mode B: derive whether the cushion is narrowing — model leverage ratio with cash $131.7M, revolver $30M = net debt negative; EBITDA proxy from op income $85.4M (9.4% of $908.4M) + D&A.",
+      "M_source": "10-K MD&A + 10-Q balance sheet.",
+      "M_value": "Net debt = $30M - $131.7M = -$101.7M (NET CASH POSITION). Leverage ratio is essentially zero. Covenant cushion is massive, not narrowing. Q1 2024: another $30M revolver paydown.",
+      "severity": "PASS",
+      "interpretation": "Pre-cutoff drawdown narrative (-29.5%) is NOT covenant- or liquidity-driven. Company is net cash. This is a margin/demand story, not a distress story."
+    },
+    {
+      "claim_id": "C6",
+      "R": "'2023 Restructuring and impairment charges $16.9M' (vs $66.6M in 2022). 'We recognized $65.1M of impairment charges in 2022, primarily related to AES operating segment equipment-in-process in the U.S. as well as EMS operating segment intangibles and fixed assets related to our high-performance engineered cellular elastomer business.'",
+      "f": "Mode A: verify the $66.6M -> $16.9M decline; Mode B: derive whether impairments are TRAILING (cleansing) or LEADING (still more to come, given Q1 24 -12.5% sales).",
+      "M_source": "10-K Note 14 narrative; 10-Q Q1 2024 restructuring line (small but present).",
+      "M_value": "FY22 took the big bath on EMS cellular elastomer business and AES equipment. FY23 follow-on. Q1 2024 has continued small restructuring charges — manufacturing footprint optimization in Europe/Asia ongoing.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Restructuring is a multi-year project, not finished. Capex/impairment risk persists if Q2-Q4 2024 sales continue to weaken. But disclosed honestly with specific segments named."
+    },
+    {
+      "claim_id": "C7",
+      "R": "10-K silent on a going-concern qualification. No 'substantial doubt' language in any going-concern context.",
+      "f": "Mode A: verify absence of going-concern; Mode B: derive whether implicit distress (sales decline + EV slowdown + China tariff risk) warrants substantial-doubt language they avoided.",
+      "M_source": "going_concern_local.going_concern_from_text",
+      "M_value": "signal=NO_GOING_CONCERN; n_matches=0; n_current_period=0; n_cure=0. Confirmed clean.",
+      "severity": "PASS",
+      "interpretation": "Net cash, profitable, Big 4 clean, ICFR effective — going concern is correctly absent. No Mode B gap."
+    },
+    {
+      "claim_id": "C8",
+      "R": "Insider activity (Form 4 filings 2023-08-01 through 2024-05-15): predominantly Code F (tax withholding on RSU vest) and Code A (RSU grants).",
+      "f": "Mode A: verify insider transaction codes; Mode B: derive whether insiders are buying or selling at depressed prices ahead of suspected bad news.",
+      "M_source": "edgar.fetch_form4_xml batch parse of 34 Form 4 filings in window",
+      "M_value": "Codes A=17 (grants), F=18 (tax withholding), S=1 (one small VP-EMS sale 300 shares @ $138.48 = ~$42K on 2023-08-24), P=2 (Director Anne Roby 315 sh @ $148.06 on 2023-08-09; Director Armand Lauzon 3,350 sh @ $150.04 = $502K on 2023-08-08). NO insider open-market selling in last 8 months pre-cutoff.",
+      "severity": "PASS",
+      "interpretation": "Two directors made open-market PURCHASES of ~$550K in August 2023. Effectively zero open-market selling. Insiders are underwater at cutoff (-29.5% drawdown) — they bet on the company. Bullish insider signal."
+    },
+    {
+      "claim_id": "C9",
+      "R": "Cash $131.7M (US $60M / EU $37.6M / Asia $34.1M) at 2023-12-31; net working capital $410.5M.",
+      "f": "Mode A: verify; Mode B: derive cash adequacy under stress scenario (Q1 24 cash burn / repatriation friction in China).",
+      "M_source": "10-K balance sheet + 10-Q.",
+      "M_value": "Q1 2024 cash decreased (paid down $30M revolver, normal seasonal working capital). 'Asia cash held in China — historical foreign earnings indefinitely reinvested.' No need to repatriate near-term given net cash and US balance of $60M.",
+      "severity": "PASS",
+      "interpretation": "Liquidity is not a concern. Stress-test cash adequacy passes."
+    },
+    {
+      "claim_id": "C10",
+      "R": "Asbestos-related product liability claims related to operations before the 1990s. 'The full extent of our financial exposure to asbestos-related litigation remains very difficult to estimate.'",
+      "f": "Mode A: verify ongoing reserve adequacy disclosure; Mode B: derive whether asbestos accrual is rising or insurance solvency at risk.",
+      "M_source": "10-K Note 10 + 10-Q asbestos-related insurance receivables line item on balance sheet.",
+      "M_value": "Asbestos receivable + liability both maintained on balance sheet, with carry-forward language. No accrual surge disclosed. Insurance recovery framework in place. Disclosure is standard for industrial heritage names.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Legacy tail-risk that company explicitly says is hard to estimate. Not lying, but inherently unquantifiable. Small relative to capitalization."
+    }
+  ],
+  "supplemental_signals": {
+    "end_market_exposure": "~22% EV/HEV + ~31% high growth (ADAS, portable electronics, renewable, aero/defense) = 53% cyclical growth-market dependent. EV slowdown in 2024 is the obvious headwind not yet fully discounted in FY23 numbers but visible in Q1 2024 -12.5% topline.",
+    "geographic_exposure": "74% foreign sales; 40% Asia + 31% Europe of foreign; China cash held indefinitely reinvested. Tariff/SAMR risk is real (DuPont deal died on SAMR).",
+    "capital_actions": "DuPont termination fee $162.5M deployed entirely to revolver paydown (revolver $215M -> $30M -> $0 trajectory). No buybacks in 2023. No dividend. Disciplined.",
+    "auditor": "PwC Big 4, clean ICFR opinion, no material weakness, no resignation.",
+    "insider_signal": "Bullish — two directors bought ~$550K combined at $148-150 in Aug 2023; only one minor VP sale ($42K). Underwater at cutoff.",
+    "covenant_cushion": "Net debt = -$101.7M (NET CASH). Leverage ratio ~0 vs 2.75x covenant. Massive cushion.",
+    "claim_evolution_10K_vs_10Q": "Revenue trajectory deteriorated (-6.5% FY23 -> -12.5% Q1 24), but disclosed in Q1 10-Q without spin; operating income margin RECOVERED to +5.5% from prior-year loss."
+  },
+  "summary": "Rogers Corporation is NOT a distressed/lying name. The -29.5% drawdown reflects EV/HEV demand slowdown and topline contraction, but the underlying disclosure is clean: PwC Big 4 with effective ICFR, no going-concern, NET CASH balance sheet (-$101.7M net debt), DuPont $162.5M termination fee fully deployed to deleveraging, two directors buying $550K open-market at $148-150 (underwater at cutoff). Q1 2024 10-Q honestly disclosed accelerated -12.5% topline decline but margin recovery to +5.5% op income from prior-year loss. The one Mode B catch (C1, C6) — accelerating top-line deterioration and unfinished restructuring — is real but transparently disclosed. This is an honest cyclical drawdown, not a forensic short candidate.",
+  "composite": 0.82
+}

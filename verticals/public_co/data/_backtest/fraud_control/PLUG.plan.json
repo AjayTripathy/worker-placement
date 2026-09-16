@@ -1,0 +1,332 @@
+{
+  "ticker": "PLUG",
+  "cutoff": "2020-08-01",
+  "filing": "0001558370-20-002267_10K.txt",
+  "plan_version": 1,
+  "claims": [
+    {
+      "claim_id": "PLUG-1",
+      "claim_text": "Plug Power's GenKey solution serves named commercial customers including Amazon, The Home Depot, The Southern Company, BMW, Carrefour, and Walmart.",
+      "source_quote": "Plug Power's vertically integrated GenKey solution ties together all critical elements to power, fuel, and provides service aftermarket support to customers such as Amazon, The Home Depot, The Southern Company, BMW, Carrefour, and Walmart.",
+      "subject": "Plug Power Inc.",
+      "predicate": "supplies_fuel_cell_systems_to",
+      "object_value": "Amazon, Walmart, Home Depot, Southern Company, BMW, Carrefour",
+      "category": "partnership",
+      "referent_type": "entity",
+      "m_source_status": "MAPPED",
+      "source_id": "megacap_namecheck.query_megacap_mentions",
+      "source_params": {
+        "small_cap_name": "Plug Power",
+        "cutoff_date": "2020-08-01",
+        "megacap_subset": ["Amazon", "Walmart"],
+        "window_days": 3650,
+        "forms": "10-K,10-Q,8-K"
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "Amazon / Walmart S-3 warrant exhibits + 8-Ks",
+          "endpoint_or_method": "edgar fulltext for 'Plug Power' restricted to CIK 0001018724 (AMZN) and 0000104169 (WMT)",
+          "rationale": "Plug Power has documented warrant agreements with Amazon (April 2017) and Walmart (April 2017) tied to GenDrive purchases at $XX million milestones — these are large enough events that AMZN and WMT 10-Ks/proxy statements may mention them.",
+          "expected_observable": "filing hits naming 'Plug Power' in AMZN/WMT filings",
+          "signal_direction": "if 0 hits across either AMZN or WMT 10-K window, contradicts the marketed scale of these named partnerships",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "claim_evolution on Plug Power's own subsequent filings",
+          "endpoint_or_method": "claim_evolution.query_claim_evolution(cik='0001093691', search_term='Amazon', base_filing_date='2020-03-10', cutoff_date='2020-08-01')",
+          "rationale": "If the Amazon/Walmart customer relationship is real and material, Plug Power should keep re-disclosing it in subsequent 10-Q filings. SILENT_POST_CLAIM would be the warning sign.",
+          "expected_observable": "count of subsequent filings mentioning Amazon/Walmart",
+          "signal_direction": "presence = corroborated; silence = soft contradiction",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "energy_utilities",
+      "claim_type_taxonomy": "commercial_customer",
+      "extraction_notes": "Two named-customer concentration (49.6% of 2019 revenue) almost certainly = Amazon + Walmart based on the public warrant agreements. Megacap-namecheck preferred to direct counterparty CIK fulltext because it aggregates calibrated thresholds across the megacap set."
+    },
+    {
+      "claim_id": "PLUG-2",
+      "claim_text": "Plug Power has deployed over 30,000 fuel cell systems (GenDrive units) into commercial applications.",
+      "source_quote": "We have made significant progress in penetrating the material handling market, supported through the deployment of over 30,000 GenDrive units into commercial applications. ... we have deployed over 30,000 fuel cell systems, and has become the largest buyer of liquid hydrogen, having built and operated a hydrogen network across North America.",
+      "subject": "Plug Power Inc.",
+      "predicate": "deployed_count",
+      "object_value": "30000 GenDrive fuel cell units",
+      "category": "production_volume",
+      "referent_type": "quantity",
+      "m_source_status": "PROPOSED",
+      "source_id": null,
+      "source_params": {},
+      "proposed_connector": {
+        "name": "doe_h2_tools.hydrogen_infrastructure_deployments",
+        "description": "DOE Hydrogen Tools Library — list of hydrogen deployments / fuel-cell installations at named US sites, tracked under DOE/NREL H2@Scale and FCTO program records.",
+        "endpoint": "https://h2tools.org/h2_infrastructure (HTML scrape) and https://www.energy.gov/eere/fuelcells/fuel-cell-and-hydrogen-energy-association reports",
+        "access_pattern": "scrape",
+        "auth_required": false,
+        "sample_invocation": "GET https://h2tools.org/h2_infrastructure?operator=Plug+Power; parse table for site_name, state, units_deployed",
+        "rationale": "Deployed-unit counts at fuel-cell scale would aggregate at DOE/NREL's hydrogen infrastructure library. 30,000 cumulative units across N customer sites should leave a footprint in DOE/NREL deployment trackers; the catalog has no equivalent.",
+        "estimated_cost": "free",
+        "completeness": "US hydrogen infrastructure tracked via DOE/NREL only; private deployments missing",
+        "referent_type": "fuel_cell_deployment",
+        "attribute": "unit_count"
+      },
+      "creative_extensions": [
+        {
+          "source_label": "NREL Alternative Fueling Stations (HY operators)",
+          "endpoint_or_method": "nrel_fuel.query_alt_fuel_stations(fuel_type='HY', cutoff_date='2020-08-01', name_filter='Plug Power')",
+          "rationale": "Plug Power claims to operate a North-American hydrogen network. NREL Alternative Fueling Stations is the canonical DOE registry for hydrogen stations — operator name should resolve to multiple sites if claim is true.",
+          "expected_observable": "count of hydrogen stations operated by Plug Power",
+          "signal_direction": "0 stations = strong contradiction; 50+ stations = corroboration",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "EPA Facility Registry Service (FRS) — Plug Power hydrogen generation facilities",
+          "endpoint_or_method": "epa_emissions.query_facility_emissions(company_name='Plug Power')",
+          "rationale": "Industrial-scale hydrogen handling at 30,000-unit deployment scale implies multiple EPA-permitted hydrogen storage/dispensing sites. EPA FRS would index them.",
+          "expected_observable": "count of EPA-registered facilities + program memberships (TRI, GHGRP)",
+          "signal_direction": "EPA-absent for an operator at this claimed scale = facility-scope contradiction",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "energy_utilities",
+      "claim_type_taxonomy": "production_count_generation",
+      "extraction_notes": "Taxonomy cell (energy_utilities, production_count_generation) is GAP — explicitly invites creative extensions. Closest catalog source is NREL stations (which counts hydrogen stations, not GenDrive units). Marked PROPOSED with a concrete DOE/NREL connector idea + creative extensions for indirect tests."
+    },
+    {
+      "claim_id": "PLUG-3",
+      "claim_text": "Plug Power has 109 issued patents active with the USPTO and seven US patent applications pending as of end of 2019.",
+      "source_quote": "We have a total of 109 issued patents currently active with the USPTO and at the close of 2019, we had seven U.S. patent applications pending. Additionally, we have 20 trademarks registered with the USPTO and 2 trademark applications pending.",
+      "subject": "Plug Power Inc.",
+      "predicate": "owns_granted_patents_count",
+      "object_value": "109 granted patents",
+      "category": "technology",
+      "referent_type": "quantity",
+      "m_source_status": "MAPPED",
+      "source_id": "uspto_odp.query_assignee",
+      "source_params": {
+        "assignee_name": "Plug Power",
+        "cutoff_date": "2020-08-01",
+        "categorize": {
+          "fuel_cell": ["fuel cell", "PEM", "membrane electrode"],
+          "hydrogen": ["hydrogen", "electrolyzer", "electrolysis"],
+          "balance_of_plant": ["balance of plant", "stack", "compressor"]
+        }
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "Google Patents assignee search fallback",
+          "endpoint_or_method": "google_patents.query_assignee(assignee_name='Plug Power', cutoff_date='2020-08-01')",
+          "rationale": "Backup for USPTO ODP — Google Patents indexes US + non-US assignments, useful if USPTO returns under-count due to subsidiary-name asymmetry (HyPulsion / Relion / Emerging Power)",
+          "expected_observable": "granted patent count across assignee variants",
+          "signal_direction": "corroborates USPTO count or surfaces additional patents under subsidiary names",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "energy_utilities",
+      "claim_type_taxonomy": "patents_ip",
+      "extraction_notes": "Patent claims are CANONICAL for USPTO ODP. 109 is verifiable as a granted count. Worth checking under subsidiary names too: HyPulsion (Europe), Relion, Emerging Power."
+    },
+    {
+      "claim_id": "PLUG-4",
+      "claim_text": "Plug Power operates manufacturing facilities at 140,000 sqft in Latham NY, 29,200 sqft in Spokane WA, and 38,400 sqft in Clifton Park NY, with service centers in Dayton OH and Romeoville IL.",
+      "source_quote": "Our principal offices are located in Latham, New York, where we lease a 140,000 square foot facility that includes our headquarter office building, our manufacturing facility, and our primary research and development center. We lease a 830 square foot facility in Rochester, New York that includes additional office and research and development space, a 29,200 square foot facility in Spokane, Washington that includes an office building and a manufacturing facility and a 38,400 square foot manufacturing facility in Clifton Park, New York. We also lease service centers in Dayton, Ohio and Romeoville, Illinois.",
+      "subject": "Plug Power Inc.",
+      "predicate": "operates_manufacturing_facilities_at",
+      "object_value": "Latham NY, Spokane WA, Clifton Park NY, Rochester NY (R&D), Dayton OH, Romeoville IL",
+      "category": "physical_facility",
+      "referent_type": "geographic_area",
+      "m_source_status": "MAPPED",
+      "source_id": "epa_emissions.query_facility_emissions",
+      "source_params": {
+        "company_name": "Plug Power",
+        "claimed_locations": [
+          {"city": "Latham", "state": "NY"},
+          {"city": "Spokane", "state": "WA"},
+          {"city": "Clifton Park", "state": "NY"},
+          {"city": "Rochester", "state": "NY"},
+          {"city": "Dayton", "state": "OH"},
+          {"city": "Romeoville", "state": "IL"}
+        ]
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "OSHA Form 300A — Plug Power Latham + Spokane + Clifton Park",
+          "endpoint_or_method": "osha_establishments.query_establishments(company_name='Plug Power', match_mode='word_boundary')",
+          "rationale": "All three NY/WA manufacturing sites are above OSHA's 20-employee threshold; a real 140k sqft HQ+mfg should show up in OSHA Form 300A with hundreds of employees. Absence = scope contradiction.",
+          "expected_observable": "establishment list with annual_average_employees and NAICS",
+          "signal_direction": "presence at scale = strong corroboration; absence = SEVERE contradiction for a claim of 835 employees",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "BLS QCEW — Albany County NY (Latham) NAICS 3359 / 3364 employment denominator",
+          "endpoint_or_method": "bls_qcew.query_county_naics(fips5='36001', year=2019, qtr=4, naics_prefix='3359')",
+          "rationale": "Latham (Albany County NY) is the HQ + main mfg site. PLUG's ~600 NY-resident employees should be a measurable share of county NAICS-3359 (electrical equipment) employment.",
+          "expected_observable": "county-NAICS employment count; PLUG-implied share",
+          "signal_direction": "if implied share is implausibly large (>50%) the headcount claim is suspect; if <2% it's normal",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "SAM.gov entity registration — Plug Power UEI lookup",
+          "endpoint_or_method": "sam_entity.query_entity_by_uei (resolve UEI first via usaspending)",
+          "rationale": "SAM lists the federally-registered primary address and NAICS — should match Latham NY and reflect a manufacturing NAICS prefix.",
+          "expected_observable": "primary NAICS + registered physical address",
+          "signal_direction": "NAICS mismatch (e.g. SAM lists 541330 'Engineering Services' for a claimed manufacturer) = scope contradiction",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "energy_utilities",
+      "claim_type_taxonomy": "facility_scope",
+      "extraction_notes": "Facility-scope is CANONICAL for EPA emissions + claimed_locations audit. Plug Power's hydrogen handling at Latham + on-site customer hydrogen network should leave an EPA FRS trail. Multiple creative extensions for OSHA + QCEW + SAM corroboration."
+    },
+    {
+      "claim_id": "PLUG-5",
+      "claim_text": "Plug Power had 835 employees as of December 31, 2019, including 206 temporary employees.",
+      "source_quote": "As of December 31, 2019, we had 835 employees, including 206 temporary employees.",
+      "subject": "Plug Power Inc.",
+      "predicate": "employee_headcount",
+      "object_value": "835 total (629 permanent + 206 temporary)",
+      "category": "physical_facility",
+      "referent_type": "quantity",
+      "m_source_status": "MAPPED",
+      "source_id": "osha_establishments.query_establishments",
+      "source_params": {
+        "company_name": "Plug Power",
+        "match_mode": "word_boundary",
+        "max_results": 25
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "DOL H-1B LCA filings — Plug Power R&D worksites",
+          "endpoint_or_method": "dol_h1b_lca.query_lca_filings(employer_name='Plug Power', match_mode='word_boundary')",
+          "rationale": "Industrial OEMs with active R&D (33.7M R&D spend in 2019) typically have SOME H-1B engineering hires; very low LCA counts among a 600+ permanent workforce would be unusual. Calibration: traditional industrial co's have lower LCA density than software, so don't over-fire on absence.",
+          "expected_observable": "count of certified H-1B LCAs by year and worksite",
+          "signal_direction": "presence at scale = corroborates R&D headcount; absence is weak signal (industrial)",
+          "severity_if_contradiction": "UNVERIFIABLE"
+        }
+      ],
+      "domain": "energy_utilities",
+      "claim_type_taxonomy": "workforce",
+      "extraction_notes": "Workforce CANONICAL for DOL H-1B but PLUG is energy_utilities not biotech/saas, so OSHA is the stronger source. OSHA + LCA together test the 835-employee claim."
+    },
+    {
+      "claim_id": "PLUG-6",
+      "claim_text": "Plug Power operates a hydrogen fueling network across North America and is the largest buyer of liquid hydrogen in the region.",
+      "source_quote": "the Company has deployed over 30,000 fuel cell systems, and has become the largest buyer of liquid hydrogen, having built and operated a hydrogen network across North America.",
+      "subject": "Plug Power Inc.",
+      "predicate": "operates_hydrogen_network_in",
+      "object_value": "North American hydrogen fueling network",
+      "category": "physical_facility",
+      "referent_type": "geographic_area",
+      "m_source_status": "MAPPED",
+      "source_id": "nrel_fuel.query_alt_fuel_stations",
+      "source_params": {
+        "fuel_type": "HY",
+        "cutoff_date": "2020-08-01",
+        "name_filter": "Plug Power"
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "EPA FRS reverse-lookup at customer-site addresses",
+          "endpoint_or_method": "epa_emissions.query_facility_emissions reverse-lookup at named Amazon/Walmart fulfillment centers that PLUG installed hydrogen at",
+          "rationale": "Plug Power's GenKey installs hydrogen infrastructure AT customer locations (Amazon FCs etc.) — those installations would show up in EPA FRS under either PLUG, the customer, or the gas-supplier (Praxair / Air Products / Linde) as the permitted operator.",
+          "expected_observable": "EPA-permitted hydrogen sites at marketed customer addresses",
+          "signal_direction": "absence at scale = facility-scope contradiction",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "energy_utilities",
+      "claim_type_taxonomy": "fueling_network",
+      "extraction_notes": "fueling_network is CANONICAL for nrel_fuel — directly adjudicates this claim. NREL station locator should return >0 hits for any real US hydrogen network operator."
+    },
+    {
+      "claim_id": "PLUG-7",
+      "claim_text": "Plug Power has accumulated $1.3 billion in deficit through Dec 31 2019, incurred $85.5M net loss in 2019, and disclosed dependence on continued financing including ATM equity, convertible notes ($40M Sept 2019; $100M March 2018), and sale-leaseback finance obligations.",
+      "source_quote": "We have experienced and continue to experience negative cash flows from operations and net losses. The Company incurred net losses attributable to common stockholders of $85.5 million, $78.2 million and $130.2 million for the years ended December 31, 2019, 2018, and 2017, respectively, and had an accumulated deficit of $1.3 billion at December 31, 2019. ... In September 2019, the Company issued a $40.0 million in aggregate principal amount of 7.5% convertible senior note due in 2023 ... In March 2018, the Company issued $100.0 million in aggregate principal amount of 5.5% convertible senior notes due in 2023",
+      "subject": "Plug Power Inc.",
+      "predicate": "financial_position",
+      "object_value": "accumulated_deficit=$1.3B, 2019_loss=$85.5M, convertible_debt=$140M, sale-leaseback_obligations=$227.2M",
+      "category": "financial_distress",
+      "referent_type": "amount",
+      "m_source_status": "MAPPED",
+      "source_id": "ucc_proxy.query_ucc_exposure",
+      "source_params": {
+        "cik": "0001093691",
+        "cutoff_date": "2020-08-01",
+        "window_months": 36
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "SEC filings list — 8-K Item 2.03 and 3.02 cadence",
+          "endpoint_or_method": "sec_filings.list_filings_by_form(cik='0001093691', forms=['8-K','S-3','424B5'], cutoff_date='2020-08-01', start_date='2018-01-01')",
+          "rationale": "Distress-cluster fingerprint requires multiple markers within ~6 months. List all 8-Ks (especially Item 2.03 Direct Financial Obligation, Item 3.02 Unregistered Sales) + S-3 shelf registrations + 424B5 prospectus supplements. Two convertibles + ATM + warrant issuances in 24 months = elevated but not extreme; below RIDE/NKLA fraud pattern.",
+          "expected_observable": "filing count by form by quarter",
+          "signal_direction": "cluster density indicates capital-raise pace",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "claim_evolution on going-concern language",
+          "endpoint_or_method": "claim_evolution.query_claim_evolution(cik='0001093691', search_term='going concern', base_filing_date='2020-03-10', cutoff_date='2020-08-01')",
+          "rationale": "Test whether subsequent 10-Q filings introduce going-concern qualifications (which would escalate distress signal).",
+          "expected_observable": "filing count mentioning 'going concern'",
+          "signal_direction": "appearance of going-concern qualifier = escalation",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "energy_utilities",
+      "claim_type_taxonomy": "financial_distress",
+      "extraction_notes": "Financial-distress is CANONICAL for ucc_proxy + claim_evolution + sec_filings cadence. PLUG has documented ATM + convertible cadence but not a fraud-vintage red-flag cluster (no recent reverse splits, no auditor qualifiers, cash position has improved). Heuristic-10 calibration: 2 convertibles + 1 ATM + restricted-cash secured leases is elevated but well below the 4-5 cluster threshold for an EMIT."
+    },
+    {
+      "claim_id": "PLUG-8",
+      "claim_text": "Plug Power operates in Europe under the name HyPulsion as a joint venture for hydrogen fuel cell systems in the European material handling market.",
+      "source_quote": "Additionally, we operate in Europe under the name HyPulsion, to develop and sell hydrogen fuel cell systems for the European material handling market.",
+      "subject": "Plug Power Inc.",
+      "predicate": "operates_european_subsidiary_named",
+      "object_value": "HyPulsion (Europe)",
+      "category": "partnership",
+      "referent_type": "entity",
+      "m_source_status": "PROPOSED",
+      "source_id": null,
+      "source_params": {},
+      "proposed_connector": {
+        "name": "eu_business_registers.search_entity",
+        "description": "EU Business Registers Interconnection System (BRIS) — search across EU member-state business registers for a named entity.",
+        "endpoint": "https://e-justice.europa.eu/489/EN/business_registers__search_for_a_company_in_the_eu",
+        "access_pattern": "scrape",
+        "auth_required": false,
+        "sample_invocation": "GET https://e-justice.europa.eu/content_find_a_company-489-en.do?companyName=HyPulsion",
+        "rationale": "HyPulsion would be a French entity (Plug Power's JV with Axane / Air Liquide). EU BRIS aggregates France's INPI/SIRENE register among others. No catalog connector currently covers EU national registries.",
+        "estimated_cost": "free",
+        "completeness": "EU member-state business registers only",
+        "referent_type": "entity",
+        "attribute": "registration_status"
+      },
+      "creative_extensions": [
+        {
+          "source_label": "French SIRENE registry direct lookup",
+          "endpoint_or_method": "https://annuaire-entreprises.data.gouv.fr/rechercher?terme=HyPulsion",
+          "rationale": "France's open SIRENE / annuaire-entreprises is the canonical French business registry; HyPulsion as a French SAS would be searchable here with SIREN + active/inactive status.",
+          "expected_observable": "SIREN number, registration status, principal address, NAF code",
+          "signal_direction": "active SIREN = corroboration; inactive or zero-result = contradiction",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "USPTO assignee with HyPulsion variant",
+          "endpoint_or_method": "uspto_odp.query_assignee(assignee_name='HyPulsion', cutoff_date='2020-08-01')",
+          "rationale": "If HyPulsion is a meaningful operating subsidiary, some hydrogen-related US patents may be assigned to it directly.",
+          "expected_observable": "patent count under HyPulsion assignee",
+          "signal_direction": "presence corroborates separate operating entity; absence is weak (JVs often patent under parent)",
+          "severity_if_contradiction": "UNVERIFIABLE"
+        }
+      ],
+      "domain": "energy_utilities",
+      "claim_type_taxonomy": "existence",
+      "extraction_notes": "Foreign subsidiary existence is a GAP for the US-focused catalog. EU BRIS / French SIRENE is the canonical missing connector. Severity if absent is MODERATE because PLUG describes HyPulsion as an operating entity, not a brand."
+    }
+  ]
+}

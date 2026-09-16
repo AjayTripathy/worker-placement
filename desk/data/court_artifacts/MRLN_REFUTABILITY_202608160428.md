@@ -1,0 +1,30 @@
+## MRLN — Refutability Triage
+
+Two framing caveats before the table, both material. **(1)** `knowledge_graph/cohorts.json` was permission-denied, so the COHORT and its NARRATIVE are unknown to me; I triage below against the metric axis the template requires, but I cannot test "the narrative's predicted damage" against a narrative I can't read. **(2)** The cohort assignment is probably an artifact: MRLN's `sector=Technology / industry=EDP Services` is the SIC inherited from its SPAC shell (Inflection Point Acquisition Corp IV). Merlin is an **aerospace autonomy** company (autopilot retrofit; USSOCOM C-130J). The `-0.396 excess_dd vs Technology sector median` therefore benchmarks a pre-revenue defense de-SPAC against enterprise software — that number carries no information about mispricing.
+
+| ticker | class | refuting metric | current value/trend (cited) | next print date | note |
+|---|---|---|---|---|---|
+| MRLN | **STRUCTURAL** | Remaining performance obligations (RPO) — i.e. conversion of the $105M USSOCOM IDIQ *ceiling* into booked task orders — cross-checked against YoY revenue | RPO **$593K** at 6/30/26, recognizable within 12mo. Revenue **declining**: Q2'26 $2.194M vs Q2'25 $3.107M (−29%); H1'26 $3.195M vs H1'25 $3.975M (−20%). >90% from US government. OCF −$50.9M in H1. Share count 84.26M (3/16/26 close) → 100.59M (6/30) → ~114.1M (8/11 cover) = **+35% in 5 months** ([10-Q, 8/14/26](https://www.sec.gov/Archives/edgar/data/0002028707/000121390026057138/ea0289176-10q_merlin.htm); [8-K/EX-99.1, 8/13/26](https://www.sec.gov/Archives/edgar/data/0002028707/000121390026056230/ea029055601ex99-1.htm); [merger 8-K](https://www.sec.gov/Archives/edgar/data/2028707/000121390026032329/ea028257401ex99-4.htm)) | **2026-11-12** (yfinance-derived, UNCONFIRMED) | Q2 print already landed 8/13 AMC — the `dd52` in the event blob was computed 8/11, **stale by one earnings event** |
+
+**Why STRUCTURAL, not damage-absent.** The discount is doing real work that a re-rating narrative didn't invent:
+
+- **True EV is understated by the screen.** Mcap $428.6M **+** Series A preferred $162.5M (mezzanine, senior, 10% cash / **12% PIK**) **−** cash $183.9M ≈ **$407M EV** — roughly **64× annualized H1 revenue, on a declining top line**, and ~2.3× the entire $105M IDIQ *ceiling*. The screen's implied "cash-rich, $245M EV" read omits a senior claim.
+- **A quantified, ongoing transfer away from common.** 12% PIK accretion on $162.5M ≈ **$19.5M/yr**, ~4.5% of the common's entire market cap annually, before any operating burn.
+- **A dated, adverse flow catalyst 22 days out.** Merger closed **3/16/2026** with **six-month lock-ups** on both sponsor and legacy Merlin holders → **9/16/2026**. That date is confirmed by arithmetic from the merger 8-K.
+- **Stockholders' deficit** $(99.9)M; accumulated deficit $(699.9)M; **699,407,840** common reserved for preferred conversion against ~114M outstanding.
+
+**Two things I checked that came back benign — and one that did not:**
+- The `RestatementAdjustmentMember` tags in the evidence pack's XBRL are **not a restatement**. They are retroactive recapitalization of prior-period share counts for the reverse merger. No accounting event.
+- **No going-concern doubt.** Management asserts ≥12 months liquidity; OCF burn of ~$102M/yr against $183.9M implies **~1.8 years** runway. The cash is genuinely the common's near-term: the **holder put on the preferred does not open until the fifth anniversary (~3/16/2031)**; only the *company* may redeem earlier (150%→100% of accrued value, sliding).
+- **Unresolved:** the claim that 9/16 also carries a Series A **conversion-price reset off a 20-day VWAP floored at $5.00** (affecting 44.3M shares) rests on a **single secondary source** ([Shawarma Capital](https://research.shawarmacapital.net/p/mrln-part-10-the-deep-update)). The merger 8-K summary explicitly does *not* disclose VWAP reset provisions. With the stock at $3.755 — below that alleged floor — this is the difference between a bounded and an unbounded ratchet, and I could not confirm it.
+
+**COURT-WORTHY (damage-absent, ranked):**
+None. No member classifies damage-absent. The bull case is real but not ignored — sole-prime on a $105M SOCOM IDIQ, CDR complete, NZ CAA SOI-3, first autonomous landing at Oshkosh — and the market is paying $407M EV for it. The live question is not *mispricing* but *calendar*: a 39%-of-float unlock on a known date. Per response taxonomy that is a **timing** finding → tranche/wait, not a court.
+
+**COURT-WORTHINESS MRLN: 3/10** — decisive facts (64× EV/revenue on declining revenue, $593K RPO, dated 9/16 unlock, 12% PIK senior accretion) are undisputed and already determine the sizing, so a court would not move it.
+
+**PRINT PROXIMITY: 2026-11-12 (Q3) — yfinance-derived, UNCONFIRMED; no company PR names it.** Not within 5 trading days, so the print-decisive reconstruction is not triggered. The *relevant* catalyst is **2026-09-16** (lock-up expiry), confirmed as closing 3/16/26 + the 6-month lock-ups in the merger 8-K.
+
+**PRE-CATALYST POSITION: FLAT** (book confirms no position, no orders). A ~39%-of-float unlock lands in 22 days into a stock 15% off its 52-week low with revenue declining and RPO under $600K; there is no reason to own the unlock, and the C-130J integration thesis is testable at the 11/12 print via RPO — which is the metric to gate any future entry on.
+
+**Provenance caveat:** `sec.gov` returned HTTP 403 to every fetch in this session (no User-Agent control, and no Bash available to set one), so the SEC documents cited above were read via StockTitan's filing summaries rather than fetched directly. Figures are consistent across the 10-Q, the 8-K press release, and the merger 8-K, but the $5.00 VWAP floor is the one claim I would want re-pulled from the 424B3 primary before it's relied on.

@@ -1,0 +1,297 @@
+{
+  "asof": "2026-07-13",
+  "doctrine": "An edge is only OURS if it carries a capacity ceiling, a liquidity premium, or a latency advantage that keeps institutions out (the office thesis). Every candidate below is narrow BY DESIGN \u2014 a high-precision detector, not a comprehensive score (detector-composition lesson). status: building = scanner in progress; proposed = vetted idea, not yet built; live = productized generator already running.",
+  "status_legend": {
+    "building": "scanner under construction this session",
+    "proposed": "idea vetted, awaiting a build decision",
+    "live": "already a running generator"
+  },
+  "theses": [
+    {
+      "id": "lockup_expiry",
+      "title": "IPO/SPAC lock-up expiration air-pockets",
+      "edge_source": "FLOW",
+      "dated": true,
+      "status": "live",
+      "mechanism": "At lock-up expiry (usually 180d post-IPO) pre-IPO holders + insiders can sell for the first time; large locked supply into a thin float forces a pre-unlock drift-down and an unlock-day washout. Buy the price-insensitive seller's air-pocket, like the ADIG orphan spin.",
+      "why_ours": "LIQUIDITY + CAPACITY \u2014 small-cap floats institutions won't warehouse; the flow is large vs ADV only on names too small for arb funds.",
+      "scan": "EDGAR 424B4 (recent IPOs, ~200d) -> lock-up term (default 180d, parse where feasible) -> unlock_date; flag unlock in 0-21d (actionable) / 22-90d (upcoming); magnitude = locked shares / public float.",
+      "disconfirm": "Staggered/pre-hedged lockups; a strong tape absorbs the supply; early-release provisions; the float is already large. KILL if arb'd flat on the unlock day.",
+      "related_live": "generalizes reference_spcx_ipo_lockup_calendar; same air-pocket family as ADIG (event_windows)",
+      "priority": 1
+    },
+    {
+      "id": "spac_trust_arb",
+      "title": "SPAC trust-value floor arbitrage",
+      "edge_source": "CARRY",
+      "dated": true,
+      "status": "live",
+      "mechanism": "SPACs trading BELOW trust value pre-deadline give a near-guaranteed redemption floor (pro-rata trust cash + interest) plus free deal/extension/warrant optionality. Buy below trust; redeem or ride the deal.",
+      "why_ours": "CAPACITY + LIQUIDITY \u2014 odd-lot, sub-fund-threshold; the floor is contractual, so it's rented risk (RP_FAIR), not a directional bet.",
+      "scan": "Seed active-SPAC universe -> trust/share from EDGAR XBRL (AssetsHeldInTrust...) / public shares -> vs live price -> discount-to-trust x days-to-deadline = annualized yield.",
+      "disconfirm": "Extension amendments that erode/ delay the floor; trust drawn down; deal that overpays; you must actually tender to redeem. Verify the deadline + redemption mechanics per name.",
+      "priority": 1
+    },
+    {
+      "id": "insider_10b51",
+      "title": "10b5-1 termination + insider buy-cluster nowcast",
+      "edge_source": "INFO",
+      "dated": false,
+      "status": "live",
+      "mechanism": "(a) 2+ insiders buying open-market (code P) in a short window = bullish conviction; (b) a 10b5-1 plan TERMINATION (Reg S-K Item 408 / Form 4 flag) is a notable tell (plans killed ahead of material events). Both lead the narrative.",
+      "why_ours": "LATENCY + primary-source \u2014 un-automated Form-4/Item-408 parsing; small-cap clusters nobody watches.",
+      "scan": "EDGAR Form 4 XML -> code-P buys grouped by issuer (>=2 insiders / ~10d) + the Rule 10b5-1 indicator; EFTS full-text 10-Q/8-K 'Rule 10b5-1' + 'terminated' for the termination leg.",
+      "disconfirm": "Token-matching over-fires (recall-floor lesson) \u2014 narrow to small/mid-cap clusters, key on the attribute; single-insider buys are noise; terminations can be benign/routine.",
+      "related_live": "borrow-fee overlay would pair with squeeze_watch",
+      "priority": 1
+    },
+    {
+      "id": "thematic_etf_rebalance",
+      "title": "Thematic-ETF rebalance flow (ARK / clean-energy / semis / uranium)",
+      "edge_source": "FLOW",
+      "dated": true,
+      "status": "live",
+      "mechanism": "A thematic fund adding/dropping a $1-3B name forces days of concentrated flow \u2014 far less arbitraged than S&P/Russell recon.",
+      "why_ours": "CAPACITY \u2014 the underlying names are small enough that only we care; the big index-arb desks skip thematics.",
+      "scan": "Published thematic-index methodologies + quarterly rebalance dates x fund-AUM-vs-name-float; flag high AUM/float on rebalance.",
+      "disconfirm": "Flow small vs ADV; discretionary (not rules-based) funds don't force it; front-run by other quants.",
+      "related_live": "extends gen_russell_recon / index_events to thematics",
+      "priority": 2
+    },
+    {
+      "id": "fallen_angel_rating_migration",
+      "title": "Fallen-angel / rating-migration forced selling",
+      "edge_source": "FLOW",
+      "dated": true,
+      "status": "stood_up 2026-07-13 \u2014 NARROW FIT (see instrument finding)",
+      "mechanism": "Index-mandate forced selling at a KNOWN, dated reconstitution -> price pressure independent of fundamentals.",
+      "why_ours": "LIQUIDITY \u2014 extends our muni-credit engine to a cross-market rating-action scanner; odd-lot credit lines.",
+      "scan": "Moody's/S&P/Fitch downgrade feed x index-eligibility (IG boundary) x forced-holder base; buy the technical over-shoot on names where the pledge/coverage is money-good.",
+      "disconfirm": "The downgrade is real permanent impairment, not a technical (the muni dislocation lesson \u2014 insulation must be structural).",
+      "related_live": "reference_muni_dislocation_strategy, muni_credit vertical",
+      "priority": 2,
+      "edge_class": "FLOW / forced-seller",
+      "hypothesis": "When an issuer is downgraded IG->HY (crossing BBB-/Baa3 -> BB+/Ba1), IG index funds are MANDATE-FORCED to sell at the month-end index reconstitution, overshooting; buying the fallen-angel security into that forced exit captures the reversion as HY/crossover buyers step in.",
+      "signal": "Recent/imminent IG->HY rating crossings (Moody/S&P/Fitch); the forced-sell window = month-end index exit following the downgrade; magnitude scales with index AUM x issuer weight.",
+      "instrument": "IBKR-tradeable: the issuer exchange-traded BABY BONDS / PREFERREDS (odd-lot credit we can hold), or the equity if it sold in sympathy. Office-thesis fit = thin credit lines institutions ignore.",
+      "kill_criteria": "Fails if the downgrade reflects real impairment (not just a threshold cross), or the security isnt IBKR-tradeable, or the forced-seller overshoot is already gone by the reconstitution date.",
+      "screen": "Composite rating (middle of 3 / lower of 2) crosses to Ba1/BB+ -> dropped from IG index at the MONTH-END following the cut -> IG-mandate funds forced flat -> overshoot; HY/crossover (ANGL/FALN) buy the reversion. Underperform BEFORE the cut (pre-selling), outperform AFTER. Sources: agency press releases + Bloomberg/ICE rebalance calendar.",
+      "instrument_finding": "BINDING CONSTRAINT: the 2025-26 fallen angels are big IG issuers with $1,000-par INSTITUTIONAL bonds (IBKR bond desk, min-lots), NOT $25-par exchange baby bonds. NO listed baby bonds/preferreds found for Centene/Ford/Paramount/Celanese/Huntsman/WBD. So for our equities+baby-bond account the only expressions are (a) the COMMON EQUITY = a sympathy proxy (junior, NO reversion mechanic, can move opposite the bond) or (b) the institutional bond via desk. Genuine odd-lot-credit fit = only BDC/REIT fallen angels that fund with LISTED baby bonds/preferreds -> FSK/OCSL + the Moody-negative BDC sector (connects to our OXLCZ line).",
+      "candidates": [
+        {
+          "tkr": "CNC",
+          "co": "Centene",
+          "cut": "S&P ~Apr-2026 BBB-\u2192BB+ (composite HY, ~$14bn par out)",
+          "fit": "BOND-DESK; equity already -40% (overshoot partly spent)",
+          "verdict": "freshest technical cross, but bond-desk trade"
+        },
+        {
+          "tkr": "PSKY",
+          "co": "Paramount Skydance",
+          "cut": "Fitch ~Mar-2026 BBB-\u2192BB+ (1 agency; watch 2nd)",
+          "fit": "equity $9.54 near 52w low, WBD-deal M&A risk",
+          "verdict": "catalyst-rich; wait for 2nd agency to trigger bond forced-sell"
+        },
+        {
+          "tkr": "F",
+          "co": "Ford",
+          "cut": "Moody's Ba1; S&P+Fitch still BBB- (one agency away)",
+          "fit": "equity / Ford Credit bonds",
+          "verdict": "PROSPECTIVE pre-position before composite cross"
+        },
+        {
+          "tkr": "FSK",
+          "co": "FS KKR (BDC)",
+          "cut": "Moody's ~Nov-2025 Baa3\u2192Ba1",
+          "fit": "the ONLY real odd-lot-credit fit (BDC baby bonds)",
+          "verdict": "but REAL asset-quality erosion + sector neg outlook = credit call, not clean technical"
+        }
+      ],
+      "kills": "Celanese (downgraded AGAIN Nov-2025 = serial, market was right), Nissan (structural collapse), Huntsman/WBD (stale/recovered). Falling knives, not reversions.",
+      "data_caveat": "Exact notches/dates are verified-SECONDARY (agency PDFs 403d this session) \u2014 pull primary agency press releases before sizing any name + confirm which month-end is the forced-sell window.",
+      "our_verdict": "WEAKER FIT than postreorg for our account: mechanism real but mostly a BOND-DESK strategy; deployable odd-lot version = a narrow BDC-baby-bond screen entangled with real sector deterioration. Not a priority vs postreorg."
+    },
+    {
+      "id": "postreorg_orphan_equity",
+      "title": "Post-reorg / post-bankruptcy orphan equity",
+      "edge_source": "FLOW",
+      "dated": false,
+      "status": "e2e complete 2026-07-13 \u2014 2/2 AVOID; NARROWED (do not run broad framing)",
+      "mechanism": "Creditor-to-equity conversion creates non-natural holders forced to sell into zero coverage/liquidity.",
+      "why_ours": "CAPACITY + LATENCY \u2014 the ADIG orphan pattern applied to emergence equities nobody covers.",
+      "scan": "Ch.11 emergence docket + first cleansing/8-K filings -> new share structure -> forced-holder overhang window.",
+      "disconfirm": "The plan over-levered the newco; the fresh-start balance sheet is worse than the orphan discount implies.",
+      "priority": 3,
+      "edge_class": "FLOW / forced-seller",
+      "hypothesis": "Companies emerging from Ch11 issue NEW equity to former CREDITORS (distressed-debt funds/banks) who are reluctant holders wanting to exit -> indiscriminate creditor selling + no analyst coverage + no index membership = an orphan-equity overhang that mis-prices cheap; buy the overhang, capture the re-rating as it clears (coverage init, uplisting, creditor lockup expiry).",
+      "signal": "EDGAR: post-emergence 8-K + Form 10/registration + fresh-start accounting; recent (last ~6-18mo) large Ch11 emergences; thin/OTC trading; low/zero analyst coverage; creditor concentration + lockup schedule.",
+      "instrument": "The post-reorg COMMON (often OTC/thin); catalyst = overhang clearing (uplist, coverage, lockup expiry).",
+      "kill_criteria": "Fails if the business is still impaired (reorg didnt fix the model), the overhang has no clearing catalyst, or its untradeable/too illiquid even for our size.",
+      "screen": "EDGAR sequence: emergence 8-K (Item1.03/5.01) -> fresh-start ASC852 footnote -> resale S-1/Form10 (the exit door) -> concentrated distressed 13D/13G (names the overhang) -> RRA/lockup schedule (supply timing) -> thin/OTC listing. Screen OUT Expert-Market/deregistered (Form 15-12G).",
+      "candidates": [
+        {
+          "tkr": "WOLF",
+          "co": "Wolfspeed",
+          "emerged": "2025-09-29",
+          "venue": "NYSE",
+          "note": "serial S-1 resale regs; scarce 200mm SiC fab = best assets-not-broken; catalyst=SiC ramp + creditor sell-through"
+        },
+        {
+          "tkr": "OPI",
+          "co": "Office Properties Income Trust",
+          "emerged": "2026-06-17",
+          "venue": "Nasdaq",
+          "note": "FRESHEST overhang: Helix 25.3% + Redwood 19.7% 13D; office-REIT secular tape risk is the offset"
+        },
+        {
+          "tkr": "VRM",
+          "co": "Vroom",
+          "emerged": "2025-01-14",
+          "venue": "Nasdaq",
+          "note": "92.9% to converts, ~5M-share micro-float = concentration+illiquidity trap"
+        },
+        {
+          "tkr": "WW",
+          "co": "WeightWatchers",
+          "emerged": "2025-06-24",
+          "venue": "Nasdaq",
+          "note": "91% to first-lien creditors BUT GLP-1 structural impairment = turnaround not clean overhang"
+        },
+        {
+          "tkr": "CORZ",
+          "co": "Core Scientific",
+          "emerged": "2024-01-23",
+          "venue": "Nasdaq",
+          "note": "overhang CLEARED, re-rated on AI/HPC = the matured TEMPLATE, not a fresh entry"
+        }
+      ],
+      "kills": "ModivCare(Expert Mkt), CorEnergy/Cano/TPI/GlobalCleanEnergy(deregistered/private), Spirit FLYYQ(2nd Ch11, zero equity = reorg didnt fix the model). Business-impaired watch: WW(GLP-1), OPI(office).",
+      "next": "live-tape pass (spread/float/px-vs-plan-value) on WOLF/OPI/VRM + pull each RRA/lockup schedule to date the supply events, THEN e2e.",
+      "e2e_result": "WOLF AVOID (discovered 54%-short squeeze, re-levering, demand-starved) + OPI AVOID (office secular impairment, Jan-2027 wall, live LM tender). Both court-affirmed.",
+      "structural_finding": "The broad \"buy creditor overhang\" framing has BUILT-IN ADVERSE SELECTION: the forced seller IS the best-informed holder (fulcrum creditor who set plan value), selling into \u00a71145-free float precisely when equity over-recovered vs a still-broken business. The overhang is INFORMED DISTRIBUTION, not indiscriminate liquidity supply \u2014 the inversion of the thesis premise. 2/2 AVOID is a correct rejection of the broad framing.",
+      "narrowed_filters": [
+        "(1) still UNDISCOVERED (conditioning layer: reject CROWDED \u2014 WOLF 54% SI violated)",
+        "(2) underlying business NOT secularly impaired AND not still-deteriorating post-emergence (OPI office violated)",
+        "(3) post-reorg DE-levering, not RE-levering \u2014 kill names issuing paper/diluting post-emergence (WOLF violated)",
+        "(4) seller identity = MECHANICAL/index/ratings/mandate-forced, NOT the fulcrum creditor; resale block priced ~4x plan basis = informed exit = auto-reject (WOLF violated)",
+        "(5) a DATED supply cliff still AHEAD (buy INTO a known unlock, not the aftermath \u2014 both were past the disorderly window)"
+      ],
+      "re_scope": "\"mechanical-seller-into-dated-cliff, de-levering, still-undiscovered\" = the classic index-deletion / ratings-forced / spin-orphan trade. Distinct from \"buy any post-reorg overhang\" (a value-trap generator). Narrow, do not park."
+    },
+    {
+      "id": "january_reversal",
+      "title": "January-effect reversal (tax-loss bounce)",
+      "edge_source": "FLOW",
+      "dated": true,
+      "status": "live",
+      "mechanism": "Small-caps dumped for December tax losses snap back in January as the forced selling lifts. The reversal leg of the December dislocation.",
+      "why_ours": "CAPACITY \u2014 the effect survives only in small caps too small for the factor funds that arbitraged it out of large caps.",
+      "scan": "Pairs with december_dislocation: the Dec loss-basket -> re-enter early Jan on names where the selling was tax-technical, not fundamental.",
+      "disconfirm": "The effect has decayed in liquid names; a name was a loser for real reasons (value trap). DD+court mandatory (quality-at-a-loss).",
+      "related_live": "december_dislocation_scanner (the Dec leg is built)",
+      "priority": 2
+    },
+    {
+      "id": "cef_term_liquidation",
+      "title": "Closed-end-fund term/liquidation NAV convergence",
+      "edge_source": "CARRY",
+      "dated": true,
+      "status": "live",
+      "mechanism": "Term/target-term CEFs and activist-forced tenders converge the discount to NAV on a DATED event; buy the discount, collect the convergence.",
+      "why_ours": "LIQUIDITY \u2014 odd-lot retail vehicles; the convergence is mechanical near the term date.",
+      "scan": "CEF term/termination calendar x current discount-to-NAV x days-to-term; flag wide discounts near term.",
+      "disconfirm": "NAV itself is falling (you convergence into a declining mark); term extended by vote. NB our frontrun_engine CEF work REFUTED the pre-IPO leg \u2014 this is the term-event leg, different mechanism.",
+      "related_live": "project_frontrun_engine_cef_nav (pre-IPO leg refuted; term-event leg untested)",
+      "priority": 3
+    },
+    {
+      "id": "ptab_itc_docket",
+      "title": "PTAB / ITC docket ruling nowcast",
+      "edge_source": "INFO",
+      "dated": true,
+      "status": "live",
+      "mechanism": "Patent-validity (IPR institution -> final written decision) and tariff (Section 337 / AD-CVD) rulings move single small caps on a PUBLISHED calendar the market doesn't price until the press release.",
+      "why_ours": "LATENCY \u2014 the docket date is public but un-priced; nobody reads PTAB/ITC EDIS.",
+      "scan": "PTAB + ITC EDIS calendars mapped to tickers (the patent-holder / respondent); event windows around decision dates.",
+      "disconfirm": "Outcome genuinely 50/50 -> size as convexity not conviction; the IP isn't material to the equity.",
+      "related_live": "litigation_screen connector; bind the ruling to the SPECIFIC docket (catalyst-identity lesson)",
+      "priority": 2
+    },
+    {
+      "id": "borrow_fee_utilization",
+      "title": "Borrow-fee / utilization spike scanner",
+      "edge_source": "INFO",
+      "dated": false,
+      "status": "live",
+      "mechanism": "A jump in borrow cost + utilization is a leading distress OR squeeze tell; generalize squeeze_watch beyond the SpaceX proxy-hedge basket.",
+      "why_ours": "LATENCY \u2014 reuses our FINRA short-volume plumbing; small-cap borrow dynamics move before the tape.",
+      "scan": "Borrow-fee + utilization feed x recent short-volume; flag simultaneous spikes; classify distress vs squeeze via the conditioning layer.",
+      "disconfirm": "Fee spikes measure SUPPLY not conviction (MAUDE-velocity lesson: LR~1 unless demand-driven) \u2014 verify it's demand, condition through discovery_state.",
+      "related_live": "squeeze_watch.py, reference_conditioning_layer",
+      "priority": 2
+    },
+    {
+      "id": "subthreshold_merger_arb",
+      "title": "Sub-threshold merger-arb (<$500M deals)",
+      "edge_source": "CARRY",
+      "dated": true,
+      "status": "live",
+      "mechanism": "Arb funds skip small deals; you collect a wider spread for the SAME regulatory/financing risk on names below their size floor.",
+      "why_ours": "CAPACITY by design \u2014 the whole point is the deals arbs can't be bothered with.",
+      "scan": "Merger agreements (8-K / DEFM14A) filtered by deal size < $500M x spread x est. close; financing + antitrust filter.",
+      "disconfirm": "Small deals break MORE often (financing, MAC, buyer walk); need a break-rate-adjusted spread, not raw spread. NNDM taught: a non-binding proposal is not a deal.",
+      "related_live": "NNDM court (deal-arb-vs-cash-box discipline)",
+      "priority": 2
+    },
+    {
+      "id": "korea_valueup_catalyst",
+      "title": "Korea 'value-up' / mandatory-cancellation catalyst",
+      "edge_source": "VALUE",
+      "dated": true,
+      "status": "executed 2026-07-13",
+      "mechanism": "The chaebol/holdco governance discount closes on DATED reform (buyback-cancellation mandates, holdco unwinds, value-up incentives).",
+      "why_ours": "LATENCY on a foreign legislative calendar + we already hold the Korean names (KB, 003550, 005387, COSMECCA cohort).",
+      "scan": "Korea value-up statute/enforcement calendar x holdco/cross-holding discount x payout policy; catalyst layer on the existing Korean holdings.",
+      "disconfirm": "Reform slips or is watered down (verify statute dates \u2014 the spurious-date lesson); the discount is a governance permanent, not a closing gap.",
+      "related_live": "8750.T (Japan cross-holder analog), Korean equity sleeve",
+      "priority": 3,
+      "note": "Converted to a LIVE Korea value-up sleeve: Woori (WF) STARTER anchor w/ $62.40 GTC bid + catalyst-prediction pass (Jul-24 H1 print + Feb-2027 annual value-up, both frozen); SK Inc 034730 STARTER-catalyst; Hyundai-pref optional; LS Corp AVOID (court-overturned). See research_ledger korea_valueup sleeve."
+    },
+    {
+      "id": "auditor_change_late_filing",
+      "title": "Auditor-resignation + late-filing forensic exclusion",
+      "edge_source": "EXCLUSION",
+      "dated": false,
+      "status": "live",
+      "mechanism": "An auditor change PLUS a late-filing notice (NT 10-K/Q) is a high-precision distress/fraud precursor; the value is in NOT owning these (the anti-portfolio compounds).",
+      "why_ours": "Primary-source EXCLUSION; the office's honesty-alpha = excluding liars, not re-detecting disclosed bad news.",
+      "scan": "EDGAR 8-K Item 4.01 (auditor change) INTERSECT NT 10-K/10-Q (late filing) within a window; the CONJUNCTION is the precision gate.",
+      "disconfirm": "Many late filings + auditor changes are benign \u2014 precision comes only from the conjunction; a single flag over-fires.",
+      "related_live": "project_smallcap_honesty_strategy (catastrophe overlay 80-93% recall), concentration_instability_detector",
+      "priority": 2
+    },
+    {
+      "id": "overnight_dislocation_intraday_fade",
+      "name": "Overnight thin-tape dislocation -> intraday fade",
+      "status": "KILLED (thin variant) \u2014 court-affirmed 2026-07-13",
+      "submitted": "2026-07-13",
+      "edge_class": "CONVEXITY/short-term-reversal",
+      "hypothesis": "Buying large, NO-NEWS, thin-tape overnight DOWN-dislocations at the open and selling at the close earns positive net-of-cost intraday reversion.",
+      "literature_anchor": "Lou-Polk-Skouras 'A Tug of War' (JFE 2019): overnight moves CONTINUE overnight but REVERSE intraday (cross-period reversal ~3.24%/mo in a value-weighted overnight-loser decile, persistent for years, clientele-driven, not news). Cooper-Cliff-Gulen 'Like Night and Day' (overnight premium, large-cap/index). KEY: the paper EXCLUDES microcaps (<$5/bottom NYSE quintile) for microstructure noise -> our thin-tape single-name flavor is OUTSIDE its clean universe = the untested, risky slice.",
+      "falsifiable_predictions": [
+        "Overnight return negatively predicts same-session intraday return (reversal slope < 0).",
+        "Exit at CLOSE not overnight (overnight = continuation, wrong side).",
+        "Diversified overnight-loser DECILE reverts intraday (paper's clean object) = the null to beat.",
+        "The thin-name single-event version survives net of costs AND has a bounded left tail (the novel, doubtful claim)."
+      ],
+      "design": "Two-stage backtest: (1) replicate the clean liquid overnight-loser decile, buy-open/sell-close, as the NULL; (2) test extension into illiquid/concentrated/single-event thin-tape names. Requires a NO-NEWS classifier (EDGAR 8-K + news wire) \u2014 the make-or-break module \u2014 and a realistic spread/impact cost model. Grade in CONVEXITY class w/ placebo + explicit left-tail (mis-classified news continuations).",
+      "kill_criteria": "Fails if: net-of-cost expectancy <= 0 in thin names, OR left tail (news-continuation) dominates, OR the reversion is already gone by the tradeable open. If only the discretionary check-for-news-then-fade form survives, log as DISCRETIONARY alpha, not a systematic strategy.",
+      "current_stage": "KILLED + banked (backlog + memory)",
+      "instance": "GCT 2026-07-13 after-hours -5% fade (manual instance: checked-for-news -> none -> bought the reversion).",
+      "verdict": "KILL the thin-name systematic strategy. Probe: liquid reversal replicates (slope -0.109 t=-5.2; down-gap +17bps, net +7-12bps) but thin is DEAD (slope ~0; down-gap -2bps NEGATIVE before cost; net -52 to -152bps; fat tail). Court AFFIRMED via 3 independent kills + the decisive structural identity below.",
+      "court_key_insight": "In a thin name the REVERSION PREMIUM and the TRANSACTION COST ARE THE SAME OBJECT \u2014 the bid-ask bounce. The liquidity premium accrues to the PASSIVE resting limit (the maker who gets hit on the gap), NOT to a marketable open->close round-trip, which PAYS the very illiquidity premium it hopes to earn. Only capture route = BECOMING the liquidity provider (fill-probability + adverse selection: filled precisely when wrong). So the tradeable KILL holds (~0.85) regardless of whether a clean no-news fade exists.",
+      "salvage": "The LIQUID-name overnight->intraday reversal is real but usable ONLY as a FREE PASSIVE-ENTRY EXECUTION OVERLAY: if already buying a liquid name for independent reasons and it gapped down overnight on no news, enter at the open (dont chase) \u2014 reversion is ~free because the round-trip cost isnt charged against the edge. NOT a standalone book (+17bps, t~2 optimistic given clustered/correlated dislocation days, one regime, daily-open != first-30min-VWAP).",
+      "followon": "Clean NO-NEWS thin test (exclude 8-K/earnings/halt days) worth running for KNOWLEDGE-GRAPH completeness only \u2014 P(clean fade exists)~0.5 but P(tradeable)~0.15; the trade is not hiding in it."
+    }
+  ]
+}

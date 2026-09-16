@@ -1,0 +1,179 @@
+{
+  "ticker": "PLUG",
+  "cutoff": "2024-05-17",
+  "filing": "0001558370-24-002178_10K.txt",
+  "plan_version": 1,
+  "claims": [
+    {
+      "claim_id": "PLUG-1",
+      "claim_text": "Plug has deployed more than 69,000 fuel cell systems for forklifts and more than 250 fueling stations as of the FY2023 10-K, anchoring its claim to be the first commercially viable hydrogen fuel-cell market.",
+      "source_quote": "In creating the first commercially viable market for hydrogen fuel cells, the Company has deployed more than 69,000 fuel cell systems for forklifts and more than 250 fueling stations.",
+      "subject": "Plug Power",
+      "predicate": "has_deployed_count_of",
+      "object_value": "69,000+ fuel cell systems; 250+ fueling stations",
+      "category": "production_volume",
+      "referent_type": "physical_object",
+      "m_source_status": "MAPPED",
+      "source_id": "nrel_fuel.query_alt_fuel_stations",
+      "source_params": {
+        "fuel_type": "HY",
+        "cutoff_date": "2024-05-17",
+        "name_filter": "Plug"
+      },
+      "proposed_connector": null,
+      "extraction_notes": "NREL Alternative Fuel Stations Locator tracks public hydrogen fueling stations. Plug's 250 'fueling stations' figure is dominated by ON-SITE, customer-private material-handling refueling installations at distribution centers (not retail/public stations), so NREL will likely show a much smaller count of PUBLIC HY stations operated by Plug. That mismatch is the Calibration Heuristic 3 (announced vs operational/registry-visible) signal. The 69,000 forklift count has no comparable public registry (forklift fuel cells are not vehicle-registered with NHTSA) -- the NREL station number is the closest registry analog."
+    },
+    {
+      "claim_id": "PLUG-2",
+      "claim_text": "Walmart was Plug Power's largest customer in FY2023 at 23.4% of consolidated revenue, and the top-three customers (Walmart plus two others, one at 10.9%) accounted for 43.8% of FY2023 consolidated revenue of approximately $891 million.",
+      "source_quote": "For the year ended December 31, 2023, Walmart, Inc. ('Walmart'), accounted for 23.4% of our total consolidated revenues, which included a provision for warrant charge of $5.9 million. Additionally, 10.9% of our total consolidated revenues were associated with our second largest customer. ... total revenue in 2023 associated with our top three customers was $390.5 million ... such customers accounted for 43.8% of our total consolidated revenues.",
+      "subject": "Walmart Inc.",
+      "predicate": "is_top_customer_of",
+      "object_value": "23.4% of FY2023 revenue (~$209M)",
+      "category": "customer_pipeline",
+      "referent_type": "entity",
+      "m_source_status": "MAPPED",
+      "source_id": "edgar_fts.query_fulltext",
+      "source_params": {
+        "search_term": "Plug Power",
+        "cutoff_date": "2024-05-17",
+        "cik": "0000104169",
+        "start_date": "2020-01-01",
+        "forms": "10-K,10-Q,8-K,DEF 14A"
+      },
+      "proposed_connector": null,
+      "extraction_notes": "Layer 3 Rule 7: if Walmart's purchases from Plug are material AND Walmart granted equity warrants in a Transaction Agreement, this should be discoverable in Walmart's own SEC filings. Walmart is a US filer (CIK 0000104169). $209M is immaterial to Walmart's $611B revenue but the warrant overhang and forklift-fleet relationship are typically disclosed in Walmart proxy/10-K footnotes when material. Counterparty corroboration on the broader strategic relationship is the test."
+    },
+    {
+      "claim_id": "PLUG-3",
+      "claim_text": "Amazon is a strategic counterparty of Plug Power under a 2022 Amazon Transaction Agreement (warrant-backed) and was previously party to a 2017 Amazon Transaction Agreement -- treated as a top-three customer subject to warrant share charges in FY2023.",
+      "source_quote": "Amazon Transaction Agreement in 2022 ... Amazon Transaction Agreement in 2017 ... Walmart Transaction Agreement. The Company recorded a portion of the estimated fair value of the warrants as a reduction of revenue.",
+      "subject": "Amazon.com, Inc.",
+      "predicate": "is_warrant_counterparty_customer_of",
+      "object_value": "2017 and 2022 Transaction Agreements",
+      "category": "customer_pipeline",
+      "referent_type": "entity",
+      "m_source_status": "MAPPED",
+      "source_id": "edgar_fts.query_fulltext",
+      "source_params": {
+        "search_term": "Plug Power",
+        "cutoff_date": "2024-05-17",
+        "cik": "0001018724",
+        "start_date": "2017-01-01",
+        "forms": "10-K,10-Q,8-K,DEF 14A"
+      },
+      "proposed_connector": null,
+      "extraction_notes": "Layer 3 Rule 7 directly applicable: Amazon (CIK 0001018724) is a US filer; if a hyperscaler/logistics counterparty has warrant agreements material enough to drive Plug's revenue-reduction accounting (multi-million-dollar warrant amortization), Amazon's own 10-K typically discloses material commercial relationships in the related-party / commitments sections. ABSENCE while PLUG asserts the relationship is a corroboration weakness."
+    },
+    {
+      "claim_id": "PLUG-4",
+      "claim_text": "Plug commenced producing liquid hydrogen at its Kingsland, Georgia plant in January 2024 and restarted its Charleston, Tennessee plant in February 2024, with additional U.S. plants under construction in New York, Louisiana and Texas.",
+      "source_quote": "Plug began producing liquid hydrogen at its hydrogen production facility in Kingsland, Georgia in January 2024. In addition, Plug has construction underway for several new hydrogen plants throughout the United States, including in New York, Louisiana and Texas. ... Plug restarted operation of its hydrogen plant in Tennessee in February 2024.",
+      "subject": "Plug Power Kingsland GA / Charleston TN hydrogen plants",
+      "predicate": "is_operational_or_under_construction_at",
+      "object_value": "Kingsland GA (operational Jan 2024), Charleston TN (restarted Feb 2024); NY, LA, TX under construction",
+      "category": "physical_facility",
+      "referent_type": "physical_object",
+      "m_source_status": "MAPPED",
+      "source_id": "epa_frs.query_facilities",
+      "source_params": {
+        "facility_name": "Plug Power",
+        "state_abbr": "GA",
+        "city_filter": "Kingsland"
+      },
+      "proposed_connector": null,
+      "extraction_notes": "EPA Facility Registry Service is the authoritative test for industrial facility existence: a hydrogen production / liquefaction plant must register for Clean Air Act permits, Title V, and (for green-H2 via electrolysis) state environmental permits. Plan_executor should also re-run with state_abbr='TN' city_filter='Charleston' for the Tennessee plant. Per Calibration Heuristic 3 (announced vs operational), the Kingsland claim is the high-discriminative one because Plug just declared it operational in Jan 2024 -- EPA FRS lookup as of cutoff May 17 2024 should show a registered facility there."
+    },
+    {
+      "claim_id": "PLUG-5",
+      "claim_text": "Plug holds 50 issued U.S. patents (active with USPTO) and has 35 U.S. patent applications pending as of year-end 2023.",
+      "source_quote": "We have a total of 50 issued patents currently active with the United States Patent and Trademark Office ('USPTO'), expiring between 2024 and 2041. At the close of 2023, we had 35 U.S. patent applications pending.",
+      "subject": "Plug Power",
+      "predicate": "has_count_of_active_patents",
+      "object_value": "50 issued; 35 pending",
+      "category": "technology",
+      "referent_type": "intangible",
+      "m_source_status": "MAPPED",
+      "source_id": "uspto_odp.query_assignee",
+      "source_params": {
+        "assignee_name": "Plug Power",
+        "cutoff_date": "2024-05-17",
+        "categorize": {
+          "fuel_cell": ["fuel cell", "PEM", "membrane electrode", "MEA", "stack"],
+          "electrolyzer": ["electrolyzer", "electrolysis", "hydrogen production"],
+          "hydrogen_storage": ["liquefaction", "cryogenic", "hydrogen storage", "tank"]
+        }
+      },
+      "proposed_connector": null,
+      "extraction_notes": "USPTO ODP is authoritative for US patent counts. n_granted comparable to 'issued patents currently active' (subject to small discrepancy because ODP indexes applications; some pre-1997 family patents may not be in ODP). Categorization tests claimed technology depth across PLUG's core areas. NHTSA-style 'incomplete vehicle' analog: if the bulk of granted patents are in legacy material-handling and not in green-hydrogen-production or large-scale electrolyzer manufacturing, the IP moat is mis-positioned for the announced strategic shift."
+    },
+    {
+      "claim_id": "PLUG-6",
+      "claim_text": "Plug Power disclosed substantial doubt about its ability to continue as a going concern at the time of its Q3 2023 10-Q, with FY2023 net loss of $1.4 billion and only $135.0 million of unrestricted cash at 12/31/2023; the company is funding operations through a B. Riley $1.0 billion ATM share-issuance program (Original ATM signed Jan 17, 2024; amended Feb 23, 2024).",
+      "source_quote": "The Company incurred net losses of approximately $1.4 billion, $724.0 million and $460.0 million for the years ended December 31, 2023, 2022 and 2021, respectively. The Company's working capital was $822.2 million at December 31, 2023, which included unrestricted cash and cash equivalents of $135.0 million and restricted cash of $1.0 billion. ... At the time of the issuance of the Company's 2023 third quarter Form 10-Q, conditions existed that raised substantial doubt about the Company's ability to continue as a going concern. ... on January 17, 2024, the Company entered into the At Market Issuance Sales Agreement (the 'Original ATM Agreement') with B. Riley Securities, Inc. ... As of February 23, 2024, the Company had offered and sold 77,417,069 shares of common stock having an aggregate offering price of approximately $302.1 million under the Original ATM Agreement.",
+      "subject": "Plug Power Inc.",
+      "predicate": "is_funding_via_ATM_program_after_going_concern",
+      "object_value": "B. Riley $1.0B ATM; 77.4M shares sold for $302.1M as of 2/23/2024",
+      "category": "financial_distress",
+      "referent_type": "event",
+      "m_source_status": "MAPPED",
+      "source_id": "sec_filings.list_filings_by_form",
+      "source_params": {
+        "cik": "0001093691",
+        "forms": ["424B5", "8-K", "S-3", "S-3ASR", "10-Q"],
+        "cutoff_date": "2024-05-17",
+        "start_date": "2024-01-01",
+        "limit": 50
+      },
+      "proposed_connector": null,
+      "extraction_notes": "An ATM equity program of $1B and rapid share issuance produces a heavy cadence of 424B5 prospectus supplements and 8-K disclosures. Counts of those filings between 2024-01-17 and cutoff 2024-05-17, plus the Q1 2024 10-Q (which should restate going concern or describe its lifting), are the registry-side adjudication for the dilution-funded going-concern story. Calibration Heuristic on financial distress: companies that 'cure' going concern via ATM at distressed equity prices materially understate go-forward share count -- this is the operative short thesis here."
+    },
+    {
+      "claim_id": "PLUG-7",
+      "claim_text": "Plug Power is pursuing a U.S. Department of Energy Loan Programs Office loan to capitalize hydrogen production expansion (referenced as a risk-factor dependency: a government shutdown could impair the company's ability to secure a DOE loan).",
+      "source_quote": "a government shutdown may impact the availability and administration of government funding, which may impact our ability to secure a loan with the U.S. Department of Energy, or our ability to access the public markets and obtain necessary capital in order to properly capitalize and continue our operations.",
+      "subject": "Plug Power",
+      "predicate": "is_seeking_loan_guarantee_from",
+      "object_value": "U.S. Department of Energy",
+      "category": "regulatory_milestone",
+      "referent_type": "event",
+      "m_source_status": "PROPOSED",
+      "source_id": null,
+      "source_params": {},
+      "proposed_connector": {
+        "name": "doe_lpo.query_active_applications",
+        "description": "DOE Loan Programs Office active and conditional-commitment list (Title XVII, ATVM) by borrower name",
+        "endpoint": "https://www.energy.gov/lpo/active-and-conditional-commitments-loan-portfolio",
+        "access_pattern": "scrape",
+        "auth_required": false,
+        "sample_invocation": "GET https://www.energy.gov/lpo/active-and-conditional-commitments-loan-portfolio ; parse HTML rows for borrower_name substring 'Plug Power' returning status (conditional commitment / closed / disbursed), loan_amount, technology, announcement_date",
+        "rationale": "Plug repeatedly references a DOE loan as a material funding source. The DOE LPO publishes its active pipeline, conditional commitments, and closed loans. Direct registry adjudication of whether the loan is at application, conditional, closed, or absent (Calibration Heuristic 3 stage gate: announced -> conditional -> closed -> disbursed) is structurally needed.",
+        "estimated_cost": "free",
+        "completeness": "All DOE LPO loan-guarantee and direct-loan programs (Title XVII, ATVM, Tribal Energy); covers all named borrowers in U.S. clean-energy loan portfolio",
+        "referent_type": "loan_application",
+        "attribute": "status_and_amount"
+      },
+      "extraction_notes": "edgar_fts on 'Plug Power' inside DOE-adjacent filings is not adequate -- DOE LPO does not file with EDGAR. usaspending.gov tracks grants and contracts but not Title XVII loan guarantees (those are not federal-financial-assistance program records). The DOE LPO website is the authoritative source; a connector that scrapes its published active-and-conditional table is the proper M-source."
+    },
+    {
+      "claim_id": "PLUG-8",
+      "claim_text": "Plug has joint ventures named HyVia (with Renault SAS, France, 50/50, FCE light-commercial vehicles), AccionaPlug S.L. (with Acciona, Spain, 50/50, Iberian clean H2), Hidrogenii (with Olin Corp Niloco subsidiary, 50/50, 15-tpd plant in St. Gabriel, Louisiana), and SK Plug Hyverse (with SK E&S, 49/51, Korea/Asia).",
+      "source_quote": "Plug Power France, entered into a joint venture with Renault named HyVia ... Plug Power Espa a S.L. ... entered into a joint venture with Acciona, named AccionaPlug S.L. ... Plug Power LA JV, LLC, created a joint venture with Niloco Hydrogen Holdings LLC, a wholly-owned subsidiary of Olin Corporation ... named Hidrogenii ... Plug Power Inc. entered into a joint venture with SK E&S named SK Plug Hyverse Co. Ltd. ('SK Plug Hyverse'), which was initially funded in the first quarter of 2022.",
+      "subject": "Plug Power joint ventures (HyVia, AccionaPlug, Hidrogenii, SK Plug Hyverse)",
+      "predicate": "has_active_JV_with",
+      "object_value": "Renault (50%), Acciona (50%), Olin/Niloco (50%), SK E&S (51%)",
+      "category": "partnership",
+      "referent_type": "entity",
+      "m_source_status": "MAPPED",
+      "source_id": "edgar_fts.query_fulltext",
+      "source_params": {
+        "search_term": "Hidrogenii",
+        "cutoff_date": "2024-05-17",
+        "start_date": "2022-01-01",
+        "forms": "10-K,10-Q,8-K,DEF 14A,20-F"
+      },
+      "proposed_connector": null,
+      "extraction_notes": "Of the four JV partners, only Olin Corporation is a US 10-K filer (Renault: French ADR/foreign filer, no 10-K; Acciona: Spanish; SK E&S: Korean). 'Hidrogenii' is a distinctive single token unlikely to false-positive. Counterparty corroboration via Olin's 10-K/10-Q is the strongest adjudication of any JV existence; absence of 'Hidrogenii' / 'Plug Power LA JV' in Olin's filings would be a hard Layer 3 Rule 7 contradiction since the Louisiana JV is a 50/50 joint venture with Olin. Search broader 'Plug Power' in Olin's CIK (0000074260) as a secondary check; the plan_executor can also iterate with search_term='HyVia' cik=Renault foreign-filer-unknown, recognizing the foreign-filer caveat from the QS template."
+    }
+  ]
+}

@@ -1,0 +1,110 @@
+{
+  "ticker": "HEI",
+  "cutoff": "2023-01-15",
+  "filing": "0000046619-22-000066_10-K.txt",
+  "framework_finding": "HEICO 10-K is structurally NOT a J-Book-divergence short candidate. The filing describes broad defense/space end-markets (TWTAs, MPMs, EW components, missile-seeker IR sim, satellite microwave, PGM antennas, rotorcraft self-sealing fuel systems) but names ZERO specific Program Elements, no program-of-record revenue concentration, no IDIQ ceiling vs obligated, and no forward dollar-load on any single named program. The only specific platform named is F-16 (foreign-military aftermarket). pentagon_jbook fired on 6 of 7 J-Book-grounded claims; all returned NOT_FOUND / NOT_FOUND_IN_TIMERANGE — but this is a feature, not a failure: there is nothing PE-specific to verify because the company didn't make PE-specific claims. USAspending cross-check is constructive: HEICO subsidiary Robertson Fuel Systems shows $42M+ on individual rotorcraft fuel-system orders (W58RGZ Army Aviation), confirming the rotorcraft aux-fuel business is real revenue, not a forward-looking narrative. Net: framework correctly classifies HEI as PASS / UNVERIFIABLE on this cohort thesis.",
+  "scores": [
+    {
+      "claim_id": "HEI-1",
+      "claim_text": "FSG is a leading provider of products/services for F-16 fighter aircraft operational capabilities.",
+      "severity": "UNVERIFIABLE",
+      "supports": "F-16 is a legacy platform; foreign-military aftermarket demand is largely outside the FY2026 J-Book RDT&E corpus (US procurement of new F-16s is for FMS partners). HEICO's claim is aftermarket support, not a Program of Record claim.",
+      "M_check": "pentagon_jbook.query_program_funding(program_name='F-16')",
+      "M_value": "1 match: F-16 Squadrons (PE 0207133F, USAF). Signal: NOT_FOUND_IN_TIMERANGE — corpus is FY2026 J-Book, no funding history available at the 2023-01-15 cutoff.",
+      "interpretation": "Aftermarket on a legacy active platform — F-16 production for FMS partners (Taiwan, Bahrain, Slovakia, Bulgaria, Greece) is active at the cutoff. Even without J-Book funding history, the aftermarket thesis is structurally robust because >2,000 F-16s remain in service globally. Not a J-Book-divergence pattern. PASS-equivalent, but mark UNVERIFIABLE because the corpus cannot confirm forward funding at cutoff."
+    },
+    {
+      "claim_id": "HEI-2",
+      "claim_text": "~56% of ETG FY2022 net sales from defense / defense-satellite / homeland-security products (implied ~24% of consolidated).",
+      "severity": "PASS",
+      "supports": "Statement is a backward-looking revenue-mix disclosure for FY2022, not a forward claim on a specific PE. USAspending cross-check shows HEICO-affiliated entities (notably Robertson Fuel Systems, L.L.C., a HEICO subsidiary) received ~$166M in DoD obligations across 4,885 awards, with multiple multi-million-dollar Army Aviation orders (W58RGZ contract family) — confirming the defense revenue mix is real, not narrative-only.",
+      "M_check": "pentagon_jbook.query_program_funding(contractor_name='HEICO') + usaspending.query_dod_contracts(recipient_name='HEICO Corporation')",
+      "M_value": "pentagon_jbook: NOT_FOUND (HEICO is not a named primary contractor in the 410-PE corpus — they are a diversified component supplier, not a prime). usaspending: 4,885 awards, $165.9M total; top awards via Robertson Fuel Systems on N00019 (NAVAIR) and W58RGZ (Army Aviation Redstone) contracts for crashworthy/external fuel systems.",
+      "interpretation": "Defense exposure is REAL and DIVERSIFIED across thousands of small awards through HEICO operating subsidiaries — exactly the opposite of the YSS/IONQ single-PE-concentration pattern this cohort hunts. PASS."
+    },
+    {
+      "claim_id": "HEI-3",
+      "claim_text": "ETG TWTAs/MPMs predominately used in radar/EW/jamming/countermeasure systems.",
+      "severity": "UNVERIFIABLE",
+      "supports": "Capability description, not a PE-specific revenue claim. No quantified exposure to NGJ, SEWIP, EW Planning & Mgmt Tools, or any named EW PE.",
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Electronic Warfare')",
+      "M_value": "3 matches (incl. 'Electronic Warfare Development'); signal NOT_FOUND_IN_TIMERANGE at cutoff (corpus is FY2026, no FY2023 history). NGJ explicitly NOT_FOUND in corpus.",
+      "interpretation": "Diversified EW component supply across multiple programs/primes. No single-PE dependency the framework can falsify. UNVERIFIABLE on J-Book grounds; not a red flag."
+    },
+    {
+      "claim_id": "HEI-4",
+      "claim_text": "ETG antennas for precision-guided munitions and military aircraft.",
+      "severity": "UNVERIFIABLE",
+      "supports": "Capability/end-market description; no named munition program, no dollar attribution.",
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Precision Guided Munitions'/'JASSM')",
+      "M_value": "Both NOT_FOUND in corpus.",
+      "interpretation": "PGM antenna supply is plausibly spread across many primes (Lockheed JASSM/LRASM, Raytheon SM-6/StormBreaker, etc.). No PE dependency. UNVERIFIABLE; no red flag."
+    },
+    {
+      "claim_id": "HEI-5",
+      "claim_text": "ETG IR-scene simulation/test equipment (MIRAGE) for missile-seeker development; customers include DoD weapons labs and primes.",
+      "severity": "UNVERIFIABLE",
+      "supports": "MIRAGE IR Scene Simulator is a real product line (Santa Barbara Infrared, a HEICO sub). Revenue is test/calibration equipment to DoD labs and primes — structurally diversified.",
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Missile Defense'/'Infrared Countermeasures')",
+      "M_value": "Missile Defense: 13 matches but NOT_FOUND_IN_TIMERANGE at cutoff. Infrared Countermeasures: NOT_FOUND.",
+      "interpretation": "Test/simulation equipment is sold as capital equipment across many customers and programs — not single-PE dependent. UNVERIFIABLE; no red flag."
+    },
+    {
+      "claim_id": "HEI-6",
+      "claim_text": "ETG microwave/satellite components used in commercial+military satellites; growth target in stand-off warfare sensor market.",
+      "severity": "UNVERIFIABLE",
+      "supports": "Forward-looking aspiration ('goal of increasing our activity in the stand-off market') — not booked revenue.",
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Space Development Agency'/'Tracking Layer')",
+      "M_value": "SDA: NOT_FOUND. Tracking Layer: 1 match (Tranche 3 Tracking Layer PWSA) but NOT_FOUND_IN_TIMERANGE at 2023-01-15 (T3 not yet in J-Book at that date).",
+      "interpretation": "Aspirational language at PIT date; SDA Transport/Tracking Layer was at T0/T1 in early 2023 (real, growing). Even if HEICO supplies components, exposure is sub-component-level across multiple prime bus manufacturers (York Space, Northrop, Lockheed, L3Harris, Terran Orbital). No PE-concentration risk. UNVERIFIABLE."
+    },
+    {
+      "claim_id": "HEI-7",
+      "claim_text": "ETG manufactures mission-extending crashworthy/ballistically self-sealing auxiliary fuel systems for military rotorcraft.",
+      "severity": "PASS",
+      "supports": "USAspending cross-check is highly confirmatory: HEICO subsidiary Robertson Fuel Systems, L.L.C. shows multiple multi-million-dollar awards including N0001919C0042 ($41.9M, NAVAIR), W58RGZ21F0172 ($22.4M, Army Aviation, 'reduced-size crashworthy external fuel system kits and internal auxiliary fuel systems'), W58RGZ19F0377 ($18.1M, RCEFS A/B kits + AMATTS), and W58RGZ22F0132 ($10.3M, IDIQ delivery order). This is the H-60/H-47/AH-64 rotorcraft aux-fuel-tank business.",
+      "M_check": "pentagon_jbook.query_program_funding(program_name='UH-60 Black Hawk'/'Future Vertical Lift') + usaspending.query_dod_contracts",
+      "M_value": "J-Book: both UH-60 and FVL NOT_FOUND in corpus (corpus is RDT&E-heavy; Black Hawk procurement is in P-40 exhibits not seeded). USAspending: 4,885 awards include the W58RGZ IDIQ family ordering RCEFS/AMATTS kits — these are Army Aviation Redstone-managed crashworthy fuel-system buys, exactly matching the 10-K language.",
+      "interpretation": "Strong orthogonal confirmation that the claim is grounded in real revenue. Robertson is a $40M+ ARPU defense business inside HEICO with diversified Army + Navy rotorcraft demand. PASS."
+    },
+    {
+      "claim_id": "HEI-8",
+      "claim_text": "Pending Exxelia International acquisition (EUR 453M + EUR 14M assumed liabilities; close Q1 FY2023); rollup strategy of ~95 acquisitions since 1990.",
+      "severity": "PASS",
+      "supports": "acq_coherence scored Exxelia 0.85 / COHERENT_ROLLUP. Exxelia's specialty high-reliability passive components / electromechanical solutions for aerospace/defense/space directly extend HEICO's stated ETG thesis.",
+      "M_check": "acq_coherence.score_acquisition_coherence",
+      "M_value": "coherence_score=0.85, category=high_coherence, signal=COHERENT_ROLLUP, is_revenue_synthetic=false",
+      "interpretation": "Exxelia is on-thesis (passive electronic components into the same defense/space supply chain ETG already serves). Not an incoherent-rollup red flag. PASS."
+    },
+    {
+      "claim_id": "HEI-9",
+      "claim_text": "Hollywood, FL HQ and multi-state US + 14-country facility footprint.",
+      "severity": "PASS",
+      "supports": "EPA FRS confirms HEICO AEROSPACE facilities at 7875 NW 64th St, Miami FL (Miami-Dade) and 3000 Taft St, Hollywood FL (Broward) — matches the 10-K's stated FL footprint.",
+      "M_check": "epa_frs.query_facilities(facility_name='HEICO', state_abbr='FL')",
+      "M_value": "3 FL facilities found (HEICO Aerospace x2, HEICO Corporation x1) in Miami and Hollywood.",
+      "interpretation": "Physical footprint is verifiable and matches narrative. PASS."
+    },
+    {
+      "claim_id": "HEI-10",
+      "claim_text": "HEICO has no material patents for jet-engine/aircraft PMA techniques and relies on trade secrets.",
+      "severity": "PASS",
+      "supports": "USPTO search returned only patents owned by 'Heico Befestigungstechnik GmbH' (a separate German fastener/bolting-tool company — Multiplex Bolting Tool patents in CPC B23P/B25B classes), NOT by HEICO Corporation the FL-based aerospace company. Consistent with the 10-K disclosure that HEICO Corp does not pursue patent protection for its PMA techniques.",
+      "M_check": "uspto_odp.query_assignee(assignee_name='HEICO', cutoff_date='2023-01-15')",
+      "M_value": "Patents returned are all from 'Heico Befestigungstechnik GmbH' (unrelated entity); no FL HEICO Corp / HEICO Aerospace / HEICO Electronic patents in the sample.",
+      "interpretation": "Confirmation by absence — the 10-K's trade-secret-not-patents claim is consistent with USPTO. PASS."
+    }
+  ],
+  "severity_counts": {
+    "PASS": 5,
+    "MODERATE_UNDERDELIVERY": 0,
+    "SEVERE_UNDERDELIVERY": 0,
+    "RED_FLAG_NEGATIVE": 0,
+    "UNVERIFIABLE": 5
+  },
+  "jbook_coverage": {
+    "n_jbook_grounded_claims": 7,
+    "n_jbook_fired": 6,
+    "notes": "HEI-1, HEI-3, HEI-4, HEI-5, HEI-6, HEI-7 hit pentagon_jbook (returned NOT_FOUND or NOT_FOUND_IN_TIMERANGE — corpus is FY2026 J-Book; pre-cutoff history not present). HEI-2 used contractor_name lookup which also fired (NOT_FOUND). Net: pentagon_jbook fired on 6 of 7 J-Book-grounded claims; the divergence test is satisfied by absence — HEICO simply did not make PE-specific claims to falsify."
+  }
+}

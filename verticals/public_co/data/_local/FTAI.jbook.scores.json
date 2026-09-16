@@ -1,0 +1,80 @@
+{
+  "ticker": "FTAI",
+  "cutoff": "2026-05-20",
+  "filing": "0001628280-26-012940_10-K.txt",
+  "cohort": "jbook_exposure_divergence",
+  "framework_finding": "J-Book divergence pattern is STRUCTURALLY INAPPLICABLE to FTAI Aviation Ltd. The FY2025 10-K (filed 2026-02-27) describes a commercial aerospace aftermarket business (CFM56-5B / CFM56-7B / V2500 engines for 737NG / A320ceo aircraft) with zero named Pentagon Program Elements, zero DoD-program-of-record claims, and zero DoD customer concentration. usaspending returned zero DoD obligations under 'FTAI Aviation'. The cohort metadata's 'LM2500 marine / military adjacency' hook does not appear as a forward-looking revenue claim in the filing (LM2500 is not mentioned; the offshore-energy line is a residual contingency). pentagon_jbook fired on 0 of 0 J-Book-grounded claims because the filing contains none to verify.",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "FTAI is a leading independent engine maintenance platform focused on the CFM56-5B, CFM56-7B and V2500 commercial aircraft engines powering 737NG and A320ceo aircraft.",
+      "severity": "PASS",
+      "supports": ["pentagon_jbook NOT_FOUND on CFM56 and V2500 (commercial engines, correctly outside J-Book corpus scope)", "usaspending shows ZERO DoD obligations for 'FTAI Aviation' 2020-2026"],
+      "M_check": "pentagon_jbook.query_program_funding + usaspending.query_dod_contracts",
+      "M_value": {"pentagon_jbook_CFM56": "NOT_FOUND", "pentagon_jbook_V2500": "NOT_FOUND", "usaspending_FTAI_DoD_awards": 0},
+      "interpretation": "Business-description claim is internally consistent: the company describes itself as a commercial engine aftermarket platform and no DoD contracting footprint exists. The cohort's J-Book divergence pattern does not apply — FTAI is not selling into Pentagon Program Elements."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "As of December 31, 2025, FTAI's Aviation Leasing segment owned/managed 290 aviation assets (47 commercial aircraft + 243 engines), with 77% utilization in Q4 2025.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["Asset-count and utilization are FTAI-only disclosures with no third-party registry that breaks them out at this granularity"],
+      "M_check": "usaspending.query_dod_contracts (to test whether leasing customers include DoD)",
+      "M_value": {"usaspending_FTAI_DoD_awards": 0},
+      "interpretation": "Fleet composition is commercial; no DoD lessees implied. Treat as UNVERIFIABLE at granular level — outside J-Book corpus scope and not a J-Book-grounded claim."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "The 2025 Partnership under the Strategic Capital Initiative completed its fundraise in October 2025 with $2.0 billion of equity commitments and agreed to acquire 45 on-lease narrowbody aircraft for an estimated net purchase price of $549 million.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["edgar_fts full-text search for the SCI / 2025 Partnership phrasing returned 0 hits cross-filer (counterparty institutional investors are private LPs and not required to disclose) — not a contradiction, just opacity"],
+      "M_check": "edgar_fts.query_fulltext",
+      "M_value": {"edgar_fts_total_hits": 0},
+      "interpretation": "$2B fundraise and $549M asset sale are material but counterparties are private institutional LPs; absence of cross-filer disclosure is expected. No J-Book linkage."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "On December 30, 2025, FTAI announced the launch of FTAI Power, a platform focused on converting CFM56 engines to power turbines.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["uspto_odp returned 0 granted patents assigned to 'FTAI Aviation' through 2026-05-20"],
+      "M_check": "uspto_odp.query_assignee",
+      "M_value": {"granted_patents_pre_cutoff": 0, "applications": 0},
+      "interpretation": "FTAI Power is a newly-announced (Dec 30, 2025) platform; absence of patent IP at the parent assignee level is consistent with a brand-new business line built around aero-derivative conversion know-how typically held as trade secrets or via JV partners (the 25% Advanced Engine Repair JV). Not a J-Book-grounded claim; downgrade noise-not-signal."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "FTAI owns and/or leases maintenance facilities in Florida, California, Canada, and Portugal for its Aerospace Products business.",
+      "severity": "PASS",
+      "supports": ["EPA FRS confirmed 'FTAI AVIATION PACIFIC' facility in Orange, CA (registry_id 110072121624) — directly corroborates the California maintenance-facility claim"],
+      "M_check": "epa_frs.query_facilities",
+      "M_value": {"FL_hits": 0, "CA_hits": 1, "CA_facility": "FTAI AVIATION PACIFIC, 2390 N AMERICAN WAY, ORANGE, CA"},
+      "interpretation": "Facility claim is concretely verified for CA. FL/Canada/Portugal not corroborated via EPA FRS (FL EPA returned 0 — could be facility registered under different operator name or under JV entity; Canada/Portugal are outside FRS scope). California datapoint is sufficient for PASS on this control claim."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Within FTAI's offshore energy business, a lessee did not fulfill its obligation; range of potential losses $0.0M-$3.3M; risk of loss remote.",
+      "severity": "PASS",
+      "supports": ["The cohort-metadata military-adjacency hook ('LM2500 marine') is NOT carried forward as a revenue-generating segment in the FY2025 10-K — the offshore-energy reference appears only as a small ($3.3M maximum) wind-down contingency"],
+      "M_check": "edgar_fts.query_fulltext",
+      "M_value": {"edgar_fts_total_hits": 0},
+      "interpretation": "Important finding for the cohort: the metadata-implied LM2500/military-adjacency hook is NOT a live forward-revenue narrative. FTAI has structurally exited offshore-energy / marine-engine exposure (legacy item only). The cohort entity-resolution test fails by design here — there is no DoD-relevant subject to verify, which is the correct answer."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "One customer represented 23% of total accounts receivable; two customers each represented 13% and 10% of Aerospace Products revenue (customers unnamed).",
+      "severity": "UNVERIFIABLE",
+      "supports": ["usaspending returned 0 DoD awards to 'FTAI Aviation' — the unnamed 10-23% concentration customers are NOT DoD agencies; they are commercial airlines / lessors / engine partners not separately identifiable from the filing"],
+      "M_check": "usaspending.query_dod_contracts",
+      "M_value": {"usaspending_DoD_awards": 0, "usaspending_total_obligated_DoD": 0.0},
+      "interpretation": "Customer concentration is REAL but commercial in nature; the framework's J-Book primary verifier has nothing to attach to. UNVERIFIABLE on counterparty identity (unnamed) — but the framework correctly rules out the DoD-concentration hypothesis."
+    }
+  ],
+  "summary": {
+    "n_claims": 7,
+    "n_queries": 11,
+    "severity_counts": {"PASS": 3, "MODERATE_UNDERDELIVERY": 0, "SEVERE_UNDERDELIVERY": 0, "RED_FLAG_NEGATIVE": 0, "UNVERIFIABLE": 4},
+    "jbook_grounded_claims": 0,
+    "pentagon_jbook_fires": 0,
+    "framework_verdict": "J-Book divergence pattern not applicable. FTAI's forward narrative is commercial-aerospace-aftermarket, not DoD-program-revenue. No SEVERE/RED signal from this cohort's primary verifier; the correct framework output is a null-finding on the J-Book axis."
+  }
+}

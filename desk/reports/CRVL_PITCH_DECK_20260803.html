@@ -1,0 +1,435 @@
+<title>CRVL — Quality-Drawdown Court Deck (Catalyst Carry)</title>
+<style>
+  :root {
+    --paper: #F7F8F6; --card: #FFFFFF; --ink: #1A2530; --ink-2: #4C5A66; --ink-3: #7C8893;
+    --rail: #23425F; --rail-ink: #E9EEF3; --hair: #DDE3E0;
+    --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a;
+    --warn-bg: #FBF3E4; --warn-bd: #D9A54A; --ok-bg: #E8F5EF; --bad-bg: #FBEAE7;
+    --pill-v: #0E6E45; --pill-c: #23425F; --pill-r: #A93226; --pill-u: #8A6D1D;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      --paper: #10161C; --card: #171F27; --ink: #E7ECF0; --ink-2: #A9B4BD; --ink-3: #77828C;
+      --rail: #1B2F44; --rail-ink: #D7E1EA; --hair: #2A353F;
+      --s1: #3987e5; --s2: #d95926; --s3: #199e70;
+      --warn-bg: #2A2415; --warn-bd: #C98500; --ok-bg: #14261E; --bad-bg: #2C1B18;
+      --pill-v: #2FA97A; --pill-c: #7FA6CC; --pill-r: #E66767; --pill-u: #C9A94E;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #10161C; --card: #171F27; --ink: #E7ECF0; --ink-2: #A9B4BD; --ink-3: #77828C;
+    --rail: #1B2F44; --rail-ink: #D7E1EA; --hair: #2A353F;
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70;
+    --warn-bg: #2A2415; --warn-bd: #C98500; --ok-bg: #14261E; --bad-bg: #2C1B18;
+    --pill-v: #2FA97A; --pill-c: #7FA6CC; --pill-r: #E66767; --pill-u: #C9A94E;
+  }
+  :root[data-theme="light"] {
+    --paper: #F7F8F6; --card: #FFFFFF; --ink: #1A2530; --ink-2: #4C5A66; --ink-3: #7C8893;
+    --rail: #23425F; --rail-ink: #E9EEF3; --hair: #DDE3E0;
+    --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a;
+    --warn-bg: #FBF3E4; --warn-bd: #D9A54A; --ok-bg: #E8F5EF; --bad-bg: #FBEAE7;
+    --pill-v: #0E6E45; --pill-c: #23425F; --pill-r: #A93226; --pill-u: #8A6D1D;
+  }
+  body { background: var(--paper); color: var(--ink); margin: 0;
+         font-family: Charter, Georgia, 'Times New Roman', serif; line-height: 1.55; }
+  .deck { max-width: 960px; margin: 0 auto; padding: 0 20px 80px; }
+  .slide { background: var(--card); border: 1px solid var(--hair); border-radius: 6px;
+           margin: 28px 0; overflow: hidden; }
+  .rail { background: var(--rail); color: var(--rail-ink); display: flex; align-items: baseline;
+          gap: 14px; padding: 8px 18px; font-family: 'Avenir Next Condensed','Arial Narrow','Helvetica Neue',sans-serif; }
+  .rail .no { font-size: 13px; letter-spacing: .18em; opacity: .75; font-variant-numeric: tabular-nums; }
+  .rail .lab { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; }
+  .body { padding: 22px 26px 26px; }
+  h1 { font-family: 'Avenir Next Condensed','Arial Narrow','Helvetica Neue',sans-serif;
+       font-weight: 700; font-size: 40px; line-height: 1.08; margin: 6px 0 10px; text-wrap: balance; }
+  h2 { font-family: 'Avenir Next Condensed','Arial Narrow','Helvetica Neue',sans-serif;
+       font-weight: 600; font-size: 25px; margin: 0 0 12px; text-wrap: balance; }
+  h3 { font-size: 17px; margin: 18px 0 6px; }
+  p, li { font-size: 15.5px; color: var(--ink); max-width: 70ch; }
+  .sub { color: var(--ink-2); }
+  .small { font-size: 13px; color: var(--ink-2); }
+  .mono, td.num, .num { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+        font-variant-numeric: tabular-nums; }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; margin: 10px 0; }
+  .tw { overflow-x: auto; }
+  th { text-align: left; font-family: 'Avenir Next Condensed','Arial Narrow',sans-serif;
+       font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2);
+       border-bottom: 2px solid var(--rail); padding: 6px 10px 4px; white-space: nowrap; }
+  td { border-bottom: 1px solid var(--hair); padding: 7px 10px; vertical-align: top; }
+  td.num { text-align: right; white-space: nowrap; }
+  .pill { display: inline-block; border-radius: 3px; padding: 1px 7px; font-size: 11px;
+          font-family: 'Avenir Next Condensed','Arial Narrow',sans-serif; letter-spacing: .08em;
+          text-transform: uppercase; color: #fff; }
+  .pv { background: var(--pill-v); } .pc { background: var(--pill-c); }
+  .pr { background: var(--pill-r); } .pu { background: var(--pill-u); }
+  .verdict { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0; }
+  .vcard { flex: 1 1 150px; border: 1px solid var(--hair); border-radius: 5px; padding: 10px 14px; }
+  .vcard .k { font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3);
+              font-family: 'Avenir Next Condensed','Arial Narrow',sans-serif; }
+  .vcard .v { font-size: 21px; font-weight: 700; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .callout { border-left: 3px solid var(--warn-bd); background: var(--warn-bg);
+             padding: 10px 16px; margin: 14px 0; border-radius: 0 4px 4px 0; }
+  .callout p { margin: 4px 0; }
+  .banner { background: var(--bad-bg); border: 1px solid var(--pill-r); border-radius: 5px;
+            padding: 12px 18px; margin: 14px 0; font-family: 'Avenir Next Condensed','Arial Narrow',sans-serif;
+            font-size: 17px; letter-spacing: .06em; }
+  figure { margin: 18px 0; }
+  figcaption { font-size: 12.5px; color: var(--ink-2); margin-top: 6px; max-width: 78ch; }
+  svg text { font-family: ui-monospace,'SF Mono',Menlo,monospace; fill: var(--ink-2); }
+  svg .axl { font-size: 10.5px; }
+  svg .dl  { font-size: 11px; fill: var(--ink); }
+  svg .grid { stroke: var(--hair); stroke-width: 1; }
+  .legend { display: flex; gap: 18px; font-size: 12.5px; color: var(--ink-2); margin: 4px 0 0; }
+  .sw { display:inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+  .fine { font-size: 12.5px; color: var(--ink-3); }
+  #tip { position: fixed; pointer-events: none; background: var(--ink); color: var(--paper);
+         font: 12px ui-monospace, Menlo, monospace; padding: 4px 8px; border-radius: 3px;
+         opacity: 0; transition: opacity .12s; z-index: 10; max-width: 260px; }
+  @media (prefers-reduced-motion: reduce) { #tip { transition: none; } }
+</style>
+
+<div id="tip" role="status"></div>
+<div class="deck">
+
+<!-- ══════════ SLIDE 1 — COVER ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">01 / 10</span><span class="lab">Cover · Verdict · Catalyst carry</span></div>
+  <div class="body">
+    <p class="small mono">DESK RESEARCH · QUALITY-DRAWDOWN COHORT · 2026-08-03 · CRVL (NASDAQ) · v1.4.1 CATALYST-CARRY DOC</p>
+    <h1>CorVel: the AI pitch is dead — the honesty tells and the payment-integrity bull are what's left</h1>
+    <p class="sub">A workers'-comp claims TPA de-rated 32% on an AI-margin story that was always the wrong thesis.
+    Underneath: the core franchise at zero growth, a disclosure record with two genuine tells, and a real —
+    different — bull in payment integrity. This document rides with the resolution packs into Wednesday's print;
+    the decision rubric below was written before the number, not after.</p>
+    <div class="banner"><b>ZERO CAPITAL THROUGH THE PRINT.</b> CorVel reports Wednesday 2026-08-05, 11:30 ET —
+    the first print under new CEO Sarah Scott (Combs stays as Executive Chair), with live analyst Q&amp;A.
+    This name carries a −26% single-day precedent on the identical setup and 35% annualized vol. Entry, if any,
+    is a post-print decision executed against the pre-committed branches on slide 9.</div>
+    <div class="verdict">
+      <div class="vcard"><div class="k">Court verdict</div><div class="v">4 / 10</div>
+        <div class="small">WATCH — below the red-team bar</div></div>
+      <div class="vcard"><div class="k">Class</div><div class="v" style="font-size:16px">NONE at $60<br>RP_FAIR ≤ $53</div></div>
+      <div class="vcard"><div class="k">Live (2026-08-03)</div><div class="v">$60.06</div>
+        <div class="small">−32% from high · 31st pctile of 52w · +34% off the Feb low</div></div>
+      <div class="vcard"><div class="k">Prob-weighted FV</div><div class="v">$66.6</div>
+        <div class="small">edge +10.9% — not enough for a 2-day binary</div></div>
+      <div class="vcard"><div class="k">Post-print starter</div><div class="v">0.75%</div>
+        <div class="small">half-size, conditions on slide 9</div></div>
+    </div>
+    <p class="fine"><b>Position disclosure (at publication):</b> no CRVL position is held as of 2026-08-03
+    (positions polled same-session). Re-entry bands in this document may be acted on after the print;
+    the author may trade at any time without notice.</p>
+  </div>
+</section>
+
+<!-- ══════════ SLIDE 2 — THE SETUP ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">02 / 10</span><span class="lab">The setup — why this is a carry doc, not an entry doc</span></div>
+  <div class="body">
+    <h2>Every timing fact argues for patience; the doc exists so patience is executable</h2>
+    <div class="tw"><table>
+      <tr><th>Timing fact</th><th>Reading</th></tr>
+      <tr><td>Print <b>Wednesday 2026-08-05, 11:30 ET</b> — IR-confirmed 07-27</td>
+          <td>a dated binary two sessions out; nowcast-vs-tape doctrine forbids blind entry</td></tr>
+      <tr><td>First print under a <b>first-time CEO</b> (Sarah Scott; Combs to Exec Chair)</td>
+          <td>no track record on guidance style, kitchen-sink risk is live in both directions</td></tr>
+      <tr><td><b>−26% single-day precedent</b> on the identical setup</td>
+          <td>the tape has already shown what a miss does to this register</td></tr>
+      <tr><td>+34% off the February low <b>into</b> the event; trailing P/E 28.1x — exactly its own 6-month median</td>
+          <td>no dislocation left to buy pre-print; the de-rate has already half-retraced</td></tr>
+      <tr><td>Zero effective sell-side coverage — no consensus FY27 estimate exists; zero analyst questions on the Q4 call</td>
+          <td>cuts both ways: our decomposition is genuinely unprocessed, and there is no analyst to re-rate it</td></tr>
+    </table></div>
+    <p>Per the house response taxonomy this is a <b>timing finding → tranche instrument</b>: the court did not
+    price-gate the name into oblivion; it wrote the post-print branches in advance and attached them to the
+    resolution packs. Wednesday grades the frozen calls; the branches decide the money.</p>
+  </div>
+</section>
+
+<!-- ══════════ SLIDE 3 — THE WRONG THESIS ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">03 / 10</span><span class="lab">The wrong thesis — and the court's own concessions</span></div>
+  <div class="body">
+    <h2>The AI-margin pitch dies on the pricing model. The court killed two of its own bears too.</h2>
+    <p>The generator sourced CRVL as an "AI adopter": a 3-year audited grind in the personnel-expense ratio
+    with the stock −32%. The court's disconfirming pass dismantled the pitch — <i>and</i>, in the same pass,
+    two of its own bear arguments. We keep all three corrections, because corrections are the credibility:</p>
+    <div class="tw"><table>
+      <tr><th>Claim</th><th>What the record shows</th><th>Status</th></tr>
+      <tr><td>"AI savings flow to CorVel's margin"</td>
+          <td>Filing history: "%-of-savings" pricing language weakened from FY1997 and was <b>dropped entirely by FY2012</b>.
+          Bill review is priced <b>per bill</b> — efficiency accrues to the <b>vendor</b>. Confirming datum: network
+          solutions +15% on <i>"higher revenue per bill"</i> with expanding gross margin.</td>
+          <td><span class="pill pc">Re-framed</span> — real, but it is a <i>vendor-economics</i> point, not an AI story</td></tr>
+      <tr><td>Court's bear #1: "savings-share pass-through caps the margin"</td>
+          <td><b>Conceded by the court itself</b> — refuted by the same filing history above. The surviving fragment:
+          case management (inside Patient Management) bills on <b>time incurred</b>, so automating it shrinks its own revenue.</td>
+          <td><span class="pill pr">Withdrawn</span></td></tr>
+      <tr><td>Court's bear #2: "declining WC premiums shrink the TPA fee pool"</td>
+          <td><b>Refuted by the court itself</b> — it conflated premium rate with medical spend. Loss costs are decelerating
+          (−9.2% → −6.1% → −5.0%), NCCI accident-year combined ratio is <b>102</b> (soft market ending), medical cost per
+          claim <b>+6–7%/yr</b>, and California is an outright tailwind: pure premium −2.1% → <b>+8.7%</b> → <b>+6.6%</b>,
+          OMFS physician conversion factor <b>+5.8%</b>. The dollar pool CorVel monetizes is growing.</td>
+          <td><span class="pill pr">Withdrawn</span></td></tr>
+    </table></div>
+    <p class="fine">What this slide buys the reader: the bear case that survives (next slide) is the one that
+    outlived the court's own attempt to kill it.</p>
+  </div>
+</section>
+
+<!-- ══════════ SLIDE 4 — THE REAL FINDING ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">04 / 10</span><span class="lab">The real finding — the franchise went to zero</span></div>
+  <div class="body">
+    <h2>Patient Management — 62% of revenue — printed +0.1% in the December quarter</h2>
+    <p>Visible only in the service-line note, never in a headline:</p>
+    <figure>
+      <svg viewBox="0 0 880 250" width="100%" role="img" aria-label="CorVel segment revenue growth by fiscal quarter, Patient Management versus Network Solutions">
+        <line class="grid" x1="60" y1="210" x2="860" y2="210"/>
+        <line class="grid" x1="60" y1="142" x2="860" y2="142"/><text class="axl" x="22" y="146">+10%</text>
+        <line class="grid" x1="60" y1="74" x2="860" y2="74"/><text class="axl" x="22" y="78">+20%</text>
+        <text class="axl" x="30" y="214">0%</text>
+        <g>
+          <rect x="120" y="172.6" width="36" height="37.4" rx="4" fill="var(--s1)"><title>Q1 FY26 (Jun-25): Patient Management +5.5%</title></rect>
+          <rect x="160" y="66"    width="36" height="144"  rx="4" fill="var(--s3)"><title>Q1 FY26: Network Solutions +21.2%</title></rect>
+          <rect x="300" y="193"   width="36" height="17"   rx="4" fill="var(--s1)"><title>Q2 FY26 (Sep-25): Patient Management +2.5%</title></rect>
+          <rect x="340" y="107.3" width="36" height="102.7" rx="4" fill="var(--s3)"><title>Q2 FY26: Network Solutions +15.1%</title></rect>
+          <rect x="480" y="208"   width="36" height="2"    rx="1" fill="var(--s1)"><title>Q3 FY26 (Dec-25): Patient Management +0.1% — the break</title></rect>
+          <rect x="520" y="148.1" width="36" height="61.9" rx="4" fill="var(--s3)"><title>Q3 FY26: Network Solutions +9.1%</title></rect>
+          <rect x="660" y="191.6" width="36" height="18.4" rx="4" fill="var(--s1)"><title>Q4 FY26 (Mar-26): Patient Management +2.7%</title></rect>
+          <rect x="700" y="103.2" width="36" height="106.8" rx="4" fill="var(--s3)"><title>Q4 FY26: Network Solutions +15.7%</title></rect>
+        </g>
+        <text class="dl" x="124" y="166">+5.5</text><text class="dl" x="304" y="187">+2.5</text>
+        <text class="dl" x="478" y="200">+0.1</text><text class="dl" x="664" y="185">+2.7</text>
+        <text class="axl" x="128" y="228">Q1 FY26</text><text class="axl" x="308" y="228">Q2 FY26</text>
+        <text class="axl" x="488" y="228">Q3 FY26</text><text class="axl" x="668" y="228">Q4 FY26</text>
+      </svg>
+      <div class="legend"><span><span class="sw" style="background:var(--s1)"></span>Patient Management (62% of revenue — the WC-TPA franchise)</span>
+      <span><span class="sw" style="background:var(--s3)"></span>Network Solutions</span></div>
+      <figcaption>Quarterly service-line growth, y/y, from the disaggregation note. The core franchise decelerated
+      +5.5 → +2.5 → <b>+0.1</b> → +2.7% while the smaller, per-bill-priced segment carried the totals.</figcaption>
+    </figure>
+    <p>And the cheap margin lever is exhausted on the company's own numbers: <b>comp-per-head grew +0.1% versus
+    +5.2% the prior year</b>, while the labor-ratio improvement decayed four straight quarters
+    (−2.82 → −2.05 → −1.14 → −0.92pp). Management said it themselves: <i>"personnel levels are expected to
+    normalize as deployments mature"</i> — the labor lever inverting, in their words.</p>
+  </div>
+</section>
+
+<!-- ══════════ SLIDE 5 — THE HONESTY TELLS ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">05 / 10</span><span class="lab">Disclosure behavior — two genuine tells</span></div>
+  <div class="body">
+    <h2>The metric vanished the year it turned, and the question got a non-answer</h2>
+    <div class="tw"><table>
+      <tr><th>Tell</th><th>The record</th></tr>
+      <tr><td><b>1. The deleted metric</b></td>
+          <td>The FY25 10-K quantified the operating driver plainly: <i>"Total new claims increased by 5%."</i>
+          The FY26 10-K — the year Patient Management went to +0.1% — contains <b>no current-year claims-count
+          figure at all</b> (grep-verified against the full filing text). The one number that measures the
+          franchise disappeared exactly when it stopped flattering.</td></tr>
+      <tr><td><b>2. The deflection</b></td>
+          <td>Asked about the deceleration on the Q3 call, Executive Chair Combs attributed it to
+          <i>"short-term operational factors… including the normalization of our effective tax rate"</i> — a tax
+          rate cannot explain a revenue deceleration — and, pressed further: <i>"we do not break up the
+          various products."</i></td></tr>
+      <tr><td><b>3. The concession</b> (fair to management)</td>
+          <td>The risk itself is disclosed in their own words: <i>"Although pricing pressure is likely over time,
+          we expect cost efficiencies to more than offset any associated fee adjustments."</i> That is the entire
+          bear-and-bull of the margin story in one sentence — honestly stated, outcome unproven.</td></tr>
+    </table></div>
+    <div class="callout"><p><b>Grading note (house honesty framework):</b> these are <i>emphasis-and-omission</i>
+    tells — a review flag, not an exclusion. Every damaging number in this deck is computable from CorVel's own
+    filings. But takeaway-vs-data divergence is exactly what the frozen calls on slide 10 are built to score:
+    if the December-quarter break was noise, Wednesday's 10-Q will say so in the service-line note.</p></div>
+  </div>
+</section>
+
+<!-- ══════════ SLIDE 6 — THE REAL BULL ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">06 / 10</span><span class="lab">The real bull — CERIS, not AI</span></div>
+  <div class="body">
+    <h2>The ownable thesis is payment integrity with one good year of evidence</h2>
+    <ul>
+      <li><b>Bookings +56% year-over-year</b> — disclosed on the Q4 call, the single strongest forward datum in the file.</li>
+      <li><b>Four large payer programs launching CY2026</b>, including <b>two multiyear top-10 national payer
+      partnerships</b>; revenue explicitly back-half weighted.</li>
+      <li><b>CERIS shifting to prepay</b> — realization moves from 6+ months to 1–2 months, pulling the bookings
+      wave into the P&amp;L faster than the historical pattern.</li>
+      <li>This is a <b>dated, mechanical H2-FY27 catalyst</b> — and it is a payment-integrity story (per-bill vendor
+      economics, the slide-3 finding working <i>for</i> the holder), not an AI story.</li>
+    </ul>
+    <p>Why half-size even on a clean gate: the CERIS evidence is one year old, the segment is the smaller of the
+    two, and nobody outside the company has audited the bookings-to-revenue conversion. The court sized the
+    starter at 0.75% — half the normal quality-starter weight — for exactly that reason.</p>
+    <p class="fine">Coverage vacuum, restated: with no consensus FY27 and no analyst engagement, a CERIS-driven
+    beat has no estimate ladder to climb — re-rating requires the company to put the numbers where the market
+    can see them. Patience is structural here, not optional.</p>
+  </div>
+</section>
+
+<!-- ══════════ SLIDE 7 — VALUATION ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">07 / 10</span><span class="lab">Valuation — +11% does not pay for a two-day binary</span></div>
+  <div class="body">
+    <h2>Fair value ~$67; the market will quote us a better basis or a cleaner fact on Wednesday</h2>
+    <figure>
+      <svg viewBox="0 0 880 190" width="100%" role="img" aria-label="Fair-value scenarios versus live price with post-print re-entry band">
+        <rect x="205" y="50" width="43.5" height="90" fill="var(--ok-bg)"><title>Post-print re-entry band $50–53 (disappointing-print branch)</title></rect>
+        <line class="grid" x1="60" y1="95" x2="860" y2="95"/>
+        <g>
+          <circle cx="104" cy="95" r="8" fill="var(--s2)"><title>BEAR $43 · weight 28% — PM stays ex-growth, wage catch-up resumes; 21x $2.06</title></circle>
+          <circle cx="452" cy="95" r="8" fill="var(--s1)"><title>BASE $67 · weight 42% — PM stabilizes low-single-digit, CERIS lands; 28x $2.38</title></circle>
+          <circle cx="756" cy="95" r="8" fill="var(--s3)"><title>BULL $88 · weight 30% — payer programs scale H2; 34x $2.60</title></circle>
+          <line x1="351" y1="45" x2="351" y2="145" stroke="var(--ink)" stroke-width="2" stroke-dasharray="5 4"><title>Live $60.06</title></line>
+          <line x1="446" y1="60" x2="446" y2="130" stroke="var(--ink-3)" stroke-width="2"><title>Probability-weighted fair value $66.6 (28/42/30)</title></line>
+          <line x1="292" y1="55" x2="292" y2="135" stroke="var(--s3)" stroke-width="2" stroke-dasharray="3 4"><title>$56 — the clean-print acceptable ceiling (bookings catalyst credit)</title></line>
+        </g>
+        <text class="dl" x="86" y="140">$43</text><text class="dl" x="432" y="140">$67</text>
+        <text class="dl" x="738" y="140">$88</text>
+        <text class="dl" x="329" y="36">live $60.06</text><text class="dl" x="424" y="56">PWFV $66.6</text>
+        <text class="dl" x="196" y="160">re-entry $50–53</text><text class="dl" x="272" y="46">≤$56 clean</text>
+        <text class="axl" x="80" y="176">BEAR · 28%</text><text class="axl" x="424" y="176">BASE · 42%</text><text class="axl" x="728" y="176">BULL · 30%</text>
+      </svg>
+      <figcaption>Scenario fair values on FY27 EPS (bear $2.06 @ 21x · base $2.38 @ 28x · bull $2.60 @ 34x).
+      The +10.9% prob-weighted edge is real but does not compensate a two-session binary under a first-time CEO
+      with a −26% single-day precedent — so the edge is harvested through the branches, not through pre-positioning.</figcaption>
+    </figure>
+    <p>Note what the bands mean: <b>$50–53 ≈ 21–22x base FY27 EPS</b> — the price at which even a disappointing
+    print is fairly paid; <b>≤$56</b> is acceptable only on a clean print, where the CERIS bookings catalyst has
+    been de-risked by the number itself. <b>Do not chase above $62</b> under any branch.</p>
+  </div>
+</section>
+
+<!-- ══════════ SLIDE 8 — FOUR-IDEA FRAME ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">08 / 10</span><span class="lab">The four-idea frame (v1.6)</span></div>
+  <div class="body">
+    <h2>Market belief · our belief · the edge claim · the priced-in risk</h2>
+    <div class="tw"><table>
+      <tr><th style="width:20%">Leg</th><th>Statement</th></tr>
+      <tr><td><b>Market believes</b></td><td>An AI-efficiency compounder is de-rating into value: the ratio grind is real,
+        the −32% is the entry, and the franchise is intact underneath.</td></tr>
+      <tr><td><b>We believe</b></td><td>The AI framing was always wrong (per-bill pricing = vendor economics, no
+        savings-share lever), the core WC-TPA franchise is at zero growth with the measuring metric deleted from
+        the 10-K, and the cheap labor lever is exhausted by management's own admission. The ownable thesis is
+        CERIS payment integrity — bookings +56%, top-10 payer programs, prepay conversion — which is one year old
+        and worth half-size, below $53.</td></tr>
+      <tr><td><b>Why we might have edge</b></td><td>Zero effective coverage means the service-line decomposition and the
+        deleted-metric tell are genuinely unprocessed. Modest and honest: the same vacuum means no re-rating agent
+        exists, so the edge pays slowly if at all.</td></tr>
+      <tr><td><b>Why it may be priced in</b></td><td>The stock already retraced +34% off the February low into this print;
+        28.1x trailing is exactly its 6-month median. The de-rate may simply be the market having correctly
+        discovered everything in this deck.</td></tr>
+      <tr><td><b>Mechanism falsifier</b></td><td>Wednesday's 10-Q service-line note: PM growth ≥4% with the labor ratio
+        still improving ≥0.6pp would mean the December break was noise and the deceleration thesis is wrong as
+        stated — both frozen calls grade UNFAVORABLE and the re-entry band lifts toward $56.</td></tr>
+      <tr><td><b>Edge label</b></td><td><b>NONE at $60.06 → RP_FAIR at ≤$53.</b> Carry labeled carry; the CERIS optionality
+        rides free inside the band, never paid up for.</td></tr>
+    </table></div>
+  </div>
+</section>
+
+<!-- ══════════ SLIDE 9 — THE PRE-COMMITTED BRANCHES ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">09 / 10</span><span class="lab">Structure — the decision rubric, written before the number</span></div>
+  <div class="body">
+    <h2>Wednesday executes this table; nothing else</h2>
+    <div class="tw"><table>
+      <tr><th>Branch (print outcome)</th><th>Action</th></tr>
+      <tr><td><b>Disappointing print</b> — PM still ex-growth and/or labor ratio confirms the frozen calls</td>
+          <td>re-entry band <b>$50–53</b> (≈21–22x base FY27); starter <b>0.75% ($7,500), half-size</b>;
+          conditions hold: labor/rev ≤48.2% <b>and</b> PM growth ≥3% must both print before any order rests</td></tr>
+      <tr><td><b>Clean print</b> — conditions met and CERIS bookings conversion visible</td>
+          <td>band lifts to <b>≤$56</b>; same 0.75% half-size; the bookings catalyst is now de-risked by the number</td></tr>
+      <tr><td><b>Both frozen calls MISS</b> (ratio improves ≥0.6pp AND PM ≥4%)</td>
+          <td>our deceleration thesis was wrong — grade the Briers honestly, band lifts toward $56 per the pack;
+          re-court before sizing past the starter</td></tr>
+      <tr><td><b>Any branch</b></td>
+          <td><b>do not chase above $62</b>; no options in the taxable book; no pre-print positioning of any kind</td></tr>
+    </table></div>
+    <h3>Kill triggers (dated at entry, if a starter fills)</h3>
+    <ul>
+      <li>Comp-per-head growth <span class="mono">&gt; +3%</span> in any quarter with revenue-per-head <span class="mono">&lt; +4%</span> —
+      the wage catch-up arrives before the operating leverage → exit</li>
+      <li>Patient Management growth <span class="mono">&lt; 2%</span> in any post-entry quarter → the franchise question
+      re-opens; cut to zero and re-court</li>
+    </ul>
+    <p class="fine">Sleeve note: CRVL is claims/med-cost adjacent — count any starter against the healthcare-services
+    axis (CI + HCA held), not as a fresh diversifier.</p>
+  </div>
+</section>
+
+<!-- ══════════ SLIDE 10 — FROZEN CALLS · VERIFICATION · DISCLAIMER ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">10 / 10</span><span class="lab">The graded calls · verification · epilogue</span></div>
+  <div class="body">
+    <h2>Two frozen calls grade this thesis on Friday's 10-Q, in public</h2>
+    <div class="callout">
+      <p class="mono"><b>FROZEN · CRVL | 2026-08-05</b> (frozen 2026-08-03 at $60.06 · grades off the ~08-07 10-Q)</p>
+      <p>Q1-FY27 <b>LaborAndRelatedExpense ≥ 47.6% of revenue</b> — the ratio improves by less than 0.6pp vs
+      48.16% a year ago, i.e. the automation dividend is decelerating. <b>our_p = 0.72.</b></p>
+      <p class="mono"><b>FROZEN · CRVL-PM | 2026-08-05</b> (same freeze, same source)</p>
+      <p>Q1-FY27 <b>Patient Management revenue growth &lt; 4.0% y/y</b> from the service-line note. <b>our_p = 0.75.</b></p>
+      <p class="small">Both calls deliberately lean bearish: they test <i>our</i> deceleration read, not the happy path.
+      If both miss, the packs lift the re-entry band toward $56 — the thesis loses, the process wins, and the
+      Brier book records it. Frozen numbers never revise.</p>
+    </div>
+    <h3>Verification table (v1.6)</h3>
+    <div class="tw"><table>
+      <tr><th>Claim</th><th>Authority</th><th>Grade</th></tr>
+      <tr><td>Audited labor-ratio series (48.16% → 47.67%; improvement decaying 4 quarters)</td>
+          <td>SEC XBRL companyconcept, LaborAndRelatedExpense / revenue</td><td><span class="pill pv">Verified</span></td></tr>
+      <tr><td>PM service-line growth +5.5 / +2.5 / +0.1 / +2.7%</td>
+          <td>10-Q/10-K service-line disaggregation notes</td><td><span class="pill pv">Verified</span></td></tr>
+      <tr><td>Claims-count metric present in FY25 10-K, absent in FY26 10-K</td>
+          <td>full-text grep of both filings</td><td><span class="pill pv">Verified</span></td></tr>
+      <tr><td>%-of-savings pricing dropped by FY2012; per-bill model current</td>
+          <td>10-K filing history FY1997 → FY2012 language trace</td><td><span class="pill pv">Verified</span></td></tr>
+      <tr><td>WC fee pool growing (NCCI AY combined 102; CA pure premium +6.6%; OMFS +5.8%)</td>
+          <td>NCCI AIS 2026; CA CDI release 024-2026; DIR/DWC 2026-16</td><td><span class="pill pv">Verified</span></td></tr>
+      <tr><td>Bookings +56%; two top-10 payer partnerships; prepay shift</td>
+          <td>Q4 FY26 earnings call (company-controlled venue — no independent corroboration exists)</td>
+          <td><span class="pill pc">Corroborated</span></td></tr>
+      <tr><td>Earnings date 2026-08-05 11:30 ET, first under CEO Scott</td>
+          <td>IR press release 2026-07-27; CEO transition 8-K</td><td><span class="pill pv">Verified</span></td></tr>
+      <tr><td>Offshore-vs-AI headcount geography (the cross-lane margin-lever question)</td>
+          <td>not disclosed in any filing read</td><td><span class="pill pu">Unverifiable</span></td></tr>
+    </table></div>
+    <h3>Epilogue — what the adversarial process changed</h3>
+    <p class="sub">The court downgraded its own first pass (3/10 → 4/10) after research refuted two of its three
+    bear legs — and it published the concessions. What survived is narrower and harder: a zero-growth core
+    franchise, a deleted metric, an exhausted labor lever, and a young but real payment-integrity bull. The
+    frozen calls put our remaining bear on the record where Wednesday can grade it.</p>
+    <hr style="border:none;border-top:1px solid var(--hair);margin:18px 0">
+    <p class="fine"><b>Disclaimer.</b> This document is personal research, published for informational and
+    educational purposes only. It is not financial, investment, tax, or legal advice, and it is not an offer
+    or a solicitation to buy or sell any security. The author is not a financial advisor, registered
+    investment adviser, or broker-dealer. <b>Position disclosure:</b> at the time of writing the author holds
+    no position in CRVL; orders consistent with the branches in this document may be placed after the
+    2026-08-05 print, and the author may buy or sell at any time without notice. Every figure reflects a
+    good-faith effort at verification against primary sources (SEC filings, XBRL, regulator releases, live
+    IBKR quotes), but errors are possible and numbers go stale; nothing here is a guarantee of accuracy or of
+    future results. Do your own research and consult a licensed professional before making any investment
+    decision.</p>
+  </div>
+</section>
+
+</div>
+<script>
+  (function () {
+    var tip = document.getElementById('tip');
+    var marks = document.querySelectorAll('svg circle, svg rect[fill^="var(--s"], svg rect[fill^="var(--ok"], svg line[stroke-dasharray]');
+    marks.forEach(function (m) {
+      var t = m.querySelector('title');
+      if (!t) return;
+      m.addEventListener('mousemove', function (e) {
+        tip.textContent = t.textContent;
+        tip.style.left = Math.min(e.clientX + 14, window.innerWidth - 270) + 'px';
+        tip.style.top = (e.clientY + 14) + 'px';
+        tip.style.opacity = 1;
+      });
+      m.addEventListener('mouseleave', function () { tip.style.opacity = 0; });
+    });
+  })();
+</script>

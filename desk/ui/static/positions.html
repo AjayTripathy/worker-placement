@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Open Trades — positions board</title>
+<style>
+  :root{ --ink:#1b1d1f; --muted:#5d6167; --faint:#8d9197; --rule:#e0ded8;
+    --paper:#fffefb; --ground:#f3f1ec; --up:#2e5e4e; --up-bg:#e9f2ee;
+    --dn:#8a3324; --dn-bg:#f6ece8; --acc:#2b4a6f; --acc-bg:#e9eef5; --chip-ink:#fff; }
+  @media (prefers-color-scheme: dark){
+    :root{ --ink:#e8e6e1; --muted:#a5a9ae; --faint:#7d8187; --rule:#3a3c3e;
+      --paper:#232527; --ground:#1a1c1e; --up:#8fc0ad; --up-bg:#24332d;
+      --dn:#d08a72; --dn-bg:#3a2b24; --acc:#9db8d8; --acc-bg:#263241; --chip-ink:#1a1c1e; } }
+  :root[data-theme="light"]{ --ink:#1b1d1f; --muted:#5d6167; --faint:#8d9197; --rule:#e0ded8;
+    --paper:#fffefb; --ground:#f3f1ec; --up:#2e5e4e; --up-bg:#e9f2ee;
+    --dn:#8a3324; --dn-bg:#f6ece8; --acc:#2b4a6f; --acc-bg:#e9eef5; --chip-ink:#fff; }
+  :root[data-theme="dark"]{ --ink:#e8e6e1; --muted:#a5a9ae; --faint:#7d8187; --rule:#3a3c3e;
+    --paper:#232527; --ground:#1a1c1e; --up:#8fc0ad; --up-bg:#24332d;
+    --dn:#d08a72; --dn-bg:#3a2b24; --acc:#9db8d8; --acc-bg:#263241; --chip-ink:#1a1c1e; }
+  body{font:13.5px/1.45 system-ui,-apple-system,sans-serif;color:var(--ink);background:var(--ground);margin:0;padding:16px;}
+  .wrap{max-width:1420px;margin:0 auto;}
+  h1{font-size:19px;margin:0 0 2px;} h2{font-size:14px;margin:22px 0 6px;}
+  .sub{color:var(--muted);font-size:12px;margin:0 0 12px;}
+  a{color:var(--acc);} .stale{color:var(--dn);font-weight:600;}
+  .banner{background:var(--dn-bg);color:var(--dn);border:1px solid var(--dn);border-radius:6px;
+    padding:6px 12px;font-size:12px;margin:0 0 10px;}
+  .cards{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 12px;}
+  .card{background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:8px 14px;min-width:118px;}
+  .card .n{font-size:19px;font-weight:700;font-variant-numeric:tabular-nums;}
+  .card .s{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums;}
+  .card .l{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);font-weight:600;}
+  .ctl{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:0 0 10px;}
+  .ctl input[type=search]{background:var(--paper);border:1px solid var(--rule);border-radius:5px;
+    color:var(--ink);font:inherit;padding:4px 10px;width:180px;}
+  .fchip{background:var(--paper);border:1px solid var(--rule);border-radius:14px;color:var(--muted);
+    font-size:11.5px;font-weight:600;padding:3px 11px;cursor:pointer;user-select:none;}
+  .fchip.on{background:var(--acc);border-color:var(--acc);color:var(--chip-ink);}
+  .tblwrap{overflow-x:auto;background:var(--paper);border:1px solid var(--rule);border-radius:6px;}
+  table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:12.5px;min-width:1280px;}
+  th{position:sticky;top:0;z-index:1;background:var(--paper);text-align:left;font-size:10px;letter-spacing:.08em;
+     text-transform:uppercase;color:var(--faint);font-weight:600;padding:7px 9px;border-bottom:1px solid var(--ink);
+     cursor:pointer;user-select:none;white-space:nowrap;}
+  th.n{text-align:right;} th .arr{font-size:9px;}
+  td{padding:6px 9px;border-bottom:1px solid var(--rule);vertical-align:top;white-space:nowrap;}
+  td.n{text-align:right;} tr.main:hover{background:var(--acc-bg);cursor:pointer;}
+  tr.grp td{background:var(--ground);color:var(--muted);font-size:11px;font-weight:700;
+    letter-spacing:.05em;text-transform:uppercase;padding:5px 9px;}
+  tr.grp .gv{font-weight:600;text-transform:none;letter-spacing:0;margin-left:14px;}
+  tr.detail td{white-space:normal;background:var(--ground);color:var(--muted);font-size:12px;padding:8px 14px;line-height:1.5;}
+  tr.detail .dwrap{max-width:1080px;}
+  tr.detail b{color:var(--ink);}
+  tfoot td{font-weight:700;border-top:1.5px solid var(--ink);border-bottom:none;background:var(--paper);}
+  .pnl-up{color:var(--up);font-weight:600;} .pnl-dn{color:var(--dn);font-weight:600;}
+  .src{color:var(--faint);font-size:10px;}
+  .chip{display:inline-block;font-size:9.5px;font-weight:700;letter-spacing:.05em;padding:1px 6px;border-radius:3px;
+        text-transform:uppercase;margin-right:3px;max-width:130px;overflow:hidden;text-overflow:ellipsis;vertical-align:middle;}
+  .c-hold{background:var(--acc);color:var(--chip-ink);} .c-exit{background:var(--dn);color:var(--chip-ink);}
+  .c-warn{background:var(--dn-bg);color:var(--dn);border:1px solid var(--dn);}
+  .c-date{background:var(--acc-bg);color:var(--acc);}
+  .c-band{background:var(--up-bg);color:var(--up);border:1px solid var(--up);}
+  .c-band.trim,.c-band.harv{background:var(--dn-bg);color:var(--dn);border-color:var(--dn);}
+  .rung{display:inline-block;background:var(--up-bg);color:var(--up);border-radius:3px;padding:0 5px;margin:0 3px 2px 0;font-size:11.5px;}
+  .rung.b{background:var(--acc-bg);color:var(--acc);}
+  .bar{display:inline-block;width:64px;height:8px;position:relative;vertical-align:middle;
+    background:var(--ground);border-radius:2px;margin-left:6px;}
+  .bar::after{content:"";position:absolute;left:50%;top:-1px;bottom:-1px;width:1px;background:var(--faint);}
+  .bar i{position:absolute;top:0;bottom:0;border-radius:2px;}
+  .bar i.up{background:var(--up);left:50%;} .bar i.dn{background:var(--dn);right:50%;}
+  .slv{color:var(--faint);font-size:11px;}
+  #stgtbl .chip{max-width:none;}
+  .foot{color:var(--faint);font-size:11px;margin:14px 0 4px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Open Trades</h1>
+  <p class="sub">Every position, whole-book USD: live P&amp;L, day move, court verdict, edge class + exit band,
+    resting rungs, next dated event. Click a row for the court note; tickers open the dossier.
+    <a href="/">dashboard</a> · <a href="/static/orders_calendar.html">orders calendar</a> ·
+    <a href="/static/strategy_book.html">strategy book</a> · <span id="asof"></span></p>
+  <div id="banner"></div>
+  <div class="cards" id="cards"></div>
+  <div class="ctl">
+    <input type="search" id="q" placeholder="filter symbol / sleeve / verdict">
+    <span class="fchip" data-f="group">group by sleeve</span>
+    <span class="fchip" data-f="losers">losers</span>
+    <span class="fchip" data-f="winners">winners</span>
+    <span class="fchip" data-f="flagged">flagged</span>
+    <span class="fchip" data-f="foreign">non-USD</span>
+  </div>
+  <div class="tblwrap"><table id="tbl">
+    <thead><tr>
+      <th data-k="fam">Sym</th><th data-k="sleeve">Sleeve</th>
+      <th class="n" data-k="qty">Qty</th><th class="n" data-k="avg">Avg</th>
+      <th class="n" data-k="last">Last</th><th class="n" data-k="day_pct">Day</th>
+      <th class="n" data-k="upnl_usd">uP&amp;L $</th><th class="n" data-k="upnlpct">uP&amp;L %</th>
+      <th class="n" data-k="mv_usd">Value $</th><th class="n" data-k="weight_pct">Wt</th>
+      <th data-k="verdict">Verdict</th><th data-k="band">Band</th>
+      <th class="n" data-k="rungs">Rungs</th><th data-k="next_date">Next date</th><th>Flags</th>
+    </tr></thead>
+    <tbody id="rows"></tbody>
+    <tfoot id="tfoot"></tfoot>
+  </table></div>
+
+  <h2>Orders <span style="font-weight:400;color:var(--faint);font-size:12px">— the full GTC ladder book resting at IBKR, plus staged plan rungs not yet at the broker (plan rows already placed are folded into their resting order)</span></h2>
+  <div class="ctl">
+    <span class="fchip ochip on" data-o="all">all</span>
+    <span class="fchip ochip" data-o="resting">resting</span>
+    <span class="fchip ochip" data-o="staged">staged</span>
+    <span class="fchip ochip" data-o="buys">buys</span>
+    <span class="fchip ochip" data-o="sells">sells</span>
+    <span class="fchip ochip" data-o="action">needs action</span>
+    <span id="ocount" style="color:var(--faint);font-size:11.5px"></span>
+  </div>
+  <div class="tblwrap"><table style="min-width:980px" id="stgtbl">
+    <thead><tr><th>Ticker</th><th>Book</th><th class="n">Tranche</th><th class="n">Order</th>
+      <th class="n">Est $</th><th class="n">Last</th><th class="n">Limit vs px</th><th>Status</th><th>Source / note</th></tr></thead>
+    <tbody id="stgrows"></tbody>
+  </table></div>
+
+  <h2>Short options</h2>
+  <div class="tblwrap"><table style="min-width:520px">
+    <thead><tr><th>Underlying</th><th class="n">Contracts</th><th class="n">Premium collected $</th><th>Coverage</th></tr></thead>
+    <tbody id="optrows"></tbody>
+  </table></div>
+
+  <p class="foot">Structure rebuilds hourly (<code>positions_board.json</code>: closes + FX for every line via yahoo,
+  edge classifications joined). US prices go live intraday from the quote daemon (<code>live_quotes.json</code>, 60s);
+  foreign lines mark from the latest local close (~date shown). All $ figures converted at the board's FX. Read-only.</p>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let board=null, quotes=null, sortK="mv_usd", sortAsc=false, open=new Set(), OF="all";
+const F={group:false,losers:false,winners:false,flagged:false,foreign:false};
+function fmt(x,d=2){return x==null||isNaN(x)?"–":Number(x).toLocaleString(undefined,{minimumFractionDigits:d,maximumFractionDigits:d});}
+function sgn(x,d=0,suf=""){return x==null||isNaN(x)?"–":(x>=0?"+":"")+fmt(x,d)+suf;}
+
+function enrich(){
+  if(!board) return [];
+  const q=(quotes&&quotes.quotes)||{};
+  const qfresh=quotes&&(Date.now()/1000-quotes.asof)<1200;
+  return board.positions.map(p=>{
+    const lq=qfresh?(q[p.symbol]||q[p.fam]):null;
+    let last=lq?lq.px:p.px_close, live=!!lq;
+    // unit guard: a live pence tick against a pound close
+    if(live&&p.px_close&&last/p.px_close>50) last/=100;
+    const fx=p.fx_usd||1;
+    const upnl_usd=(last!=null&&p.avg!=null)?(last-p.avg)*p.qty*fx:null;
+    const upnlpct=(last!=null&&p.avg)?100*(last/p.avg-1):null;
+    const mv_usd=last!=null?last*p.qty*fx:null;
+    const day_pct=(last!=null&&p.px_prev)?100*(last/p.px_prev-1):p.day_pct;
+    const day_usd=(last!=null&&p.px_prev)?(last-p.px_prev)*p.qty*fx:null;
+    const band=(p.edge&&p.edge.exit_band)||"";
+    return {...p,last,live,upnl_usd,upnlpct,mv_usd,day_pct,day_usd,band,
+            rungs:p.exit_rungs.length+p.entry_rungs.length};
+  });
+}
+function visible(rows){
+  const s=($("q").value||"").trim().toUpperCase();
+  return rows.filter(r=>{
+    if(s&&![r.symbol,r.sleeve,r.verdict,r.band].some(v=>String(v||"").toUpperCase().includes(s)))return false;
+    if(F.losers&&!(r.upnlpct<0))return false;
+    if(F.winners&&!(r.upnlpct>0))return false;
+    if(F.flagged&&!r.flags.length)return false;
+    if(F.foreign&&r.ccy==="USD")return false;
+    return true;
+  });
+}
+function kpis(rows){
+  const mv=rows.reduce((s,r)=>s+(r.mv_usd||0),0);
+  const cash=rows.filter(r=>r.fam==="SGOV").reduce((s,r)=>s+(r.mv_usd||0),0);
+  const upnl=rows.reduce((s,r)=>s+(r.upnl_usd||0),0);
+  const cost=board.totals.cost_usd;
+  const day=rows.filter(r=>r.day_usd!=null).reduce((s,r)=>s+r.day_usd,0);
+  const nlive=rows.filter(r=>r.live).length;
+  $("cards").innerHTML=[
+    ["$"+fmt(mv,0),"deployed $"+fmt(mv-cash,0)+" ex-SGOV","Book value",""],
+    [sgn(upnl),cost?sgn(100*upnl/cost,1,"% on cost"):"","Unrealized P&L",upnl<0?"dn":"up"],
+    [sgn(day),"whole book","Day P&L",day<0?"dn":"up"],
+    [rows.length,nlive+" live · "+(rows.length-nlive)+" close","Positions",""],
+    ["$"+fmt(board.totals.resting_buy_usd||0,0),(board.counts.resting||0)+" orders · $"+fmt(board.totals.resting_sell_usd||0,0)+" sells","Resting buys",""],
+    ["$"+fmt(board.totals.staged_usd||0,0),(board.counts.staged||0)+" orders","Staged buys",""],
+    [board.counts.exit_undated,"","Exit-undated",board.counts.exit_undated?"dn":""],
+    [board.counts.pending,"","Pending decision",board.counts.pending?"dn":""],
+    ["$"+fmt(board.totals.short_premium_usd,0),board.short_options.length+" legs","Short opt premium",""],
+  ].map(([n,s,l,c])=>`<div class="card"><div class="n ${c==="dn"?"pnl-dn":c==="up"?"pnl-up":""}">${n}</div>
+    ${s?`<div class="s">${s}</div>`:""}<div class="l">${l}</div></div>`).join("");
+}
+function bar(pct){
+  if(pct==null||isNaN(pct))return"";
+  const w=Math.min(Math.abs(pct),50)/50*32;
+  return `<span class="bar" title="${sgn(pct,1)}%"><i class="${pct>=0?'up':'dn'}" style="width:${w}px"></i></span>`;
+}
+function bandChip(r){
+  if(!r.band)return"—";
+  const cls=/TRIM/.test(r.band)?"trim":/HARVEST/.test(r.band)?"harv":"";
+  return `<span class="chip c-band ${cls}" title="${esc(r.band)}${r.edge.exit_band_asof?" (as of "+esc(r.edge.exit_band_asof)+")":""}">${esc(r.band.split(" ")[0].slice(0,16))}</span>`;
+}
+function rowHtml(r){
+  const vcls=/EXIT|SELL|HARVEST/.test(String(r.verdict).toUpperCase())?"c-exit":"c-hold";
+  const pn=r.upnlpct==null?"":(r.upnlpct>=0?"pnl-up":"pnl-dn");
+  const dn=r.day_pct==null?"":(r.day_pct>=0?"pnl-up":"pnl-dn");
+  const src=r.live?'<span class="src">•live</span>':(r.px_asof?`<span class="src" title="local close ${esc(r.px_asof)}">~${esc((r.px_asof||"").slice(5))}</span>`:"");
+  const rungt=[r.exit_rungs.length?("sell "+r.exit_rungs.join(", ")):"",r.entry_rungs.length?("buy "+r.entry_rungs.join(", ")):"",
+    (r.staged_rungs||[]).length?("staged "+r.staged_rungs.join(", ")):""].filter(Boolean).join(" · ");
+  return `<tr class="main" data-i="${esc(r.fam)}">
+    <td><a href="/ticker/${esc(r.fam)}" target="_blank" onclick="event.stopPropagation()"><b>${esc(r.symbol)}</b></a>
+        <span style="color:var(--faint)">${esc(r.ccy!=="USD"?r.ccy:"")}</span></td>
+    <td class="slv">${esc(r.sleeve||"")}</td>
+    <td class="n">${fmt(r.qty,0)}</td><td class="n">${fmt(r.avg)}</td>
+    <td class="n">${fmt(r.last)} ${src}</td>
+    <td class="n ${dn}">${r.day_pct!=null?sgn(r.day_pct,1)+"%":"–"}</td>
+    <td class="n ${pn}">${sgn(r.upnl_usd)}</td>
+    <td class="n ${pn}">${r.upnlpct!=null?sgn(r.upnlpct,1)+"%":"–"}${bar(r.upnlpct)}</td>
+    <td class="n">${fmt(r.mv_usd,0)}</td>
+    <td class="n">${r.mv_usd!=null&&enrichTotal?fmt(r.mv_usd/enrichTotal*100,1)+"%":"–"}</td>
+    <td><span class="chip ${vcls}" title="${esc(r.verdict)}">${esc(String(r.verdict).slice(0,18))}</span></td>
+    <td>${bandChip(r)}</td>
+    <td class="n" title="${esc(rungt)}">${[r.exit_rungs.length?r.exit_rungs.length+"↓":"",r.entry_rungs.length?r.entry_rungs.length+"↑":"",
+        r.staged_count?r.staged_count+"◦":""].filter(Boolean).join(" ")||"—"}</td>
+    <td>${r.next_date?`<span class="chip c-date">${esc(r.next_date)}</span>`:"—"}</td>
+    <td>${r.flags.map(f=>`<span class="chip c-warn">${esc(f)}</span>`).join("")}</td>
+  </tr>`+(open.has(r.fam)?detailHtml(r):"");
+}
+function detailHtml(r){
+  const e=r.edge||{};
+  const parts=[
+    r.court||r.note?`<b>${esc(r.court||"court")} ${esc(r.court_date||"")}</b> — ${esc(r.note||"no note")}`:"",
+    e.edge_type?`<b>edge:</b> ${esc(e.edge_type)}${e.conviction?` (conviction ${esc(e.conviction)})`:""}${e.ec_date?` <i>as of ${esc(e.ec_date)}</i>`:""}`:"",
+    e.action?`<b>action:</b> ${esc(e.action)}`:"",
+    r.band?`<b>exit band:</b> ${esc(r.band)}${e.exit_band_asof?` <i>(${esc(e.exit_band_asof)})</i>`:""}`:"",
+    r.thesis?`<b>thesis:</b> ${esc(r.thesis)}`:"",
+    (r.exit_rungs.length||r.entry_rungs.length||(r.staged_rungs||[]).length)?`<b>rungs:</b> ${r.exit_rungs.map(x=>`<span class="rung">↓${esc(x)}</span>`).join("")}${r.entry_rungs.map(x=>`<span class="rung b">↑${esc(x)}</span>`).join("")}${(r.staged_rungs||[]).map(x=>`<span class="rung b" style="opacity:.65">◦${esc(x)} staged</span>`).join("")}`:"",
+    r.next_pack?`<i>next: ${esc(r.next_pack)}</i>`:"",
+  ].filter(Boolean);
+  return `<tr class="detail"><td colspan="15"><div class="dwrap">${parts.join("<br>")||"no research context on file"}</div></td></tr>`;
+}
+let enrichTotal=0;
+function render(){
+  if(!board) return;
+  const all=enrich();
+  let rows=visible(all);
+  enrichTotal=all.reduce((s,r)=>s+(r.mv_usd||0),0);  // weights vs the WHOLE book, not the filtered view
+  rows.sort((a,b)=>{const va=a[sortK],vb=b[sortK];
+    if(va==null)return 1; if(vb==null)return -1;
+    return (va<vb?-1:va>vb?1:0)*(sortAsc?1:-1);});
+  kpis(all);
+  const age=(Date.now()-new Date(board.generated_utc).getTime())/36e5;
+  const qage=quotes?((Date.now()/1000-quotes.asof)/60):null;
+  $("asof").innerHTML=`board ${age.toFixed(1)}h${age>2.5?' <span class="stale">(STALE)</span>':""} · quotes ${qage!=null?qage.toFixed(0)+"m":"–"}${qage!=null&&qage>20?' <span class="stale">(stale)</span>':""}`;
+  $("banner").innerHTML=board.price_note?`<div class="banner">${esc(board.price_note)}</div>`:"";
+  document.querySelectorAll("th[data-k]").forEach(th=>{
+    th.querySelector(".arr")?.remove();
+    if(th.dataset.k===sortK){const s=document.createElement("span");s.className="arr";s.textContent=sortAsc?" ▲":" ▼";th.appendChild(s);}
+  });
+  let html="";
+  if(F.group){
+    const gs={};
+    rows.forEach(r=>{(gs[r.sleeve||"unsleeved"]=gs[r.sleeve||"unsleeved"]||[]).push(r);});
+    Object.entries(gs).sort((a,b)=>b[1].reduce((s,r)=>s+(r.mv_usd||0),0)-a[1].reduce((s,r)=>s+(r.mv_usd||0),0))
+      .forEach(([g,rs])=>{
+        const gmv=rs.reduce((s,r)=>s+(r.mv_usd||0),0), gp=rs.reduce((s,r)=>s+(r.upnl_usd||0),0);
+        html+=`<tr class="grp"><td colspan="15">${esc(g)}<span class="gv">$${fmt(gmv,0)} · <span class="${gp>=0?'pnl-up':'pnl-dn'}">${sgn(gp)}</span></span></td></tr>`;
+        html+=rs.map(rowHtml).join("");
+      });
+  } else html=rows.map(rowHtml).join("");
+  $("rows").innerHTML=html;
+  const day=rows.filter(r=>r.day_usd!=null).reduce((s,r)=>s+r.day_usd,0);
+  const up=rows.reduce((s,r)=>s+(r.upnl_usd||0),0);
+  $("tfoot").innerHTML=`<tr><td colspan="5">${rows.length} shown</td>
+    <td class="n ${day>=0?'pnl-up':'pnl-dn'}">${sgn(day)}</td>
+    <td class="n ${up>=0?'pnl-up':'pnl-dn'}">${sgn(up)}</td><td></td>
+    <td class="n">${fmt(enrichTotal,0)}</td><td colspan="6"></td></tr>`;
+  document.querySelectorAll("tr.main").forEach(tr=>tr.onclick=()=>{
+    const k=tr.dataset.i; open.has(k)?open.delete(k):open.add(k); render();});
+  const stCls=l=>l==="NEEDS-APPROVAL"||l==="CXL-PENDING"?"c-warn":l==="APPROVED-UNSUBMITTED"?"c-hold":l==="RESTING"?"c-band":"c-date";
+  // fractional-dust sells (1-2 sh at token limits) are intentional at-any-price cleanups, not action
+  const isAction=s=>["NEEDS-APPROVAL","APPROVED-UNSUBMITTED","CXL-PENDING"].includes(s.label)
+    ||(s.away_pct!=null&&(s.est_usd||0)>=500&&(s.side==="BUY"?s.away_pct>0:s.away_pct<0));
+  const oAll=(board.orders||[]);
+  const orows=oAll.filter(s=>{
+    if(OF==="resting")return s.label==="RESTING"||s.label==="CXL-PENDING";
+    if(OF==="staged")return s.label!=="RESTING"&&s.label!=="CXL-PENDING";
+    if(OF==="buys")return s.side==="BUY";
+    if(OF==="sells")return s.side==="SELL";
+    if(OF==="action")return isAction(s);
+    return true;});
+  const oq=($("q").value||"").trim().toUpperCase();
+  const orows2=oq?orows.filter(s=>s.ticker.toUpperCase().includes(oq)):orows;
+  $("ocount").textContent=`${orows2.length} of ${oAll.length} · $${fmt(orows2.filter(s=>s.side==="BUY").reduce((a,s)=>a+(s.est_usd||0),0),0)} buys shown`;
+  $("stgrows").innerHTML=orows2.map(s=>{
+    const away=s.away_pct;
+    const marketable=away!=null&&(s.side==="BUY"?away>0:away<0);
+    const awayHtml=away==null?"–":(marketable
+      ?`<span class="pnl-dn" title="limit is through the market — marketable">${sgn(away,1)}%</span>`
+      :`<span style="color:var(--muted)">${sgn(away,1)}%</span>`);
+    return `<tr>
+      <td><a href="/ticker/${esc(s.fam)}" target="_blank"><b>${esc(s.ticker)}</b></a>
+          <span style="color:var(--faint)">${esc(s.ccy!=="USD"?s.ccy:"")}</span></td>
+      <td>${s.held?'<span class="chip c-hold">'+(s.side==="SELL"?"exit":"add")+'</span>':'<span class="chip c-date">new name</span>'}</td>
+      <td class="n">${esc(s.tranche??"–")}</td>
+      <td class="n">${esc(s.side)} ${fmt(s.qty,0)} @ ${fmt(s.limit)}</td>
+      <td class="n">${fmt(s.est_usd,0)}</td>
+      <td class="n">${fmt(s.px_close)}${s.px_asof?` <span class="src">~${esc(s.px_asof.slice(5))}</span>`:""}</td>
+      <td class="n">${awayHtml}</td>
+      <td><span class="chip ${stCls(s.label)}">${esc(s.label)}</span></td>
+      <td style="white-space:normal;max-width:420px;color:var(--muted);font-size:11.5px">${esc(s.source)}${s.note?` — ${esc(s.note.slice(0,160))}`:""}</td>
+    </tr>`;}).join("")||'<tr><td colspan="9" style="color:var(--faint)">none</td></tr>';
+  $("optrows").innerHTML=(board.short_options||[]).map(o=>`<tr>
+    <td><a href="/ticker/${esc(o.underlying)}" target="_blank"><b>${esc(o.underlying)}</b></a></td>
+    <td class="n">${fmt(o.qty,0)}</td><td class="n">${fmt(o.premium_usd)}</td>
+    <td>${o.covered?'<span class="chip c-hold">stock leg held</span>':'<span class="chip c-date">no stock leg</span>'}</td></tr>`).join("")
+    ||'<tr><td colspan="4" style="color:var(--faint)">none</td></tr>';
+}
+document.querySelectorAll("th[data-k]").forEach(th=>th.onclick=()=>{
+  const k=th.dataset.k; if(sortK===k)sortAsc=!sortAsc; else {sortK=k; sortAsc=(k==="fam"||k==="next_date"||k==="sleeve"||k==="verdict"||k==="band");} render();});
+document.querySelectorAll(".ochip").forEach(c=>c.onclick=()=>{
+  OF=c.dataset.o;
+  document.querySelectorAll(".ochip").forEach(x=>x.classList.toggle("on",x.dataset.o===OF));
+  render();});
+document.querySelectorAll(".fchip:not(.ochip)").forEach(c=>c.onclick=()=>{
+  const f=c.dataset.f; F[f]=!F[f];
+  if(f==="losers"&&F.losers){F.winners=false;} if(f==="winners"&&F.winners){F.losers=false;}
+  document.querySelectorAll(".fchip:not(.ochip)").forEach(x=>x.classList.toggle("on",F[x.dataset.f])); render();});
+$("q").oninput=()=>render();
+async function loadBoard(){try{board=await (await fetch("/static/positions_board.json?ts="+Date.now(),{cache:"no-store"})).json();render();}catch(e){$("asof").innerHTML=`<span class="stale">board fetch failed</span>`;}}
+async function loadQuotes(){try{quotes=await (await fetch("/static/live_quotes.json?ts="+Date.now(),{cache:"no-store"})).json();render();}catch(e){/* quotes optional */}}
+loadBoard();loadQuotes();
+setInterval(loadQuotes,60000);setInterval(loadBoard,300000);
+</script>
+</body>
+</html>

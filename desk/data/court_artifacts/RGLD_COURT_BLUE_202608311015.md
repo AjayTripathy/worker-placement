@@ -1,0 +1,54 @@
+## BLUE BENCH — RGLD — RED CASE: PARTIALLY OVERTURNED
+
+**PACK: acknowledged.** Superseded: pack XBRL block (`dil_sh` 65.8M, `rev` $209.6M, `ocf` $136.4M — all pre-Sandstorm/pre-Kansanshi); replaced with 10-Q primary (PROXY-FETCHED). Both benches' integrity flag CONFIRMED.
+**PRINT PROXIMITY: 2026-11-04, ~45 trading days out — NOT within 5.** Cadence-verified as both benches state.
+**PRIZE-TABLE MANDATE: N/A** — RGLD is not a pre-revenue developer ($919.7M H1 revenue, $628.7M H1 OCF, 10-Q).
+
+### PER-FINDING RULINGS
+
+**1. "$1,625.9M acquisitions = 122% of OCF; replacement is not optional" — REDUCED (severity mis-tagged; NOVEL→CONSENSUS-adjacent).** Check: identified the $993.5M. It is a single **$1.0B advance payment for the Kansanshi gold stream** (RGLD Gold AG / First Quantum), Q3-2025, funded by a **$775M revolver draw** ([Q3-2025 results 8-K](https://www.sec.gov/Archives/edgar/data/85535/000008553525000158/rgld-20251105xexx991.htm)). That is a discrete new asset — growth, not maintenance — and red's own trigger (d) is satisfied in substance. Red's decisive trigger (a) is also now met from primary: the five-year outlook to **430–480k GEO is built from the *existing* portfolio** — Khoemacau/Platreef expansions, Corani, Great Bear, Hod Maden NSR — explicitly *excluding* the direct Hod Maden JV and later starts ([2026 guidance & 5-yr outlook 8-K](https://www.sec.gov/Archives/edgar/data/85535/000008553526000013/pressreleasedatedmarch3120.htm)). Volumes rise ~25–35% over five years with **zero incremental acquisition**. Sustaining capex ≈ the H1-2026 run rate: **$50.0M = 8% of OCF** (10-Q investing). What survives: the OCF red annualizes was *bought* with that $1.0B, so charging it again is a double-count — the classic base-effect trick. What genuinely survives is directional: RGLD is a capital-deploying compounder, not a pure annuity.
+
+**2. "Replacement-charged FV $164–196" — OVERTURNED.** Built on (1)'s misclassification, plus a units error: red charges capex out of OCF and then applies an **EV/OCF** peer multiple (16–19x) to the resulting FCF — double-discounting. Corrected: sustaining-adjusted OCF ≈ $1,130M (H1-annualized $1,257M less 8–12% true sustaining) → at 16–19x, EV $18.1–21.5B less $213.4M net debt ÷ 84.728M = **$211–252/sh**. REFUTED as stated; but see NET POSITION — my corrected band still sits *below* the $262.85 tape.
+
+**3. "Management's revealed FV is $203.80, 29% below the tape" — OVERTURNED (artifact).** Check: RGLD's actual tape during the repurchase window. **June 2026 traded $197.45–223.20, closing $199.61; July $186.33–206.75** ([monthly history](https://stockanalysis.com/stocks/rgld/history/?p=monthly)). $203.80 *was* the market. Management did not "decline to pay $204" — it paid the prevailing price and the stock re-rated +30% in August, after the buy. This is a stale-mark comparison, structurally identical to the pack-XBRL error red itself flagged. The `issuer_buyback_price_as_fv_anchor` candidate should be harvested **with a mandatory same-window VWAP guard**, or it will fire on every rallying name.
+
+**4. "16.6x is the most flattering basis; TTM = 21.4x" — REDUCED.** Correct that single-quarter annualization is undisciplined. Wrong on the alternative: TTM $1,044M spans Q3/Q4-2025, i.e. pre-Kansanshi-delivery and pre-Sandstorm-close — a stale-mix artifact. Honest basis is H1-annualized $1,257M → EV $22.49B / = **17.9x**. Between the brief's 16.6x and red's 21.4x, both are wrong; 17.9x is the number.
+
+**5. "We agree with the street" — REDUCED, and tag contested.** Red did supply the street's load-bearing numbers (EPS $12.15, rev $1.91B), so this is not a coverage-count kill and survives §DIVERGENCE. But H1 revenue ×2 = $1.84B is a straight-line artifact: **27,400 oz Au / 371,200 oz Ag / 0.7 Mlb Cu sit in ending inventory** (10-Q), pre-loading H2. And the thesis is a *cash-flow* claim; red never produced the street's cash-flow or NAV number, which is the only anchor that tests it. Removes claimed edge; does not refute value. **CONSENSUS.**
+
+**6. "$4,506 is the LBMA average, not a realized price" — SUSTAINED, immaterial.** Confirmed as a provenance correction; red concedes the conclusion survives.
+
+**7. "Equity never took the stress; drawdown beta 0.69x" — OVERTURNED (mismatched-window).** Red measured gold peak→today against RGLD 52wk-high→today, after a +41% six-week rally. Trough-to-trough: **RGLD $306.25 → $186.33 (July 2026) = −39.2%** against gold −20.3% → realized beta ≈ **1.9x**. The equity took *more* stress than its commodity and then recovered. Red's "downside is likely milder" is refuted; the brief's $180–218 stress band is if anything generous.
+
+### NEW FINDINGS RED MISSED
+
+- **The real timing kill is larger than either bench found.** RGLD printed **$186.33 in July 2026** — ~12x H1-annualized OCF, six weeks ago. Today's "fair" verdict is entirely a function of a violent August re-rate ($206.21 → $262.85, +27% in one month). Neither bench priced how recent and how fast that was. **TIMING, NOVEL.**
+- **Red's investing tally omits $84.7M of Hod Maden equity cash calls** (10-Q). Red simultaneously *over*counts maintenance (Kansanshi) and *under*counts development capital.
+- **H1-2026's light acquisition spend is a deleveraging phase, not a price-discipline pause.** Financing shows **$500.0M debt repaid** against the Kansanshi revolver, plus $80.5M dividends and $30.0M buyback = $610.5M returned/deleveraged vs $628.7M OCF (97%). Red read the lull as "the pause after the spree"; it is the amortization of the spree — which *supports* the annuity read for 2026–27, but means the balance sheet, not the multiple, absorbed the growth.
+- **Corrected FV still lands below the tape.** $211–252 vs $262.85: RGLD is **modestly RICH, not fair** — against the brief's "4% below mid." This is a blue finding against the brief.
+
+### DETECTORS CONSULTED
+
+- **plant_thermal** — NOT-APPLICABLE: non-operator; Kansanshi thermal reads First Quantum's utilization, not RGLD's contractual delivery (already disclosed and dated in the 10-Q).
+- **sentinel2_buildout** — NOT-APPLICABLE: same non-operator logic. Would be diligence on FQM, and would not test the DD&A/replacement axis this court turned on.
+- **carbon_mapper** — NOT-FIRED: checked applicability; RGLD makes no operational environmental claim — it owns paper. Plume evidence would attach to the operator.
+- **chinese_smallcap_ramp_dump_archetype** — NOT-FIRED: Colorado-domiciled, Nasdaq, 40-year history, Big-4 audited. `asia_operating_jurisdiction` is a spurious match on Zambia/Türkiye/Ecuador asset locations.
+- **clinical_trial_referral_quality** — NOT-APPLICABLE: no diagnostics/lab/referral business. False dispatch.
+- **common_control_merger_accounting** — NOT-FIRED, and this one deserved a check: Sandstorm/Horizon was a >$1B absorption, but arm's-length between unaffiliated public companies, not common control. Separate purchase accounting applied — which is exactly *why* the step-up DD&A exists.
+- **lockup_expiration_calendar** — NOT-FIRED: 18.6M shares were merger consideration (Oct 2025), not a locked-up follow-on; no offering in the filing inventory. The recurring 144+Form 4 pairs (5/11, 6/16, 8/28) remain **UNCHECKED — coverage gap**, neither bench read them firsthand.
+- **albuquerque_permits / austin_permits / bozeman_permits** — NOT-APPLICABLE: no US real-estate development; `real_estate_development` is a false dispatch on mine-property language.
+- **app_review_velocity** — NOT-APPLICABLE: no consumer app.
+- **beauty_virality / beauty_velocity_poll** — NOT-APPLICABLE: no consumer brand.
+- **census_acs** — NOT-APPLICABLE: no residential rental business.
+
+Planner's coverage ruling **upheld**. Every dispositive fact in this court came from the 10-Q cash flow statement, the guidance 8-K, and the monthly price tape — none covered by the atlas.
+
+**COVERAGE GAP (reportable):** IBKR `search_contracts` permission-denied here as it was for red, so no live tick, no options-implied band, no independent ADV. I used the pack tape and public monthly bars. Executability is not in dispute at $30–50k.
+
+### NET POSITION AFTER BOTH BENCHES
+
+Class **DAMAGE-ABSENT survives** — neither bench refuted it, and red's strongest kill dissolves once the $993.5M is identified as a one-time debt-funded Kansanshi stream purchase and the five-year outlook is read as portfolio-intrinsic. The honest multiple is **17.9x EV/OCF** on H1-annualized cash flow, not 16.6x and not 21.4x. But red's *conclusion* on entry survives my correction of its reasoning, and my own arithmetic lands harder than the brief's: sustaining-adjusted FV is **$211–252**, so at $262.85 RGLD is **modestly rich, roughly 4–20% above my band**, after a +27% one-month re-rate off a July low of $186.33 that neither bench surfaced. Post-audit kill tally: **kills 2 novel / 2 consensus** (novel: the July-low timing kill and the omitted Hod Maden/deleveraging capital picture; consensus: street-agreement and the no-dislocation read) — red's two self-tagged NOVELs (portfolio replacement, buyback anchor) are **demoted to artifact**. Ruling: **STARTER deferred, not FLAT and not now.** Cut T1 entirely; first tranche **≤$225**, T2 $200–210, T3 <$190 — a band the tape visited six weeks ago and would revisit on any gold consolidation, with realized drawdown beta ~1.9x arguing the ladder gets filled rather than missed. Re-court trigger: Q3 prelim-sales 8-K ~2026-10-20 (inventory conversion at ≥$4,450 with total GEO ≥110k), or any Q3 repurchase above $250.
+
+**CONVICTION: 7/10.** High confidence on the artifact rulings (3, 7 are clean overturns with primary tape; 1 is closed by red's own named trigger). The residual uncertainty is my sustaining-capex assumption — 8% of OCF is one half-year of evidence, and if RGLD resumes deal-making at Kansanshi scale in 2027 the multiple I defend compresses toward red's.
+
+**Primary citations:** [10-Q 2026-06-30, acc. 0000085535-26-000041 — PROXY-FETCHED via r.jina.ai after sec.gov 403](https://www.sec.gov/Archives/edgar/data/85535/000008553526000041/rgld-20260630.htm) · [Q3-2025 8-K — $1.0B Kansanshi advance payment, $775M revolver draw](https://www.sec.gov/Archives/edgar/data/85535/000008553525000158/rgld-20251105xexx991.htm) · [2026 guidance & five-year outlook 8-K — 430–480k GEO from existing portfolio](https://www.sec.gov/Archives/edgar/data/85535/000008553526000013/pressreleasedatedmarch3120.htm) · [RGLD monthly price history — June $199.61 close, July low $186.33](https://stockanalysis.com/stocks/rgld/history/?p=monthly) · [quarterly cash-flow series](https://stockanalysis.com/stocks/rgld/financials/cash-flow-statement/?p=quarterly)

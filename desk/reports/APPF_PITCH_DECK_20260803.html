@@ -1,0 +1,413 @@
+<title>APPF — Quality-Drawdown Court Deck</title>
+<style>
+  :root {
+    --paper: #F7F8F6; --card: #FFFFFF; --ink: #1A2530; --ink-2: #4C5A66; --ink-3: #7C8893;
+    --rail: #23425F; --rail-ink: #E9EEF3; --hair: #DDE3E0;
+    --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a;
+    --warn-bg: #FBF3E4; --warn-bd: #D9A54A; --ok-bg: #E8F5EF; --bad-bg: #FBEAE7;
+    --pill-v: #0E6E45; --pill-c: #23425F; --pill-r: #A93226; --pill-u: #8A6D1D;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      --paper: #10161C; --card: #171F27; --ink: #E7ECF0; --ink-2: #A9B4BD; --ink-3: #77828C;
+      --rail: #1B2F44; --rail-ink: #D7E1EA; --hair: #2A353F;
+      --s1: #3987e5; --s2: #d95926; --s3: #199e70;
+      --warn-bg: #2A2415; --warn-bd: #C98500; --ok-bg: #14261E; --bad-bg: #2C1B18;
+      --pill-v: #2FA97A; --pill-c: #7FA6CC; --pill-r: #E66767; --pill-u: #C9A94E;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #10161C; --card: #171F27; --ink: #E7ECF0; --ink-2: #A9B4BD; --ink-3: #77828C;
+    --rail: #1B2F44; --rail-ink: #D7E1EA; --hair: #2A353F;
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70;
+    --warn-bg: #2A2415; --warn-bd: #C98500; --ok-bg: #14261E; --bad-bg: #2C1B18;
+    --pill-v: #2FA97A; --pill-c: #7FA6CC; --pill-r: #E66767; --pill-u: #C9A94E;
+  }
+  :root[data-theme="light"] {
+    --paper: #F7F8F6; --card: #FFFFFF; --ink: #1A2530; --ink-2: #4C5A66; --ink-3: #7C8893;
+    --rail: #23425F; --rail-ink: #E9EEF3; --hair: #DDE3E0;
+    --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a;
+    --warn-bg: #FBF3E4; --warn-bd: #D9A54A; --ok-bg: #E8F5EF; --bad-bg: #FBEAE7;
+    --pill-v: #0E6E45; --pill-c: #23425F; --pill-r: #A93226; --pill-u: #8A6D1D;
+  }
+  body { background: var(--paper); color: var(--ink); margin: 0;
+         font-family: Charter, Georgia, 'Times New Roman', serif; line-height: 1.55; }
+  .deck { max-width: 960px; margin: 0 auto; padding: 0 20px 80px; }
+  .slide { background: var(--card); border: 1px solid var(--hair); border-radius: 6px;
+           margin: 28px 0; overflow: hidden; }
+  .rail { background: var(--rail); color: var(--rail-ink); display: flex; align-items: baseline;
+          gap: 14px; padding: 8px 18px; font-family: 'Avenir Next Condensed','Arial Narrow','Helvetica Neue',sans-serif; }
+  .rail .no { font-size: 13px; letter-spacing: .18em; opacity: .75; font-variant-numeric: tabular-nums; }
+  .rail .lab { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; }
+  .body { padding: 22px 26px 26px; }
+  h1 { font-family: 'Avenir Next Condensed','Arial Narrow','Helvetica Neue',sans-serif;
+       font-weight: 700; font-size: 40px; line-height: 1.08; margin: 6px 0 10px; text-wrap: balance; }
+  h2 { font-family: 'Avenir Next Condensed','Arial Narrow','Helvetica Neue',sans-serif;
+       font-weight: 600; font-size: 25px; margin: 0 0 12px; text-wrap: balance; }
+  h3 { font-size: 17px; margin: 18px 0 6px; }
+  p, li { font-size: 15.5px; color: var(--ink); max-width: 70ch; }
+  .sub { color: var(--ink-2); }
+  .small { font-size: 13px; color: var(--ink-2); }
+  .mono, td.num, .num { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+        font-variant-numeric: tabular-nums; }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; margin: 10px 0; }
+  .tw { overflow-x: auto; }
+  th { text-align: left; font-family: 'Avenir Next Condensed','Arial Narrow',sans-serif;
+       font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2);
+       border-bottom: 2px solid var(--rail); padding: 6px 10px 4px; white-space: nowrap; }
+  td { border-bottom: 1px solid var(--hair); padding: 7px 10px; vertical-align: top; }
+  td.num { text-align: right; white-space: nowrap; }
+  .pill { display: inline-block; border-radius: 3px; padding: 1px 7px; font-size: 11px;
+          font-family: 'Avenir Next Condensed','Arial Narrow',sans-serif; letter-spacing: .08em;
+          text-transform: uppercase; color: #fff; }
+  .pv { background: var(--pill-v); } .pc { background: var(--pill-c); }
+  .pr { background: var(--pill-r); } .pu { background: var(--pill-u); }
+  .verdict { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0; }
+  .vcard { flex: 1 1 150px; border: 1px solid var(--hair); border-radius: 5px; padding: 10px 14px; }
+  .vcard .k { font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3);
+              font-family: 'Avenir Next Condensed','Arial Narrow',sans-serif; }
+  .vcard .v { font-size: 21px; font-weight: 700; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .callout { border-left: 3px solid var(--warn-bd); background: var(--warn-bg);
+             padding: 10px 16px; margin: 14px 0; border-radius: 0 4px 4px 0; }
+  .callout p { margin: 4px 0; }
+  figure { margin: 18px 0; }
+  figcaption { font-size: 12.5px; color: var(--ink-2); margin-top: 6px; max-width: 78ch; }
+  svg text { font-family: ui-monospace,'SF Mono',Menlo,monospace; fill: var(--ink-2); }
+  svg .axl { font-size: 10.5px; }
+  svg .dl  { font-size: 11px; fill: var(--ink); }
+  svg .grid { stroke: var(--hair); stroke-width: 1; }
+  .legend { display: flex; gap: 18px; font-size: 12.5px; color: var(--ink-2); margin: 4px 0 0; }
+  .sw { display:inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+  .fine { font-size: 12.5px; color: var(--ink-3); }
+  #tip { position: fixed; pointer-events: none; background: var(--ink); color: var(--paper);
+         font: 12px ui-monospace, Menlo, monospace; padding: 4px 8px; border-radius: 3px;
+         opacity: 0; transition: opacity .12s; z-index: 10; max-width: 260px; }
+  @media (prefers-reduced-motion: reduce) { #tip { transition: none; } }
+</style>
+
+<div id="tip" role="status"></div>
+<div class="deck">
+
+<!-- ══════════ SLIDE 1 — COVER ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">01 / 10</span><span class="lab">Cover · Verdict</span></div>
+  <div class="body">
+    <p class="small mono">DESK RESEARCH · QUALITY-DRAWDOWN COHORT · 2026-08-03 · APPF (NASDAQ)</p>
+    <h1>AppFolio: the de-rate is real, the entry already left</h1>
+    <p class="sub">A property-management SaaS whose guidance was raised twice while its multiple compressed
+    ~65% — the exact winner pattern — and whose stock then repaired +34.5% in 42 days before our screen
+    ever surfaced it. The business clears every derailment test. The price at spot clears none of ours.
+    This deck is a resting ladder, not a buy note.</p>
+    <div class="verdict">
+      <div class="vcard"><div class="k">Court verdict</div><div class="v">5 / 10</div>
+        <div class="small">RP_FAIR — <b>valuation-gated</b>, below the red-team bar</div></div>
+      <div class="vcard"><div class="k">Class</div><div class="v" style="font-size:16px">RP_FAIR<br>no edge overlay at spot</div></div>
+      <div class="vcard"><div class="k">Live (2026-08-03)</div><div class="v">$191.69</div>
+        <div class="small">+6.38% on the day · closed ABOVE its 13-week high</div></div>
+      <div class="vcard"><div class="k">Prob-weighted FV</div><div class="v">$212</div>
+        <div class="small">edge +10.6% — and all of it in one leg (slide 7)</div></div>
+      <div class="vcard"><div class="k">Structure</div><div class="v">ladder only</div>
+        <div class="small">$168 / $150 / $138 · max 1.0%</div></div>
+    </div>
+    <p class="fine"><b>Position disclosure (at publication):</b> no APPF position is held as of 2026-08-03
+    (positions polled same-session). This document gates a resting GTC limit ladder that may be staged after
+    publication; the author may trade at any time without notice. All levels are publishable — the full
+    ladder is a fraction of a percent of APPF's average daily dollar volume.</p>
+  </div>
+</section>
+
+<!-- ══════════ SLIDE 2 — THE FRAME, AND THE EXHIBIT ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">02 / 10</span><span class="lab">The frame — and the screen defect this name exposed</span></div>
+  <div class="body">
+    <h2>APPF is the path-blindness exhibit for the whole cohort</h2>
+    <p>The quality-drawdown screen ranks on distance from the 3-year high — the entry signature of the
+    book's winners (HubSpot −77%, monday −77%, Cognizant −53%, SAP −48% at entry; median −46%). APPF
+    screens at −40.3%: looks ideal.</p>
+    <p>What the screen cannot see: the stock bottomed at <b>$142.56 on June 22</b>, recovered
+    <b>+34.5% in 42 days</b> — <b>+18.2% of it in the eight sessions after the July print</b> — and closed
+    today <i>above its own 13-week high</i>. The capitulation the screen exists to buy was bought by someone
+    else six weeks ago.</p>
+    <figure>
+      <svg viewBox="0 0 880 220" width="100%" role="img" aria-label="APPF price path: melt-up spike, decline, June trough, 42-day recovery">
+        <line class="grid" x1="60" y1="30" x2="60" y2="185"/><line class="grid" x1="60" y1="185" x2="860" y2="185"/>
+        <text class="axl" x="18" y="46">$326</text><text class="axl" x="18" y="106">$235</text>
+        <text class="axl" x="18" y="152">$190</text><text class="axl" x="18" y="188">$142</text>
+        <polyline fill="none" stroke="var(--s1)" stroke-width="2" points="
+          60,120 130,108 200,112 250,42 300,74 370,96 440,118 510,132 570,150 630,182 700,168 760,146 830,148"/>
+        <g fill="var(--s1)">
+          <circle cx="250" cy="42" r="4"><title>2025-08: $326.04 — a 5-week melt-up spike off the Q2-25 print, retraced within days</title></circle>
+          <circle cx="630" cy="182" r="4"><title>2026-06-22: $142.56 low</title></circle>
+          <circle cx="760" cy="146" r="4"><title>Post-print: +18.2% in 8 sessions</title></circle>
+          <circle cx="830" cy="148" r="5" stroke="var(--card)" stroke-width="2"><title>2026-08-03: $191.69 — above the 13-week high</title></circle>
+        </g>
+        <text class="dl" x="200" y="34">$326 spike (the screen's anchor)</text>
+        <text class="dl" x="540" y="207">$142.56 low, Jun-22</text>
+        <text class="dl" x="700" y="132">+34.5% in 42 days</text>
+      </svg>
+      <figcaption>Schematic through verified closes (IBKR bars, anchor points hover-labeled). Against the
+      pre-spike $235–265 base the stock is down 19–28%, not 41% — the screen's own anchor was a five-week
+      melt-up. Generator fix filed: add <span class="mono">% off 52w low</span> and
+      <span class="mono">days since low</span>; de-prioritize anything &gt;20% off its low or closing above
+      its 13-week high.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ══════════ SLIDE 3 — CAUSE CHECK ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">03 / 10</span><span class="lab">Cause check — every derailment hypothesis, tested</span></div>
+  <div class="body">
+    <h2>Operationally, nothing broke. The decline was a multiple against rising numbers.</h2>
+    <div class="tw"><table>
+      <tr><th>Hypothesis</th><th>What the primaries say</th><th>Finding</th></tr>
+      <tr><td>"Growth 30%+ → 19% and still slowing"</td><td>Q2-24 +34.2% → Q2-25 +19.4% → Q2-26 +19.3%. Six quarters flat at 19–21%. The deceleration is 18 months old and has <b>flattened</b>.</td><td><span class="pill pr">Refuted</span> (partly)</td></tr>
+      <tr><td>Guidance cut</td><td><b>Raised twice.</b> Rev mid $1,110M → $1,117.5M → $1,122M; margin mid 26.5% → 27.0% → 27.25%. Implied non-GAAP EBIT +3.9% across the guides.</td><td><span class="pill pr">Refuted</span></td></tr>
+      <tr><td>CEO / CFO exit</td><td>Trigg CEO throughout, <b>5-year retention package April 2026</b> (RSUs through 2030); Eaton CFO throughout.</td><td><span class="pill pr">Refuted</span></td></tr>
+      <tr><td>Payments / VAS attach saturating</td><td>VAS +21.8%, now 78.1% of revenue; <b>VAS-per-unit +12.9%</b> (Q1 +13.2%) — stable, not saturating.</td><td><span class="pill pr">Refuted</span> (thru Q2)</td></tr>
+      <tr><td>Multifamily softness hitting the base</td><td>Units under management +8% three straight quarters — softness would hit units first.</td><td><span class="pill pc">Not visible</span></td></tr>
+      <tr><td>Restatement / litigation / new risk factors</td><td>10-Q Part II: "no material changes." No new proceedings.</td><td><span class="pill pv">Clean</span></td></tr>
+      <tr><td>Competition / sector AI-disruption de-rate</td><td>Web budget exhausted before the sweep — <b>not confirmed, not cleared</b>. The single most likely home of a disconfirming fact we have not seen.</td><td><span class="pill pu">Unverifiable</span></td></tr>
+    </table></div>
+    <p class="fine">One time-coincident governance event, reported not alarmed: three directors resigned
+    simultaneously the exact week of the $326 all-time high, to become "significant shareholders in a company
+    that is a customer of AppFolio." With the June-2026 chairman retirement, 8 of ~9 board seats turned over
+    in 15 months and the CEO took the Chairman title. A rebuilt-oversight signal — not a fraud tell, but not
+    nothing either.</p>
+  </div>
+</section>
+
+<!-- ══════════ SLIDE 4 — THE FINDING ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">04 / 10</span><span class="lab">The finding — guidance ladder vs multiple path</span></div>
+  <div class="body">
+    <h2>Estimates rose +3.9% while the price fell 35% to the June low</h2>
+    <div class="tw"><table>
+      <tr><th>FY2026 guide given at</th><th class="num">Revenue mid $M</th><th class="num">Margin mid</th><th class="num">Implied non-GAAP EBIT $M</th></tr>
+      <tr><td class="mono">2026-01-29</td><td class="num">1,110.0</td><td class="num">26.5%</td><td class="num">294.2</td></tr>
+      <tr><td class="mono">2026-04-23</td><td class="num">1,117.5</td><td class="num">27.0%</td><td class="num">301.7</td></tr>
+      <tr><td class="mono"><b>2026-07-23</b></td><td class="num"><b>1,122.0</b></td><td class="num"><b>27.25%</b></td><td class="num"><b>305.8 (+3.9%)</b></td></tr>
+    </table></div>
+    <p>That is the signal channel: three dated 8-K guidance points moving <i>up</i> while price went
+    $219 → $142.56 → $191.69. It cleanly separates de-rate from derailment, it is free, and it is
+    primary-sourced. Its weakness is equally plain: <b>the half-life is about one earnings cycle</b> —
+    the tape closed most of the gap within eight sessions of the July print. By the time a
+    percent-off-high screen surfaces this signature, the re-rate is usually underway.</p>
+    <h3>What is actually driving growth</h3>
+    <p>Q2-2026 decomposition ties exactly: customers +6.3% × units-per-customer +1.5% × revenue-per-unit
+    +10.6% = <b>+19.3%</b>. So <b>55% of growth is monetization, 45% volume</b> — and inside monetization,
+    subscription-per-unit is decelerating (+8.9% → +5.5%) while VAS-per-unit holds (+12.9%). The thesis
+    rests on ARPU, and ARPU currently rests on VAS. That is a narrower engine than the headline suggests,
+    and it is why this is a 5, not a 6.</p>
+  </div>
+</section>
+
+<!-- ══════════ SLIDE 5 — HONESTY & QUALITY ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">05 / 10</span><span class="lab">Honesty grade — clean, and genuinely rare</span></div>
+  <div class="body">
+    <h2>A SaaS non-GAAP you can actually trust: the share count is shrinking</h2>
+    <div class="tw"><table>
+      <tr><th>Metric</th><th class="num">Value</th><th>Read</th></tr>
+      <tr><td>Diluted share count, y/y</td><td class="num"><b>−2.05%</b></td><td>36,204k → 35,461k — buybacks exceed SBC issuance; the add-back is validated by arithmetic, not narrative</td></tr>
+      <tr><td>SBC / revenue</td><td class="num">7.3%</td><td>down from 7.8%; low for the category</td></tr>
+      <tr><td>Net cash / debt</td><td class="num">$309.4M / $0</td><td>$150M revolver undrawn; customer payments float is off-balance-sheet (restricted cash $250k only)</td></tr>
+      <tr><td>GAAP op margin</td><td class="num">18.8%</td><td>vs 17.2% LY — real, not adjusted-only</td></tr>
+      <tr><td>Disclosure of the bear</td><td class="num">—</td><td>the 8% units deceleration — the actual bear case — is <b>headline bullet #2</b> of the company's own release, not buried</td></tr>
+    </table></div>
+    <p><b>Honesty grade: CLEAN.</b> "Strong 2026 Continues with 19% Revenue Growth and Expanding
+    Profitability" is true on its own numbers, and everything that complicates it is computable from the
+    same press release in five minutes. Per house doctrine that cuts both ways: there is no liar to exclude
+    here, therefore no honesty-alpha — <b>this stands or falls as a valuation call, and at spot it falls.</b></p>
+  </div>
+</section>
+
+<!-- ══════════ SLIDE 6 — QUALITY DEMERITS ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">06 / 10</span><span class="lab">The demerits — kept in the record, not argued away</span></div>
+  <div class="body">
+    <h2>Four things the bull deck would have omitted</h2>
+    <ul>
+      <li><b>The margin expansion is bought from R&amp;D.</b> R&amp;D spend +9.3% against revenue +19.3%
+      (ratio 19.8% → 18.1%) — in the same window the CEO's new PSUs (April 2026, running 2027–2030) began
+      keying off <i>income from operations</i>. Margin beats may be purchased with future growth. Watch the
+      ratio, not the beat.</li>
+      <li><b>Capital allocation bought high and abstained low.</b> $50.0M repurchased at $204.77 avg,
+      $125.0M at $177.95 — then <b>$0 in the quarter the stock touched $142.56</b>. $125.0M remains
+      authorized. The charitable read (investments shifted to cash, dry powder for M&amp;A) is two-sided
+      risk at a 5.8× EV/S acquirer; a deal &gt;$300M at &gt;6× EV/S is a hard kill below.</li>
+      <li><b>A $219.3M cloud/AI commitment through 2031</b> sits in cost of revenue ($36.2M short-term) —
+      the gross-margin decay driver (−90bps y/y), and the bet underneath the entire AI-VAS bull case.</li>
+      <li><b>Two earnings flatterers are expiring on a schedule:</b> the deferred tax asset drains ~16 more
+      months (a ~$32M/yr FCF headwind from late-2027), and the effective tax rate is normalizing
+      (14.3% → 23.6%) as stock-comp windfalls vanished with the price — reflexive in both directions.</li>
+    </ul>
+    <p class="fine">Screen-row corrections carried into the record: the row's "fwd P/E 22.8" was FY2027 —
+    on FY2026 it is <b>28.3×</b>; "earnings +18%" is basis-dependent (GAAP NI +15.5%, non-GAAP EPS +23.9%).</p>
+  </div>
+</section>
+
+<!-- ══════════ SLIDE 7 — VALUATION ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">07 / 10</span><span class="lab">Valuation — where the edge claim honestly lives</span></div>
+  <div class="body">
+    <h2>PWFV $212 — and the entire edge is one unverifiable leg</h2>
+    <figure>
+      <svg viewBox="0 0 880 190" width="100%" role="img" aria-label="Fair-value scenarios versus live price">
+        <line class="grid" x1="60" y1="95" x2="860" y2="95"/>
+        <g>
+          <line x1="200" y1="70" x2="200" y2="120" stroke="var(--s2)" stroke-width="2"/>
+          <circle cx="200" cy="95" r="8" fill="var(--s2)"><title>BEAR $139 · 25% — VAS-per-unit decays to 6%, revenue → 12%, cloud commitment deleverages; 19x FY27 EPS $7.30</title></circle>
+          <circle cx="480" cy="95" r="8" fill="var(--s1)"><title>BASE $212 · 50% — revenue 18% → 16%, units hold 8%, margin 28.5%; 26x FY27 EPS $8.14</title></circle>
+          <circle cx="740" cy="95" r="8" fill="var(--s3)"><title>BULL $285 · 25% — AI VAS wave lands, ARPU re-accelerates >15%; 32x FY27 EPS $8.90</title></circle>
+          <line x1="405" y1="45" x2="405" y2="145" stroke="var(--ink)" stroke-width="2" stroke-dasharray="5 4"><title>Live $191.69</title></line>
+          <line x1="480" y1="60" x2="480" y2="130" stroke="var(--ink-3)" stroke-width="2"><title>Probability-weighted FV $212 (25/50/25)</title></line>
+        </g>
+        <text class="dl" x="180" y="140">$139</text><text class="dl" x="462" y="140">$212</text>
+        <text class="dl" x="722" y="140">$285</text>
+        <text class="dl" x="330" y="36">live $191.69</text><text class="dl" x="492" y="56">PWFV $212</text>
+        <text class="axl" x="172" y="162">BEAR · 25%</text><text class="axl" x="452" y="162">BASE · 50%</text><text class="axl" x="712" y="162">BULL · 25%</text>
+      </svg>
+      <figcaption>FY2027 non-GAAP EPS basis. Reference multiples: the June-22 low was 4.23× EV/FY26 sales
+      and 20.8× FY26 EPS; spot is 5.78× / 28.3×; the $326 peak was 12.1× EV/S.</figcaption>
+    </figure>
+    <div class="callout"><p><b>Said plainly:</b> holding our bear at 25%, the live price solves to
+    <b>market-implied p(bull) ≈ 0</b>. The market already carries our bear and our base. The entire +10.6%
+    "edge" is our 25% weight on an AI-ARPU re-acceleration we cannot verify from any primary source — a
+    probability disagreement, not a fact disagreement. That is why no capital moves at spot, and why the
+    competitive channel we could not sweep (Yardi / RealPage / Entrata, the sector AI-de-rate narrative)
+    argues for the gate rather than the buy.</p></div>
+  </div>
+</section>
+
+<!-- ══════════ SLIDE 8 — FOUR-IDEA FRAME ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">08 / 10</span><span class="lab">The four-idea frame (v1.6)</span></div>
+  <div class="body">
+    <h2>Market belief · our belief · the edge claim · the priced-in risk</h2>
+    <div class="tw"><table>
+      <tr><th style="width:20%">Leg</th><th>Statement</th></tr>
+      <tr><td><b>Market believes</b></td><td>Vertical SaaS growth is structurally decelerating; APPF's engine has
+        narrowed to VAS monetization; ~28× FY26 earnings is full for a 16–19% grower. Implied bull weight at
+        spot: approximately zero.</td></tr>
+      <tr><td><b>We believe</b></td><td>The de-rate is genuine (guides raised twice into a ~65% multiple
+        compression), the business is honest and net-cash, and units + VAS-per-unit — the two lines that would
+        break first — have not broken.</td></tr>
+      <tr><td><b>Why we might have edge</b></td><td>Thin, and we say so: the guidance-ladder-vs-price divergence is
+        free and primary, but its half-life is one print and most of it was arbitraged in eight sessions. The
+        residual edge is a 25% bull weight on the AI-VAS wave — unverifiable today.</td></tr>
+      <tr><td><b>Why it may be priced in</b></td><td>The stock closed above its 13-week high the day we courted it.
+        A completed re-rate with ~11% residual upside is a correct no-trade, not a missed one.</td></tr>
+      <tr><td><b>Mechanism falsifier</b></td><td>Units growth &lt;7.0% y/y <b>or</b> a guide-midpoint cut at any print —
+        either converts de-rate → derailment and takes every gate off the board immediately.</td></tr>
+      <tr><td><b>Edge label</b></td><td><b>RP_FAIR, no overlay at spot.</b> Converts to EDGE (7/10, sizing doubles)
+        only via the re-court trigger on slide 9.</td></tr>
+    </table></div>
+  </div>
+</section>
+
+<!-- ══════════ SLIDE 9 — STRUCTURE ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">09 / 10</span><span class="lab">Structure — a ladder that only fills where the math works</span></div>
+  <div class="body">
+    <h2>Three resting limits, five hard kills, one re-court trigger</h2>
+    <div class="tw"><table>
+      <tr><th>Tranche</th><th class="num">Size</th><th>Trigger</th><th>Why there</th></tr>
+      <tr><td><b>T1</b></td><td class="num">0.5% · ~$5,000</td><td class="mono">GTC limit $168.00</td>
+          <td>−12.4% from spot; 24.8× FY26, 5.03× EV/S; FV +26% from there. The stock traded there three weeks ago.</td></tr>
+      <tr><td><b>T2</b></td><td class="num">0.5% · ~$5,000</td><td class="mono">GTC limit $150.00</td>
+          <td>21.9× FY26, 4.47× EV/S; FV +41%.</td></tr>
+      <tr><td><b>T3</b></td><td class="num">0.5% · dislocation only</td><td class="mono">$138.00 — armed conditionally</td>
+          <td>below the June low; <b>arms only if</b> Q3 units ≥8% AND the FY guide is not cut.</td></tr>
+    </table></div>
+    <p><b>Max position 1.0% until a real edge appears</b> (T3 reserved). RP_FAIR sizes at the low end of the
+    starter band — with no edge overlay, the sleeve cap does the work. No options: taxable-book doctrine
+    (premium income is non-deferrable short-term ordinary income).</p>
+    <h3>Hard kills — cancel every resting order on any one of:</h3>
+    <ul>
+      <li>Units growth <span class="mono">&lt; 6%</span> y/y</li>
+      <li>VAS-per-unit growth <span class="mono">&lt; 8%</span></li>
+      <li>Any FY guide cut</li>
+      <li>An acquisition <span class="mono">&gt; $300M at &gt; 6× EV/S</span></li>
+      <li>(Watch, not kill) buyback still dormant with the stock &lt;$170 — management disagreeing with our value case</li>
+    </ul>
+    <div class="callout"><p><b>Re-court trigger — the path back to a real position:</b> at the Q3-2026 print
+    (~Oct-22), if units hold ≥8% <b>and</b> the guide is raised a third time <b>while the price sits below
+    $170</b>, this name returns to court as a genuine EDGE candidate at 7/10 and the sizing doubles. That is
+    the setup we actually want; today's deck just makes sure we are standing there if it arrives.</p></div>
+  </div>
+</section>
+
+<!-- ══════════ SLIDE 10 — VERIFICATION · FROZEN CALLS · DISCLAIMER ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">10 / 10</span><span class="lab">Validation · the graded calls · epilogue</span></div>
+  <div class="body">
+    <h2>Verification table, and the two calls this deck grades on</h2>
+    <div class="tw"><table>
+      <tr><th>Claim</th><th>Authority</th><th>Grade</th></tr>
+      <tr><td>Guidance raised twice (rev mid 1,110→1,117.5→1,122; margin 26.5→27.0→27.25%)</td>
+          <td>three consecutive 8-K guidance exhibits (Jan-29 / Apr-23 / Jul-23 2026)</td><td><span class="pill pv">Verified</span></td></tr>
+      <tr><td>$142.56 low 06-22; +34.5% in 42 days; closed above the 13-week high</td>
+          <td>IBKR daily/weekly bars</td><td><span class="pill pv">Verified</span></td></tr>
+      <tr><td>Growth decomposition +6.3% × +1.5% × +10.6% = +19.3% (ties exactly)</td>
+          <td>Q2-26 8-K EX-99.1 + units/customer disclosures</td><td><span class="pill pv">Verified</span></td></tr>
+      <tr><td>Share count −2.05% y/y; SBC 7.3%; net cash $309.4M, zero debt; float off-balance-sheet</td>
+          <td>10-Q balance sheet + XBRL; liabilities tie to the dollar</td><td><span class="pill pv">Verified</span></td></tr>
+      <tr><td>Director exodus at the top; 8-of-9 seats turned in 15 months</td>
+          <td>8-K Item 5.02 series, 2025-08-07 →</td><td><span class="pill pv">Verified</span></td></tr>
+      <tr><td>Buyback: $205/$178 paid, $0 at the low; $125M remaining</td>
+          <td>10-Q Note 7</td><td><span class="pill pv">Verified</span></td></tr>
+      <tr><td>Screen row's fwd P/E 22.8 (was FY2027; FY26 = 28.3×)</td>
+          <td>reconstruction from 1H non-GAAP EPS $3.32</td><td><span class="pill pr">Refuted</span> (framing)</td></tr>
+      <tr><td>Competitive / RealPage-antitrust / sector-AI channel</td>
+          <td>web budget exhausted at run time</td><td><span class="pill pu">Unverifiable</span></td></tr>
+      <tr><td>Sell-side positioning / consensus corroboration</td>
+          <td>not obtained</td><td><span class="pill pu">Unverifiable</span></td></tr>
+    </table></div>
+    <div class="callout">
+      <p class="mono"><b>FROZEN CALLS (calibration ledger, frozen 2026-08-03 at $191.69)</b></p>
+      <p><b>APPF | 2026-10-22</b> — Q3 units under management 9.6–9.8M (y/y ≥7.0%, not below) <b>AND</b> the
+      FY26 revenue-guide midpoint raised above $1,122M (a third consecutive raise). <b>our_p = 0.70.</b>
+      Falsifier is clean: units &lt;7.0% or a guide cut = derailment, all gates off.</p>
+      <p><b>Price call, deliberately sub-50%:</b> APPF trades ≤ $168 at some point before the Q3 print.
+      <b>our_p = 0.45.</b> The honest statement that our gate may simply never fill — and with the edge at
+      ~11%, an unfilled gate is a correct no-trade. Logged to the missed-entry ledger either way, so the
+      gate itself gets graded.</p>
+    </div>
+    <h3>Epilogue</h3>
+    <p class="sub">This court found a good, honest business and declined to buy it — because the screen that
+    surfaced it was six weeks late, the residual upside is one unverifiable probability weight, and the
+    correct instrument for a valuation concern is a price gate. If the October print delivers units ≥8% and
+    a third raise below $170, we return with double the size and a better claim. The discipline is the
+    product; the corrections are the credibility.</p>
+    <hr style="border:none;border-top:1px solid var(--hair);margin:18px 0">
+    <p class="fine"><b>Disclaimer.</b> This document is personal research, published for informational and
+    educational purposes only. It is not financial, investment, tax, or legal advice, and it is not an offer
+    or a solicitation to buy or sell any security. The author is not a financial advisor, registered
+    investment adviser, or broker-dealer. <b>Position disclosure:</b> at the time of writing the author holds
+    no position in APPF; resting limit orders consistent with this document may be placed after publication,
+    and the author may buy or sell at any time without notice. Every figure reflects a good-faith effort at
+    verification against primary sources (SEC filings, XBRL, live IBKR quotes), but errors are possible and
+    numbers go stale; nothing here is a guarantee of accuracy or of future results. Do your own research and
+    consult a licensed professional before making any investment decision.</p>
+  </div>
+</section>
+
+</div>
+<script>
+  (function () {
+    var tip = document.getElementById('tip');
+    var marks = document.querySelectorAll('svg circle, svg line[stroke-dasharray]');
+    marks.forEach(function (m) {
+      var t = m.querySelector('title');
+      if (!t) return;
+      m.addEventListener('mousemove', function (e) {
+        tip.textContent = t.textContent;
+        tip.style.left = Math.min(e.clientX + 14, window.innerWidth - 270) + 'px';
+        tip.style.top = (e.clientY + 14) + 'px';
+        tip.style.opacity = 1;
+      });
+      m.addEventListener('mouseleave', function () { tip.style.opacity = 0; });
+    });
+  })();
+</script>

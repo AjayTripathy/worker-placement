@@ -1,0 +1,154 @@
+{
+  "ticker": "RDW",
+  "cutoff": "2022-06-01",
+  "filing": "0001104659-22-048930_S-1.txt",
+  "cohort": "jbook_2022_backtest",
+  "_meta": {
+    "n_claims": 10,
+    "n_jbook_grounded_claims": 6,
+    "n_pentagon_jbook_calls": 9,
+    "n_pentagon_jbook_hits": 3,
+    "honest_2022_view_note": "At 2022-06-01 cutoff, the J-Book corpus (FY 2026 PEs from FY2024-2025 J-Books) returns NOT_FOUND_IN_TIMERANGE for nearly every SDA program because those FY rows post-date the cutoff. Per the framework, this means most program-level divergence signals are NOT YET VISIBLE in 2022; honest scoring is UNVERIFIABLE rather than manufactured SEVERE/RED. USAspending cross-checks DO confirm Redwire's subsidiaries received the contracts they implied (Roccor $27.8M, LoadPath $8 awards, MIS $87.6M Tipping Point, Redwire consolidated 189 awards / $397.6M)."
+  },
+  "scores": [
+    {
+      "claim_id": "RDW-C1",
+      "claim_text": "Redwire designed and built deployable Link 16 antennas for Tranche 0 of the SDA proliferated LEO constellation.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook hit: SDA Transport Layer Tranches 0-2 (PE 1206410SF), status_declared FUNDED_SHRINKING per FY26 J-Book, but at 2022-06-01 cutoff signal=NOT_FOUND_IN_TIMERANGE (no funding rows yet visible).",
+        "usaspending confirms Roccor (Redwire Space Solutions LLC) received $27.8M across 10 DoD contracts including SCARLET deployable trusses and ATHENA deployable antennas — the contract substrate behind the claim is real.",
+        "Primary contractors named in the J-Book for the SDA Transport Layer are York/Lockheed/Northrop (prime bus integrators); Redwire/Roccor is a component sub (antennas), consistent with the claim's modest framing."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='SDA Transport Layer Tranches 0-2', cutoff_date='2022-06-01')",
+      "M_value": "NOT_FOUND_IN_TIMERANGE (FY26 status_declared = FUNDED_SHRINKING is POST-CUTOFF and excluded)",
+      "interpretation": "At the 2022 cutoff, the SDA Transport Layer was ramping (Tranche 0 launches were mid-2022 onward); J-Book de-funding signals were not yet visible. The claim is fact-grounded (Roccor did sub on T0 Link-16 antennas per usaspending). Honest 2022 score: PASS-leaning-UNVERIFIABLE — narrative-load is light (one-line bullet, not a revenue-concentration claim). Marked UNVERIFIABLE because the forward divergence cannot be confirmed at the cutoff."
+    },
+    {
+      "claim_id": "RDW-C2",
+      "claim_text": "Redwire is positioned to deliver into the multi-tranche SDA proliferated LEO constellation pipeline (1,000+ satellites over the next decade).",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook returned 3 matches on PE 1206410SF (Tranche 3 Transport Layer = UNFUNDED_TWO_PLUS_YEARS declared, Tranche 3 Tracking Layer = FUNDED_STEADY, Tranches 0-2 = FUNDED_SHRINKING) but ALL with status=NOT_FOUND_IN_TIMERANGE at cutoff 2022-06-01.",
+        "These status_declared values reflect FY 2026 J-Book reality and are POST-CUTOFF; per the prompt they must be excluded."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(pe_number='1206410SF', cutoff_date='2022-06-01')",
+      "M_value": "NOT_FOUND_IN_TIMERANGE (3 candidate programs, all post-cutoff status)",
+      "interpretation": "The claim is forward-looking ('over the next decade') and at the cutoff the SDA roadmap was still in funded build-out posture — even the FY23 Pres Budget had Tranche 1 and Tracking Layer in the queue. The framework cannot catch this divergence at 2022. UNVERIFIABLE is the honest answer; do not manufacture severity."
+    },
+    {
+      "claim_id": "RDW-C3",
+      "claim_text": "LoadPath gives Redwire 'long history of strong relationships and contracts with the Air Force Research Lab at Kirtland AFB' — AFRL as key DoD entry point.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook: NOT_FOUND for contractor_name 'LoadPath' and 'Redwire' (corpus does not seed AFRL/Kirtland sub-PEs).",
+        "usaspending: LoadPath has 8 DoD awards confirmed under Redwire Space Solutions LLC; Roccor (also Albuquerque-adjacent through deployables) has 10 DoD awards. AFRL relationship is materially substantiated by Award IDs starting with FA-prefix (Air Force) including SCARLET, ATHENA, and SBIR-style deployable contracts."
+      ],
+      "M_check": "usaspending.query_dod_contracts(recipient_name='LoadPath')",
+      "M_value": "8 DoD awards confirmed (AFRL/Kirtland substrate is real per Award IDs)",
+      "interpretation": "The contracting relationship the S-1 implies is verifiable in usaspending — no exaggeration. AFRL Kirtland sub-PEs are outside the J-Book corpus scope so NOT_FOUND is a coverage gap rather than a red flag. Score PASS."
+    },
+    {
+      "claim_id": "RDW-C4",
+      "claim_text": "ROSA systems via DPSS are positioned for 'future commercial and DoD satellite projects' beyond NASA — DoD as forward-pipeline.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook: NOT_FOUND for both 'Roll-Out Solar Array' and 'Deployable Space Systems' contractor query — ROSA itself is a product not a J-Book line item.",
+        "usaspending: DPSS shows only 1 DoD award (mostly NASA-funded ROSA work); but Redwire consolidated has 36 DoD awards across all subs."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Roll-Out Solar Array', cutoff_date='2022-06-01')",
+      "M_value": "NOT_FOUND (ROSA is a product, not a PE)",
+      "interpretation": "Forward-pipeline claim is generic ('future commercial and DoD satellite projects') and not pegged to a specific PE. Not testable in the J-Book corpus, and not load-bearing enough to fail. UNVERIFIABLE."
+    },
+    {
+      "claim_id": "RDW-C5",
+      "claim_text": "Redwire aligns to NDSA and Space Domain Awareness procurement (SDA&R focus area).",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook: Space Domain Awareness/Planning/Tasking SW (PE 1208248SF) HIT but status=NOT_FOUND_IN_TIMERANGE at cutoff (corpus has the PE seeded but funding rows are FY24-26 only).",
+        "pentagon_jbook: 'National Defense Space Architecture' query returned NOT_FOUND — NDSA is an umbrella concept rather than a single PE."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(pe_number='1208248SF', cutoff_date='2022-06-01')",
+      "M_value": "NOT_FOUND_IN_TIMERANGE",
+      "interpretation": "Aspirational alignment claim, no quantified revenue tie. At 2022 cutoff SDA&R buildout was in early ramp posture. UNVERIFIABLE."
+    },
+    {
+      "claim_id": "RDW-C6",
+      "claim_text": "Archinaut One / OSAM-2 (~$73.8M, NASA) is 'our largest contract by revenue currently' — single-program concentration on a NASA award.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending HIT: Made In Space (NASA) award NNM17AA02C 'IN-SPACE ROBOTIC MANUFACTURING AND ASSEMBLY SYSTEM (TIPPING POINT)' = $87.6M — confirms the $73.8M Archinaut One claim (the S-1 figure is conservative vs the federal record).",
+        "pentagon_jbook: NOT_FOUND for 'Archinaut' / 'OSAM-2' — these are NASA (not DoD) programs and outside the J-Book scope by design."
+      ],
+      "M_check": "usaspending.query_dod_contracts(recipient_name='Made In Space') + usaspending.query_recipient_contracts(recipient_name='Redwire')",
+      "M_value": "$87.6M NASA Archinaut/OSAM-2 award confirmed; matches claim",
+      "interpretation": "The flagship revenue claim is fully substantiated in federal records — actually understated. NASA program concentration is a different risk pattern (delays/scope cuts) but not a J-Book divergence pattern. PASS for J-Book grounding; concentration risk noted but outside this cohort's lens."
+    },
+    {
+      "claim_id": "RDW-C7",
+      "claim_text": "Patented in-space manufacturing IP (Made In Space) supports forward OSAM pipeline thesis.",
+      "severity": "PASS",
+      "supports": [
+        "uspto_odp: Made In Space has 25 granted patents pre-2022-06-01 (51 applications); Redwire-named has 1 granted patent. The IP claim is substantiated."
+      ],
+      "M_check": "uspto_odp.query_assignee(assignee_name='Made In Space', cutoff_date='2022-06-01')",
+      "M_value": "25 granted patents pre-cutoff (n_total_applications=51)",
+      "interpretation": "Patent portfolio is real and material. PASS — control claim, not a J-Book divergence target."
+    },
+    {
+      "claim_id": "RDW-C8",
+      "claim_text": "DSS is 'an original prime contractor awardee on NASA CLPS' contract.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "usaspending: 'Deep Space Systems' returned 0 awards in DoD-only query (CLPS is a NASA contract, not DoD).",
+        "edgar_fts: 0 hits for 'Deep Space Systems Redwire CLPS' — no SEC counterparty disclosure cross-reference found.",
+        "DSS is a known CLPS Phase 1 awardee via public NASA records (outside our M-source set)."
+      ],
+      "M_check": "edgar_fts.query_fulltext(search_term='Deep Space Systems Redwire CLPS', cutoff_date='2022-06-01')",
+      "M_value": "0 EDGAR hits; 0 DoD usaspending awards (NASA contract)",
+      "interpretation": "Claim is verifiable via NASA records outside our framework's M-sources. Within the framework: UNVERIFIABLE (coverage gap, not a red flag). Control claim."
+    },
+    {
+      "claim_id": "RDW-C9",
+      "claim_text": "$271M total backlog at 12/31/2021 ($131M contracted).",
+      "severity": "PASS",
+      "supports": [
+        "usaspending: Redwire-consolidated 189 federal contracts totaling $397.6M (across 12 UEI variants of Redwire entities). DoD = 36 awards; NASA = 85 awards.",
+        "Federal-only obligated dollars exceed the contracted backlog figure, which is consistent (some federal awards are funded but not in 12/31/21 contracted backlog because performance was complete or partially complete)."
+      ],
+      "M_check": "usaspending.query_federal_presence(name_variants=['Redwire', 'Redwire Space', ...])",
+      "M_value": "189 contracts, $397.6M obligated across 12 Redwire UEIs",
+      "interpretation": "Backlog disclosure is plausible against the federal-contracting footprint. PASS."
+    },
+    {
+      "claim_id": "RDW-C10",
+      "claim_text": "Roccor supplies solar sail for NASA Solar Cruiser mission.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending: Roccor (Redwire Space Solutions LLC) has $27.8M / 10 DoD awards including LUNAR ARTICULATING SOLAR PANEL SYSTEM and SCARLET — the deployable-structure capability is well-substantiated.",
+        "Solar Cruiser is a NASA Heliophysics mission (not in DoD usaspending DoD-only query); but the claim is qualitatively verifiable as part of Roccor's deployable-structures portfolio.",
+        "edgar_fts: 0 SEC counterparty hits (NASA missions don't typically appear in 10-Ks of prime contractors)."
+      ],
+      "M_check": "usaspending.query_dod_contracts(recipient_name='Roccor') + edgar_fts.query_fulltext",
+      "M_value": "Roccor deployables substrate confirmed via DoD awards; Solar Cruiser itself is NASA",
+      "interpretation": "Control claim. Capability is real and matches Roccor's award history. PASS."
+    }
+  ],
+  "severity_counts": {
+    "PASS": 5,
+    "MODERATE_UNDERDELIVERY": 0,
+    "SEVERE_UNDERDELIVERY": 0,
+    "RED_FLAG_NEGATIVE": 0,
+    "UNVERIFIABLE": 5
+  },
+  "jbook_grounded_claim_ids": ["RDW-C1", "RDW-C2", "RDW-C3", "RDW-C4", "RDW-C5", "RDW-C6"],
+  "pentagon_jbook_hits": {
+    "RDW-C1": "HIT (SDA Transport Layer T0-T2 PE 1206410SF; NOT_FOUND_IN_TIMERANGE at cutoff)",
+    "RDW-C2": "HIT (3 matches on PE 1206410SF; NOT_FOUND_IN_TIMERANGE at cutoff)",
+    "RDW-C3": "NOT_FOUND (contractor_name search)",
+    "RDW-C4": "NOT_FOUND (ROSA is a product, not a PE)",
+    "RDW-C5": "HIT (Space Domain Awareness/Planning/Tasking SW PE 1208248SF; NOT_FOUND_IN_TIMERANGE)",
+    "RDW-C6": "NOT_FOUND (NASA program, outside corpus scope)"
+  },
+  "overall_thesis_summary": "At the 2022-06-01 cutoff, Redwire's S-1 narrative is dominated by NASA-funded programs (Archinaut/OSAM-2 = ~$73-87M, ROSA on ISS / Lunar Gateway, Solar Cruiser via Roccor) — the J-Book divergence pattern does not apply cleanly because NASA programs are outside the J-Book corpus and DoD/SDA programs that the company sub-contracted on (Tranche 0 Link-16 antennas via Roccor) had not yet reached the FY24-26 funding rows where the de-funding becomes visible. Honest 2022 verdict: NO J-Book divergence signal yet. Forward risks (SDA Transport Layer Tranche 3 declared UNFUNDED_TWO_PLUS_YEARS in FY26 J-Book, with replacement by SpaceX Starshield) would only become visible in 2024+. This is the framework correctly returning UNVERIFIABLE rather than manufacturing severity from post-cutoff knowledge."
+}

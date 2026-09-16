@@ -1,0 +1,12 @@
+# AST.WAR — Astarta Holding (sugar/soy/agri; WSE)
+**Sleeve:** ukraine_recovery · **Verdict:** STARTER
+
+**Conviction:** DEMOTED — fair-priced war-beta (in-line w/ Ukrainian peers ~3.5x) + a small, FRAGILE squeeze-out-tail edge that flips to FAIR if Fairfax exits; NOT a cheap recovery thesis
+
+## Thesis
+
+Second Ukraine equity (smaller, pure-play, no global moat = secondary to MHP). Real scale ~EUR470-500m rev, ~EUR100m FY25 EBITDA, 220k ha land bank, 6 sugar plants (a feed-data-artifact "EUR22bn" was a bad print — IGNORE). WSE: AST contract 301035646, ~PLN47.0 (also Frankfurt Z6J 720033533). ROLE: (1) a second high-variance recovery-beta name; (2) the HARVEST ROTATION PAIR for MHP — Ukraine-ag but NOT substantially identical, so rotating MHP->AST harvests the MHP loss vs the $2.4M goal without a wash-sale violation, keeps Ukraine exposure through 31 days, then rotate back. Same oligarch tail (Ivanchyk ~63%) so size SMALL. UNVERIFIABLE: confirm FY25 numbers from the 9M25/FY25 primary report before sizing; ADV ~$129k/day. || EDGE-BATCH 2026-06-30: RISK_PREMIUM pending PRICING PASS. MAJOR CORRECTION: Ivanchyk/Albacon ~44% NOT ~63%; Fairfax (Watsa) holds ~30% as an independent Western blocker -> the lowball squeeze-out tail is MATERIALLY SMALLER than MHP/Kernel (no 50%+ controller). FY25 VERIFIED: rev EUR472m / EBITDA EUR100m (a TROUGH, -37% YoY) / NP EUR19.94m; the "EUR22bn" feed figure confirmed GARBAGE. Do NOT capitalize trough EBITDA as a base. || PRICING PASS 2026-06-30: RP_OVERBLOWN -> EDGE:PRICING. The edge = ownership-correction on the squeeze-out component (44% Ivanchyk + 30% Fairfax blocker, NOT 63% controller). Live ~46.3 PLN, EV ~EUR428m, net debt ~EUR160m (1.5x, rising on new soybean plant), ~26% float. Fair ~3.5x x EUR145m normalized = ~60 PLN (+30%). MODEST re-rate (thin float + rising leverage + war tail), not a multibagger. || RE-EXAMINED + DEMOTED 2026-06-30: as a RECOVERY thesis it is NOT cheap — priced in-line with war-discounted Ukrainian-ag peers (~3.5x on trough; "cheap" needs normalizing UP from a -37% trough). The genuine edge is ONLY the narrow squeeze-out-tail correction (Fairfax 30% blocker => no Kosyuk-style sweep), which is modest + flips to FAIR on a Fairfax exit. Weakest edge in the book -> trimmed 2.5%->1.0%, moved out of Tranche 1.
+
+
+---
+*Research card auto-generated from the SignalOS research ledger (2026-06-29). Where a full deep-dive exists (DD_* / SLEEVE_* docs), that document carries the worked valuation, Mode-B pass, and primary sources.*

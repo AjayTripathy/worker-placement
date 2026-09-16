@@ -1,0 +1,93 @@
+{
+  "ticker": "UPWK",
+  "company": "Upwork Inc.",
+  "cutoff": "2026-05-20",
+  "filing": "0001627475-26-000012_10-K.txt",
+  "filing_date": "2026-02-13",
+  "rfm_tuples": [
+    {
+      "claim_id": "C1",
+      "R": "GSV (gross services volume) $4.0B in 2025 \u2014 described as economic activity scale of marketplace.",
+      "f": "If true, post-cutoff disclosures should reaffirm GSV trajectory and not reveal hidden weakness; GSV would not be flat-to-down at 4-figure scale.",
+      "M_source": "Filing-internal \u2014 MD&A states $4.0B GSV in 2025 AND 2024, $4.1B in 2023.",
+      "M_value": "GSV flat at $4.0B 2024->2025 (0% growth) AND down ~2.4% vs 2023 $4.1B peak. AI-related GSV is small subset ($300M annualized Q4'25 = ~7.5% of total). Marketplace at scale showing zero topline growth despite AI tailwind.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Marketplace at-scale stagnation contradicts growth narrative; AI-services traction is real but immaterial to total. Composite GSV-flat = quiet erosion."
+    },
+    {
+      "claim_id": "C2",
+      "R": "Net income $115.4M FY25 \u2014 sustained profitability framed as core thesis.",
+      "f": "If profitability is structurally improving, NI should be flat-to-growing YoY.",
+      "M_source": "Filing-internal cash-flow statement: NI 2025 $115.4M vs 2024 $215.6M.",
+      "M_value": "Net income DOWN 46.5% YoY (215.6 -> 115.4). 2024 NI was inflated by absence of tax-charge offsets; 2025 normalization still represents ~50% drop. Op cash flow up YoY ($248M vs $154M) so quality of earnings improving even as GAAP net income falls.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "GAAP net income halved YoY but operating cash flow improved \u2014 mixed signal; profitability claim has nuance, not catastrophic."
+    },
+    {
+      "claim_id": "C3",
+      "R": "$361M of 0.25% convertible notes mature Aug 15, 2026 \u2014 must be repaid/refi'd within ~3 months of cutoff.",
+      "f": "If liquidity is adequate, cash + marketable securities should comfortably cover $361M and refinancing options should be active.",
+      "M_source": "Filing-internal + claim_evolution.query_claim_evolution(refinancing).",
+      "M_value": "12/31/25: $294.4M cash + $378.4M marketables = $672.8M (1.86x coverage). Q1 2026 10-Q (filed 5/7/26, pre-cutoff): $328.4M cash + $251.3M marketables = $579.7M (1.60x coverage). Company explicitly disclosed evaluating refinancing options. Notes reclassified as current liability.",
+      "severity": "PASS",
+      "interpretation": "Maturity wall is fully cash-covered with active refi exploration; quantitative liquidity is comfortable for $361M August redemption."
+    },
+    {
+      "claim_id": "C4",
+      "R": "Going-concern / audit-quality integrity \u2014 PwC audit issued clean, internal controls effective.",
+      "f": "If true: no ASC 205-40 'substantial doubt' language; no Big 4 resignation; no Item 4.01 disagreements.",
+      "M_source": "going_concern_detector.query_going_concern(CIK=0001627475) + auditor_change_tracker.query_auditor_changes(CIK=0001627475).",
+      "M_value": "going_concern: NO_GOING_CONCERN (0 matches). auditor_change_tracker: CLEAN_AUDITOR_TENURE (0 Item 4.01 filings in last 5 years, 0 Big4 resignations, 0 disagreements).",
+      "severity": "PASS",
+      "interpretation": "Clean universal-quality screen; PwC tenure undisturbed; no audit-side red flags."
+    },
+    {
+      "claim_id": "C5",
+      "R": "$136M deployed on buybacks in 2025; $64M remaining + new $100M authorization Sept 2025 \u2014 capital return discipline.",
+      "f": "If true, share repurchases should be consistent with stated authorizations and disclosed cadence.",
+      "M_source": "Filing-internal Item 5 + Note 11.",
+      "M_value": "2025 actual: 9.3M shares retired at $14.61 avg for $136M (fully consumed 2024 $100M auth and partially used 2025 auth). $64M still available. Q4 cadence shows $34.4M Oct, $13.8M Nov, $5.1M Dec \u2014 DECELERATING into year-end (5x slowdown Nov->Dec) at exactly the moment stock fell to drawdown lows.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Authorization is real but execution decelerated sharply in Q4 just as price weakness deepened \u2014 sub-optimal counter-cyclical deployment that undercuts buyback-as-floor thesis."
+    },
+    {
+      "claim_id": "C6",
+      "R": "Lifted enterprise launch (Aug 2025) framed as growth catalyst \u2014 new acquisitions (Bubty, Ascen) being integrated.",
+      "f": "If genuinely material, Lifted should be reaffirmed in structured post-cutoff disclosures with quantitative metrics and customer onboarding evidence.",
+      "M_source": "claim_evolution.query_claim_evolution(Lifted, base_date 2025-08-01).",
+      "M_value": "REAFFIRMED_IN_STRUCTURED_DISCLOSURE; 8 subsequent mentions across 10-K/10-Q/8-K. BUT filing self-discloses: 'In 2025, we paused certain new client acquisition efforts in advance of the launch of Lifted' \u2014 sales-team productivity hit during transition. Quantitative Lifted-specific revenue NOT broken out in segment disclosure ('one operating segment').",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Lifted is real and ongoing but transition cost (paused sales) is admitted, and segment opacity means investors can't size the rebrand impact \u2014 narrative-heavy, metric-light."
+    },
+    {
+      "claim_id": "C7",
+      "R": "Insider trading discipline \u2014 CEO Hayden Brown's 10b5-1 plans operate under standard policy without MNPI risk.",
+      "f": "If true, insider sales should be 10b5-1-governed and not abnormally clustered around adverse events.",
+      "M_source": "insider_vs_calendar.query_insider_sales_near_budget_events(CIK=0001627475, contractor_name='Upwork').",
+      "M_value": "Last 365d: 45 Form 4 filings, 57 sales totaling $18.7M. Proximate to fiscal-year-end event: 7 sales / $2.14M / 3 unique owners (CEO Brown, CFO Gessert, Bottoms). 6 of 7 proximate sales were 10b5-1-governed. CEO Brown adopted a new 650K-share 10b5-1 plan Nov 19, 2025 (after terminating prior 753K plan Nov 11, 2025) \u2014 plan rotation timed after stock weakness, signaling continued planned distribution at depressed prices.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Sales themselves are 10b5-1 (procedurally clean) but CEO's plan-rotation cadence pre-commits continued selling at trough; insider commitment to recovery is muted."
+    },
+    {
+      "claim_id": "C8",
+      "R": "AI-services traction central to bull narrative \u2014 Upwork positioning as 'AI-enabled' marketplace.",
+      "f": "If material, AI-related GSV should be a sizable and growing share of total GSV.",
+      "M_source": "claim_evolution Q3/Q4 2025 8-Ks (Lifted query also caught these snippets) + filing-internal.",
+      "M_value": "Q4 2025: AI-related GSV $300M annualized (~7.5% of $4B total). Growth rates >50% YoY (Q3 +53%, AI Integration & Automation +90% Q4). Genuine acceleration but absolute scale still small relative to flat total GSV.",
+      "severity": "PASS",
+      "interpretation": "AI claim is corroborated and accelerating; small absolute base but real, disclosed, and growing \u2014 supports thesis that long-term mix shift is underway even though it hasn't yet offset legacy GSV stagnation."
+    }
+  ],
+  "composite": 0.625,
+  "summary": "Quality marketplace with clean audit, comfortable convert-note coverage ($580M liquid vs $361M maturity), and real AI-services acceleration \u2014 offset by FLAT $4.0B GSV (zero YoY growth, -2.4% vs 2023 peak), -47% GAAP net income, and decelerating buyback execution into trough. UPWK looks like a structurally challenged but solvent operator; LONG only if AI mix-shift + Lifted enterprise re-rate the multiple, with no acute distress signals.",
+  "scoring": {
+    "PASS": 3,
+    "UNVERIFIABLE": 0,
+    "MODERATE_UNDERDELIVERY": 5,
+    "SEVERE_UNDERDELIVERY": 0,
+    "RED_FLAG_NEGATIVE": 0,
+    "verifiable_claims": 8,
+    "weighted_sum": "(0*3 + 1*5 + 2*0 + 3*0) / 8 = 5 / 8",
+    "composite": 0.625
+  }
+}

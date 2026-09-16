@@ -1,0 +1,86 @@
+{
+  "ticker": "IRDM",
+  "cutoff": "2026-05-16",
+  "filing": "0001418819-26-000009_10-K.txt",
+  "claims": [
+    {
+      "claim_id": "C1",
+      "category": "technology",
+      "claim_text": "Iridium operates a satellite network with an architecture of 66 operational satellites with in-orbit spares, using an interlinked mesh LEO L-band constellation. Operational, not just announced.",
+      "extract_rubric": "HIGH - constellation-operational vs constellation-announced. Stage ladder critical per Heuristic 3 and 9.",
+      "queries": [
+        {"M_source": "uspto_odp.query_assignee", "kwargs": {"assignee_name": "Iridium", "cutoff_date": "2026-05-16", "categorize": {"satellite": ["satellite", "constellation"], "antenna": ["antenna", "phased"], "communication": ["communication", "wireless", "radio"]}}},
+        {"M_source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Iridium constellation", "cutoff_date": "2026-05-16"}}
+      ]
+    },
+    {
+      "claim_id": "C2",
+      "category": "customer_pipeline",
+      "claim_text": "The U.S. government generated $257.0 million in revenue (29% of total) in FY2025, primarily under the Enhanced Mobile Satellite Services (EMSS) fixed-price contract signed in September 2019 with a total value of $738.5 million over seven years (annual fixed rate $110.5M). Contract ends September 2026.",
+      "extract_rubric": "HIGH - federal contract dollar + named program (EMSS) - USAspending verifiable. Layer 3 Rule 7 absence is hard contradiction.",
+      "queries": [
+        {"M_source": "usaspending.query_recipient_contracts", "kwargs": {"recipient_name": "Iridium", "start_date": "2019-01-01", "end_date": "2026-05-16"}},
+        {"M_source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "Iridium", "start_date": "2019-01-01", "end_date": "2026-05-16"}}
+      ]
+    },
+    {
+      "claim_id": "C3",
+      "category": "partnership",
+      "claim_text": "Iridium is a subcontractor to General Dynamics Mission Systems under a Space Development Agency (SDA) contract awarded in May 2022, building ground entry points and operations centers for the DoW's Proliferated Warfighter Space Architecture (PWSA).",
+      "extract_rubric": "HIGH - federal program (SDA PWSA) + named prime. Counterparty-disclosure threshold heuristic 7.",
+      "queries": [
+        {"M_source": "usaspending.query_recipient_contracts", "kwargs": {"recipient_name": "General Dynamics Mission Systems", "start_date": "2022-01-01", "end_date": "2026-05-16", "awarding_agency": "Department of Defense"}},
+        {"M_source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Iridium", "cutoff_date": "2026-05-16", "cik": "0000040533"}}
+      ]
+    },
+    {
+      "claim_id": "C4",
+      "category": "customer_pipeline",
+      "claim_text": "Iridium had approximately 2,537,000 billable subscribers worldwide as of December 31, 2025, a 3% increase YoY, with total revenue of $871.7M in 2025 (up from $830.7M in 2024).",
+      "extract_rubric": "HIGH - operational scale claim - mature commercial customer base test.",
+      "queries": [
+        {"M_source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Iridium subscribers", "cutoff_date": "2026-05-16", "cik": "0001418819"}},
+        {"M_source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "billable subscribers", "cutoff_date": "2026-05-16", "cik": "0001418819", "forms": "10-K,10-Q"}}
+      ]
+    },
+    {
+      "claim_id": "C5",
+      "category": "technology",
+      "claim_text": "Iridium is developing 'Iridium NTN Direct' a 3GPP standards-based service (3GPP Release 19 accepted), expected to commercially launch from the existing constellation in 2026 for NB-IoT and direct-to-device (D2D) connectivity.",
+      "extract_rubric": "HIGH - direct-to-mobile claim. Stage ladder test (test-call vs MVNO vs commercial-service-live).",
+      "queries": [
+        {"M_source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "NTN Direct", "cutoff_date": "2026-05-16"}},
+        {"M_source": "uspto_odp.query_assignee", "kwargs": {"assignee_name": "Iridium", "cutoff_date": "2026-05-16", "categorize": {"ntn_3gpp": ["NTN", "3GPP", "non-terrestrial", "direct-to-device", "D2D", "NB-IoT"]}}}
+      ]
+    },
+    {
+      "claim_id": "C6",
+      "category": "physical_facility",
+      "claim_text": "Iridium owns/leases several US satellite teleport facilities including Tempe AZ (System Gateway, owned building on leased land, 31,000 sf), Chandler AZ (197,000 sf technical support center & teleport), Leesburg VA (Satellite Network Operations Center, 40,000 sf owned), and Fairbanks AK (Satellite Teleport Facility, owned).",
+      "extract_rubric": "HIGH - EPA FRS scope. Telecom teleports / gateway facilities may register; absence of facility in FRS for satcom is not necessarily a red flag (no propulsion / chemicals).",
+      "queries": [
+        {"M_source": "epa_frs.query_facilities", "kwargs": {"facility_name": "Iridium", "state_abbr": "AZ"}},
+        {"M_source": "epa_frs.query_facilities", "kwargs": {"facility_name": "Iridium", "state_abbr": "VA"}}
+      ]
+    },
+    {
+      "claim_id": "C7",
+      "category": "partnership",
+      "claim_text": "Aireon LLC has hosted payloads on Iridium satellites for aircraft tracking services. Aireon revenue is recognized as hosted-payload revenue (fees for hosting + transmitting data).",
+      "extract_rubric": "MID - hosted-payload partnership, real but disclosure-only via Aireon's partial-owner relationship.",
+      "queries": [
+        {"M_source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Aireon", "cutoff_date": "2026-05-16"}},
+        {"M_source": "uspto_odp.query_assignee", "kwargs": {"assignee_name": "Aireon", "cutoff_date": "2026-05-16"}}
+      ]
+    },
+    {
+      "claim_id": "C8",
+      "category": "vendor_relationship",
+      "claim_text": "Iridium holds $1.8B of indebtedness under Term Loan (matures September 2030, SOFR+2.25%), with $96.5M cash. Paid $62.9M dividends in 2025 and repurchased $185.0M of stock; paused buybacks Oct 2025 for financial flexibility. Quarterly dividend $0.15/share.",
+      "extract_rubric": "MID - financial-distress check. Mature company with ~2x debt/EBITDA, well within covenants. Not distress.",
+      "queries": [
+        {"M_source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Iridium dividend", "cutoff_date": "2026-05-16", "cik": "0001418819", "forms": "10-K,10-Q,8-K"}}
+      ]
+    }
+  ]
+}

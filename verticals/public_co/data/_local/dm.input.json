@@ -1,0 +1,169 @@
+{
+  "ticker": "dm",
+  "cutoff": "2024-03-31",
+  "filing": "0001558370-24-003411_10-K.txt",
+  "claims": [
+    {
+      "claim_id": "C-001",
+      "claim_text": "Desktop Metal operates manufacturing/HQ at corporate headquarters in Burlington, Massachusetts (~110,000 sq ft of office and building space; uses for manufacturing, R&D, warehousing).",
+      "subject": "Desktop Metal",
+      "predicate": "operates_facility_in_state",
+      "object_value": "Burlington, MA (manufacturing+HQ)",
+      "source_quote": "Desktop Metal s corporate headquarters are located in Burlington, Massachusetts. As of December 31, 2023, we leased approximately 110,000 square feet of office and building space ... We use these facilities primarily for manufacturing, research and development, warehousing, sales, marketing and administration.",
+      "category": "facility",
+      "queries": [
+        {
+          "source": "epa_frs.query_facilities",
+          "kwargs": {
+            "facility_name": "Desktop Metal",
+            "state_abbr": "MA"
+          },
+          "rationale": "Burlington MA HQ supposedly has manufacturing; check EPA FRS for industrial registration. R&D + light assembly may not require EPA registration; treat absence as weak signal per heuristic 1."
+        }
+      ]
+    },
+    {
+      "claim_id": "C-002",
+      "claim_text": "EnvisionTEC US LLC operates a manufacturing/product compliance facility in Dearborn, Michigan (subject to whistleblower investigation re manufacturing practices; FDA-regulated products including Flexcera resins).",
+      "subject": "EnvisionTEC US LLC (Desktop Metal subsidiary)",
+      "predicate": "operates_facility_in_state",
+      "object_value": "Dearborn, MI (manufacturing of FDA-regulated dental products)",
+      "source_quote": "the Audit Committee of the Board of Directors engaged a third party to conduct an independent internal investigation as a result of a whistleblower complaint relating to manufacturing and product compliance practices at its EnvisionTEC US LLC facility in Dearborn, Michigan.",
+      "category": "facility",
+      "queries": [
+        {
+          "source": "epa_frs.query_facilities",
+          "kwargs": {
+            "facility_name": "EnvisionTEC",
+            "state_abbr": "MI"
+          },
+          "rationale": "Dearborn MI manufacturing facility for resin-based dental products; resin/curing processes may be EPA-registered."
+        }
+      ]
+    },
+    {
+      "claim_id": "C-003",
+      "claim_text": "Desktop Metal is supported by over 1,000 patents or pending patent applications across its proprietary additive manufacturing technologies (metals, polymers, ceramics, sands, etc.).",
+      "subject": "Desktop Metal",
+      "predicate": "owns_patent_portfolio",
+      "object_value": "1000+ patents/applications across additive manufacturing tech",
+      "source_quote": "are supported by over 1,000 patents or pending patent applications.",
+      "category": "ip",
+      "queries": [
+        {
+          "source": "google_patents.query_assignee",
+          "kwargs": {
+            "assignee_name": "Desktop Metal",
+            "cutoff_date": "2024-03-31",
+            "categorize": {
+              "binder_jet_metal": ["binder", "metal", "sintering"],
+              "polymer_dental": ["polymer", "resin", "dental"],
+              "ceramics_sands": ["ceramic", "sand", "mold"]
+            }
+          },
+          "rationale": "Verify scale of granted-patent portfolio and presence in claimed tech areas."
+        }
+      ]
+    },
+    {
+      "claim_id": "C-004",
+      "claim_text": "Desktop Metal operates internationally with significant locations including Germany (the ExOne European HQ in Gersthofen, Germany is an active operating facility under a multi-year lease through 2027).",
+      "subject": "ExOne (Desktop Metal subsidiary)",
+      "predicate": "operates_foreign_facility",
+      "object_value": "ExOne European HQ in Gersthofen, Germany",
+      "source_quote": "In February 2022, the Company amended its existing facility lease for the ExOne European headquarters and operating facility in Gersthofen, Germany, extending the lease term ... through December 2027 ... aggregate annual rent totaling $1.7 million.",
+      "category": "facility_foreign",
+      "queries": [
+        {
+          "source": "edgar_fts.query_fulltext",
+          "kwargs": {
+            "search_term": "ExOne",
+            "cutoff_date": "2024-03-31",
+            "start_date": "2018-01-01",
+            "forms": "10-K,10-Q,8-K,DEF 14A,20-F,40-F"
+          },
+          "rationale": "ExOne was its own NYSE-listed firm prior to acquisition; should have substantial filing footprint."
+        }
+      ]
+    },
+    {
+      "claim_id": "C-005",
+      "claim_text": "Desktop Metal entered a definitive merger agreement with Stratasys Ltd. on May 25, 2023 (subsequently terminated) — a publicly disclosed transaction with a US-listed counterparty.",
+      "subject": "Desktop Metal",
+      "predicate": "named_counterparty_transaction",
+      "object_value": "Stratasys (SSYS) merger agreement (terminated)",
+      "source_quote": "On May 25, 2023, we entered into an Agreement and Plan of Merger ... by and among Stratasys Ltd. ... Tetris Sub Inc. ... and the Company, pursuant to which Merger Sub was to merge with and into the Company.",
+      "category": "named_counterparty",
+      "queries": [
+        {
+          "source": "edgar_fts.query_fulltext",
+          "kwargs": {
+            "search_term": "Desktop Metal",
+            "cutoff_date": "2024-03-31",
+            "cik": "0001517396",
+            "start_date": "2023-01-01"
+          },
+          "rationale": "Stratasys (SSYS, CIK 0001517396) should disclose the merger in its filings if it really happened."
+        }
+      ]
+    },
+    {
+      "claim_id": "C-006",
+      "claim_text": "Desktop Metal sells its Additive Manufacturing 2.0 hardware/parts/materials platform globally; distinctive brand name 'Desktop Metal' should appear in customer/supplier/competitor public filings.",
+      "subject": "Desktop Metal",
+      "predicate": "external_filing_footprint",
+      "object_value": "Desktop Metal brand mentioned in US-listed-filer disclosures",
+      "source_quote": "We leverage our core competencies ... by marketing and selling our Additive Manufacturing 2.0 solutions through a leading global distribution network ... covers over 40 countries around the world.",
+      "category": "external_brand_validation",
+      "queries": [
+        {
+          "source": "edgar_fts.query_fulltext",
+          "kwargs": {
+            "search_term": "Desktop Metal",
+            "cutoff_date": "2024-03-31",
+            "start_date": "2018-01-01",
+            "forms": "10-K,10-Q,8-K,DEF 14A"
+          },
+          "rationale": "'Desktop Metal' is a distinctive 2-word phrase; should have substantial footprint as public co + counterparty mentions."
+        }
+      ]
+    },
+    {
+      "claim_id": "C-007",
+      "claim_text": "Desktop Metal's Desktop Health subsidiary commercializes FDA-cleared/regulated dental products (e.g., Flexcera resins); manufactured at EnvisionTEC's Michigan facility.",
+      "subject": "Desktop Metal / Desktop Health / EnvisionTEC",
+      "predicate": "fda_regulated_products",
+      "object_value": "Flexcera dental resins, PCA4000 curing box (recalled)",
+      "source_quote": "the Company also initiated voluntary recalls of certain shipments of Flexcera resins and the PCA4000 curing box.",
+      "category": "regulatory",
+      "queries": [
+        {
+          "source": "openfda.query_approved_drugs",
+          "kwargs": {
+            "manufacturer_name": "EnvisionTEC"
+          },
+          "rationale": "EnvisionTEC has FDA-regulated dental products; check Drugs@FDA listing (note: dental resins are likely 510(k) device, not Drugs@FDA — expect 0 hits, treat as recipe-misfit if so)."
+        }
+      ]
+    },
+    {
+      "claim_id": "C-008",
+      "claim_text": "ExOne Company (acquired subsidiary) operated multiple US manufacturing/operations sites in Pennsylvania (its pre-acquisition HQ was North Huntingdon, PA).",
+      "subject": "ExOne (Desktop Metal subsidiary)",
+      "predicate": "operates_facility_in_state",
+      "object_value": "ExOne PA operations",
+      "source_quote": "Campanella asserts breach of fiduciary duty claims against former directors and officers of The ExOne Company and aiding and abetting claims against Desktop Metal in connection with the ExOne Merger.",
+      "category": "facility",
+      "queries": [
+        {
+          "source": "epa_frs.query_facilities",
+          "kwargs": {
+            "facility_name": "ExOne",
+            "state_abbr": "PA"
+          },
+          "rationale": "ExOne pre-acquisition was a PA-HQ binder-jet sand-printing OEM; sand/binder operations typically require EPA registration."
+        }
+      ]
+    }
+  ]
+}

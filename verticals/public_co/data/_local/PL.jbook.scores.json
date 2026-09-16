@@ -1,0 +1,101 @@
+{
+  "ticker": "PL",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Planet Labs Federal, Inc. is the federal-customer subsidiary HQ'd in Washington, D.C.",
+      "severity": "PASS",
+      "supports": ["usaspending.query_dod_contracts confirmed 10 DoD awards totaling $23.0M for PLANET LABS FEDERAL, INC. as of cutoff 2026-05-20"],
+      "M_check": "usaspending.query_dod_contracts",
+      "M_value": {"n_awards": 10, "total_amount_usd": 23027220.84, "top_descriptions": ["PLANETSCOPE DATA", "ELECTRO OPTICAL SATELLITE DATA IMAGERY SUBSCRIPTIONS", "SAT-EO SUBSCRIPTION"]},
+      "interpretation": "Subsidiary existence is verified — federal subsidiary genuinely receives DoD imagery/subscription contracts. PASS on existence; but note all awards are small ($6-7M ea.), short-form subscription orders under DoD/Navy purchase codes (N6600...P####) — these are recurring imagery subscriptions, NOT a Pentagon program-of-record line item. The $23M cumulative is a very small slice vs Planet's $244M FY26 revenue scale, and is invisible to the J-Book RDT&E/Procurement corpus because EOCL/TacSRT-style commercial-imagery purchases are funded through O&M and service-of-supply lines, not PE codes."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Planet names 'defense and intelligence' as a strategic vertical it intends to further penetrate.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["pentagon_jbook NOT_FOUND for EOCL, TacSRT, commercial geospatial intelligence", "Coverage gap: J-Book corpus is 410 RDT&E + Procurement PEs; commercial-imagery purchases flow through DoD O&M / NRO Commercial Systems Program Office / NGA Source operating budgets, not RDT&E PEs"],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": {"signal": "NOT_FOUND", "n_matches": 0},
+      "interpretation": "UNVERIFIABLE per heuristic 7 (NOT_FOUND in corpus that is structurally not built to cover commercial-imagery acquisition lines). The defense-vertical claim itself is generic and non-load-bearing — Planet does NOT quantify FY-by-FY DoD revenue contribution from this vertical. Cannot reject or confirm a divergence pattern without named programs."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "$852.4M RPO; 34% recognized in 12 months, 65% in 24 months — material forward backlog narrative.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["RPO is real-disclosed but not segmented by customer/program. pentagon_jbook returned NOT_FOUND for Planet contractor. usaspending shows only $23M cumulative DoD obligations under Planet Labs Federal across 10 awards, and only ~$240K under PLANET LABS PBC entity directly."],
+      "M_check": "pentagon_jbook.query_program_funding + usaspending.query_dod_contracts",
+      "M_value": {"jbook_signal": "NOT_FOUND", "usaspending_n_awards": 10, "usaspending_total_usd": 23027220.84},
+      "interpretation": "The $852.4M RPO is a load-bearing forward narrative figure (~3.5x FY26 revenue), but the 10-K never decomposes RPO by customer type. The visible DoD obligations ($23M cumulative) are an order of magnitude too small to account for any material share of the RPO under normal procurement cadence — implying the RPO is dominated by commercial/civil-gov subscriptions and/or non-US-DoD foreign government satellite-services contracts (e.g., the previously-announced large foreign satellite-services contract referenced indirectly via 'recent customer agreements'). The J-Book divergence pattern doesn't strictly fire because Planet doesn't NAME a specific PE — but the narrative depends on backlog convertibility that is independent of any Pentagon program of record. MODERATE_UNDERDELIVERY for forward narrative-load relative to verifiable DoD pipeline."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Satellite-services model represents a new funding/monetization approach for next-gen fleets.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["pentagon_jbook returned NOT_FOUND for commercial satellite services / commercial geospatial. The named satellite-services agreements are not tied in the 10-K to any specific PE or named DoD/IC program — the largest of these is widely understood to be a foreign (non-US-DoD) defense customer that would not appear in any US Pentagon J-Book."],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": {"signal": "NOT_FOUND", "n_matches": 0},
+      "interpretation": "UNVERIFIABLE — claim cannot be checked against J-Book because the funding source is not a US Pentagon PE. Not a J-Book miss in the strict sense; corpus is the wrong tool for foreign or NRO/NGA-commercial-service funding."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "U.S. government funding disruption is a top-ranked principal risk factor.",
+      "severity": "PASS",
+      "supports": ["Risk factor disclosure is consistent with usaspending evidence of 10 DoD awards. Risk factor is genuine, not boilerplate."],
+      "M_check": "usaspending.query_dod_contracts",
+      "M_value": {"n_awards": 10, "total_amount_usd": 23027220.84},
+      "interpretation": "PASS — risk disclosure is consistent with verified federal exposure. Materiality is modest in absolute dollars but real."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "FY26 net loss of $246.9M (2x FY25 $123.2M); accumulated deficit $1,449.9M.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["10-K self-disclosed numbers; net loss roughly DOUBLED YoY while RPO and 'satellite services' narrative was promoted. Operating cash flow was positive $134M (helped by $151M deferred revenue inflow from upfront satellite-services billings), but net loss acceleration suggests cost-side run-up ahead of recognition."],
+      "M_check": "internal_filing_arithmetic",
+      "M_value": {"fy26_net_loss_m": 246.9, "fy25_net_loss_m": 123.2, "accumulated_deficit_m": 1449.9, "fy26_opex_inferred_doubling": true},
+      "interpretation": "Not a J-Book-grounded claim, but flags the structural pattern: forward narrative leans heavily on satellite-services RPO billed upfront ($151M deferred-revenue inflow = the source of operating-cash positivity) while GAAP losses accelerate. This is the classic pattern where billings-first contracts mask underlying margin profile. MODERATE_UNDERDELIVERY relative to narrative tone."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Competitive set: BlackSky, Vantor (Maxar), Satellogic, ImageSat, Intuitive Machines, Airbus DS, CG Satellite.",
+      "severity": "PASS",
+      "supports": ["Competitive set disclosure is accurate; pentagon_jbook NOT_FOUND for BlackSky/Maxar confirms the J-Book corpus does not cover the commercial-EO segment (heuristic 7)."],
+      "M_check": "pentagon_jbook.query_program_funding (contractor lookup)",
+      "M_value": {"blacksky_signal": "NOT_FOUND", "maxar_signal": "NOT_FOUND"},
+      "interpretation": "PASS — counterparty disclosure is accurate; the J-Book corpus gap for commercial-EO contractors is a known coverage limitation (heuristic 7), not a divergence signal. Notable: 'Vantor Holdings' (Maxar's new name post-rebrand) is correctly listed, indicating Planet is tracking the competitive landscape carefully."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "10-K names ZERO specific Pentagon PEs, programs of record, or DoD contract vehicles.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": ["Manual scan of 98K-char filing slice confirms: no PE numbers (no 06xxxxx-style codes), no named programs-of-record (no Maven/EOCL/TacSRT/GIDE/Replicator/JADC2/Tracking Layer/Transport Layer/EnhancedView), no IDIQ ceilings, no specific DoD contract identifiers. Yet defense-and-intelligence is named as one of three primary growth verticals AND the federal subsidiary Planet Labs Federal exists with $23M of confirmed DoD obligations across 10 awards (verified via usaspending)."],
+      "M_check": "manual_filing_inspection + usaspending.query_dod_contracts",
+      "M_value": {"named_pes": 0, "named_programs_of_record": 0, "named_idiq_vehicles": 0, "verified_dod_awards": 10, "verified_dod_total_usd": 23027220.84},
+      "interpretation": "SEVERE_UNDERDELIVERY — this is the J-Book divergence pattern *in inverse*. Planet ASSERTS material defense/intelligence exposure as a strategic growth vertical AND ASSERTS $852M RPO convertibility AND raises $460M of convertible notes against a stated need for fleet investment — but provides ZERO program-specific disclosure that would let an investor map forward DoD revenue against published Pentagon budgets. usaspending shows the actual DoD obligation footprint is small ($23M cumulative, $6-7M per task order on Navy NIWC purchase codes — i.e., one-off PlanetScope/SkySat data subscriptions, not a program-of-record win). The narrative-load on 'defense and intelligence' as a growth vertical is therefore disclosure-incomplete: the company has chosen narrative breadth ('defense and intelligence vertical') without narrative depth (no PE, no program-of-record, no IDIQ ceiling). Under J-Book calibration heuristic 2 (materiality) and heuristic 6 (USAspending cross-check), this disclosure thinness pattern is itself a SEVERE finding — investors cannot independently verify forward DoD pipeline at the program level."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "$76.7M FY26 capex + $460M convertible-note issuance committed to fleet expansion against undisclosed forward DoD pipeline.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["Sept 2025 issued $460M 0.50% convertible notes due 2030; $39.6M spent on capped calls; $72.7M of tax withholding on equity awards in FY26. Net financing inflow $357M, but the deployment rationale ties to satellite-services growth without naming the underlying customer contracts or DoD programs that would justify the fleet expansion."],
+      "M_check": "pentagon_jbook.query_program_funding + usaspending.query_dod_contracts",
+      "M_value": {"conv_notes_principal_m": 460.0, "fy26_ppe_purchases_m": 76.7, "fy26_capped_calls_m": 39.6, "jbook_named_pe_for_fleet": null},
+      "interpretation": "MODERATE_UNDERDELIVERY — capital structure changes are real and disclosed, but the strategic justification ('scale satellite manufacturing capacity', 'next-generation satellite fleets') is not anchored to a specific contracted DoD/IC program of record. The $460M of new convertible debt creates a fixed obligation against a forward pipeline whose composition is opaque at the program level. Pattern is consistent with heuristic 6 logic where forward narrative outruns verifiable Pentagon programmatic anchor."
+    }
+  ],
+  "summary": {
+    "n_claims": 9,
+    "n_queries_executed": 14,
+    "n_jbook_grounded_claims": 5,
+    "n_pentagon_jbook_fires_with_signal": 0,
+    "n_pentagon_jbook_not_found": 8,
+    "key_finding": "PL exhibits an inverted J-Book divergence pattern: rather than naming PEs that are unfunded, the 10-K names ZERO Pentagon PEs/programs-of-record at all, while simultaneously promoting 'defense and intelligence' as a strategic growth vertical and reporting $852M of RPO + $460M of new convertible debt to fund fleet expansion. usaspending confirms only ~$23M cumulative DoD obligations under Planet Labs Federal (10 small Navy NIWC imagery-subscription task orders), an order of magnitude too small to anchor the forward backlog narrative. The framework's pentagon_jbook tool is the wrong lookup for commercial-EO funding lines (heuristic 7 — coverage gap), but the absence-of-named-programs pattern itself is a SEVERE disclosure finding under heuristic 2 materiality reasoning.",
+    "severity_counts": {
+      "PASS": 3,
+      "MODERATE_UNDERDELIVERY": 3,
+      "SEVERE_UNDERDELIVERY": 1,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 2
+    }
+  }
+}

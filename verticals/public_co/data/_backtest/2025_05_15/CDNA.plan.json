@@ -1,0 +1,412 @@
+{
+  "ticker": "CDNA",
+  "cutoff": "2025-05-15",
+  "filing": "0001217234-25-000012_10K.txt",
+  "plan_version": 2,
+  "domain": "biotech_pharma",
+  "naics_hint": "325413 / 621511 (In-Vitro Diagnostic Mfg / Medical Diagnostic Lab)",
+  "planner_notes": "CareDx is a COMMERCIAL-STAGE diagnostic biotech with $333.8M revenue (2024), GAAP net income $52.5M, $261M cash, no debt. This profile is NOT a typical AIRO-signature short candidate: the 'stock for services' + 'material weakness' phrases triggered the mechanical screen, but the material weakness is an ICFR/COSO process deficiency tied to stock-based comp accounting (immaterial corrected errors), not revenue recognition or going-concern. Revenue is heavily Medicare-dependent (38% of total, 50% of testing services) and concentrated in AlloSure Kidney's Palmetto/MolDX LCD coverage — the real adjudicable risks are payer-coverage durability, FDA clearance status, clinical evidence depth, and IP litigation (Natera) — not federal-customer inflation or capacity overclaim. Most-substantive pre-cutoff filing is the FY2024 10-K (filed 2025-02-28).",
+  "claims": [
+    {
+      "claim_id": "CDNA-1",
+      "claim_text": "AlloSure Kidney has been a covered Medicare service since October 2017 through a Local Coverage Determination first issued by Palmetto MolDX and adopted by Noridian, and CMS announced August 16, 2024 that the MACs decided NOT to finalize the proposed revised LCD (DL38568/DL38629).",
+      "source_quote": "AlloSure Kidney has been a covered service for Medicare beneficiaries since October 2017 through a Local Coverage Determination, or LCD, first issued by Palmetto MolDX, or MolDX ... On August 16, 2024, CMS issued a press release entitled MolDX Local Coverage Determination Statement, announcing that ... the Medicare Administrative Contractors, or MACs, decided not to finalize the proposed LCD issued on August 10, 2023.",
+      "subject": "AlloSure Kidney",
+      "predicate": "is_covered_under_LCD",
+      "object_value": "L38568 / L38629 (MolDX: Molecular Testing for Solid Organ Allograft Rejection)",
+      "category": "regulatory_milestone",
+      "referent_type": "intangible",
+      "m_source_status": "PROPOSED",
+      "source_id": null,
+      "source_params": {},
+      "proposed_connector": {
+        "name": "cms_mcd.query_lcd_status",
+        "description": "CMS Medicare Coverage Database — query LCDs by ID or by tracked-procedure code for status, effective date, retirement date, and revision history; allows CDNA-style claims of 'covered under LCD L38568' to be adjudicated against CMS's authoritative coverage record.",
+        "endpoint": "https://www.cms.gov/medicare-coverage-database/search/lcd-search.aspx (with downloadable CSV/XML feeds at https://www.cms.gov/medicare-coverage-database/downloads.aspx)",
+        "access_pattern": "scrape",
+        "auth_required": false,
+        "sample_invocation": "GET https://www.cms.gov/medicare-coverage-database/view/lcd.aspx?lcdid=38568 -> parse status (Active/Retired/Future), effective date, MAC jurisdiction, revisions history",
+        "rationale": "AlloSure Kidney's Medicare reimbursement is sourced via MolDX LCDs L38568 (Palmetto) and L38629 (Noridian). LCD status, future effective date, or retirement is the single most material catalyst for CDNA's revenue stream (50% of testing services revenue). No catalog source currently adjudicates CMS LCD status.",
+        "estimated_cost": "free",
+        "completeness": "all CMS LCDs and NCDs, all MACs",
+        "referent_type": "lcd_or_ncd",
+        "attribute": "coverage_status"
+      },
+      "creative_extensions": [
+        {
+          "source_label": "CMS MolDX press releases + Palmetto GBA MolDX coverage articles",
+          "endpoint_or_method": "https://www.palmettogba.com/palmetto/moldx.nsf/DocsCat/MolDx%20Articles + Noridian coverage-articles RSS",
+          "rationale": "MolDX publishes periodic billing-and-coding articles A56561 etc. that operationalize the foundational LCD. Tracks the cadence of revisions and whether AlloSure is still listed as a covered test code (CPT 81479 / 0118U / 0319U etc.).",
+          "expected_observable": "list of MolDX billing-and-coding articles with effective dates referencing AlloSure / dd-cfDNA / solid organ allograft monitoring",
+          "signal_direction": "if a new LCD or BCC article retires AlloSure from covered status post-cutoff that contradicts CDNA's go-forward Medicare-revenue claim; presence of active billing articles corroborates",
+          "severity_if_contradiction": "SEVERE"
+        },
+        {
+          "source_label": "Noridian Healthcare Solutions L38629 status page",
+          "endpoint_or_method": "https://med.noridianmedicare.com/web/jeb/policies/lcd-articles",
+          "rationale": "Noridian is CDNA's actual MAC (California laboratory). Noridian's published policy library is the authoritative second source on whether AlloSure Kidney is still reimbursed.",
+          "expected_observable": "active/retired status flag on L38629",
+          "signal_direction": "retirement = severe contradiction of revenue-continuity claim",
+          "severity_if_contradiction": "SEVERE"
+        }
+      ],
+      "domain": "biotech_pharma",
+      "claim_type_taxonomy": "regulatory_milestone",
+      "extraction_notes": "This is the single highest-leverage claim. CMS LCD coverage continuity is THE binary catalyst for CDNA's commercial economics; the framework currently has no canonical adjudicator. Mapped as PROPOSED."
+    },
+    {
+      "claim_id": "CDNA-2",
+      "claim_text": "AlloMap Heart has 510(k) clearance from the U.S. Food and Drug Administration for marketing and sale as a test in heart transplant recipients.",
+      "source_quote": "AlloMap Heart has 510(k) clearance from the U.S. Food and Drug Administration for marketing and sales as a test in heart transplant recipients who have stable graft function at the time of testing, to aid in the identification of those who have a low probability of moderate/severe acute cellular rejection at the time of testing, in conjunction with standard clinical assessment.",
+      "subject": "AlloMap Heart",
+      "predicate": "has_FDA_clearance_type",
+      "object_value": "510(k)",
+      "category": "regulatory_milestone",
+      "referent_type": "intangible",
+      "m_source_status": "PROPOSED",
+      "source_id": null,
+      "source_params": {},
+      "proposed_connector": {
+        "name": "fda_510k.query_clearances",
+        "description": "openFDA 510(k) device-clearance database — search by applicant or device name to verify a claimed 510(k) clearance with K-number, decision date, and product code.",
+        "endpoint": "https://api.fda.gov/device/510k.json",
+        "access_pattern": "api",
+        "auth_required": false,
+        "sample_invocation": "GET https://api.fda.gov/device/510k.json?search=applicant:%22XDx%22+OR+applicant:%22CareDx%22+OR+device_name:%22AlloMap%22&limit=20",
+        "rationale": "openFDA Drugs@FDA covers drug approvals only. Devices including in-vitro diagnostics with FDA 510(k) clearance are in the 510(k) database. AlloMap Heart is a 510(k)-cleared device; openfda.query_approved_drugs cannot adjudicate this claim. The 510(k) endpoint is the canonical missing piece for medical_devices.approval_clearance (taxonomy GAP).",
+        "estimated_cost": "free",
+        "completeness": "all FDA 510(k) clearances since 1976",
+        "referent_type": "medical_device_clearance",
+        "attribute": "clearance_status_and_kid"
+      },
+      "creative_extensions": [
+        {
+          "source_label": "FDA Drug Establishment Registration / Device Establishment Registration (FURLS)",
+          "endpoint_or_method": "https://www.accessdata.fda.gov/scripts/cder/daf/index.cfm and https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfRL/rl.cfm",
+          "rationale": "CDNA's Brisbane CA lab and Stockholm Sweden manufacturing site should appear as registered FDA establishments for their kit manufacturing / clinical-lab operations.",
+          "expected_observable": "registered establishment record with Brisbane, CA address and AlloMap/AlloSeq device listings",
+          "signal_direction": "presence corroborates real operating clinical lab + manufacturing footprint; absence at Brisbane CA would contradict",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "FDA CDRH Product Classification database",
+          "endpoint_or_method": "https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfPCD/classification.cfm",
+          "rationale": "Confirms the product code under which AlloMap Heart is classified (Class II IVD); rules out a mis-claimed clearance pathway",
+          "expected_observable": "product code + classification + regulation number",
+          "signal_direction": "corroborates clearance pathway accuracy",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "medical_devices",
+      "claim_type_taxonomy": "approval_clearance",
+      "extraction_notes": "Taxonomy cell medical_devices.approval_clearance is GAP. openfda.query_approved_drugs is drug-only and won't find this. Proposed fda_510k connector is the clean fit."
+    },
+    {
+      "claim_id": "CDNA-3",
+      "claim_text": "CareDx performed more than 175,000 commercial tests in 2024 from its Brisbane, California laboratory, generating $249.4M in testing services revenue, with no patient-volume customer or payer (other than Medicare at 38%) exceeding 10% of revenue.",
+      "source_quote": "During 2024, we performed more than 175,000 commercial tests from our Brisbane, California laboratory. ... Testing services revenue of $249.4 million, increased 19% year-over-year, and testing services volume of approximately 176,000 ... For the years ended December 31, 2024, 2023 and 2022, approximately 38 %, 40 % and 53 %, respectively, of total revenue was billed to Medicare. No other payers represented more than 10% of total revenue ...",
+      "subject": "CareDx Brisbane CA laboratory",
+      "predicate": "produced_test_volume",
+      "object_value": "~176,000 tests / $249.4M",
+      "category": "production_volume",
+      "referent_type": "quantity",
+      "m_source_status": "MAPPED",
+      "source_id": "osha_establishments.query_establishments",
+      "source_params": {
+        "company_name": "CareDx",
+        "state": "CA",
+        "city": "Brisbane",
+        "match_mode": "word_boundary",
+        "max_results": 20
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "FDA Establishment Registration (CLIA + drug/device est. registration)",
+          "endpoint_or_method": "https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfRL/rl.cfm + CMS CLIA lab registry (https://qcor.cms.gov/main.jsp)",
+          "rationale": "A high-volume clinical lab performing 176k commercial tests/yr operates under a CLIA certificate AND is FDA-registered (for kit manufacture/distribution). The CLIA lab certificate number + CMS PECOS enrollment record should both exist for the Brisbane CA address.",
+          "expected_observable": "CLIA certificate # for 8000 Marina Blvd Brisbane CA, lab director name, classification (high-complexity)",
+          "signal_direction": "presence of active CLIA cert at high-complexity tier corroborates the operational scale; absence/expiry contradicts",
+          "severity_if_contradiction": "SEVERE"
+        },
+        {
+          "source_label": "BLS QCEW San Mateo County NAICS 621511 (Medical Diagnostic Labs)",
+          "endpoint_or_method": "https://data.bls.gov/cew/apps/data_views/data_views.htm",
+          "rationale": "176k tests/yr from a single Brisbane lab implies ~250-500 lab + commercial employees at that site. BLS QCEW county-NAICS employment should show San Mateo County NAICS 6215 employment consistent with a real high-volume lab.",
+          "expected_observable": "QCEW employment count for San Mateo County NAICS 621511",
+          "signal_direction": "presence corroborates; the metric is too coarse to contradict, so absence is weak signal",
+          "severity_if_contradiction": "UNVERIFIABLE"
+        },
+        {
+          "source_label": "CMS Medicare Provider Utilization & Payment Data (Part B Carrier file) — CPT volumes by NPI",
+          "endpoint_or_method": "https://data.cms.gov/provider-summary-by-type-of-service",
+          "rationale": "CDNA's lab NPI files Part B carrier claims at the proprietary lab test (PLA) codes for AlloSure / AlloMap. Medicare's public Provider Summary data discloses claim counts and allowed amounts by NPI + HCPCS — which directly tests whether the claimed Medicare-billing volume is consistent with the 38% Medicare-revenue claim.",
+          "expected_observable": "Medicare Part B claim count and total allowed dollars under CDNA's lab NPI for the relevant PLA codes",
+          "signal_direction": "claim count << implied (176k * 38%) contradicts; consistent claim count corroborates",
+          "severity_if_contradiction": "SEVERE"
+        }
+      ],
+      "domain": "biotech_pharma",
+      "claim_type_taxonomy": "production_count",
+      "extraction_notes": "OSHA 300A is the only canonical operational-fingerprint test in the catalog. Brisbane CA lab + ~250+ employees is exactly the size that DOES file Form 300A (above the 20-emp threshold, NAICS 6215 is a covered industry). Absence at Brisbane CA would be a real contradiction. The creative extensions (CLIA cert + CMS Part B utilization) are the higher-signal tests but no catalog source covers them."
+    },
+    {
+      "claim_id": "CDNA-4",
+      "claim_text": "CareDx maintains a U.S. patent portfolio and an exclusive license from Stanford (terminated December 2023) covering dd-cfDNA diagnosis of organ-transplant rejection, plus a license from Illumina (May 2018) and a 2023 license from a university institution.",
+      "source_quote": "In June 2014, the Company entered into a license agreement with Stanford (the Stanford License), which granted the Company an exclusive license to a patent relating to the diagnosis of rejection in organ transplant recipients using dd-cfDNA. ... As the Review is complete and the Company's petition for review was denied, the Stanford License automatically terminated, and in December 2023, the Company paid Stanford certain past royalties at a reduced rate ... On May 4, 2018, the Company entered into a license agreement with Illumina, Inc.",
+      "subject": "CareDx",
+      "predicate": "holds_patent_portfolio_and_licenses",
+      "object_value": "USPTO assignee 'CareDx' (CareDx + XDx legacy); Stanford license terminated; Illumina active",
+      "category": "technology",
+      "referent_type": "intangible",
+      "m_source_status": "MAPPED",
+      "source_id": "uspto_odp.query_assignee",
+      "source_params": {
+        "assignee_name": "CareDx",
+        "cutoff_date": "2025-05-15",
+        "categorize": {
+          "ddcfdna": ["donor", "cell-free", "cfDNA", "dd-cfDNA"],
+          "transplant": ["transplant", "allograft", "rejection"],
+          "hla": ["HLA", "histocompatibility", "typing"],
+          "chimerism": ["chimerism", "engraftment"]
+        }
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "USPTO PAIR / Patent Assignment Database — Stanford-to-CareDx assignment chain",
+          "endpoint_or_method": "https://assignment.uspto.gov/patent/index.html#/patent/search",
+          "rationale": "The Stanford License was exclusive; corresponding patent assignments (or covenant-not-to-sue records) and any post-termination reversion entries are publicly recorded.",
+          "expected_observable": "assignment chain showing Stanford -> CareDx exclusive license + termination entries circa 2023",
+          "signal_direction": "presence corroborates the license claim; absence of post-termination reversion is mildly suspicious",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "USPTO PAIR — Natera v. CareDx patents-in-suit (10,526,658 / 10,597,724 / 10,655,180 / 11,111,544) prosecution + reexamination status",
+          "endpoint_or_method": "https://patentcenter.uspto.gov/ for each patent number; ex parte reexamination records",
+          "rationale": "The 10-K discloses the Feb 24 2025 invalidation order AND a separate pending ex parte reexamination at the PTO that rejected Claims 21/26/27 of '544 on Feb 14 2025. PTO PAIR is the authoritative source on whether those rejections become final.",
+          "expected_observable": "ex parte reexam status flag + final office action timing for U.S. 11,111,544 claims 21/26/27",
+          "signal_direction": "final rejection corroborates CDNA's litigation defense; allowance / claim survival keeps the Natera damages risk alive",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "google_patents.query_assignee (fallback)",
+          "endpoint_or_method": "google_patents.query_assignee — secondary corroboration of USPTO ODP results",
+          "rationale": "Cross-validates the USPTO ODP count and catches patents filed under legacy 'XDx, Inc.' assignment names.",
+          "expected_observable": "n_granted_patents under 'XDx' and 'CareDx' assignee variants",
+          "signal_direction": "presence corroborates; rate-limit noise tolerated",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "biotech_pharma",
+      "claim_type_taxonomy": "patents_ip",
+      "extraction_notes": "Canonical USPTO ODP test. Multiple assignee names (CareDx, XDx, CareDx Inc.) — should also try 'XDx' as a separate query to catch legacy filings."
+    },
+    {
+      "claim_id": "CDNA-5",
+      "claim_text": "CareDx initiated clinical studies including the KOAR (Kidney Outcomes Allograft Rejection) study (manuscript submitted Q4 2024), the SHORE Registry (2024 publication in Journal of Heart and Lung Transplant), and the ACROBAT study (launched July 2021) for AlloHeme — and has signed multiple biopharma research partnerships for AlloCell.",
+      "source_quote": "Submitted first manuscript of the Kidney Outcomes Allograft Rejection (KOAR) study for publication ... A 2024 study of the SHORE Registry published in the Journal of Heart and Lung Transplant ... In July 2021, we launched the Assessing Chimerism and Relapse of Bone marrow/HCT transplant using AlloHeme Testing (ACROBAT) study. ... we have executed multiple agreements with biopharma therapeutics companies to use AlloCell in research and clinical studies.",
+      "subject": "CareDx clinical-evidence program",
+      "predicate": "operates_named_trials",
+      "object_value": "KOAR, SHORE, ACROBAT, OKRA, AlloCell biopharma partnerships",
+      "category": "regulatory_milestone",
+      "referent_type": "event",
+      "m_source_status": "MAPPED",
+      "source_id": "clinical_trials.query_by_lead_sponsor",
+      "source_params": {
+        "sponsor_name": "CareDx",
+        "cutoff_date": "2025-05-15"
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "PubMed search for SHORE Registry / KOAR / ACROBAT publications",
+          "endpoint_or_method": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=AlloSure+CareDx",
+          "rationale": "The 10-K cites specific peer-reviewed publications (Nature Medicine June 2024 for AlloSure; J Heart Lung Transplant 2024 for SHORE; Laboratory Investigation 2023 for HistoMap). PubMed verifies these are real, indexed, and authored by CareDx-affiliated investigators.",
+          "expected_observable": "PMID + journal + author affiliations + publication date",
+          "signal_direction": "presence corroborates the clinical-evidence claim; absence of cited publications would be a SEVERE contradiction of the evidence-generation narrative",
+          "severity_if_contradiction": "SEVERE"
+        },
+        {
+          "source_label": "ISHLT (Intl Society for Heart and Lung Transplantation) 2022 Guidelines",
+          "endpoint_or_method": "https://ishlt.org/publications-resources/consensus-statements-guidelines",
+          "rationale": "CDNA claims ISHLT 2022 guidelines 'reinforced the use of AlloMap Heart and referenced the combined use of AlloSure Heart and AlloMap Heart.' Guideline endorsement is a high-value clinical-acceptance signal that the framework can verify against the published guidelines text.",
+          "expected_observable": "literal text in ISHLT 2022 guidelines referencing AlloMap and dd-cfDNA",
+          "signal_direction": "presence corroborates payer-defensibility narrative; absence would weaken the coverage-durability argument",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Clinical Trials Transformation Initiative (CTTI) AACT database — CareDx collaborator graph",
+          "endpoint_or_method": "https://aact.ctti-clinicaltrials.org/",
+          "rationale": "AACT exposes the trial-collaborator bipartite graph. AlloCell 'biopharma research partnerships' should show as named industry sponsors collaborating on CareDx-sponsored or co-sponsored trials. The taxonomy primary clinical_trials.query_by_lead_sponsor already gives sponsor + collaborators; AACT gives a richer relational view for follow-up.",
+          "expected_observable": "named biopharma collaborators on CareDx trials over 2020-2025",
+          "signal_direction": "named partner presence corroborates AlloCell partnerships claim",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "biotech_pharma",
+      "claim_type_taxonomy": "clinical_pipeline",
+      "extraction_notes": "CT.gov v2 lead-sponsor query is canonical here. CareDx is the sponsor on multiple named trials (KOAR, SHORE, ACROBAT, OKRA). Absence of any trials would be a strong contradiction."
+    },
+    {
+      "claim_id": "CDNA-6",
+      "claim_text": "As of December 31, 2024, CareDx had a material weakness in internal control over financial reporting (COSO Framework component) that was first identified as of December 31, 2022 and remained unremediated, but the weakness's manifestation has been limited to 'immaterial corrected errors in the reporting of stock-based compensation expense.'",
+      "source_quote": "We have identified a material weakness in our internal control over financial reporting as of December 31, 2022, which was not remediated at December 31, 2024 ... This material weakness resulted in immaterial corrected errors in the reporting of stock-based compensation expense as presented within Part II Item 9B of this Annual Report on Form 10-K.",
+      "subject": "CareDx ICFR",
+      "predicate": "has_material_weakness",
+      "object_value": "COSO Framework; manifested only in immaterial SBC errors",
+      "category": "financial_distress",
+      "referent_type": "intangible",
+      "m_source_status": "MAPPED",
+      "source_id": "claim_evolution.query_claim_evolution",
+      "source_params": {
+        "cik": "0001217234",
+        "search_term": "material weakness",
+        "base_filing_date": "2025-02-28",
+        "cutoff_date": "2025-05-15",
+        "forms": "10-K,10-Q,8-K,DEF 14A"
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "Audit Analytics ICFR + Restatement databases (paid; commercial)",
+          "endpoint_or_method": "https://www.auditanalytics.com/",
+          "rationale": "Audit Analytics tags every SOX 404 material-weakness and every Item 4.02 restatement with severity coding. CDNA's MW has run 3+ years — Audit Analytics scores duration + severity, which would let the framework distinguish 'genuine distress fingerprint' from 'process-deficiency-of-record.'",
+          "expected_observable": "Audit Analytics MW severity score + duration + remediation status",
+          "signal_direction": "if Audit Analytics scores CDNA's MW as Tier-1 severity that contradicts the filing's 'immaterial' characterization",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "sec_filings.list_filings_by_form — count of 8-K Item 4.02 (Non-Reliance on Previously Issued Financial Statements) filings since 2022",
+          "endpoint_or_method": "sec_filings.list_filings_by_form with cik=0001217234, forms=['8-K'] then text-grep for Item 4.02",
+          "rationale": "A truly severe MW typically triggers Item 4.02 restatements. Absence of Item 4.02 8-Ks corroborates the 'immaterial corrected errors' characterization; presence would contradict.",
+          "expected_observable": "count of 8-K filings since 2022-12-31 invoking Item 4.02",
+          "signal_direction": "0 Item 4.02 8-Ks supports CDNA's framing; 1+ would severely contradict",
+          "severity_if_contradiction": "SEVERE"
+        },
+        {
+          "source_label": "Deloitte & Touche LLP auditor change tracking via 8-K Item 4.01",
+          "endpoint_or_method": "sec_filings.list_filings_by_form forms='8-K' for Item 4.01 disclosures",
+          "rationale": "Auditor flight is a leading distress-cluster marker. Deloitte has been retained as auditor and issued an adverse opinion on ICFR but unqualified on financials. An auditor-resignation 8-K post-cutoff would be a strong distress signal.",
+          "expected_observable": "presence/absence of Item 4.01 8-K post 2025-02-28",
+          "signal_direction": "presence contradicts going-concern stability; absence corroborates",
+          "severity_if_contradiction": "SEVERE"
+        }
+      ],
+      "domain": "biotech_pharma",
+      "claim_type_taxonomy": "financial_distress",
+      "extraction_notes": "Heuristic H10 (going-concern distress cluster) requires MULTIPLE markers. Here we have ONE marker (3-year-running MW) but it is explicitly scoped to immaterial SBC errors. With $52.5M net income, $261M cash, no debt — H10's preconditions are NOT met. Claim_evolution tracks whether subsequent filings escalate the MW characterization."
+    },
+    {
+      "claim_id": "CDNA-7",
+      "claim_text": "CareDx is operating laboratory and office facilities in eight locations totaling approximately 157,000 sq ft, including 87,950 sq ft in Brisbane CA (HQ + R&D / clinical labs), Omaha NE (24,984 sq ft digital), Stockholm Sweden (24,940 sq ft R&D / product manufacturing), plus offices in West Chester PA, Columbus OH, Flowood MS, and Fremantle Australia.",
+      "source_quote": "Our headquarters are located in Brisbane, California. We lease facilities in North America, Europe, and Australia. ... Brisbane, California Corporate headquarters 26,506 ... Brisbane, California Research & development and clinical laboratories 61,444 ... West Chester, Pennsylvania Sales office and distribution 6,336 ... Omaha, Nebraska Digital solutions office 24,984 ... Columbus, Ohio Digital solutions office 3,806 ... Flowood, Mississippi Transplant pharmacy 4,800 ... Stockholm, Sweden Research & development and product manufacturing 24,940 ... Australia Fremantle Research & development 5,199",
+      "subject": "CareDx facility footprint",
+      "predicate": "operates_facilities_at",
+      "object_value": "Brisbane CA / Omaha NE / Stockholm SE / West Chester PA / Columbus OH / Flowood MS / Fremantle AU",
+      "category": "physical_facility",
+      "referent_type": "geographic_area",
+      "m_source_status": "MAPPED",
+      "source_id": "dol_h1b_lca.query_lca_filings",
+      "source_params": {
+        "employer_name": "CareDx",
+        "naics_prefix": "62",
+        "match_mode": "word_boundary",
+        "max_results": 100
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "FDA Drug Establishment Registration / Device Establishment Registration",
+          "endpoint_or_method": "https://www.accessdata.fda.gov/scripts/cdrh/cfdocs/cfRL/rl.cfm",
+          "rationale": "Stockholm Sweden site is described as 'product manufacturing' for transplant-typing reagents. Manufacturers of IVD reagents shipping into the US register annually with FDA. Brisbane CA lab is a high-complexity CLIA lab and also a registered device establishment.",
+          "expected_observable": "registered FDA establishment records at Brisbane CA, Stockholm SE addresses",
+          "signal_direction": "presence corroborates manufacturing-and-lab footprint; absence at Stockholm contradicts manufacturing claim",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "CMS CLIA Lab Registry (QCOR) for Brisbane CA",
+          "endpoint_or_method": "https://qcor.cms.gov/main.jsp -> search by address 8000 Marina Blvd Brisbane CA",
+          "rationale": "CDNA bills Medicare for testing only when tests are run in their CA lab. CMS CLIA registry is the authoritative source on lab existence + certification level.",
+          "expected_observable": "active CLIA certificate at Brisbane CA address, high-complexity tier",
+          "signal_direction": "absence or non-active status = SEVERE contradiction of Medicare-billing eligibility",
+          "severity_if_contradiction": "SEVERE"
+        },
+        {
+          "source_label": "osha_establishments.query_establishments — Brisbane CA, Omaha NE, West Chester PA",
+          "endpoint_or_method": "catalog source applied with multiple state filters",
+          "rationale": "Brisbane CA lab (~250-500 employees per the test-volume claim) is above the 20-emp OSHA filing threshold and in a covered NAICS. Omaha NE digital-solutions office is borderline. Cross-state OSHA query corroborates the multi-site facility footprint claim.",
+          "expected_observable": "Form 300A establishment records at the named city/state combinations",
+          "signal_direction": "presence at Brisbane corroborates; absence at all locations contradicts",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "EPA FRS — Brisbane CA biological-lab waste generator",
+          "endpoint_or_method": "https://www.epa.gov/frs/frs-query",
+          "rationale": "Clinical labs generating biohazard / chemical waste are typically RCRA small-quantity generators. CDNA's Brisbane lab should appear in FRS as a permitted waste generator. Not canonical for biotech (cell H1 caution) but a real corroborator at this lab's scale.",
+          "expected_observable": "FRS record at 8000 Marina Blvd Brisbane CA listing CareDx as facility",
+          "signal_direction": "presence corroborates; absence is weak per H1 caveat",
+          "severity_if_contradiction": "UNVERIFIABLE"
+        }
+      ],
+      "domain": "biotech_pharma",
+      "claim_type_taxonomy": "facility_scope",
+      "extraction_notes": "DOL H-1B LCA is the canonical primary per taxonomy. Biotech is H-1B-dense (PhDs, postdocs). CareDx should have multiple LCA filings at Brisbane CA worksite. Sweden facility is outside LCA scope. Most diagnostic value: H-1B filings at the Brisbane address corroborate real R&D + lab headcount."
+    },
+    {
+      "claim_id": "CDNA-8",
+      "claim_text": "On February 24, 2025, the U.S. District Court for the District of Delaware entered an order overturning Natera's $96.3 million jury verdict against CareDx by ruling Natera's U.S. Patents 11,111,544 and 10,655,180 invalid for lack of written description; the Company derecognized the $96.3M liability as of December 31, 2024.",
+      "source_quote": "On February 24, 2025, the Court issued an order concluding that Natera's U.S. Patents 11,111,544 and 10,655,180 were invalid for lack of written description thereby overturning the jury verdict. ... After the Court order overturned the jury finding, the Company derecognized the $96.3 million in other liabilities on the consolidated balance sheets as of December 31, 2024 as the Company concluded that the loss was no longer probable. It is reasonably possible that the Company may not prevail if the case is appealed in which case the range of loss could be up to the jury awarded amount of $96.3 million plus potential interest.",
+      "subject": "Natera v. CareDx patent infringement litigation",
+      "predicate": "court_invalidated_patents",
+      "object_value": "U.S. Patents 11,111,544 and 10,655,180 ruled invalid 2025-02-24; $96.3M liability derecognized",
+      "category": "regulatory_milestone",
+      "referent_type": "event",
+      "m_source_status": "PROPOSED",
+      "source_id": null,
+      "source_params": {},
+      "proposed_connector": {
+        "name": "pacer_recap.query_docket",
+        "description": "Free Law Project RECAP archive of PACER federal-court dockets — query a case number to retrieve docket entries, orders, and opinions. Adjudicates litigation-outcome claims where the focal company self-discloses a court order or judgment.",
+        "endpoint": "https://www.courtlistener.com/api/rest/v3/dockets/",
+        "access_pattern": "api",
+        "auth_required": false,
+        "sample_invocation": "GET https://www.courtlistener.com/api/rest/v3/dockets/?court=ded&case_name__icontains=Natera+CareDx -> retrieve docket #, list orders dated 2025-02-24",
+        "rationale": "Patent-litigation outcomes (invalidity rulings, damages awards, injunctions) are the dominant non-revenue catalyst for late-stage diagnostics companies. PACER/RECAP is the canonical free source. No catalog connector currently exists.",
+        "estimated_cost": "free (RECAP cache) / $0.10/page (live PACER)",
+        "completeness": "all federal court dockets (district + appellate)",
+        "referent_type": "litigation_event",
+        "attribute": "order_existence_and_date"
+      },
+      "creative_extensions": [
+        {
+          "source_label": "USPTO ex parte reexamination tracker for U.S. 11,111,544",
+          "endpoint_or_method": "https://patentcenter.uspto.gov/ ; ex parte reexam control # for U.S. 11,111,544",
+          "rationale": "The 10-K discloses Feb 14 2025 non-final Office action rejecting Claims 21, 26, 27. Final rejection (or allowance) is the parallel administrative track that determines whether Natera's appeal of the District Court invalidity ruling has live patent claims to assert.",
+          "expected_observable": "reexamination certificate or final rejection of claims 21/26/27 of U.S. 11,111,544",
+          "signal_direction": "final rejection corroborates CDNA's defense; allowance keeps Natera's leverage alive",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Federal Circuit appellate docket (CAFC)",
+          "endpoint_or_method": "https://cafc.uscourts.gov/home/case-information/ ; PACER appeal #",
+          "rationale": "Natera's likely appeal of the Feb 24 2025 invalidity ruling will land at the Federal Circuit. The CAFC docket establishes whether and when an appeal is filed (a known forward catalyst).",
+          "expected_observable": "appeal docket # + briefing schedule + oral argument date",
+          "signal_direction": "appeal filing is expected (already disclosed); accelerated schedule + adverse panel composition would be moderate negative",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "claim_evolution.query_claim_evolution — track 'Natera' mentions in subsequent CDNA filings",
+          "endpoint_or_method": "claim_evolution.query_claim_evolution(cik=0001217234, search_term='Natera', base_filing_date='2025-02-28', cutoff_date='2025-05-15')",
+          "rationale": "Tests whether CDNA continues to disclose the Natera matter post-10-K in 10-Qs (Q1 2025 10-Q would typically file in early May 2025).",
+          "expected_observable": "count of subsequent filings mentioning Natera and any change in reserve estimate",
+          "signal_direction": "continued disclosure expected; abrupt silence would be irregular",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "biotech_pharma",
+      "claim_type_taxonomy": "patents_ip",
+      "extraction_notes": "This is a litigation event, not a 'patents_ip' assignee question. uspto_odp won't adjudicate it. The cleanest test is PACER docket lookup (PROPOSED). The Natera reversal removes a $96M tail risk and ALSO contributes to CDNA's reported GAAP net income via the $96.3M derecognized liability — directly explaining the 'forward +24%' that defeated the short hypothesis."
+    }
+  ]
+}

@@ -1,0 +1,111 @@
+{
+  "ticker": "QUBT",
+  "cutoff": "2023-01-15",
+  "filing": "0001213900-22-012564_10-K.txt",
+  "cohort": "j_book_exposure_divergence",
+  "summary_note": "QUBT FY2021 10-K (filed 2022-03-15) does NOT name any Pentagon Program Element, PE number, or specific DoD program-of-record. The J-Book divergence pattern (claimed PE revenue vs J-Book unfunding) therefore cannot be directly tested — the company has no specific PE-grounded narrative to expose. Government-funding language is generic NQIA/NIST/NSF/DOE, with civilian/intelligence framing. Pre-revenue ($0 in FY2020 and FY2021). Orthogonal USAspending verification shows that despite a registered UEI (DMTDV6GZCQZ3), QUBT has $0 in cumulative federal contracts and grants through cutoff (INFLATION_SUSPECT). The framework's correct verdict for the J-Book cohort on QUBT is mostly UNVERIFIABLE/PASS — there is no concrete forward-DoD revenue claim to falsify here.",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "QCI is pursuing US Government opportunities under the National Quantum Initiative Act (NQIA); cites $625M DOE QIS centers initiative.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook(program_name='National Quantum Initiative', cutoff='2023-01-15') -> NOT_FOUND",
+        "pentagon_jbook(program_name='Quantum Information Science', cutoff='2023-01-15') -> NOT_FOUND",
+        "pentagon_jbook(contractor_name='Quantum Computing Inc.', cutoff='2023-01-15') -> NOT_FOUND (0 matches in 410-PE corpus; QUBT is not a primary contractor on any covered PE)",
+        "doe_budget(program_name='Quantum Information Science Research Centers', cutoff='2023-01-15') -> NOT_FOUND_IN_TIMERANGE (corpus has 'Advanced Computing Technologies'/ASCR but FY2025+ only, no pre-cutoff funding history; primary_contractors=[])",
+        "usaspending.query_federal_presence(['Quantum Computing Inc.', 'QCI', 'QPhoton', ...]) -> 1 UEI resolved (DMTDV6GZCQZ3), n_contracts=0, n_grants=0, contracts_amount_M=0.0, grants_amount_M=0.0, signal=INFLATION_SUSPECT"
+      ],
+      "M_check": "pentagon_jbook + doe_budget + usaspending.query_federal_presence",
+      "M_value": "J-Book NOT_FOUND on all three lookups (program name, QIS umbrella, contractor); DOE QIS centers not in corpus pre-2025; USAspending = $0 in cumulative federal awards through cutoff (INFLATION_SUSPECT) despite UEI registration",
+      "interpretation": "QUBT names the NQIA / DOE QIS framework only at the macro policy level — no specific Pentagon PE, no specific NIST/NSF/DOE grant, no contract value. Per cohort heuristic #7 (NOT_FOUND ≠ red flag for corpus-coverage gaps), and because the claim itself is not a forward-revenue commitment, scoring as UNVERIFIABLE. However the orthogonal USAspending check is striking: as of 2023-01-15 QUBT has been a public company for 4+ years and a NQIA-affiliated entity yet has $0 lifetime federal contracts and grants (INFLATION_SUSPECT). The 'pursuing opportunities' language is aspirational with no track record behind it."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "QCI is a founding member of the Quantum Economic Development Consortium (QED-C), established with support from NIST.",
+      "severity": "PASS",
+      "supports": [
+        "edgar_fts(search_term='Quantum Economic Development Consortium') -> 9 total hits across SEC filings; QUBT's own 10-K/10-Q/8-K (6 of 9 hits) reference QEDC; IonQ (2 hits) independently references QED-C, providing external corroboration of consortium existence and membership pattern"
+      ],
+      "M_check": "edgar_fts.query_fulltext",
+      "M_value": "9 hits; QEDC is a real, externally-referenced consortium",
+      "interpretation": "QED-C is corroborated as a real NIST-supported consortium with multi-firm membership. Founding-member status is a verifiable consortium fact, low-stakes (no revenue tie). PASS."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "QCI has entered a Technology Alliance Partnership Agreement with Splunk to pursue government-funded research (network security, dynamic logistics, scheduling) using the Qatalyst platform.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "edgar_fts(search_term='Quantum Computing Inc', cik='0000769397' [Splunk]) -> 0 hits in Splunk's own SEC filings through 2023-01-15"
+      ],
+      "M_check": "edgar_fts (counterparty disclosure check via Splunk's CIK)",
+      "M_value": "0 hits in Splunk's own 10-K/10-Q/8-K filings — Splunk does not disclose QCI as a partner, customer, or alliance counterparty in any SEC filing through cutoff",
+      "interpretation": "QCI describes the Splunk Technology Alliance prominently in Item 1 Business, but Splunk's own SEC filings do not mention Quantum Computing Inc. at all. Technology Alliance Partnerships are typically lightweight (logo-listing tier) rather than material contracts, so non-disclosure by Splunk is plausible — but it also means the partnership has no apparent revenue or material commercial substance from the counterparty side. Scoring as MODERATE_UNDERDELIVERY: the asymmetric prominence (load-bearing in QCI's narrative; invisible in Splunk's) is a soft red flag for a marketing-tier partnership presented as a research-funding pipeline."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Qatalyst is integrated with Amazon Braket and provides access to D-Wave, Rigetti, IonQ, and IBM QPUs.",
+      "severity": "PASS",
+      "supports": [
+        "edgar_fts(search_term='Quantum Computing Inc', cik='0001018724' [Amazon]) -> 0 hits in Amazon's own filings (expected — Braket is a public AWS API, not a contracted partnership)",
+        "edgar_fts(search_term='Qatalyst') -> 151 total hits but most are 'Qatalyst Partners' (the M&A boutique, unrelated). QCI is named in 6 of the top-10 hits, confirming Qatalyst-as-product is at least disclosed by QCI."
+      ],
+      "M_check": "edgar_fts on counterparty CIKs",
+      "M_value": "Counterparty non-mention is expected here because Braket is a public self-service API; no SEC-disclosable material relationship would exist.",
+      "interpretation": "Technical integrations with public cloud APIs (Braket, IBM Q Network) do not require counterparty disclosure. Claim is consistent with the API-tier integration QCI describes. PASS."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "QCI reported $0 revenue in FY2021 and FY2020; accumulated deficit $81.4M; expects to generate revenue in 2022.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "usaspending.query_dod_contracts(recipient_name='Quantum Computing Inc.') -> n_awards=0, total_amount=$0.0, no agencies, no awards through cutoff",
+        "usaspending.query_federal_presence(name_variants=[...]) -> INFLATION_SUSPECT (1 UEI resolved, $0 in obligations, $0 in grants)"
+      ],
+      "M_check": "usaspending.query_dod_contracts + query_federal_presence",
+      "M_value": "Zero DoD contracts and zero federal awards of any kind through 2023-01-15; consistent with the company's $0-revenue disclosure",
+      "interpretation": "The $0 revenue disclosure is self-validating (QCI volunteered it; USAspending corroborates the absence of any federal counterparty). The forward expectation ('expect to generate revenue in 2022') is aspirational and not falsifiable from this filing. UNVERIFIABLE on the forward, PASS on the historical disclosure. No DoD-program inflation here because no DoD program is named."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "QCI in Feb 2022 entered a Note Purchase Agreement + Exclusivity Agreement with QPhoton, Inc., loaning $1.25M and pursuing acquisition.",
+      "severity": "PASS",
+      "supports": [
+        "acq_coherence.score_acquisition_coherence(parent_thesis='Qatalyst quantum-software platform', acquisitions=[QPhoton]) -> coherence_score=0.75, category=high_coherence, signal=COHERENT_ROLLUP, reasoning='QPhoton extends QCI quantum-software thesis vertically into quantum-hardware stack — same vertical, end-to-end stack'"
+      ],
+      "M_check": "acq_coherence.score_acquisition_coherence",
+      "M_value": "COHERENT_ROLLUP at 0.75 — the QPhoton acquisition is within QCI's stated quantum vertical, not the IONQ-style cross-vertical incoherence pattern",
+      "interpretation": "Photonic-quantum hardware is a natural complement to quantum-software optimization, not a distraction acquisition. Coherence is acceptable at the cutoff. PASS."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "QCI leases ~1,050 sq ft of office/co-working space across Leesburg VA, Minneapolis MN, and Vancouver BC.",
+      "severity": "PASS",
+      "supports": [
+        "epa_frs.query_facilities(facility_name='Quantum Computing', state_abbr='VA') -> 0 facilities (expected — co-working office space is not EPA-regulated)"
+      ],
+      "M_check": "epa_frs.query_facilities",
+      "M_value": "0 EPA-registered facilities, consistent with claim of small co-working footprint (no regulated industrial operations)",
+      "interpretation": "Facility claim is consistent with a small software company. No contradiction. PASS."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "QCI relies on patents, trade secrets, trademarks, copyrights for IP protection; patents 'may not issue from applications'.",
+      "severity": "PASS",
+      "supports": [
+        "uspto_odp.query_assignee(assignee_name='Quantum Computing Inc', cutoff='2023-01-15') -> n_total_applications=4, n_granted=3 pre-cutoff (patents 12008436, 12493811, 11436519 — all 'machine learning mapping for quantum processing units' / 'variational analog quantum oracle learning' / 'adaptive learning for quantum circuits'); titles align with claimed Qatalyst product domain"
+      ],
+      "M_check": "uspto_odp.query_assignee",
+      "M_value": "3 granted patents + 1 pending application as of cutoff; CPC classifications G06N 10/* (quantum computing) and G06N 20/* (machine learning) match Qatalyst product description",
+      "interpretation": "Patent portfolio is small but real and topically aligned with the disclosed Qatalyst platform. The hedging language ('patents may not issue') is standard 10-K boilerplate. PASS."
+    }
+  ],
+  "jbook_grounded_claim_audit": {
+    "n_jbook_grounded_claims": 1,
+    "jbook_grounded_claim_ids": ["C1"],
+    "n_pentagon_jbook_queries_fired": 3,
+    "n_pentagon_jbook_returning_match": 0,
+    "all_signals_returned": ["NOT_FOUND", "NOT_FOUND", "NOT_FOUND"],
+    "interpretation": "Only 1 of 8 claims (C1) is genuinely J-Book-grounded, and even that one names only the NQIA umbrella rather than a specific Pentagon PE. Pentagon J-Book returned NOT_FOUND on all 3 variants — consistent with the company not actually naming a Pentagon line-item. The J-Book divergence cohort pattern does not fire on this filing. Per the framework's design, that is the correct verdict: QUBT at this PIT does not yet have the IONQ-style PE-concentration narrative the cohort is built to catch."
+  }
+}

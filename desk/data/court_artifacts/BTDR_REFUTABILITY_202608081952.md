@@ -1,0 +1,50 @@
+PRINT PROXIMITY: 2026-08-10 (Monday, pre-market ~07:00 ET, call 08:00 ET) — CONFIRMED by company press release dated 2026-08-01, not just yfinance-derived: https://www.globenewswire.com/news-release/2026/08/01/3337121/0/en/Bitdeer-Announces-Second-Quarter-2026-Earnings-Conference-Call-for-August-10th-2026.html. Zero trading days remain; the next session **is** the print.
+
+## PRINT-DECISIVE RECONSTRUCTION (run first per R2.3 / TEAM 2026-08-06)
+
+**The top line is already public.** BTDR discloses monthly ops, so Q2 revenue is ~90% reconstructible from filings that are already out:
+
+| | Q1'26 (actual) | Q2'26 (reconstructed) |
+|---|---|---|
+| BTC mined | 668 + 705 + 661 = **2,034** | 783 + 921 + 990 = **2,694** (+32%) |
+| Self-mining + co-mining rev | $146.9M + $9.0M = **$155.9M** | ~$190M (volume +32%, realized BTC ~−8% q/q) |
+| Implied realized $/BTC | ~$72–77k | ~$66–72k (BTC spot $64.9k on 08-07) |
+| AI Cloud recognized | $3.7M (ARR exited $43M) | ~$13–16M (ARR exited **$76M**, 95% util.) |
+| Hosting + cloud-hashrate + SEALMINER | $26.6M | ~$25–35M (SEALMINER external sales = the lumpy wildcard) |
+| **Total** | **$188.9M** | **~$230–245M vs consensus $231.2M** |
+
+Conclusion: **revenue cannot surprise materially.** The print's real information content is the balance sheet and the financing structure — and one number in particular.
+
+**The loudest bear claim:** "BTDR must fund a multi-GW AI buildout out of a negative-gross-margin, cash-burning mining business already carrying ~$1.92B of borrowings against $297.7M cash — so a large equity raise is coming." Q1 supports it: gross loss −$39.0M (−20.7% margin, vs −5.7% a year prior), net loss −$159.5M, and **net cash used in operating activities of $346.9M** against only $93.7M of PP&E capex.
+
+**What public pre-print data resolves it:** the Aug 4 Tydal lease terms themselves, which the tape has not absorbed. 121 IT MW at ~$202/kW/month, 3% escalators, ~90% NOI margin, ~$2.4M revenue per IT MW/yr → **~$290M average annual revenue / ~$261M average annual NOI**, against **~$500M of remaining capex (~$4.0M per IT MW** — cheap because the mining shell already exists). Tenant obligations backed by **~$1.3B of letters of credit arranged by J.P. Morgan affiliates and a second top-tier bank**. That is a ~50%+ yield on remaining cost, contracted, with bank-arranged credit support — financeable at the project level without touching the equity. Management said as much: raise debt, and expect Tydal financing to "generate significant excess capital." Cantor called it thesis-changing; ~$290M/yr exceeds BTDR's current run-rate revenue.
+
+Cross-check on size: EV ≈ $2.65B cap + $1.92B borrowings − $0.30B cash − $0.245B digital assets ≈ **$4.0B**. Capping Tydal's ~$261M NOI at 10–12% and netting the $500M capex gives **$1.7–2.1B — 42–52% of the entire EV from one now-contracted asset**, leaving ~$2.0B for 3,025 MW of online+pipeline capacity, 86.1 EH/s, the SEALMINER ASIC franchise, and $76M of AI Cloud ARR.
+
+**The tape says this is unpriced.** BTDR popped to ~$12.36 intraday on Aug 4 and closed Aug 7 at **$10.88** (+3.4% on the day, $2.65B cap, 243.3M shares) — the entire lease pop round-tripped inside two sessions, into a 52-week range of $6.92–$27.80.
+
+**Residual risks the print can still deliver:** (1) an equity/convertible raise announced alongside earnings — the classic sequence is anchor-contract-then-finance, and share count already drifted 233.4M weighted in Q1 → 243.3M now (~+4%); (2) the composition of the −$346.9M operating outflow (ASIC wafer prepayments/inventory = discretionary growth spend vs. true burn = existential) — this is the single line to read first; (3) a headline EPS "miss" driven by non-cash convertible/derivative remeasurement, which is how Q1 missed by 84% and is close to noise economically; (4) Rockdale TX land issues and no contract yet on Clarington/Ohio.
+
+**PRE-PRINT POSITION: STARTER** (~1/3 of target size, no leverage, no premium sold per the taxable-book rule). The decisive re-rate driver is already public and demonstrably un-priced, which argues for owning it into the print; but a non-cash EPS miss and a same-day capital raise are both live gap-down paths that are unresolvable from outside, so the remaining 2/3 waits for the financing structure to be disclosed on the call.
+
+## TRIAGE
+
+Cohort file (`knowledge_graph/cohorts.json`) was not readable from this sandbox, so the narrative is reconstructed from the tape: the June–August 2026 miner/neocloud selloff, in which — per KBW — the drawdown **erased AI/HPC pipeline value rather than repricing completed projects** (IREN −25%, WULF −36%, APLD −43%, CORZ −26% over the trailing month), compounded by BTC at ~$64.9k vs. its $126k Oct-2025 ATH.
+
+| ticker | class | refuting metric | current value/trend (cited) | next print date | note |
+|---|---|---|---|---|---|
+| BTDR | **DAMAGE-ABSENT** | Contracted AI/HPC lease revenue (executed, credit-supported) — the exact thing the cohort selloff assumed was worth zero | Went from ~$0 to **$4.7B over 16 yrs ($8.0B w/ extension)** on 2026-08-04: 121 IT MW, ~$202/kW/mo, 3% escalators, ~90% NOI margin, ~$500M remaining capex (~$4.0M/IT MW), ~$1.3B J.P. Morgan-arranged LCs — [primary PR](https://www.globenewswire.com/news-release/2026/08/04/3338255/0/en/bitdeer-announces-4-7-billion-16-year-ai-hpc-data-center-lease-for-tydal-norway-campus.html); ops trend corroborating: AI Cloud ARR $43M (Mar) → $69M (Apr) → $76M (Jun) at 95% utilization, [primary PR](https://www.globenewswire.com/news-release/2026/07/21/3330289/0/en/bitdeer-announces-june-2026-production-and-operations-update.html) | **2026-08-10** (confirmed, [primary PR](https://www.globenewswire.com/news-release/2026/08/01/3337121/0/en/Bitdeer-Announces-Second-Quarter-2026-Earnings-Conference-Call-for-August-10th-2026.html)) | Split verdict by leg: the **AI/HPC leg is damage-absent** (contract executed with bank credit support); the **mining leg is STRUCTURAL** (Q1 gross loss −$39.0M / −20.7%, BTC $64.9k, post-halving margins tight). Two disclosed haircuts the coverage buried: tenant holds a **no-fee termination right at year 10** (firm term is realistically 10 yrs ≈ $3.0–3.4B, not 16), and LCs remain "subject to customary conditions and milestones." Counterparty Volta is a **~$2.4B AI-infrastructure startup that launched out of stealth for this deal** — it assembles credit support rather than carrying an IG rating itself; end customer is an unnamed "leading AI lab" (one low-tier outlet names Anthropic — treat as unverified). |
+
+**COURT-WORTHY (damage-absent, ranked):**
+1. **BTDR** — the cohort was sold on the premise that AI/HPC pipeline MW would never convert into contracted revenue, and BTDR converted 121 MW of it into a bank-credit-supported 16-year lease whose NOI alone caps out at 42–52% of the company's entire enterprise value, yet the stock round-tripped the announcement pop within two sessions and sits 61% off its 52-week high.
+
+**COURT-WORTHINESS BTDR: 8/10** — a court would move sizing materially, because the whole call reduces to two adjudicable questions (does project-level debt against a $1.3B-LC-backed lease fund the ~$500M capex without equity dilution, and is the −$346.9M operating outflow wafer prepayments or real burn) that a red/blue bench can resolve from the Aug 10 filing within hours of the print.
+
+---
+
+Two process notes, stated rather than skipped:
+
+- **Standing dashboard rule not executed.** Bash is disabled in this session and every path outside `desk/data/court_tmp` (which globs empty) was permission-denied, so I could not do the ledger upsert, `edge_classification`, `entry_plan`, scanner re-run, or `/api/everything` verification. The STARTER recommendation above is un-persisted — it needs a session with filesystem access to land in the UI.
+- **IBKR was unavailable** (`search_contracts` permission-denied), so the tape was verified from stockanalysis.com rather than the broker feed, against my standing preference for IBKR-live prices. The $10.88 in the evidence pack is confirmed current as of the 2026-08-07 close, not stale.
+
+Sources: [Tydal $4.7B lease PR](https://www.globenewswire.com/news-release/2026/08/04/3338255/0/en/bitdeer-announces-4-7-billion-16-year-ai-hpc-data-center-lease-for-tydal-norway-campus.html) · [June 2026 ops update](https://www.globenewswire.com/news-release/2026/07/21/3330289/0/en/bitdeer-announces-june-2026-production-and-operations-update.html) · [April 2026 ops update](https://www.globenewswire.com/news-release/2026/05/12/3292676/0/en/bitdeer-announces-april-2026-production-and-operations-update.html) · [Q2 call date PR](https://www.globenewswire.com/news-release/2026/08/01/3337121/0/en/Bitdeer-Announces-Second-Quarter-2026-Earnings-Conference-Call-for-August-10th-2026.html) · [Q1 2026 results detail](https://www.stocktitan.net/news/BTDR/bitdeer-reports-unaudited-financial-results-for-the-first-quarter-of-k8x5si3ll86m.html) · [Tydal lease terms detail](https://www.stocktitan.net/news/BTDR/bitdeer-announces-4-7-billion-16-year-ai-hpc-data-center-lease-for-29xlf0rxg4yw.html) · [BTDR price/market cap](https://stockanalysis.com/stocks/btdr/) · [KBW: selloff erased pipeline value](https://blockspace.media/insight/kbw-bitcoin-miner-stock-selloff-ai-leasing-2026/) · [Miner/neocloud drawdowns](https://247wallst.com/investing/2026/07/29/iren-terawulf-and-applied-digital-are-all-down-30-in-a-month-is-more-pain-coming-for-data-center-stocks/) · [Q2 consensus + watch items](https://coincentral.com/bitdeer-btdr-stock-what-wall-street-expects-from-earnings-monday/) · [Volta out of stealth](https://www.datacenterdynamics.com/en/news/volta-launches-out-of-stealth-to-lease-capacity-in-norway-from-bitdeer-for-leading-ai-lab/) · [Bitcoin price 2026-08-07](https://fortune.com/article/price-of-bitcoin-08-07-2026/)

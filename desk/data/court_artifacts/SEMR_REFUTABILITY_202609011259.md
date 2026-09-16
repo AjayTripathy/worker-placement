@@ -1,0 +1,23 @@
+## SEMR — REFUTABILITY TRIAGE
+
+One line of context: the security named in this event does not exist. Semrush Holdings was acquired by Adobe in an all-cash merger that **completed April 28, 2026** — four months before this court was enqueued — at **$12.00/share**, ~$1.9B equity value; Class A common was suspended from NYSE pre-open that day and the registrant filed Form 15. There is no tape, no next print, and no position to size. The empty evidence pack (`ENTITY: None (CIK None)`, `no tape source reachable`) was the delisting, not a fetch failure.
+
+| ticker | class | refuting metric | current value/trend (cited) | next print date | note |
+|---|---|---|---|---|---|
+| SEMR | **UNTRIAGEABLE** — security extinguished | none exists; the AEO/GEO revenue line the thesis wanted to test is now an unreported segment inside ADBE | Merger completed 2026-04-28; $12.00/share cash, ~$1.9B equity value; NYSE trading suspended pre-open 2026-04-28, Form 25 + Form 15 filed ([Adobe completion](https://news.adobe.com/news/2026/04/adobe-completes-semrush-acquisition), [Adobe terms](https://news.adobe.com/news/2025/11/adobe-to-acquire-semrush), [MIAX options delisting notice](https://www.miaxglobal.com/alert/2026/04/28/miax-exchange-group-options-markets-delisting-semrush-holdings-inc-semr)) | **NONE** — reporting obligations terminated | Red team's three assigned attacks (AEO revenue real?, core SEO decay, Ahrefs/GSC competition) are all unanswerable: no further public disclosure will ever be filed |
+
+**PRINT PROXIMITY: NONE — verified via Adobe's own completion release (2026-04-28) plus the exchange's options-delisting notice; the registrant filed Form 15 terminating reporting, so no future print exists.** The print-decisive reconstruction is moot and the pre-print position recommendation is forced: **FLAT — unfillable, not judgment.**
+
+**COURT-WORTHY (damage-absent, ranked):** none. Zero members survive triage.
+
+**COURT-WORTHINESS SEMR: 0/10** — the security was cashed out and delisted 2026-04-28; a court cannot change a sizing decision on an instrument that cannot be bought.
+
+---
+
+### Two things worth carrying out of this, since the ticker itself is a dead end
+
+**1. The acquisition is evidence *for* the thesis frame, not against it.** Adobe paid $1.9B cash for exactly the "AEO measurement layer gets paid regardless of which advertiser wins" argument, and said so in its own words — the completion release frames the rationale as serving marketers with "search engine optimization (SEO), generative engine optimization (GEO) and agentic search optimization (ASO)." A strategic acquirer independently priced the picks-and-shovels claim at ~10x forward revenue. That is a genuine external anchor for the QNST and SHOP legs of the OpenAI-ad-channel court, and it is a stronger datum than anything the SEMR bench would have produced. It also means the AEO-tooling expression is now **structurally unavailable in public equity at meaningful beta** — inside a ~$200B+ ADBE, Semrush is immaterial to the P&L, so ADBE is not a substitute leg. If the sleeve wants this exposure, the replacement has to be a different name, not a re-pointed ticker.
+
+**2. This is an infra failure that presented as a research task.** The pack builder resolved `CIK None` and `no tape source reachable` and still emitted a full court prompt with red-team attacks assigned and an auto-escalation rule at ≥6/10 — the null tape was passed downstream as if it were a data gap rather than a hard stop. Two benches would have burned a full adversarial cycle on a non-existent security, and the ≥6 auto-escalate path could have routed it further. The narrow fix: **a null/None CIK or an unreachable tape should hard-fail the enqueue rather than render a prompt**, and the pack builder should check for Form 25/15 on the CIK before building. I don't have write access to the repo in this session (Bash disabled, and reads of `knowledge_graph/` and `court_queue.json` were not permitted), so I could not wire the guard or drain the queue entry — flagging it rather than silently leaving it. Say the word and I'll implement the preflight check and dequeue SEMR when access is available.
+
+Sources: [Adobe completes Semrush acquisition](https://news.adobe.com/news/2026/04/adobe-completes-semrush-acquisition) · [Adobe to acquire Semrush ($12.00/share, ~$1.9B)](https://news.adobe.com/news/2025/11/adobe-to-acquire-semrush) · [MIAX options delisting notice, 2026-04-28](https://www.miaxglobal.com/alert/2026/04/28/miax-exchange-group-options-markets-delisting-semrush-holdings-inc-semr)

@@ -1,0 +1,43 @@
+## Context
+
+Cohort file unreadable this session (`knowledge_graph/cohorts.json` — permission denied), so the narrative is reconstructed from market evidence: the Aug-2026 **fintech/consumer-finance de-rate** (FINX −9% YTD; SoFi sold off on a non-raised guide, JPM cut Klarna to Neutral) — thesis being priced is *"elevated-multiple fintechs whose growth is decelerating and whose rate-sensitive revenue is impaired."* WLTH's −37.9% dd52 is **mostly not** that narrative: it is idiosyncratic (IPO'd $14 on 12/15/25 → three disappointing prints, a CEO related-party disclosure, and an open securities-fraud investigation). Two pack corrections below.
+
+| ticker | class | refuting metric | current value/trend (cited) | next print date | note |
+|---|---|---|---|---|---|
+| WLTH | **DAMAGE-ARRIVING** | **Cash Management Net Deposits** (monthly, company-disclosed) — the 74%-of-revenue segment | **−$235M in Jun-26 vs +$771M in Jun-25**; Cash Mgmt Assets $44,752M, **−2.1% YoY**, −0.5% MoM (May $44,987M, Apr $44,883M, Mar $45,500M, Jan $45,400M) — [Jun-26 monthly metrics, 7/7/26](https://www.globenewswire.com/news-release/2026/07/07/3323635/0/en/wealthfront-reports-june-2026-monthly-metrics.html); [Q1 FY27 release, 6/4/26](https://www.sec.gov/Archives/edgar/data/1524566/000162828026040793/q127earningsrelease.htm) | **2026-09-09** (confirmed) | Damage is **present but mis-attributed**. Bear says *rate sensitivity*; the Fed has been flat at 3.50–3.75% for five meetings and WLTH's base APY has been frozen at **3.30% since 01/30/2026** ([wealthfront.com/cash](https://www.wealthfront.com/cash)) — so this quarter's bleed is **client rotation into equities**, not rates. Rotation is still revenue-negative: cash earns ~56.5bps, advisory ~20.3bps (my arithmetic on disclosed $63.381M/$44,883M and $26,244M/$51,718M). Blended take rate 41.7 → 37.5bps YoY. Magnitude unresolved: **July AND August metrics both land on 9/9** — no monthly release in fiscal quarter-end months. |
+
+**COURT-WORTHY (damage-absent, ranked):**
+None. WLTH does **not** qualify as DAMAGE-ABSENT. The narrative's predicted damage is verifiably in the numbers: platform assets +14.6% YoY and funded clients +15.1% YoY, but revenue only +7% — asset growth is running at 2× revenue growth because the mix is migrating out of the high-take-rate segment. Not STRUCTURAL either: the franchise is still gathering ($99.1B record, 63% cross-product adoption) and threw off $151.1M FY26 FCF. It is squarely in the middle band.
+
+---
+
+## PRINT PROXIMITY: **2026-09-09** — CONFIRMED by company PR dated 2026-08-19 ("[Wealthfront to Announce Fiscal Second Quarter 2027 Financial Results on September 9, 2026](https://www.globenewswire.com/news-release/2026/08/19/3347969/0/en/wealthfront-to-announce-fiscal-second-quarter-2027-financial-results-on-september-9-2026.html)"), after the close. **10 trading days out** (Aug 26–Sep 9; Sep 7 Labor Day) — outside the 5-day mandatory window, but run anyway because the catalyst is dated and unusually high-variance.
+
+### Print-decisive reconstruction
+
+The loudest bear claim — that "asset flows, interest rate sensitivity, operating performance" were misrepresented — is **arithmetically testable today** from published monthly balances, because Q2 FY27 = May 1–Jul 31 and two of those three months are already public.
+
+| input | May-26 | Jun-26 | Jul-26 (est) | avg |
+|---|---|---|---|---|
+| Cash mgmt assets | $44,987M | $44,752M | ~$44,500M | ~$44,750M |
+| Advisory assets | $53,974M | $54,343M | ~$54,500M | ~$54,270M |
+
+At the Q1 FY27 realized take rates (56.5bps / 20.3bps) → **$90.7M**. At one more notch of compression (56.0 / 20.0) → **$89.8M**. Range **$89–91M**.
+
+Now the comparison nobody is making: FY26 total $365.0M − Q3 $93.2M − Q4 $96.1M = $175.7M for H1 FY26; Q1 FY26 = $84.6M → **Q2 FY26 = $91.1M**.
+
+**So Q2 FY27 reconstructs to −2% to −0.4% YoY — revenue turns negative year-over-year, while the headline prints another record platform-asset number.** Revenue only holds positive if the cash take rate stays at Q2 FY26's ~59bps with zero further compression — implausible while the acquisition promo (up to 4.20% APY vs 3.30% base, 3 months on $150k) is live on the site today, funded straight out of the spread. Sell-side PTs are $11–13 (KBW/JPM/RBC, all cut after the June miss); none of that is in the models, and management gives **no guidance**.
+
+### PRE-PRINT POSITION: **FLAT**
+
+Three independent reasons converge and none require winning an argument: (1) the reconstruction points to a second consecutive revenue miss with YoY growth crossing zero; (2) **RP_TAINTED is live and worsening** — the CEO owns **95.1% of Wealthfront Holdings / Wealthfront Home Lending** (acquired from him for $357,513 in mid-2024), the restructuring he promised has no timeline, and the company spent 8/11/26 expanding that CEO-owned entity into California at ~50bps below market using the public company's client funnel, *during* an open multi-firm securities investigation into exactly that; (3) the stock is already **+31% off its $7.20 low**, so the dislocation premise is half-healed — you'd be paying up for a catalyst that reconstructs negative. Per doctrine, a flagged name is never RP_FAIR and caps at 0.85× E[fv]; there is no version of this where a starter clears before 9/9.
+
+**COURT-WORTHINESS WLTH: 5/10** — a court would mostly re-derive what the monthly metrics already say, and the RP_TAINTED cap plus a 10-day-out print that reconstructs to a miss pins the answer at FLAT regardless of who wins.
+
+### Pack corrections + open items
+- **Upgrade:** pack listed the 9/9 print as "yfinance-derived — UNCONFIRMED." It is now **CONFIRMED** by company PR (8/19). Worth writing back to the pack builder.
+- **Gap:** pack's XBRL block was empty (rev/sbc/dil\_sh/ocf all blank); I sourced them from the Q1 FY27 release — SBC **$17,053K** (vs $1,879K PY), diluted WAS **175,500,854**, OCF **$22,683K** (−41% YoY), rev **$90,484K**. Note the ~20% gap between ~146.5M shares outstanding and 175.5M diluted — the blob's $1.368B mcap is the *basic* number; fully-diluted is ~$1.65B.
+- **Unverified (do not size on these):** net cash / holdco liquidity — I could not get a balance sheet (sec.gov returned 403 to the fetcher, and the 10-K mirror omitted the line items); only Wealthfront Brokerage LLC net capital of $150.3M at 1/31/26. The blob's `LEVERAGE UNCHECKED` flag is real: Home Lending funds originations on a **warehouse line of credit**, and its consolidation treatment given 95.1% CEO ownership is an open question. Resolve before any EV multiple is quoted.
+- Sourcing honesty: sec.gov and globenewswire both refused/timed out on direct fetch; the release figures above came via the StockTitan mirror of the company releases and search snippets. Numbers are quoted as the company reported them, but they are one hop from primary.
+
+**Sources:** [Q1 FY27 earnings release (SEC)](https://www.sec.gov/Archives/edgar/data/1524566/000162828026040793/q127earningsrelease.htm) · [Q1 FY27 mirror](https://www.stocktitan.net/news/WLTH/wealthfront-reports-fiscal-first-quarter-2027-gzlk51d581b5.html) · [June 2026 monthly metrics](https://www.globenewswire.com/news-release/2026/07/07/3323635/0/en/wealthfront-reports-june-2026-monthly-metrics.html) · [June metrics table](https://www.stocktitan.net/news/WLTH/wealthfront-reports-june-2026-monthly-6jp2x80cy11p.html) · [Q2 FY27 date PR](https://www.globenewswire.com/news-release/2026/08/19/3347969/0/en/wealthfront-to-announce-fiscal-second-quarter-2027-financial-results-on-september-9-2026.html) · [FY26 results](https://www.barchart.com/story/news/697589/wealthfront-reports-fiscal-fourth-quarter-and-full-year-2026-results) · [Cash Account APY](https://www.wealthfront.com/cash) · [Home Lending CA launch 8/11/26](https://www.globenewswire.com/news-release/2026/08/11/3343048/0/en/wealthfront-home-lending-launches-in-california-with-rates-0-50-below-the-national-average.html) · [RIABiz on the 95.1% stake](https://riabiz.com/a/2026/1/13/wealthfronts-shares-nosedive-after-tepid-flows-and-stark-revelation-that-its-ceo-owns-the-bank-at-heart-of-robo-advisors-mortgage-future) · [Johnson Fistel investigation 8/20/26](https://www.globenewswire.com/news-release/2026/08/20/3348546/0/en/wealthfront-wlth-investor-alert-johnson-fistel-investigates-post-ipo-disclosures.html) · [June 8 selloff / PT cuts](https://www.investing.com/news/stock-market-news/why-is-wealthfront-stock-down-12-today-93CH-4731040) · [FY26 10-K summary](https://www.stocktitan.net/sec-filings/WLTH/10-k-wealthfront-corp-files-annual-report-c4edd51145bf.html) · [July 2026 FOMC hold](https://www.advisorperspectives.com/dshort/updates/2026/07/29/feds-interest-rate-decision-july-29-2026)

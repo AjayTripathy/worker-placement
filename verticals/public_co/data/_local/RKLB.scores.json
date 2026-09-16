@@ -1,0 +1,74 @@
+{"ticker": "RKLB", "scores": [
+  {
+    "claim_id": "C8",
+    "claim_text": "Direct Funding Agreement with U.S. Department of Commerce that restricts share buybacks/dividends (likely CHIPS Act solar-cell industrial-base award supporting Albuquerque SolAero facility).",
+    "severity": "UNVERIFIED",
+    "supports": null,
+    "M_check": "usaspending.query_recipient_grants + contracts (Rocket Lab, SolAero, Department of Commerce)",
+    "M_value": {"rocketlab_doc_grants": 0, "rocketlab_doc_contracts": 0, "lean_rocket_lab_only_doc_grant": 563302.51, "solaero_grants_DoD_only": 3, "solaero_grants_doc": 0},
+    "interpretation": "UNVERIFIED. The Direct Funding Agreement with Commerce is disclosed only in passing (as a dividend/buyback restriction) but no specific dollar amount, program name, or award date is given. USAspending shows zero Commerce awards to Rocket Lab USA or to SolAero Technologies. CHIPS Act / industrial-base awards often take 6-12 months to post in USAspending after announcement, and the agreement's existence is corroborated only by the negative-covenant text in the 10-K itself. Not a hard contradiction (Heuristic 7 not triggered because no dollar amount was asserted), but the lack of any independent footprint is a moderate amber flag worth tracking; if no related Commerce-CHIPS line item appears post-cutoff, this would migrate to MODERATE."
+  },
+  {
+    "claim_id": "C7",
+    "claim_text": "Neutron medium-lift vehicle (13,000 kg reusable to LEO) under development at LC-3 Wallops; Jan 21 2026 Stage 1 tank ruptured in hydro qual test, impacting launch schedule; securities class action re Neutron progress representations.",
+    "severity": "MODERATE",
+    "supports": true,
+    "M_check": "edgar_fts.query_fulltext (Neutron 8-K) + filing self-disclosure",
+    "M_value": {"neutron_8K_mentions": 61, "tank_failure_8K": "0001819994-26-000004 filed 2026-01-22", "securities_class_action_status": "Motion to Dismiss granted Nov 10 2025; amended complaint filed Dec 19 2025; second MTD filed Jan 19 2026", "neutron_operational": false, "lc3_status": "expected in service in 2026; under construction"},
+    "interpretation": "MODERATE per Calibration Heuristic 3 (planned-vs-operational with EXTRA WEIGHT). Neutron is squarely in the 'design/prototype' stage of the stage ladder — not yet first-launched. The Jan 2026 tank rupture is candidly disclosed as a subsequent event, and the 8-K trail confirms timely public disclosure. However, the existence of a securities class action specifically alleging misstatements about Neutron development progress is a real signal that prior public communications may have overstated readiness; the case had survived to amended-complaint stage as of cutoff. Score MODERATE because: (a) the 10-K itself is honest about the slip; (b) the still-pending litigation indicates the market is testing the prior optimism; (c) Neutron 2026 service entry now looks optimistic given Q1 tank failure. Not SEVERE because disclosure is contemporaneous and concrete."
+  },
+  {
+    "claim_id": "C6",
+    "claim_text": "NASA Artemis-program work (CAPSTONE lunar mission via Photon, 2022) and components used by defense primes (Lockheed, Northrop, Raytheon).",
+    "severity": "PASS",
+    "supports": true,
+    "M_check": "edgar_fts.query_fulltext (LMT, NOC, RTX CIKs) + USAspending NASA CAPSTONE",
+    "M_value": {"LMT_hits": 0, "NOC_hits": 0, "RTX_hits": 0, "NASA_CAPSTONE_USAspending_award_id": "80KSC020C0002", "NASA_CAPSTONE_award_usd": 10065500, "NASA_VADR_award_usd": 32322522},
+    "interpretation": "PASS. The CAPSTONE lunar pathfinder claim — the only specific Artemis-related claim in the 10-K — is independently confirmed in USAspending (NASA award 80KSC020C0002 for $10.07M, CISLUNAR AUTONOMOUS POSITIONING SYSTEM TECHNOLOGY OPERATIONS AND NAVIGATION EXPERIMENT LAUNCH SERVICE). Defense-prime corroboration is null (LMT/NOC/RTX 10-Ks do not mention 'Rocket Lab'), but the 10-K does not name any specific prime as a material customer — it only generically references 'aerospace prime contractors' — so Heuristic 7 absence-while-naming is not triggered."
+  },
+  {
+    "claim_id": "C5",
+    "claim_text": "Physical US facilities: Long Beach CA HQ/engines, Albuquerque NM solar cells (~160K sq ft), Stennis MS Archimedes test, Middle River MD composites, Tucson AZ optical, Wallops VA launch.",
+    "severity": "PASS",
+    "supports": true,
+    "M_check": "epa_frs.query_facilities (multi-state)",
+    "M_value": {"SolAero_Albuquerque_NM": "REGISTERED (10420 Research Rd SE)", "Rocket_Lab_Middle_River_MD": "REGISTERED (605 Chesapeake Plaza)", "Long_Beach_CA": "not in FRS under Rocket Lab name", "Stennis_MS": "not in FRS (NASA-leased)", "Wallops_VA": "not in FRS (NASA-leased)", "GEOST_AZ": "not in FRS"},
+    "interpretation": "PASS with caveat. The two purely commercial industrial sites that RKLB operates as principal — the SolAero solar-cell fab in Albuquerque and the composite production complex in Middle River MD — both appear in EPA FRS under exactly the names and addresses claimed. The non-appearance of Long Beach (likely office/light-mfg), Stennis (NASA leasehold, registers under NASA), Wallops (NASA leasehold), and the Tucson GEOST site (recent acquisition Aug 2025) is consistent with their facility-ownership status rather than a fabrication. Heuristic 1 (EPA-FRS scope) test passes: at least two claimed industrial facilities are independently verified."
+  },
+  {
+    "claim_id": "C4",
+    "claim_text": "Proprietary technology: 3D-printed Rutherford engines, Photon spacecraft, Archimedes engine, optical systems, reaction wheels, kick stage, composite tanks; patent portfolio backs claims.",
+    "severity": "PASS",
+    "supports": true,
+    "M_check": "uspto_odp.query_assignee (Rocket Lab + acquired-subsidiaries)",
+    "M_value": {"rocketlab_n_total_applications": 24, "rocketlab_n_granted": 14, "solaero_n_granted": 174, "geost_n_granted": 0, "patent_titles_observed": ["ROCKET ENGINE INJECTOR (2025)", "JETTISONABLE BATTERY SYSTEMS FOR ELECTRICAL TURBOPUMPS (2024)", "SATELLITE DEPLOYER WITH COMPOSITE GUIDE RAIL (2023)", "SATELLITE DEPLOYER WITH EXTERNALLY ADJUSTABLE PAYLOAD RESTRAINT (2023)"]},
+    "interpretation": "PASS per Heuristic 8. RKLB has 14 granted patents under its own name with titles directly mapping to claimed tech (Rutherford engine injector, electric turbopump battery system, satellite deployer / kick-stage composite hardware). Acquired subsidiary SolAero adds 174 granted patents (solar cell / III-V multi-junction technology). Combined IP portfolio comfortably exceeds the n_granted >= 10 threshold and the title hits cover propulsion + spacecraft + structures."
+  },
+  {
+    "claim_id": "C3",
+    "claim_text": "Named commercial customers Blacksky, Capella, Planet, Synspective, Canon, Kineis, OHB, MDA Corporation (17-spacecraft-bus contract). Material commercial customers visible in counterparty 10-Ks.",
+    "severity": "PASS",
+    "supports": true,
+    "M_check": "edgar_fts.query_fulltext (counterparty CIKs)",
+    "M_value": {"blacksky_10k_hits": 15, "planet_10k_hits": 8, "foreign_filer_hits": 4, "mda_status": "Canadian filer (TSX), off-EDGAR — UNVERIFIABLE per Heuristic 5"},
+    "interpretation": "PASS. BlackSky (CIK 0001753539) mentions Rocket Lab 15x in EDGAR filings, including a launch-services agreement filed as an exhibit (a1034-blackskyxrocketloa.htm). Planet Labs references Rocket Lab 8x. The MDA Corporation contract is the largest individual commercial relationship in space-systems backlog (17 buses) but MDA Space is a Canadian TSX issuer not in EDGAR (foreign-jurisdiction unverifiable per Heuristic 5; not a contradiction). No commercial-customer disclosure contradiction; Heuristic 7 counterparty-disclosure threshold satisfied."
+  },
+  {
+    "claim_id": "C2",
+    "claim_text": "21 Electron launches in 2025 (2nd most-frequent orbital rocket); 75 cumulative successful missions / 200+ spacecraft deployed through 12/31/2025; revenue $601.8M FY2025 (+38% YoY).",
+    "severity": "PASS",
+    "supports": true,
+    "M_check": "edgar_fts.query_fulltext + internal cadence consistency",
+    "M_value": {"electron_mentions_rklb_filings": 84, "rocketlab_external_mentions": 200, "fy_revenue_per_10k_usd_m": 601.8, "vehicles_built_2025": 24, "vehicles_launched_2025": 21, "revenue_per_launch_usd_m": 8.5, "cost_per_launch_usd_m": 4.8, "prior_year_built": 14, "prior_year_launched": 16},
+    "interpretation": "PASS. Launch cadence (21 launches/yr from 16 prior) is internally consistent: MD&A reports approximately 24 vehicles built and 21 launched in 2025, with revenue/cost-per-launch tracking the higher cadence (RPL up to $8.5M, CPL down to $4.8M driven by scale efficiencies). Electron is name-checked extensively in RKLB EDGAR filings (84 hits) and the company is independently referenced 200+ times across third-party EDGAR. No internal cadence contradiction in financial-statement notes. Calibration Heuristic 11 (cadence-vs-manifest) satisfied."
+  },
+  {
+    "claim_id": "C1",
+    "claim_text": "Federal contractor (DoW, NASA, DARPA, NRO) including SDA Tranche 3 contract Dec 2025; federal-agency dollars should be visible in USAspending.",
+    "severity": "PASS",
+    "supports": true,
+    "M_check": "usaspending.query_recipient_contracts (Rocket Lab)",
+    "M_value": {"n_awards": 17, "total_amount_usd": 81135408, "agencies": {"NASA": 10, "DoD": 7}, "named_programs_observed": ["VADR umbrella task order ($32.3M)", "STP-S30 mission ($14.5M)", "CAPSTONE launch ($10.1M)", "VCLS ($6.95M)", "DARPA R3D2 ($6.8M)", "NSSL Phase 3 Lane 1 ($5.0M)"]},
+    "interpretation": "Strong PASS. USAspending confirms RKLB as a NASA + DoD prime/subcontractor with $81M aggregate contract value across 17 awards. Named programs in 10-K text (NSSL Phase 3 Lane 1, CAPSTONE, VADR, STP-S30) all map directly to USAspending records. Layer-3 Rule 7 federal-contract test passes decisively. SDA Tranche 3 not individually verified but would likely flow via SDA awarding office; not contradicted."
+  }
+]}

@@ -1,0 +1,528 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>us_broad_dislocation_sweep</title><style>
+body{margin:0;background:#0b0e12;color:#e8ebee;font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:26px 24px 90px}
+a{color:#8b7cf6} h1{font-size:23px;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:#7d858e;margin:0 0 20px;font-size:13px}
+h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:#7d858e;margin:24px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 10px;border-bottom:1px solid #242a31;text-align:left;vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#7d858e}
+.k{font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:20px}
+.k-generator{color:#c3b8fb;background:rgba(139,124,246,.15)}
+.k-detector{color:#eccb8a;background:rgba(217,164,65,.15)}
+.k-watcher{color:#8ee5c1;background:rgba(53,201,143,.15)}
+.k-evidence{color:#b3bcc6;background:rgba(138,147,158,.15)}
+.h-OK{color:#35c98f} .h-STALE{color:#d9a441} .h-ERROR{color:#e0736a} .h-NEVER_RUN{color:#8a939e}
+pre{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px;overflow-x:auto;font-size:12px;line-height:1.5}
+.panel{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px 18px;margin-bottom:12px}
+ul{margin:4px 0;padding-left:20px} li{margin-bottom:4px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+</style></head><body><div class="wrap"><h1>us_broad_dislocation_sweep</h1><p class="sub">registered capability · us_broad_dislocation_sweep</p><a href="signals.html">&larr; all signals</a><div class="panel" style="margin-top:10px"><span class="k k-generator">GENERATOR</span> &nbsp;<span class="h-NEVER_RUN"><b>NEVER_RUN</b></span> · last run <span class="mono">never</span></div><p>the BROAD-US leg of the dislocation watch (built 2026-08-13).</p><form method="POST" action="/signals/run" style="margin:10px 0"><input type="hidden" name="name" value="us_broad_dislocation_sweep"><input name="symbol" placeholder="symbol (if applicable)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px"><input name="symbols" placeholder="universe, comma-sep (generators)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px;margin-left:6px"><button type="submit" style="background:#8b7cf6;color:#0b0e12;border:0;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;margin-left:6px">Run now</button></form><h2>Datasources</h2><ul><li>reference implementation: verticals/generators/us_broad_dislocation_sweep.py (see the code section for the feeds it touches)</li></ul><h2>Applies to</h2><ul><li><b>strategies:</b> value_band_entry</li></ul><h2>The code</h2><pre>&quot;&quot;&quot;us_broad_dislocation_sweep — the BROAD-US leg of the dislocation watch (built 2026-08-13).
+
+THE GAP IT FILLS — the SPGI miss, verified on the tape:
+  SPGI ground 457.38 (2026-07-16 close) -&gt; 405.24 (2026-08-06 close), -11.4% peak-to-trough over
+  17 sessions, with SPY flat and NO single session worse than -3.5%. Nothing on the desk saw it,
+  and every screen had a *structural* reason to be blind:
+    · broken_print_radar     only fires on SINGLE-SESSION breaks (&lt;= -15%, or -8% on 3x volume)
+    · dislocation_sweep      multi-session excess, but ONLY over the ~490-name researched universe
+                             — SPGI was never researched, so it was never in scope
+    · blob/value screens     a premium-multiple quality compounder never passes a cheapness screen
+    · intl_dislocation_sweep gives 8,133 FOREIGN names the multi-session treatment that
+                             unresearched US large-caps did not have
+  So an unresearched US large-cap could bleed a fifth of its value in a month, in full view, and
+  no watch on the desk would say a word. This module is that watch.
+
+TWO GAPS, NOT ONE. Closing the universe gap alone would still have missed SPGI, and this is the
+part worth remembering: as-of 2026-08-06 SPGI&#x27;s 21-session POINT-TO-POINT excess vs SPY was only
+-9.0pp and its deepest 5d excess over the whole slide was -7.9pp — both inside the -15/-8 gates the
+other two sweeps use. The t-21 anchor (2026-07-08) happened to be a local low, so the measure never
+saw the 7/16 peak at all. Point-to-point return is ANCHOR-LUCKY. Measured peak-anchored, the same
+tape reads -11.0pp of excess drawdown. The METRIC was as blind as the universe.
+
+FIVE LEGS (all the shared, date-aligned machinery in intl_dislocation_sweep — this module owns no
+benchmark arithmetic of its own):
+    5d       excess vs SPY &lt;= -8pp   (HIGH -12)   — the sharp break
+    21d      excess vs SPY &lt;= -15pp  (HIGH -20)   — the classic multi-session dislocation
+    grind21  excess DRAWDOWN from the 21-session high &lt;= -11pp (HIGH -18)   &lt;- the SPGI shape
+    63d      excess vs SPY &lt;= -20pp  (HIGH -28), raw &lt;= -10%  — the multi-month grind
+    bleed52  (dd-from-52w-high - SPY&#x27;s own) &lt;= -25pp AND still WIDENING &gt;= 5pp/21 sessions
+                                                                          -&gt; labelled SLOW_BLEED
+Bands are calibrated on the S&amp;P 500 across five as-of dates spanning +18.5% and -5.2% SPY 63d
+regimes; see the calibration block at the top of intl_dislocation_sweep. Every leg keeps the
+raw-move-must-be-negative guard: underperforming a ripping tape is relative weakness, not a
+dislocation, and firing on it is the beta-bleed error.
+
+UNIVERSE = S&amp;P 500 constituents (the weekly-cached Wikipedia list spinoff_orphans already
+maintains) UNION broken_print_radar&#x27;s broad US cap-ladder universe (~800 names, its own builder,
+cached weekly here to stay inside the Yahoo rate budget), MINUS everything already in the
+researched universe — those are dislocation_sweep&#x27;s names and a double-fire is noise, not coverage.
+So every fire from this module is by construction an UNRESEARCHED name: an intake proposal.
+
+BENCHMARK = SPY for the gate. The SPDR sector ETF is resolved lazily FOR FIRES ONLY (one cached
+yfinance lookup per new name, never for the whole universe) and printed as CONTEXT: a name -12pp vs
+SPY but -1pp vs XLF is a sector move wearing a single name&#x27;s clothes, and triage should see that
+before it opens a court.
+
+PROPOSES ONLY. Identical routing to the other two sweeps: cause-check -&gt; discovery_state -&gt;
+independent court (v1.4) -&gt; thesis doc -&gt; THEN staging. Fires are ENQUEUE-CANDIDATEs.
+
+Emits DETFIRE|us_broad_dislocation|&lt;ticker&gt;|&lt;SEV&gt;|&lt;evidence&gt;; the registry&#x27;s detector_scan
+extractor turns them into DETECTOR_FIRE signals. Writes data/US_BROAD_DISLOCATION_SWEEP.json +
+data/us_broad_dislocation_state.json (new-vs-deepened dedup, keyed on tier AND leg set).
+
+  python3 verticals/generators/us_broad_dislocation_sweep.py [--limit 200] [--dry-run]
+  python3 verticals/generators/us_broad_dislocation_sweep.py --refresh-universe   # force the ladder
+&quot;&quot;&quot;
+from __future__ import annotations
+
+import argparse
+import datetime
+import json
+import sys
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[1]
+DATA = HERE / &quot;data&quot;
+OUT_JSON = DATA / &quot;US_BROAD_DISLOCATION_SWEEP.json&quot;
+STATE = DATA / &quot;us_broad_dislocation_state.json&quot;
+UNI_CACHE = DATA / &quot;_us_broad_universe.json&quot;
+SECTOR_CACHE = DATA / &quot;_us_sector_cache.json&quot;
+LEDGER = ROOT / &quot;desk&quot; / &quot;data&quot; / &quot;research_ledger.json&quot;
+
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from verticals.generators import intl_dislocation_sweep as I   # noqa: E402  (shared machinery)
+
+# ---------------------------------------------------------------- tunables (top, per house rule)
+BENCH = &quot;SPY&quot;
+HISTORY = &quot;1y&quot;               # bleed52 needs a real 52-week high; a 3mo window cannot supply one
+LADDER_SIZE = 250            # names per cap band asked of broken_print_radar&#x27;s builder
+UNI_CACHE_DAYS = 7           # the cap ladder costs 8 screener calls — refresh weekly, not daily
+BATCH = 60                   # yfinance names per download call (1y payload; 60 is comfortable)
+PAUSE = 0.8                  # polite gap between batches; ~14 batches ≈ 20s for the whole leg
+TIME_BUDGET_S = 420          # wall clock for the price pull; the runner kills a watch at 600s
+MIN_UNIVERSE = 400           # below this the universe build is BROKEN — refuse, never report quiet
+SECTOR_LOOKUP_CAP = 40       # sector context is per-FIRE only; cap the tail on a loud tape
+EVIDENCE_BUDGET = 600        # desk.signals.make truncates evidence here — see fire_line()
+
+# Sector -&gt; SPDR sector ETF. CONTEXT ONLY, never the gate. Both vocabularies are here on purpose:
+# the index table publishes true GICS names (&quot;Health Care&quot;, &quot;Information Technology&quot;) while
+# yfinance publishes its own (&quot;Healthcare&quot;, &quot;Technology&quot;), and the two sources feed the same map.
+SECTOR_ETF = {
+    # yfinance vocabulary
+    &quot;Technology&quot;: &quot;XLK&quot;, &quot;Financial Services&quot;: &quot;XLF&quot;, &quot;Healthcare&quot;: &quot;XLV&quot;,
+    &quot;Consumer Cyclical&quot;: &quot;XLY&quot;, &quot;Consumer Defensive&quot;: &quot;XLP&quot;, &quot;Industrials&quot;: &quot;XLI&quot;,
+    &quot;Energy&quot;: &quot;XLE&quot;, &quot;Utilities&quot;: &quot;XLU&quot;, &quot;Real Estate&quot;: &quot;XLRE&quot;,
+    &quot;Basic Materials&quot;: &quot;XLB&quot;, &quot;Communication Services&quot;: &quot;XLC&quot;,
+    # GICS vocabulary (the constituent table)
+    &quot;Information Technology&quot;: &quot;XLK&quot;, &quot;Financials&quot;: &quot;XLF&quot;, &quot;Health Care&quot;: &quot;XLV&quot;,
+    &quot;Consumer Discretionary&quot;: &quot;XLY&quot;, &quot;Consumer Staples&quot;: &quot;XLP&quot;, &quot;Materials&quot;: &quot;XLB&quot;,
+}
+SECTOR_SEED_DAYS = 7         # re-seed the free index-table sector map weekly
+SECTOR_INFO_BUDGET = 12      # per run: yfinance .info calls for names the free seed cannot cover
+SECTOR_INFO_PAUSE = 0.4      # …paced; a 100-call burst rate-limits the whole Yahoo session
+SP500_WIKI = &quot;https://en.wikipedia.org/wiki/List_of_S%26P_500_companies&quot;
+SECTOR_ETFS = sorted(set(SECTOR_ETF.values()))
+DETECTOR = &quot;us_broad_dislocation&quot;
+
+
+# ---------------------------------------------------------------- universe
+def yf_us(ticker: str) -&gt; str:
+    &quot;&quot;&quot;Index/ledger ticker -&gt; Yahoo symbol. BRK.B -&gt; BRK-B (the class-share convention).&quot;&quot;&quot;
+    return ticker.replace(&quot;.&quot;, &quot;-&quot;)
+
+
+def sp500(cache_only: bool = False) -&gt; tuple[list[str], str]:
+    &quot;&quot;&quot;S&amp;P 500 constituents + the list&#x27;s asof date, off the weekly cache spinoff_orphans keeps.
+
+    Reuses that module&#x27;s fetcher rather than re-scraping: one cache, one refresh cadence, one
+    place where a degraded Wikipedia fetch is refused.&quot;&quot;&quot;
+    try:
+        js = json.loads((HERE / &quot;data&quot; / &quot;_sp_constituents.json&quot;).read_text())
+        asof, rows = js.get(&quot;asof&quot;, &quot;?&quot;), (js.get(&quot;indices&quot;) or {}).get(&quot;500&quot;) or []
+    except Exception:
+        asof, rows = &quot;?&quot;, []
+    stale = True
+    try:
+        stale = (datetime.date.today() - datetime.date.fromisoformat(asof)).days &gt; 7
+    except Exception:
+        pass
+    if rows and (cache_only or not stale):
+        return sorted(rows), asof
+    try:                                       # cache absent or stale -&gt; let the owner refresh it
+        from verticals.generators.spinoff_orphans import sp_constituents
+        idx = sp_constituents()
+        got = sorted((idx or {}).get(&quot;500&quot;) or [])
+        if got:
+            return got, datetime.date.today().isoformat()
+    except Exception as e:
+        print(f&quot;[us_broad] S&amp;P constituent refresh failed ({type(e).__name__}) — &quot;
+              f&quot;falling back to the cached list asof {asof}&quot;)
+    return sorted(rows), asof
+
+
+def cap_ladder(refresh: bool = False, size: int = LADDER_SIZE) -&gt; tuple[list[str], str]:
+    &quot;&quot;&quot;broken_print_radar&#x27;s broad US cap-ladder universe (~800 names), cached weekly here.
+
+    REUSES ITS BUILDER — the cap bands, the OTC/pink exclusion and the per-band pacing all live in
+    _us_backfill_universe and are not re-implemented. What is added is a disk cache: the ladder
+    costs 8 server-side screener calls, and this leg runs every weekday alongside two other Yahoo
+    sweeps. A degraded refetch never overwrites a good cache (the sp_constituents rule).&quot;&quot;&quot;
+    cached, asof = [], &quot;?&quot;
+    try:
+        js = json.loads(UNI_CACHE.read_text())
+        cached, asof = js.get(&quot;symbols&quot;) or [], js.get(&quot;asof&quot;, &quot;?&quot;)
+        if not refresh and (datetime.date.today() - datetime.date.fromisoformat(asof)).days &lt;= UNI_CACHE_DAYS:
+            return cached, asof
+    except Exception:
+        pass
+    try:
+        from desk.broken_print_radar import _us_backfill_universe
+        got = _us_backfill_universe(size=size)
+    except Exception as e:
+        print(f&quot;[us_broad] cap-ladder refresh FAILED ({type(e).__name__}) — using the cached &quot;
+              f&quot;ladder asof {asof} ({len(cached)} names)&quot;)
+        return cached, asof
+    if len(got) &lt; 0.5 * len(cached):
+        print(f&quot;[us_broad] cap-ladder refetch returned {len(got)} vs {len(cached)} cached = &quot;
+              f&quot;DEGRADED; keeping the cache asof {asof}&quot;)
+        return cached, asof
+    today = datetime.date.today().isoformat()
+    UNI_CACHE.write_text(json.dumps({&quot;asof&quot;: today, &quot;source&quot;: &quot;desk.broken_print_radar.&quot;
+                                     &quot;_us_backfill_universe (Yahoo cap-ladder screener)&quot;,
+                                     &quot;size_per_band&quot;: size, &quot;symbols&quot;: sorted(got)}, indent=1))
+    return sorted(got), today
+
+
+def researched() -&gt; set[str]:
+    &quot;&quot;&quot;Every ticker dislocation_sweep already covers, PLUS the dead-verdict names it drops.
+
+    Both halves matter and for different reasons: a live researched name would double-fire, and a
+    dead-verdict name (AVOID/PASS/TRAP) is one we decided not to own — its drawdown is not our
+    business. Returned in BOTH punctuations so BRK.B and BRK-B exclude each other.&quot;&quot;&quot;
+    out: set[str] = set()
+    try:
+        from verticals.generators.dislocation_sweep import build_universe
+        out |= set(build_universe())
+    except Exception as e:
+        print(f&quot;[us_broad] WARNING: researched-universe load failed ({type(e).__name__}) — &quot;
+              f&quot;exclusion is INCOMPLETE, expect double-fires against dislocation_sweep&quot;)
+    try:
+        for r in json.loads(LEDGER.read_text()).get(&quot;names&quot;, []):
+            for k in (r.get(&quot;ticker&quot;), r.get(&quot;yf&quot;)):
+                if k:
+                    out.add(str(k))
+    except Exception:
+        pass
+    return {t for x in out for t in (x, x.replace(&quot;.&quot;, &quot;-&quot;), x.replace(&quot;-&quot;, &quot;.&quot;))}
+
+
+def load_universe(refresh_universe: bool = False) -&gt; tuple[dict[str, dict], dict]:
+    &quot;&quot;&quot;symbol -&gt; {shelf, bench, researched, verdict}, plus a provenance report.&quot;&quot;&quot;
+    idx, idx_asof = sp500()
+    ladder, ladder_asof = cap_ladder(refresh=refresh_universe)
+    known = researched()
+    uni: dict[str, dict] = {}
+    excluded = 0
+    for shelf, rows in ((&quot;sp500&quot;, idx), (&quot;us_tape&quot;, ladder)):
+        for tk in rows:
+            sym = yf_us(tk)
+            if sym in uni:
+                continue
+            if tk in known or sym in known:
+                excluded += 1
+                continue
+            uni[sym] = {&quot;shelf&quot;: shelf, &quot;bench&quot;: BENCH, &quot;researched&quot;: False,
+                        &quot;verdict&quot;: &quot;UNRESEARCHED&quot;}
+    rep = {&quot;sp500&quot;: len(idx), &quot;sp500_asof&quot;: idx_asof, &quot;cap_ladder&quot;: len(ladder),
+           &quot;cap_ladder_asof&quot;: ladder_asof, &quot;excluded_already_researched&quot;: excluded,
+           &quot;universe&quot;: len(uni)}
+    return uni, rep
+
+
+# ---------------------------------------------------------------- sector context (fires only)
+def seed_sectors(cache: dict, force: bool = False) -&gt; str:
+    &quot;&quot;&quot;Fill the sector map from the FREE index constituent table (Symbol + GICS Sector columns).
+
+    WHY THIS EXISTS — the first live run resolved 0 of 114 sectors. yfinance&#x27;s .info goes through
+    Yahoo&#x27;s cookie/crumb endpoint, and a burst of it straight after an 875-name history sweep
+    trips YFRateLimitError for every single name. The failure was correctly LABELLED per line
+    (&#x27;SECTOR CONTEXT UNAVAILABLE&#x27;) but the mechanism was simply not working, which is a defect
+    however honestly it is reported. The constituent table carries the sector for ~500 of the
+    names outright, for one HTTP GET a week and zero Yahoo quota.&quot;&quot;&quot;
+    marker = cache.get(&quot;_seed&quot;) or {}
+    try:
+        fresh = (datetime.date.today()
+                 - datetime.date.fromisoformat(marker.get(&quot;asof&quot;, &quot;1970-01-01&quot;))).days &lt; SECTOR_SEED_DAYS
+    except Exception:
+        fresh = False
+    if fresh and not force:
+        return f&quot;cached seed asof {marker.get(&#x27;asof&#x27;)} ({marker.get(&#x27;n&#x27;, 0)} names)&quot;
+    import re
+    import urllib.request
+    try:
+        req = urllib.request.Request(SP500_WIKI, headers={&quot;User-Agent&quot;: &quot;signalos-research 4tripathy@gmail.com&quot;})
+        html = urllib.request.urlopen(req, timeout=60).read().decode(&quot;utf-8&quot;, &quot;ignore&quot;)
+        tbl = re.findall(r&quot;&lt;table[^&gt;]*wikitable[^&gt;]*&gt;(.*?)&lt;/table&gt;&quot;, html, re.S)[0]
+    except Exception as e:
+        return f&quot;seed FAILED ({type(e).__name__}) — keeping {len(cache) - 1} cached names&quot;
+    n = 0
+    for row in re.findall(r&quot;&lt;tr[^&gt;]*&gt;(.*?)&lt;/tr&gt;&quot;, tbl, re.S):
+        cells = [re.sub(r&quot;&lt;[^&gt;]+&gt;&quot;, &quot;&quot;, c).strip()
+                 for c in re.findall(r&quot;&lt;t[dh][^&gt;]*&gt;(.*?)&lt;/t[dh]&gt;&quot;, row, re.S)]
+        if len(cells) &lt; 3 or not re.fullmatch(r&quot;[A-Z][A-Z.\-]{0,5}&quot;, cells[0]):
+            continue
+        sec = cells[2]
+        if sec not in SECTOR_ETF:
+            continue
+        cache[yf_us(cells[0])] = {&quot;etf&quot;: SECTOR_ETF[sec], &quot;sector&quot;: sec, &quot;src&quot;: &quot;index_table&quot;,
+                                  &quot;asof&quot;: datetime.date.today().isoformat()}
+        n += 1
+    cache[&quot;_seed&quot;] = {&quot;asof&quot;: datetime.date.today().isoformat(), &quot;n&quot;: n, &quot;source&quot;: SP500_WIKI}
+    return f&quot;seeded {n} names from the index table (free, no Yahoo quota)&quot;
+
+
+def sector_etf(symbol: str, cache: dict, budget: list[int]) -&gt; tuple[str | None, str]:
+    &quot;&quot;&quot;(SPDR sector ETF, sector name) for ONE ticker. (&#x27;&#x27;, &#x27;UNKNOWN&#x27;) if unresolved.
+
+    Ladder: disk cache (permanent — a company&#x27;s sector does not change) -&gt; the free index-table
+    seed -&gt; a PACED, BUDGETED yfinance .info call. `budget` is a one-element list acting as a
+    mutable counter across the run, so the map fills in over days instead of in one rate-limiting
+    burst — the same discipline the cohort mapper uses.&quot;&quot;&quot;
+    if symbol in cache and symbol != &quot;_seed&quot;:
+        c = cache[symbol]
+        return c.get(&quot;etf&quot;), c.get(&quot;sector&quot;, &quot;UNKNOWN&quot;)
+    if budget[0] &lt;= 0:
+        return None, &quot;UNKNOWN&quot;
+    budget[0] -= 1
+    sec, err = &quot;&quot;, &quot;&quot;
+    try:
+        import time as _t
+        import yfinance as yf
+        _t.sleep(SECTOR_INFO_PAUSE)
+        sec = (yf.Ticker(symbol).info or {}).get(&quot;sector&quot;) or &quot;&quot;
+    except Exception as e:
+        err = type(e).__name__
+        if &quot;RateLimit&quot; in err:                       # stop asking; the whole session is throttled
+            budget[0] = 0
+    if err:
+        return None, &quot;UNKNOWN&quot;                       # NOT cached: a throttled miss is not a fact
+    etf = SECTOR_ETF.get(sec)
+    cache[symbol] = {&quot;etf&quot;: etf, &quot;sector&quot;: sec or &quot;UNKNOWN&quot;, &quot;src&quot;: &quot;yfinance&quot;,
+                     &quot;asof&quot;: datetime.date.today().isoformat()}
+    return etf, (sec or &quot;UNKNOWN&quot;)
+
+
+def attach_sector_context(hits: list[dict], bars: dict, cap: int = SECTOR_LOOKUP_CAP,
+                          seed: bool = True) -&gt; tuple[int, str]:
+    &quot;&quot;&quot;Annotate each fire with its excess vs its own sector ETF. CONTEXT, never a gate.
+
+    Uses the same date-aligned lookup as the SPY leg, so the sector number is comparable to the
+    headline one rather than a positionally-drifted lookalike. Returns (n_annotated, status) —
+    the status is REPORTED, never swallowed: &#x27;we could not resolve the sector&#x27; and &#x27;we were rate
+    limited out of asking&#x27; are different facts.&quot;&quot;&quot;
+    try:
+        cache = json.loads(SECTOR_CACHE.read_text())
+    except Exception:
+        cache = {}
+    # CACHE HYGIENE, and it is not cosmetic: the first live run was rate-limited and wrote 30
+    # entries saying sector=UNKNOWN. Those are not facts about the companies, they are a record of
+    # an outage — and once on disk they are answered from cache forever, so the outage becomes
+    # permanent. An unresolved sector is dropped on load and simply re-asked later.
+    stale = [k for k, v in cache.items()
+             if k != &quot;_seed&quot; and isinstance(v, dict) and not v.get(&quot;etf&quot;)]
+    for k in stale:
+        cache.pop(k)
+    status = seed_sectors(cache) if seed else &quot;seed skipped&quot;
+    if stale:
+        status += f&quot;; dropped {len(stale)} unresolved-sector cache entries (re-ask, don&#x27;t inherit an outage)&quot;
+    budget = [SECTOR_INFO_BUDGET]
+    n = 0
+    for h in hits[:cap]:
+        etf, sec = sector_etf(h[&quot;ticker&quot;], cache, budget)
+        h[&quot;sector&quot;] = sec
+        h[&quot;sector_bench&quot;] = etf or &quot;UNAVAILABLE&quot;
+        if not etf or etf not in bars:
+            continue
+        e = bars.get(h[&quot;ticker&quot;])
+        m = I._moves(e)
+        if not m:
+            continue
+        anchors = m[3]
+        bm = I._bench_moves(bars.get(etf), anchors)
+        if bm:
+            h[&quot;sector_excess21_pct&quot;] = round(h[&quot;r21_pct&quot;] - bm[1], 1)
+            h[&quot;sector_r21_pct&quot;] = round(bm[1], 1)
+        dd = I._drawdown(e, I.MIN_BARS - 1)
+        if dd is not None:
+            sdd = I._bench_drawdown(bars.get(etf), dd[&quot;d_peak&quot;], dd[&quot;d_now&quot;])
+            if sdd is not None:
+                h[&quot;sector_excess_dd21_pct&quot;] = round(dd[&quot;dd_pct&quot;] - sdd, 1)
+        n += 1
+    try:
+        SECTOR_CACHE.write_text(json.dumps(cache, indent=1, sort_keys=True))
+    except Exception:
+        pass
+    unresolved = sum(1 for h in hits[:cap] if h.get(&quot;sector_bench&quot;) == &quot;UNAVAILABLE&quot;)
+    if budget[0] == 0 and unresolved:
+        status += (f&quot;; yfinance .info budget EXHAUSTED or rate-limited — {unresolved} fire(s) &quot;
+                   f&quot;carry no sector context this run (they resolve on later runs as the cache fills)&quot;)
+    return n, status
+
+
+def sector_clause(hit: dict, short: bool = False) -&gt; str:
+    &quot;&quot;&quot;The &#x27;is this just the sector?&#x27; sentence. Silent when we could not resolve one.&quot;&quot;&quot;
+    etf = hit.get(&quot;sector_bench&quot;)
+    if not etf or etf == &quot;UNAVAILABLE&quot;:
+        return f&quot; SECTOR CONTEXT UNAVAILABLE (sector={hit.get(&#x27;sector&#x27;, &#x27;UNKNOWN&#x27;)}).&quot;
+    bits = []
+    if hit.get(&quot;sector_excess21_pct&quot;) is not None:
+        bits.append(f&quot;{hit[&#x27;sector_excess21_pct&#x27;]:+.1f}pp/21d&quot;)
+    if hit.get(&quot;sector_excess_dd21_pct&quot;) is not None:
+        bits.append(f&quot;{hit[&#x27;sector_excess_dd21_pct&#x27;]:+.1f}pp on the 21d drawdown&quot;)
+    if not bits:
+        return f&quot; SECTOR CONTEXT UNAVAILABLE ({etf} had no date-aligned series).&quot;
+    if short:
+        return f&quot; SECTOR vs {etf}: {&#x27; / &#x27;.join(bits)}.&quot;
+    return (f&quot; SECTOR: vs {etf} ({hit.get(&#x27;sector&#x27;)}) the same move is {&#x27; / &#x27;.join(bits)}&quot;
+            f&quot; — near zero = the sector, not the name.&quot;)
+
+
+def fire_line(hit: dict) -&gt; str:
+    &quot;&quot;&quot;The shared DETFIRE line, retagged us_broad, with the sector-context sentence spliced in
+    ahead of the doctrine sentence (which stays verbatim and LAST).
+
+    LENGTH IS A CONTRACT, not cosmetics: desk.signals.make truncates `evidence` at
+    EVIDENCE_BUDGET chars, so a line that runs long silently loses its TAIL — and the tail is the
+    routing sentence plus the PROPOSES-ONLY doctrine, the two parts that stop a reader treating a
+    fire as a buy. Five legs plus a SUSPECT label plus sector context can overrun it. So the line
+    is assembled down a ladder that sheds the least load-bearing prose first, in this order:
+        sector sentence (long -&gt; numbers-only -&gt; gone)  -&gt;  leg evidence (prose -&gt; numbers -&gt; gone)
+    The routing and the doctrine are never candidates. The final hard cut exists only so the
+    guarantee is STRUCTURAL and does not depend on anyone remembering to keep the prose short.&quot;&quot;&quot;
+    ladder = [(sector_clause(hit), None), (sector_clause(hit, short=True), None),
+              (&quot;&quot;, None), (&quot;&quot;, I.leg_clause(hit, compact=True)), (&quot;&quot;, &quot;&quot;)]
+    for sec, legs_text in ladder:
+        parts = I.fire_line(hit, detector=DETECTOR, shelf_word=&quot;universe&quot;,
+                            legs_text=legs_text).replace(I.DOCTRINE, sec + I.DOCTRINE).split(&quot;|&quot;, 4)
+        if len(parts[4]) &lt;= EVIDENCE_BUDGET:
+            return &quot;|&quot;.join(parts)
+    tail = &quot; …(full metrics: US_BROAD_DISLOCATION_SWEEP.json)&quot; + I.DOCTRINE
+    parts[4] = parts[4][:max(0, EVIDENCE_BUDGET - len(tail))].rstrip() + tail
+    return &quot;|&quot;.join(parts)
+
+
+# ---------------------------------------------------------------- driver
+def sweep(limit: int = 0, dry_run: bool = False, refresh_universe: bool = False,
+          quiet_sessions: int = I.QUIET_SESSIONS,
+          legs: tuple[str, ...] = I.LEGS_ALL) -&gt; list[dict]:
+    today = datetime.date.today().isoformat()
+    uni, rep = load_universe(refresh_universe=refresh_universe)
+    syms = sorted(uni)
+    if limit:
+        syms = syms[:limit]
+        uni = {s: uni[s] for s in syms}
+    if not limit and len(syms) &lt; MIN_UNIVERSE:
+        # The silently-dead-watch failure in its universe form: a broken constituent list would
+        # make this print &quot;0 dislocations&quot; forever, which reads exactly like a calm tape.
+        raise SystemExit(f&quot;[us_broad] UNIVERSE BUILD FAILED: {len(syms)} names (&lt; {MIN_UNIVERSE}) — &quot;
+                         f&quot;{rep}. Refusing to run a screen whose quiet result would be a lie.&quot;)
+    print(f&quot;[us_broad] {today}: universe {len(syms)} &quot;
+          f&quot;(S&amp;P500 {rep[&#x27;sp500&#x27;]} asof {rep[&#x27;sp500_asof&#x27;]} + cap-ladder {rep[&#x27;cap_ladder&#x27;]} asof &quot;
+          f&quot;{rep[&#x27;cap_ladder_asof&#x27;]}, minus {rep[&#x27;excluded_already_researched&#x27;]} already-researched) &quot;
+          f&quot;· legs {&#x27;,&#x27;.join(legs)} · bench {BENCH} + {len(SECTOR_ETFS)} sector ETFs&quot;)
+
+    bars, not_swept = I.fetch_bars(syms + [BENCH] + SECTOR_ETFS, batch=BATCH, pause=PAUSE,
+                                   budget_s=TIME_BUDGET_S, period=HISTORY, label=&quot;us_broad&quot;)
+    missing = [s for s in syms if len(((bars.get(s) or {}).get(&quot;close&quot;)) or []) &lt; I.MIN_BARS
+               and s not in set(not_swept)]
+    alt_map = {a: s for s in missing for a in I.alt_symbols(s)}
+    if alt_map:
+        print(f&quot;[us_broad] retrying {len(missing)} unpriced via {len(alt_map)} alternate forms&quot;)
+        alt_bars, _ = I.fetch_bars(sorted(alt_map), budget_s=60, period=HISTORY,
+                                   label=&quot;us_broad&quot;, verbose=False)
+        for a, b in alt_bars.items():
+            orig = alt_map[a]
+            if len(b.get(&quot;close&quot;) or []) &gt;= I.MIN_BARS and orig not in bars:
+                bars[orig] = dict(b, symbol_fixed_to=a)
+    still = [s for s in syms if len(((bars.get(s) or {}).get(&quot;close&quot;)) or []) &lt; I.MIN_BARS
+             and s not in set(not_swept)]
+    gw_alive, gw_status = (I.gw_probe(still, default_venue=(&quot;SMART&quot;, &quot;USD&quot;)) if still
+                           else ({}, &quot;not attempted&quot;))
+
+    if len((bars.get(BENCH) or {}).get(&quot;close&quot;) or []) &lt; I.BARS_63:
+        raise SystemExit(f&quot;[us_broad] ABORT: no usable {BENCH} series — every excess would be a raw &quot;
+                         f&quot;move wearing a benchmark&#x27;s name. INFRA failure, not a quiet tape.&quot;)
+
+    try:
+        state = json.loads(STATE.read_text())
+    except Exception:
+        state = {}
+    hits, new_state, scanned = I.scan(bars, uni, state, today, quiet_sessions=quiet_sessions,
+                                      legs=legs)
+    n_sector, sector_status = attach_sector_context(hits, bars)
+    for h in hits:
+        print(fire_line(h))
+
+    dline, drep = I.degraded_line(syms, bars, not_swept, gw_alive, gw_status=gw_status,
+                                  store=&quot;US_BROAD_DISLOCATION_SWEEP.json&quot;)
+    print(dline)
+    # LEG-LEVEL DEGRADATION: the slow-slide legs need more tape than the 5d/21d pair. A name with
+    # 8 months of history is screened on 5d/21d/grind21/63d and NOT on bleed52 — that is a partial
+    # screen, and reporting it as a full one is the degraded-as-observation failure.
+    short = {&quot;63d&quot;: 0, &quot;bleed52&quot;: 0}
+    for s in syms:
+        n = len(((bars.get(s) or {}).get(&quot;close&quot;)) or [])
+        if I.MIN_BARS &lt;= n &lt; I.BARS_63:
+            short[&quot;63d&quot;] += 1
+        if I.MIN_BARS &lt;= n &lt; I.BLEED_MIN_BARS:
+            short[&quot;bleed52&quot;] += 1
+    if any(short.values()):
+        print(f&quot;LEG COVERAGE: {short[&#x27;63d&#x27;]} priced names have &lt;{I.BARS_63} bars (63d leg not &quot;
+              f&quot;evaluated) and {short[&#x27;bleed52&#x27;]} have &lt;{I.BLEED_MIN_BARS} bars (bleed52 leg not &quot;
+              f&quot;evaluated) — screened, but on FEWER legs than the headline suggests&quot;)
+    by_leg: dict[str, int] = {}
+    for h in hits:
+        for lg in h.get(&quot;legs&quot;) or []:
+            by_leg[lg] = by_leg.get(lg, 0) + 1
+    # STANDING vs NEW. &quot;0 new/deepened&quot; on a day when 114 names are still dislocated reads as a
+    # quiet tape to anyone skimming. Both numbers, always.
+    print(f&quot;[us_broad] {today}: {scanned} screened · {len(new_state)} names STILL in dislocation &quot;
+          f&quot;(carried) · {len(hits)} new/deepened dislocations &quot;
+          f&quot;(by leg: {by_leg or &#x27;none&#x27;}; shapes: &quot;
+          f&quot;{ {s: sum(1 for h in hits if h[&#x27;shape&#x27;] == s) for s in (&#x27;BREAK&#x27;, &#x27;GRIND&#x27;, &#x27;SLOW_BLEED&#x27;)} }) &quot;
+          f&quot;· sector context resolved for {n_sector}/{len(hits)} [{sector_status}]&quot;
+          f&quot; — ALL UNRESEARCHED, PROPOSES ONLY&quot;)
+
+    if dry_run:
+        print(&quot;[us_broad] --dry-run: no state/JSON written&quot;)
+        return hits
+    STATE.write_text(json.dumps(new_state, indent=1))
+    OUT_JSON.write_text(json.dumps({
+        &quot;asof&quot;: today, &quot;provenance&quot;: rep, &quot;screened&quot;: scanned, &quot;legs&quot;: list(legs),
+        &quot;standing_dislocations&quot;: len(new_state),
+        &quot;benchmark&quot;: BENCH,
+        &quot;bench_r21_pct&quot;: round(I._moves(bars.get(BENCH))[2], 2),
+        &quot;bench_r63_pct&quot;: round(I._window_move(bars.get(BENCH), I.BARS_63 - 1)[1], 2),
+        &quot;leg_counts&quot;: by_leg, &quot;leg_coverage_short&quot;: short,
+        &quot;sector_context&quot;: {&quot;resolved&quot;: n_sector, &quot;status&quot;: sector_status},
+        &quot;coverage&quot;: drep, &quot;hits&quot;: hits}, indent=1))
+    return hits
+
+
+if __name__ == &quot;__main__&quot;:
+    ap = argparse.ArgumentParser()
+    ap.add_argument(&quot;--limit&quot;, type=int, default=0, help=&quot;screen only the first N symbols&quot;)
+    ap.add_argument(&quot;--dry-run&quot;, action=&quot;store_true&quot;, help=&quot;print fires; write no state/JSON&quot;)
+    ap.add_argument(&quot;--refresh-universe&quot;, action=&quot;store_true&quot;,
+                    help=&quot;force a cap-ladder refetch (8 screener calls) instead of the weekly cache&quot;)
+    ap.add_argument(&quot;--quiet-sessions&quot;, type=int, default=I.QUIET_SESSIONS)
+    ap.add_argument(&quot;--legs&quot;, default=&quot;,&quot;.join(I.LEGS_ALL),
+                    help=f&quot;comma-separated subset of {&#x27;,&#x27;.join(I.LEGS_ALL)}&quot;)
+    a = ap.parse_args()
+    sweep(limit=a.limit, dry_run=a.dry_run, refresh_universe=a.refresh_universe,
+          quiet_sessions=a.quiet_sessions,
+          legs=tuple(x.strip() for x in a.legs.split(&quot;,&quot;) if x.strip()))
+</pre></div></body></html>

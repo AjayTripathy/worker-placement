@@ -1,0 +1,163 @@
+{
+  "ticker": "GE",
+  "cutoff": "2024-09-01",
+  "filing": "0000040545-24-000027_10-K.txt",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "GE Aerospace's XA100 next-generation large-combat engine architecture is positioned as a forward growth driver, supported by U.S. DoD and foreign-government budgets for fleet upgrade and modernization.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "pentagon_jbook(XA100) = NOT_FOUND",
+        "pentagon_jbook(Adaptive Engine Transition Program / AETP) = NOT_FOUND",
+        "pentagon_jbook(PE 0604010F Next Generation Adaptive Propulsion) = FUNDED_STEADY ($573.8M FY24)",
+        "pentagon_jbook(PE 0604004F Advanced Engine Development) = FUNDED_STEADY ($270.0M FY24)"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": {
+        "XA100": "NOT_FOUND (corpus does not catalog the XA100 demonstrator name directly)",
+        "AETP": "NOT_FOUND (program-name lookup miss)",
+        "PE_0604010F_NGAP": "FUNDED_STEADY @ $573.832M FY24 (Air Force RDT&E)",
+        "PE_0604004F_AED": "FUNDED_STEADY @ $269.971M FY24 (Air Force RDT&E)"
+      },
+      "interpretation": "Apply heuristic #3 (reorganization caveat) + #4 (PE name ambiguity): XA100 was the GE entrant in the Adaptive Engine Transition Program (AETP, originally PE 0604004F-funded). In FY24 budgeting, AF cancelled the F-35 re-engine path (no XA100 production decision) and FOLDED adaptive-cycle work into the new Next Generation Adaptive Propulsion (NGAP, PE 0604010F) — which IS funded, at $573.8M. So XA100 the *named product* has been effectively cancelled as an F-35 re-engine, but adaptive-cycle propulsion R&D continues at NGAP. The narrative claim 'support for next generation large-combat engine architecture such as Aerospace's XA100 program' overstates: XA100 itself is not a Pentagon line, and the AETP program-of-record path was terminated; NGAP is a re-compete that GE must win against P&W. MODERATE because the broader propulsion-R&D bucket survives and GE remains a credible bidder, but the specifically-named product (XA100) is no longer a J-Book line."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "GE Aerospace delivered the first two T901 flight-test engines to the U.S. Army in October 2023 to power Future Attack Reconnaissance Aircraft (FARA) prototypes, framed as a significant milestone for the Defense business.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook(T901) = NOT_FOUND",
+        "pentagon_jbook(Future Attack Reconnaissance Aircraft) = NOT_FOUND",
+        "pentagon_jbook(FARA) = NOT_FOUND",
+        "pentagon_jbook(Improved Turbine Engine Program) = NOT_FOUND",
+        "usaspending: General Electric Company = 10,918 DoD awards / $12.0B cumulative (confirms GE-Army contracting relationship is real)"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": {
+        "T901": "NOT_FOUND",
+        "FARA": "NOT_FOUND",
+        "Improved Turbine Engine Program": "NOT_FOUND",
+        "usaspending_GE_DoD": "10918 awards / $11.99B (orthogonal corroboration)"
+      },
+      "interpretation": "T901 ITEP and FARA are Army programs; the J-Book corpus is heavily Air Force RDT&E / Space Force / DARPA / MDA / SOCOM and does NOT include Army PEs (per heuristic #7, NOT_FOUND outside corpus scope = UNVERIFIABLE, not red flag). usaspending confirms GE is a major DoD prime ($12.0B cumulative). The framework correctly flags a coverage gap rather than mis-signaling; this is the kind of claim that would need a separate Army-side J-Book corpus extension to verify forward funding (FARA's cancellation status is the implied-verification angle but cannot be retrieved from this corpus)."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Defense-related sales were 6%, 7%, and 7% of GE total revenues for FY2023, FY2022, and FY2021 respectively, within the Aerospace segment.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook(contractor='GE Aerospace') = NOT_FOUND (corpus contractor index does not list GE)",
+        "pentagon_jbook(contractor='General Electric') = NOT_FOUND",
+        "usaspending: General Electric Company = 10,918 DoD awards / $11.99B cumulative",
+        "usaspending: GE Aviation = 3,611 DoD awards / $683.7M cumulative"
+      ],
+      "M_check": "usaspending.query_dod_contracts",
+      "M_value": {
+        "GE_Company_DoD_awards": 10918,
+        "GE_Company_DoD_total": 11986888867.81,
+        "GE_Aviation_awards": 3611,
+        "GE_Aviation_total": 683704821.22
+      },
+      "interpretation": "Disclosure is consistent and conservative: a 6-7% concentration of $68B revenue implies ~$4.1-4.8B/yr Pentagon. USAspending shows GE Company $12.0B cumulative DoD obligations across all years — order-of-magnitude consistent with a steady 6-7% rev share at ~$4B/yr. The DOWNTICK from 7% to 6% is itself a quiet signal of softening defense mix, but the disclosure is accurate and J-Book-orthogonal. PASS for accuracy; flag the 1-pt YoY decline as a soft headwind, not red-flag."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "GE Aerospace defense-engine unit shipments declined sequentially: 553 (FY2021) -> 632 (FY2022) -> 556 (FY2023), a -12% YoY drop, while company narrative still calls out 'strong demand' and forward growth.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "pentagon_jbook(PE 0207268F Aircraft Engine Component Improvement) = FUNDED_STEADY @ $58.3M FY24",
+        "pentagon_jbook(PE 0603216F Aerospace Propulsion and Power Technology) = FUNDED_STEADY",
+        "Filing-internal: 76 fewer engine shipments YoY (-12%) while narrative says 'strong demand creating future growth opportunities'"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": {
+        "PE_0207268F": "FUNDED_STEADY @ $58.262M FY24",
+        "PE_0603216F": "FUNDED_STEADY"
+      },
+      "interpretation": "Upstream RDT&E and component-improvement PEs are steady, so the production decline is NOT explained by Pentagon zeroing programs. The mismatch between narrative ('strong demand') and the actual unit-trajectory (-12% YoY) is a tone-disclosure gap — typical of large incumbents where overall DoD posture is fine but specific platforms (F-18 line wind-down, F-16 export volatility, Black Hawk T700 production tail) shrink. MODERATE because the framework cannot localize WHICH engine line shrunk from this filing alone; the relevant J-Book Army platforms (T700/T901) aren't in corpus."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "GE Aerospace's defense engines power fighters, bombers, tankers, helicopters and surveillance aircraft — implying broad platform exposure across F-15/F-16 (F110), F/A-18 (F404), B-21 (engines TBD/classified), F-35 squadron sustainment, etc.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook(PE B02100 B-21 Raider) = FUNDED_STEADY @ $1,878.9M FY24",
+        "pentagon_jbook(PE F01500 F-15 Aircraft Support Equipment) = UNFUNDED_TWO_PLUS_YEARS (3 consecutive zeroed years on the *support equipment & facilities post-production* sub-line — irrelevant to engine deliveries)",
+        "pentagon_jbook(PE 0207146F F-15EX) = FUNDED_STEADY (this is the relevant F-15EX production-coverage RDT&E for the F110-129-engined jet)",
+        "pentagon_jbook(PE 0207142F F-35 Squadrons) = FUNDED_STEADY @ $89.0M FY24",
+        "pentagon_jbook(PE 0207171F F-15 EPAWSS) = FUNDED_STEADY"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": {
+        "B-21_Raider": "FUNDED_STEADY @ $1,878.868M FY24",
+        "F-15EX_RDT&E": "FUNDED_STEADY",
+        "F-35_Squadrons": "FUNDED_STEADY @ $88.991M FY24",
+        "F-15_post-production_support_line": "UNFUNDED_TWO_PLUS_YEARS (post-prod support equipment, not engines)"
+      },
+      "interpretation": "Apply heuristic #4 (PE ambiguity): F01500 is a P-40 'Aircraft Support Equipment & Facilities Post Production' sub-line that has been zero-funded since 2008 — it is NOT the F-15EX production line nor the F110 engine sustainment line. The actually-relevant lines (F-15EX, F-35 squadrons, B-21) are all FUNDED_STEADY. PASS: GE's broad platform claim is corroborated by J-Book. The B-21 funding ($1.88B FY24 procurement) is the cleanest forward read."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "CFM's RISE program is GE/Safran's single largest efficiency step-change (>=20% fuel reduction) — commercial open-rotor narrowbody propulsion.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook(RISE) returned spurious substring matches on 'enteRprISE' PEs (e.g., PE 0604776F Deployment & Distribution Enterprise R&D, PE 0701200F Enterprise Select Class II) — not RISE."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": {"RISE_substring_false_positives": "Multiple 'Enterprise' PEs falsely matched; no genuine RISE entry in J-Book corpus, as expected since RISE is commercial CFM/Safran, not Pentagon-funded."},
+      "interpretation": "Control claim — non-J-Book commercial program. J-Book corpus correctly does NOT have a real RISE entry (the matches were string-collisions on 'enteRprISE'). This is a methodology note for the framework: pentagon_jbook should require word-boundary matching, not substring. PASS: claim is accurately framed by GE as commercial; not a J-Book exposure."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "GE Aerospace was selected by NASA for phase two of the Hybrid Thermally Efficient Core (HyTEC) program in December 2023 — non-DoD federal R&D.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook(HyTEC) = NOT_FOUND (expected — NASA, not DoD)"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": {"HyTEC": "NOT_FOUND"},
+      "interpretation": "Control claim. HyTEC is NASA Aeronautics-funded; correctly absent from DoD J-Book corpus. PASS — narrative is internally consistent (GE labels it 'NASA selected'), not Pentagon-grounded."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Total sales to U.S. Government agencies were 8% of GE total revenues in FY2023, FY2022, and FY2021 — stable concentration.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending: GE Company DoD = $12.0B cumulative across 10,918 awards",
+        "Implied: 8% of $68.0B FY23 revenue = $5.44B/yr U.S. Government revenue; 6% defense Aerospace = $4.08B; residual ~$1.4B from NASA/DOE/Power-segment federal customers"
+      ],
+      "M_check": "usaspending.query_dod_contracts",
+      "M_value": {"GE_Company_DoD_cumulative_awards": 10918, "GE_Company_DoD_total": 11986888867.81},
+      "interpretation": "Disclosure is stable (8% three years running) and consistent with USAspending scale. No J-Book pattern to flag — this is structural revenue mix, not a single-program dependence. PASS."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "GE Aerospace RPO is $267.2B (equipment $54.7B / services $212.6B), with services 12%/42%/66%/82% recognizable within 1/5/10/15 years.",
+      "severity": "PASS",
+      "supports": [
+        "Internal disclosure consistency — RPO matches GAAP ASC 606 disclosure expectations.",
+        "Long-tail services RPO is overwhelmingly commercial-engine LTSA aftermarket, not DoD-program-dependent."
+      ],
+      "M_check": "edgar_fts.query_fulltext",
+      "M_value": {"_skipped": "Backlog disclosure is commercial-aftermarket-dominated; J-Book irrelevant; non-DoD control claim."},
+      "interpretation": "Control claim. Backlog is structurally commercial-engine LTSA (LEAP, GE9X, GEnx), not Pentagon-program-dependent. PASS — included to verify the framework distinguishes commercial-aftermarket disclosures from J-Book-grounded ones."
+    }
+  ],
+  "jbook_grounded_claims": ["C1","C2","C3","C4","C5"],
+  "jbook_grounded_claim_count": 5,
+  "pentagon_jbook_fired_on": ["C1","C3","C4","C5"],
+  "pentagon_jbook_fired_count": 4,
+  "summary": {
+    "total_claims": 9,
+    "total_queries": 21,
+    "severity_counts": {
+      "PASS": 6,
+      "MODERATE_UNDERDELIVERY": 2,
+      "SEVERE_UNDERDELIVERY": 0,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 1
+    },
+    "thesis_summary": "GE Aerospace's J-Book exposure at 2024-09-01 is structurally sound: B-21, F-15EX, F-35 sustainment, and NGAP are all FUNDED_STEADY in the FY26 books. Two soft signals warrant a MODERATE flag: (1) the specifically-named XA100 product is no longer a J-Book line — AETP terminated, NGAP is a re-compete GE must win; (2) Defense engine unit shipments dropped -12% YoY despite 'strong demand' narrative, suggesting platform-mix headwinds that the company has not localized for investors. T901/FARA (the most narratively-emphasized Army win) cannot be verified — J-Book corpus is AF/Space/DARPA-heavy and lacks Army PEs, a known coverage gap. The 6-7% defense mix is small relative to GE's $68B total revenue, so even a severe Pentagon shock would be margin-not-existential."
+  }
+}

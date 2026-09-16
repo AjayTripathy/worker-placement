@@ -1,0 +1,41 @@
+## Context
+
+Cause-check first, and it changes the framing: **the cohort assignment is an artifact.** PXED is tagged `sector: "Real Estate"` in the blob sweep, so the headline `excess_dd −0.303 vs Real Estate sector median` is computed against the wrong anchor and carries no information — PXED is for-profit post-secondary education (University of Phoenix), Consumer Discretionary/Education Services. Second, the −40.3% dd52 is measured off a post-IPO momentum peak: PXED IPO'd at $32 on 2025-10-09, closed day one at $39.02 (+21.9%), ran to $47.08, and the pack's own `hi26w` of $35.01 dates that peak before ~2026-02-23. Against the IPO price the stock is −12.2%, not −40%. There is no indiscriminately-sold cohort here — there is one post-IPO de-rate on a ~13% float. The *real* narrative being priced is AI-powered search breaking the paid-lead-gen funnel that for-profit education runs on, and that narrative is genuinely testable on this name.
+
+| ticker | class | refuting metric | current value/trend (cited) | next print date | note |
+|---|---|---|---|---|---|
+| PXED | **DAMAGE-ARRIVING** | New Degreed Enrollment (starts) growth, plus advertising expense as % of revenue | Total degreed enrollment growth decelerated **+4.1% (Q1 FY26) → +2.2% (9-mo avg) → +0.6% (Q3 FY26, 85,300 vs 84,800)**; mgmt attributes Q3 growth to *retention* and **declined to disclose new starts**, conceding "new enrollment has faced headwinds from the search transition"; Q3 advertising **+$6.6M / +16% YoY**; FY26 revenue guide **cut** to $1.020–1.025B while adj. EBITDA guide **raised** to $246–250M ([Q3 PR, businesswire/company IR](https://phoenixeducationpartners.com/investor-relations/investor-news/news-details/2026/Phoenix-Education-Partners-Inc--Reports-First-Quarter-Fiscal-Year-2026-Results/default.aspx); [Q1 PR 2026-01-13](https://www.businesswire.com/news/home/20260113511855/en/phoenix-education-partners-inc.-reports-first-quarter-fiscal-year-2026-results/)) | **2026-11-19** (yfinance-derived, UNCONFIRMED) | Not DAMAGE-ABSENT: the predicted damage is in the print. Not STRUCTURAL: debt-free, $269.4M liquid, ~3.0–3.3x EV/EBITDA, B2B/employer channel 36% of base (+300bp) is structurally outside the AI-search CAC funnel |
+
+**Why not STRUCTURAL.** At $28.11 × 36.05M shares = $1.01B cap, less $269.4M cash + marketable securities and **zero debt**, EV ≈ $744M (≈$822M on 38.8M diluted) against FY26 guided adj. EBITDA of $246–250M — **3.0–3.3x EV/EBITDA**, 6.2x forward earnings, 9-mo OCF $116.7M on $15.0M capex, 2.99% dividend. That is a terminal-decline multiple on a business whose enrollment is still *growing*. The discount is not obviously correct.
+
+**Why not DAMAGE-ABSENT.** Growth going 4.1% → 0.6% in two quarters, the top-of-funnel metric going *undisclosed* in the same quarter, and a revenue guide cut are precisely the three markers the R2.3 rubric names. The EBITDA raise alongside the revenue cut is cost defense, not demand.
+
+## COURT-WORTHY (damage-absent, ranked)
+
+**None.** PXED classifies DAMAGE-ARRIVING, so it does not qualify for this section. Stating that plainly rather than promoting it — the cheapness is real, but the narrative's damage is present in the numbers, not absent from them.
+
+## Two named kills (why this is FLAT without a court)
+
+Per clean-court doctrine, FLAT needs a named kill. There are two, and neither is resolvable by a fundamental bench today:
+
+1. **Apollo owns 69.1% — 24,901,319 shares as of 2026-06-30 ([SCHEDULE 13G/A, 0001104659-26-093623](https://www.sec.gov/Archives/edgar/data/0001600222/000110465926093623/primary_doc.xml)) — and the 180-day lockup expired 2026-04-07.** A sponsor that has been exiting this asset since the 2016 take-private, sitting past its lockup on 69% of the shares, is a *discretionary, better-informed* seller with no dated exit. That is the inverted side of the forced-seller rule — the ownable case is a dated mechanical cliff, and this is the opposite. The CFO confirmed the constraint from the inside, saying buyback pacing must weigh "float as well as volume considerations" (only $4.0M of the $50M April-2026 authorization deployed in Q3, at $29.29 avg).
+2. **The decisive metric has gone dark.** Management explicitly declined to disclose new student starts on the Q3 call while conceding new enrollment headwinds. Disclosure withdrawal on the exact series that would settle the bear case means a court would be adjudicating an absence.
+
+Additional flag, not a kill: the Department of Education has approved 1,200+ borrower-defense claims and discharged ~$37M tied to prior advertising, with **no recoupment action begun and no liability accrued** — an un-accrued contingent tail that should bar any RP_FAIR treatment on this name.
+
+**COURT-WORTHINESS PXED: 5/10** — genuinely cheap with a crisp refutable question, but the sizing decision is dominated by a 69%-held informed discretionary overhang and a top-of-funnel metric the company has stopped disclosing, neither of which a red/blue bench can resolve before the November print.
+
+Below the ≥6 auto-escalate threshold — **no court routed.** Re-score triggers, both dated or event-driven: (a) the FY26 Q4/full-year print if it restores a new-enrollment disclosure, and (b) *immediately* on any Apollo resale registration (S-1/S-3) or secondary announcement, which would convert the undated overhang into a dated clearing event and flip this to court-worthy.
+
+**PRINT PROXIMITY: 2026-11-19 — UNCONFIRMED (yfinance-derived; no company PR names it). ~61 trading days out, far outside the 5-day window, so no print-decisive reconstruction is triggered.** Caveat on the date: the Q1–Q3 cadence ran ~45 days post-quarter-end (Jan 13, Apr 7, Jul 14), but this is the Aug-31 fiscal year-end report, which typically runs longer — treat the actual window as mid-October to Nov 19. **PRE-PRINT POSITION: FLAT** (currently `held="NO POSITION" orders="NONE"`), on the two named kills above rather than on valuation.
+
+## Unverified — work queue
+
+Flagging what I could not confirm from primary, rather than papering over it:
+
+- **SEC.gov 403'd every direct fetch** (browse-edgar, the 10-Q filing index, and the 13G/A primary doc). The ownership, borrower-defense, and buyback figures above come from search-layer summaries *of* those SEC documents and from the company's own PR/call — not from a direct read of the filing text. Needs a full-fingerprint refetch.
+- **The 10-Q carries an XBRL tag `srt:ScenarioForecastMember us-gaap:IPOMember 2026-10-10`** — exactly the one-year IPO anniversary, ~7 weeks out. I could not read the surrounding text to learn what contractual event it marks (registration-rights milestone, exchange right, or award vesting are the candidates). If it is a supply event, it is the single most sizing-relevant dated fact on this name and would raise the court score. **This is the top work-queue item.**
+- **Form 3 + Form 4 + 8-K all filed 2026-07-13**, the day before the Q3 print, plus a **Form 4 on 2026-08-21** — unidentified officer/director change and recent insider activity, unread.
+- **Tape dating is inferred**, not bar-verified: the IBKR `search_contracts` call was not permission-granted, so the $47.08 peak is placed before 2026-02-23 by arithmetic on the pack's `hi26w` vs `hi52` plus public reporting, not from OHLC bars. Grant IBKR access and I'll confirm the drawdown path directly.
+
+Sources: [Renaissance Capital IPO pricing](https://www.renaissancecapital.com/IPO-Center/News/114099/University-of-Phoenix-operator-Phoenix-Education-Partners-prices-IPO-at-$32) · [Q1 FY26 PR](https://www.businesswire.com/news/home/20260113511855/en/phoenix-education-partners-inc.-reports-first-quarter-fiscal-year-2026-results/) · [Q3 FY26 PR](https://www.stocktitan.net/news/PXED/phoenix-education-partners-inc-reports-third-quarter-fiscal-year-zcek7cb2xw76.html) · [Q3 earnings call transcript](https://www.investing.com/news/transcripts/earnings-call-transcript-phoenix-education-partners-misses-q3-2026-eps-forecast-93CH-4791963) · [Q3 slides/margin detail](https://www.investing.com/news/company-news/phoenix-education-q3-2026-slides-flat-revenue-margins-compress-93CH-4791973) · [Apollo 13G/A](https://www.sec.gov/Archives/edgar/data/0001600222/000110465926093623/primary_doc.xml) · [stockanalysis.com PXED](https://stockanalysis.com/stocks/pxed/)

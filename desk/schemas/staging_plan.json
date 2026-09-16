@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "staging_plan store (queue_stager output; executed by a connector-auth lane)",
+  "type": "object",
+  "required": ["actions"],
+  "properties": {
+    "actions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["action", "ticker", "side", "qty", "limit", "ccy", "provenance", "status"],
+        "properties": {
+          "action": {"enum": ["create", "withdraw"]},
+          "ticker": {"type": "string"},
+          "side": {"enum": ["BUY", "SELL"]},
+          "qty": {"type": "number", "exclusiveMinimum": 0},
+          "limit": {"type": "number", "exclusiveMinimum": 0},
+          "ccy": {"type": "string"},
+          "order_type": {"const": "LIMIT"},
+          "provenance": {
+            "type": "object",
+            "required": ["court_date", "source"],
+            "properties": {
+              "court_date": {"type": "string"},
+              "pack_id": {"type": "string"},
+              "pitch_doc": {"type": "string"},
+              "source": {"type": "string"}
+            }
+          },
+          "status": {"enum": ["planned", "executed", "expired", "superseded"]},
+          "planned_utc": {"type": "string"},
+          "executed_utc": {"type": "string"}
+        }
+      }
+    },
+    "_meta": {"type": "object"}
+  }
+}

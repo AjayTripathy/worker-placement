@@ -1,0 +1,121 @@
+{
+  "ticker": "VVX",
+  "scores": [
+    {
+      "claim_id": "VVX-C1",
+      "claim_text": "LOGCAP V Kuwait Task Order contributed $441.6M of revenue in FY2025 (9.9% of total revenue), down slightly from $450.3M (10.4%) in FY2024 and 12.0% in FY2023. Current PoP exercised through June 30, 2026, with possible extension to June 2030.",
+      "severity": "PASS",
+      "supports": [
+        "revenue_concentration: top_task_order_pct=9.9% \u2192 TYPICAL (within industry-standard 4-10% band; 100th percentile of 6 peers but inside threshold)",
+        "pentagon_jbook 'Base Operations Support' (the SAG funding LOGCAP V) \u2192 FUNDED_STEADY at Army OP-5 SAG ($10.3B FY26)",
+        "Disclosed PoP through June 2026 with extension to June 2030 is supported by the underlying Army Base Ops Support envelope being steady"
+      ],
+      "M_check": "revenue_concentration.query_revenue_concentration + pentagon_jbook.query_program_funding(program_name='Base Operations Support')",
+      "M_value": "revenue_concentration=TYPICAL; pentagon_jbook Army Base Ops Support FY26=$10,264M FUNDED_STEADY",
+      "interpretation": "Largest single-TO at 9.9% is the top of the industry-TYPICAL band but within it. Underlying Army Base Operations Support SAG is FUNDED_STEADY \u2014 budget supports the disclosed PoP extension to 2030. Not a concentration risk; not a budget-driven risk."
+    },
+    {
+      "claim_id": "VVX-C2",
+      "claim_text": "LOGCAP V IDIQ contract vehicle: V2X is one of four prime awardees; the aggregate LOGCAP V vehicle (Kuwait, Iraq, INDOPACOM and other task orders) represents the company's largest contract relationship. The Kuwait TO award was approximately $2.9B with estimated completion December 2026.",
+      "severity": "PASS",
+      "supports": [
+        "revenue_concentration: top_vehicle_pct=25% \u2192 TYPICAL (12-30% band; 100th percentile of peers but inside threshold)",
+        "pentagon_jbook 'Base Operations Support' FUNDED_STEADY across Army Active/NG/Reserve",
+        "1-of-4 IDIQ position is typical for federal services primes (multi-award IDIQs are the standard structure)"
+      ],
+      "M_check": "revenue_concentration + pentagon_jbook",
+      "M_value": "top_vehicle 25% TYPICAL (peer median 16%); Base Ops Support FY26 $10.3B FUNDED_STEADY",
+      "interpretation": "25% top-vehicle concentration is at the high end of industry-TYPICAL but within. Underlying SAG envelope is steady; multi-award IDIQ structure caps single-award loss exposure."
+    },
+    {
+      "claim_id": "VVX-C3",
+      "claim_text": "Warfighter Training Readiness Solutions (WTRS) Program is the Army's largest support and services program for worldwide training systems sustainment; V2X performs as a sole-source task order under the ASTRO IDIQ contract.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "pentagon_jbook 'Training Support' \u2192 Army OP-5 SAG FUNDED_SHRINKING ($550M FY26 vs FY25)",
+        "WTRS is sole-source under ASTRO IDIQ \u2014 recompete exposure if SAG continues to shrink",
+        "The Army's largest training-systems sustainment program runs in a SAG with declining FY26 funding trajectory"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Training Support')",
+      "M_value": "Army Training Support SAG: FY26 $550M, FUNDED_SHRINKING",
+      "interpretation": "WTRS narrative depends on the Training Support SAG which is FUNDED_SHRINKING at FY26 cutoff. Sole-source TO under ASTRO is a near-term protection but the underlying envelope is contracting. Forward-pipeline narrative needs to account for the budget trend."
+    },
+    {
+      "claim_id": "VVX-C4",
+      "claim_text": "T-45 Goshawk trainer aircraft program: V2X provides Navy and Marine organizational, intermediate, and depot-level maintenance, sustainment, and life-extension services across 29 unique configurations.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook 'Aircraft Depot Maintenance' returned Army primary match \u2014 T-45 is Navy, so the corpus match is service-wrong",
+        "Navy 'Aircraft Depot Maintenance' SAG ingest depends on Navy O&M parser routing; current corpus has Navy SAGs but the Aircraft Depot Maintenance line may need direct lookup"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Aircraft Depot Maintenance') \u2014 service mismatch",
+      "M_value": "Primary match was Army-Reserve Depot Maintenance, wrong service for T-45 Navy/Marine claim",
+      "interpretation": "T-45 Goshawk is Navy / Marine depot maintenance. Corpus query landed on Army Depot Maintenance \u2014 wrong service. Need explicit Navy aircraft depot SAG lookup (corpus has Navy O&M but match priority returned wrong service). Coverage gap, not a falsification."
+    },
+    {
+      "claim_id": "VVX-C5",
+      "claim_text": "Customer mix: substantial majority of FY2025 revenue derived from U.S. Government customers; specifically, approximately 41% of FY2025 total revenue (43% in FY2024, 41% in FY2023) came from the U.S. Army.",
+      "severity": "PASS",
+      "supports": [
+        "U.S. Government customer concentration is the design expectation for a defense services prime \u2014 DoD is a stable counterparty with statutory funding",
+        "usaspending: V2X recipient name resolves to multiple DoD awards (32 awards $24M for direct V2X match; larger figures under Vectrus and Vertex Aerospace per prior runs)",
+        "revenue_concentration: customer concentration is not a primary axis in the analyzer (by design \u2014 DoD concentration is the premise of services primes, not a risk)"
+      ],
+      "M_check": "usaspending.query_dod_contracts(recipient_name='V2X') + revenue_concentration (customer axis informational)",
+      "M_value": "V2X+Vectrus+Vertex aggregate is a multi-billion-dollar DoD prime; 41% Army share is consistent with LOGCAP-heavy mix",
+      "interpretation": "41% Army share is consistent with LOGCAP-centric customer mix; the other ~59% spans Navy, Air Force, intel and international DoD customers. Customer concentration on DoD is not a fragility signal."
+    },
+    {
+      "claim_id": "VVX-C6",
+      "claim_text": "U.S. Government contracts performed internationally represented approximately 42% of total revenue for FY2025; operations span 349 locations in 49 countries.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "No M-source covers international/domestic split of U.S. Government contracts",
+        "International work is consistent with the LOGCAP-Kuwait + INDOPACOM TO portfolio described in C1/C2"
+      ],
+      "M_check": "(no applicable M-source)",
+      "M_value": "Geographic split of US Gov contracts not in any current connector",
+      "interpretation": "International % isn't directly verifiable. Internally consistent with LOGCAP-Kuwait + INDOPACOM concentration described in C1/C2."
+    },
+    {
+      "claim_id": "VVX-C7",
+      "claim_text": "Total backlog of $11.1B as of December 31, 2025 ($2.3B funded, $8.8B unfunded); backlog decreased by $1.4B YoY primarily due to timing of new awards offset by revenue recognition. FY2025 funded orders of $4.5B (+$0.7B YoY).",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "Disclosed backlog declined $1.4B YoY (-12.6%) while FY25 revenue grew only 3.7% \u2014 book-to-bill deteriorating",
+        "Net backlog burn-rate exceeds new booking pace at current revenue run-rate",
+        "Funded backlog of $2.3B = ~6 months of revenue (typical-to-low for services primes)"
+      ],
+      "M_check": "(disclosed metric; no external M-source)",
+      "M_value": "-$1.4B backlog YoY vs +3.7% revenue; funded backlog 6 months of revenue",
+      "interpretation": "Declining backlog with low-single-digit revenue growth is a soft headwind on forward visibility. Funded portion at ~6 months coverage is adequate but not strong. Disclosed risk, not hidden."
+    },
+    {
+      "claim_id": "VVX-C8",
+      "claim_text": "FY2025 revenue of $4,480.0M (+3.7% YoY), operating income $194.3M (4.3% margin, +60 bps), net income $77.9M; workforce of approximately 16,200 employees with ~30% represented by 60 collective bargaining agreements.",
+      "severity": "PASS",
+      "supports": [
+        "Disclosed financials in 10-K \u2014 verifiable via SEC filing itself",
+        "usaspending confirms VVX as real DoD prime recipient",
+        "Workforce 16,200 with ~30% collective-bargaining representation is consistent with logistics-heavy services mix"
+      ],
+      "M_check": "self-disclosure + usaspending",
+      "M_value": "FY25 rev $4,480M, margin 4.3%, headcount 16,200",
+      "interpretation": "Disclosed financials are auditable in the 10-K itself; usaspending corroborates revenue flow from DoD."
+    },
+    {
+      "claim_id": "VVX-C9",
+      "claim_text": "Defense logistics/operational support cohort positioning: LOGCAP V (Kuwait + INDOPACOM TOs), WTRS under ASTRO, and T-45 Goshawk depot maintenance constitute V2X's headline named programs. Each ties to an ongoing OP-5 SAG line item (Base Operations Support, Training Support, Aircraft Depot Maintenance).",
+      "severity": "PASS",
+      "supports": [
+        "C1/C2 LOGCAP V verified at Army Base Operations Support FUNDED_STEADY",
+        "C3 WTRS flagged MODERATE under Army Training Support FUNDED_SHRINKING",
+        "C4 T-45 Goshawk UNVERIFIABLE \u2014 Navy depot SAG match needs work",
+        "Narrative is consistent with the named programs in the filing; SAG-level adjudication of each is in C1-C4"
+      ],
+      "M_check": "Aggregate of C1-C4 SAG-level lookups",
+      "M_value": "Mixed: 2 SAGs FUNDED_STEADY (LOGCAP), 1 SAG FUNDED_SHRINKING (WTRS), 1 SAG UNVERIFIABLE (T-45)",
+      "interpretation": "The 3-program portfolio splits 2/3 PASS, 1/3 MODERATE on the SAG-level envelopes. Headline narrative is broadly supported by the J-Book but WTRS deserves attention."
+    }
+  ]
+}

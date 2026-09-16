@@ -1,0 +1,105 @@
+{
+  "ticker": "IONQ",
+  "cutoff": "2022-06-01",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "IonQ's technology may be deemed a matter of national security and its customer base may be tightly restricted; it may accept government grants that place restrictions on its ability to operate.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook.query_program_funding(contractor_name='IonQ', cutoff_date='2022-06-01') returned 3 matches; primary program 'AFRL Quantum Networking (IONQ)' with signal=FUNDED_STEADY at cutoff, $13M funded FY2022 (history_rows: FY2022 funded_M=13, 'earmark-funded; recognized as revenue')",
+        "usaspending.query_federal_presence(name_variants=['IonQ','IonQ, Inc.','IonQ Federal, LLC'], end_date='2022-06-01') returned 1 UEI (EH32NDF7YPM7) but n_contracts=0, contracts_amount_M=0, signal=INFLATION_SUSPECT — the AFRL earmark obligations had not yet appeared in USAspending as of the cutoff"
+      ],
+      "M_check": "pentagon_jbook + usaspending",
+      "M_value": "pentagon_jbook signal=FUNDED_STEADY (latest_funded_year=2022, $13M); usaspending signal=INFLATION_SUSPECT (0 contracts, 0 grants at cutoff)",
+      "interpretation": "The 10-K's statement is generic risk language — IonQ does not claim a specific Pentagon program in this filing. J-Book at the 2022 cutoff shows a $13M FY22 AFRL Quantum Networking line item attributed to IonQ but classified as FUNDED_STEADY based on visible-at-cutoff history. The corpus note flags the program as earmark-secured (a structural fragility signal) but at 2022-06-01 there is no de-funding visible. Per the calibration heuristic 1 (FUNDED_STEADY → PASS), score PASS. The dataset's longer-horizon UNFUNDED_TWO_PLUS_YEARS label is explicitly post-cutoff and excluded by the cutoff filter."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "IonQ has a partnership with DOE/PNNL under which it announced barium-source miniaturization, characterized as significant for shrinking core system components.",
+      "severity": "PASS",
+      "supports": [
+        "doe_budget.query_program_funding(program_name='Pacific Northwest National Laboratory', cutoff_date='2022-06-01') → NOT_FOUND (corpus coverage gap)",
+        "doe_budget.query_program_funding(program_name='National Quantum Initiative', cutoff_date='2022-06-01') → NOT_FOUND",
+        "doe_budget.query_program_funding(program_name='ASCR' / 'Advanced Scientific Computing Research', cutoff_date='2022-06-01') → NOT_FOUND"
+      ],
+      "M_check": "doe_budget.query_program_funding (multiple synonyms)",
+      "M_value": "signal=NOT_FOUND across all DOE program names tested",
+      "interpretation": "PNNL is a DOE national lab; the claim is a research-milestone announcement, not a revenue-attribution claim. The DOE-budget corpus has no entries for PNNL / NQI / ASCR — per heuristic 7, NOT_FOUND in the corpus is not a red flag, it is a coverage gap. The claim itself is non-load-bearing (no dollars attributed, no forward expectation). PASS with a noted DOE-corpus coverage gap."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "IonQ purchases isotopically enriched atomic samples through the National Isotope Development Center managed by the U.S. DOE Isotope Program; no supplier agreement, standard ordering process.",
+      "severity": "PASS",
+      "supports": [
+        "doe_budget.query_program_funding(program_name='DOE Isotope Program', cutoff_date='2022-06-01') → NOT_FOUND",
+        "doe_budget.query_program_funding(program_name='Isotope Program', cutoff_date='2022-06-01') → NOT_FOUND"
+      ],
+      "M_check": "doe_budget.query_program_funding",
+      "M_value": "signal=NOT_FOUND (corpus gap)",
+      "interpretation": "Supplier-dependency disclosure is honest and self-flagging (no agreement, sole source via federal program). The DOE Isotope Program is run within the DOE Office of Nuclear Physics; absent from the corpus. Treat as UNVERIFIABLE-on-budget-track but the underlying claim is a risk-factor admission, not a forward-revenue narrative. PASS (no J-Book pattern present)."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "For FY2021, IonQ's revenue was primarily from two unnamed >10% customers; going-forward narrative depends on AWS Braket, Azure Quantum, Google Cloud Marketplace and co-development with Hyundai and GE Research.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook.query_program_funding(program_name='AFRL Quantum Networking', cutoff_date='2022-06-01') → signal=FUNDED_STEADY, $13M FY22 to IonQ (earmark-secured)",
+        "usaspending.query_federal_presence at cutoff → 0 contracts, 0 grants, INFLATION_SUSPECT",
+        "Filing does not name the two >10% customers; cannot test directly which are commercial vs federal"
+      ],
+      "M_check": "pentagon_jbook + usaspending",
+      "M_value": "J-Book has $13M FY22 IonQ earmark line; usaspending shows zero obligations at cutoff (lag) — the two undisclosed customers cannot be tied to a named Pentagon PE from this filing",
+      "interpretation": "The 10-K does not name the two >10% customers, so we cannot directly test J-Book divergence against them. If one of them is the AFRL earmark (plausible given $13M FY22 and IonQ's modest 2021 revenue base), the J-Book at cutoff still shows FUNDED_STEADY — no divergence yet visible. usaspending lag (no contracts on record yet) means we cannot cross-check obligations. Per heuristic 6, USAspending-side ZERO + J-Book FUNDED is consistent with new-vehicle lag rather than fabrication. Score UNVERIFIABLE — the disclosure is too vague to tie to a specific program and the J-Book/USAspending evidence does not establish divergence at this cutoff."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Core IP licensed from UMD/Duke was developed via government-funded research and is subject to Bayh-Dole regulations (march-in rights, U.S.-manufacturing preference).",
+      "severity": "PASS",
+      "supports": [
+        "uspto_odp.query_assignee(assignee_name='IonQ', cutoff_date='2022-06-01') → n_total_applications=167, n_granted=64; large patent estate consistent with active prosecution of trapped-ion technology",
+        "Filing also notes a pentagon_jbook-matched program 'University of Maryland Quantum (IONQ subcontractor)' with status_declared='UNFUNDED_THIS_YEAR' in the corpus, but at the 2022 cutoff (signal=FUNDED_STEADY by primary_match logic, n_consecutive_unfunded=0) this is not yet visible"
+      ],
+      "M_check": "uspto_odp.query_assignee",
+      "M_value": "n_granted=64 patents to IONQ, INC. as of 2022-06-01",
+      "interpretation": "Control claim. IP-licensing disclosure is consistent with the public record; large granted-patent count corroborates an active inventive estate. No J-Book divergence. PASS."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "IonQ's commercial distribution runs through Amazon Braket, Microsoft Azure Quantum and Google Cloud Marketplace.",
+      "severity": "PASS",
+      "supports": [
+        "edgar_fts.query_fulltext(search_term='IonQ', start_date='2020-01-01', cutoff_date='2022-06-01') → 103 total hits (mostly IonQ-own); CIK-restricted: Amazon CIK 0001018724 → 2 hits, MSFT → 0 hits, GOOG → 0 hits",
+        "Hyperscaler counterparty disclosure is sparse but Amazon mentions exist; absence in MSFT/GOOG 10-K is unsurprising for a non-material commercial relationship"
+      ],
+      "M_check": "edgar_fts.query_fulltext",
+      "M_value": "103 total IonQ mentions; Amazon-CIK restricted=2",
+      "interpretation": "Control claim — orthogonal to J-Book pattern. Counterparty disclosure is consistent with a small-cap quantum vendor on hyperscaler marketplaces; no contradiction. PASS."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Co-founders Jungsang Kim (CTO) and Christopher Monroe (Chief Scientist) are originating inventors of the trapped-ion qubit technology IonQ commercializes; the company is materially dependent on retaining them.",
+      "severity": "PASS",
+      "supports": [
+        "uspto_odp.query_assignee(assignee_name='IonQ', cutoff_date='2022-06-01') → 64 granted patents pre-cutoff, applicants include IONQ, INC.; CPC classes G06N 10/* (quantum computing) and B82Y 10/00 (nanotechnology) consistent with trapped-ion R&D"
+      ],
+      "M_check": "uspto_odp.query_assignee",
+      "M_value": "64 granted patents in trapped-ion / quantum-computing CPC classes",
+      "interpretation": "Control claim. Patent estate consistent with claimed scientific origin. PASS."
+    }
+  ],
+  "_summary": {
+    "n_claims": 7,
+    "n_queries": 11,
+    "severity_counts": {
+      "PASS": 6,
+      "MODERATE_UNDERDELIVERY": 0,
+      "SEVERE_UNDERDELIVERY": 0,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 1
+    },
+    "jbook_grounded_claims": ["C1", "C2", "C3", "C4"],
+    "pentagon_jbook_fired_on": ["C1", "C4"],
+    "note": "At the 2022-06-01 cutoff IONQ's 10-K does NOT name specific Pentagon PEs or DoD programs as material revenue contributors. The AFRL Quantum Networking line item (visible in the J-Book corpus as a $13M FY22 IonQ earmark) shows FUNDED_STEADY at this cutoff — the UNFUNDED_TWO_PLUS_YEARS divergence is structurally post-cutoff and excluded by the cutoff filter. usaspending shows 0 obligations at cutoff (lag effect for a newly de-SPAC'd company). Honest 2022 view: no J-Book divergence visible yet; severity defaults to PASS with one UNVERIFIABLE on the undisclosed-customer-concentration claim."
+  }
+}

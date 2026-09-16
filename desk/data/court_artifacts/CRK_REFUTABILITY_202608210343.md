@@ -1,0 +1,39 @@
+## CAUSE-CHECK FIRST
+
+CRK's −50.6% is **not** the cohort's drawdown. Against a hand-built gas-E&P peer set priced the same day (2026-08-20 close), the sector narrative explains roughly 19pp of it; the remaining ~31pp is idiosyncratic and traces to a named, dated, company-specific cause — a widening cash outspend funded with debt while H1 volumes fell y/y.
+
+| name | px | 52w high | dd52 |
+|---|---|---|---|
+| EXE | 96.07 | 126.62 | −24.1% |
+| EQT | 53.89 | 68.24 | −21.0% |
+| AR | 37.66 | 45.75 | −17.7% |
+| RRC | 40.67 | 48.31 | −15.8% |
+| **peer median** | | | **−19.4%** |
+| **CRK** | **13.87** | **28.09** | **−50.6%** (excess **−31.2pp**) |
+
+This is a *discriminating* sell-off, not indiscriminate cohort selling — which is the opposite of the setup this triage hunts for.
+
+COHORT: unresolved as specified — `signalos/knowledge_graph/cohorts.json` was outside my granted read scope (permission denied), so I reconstructed the cohort from the event blob (Energy / Oil & Gas Production, excess_dd −0.362) plus the peer set above. NARRATIVE reconstructed as: *record supply + cut Henry Hub deck impairs gas-E&P cash generation* — confirmed primary: EIA STEO (Aug 11, 2026) cut Q3-26 HH to **$2.87/MMBtu**, 2027 to **$3.31**, and projects a record **3,985 Bcf** end-October inventory, highest going into winter since 2016.
+
+| ticker | class | refuting metric | current value/trend (cited) | next print date | note |
+|---|---|---|---|---|---|
+| CRK | **STRUCTURAL** | (a) consolidated quarterly FCF; (b) Western Haynesville D&C $/lateral-ft sustained across the program | FCF −$261.7M in Q2-26 (OCF $170.2M − capex $431.9M), 4th straight negative quarter and worsening (−188.4 / −141.3 / −143.9 / −261.7 = **−$735M LTM**); net debt $3.125B, **+$245M q/q even after** banking $600M from the Pinnacle stake sale; realized **$2.55/Mcfe pre-hedge** in Q2 vs an already-cut $2.87 HH deck; H1 volumes **−7% y/y to 1,166 MMcf/d** on ~$848M H1 capex. Only bull datapoint: one "big-hole" well at **$1,310/lateral ft, 25% below the quarterly average** — n=1. | 2026-11-02 (yfinance-derived, **unconfirmed** — no company PR names it) | Damage is not merely present, it is *amplified* vs cohort. Mgmt states 2027 activity "will be determined by future price strength," decided "late in the year" — the magnitude variable is undefined by design. Revolver matures Nov-2027; leverage exactly 3.0x LTM; $1.2B liquidity, $545M drawn on a $2B base. |
+
+Primary/issuer citations: EIA STEO natural gas, Aug 11 2026 — https://www.eia.gov/outlooks/steo/report/natgas.php · Comstock Q2-26 issuer release (GlobeNewswire wire), July 29 2026 — https://www.globenewswire.com/news-release/2026/07/29/3335599/0/en/COMSTOCK-RESOURCES-INC-REPORTS-SECOND-QUARTER-2026-FINANCIAL-AND-OPERATING-RESULTS.html · 10-Q filed 2026-07-30, accession 0001193125-26-326260 — https://www.sec.gov/Archives/edgar/data/23194/000119312526326260/
+
+**Citation-quality disclosure (matters for how hard you lean on the table):** sec.gov and data.sec.gov returned **403 to every direct fetch** in this session — I could not read the 10-Q text myself beyond the excerpt in the evidence pack. The issuer PR content was read via a verbatim GlobeNewswire syndication (manilatimes.net) after globenewswire.com timed out twice. Balance-sheet and cash-flow figures (capex $431.9M, net debt $3.125B, NCI $584.4M) come from stockanalysis.com's rendering of that 10-Q, **not** the filing text. Leverage 3.0x, $1.2B liquidity, $545M/$2B revolver, and $1,310/lateral-ft are management statements from the Q2 call transcript (fool.com), not filings. Anything sizing-decisive should be re-pulled full-fingerprint from EDGAR before it moves money.
+
+**COURT-WORTHY (damage-absent, ranked):**
+NONE. No member classifies damage-absent. The one genuinely damage-absent sub-claim worth recording: **share count is flat** (294.2M diluted at 6/30/25 per XBRL vs 293.6M outstanding now), so the "they'll dilute equity holders to fund the outspend" bear leg is testably false to date — it has been funded with debt and the midstream stake sale, not stock. That refutes a *sub-claim*, not the narrative, and does not earn a court.
+
+**COURT-WORTHINESS CRK: 5/10** — the −31pp excess drawdown is already explained by four printed quarters of worsening negative FCF at 3.0x into a cut strip, and the one variable that could invert it (2027 capex plan × hedgeable strip) is undefined until management sets it "late in the year," so a court cannot move the sizing decision today.
+
+**PRINT PROXIMITY: 2026-11-02 — yfinance-derived, UNCONFIRMED (no Comstock PR names a Q3 date; the 8-K/PR cadence is consistent with late Oct–early Nov).** ~50 trading days out, well beyond the 5-day window — the print-decisive reconstruction and PRE-PRINT POSITION section are not triggered. Book state is NO POSITION / NO ORDERS, and nothing here argues for changing that.
+
+Two things I'd want the desk to note rather than bury:
+
+1. **There is a same-event external anchor here**, which is rare and is the one thing that could justify overriding the 5. Sixth Street paid **$600M cash for 27% of Pinnacle Gas Services in June 2026** (~$2.2B implied EV, per the Q2 call) — a third-party mark, not a model. Crude SOTP: consolidated EV ≈ $4.07B mcap + $3.13B net debt ≈ **$7.20B**; less CRK's 73% of Pinnacle (~$1.62B) leaves **~$5.6B for the upstream** on ~1.2 Bcf/d. That is roughly $4.5–4.8M per MMcf/d — not distressed for a levered, declining, $2.55-realization asset. The anchor exists and it does *not* rescue the name, which is why I did not escalate. (Assumption flagged: post-transaction Pinnacle preferred and debt were retired with the proceeds, so common ≈ EV; and Pinnacle's residual facility sits inside the $3.13B consolidated net debt, so this deduction risks double-counting in CRK's favor.)
+
+2. **The real kill-variable watch, if you want one wired:** Western Haynesville $/lateral-ft across the *program* (not one well) and quarterly FCF, both carried by the 2026-11-02 print; plus the 2027 budget (historically with Q4 results in February) and the Nov-2027 revolver refinancing. If $/ft holds near $1,310 program-wide while the 2027 strip is hedgeable above ~$3.50, the STRUCTURAL call flips to DAMAGE-ABSENT and the name deserves a real court then. Today it deserves a tripwire.
+
+Sources: [EIA STEO — Natural Gas (Aug 11, 2026)](https://www.eia.gov/outlooks/steo/report/natgas.php) · [EIA lowers Henry Hub forecasts (Rigzone, Aug 19 2026)](https://www.rigzone.com/news/eia_lowers_henry_hub_gas_price_forecasts-19-aug-2026-184410-article/) · [Comstock Q2 2026 results (issuer PR)](https://www.globenewswire.com/news-release/2026/07/29/3335599/0/en/COMSTOCK-RESOURCES-INC-REPORTS-SECOND-QUARTER-2026-FINANCIAL-AND-OPERATING-RESULTS.html) · [syndicated verbatim copy read](https://www.manilatimes.net/2026/07/30/tmt-newswire/globenewswire/comstock-resources-inc-reports-second-quarter-2026-financial-and-operating-results/2394439) · [CRK Q2 2026 earnings call transcript](https://www.fool.com/earnings/call-transcripts/2026/08/07/comstock-resources-crk-q2-2026-earnings-call-transcript/) · [CRK cash flow (quarterly)](https://stockanalysis.com/stocks/crk/financials/cash-flow-statement/?p=quarterly) · [CRK balance sheet (quarterly)](https://stockanalysis.com/stocks/crk/financials/balance-sheet/?p=quarterly) · [CRK](https://stockanalysis.com/stocks/crk/) · [EXE](https://stockanalysis.com/stocks/exe/) · [EQT](https://stockanalysis.com/stocks/eqt/) · [AR](https://stockanalysis.com/stocks/ar/) · [RRC](https://stockanalysis.com/stocks/rrc/) · [TipRanks — elevated capex/cash outspend note](https://www.tipranks.com/news/ratings/comstock-resources-elevated-capex-cash-outspend-and-premium-valuation-justify-neutral-stance-despite-longer-term-gas-upside-ratings)

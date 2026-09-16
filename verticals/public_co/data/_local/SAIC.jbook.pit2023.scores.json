@@ -1,0 +1,106 @@
+{
+  "ticker": "SAIC",
+  "cutoff": "2023-01-15",
+  "filing": "0001571123-22-000007_10-K.txt",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "SAIC generated approximately $7.4 billion FY2022 revenue with 98% from U.S. government contracts.",
+      "severity": "PASS",
+      "supports": ["usaspending"],
+      "M_check": "usaspending.query_dod_contracts(recipient_name='Science Applications International Corporation')",
+      "M_value": {"n_top_awards": 25, "total_dod_obligations_usd": 10794113848.78, "top_award_usd": 922864971.23, "top_award_desc": "Systems and Computer Resources Support for U.S. Army RDECOM Software Engineering Directorate"},
+      "interpretation": "USAspending confirms multi-billion-dollar DoD obligation base consistent with $7.4B FY22 revenue and 98% U.S.-gov mix. Top award is a major Army RDECOM IDIQ. No divergence — concentration claim is substantiated."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "U.S. Army 15% / U.S. Navy 12% / Other DoD 21% of FY2022 revenue.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["pentagon_jbook_not_found"],
+      "M_check": "pentagon_jbook.query_program_funding(contractor_name='SAIC' | 'Science Applications International')",
+      "M_value": {"signal_short": "NOT_FOUND", "signal_full": "NOT_FOUND", "n_matches": 0},
+      "interpretation": "J-Book corpus (410 PEs from FY26 books, contractor-indexed) returns no contractor-name hits for SAIC under either short or full name. This is expected: SAIC is primarily an O&M / services integrator, not a hardware prime, and most of its work flows through IDIQ task orders that do not surface as named contractors in R-2 / P-40 exhibits. Coverage gap, not a red flag — see calibration heuristic #7."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Approximately 1,900 active contracts and task orders.",
+      "severity": "PASS",
+      "supports": ["usaspending"],
+      "M_check": "usaspending.query_dod_contracts(recipient_name='Science Applications International Corporation')",
+      "M_value": {"n_top_awards_visible": 25, "total_top_award_value_usd": 10794113848.78},
+      "interpretation": "Even the top 25 awards confirmed via usaspending sum to ~$10.8B, consistent with the disclosed diffuse 1,900-contract portfolio. Diffusion itself reduces program-specific J-Book exposure (good for survivability, bad for thesis identifiability)."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Majority of forward business expected via IDIQ / GSA Schedule / multi-award competitive bidding.",
+      "severity": "PASS",
+      "supports": ["usaspending", "filing_self_consistency"],
+      "M_check": "usaspending.query_dod_contracts; consistency with disclosed 1,900 task orders",
+      "M_value": {"top_awards_are_idiq_task_orders": true, "top_award_internal_id_pattern": "CONT_AWD_<task>_<W31P4Q05A0031>"},
+      "interpretation": "USAspending top awards visibly follow IDIQ task-order ID patterns (W31P4Q05A0031 = Army RDECOM IDIQ vehicle). Forward-pipeline narrative is consistent with the actual contracting structure. No PE-level divergence to score."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "USMC AAV program terminated for convenience October 3, 2018; SAIC still negotiating cost recovery as of Jan 28, 2022.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["pentagon_jbook_not_found", "filing_self_disclosed_termination"],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Assault Amphibious Vehicle' | 'AAV')",
+      "M_value": {"signal": "NOT_FOUND", "n_matches": 0},
+      "interpretation": "The AAV program is a USMC ground combat vehicle line that pre-dates our FY26 J-Book corpus snapshot — it would have appeared in earlier USMC P-40 procurement exhibits. The termination is SELF-DISCLOSED by SAIC (no divergence to catch); the only residual risk is the cost-recovery dispute, which is a P&L tail, not a J-Book signal. Treat as UNVERIFIABLE via J-Book; the underlying fact is admitted in the filing."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Forward opportunity narrative: 'broadband, cyber, climate resiliency' from infrastructure bill.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["pentagon_jbook_not_found_in_timerange"],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='cyber')",
+      "M_value": {"signal": "NOT_FOUND_IN_TIMERANGE", "n_matches": 9, "matched_pes": ["0305103C", "0604414F", "0605829F", "0208087F", "0208088F", "0301113F", "0303089F", "0305103F", "0305881F"]},
+      "interpretation": "Nine cyber-related Air Force / OSD PEs match the keyword but fall outside the 2023-01-15 cutoff window in our corpus, so no funded/unfunded status can be assigned. More importantly, the company never names any of these PEs in the filing — the 'cyber/broadband/climate resiliency' language is generic marketing, not a J-Book-grounded forward claim. Cannot score divergence on hand-waving."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Rollup acquisition cadence: Unisys Federal (2020, ~$1.0B financed), Koverse (2021), Halfaker (2021, $100M financed).",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["acq_coherence_subagent"],
+      "M_check": "acq_coherence.score_acquisition_coherence(parent_thesis='pure-play government IT services / digital transformation', acquisitions=[Unisys Federal, Koverse, Halfaker])",
+      "M_value": {"signal": "INCOHERENT_ROLLUP", "mean_coherence": 0.167, "n_low_coherence": 2, "n_revenue_synthetic": 1, "per_acquisition": {"Unisys Federal": "medium 0.5 (sector-adjacent gov-IT carve-out, revenue-synthetic)", "Koverse": "low 0.0 (insufficient stack overlap data)", "Halfaker": "low 0.0 (health-IT bolt-on; integration thesis unproven)"}},
+      "interpretation": "Acq-coherence subagent flags INCOHERENT_ROLLUP, but with low-confidence reasoning (cited insufficient data on each target). The Unisys Federal deal IS revenue-synthetic in the strict sense (purchased existing federal-IT book of business). Soften to MODERATE_UNDERDELIVERY rather than RED — the rollup signal is real but the subagent did not have rich target-side data. Watch-item, not a kill-shot."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "$2.54B long-term debt; $2.1B variable-rate debt; $518M FY22 op cash flow.",
+      "severity": "PASS",
+      "supports": ["filing_self_disclosed", "edgar_fts_no_external_hits"],
+      "M_check": "edgar_fts.query_fulltext(search_term='SAIC term loan covenant')",
+      "M_value": {"total_hits": 0},
+      "interpretation": "No external EDGAR full-text hits flagging covenant trouble. Coverage ratio (op CF $518M vs $148M FY23 LTD maturities + $77M interest) is comfortable. Leverage is real but service-able. No divergence."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "~4M sq ft, 160 offices, 31 states; Reston VA HQ.",
+      "severity": "UNVERIFIABLE",
+      "supports": [],
+      "M_check": "epa_frs.query_facility (not in catalog for this run)",
+      "M_value": {"error": "unknown_source: epa_frs.query_facility"},
+      "interpretation": "EPA FRS source is not registered in this catalog instance; SAIC's footprint is office space (not regulated manufacturing facilities) so EPA FRS would not be informative anyway. Control claim — accepted at face value."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "Sensitive IC agencies named as customers, but no specific IC program or PE disclosed.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["edgar_fts_no_hits"],
+      "M_check": "edgar_fts.query_fulltext(search_term='Science Applications International intelligence community program')",
+      "M_value": {"total_hits": 0},
+      "interpretation": "Counterparty disclosure on IC work is intentionally vague (as expected for clearance-required programs). No external EDGAR cross-references found. Correctly UNVERIFIABLE — and this is the SIGNAL: an entire business line is asserted with zero verifiable hook."
+    }
+  ],
+  "summary": {
+    "n_claims": 10,
+    "n_jbook_grounded_claims": 5,
+    "n_jbook_pentagon_jbook_fired": 4,
+    "n_jbook_pentagon_jbook_actionable_signal": 0,
+    "severity_counts": {"PASS": 4, "MODERATE_UNDERDELIVERY": 1, "SEVERE_UNDERDELIVERY": 0, "RED_FLAG_NEGATIVE": 0, "UNVERIFIABLE": 5},
+    "key_finding": "SAIC discloses ZERO named Pentagon Program Elements and ZERO named forward programs of record. Revenue is reported only by service branch (Army 15% / Navy 12% / Other DoD 21% / Other federal 50%) and spread across ~1,900 task orders. The J-Book Exposure Divergence pattern requires a company to name specific programs the framework can falsify; SAIC's filing is structurally immune to this pattern because it discloses no falsifiable program-specific forward claims. The only real signal is acq_coherence flagging the FY20-FY22 rollup (Unisys Federal + Koverse + Halfaker) as low-mean-coherence — but that is an orthogonal signal, not a J-Book divergence. Framework correctly returns 'mostly UNVERIFIABLE' here, which is the right answer for diffuse IT-integrator filings.",
+    "framework_calibration_note": "This filing tests the FALSE-POSITIVE rate of the J-Book module. The module did not generate any false SEVERE/RED signals on a filing that names no PE numbers. That is the desired behavior. The cohort gains a true-negative observation: SAIC is the control case for the J-Book Exposure Divergence pattern."
+  }
+}

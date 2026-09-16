@@ -1,0 +1,106 @@
+{
+  "ticker": "AIRO",
+  "cutoff": "2026-05-20",
+  "filing": "0001493152-26-014116_10-K.txt",
+  "filing_date": "2026-03-31",
+  "filing_age_days": 50,
+  "scores": [
+    {
+      "claim_id": "AIRO-1",
+      "claim_text": "Training segment (CDI) is mandated recipient on $5.7B IDIQ + $1.9M IDIQ.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": false,
+      "M_check": "usaspending.query_recipient_contracts(recipient_name=COASTAL DEFENSE INC)",
+      "M_value": "n_awards=472, total_obligated=$23.6M, all DoD; top contracts in $1-4M range (ISR SUPPORT, JTAC AIR SERVICES, REMOTE CONTROL VEHICLES). No award close to the $5.7B IDIQ ceiling visible — multi-vendor IDIQ structure consistent. Mode B: SAM/UEI lookup signature N/A (function needs UEI). Variant 'Coastal Defense International' returns 0.",
+      "interpretation": "Coastal Defense Inc is a verified DoD recipient with substantial real obligations ($23.6M cumulative across 472 awards), confirming the company has the relationship it claims. However the $5.7B IDIQ headline is multi-vendor ceiling — AIRO's actual obligated share appears modest. Heuristic 10: IDIQ ceiling ≠ obligated; downstream readers may overweight the $5.7B figure. Not a fabrication — Mode A passes, Mode B suggests ceiling vs obligated gap is material to a thoughtful investor."
+    },
+    {
+      "claim_id": "AIRO-2",
+      "claim_text": "ICFR material weaknesses persist as of 12/31/2025; disclosure controls NOT effective.",
+      "severity": "RED_FLAG_NEGATIVE",
+      "supports": true,
+      "M_check": "claim_evolution.query_claim_evolution(search_term='material weakness'); 10-K Item 9A narrative.",
+      "M_value": "claim_evolution: 4 subsequent mentions across 10-K and three 10-Qs (2025-08, 2025-11, 2026-05), evolution_status=MENTIONED_INCIDENTALLY, no remediation classification. 10-K Item 9A: 'these material weaknesses were not remediated and continued to be present as of December 31, 2025'. Misstatements identified since fiscal year 2023 'individually and in the aggregate were material to the consolidated financial statements'.",
+      "interpretation": "Hard self-disclosure of material weakness + recurring since fiscal 2023 + material aggregate misstatements + management explicitly admits disclosure controls are NOT effective + remediation deferred to future periods. Heuristic 11 (ICFR RED). This is a textbook RED — newly public SPAC carrying multi-year unremediated ICFR weaknesses post-IPO."
+    },
+    {
+      "claim_id": "AIRO-3",
+      "claim_text": "Two customers = 79% of consolidated revenue (2025), all Drone segment; European geographic revenue $76.4M of $79.1M Drones.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": false,
+      "M_check": "Mode A confirmed in 10-K. Mode B: usaspending.query_recipient_contracts(Sky-Watch)=0; (AIRO Drone)=0; concentration is European (NATO sovereigns), not U.S. federal.",
+      "M_value": "Sky-Watch returns 0 DoD awards; AIRO Drone returns 0. Disclosed concentration: two customers = 79% of $90.9M ≈ $71.8M; European drone revenue alone was $76.4M (84% of total). Customer identities unnamed.",
+      "interpretation": "Customer concentration is real and extreme; revenue is almost entirely European sovereign procurement of Sky-Watch drones. The 10-K does not name Customer A or Customer B, and they are NOT identifiable via USAspending (foreign sovereigns, not U.S. federal). Per heuristic 5 (source-jurisdiction mismatch) USAspending cannot resolve this; per heuristic 2 (foreign-issuer caveat analog) European sovereigns are inherently opaque. The SEVE comes from: (a) 79% concentration in two unnamed NATO sovereigns whose procurement cycles are political; (b) no long-term commitments per the filing ('purchase orders' only); (c) the entire business depends on Ukraine-war-driven NATO drone demand persisting. Concentration disclosure satisfies the rule, but absent identification + lack of multi-year POs is a material going-concern-adjacent risk."
+    },
+    {
+      "claim_id": "AIRO-4",
+      "claim_text": "Phoenix AZ industrial facility (29,353 sqft) supports U.S. drone manufacturing; critical for Blue UAS certification path.",
+      "severity": "UNVERIFIABLE",
+      "supports": null,
+      "M_check": "epa_frs.query_facilities(AIRO, AZ); osha_establishments.query_establishments(AIRO, AZ)",
+      "M_value": "EPA FRS: 3 'AIRO' hits in AZ but they are AIRO GRAPHICS and AIRO PRODUCTS — unrelated commercial printers/manufacturers, not AIRO Group Holdings. OSHA: NO_OSHA_FOOTPRINT for AIRO Group. The 23048 N. 15th Ave Phoenix 85027 address is in north Phoenix; the EPA hits are at downtown / south Phoenix addresses — different entities.",
+      "interpretation": "Per heuristic 1, light drone assembly facilities are typically NOT EPA-FRS-regulated (no air/water/hazwaste permits required), so absence is not damning. The lease disclosure (Phoenix 85027, 29,353 sqft, 62-month lease expiring Oct 2030) is straightforward and verifiable via county records (not queried here). Not a red flag; just out-of-coverage."
+    },
+    {
+      "claim_id": "AIRO-5",
+      "claim_text": "Aspen Avionics supplies OEMs Robinson Helicopters, Pilatus, Honeywell, and Joby Aviation.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": false,
+      "M_check": "edgar_fts.query_fulltext(Aspen Avionics, cik=Honeywell 0000773840); same with cik=Joby 0001628280; plus generic search.",
+      "M_value": "Honeywell (CIK 0000773840): 0 hits for 'Aspen Avionics'. Joby Aviation (CIK 0001628280): 0 hits for 'Aspen Avionics'. Generic search: 25 hits, all from AIRO's own filings, Kernel Group SPAC predecessor, or unrelated Aspen Insurance / Aspen Group filings. Zero counterparty disclosure from any named OEM.",
+      "interpretation": "Per heuristic 7, 0 mentions in a named-counterparty's filings is SEVERE only when (a) counterparty is large AND (b) revenue is material AND (c) above sub-tier disclosure threshold. Aspen total avionics segment revenue is $6.9M (2025); Honeywell revenue is $38B+; Joby is pre-revenue eVTOL. Aspen's share of Honeywell or Joby spend is plainly de minimis — below any disclosure threshold. The claim is therefore plausible but unverified — Mode A registry doesn't confirm partnership, Mode B counterparty filings stay silent (consistent with non-material sub-tier supply). Downgrade from SEVE to MOD."
+    },
+    {
+      "claim_id": "AIRO-6",
+      "claim_text": "Rollup of Sky-Watch / CDI / Aspen Avionics / Jaunt / Agile Defense / AIRO Drone under four-segment platform thesis.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "acq_coherence.score_acquisition_coherence(parent_thesis=..., acquisitions=[5 entities])",
+      "M_value": "Aggregate mean_coherence=0.824, signal=COHERENT_ROLLUP. Per-acquisition: Sky-Watch 0.85, CDI 0.72, Aspen 0.85, Jaunt 0.85, Agile Defense 0.85 — all 'high_coherence'. Each acquisition maps cleanly to one of the four named segments (Drones/Avionics/Training/eVTOL).",
+      "interpretation": "Unlike the IonQ pattern (incoherent rollup of SAR satellites + atomic clocks + foundry under a quantum-computing parent), AIRO's acquisitions are tightly coupled to its stated A&D platform thesis. Each segment has a real acquired anchor business. Mode B aggregate coherence does NOT trip the rollup-incoherence signal. The risk here is execution / integration, not thesis fakery."
+    },
+    {
+      "claim_id": "AIRO-7",
+      "claim_text": "Pursuing DoD Blue UAS certification expected June 2026; required to sell drones to DoD.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": false,
+      "M_check": "usaspending.query_recipient_contracts(AIRO Group, Sky-Watch, AIRO Drone)",
+      "M_value": "AIRO Group: 0 awards. Sky-Watch: 0 awards. AIRO Drone: 0 awards. Only Coastal Defense (training services) and tiny Jaunt STTRs ($449k total). NO U.S. DoD drone obligations.",
+      "interpretation": "Heuristic 3 (planned/to-be-delivered): the Blue UAS certification is forward-looking and should not be hard-red on a current-registry absence. HOWEVER, the company's entire U.S.-DoD drone thesis (and the Phoenix facility build-out) is contingent on (a) achieving Blue UAS by June 2026 and (b) sourcing U.S.-domiciled production. Mode B reveals: zero current DoD drone footprint despite the SPAC pitch leaning heavily on 'NATO + U.S. defense'. This is a SEVE because the entire U.S. drone revenue line is hypothetical — current $79M drone segment is European-only. If Blue UAS slips (common per heuristic 10) the Phoenix capex is stranded."
+    },
+    {
+      "claim_id": "AIRO-8",
+      "claim_text": "Jaunt has patented compound rotorcraft configuration with 300+ piloted flight hours.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "uspto_odp.query_assignee(Jaunt Air Mobility); also Carter Aviation (predecessor IP)",
+      "M_value": "Jaunt Air Mobility: 3 granted patents (n_granted=3) including US 11,713,113 'Compound Rotorcraft with Propeller' (granted 2023-08-01), US 11,174,016 'Compound Rotorcraft with Propeller' (granted 2021-11-16), and US 12,404,018 'Mast Dampener for a Rotorcraft' (granted 2025-09-02). Carter Aviation Technologies (Jaunt's IP predecessor per 10-K): 0 granted (provisional/abandoned). All filings on-topic (B64C 27/* rotorcraft CPC classifications).",
+      "interpretation": "Patent claim is corroborated. Three granted patents directly on 'compound rotorcraft' technology with proper CPC codes. Per heuristic 8 the bar is n_granted>=5 for full PASS, but the IP is directly on-topic so PASS is appropriate (not Nikola pattern). Note: aggregate granted count is modest, so IP moat may be narrow."
+    },
+    {
+      "claim_id": "AIRO-9",
+      "claim_text": "IPO June 2025 ($69M gross @ $10) + Follow-on (~$82.6M net) + insider equity issuances at IPO close.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "sec_filings.list_filings_by_form(cik=AIRO, form=S-1); insider_vs_calendar.query_insider_sales_near_budget_events",
+      "M_value": "SEC: 2 S-1 filings found (2025-02-21 initial, 2025-09-08 follow-on / amended). Confirms IPO + Follow-on path. Insider sales: 25 Form-4 filings, 12 sales totaling $19.5M; 0 proximate to budget events in lookback window (PB releases are not the relevant calendar event for AIRO — IPO-cycle / lock-up events are). n_form4=25 indicates active insider trading activity post-IPO.",
+      "interpretation": "Mode A: S-1 filings confirm both equity raises on file. Mode B: 25 Form-4 filings and $19.5M in insider sales post-IPO is notable for a $700M-cap newly-public SPAC — but the calendar-budget-event scaffold doesn't fit (this is not a federal-budget-cycle company). The sales activity itself is worth flagging but not RED without 10b5-1 classification. Cantor Fitzgerald as lead bookrunner + IPO at $10 + post-IPO trade at avg ~$20+ (per repurchase table at $20.20) suggests substantial insider mark-up windows; absent discretionary-vs-10b5-1 classification this is PASS-with-watchlist."
+    },
+    {
+      "claim_id": "AIRO-10",
+      "claim_text": "Named DoD customers: USAF Air Combat Command, U.S. Naval Air Warfare Center, SEAL teams via CDI brand.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "usaspending.query_recipient_contracts(Coastal Defense)",
+      "M_value": "COASTAL DEFENSE INC: 472 awards, $23.6M total. Awarding agency codes include USAF (FA489*, FA864*), Navy (N0042122F0378 'TACT SERVICES', N-prefix contracts), DARPA-adjacent (H9224*), AFRL/AFLCMC. Contract descriptions include 'ISR SUPPORT SERVICES', 'JTAC AIR SERVICES', 'TACT SERVICES'. The relationships to USAF Air Combat Command + Naval Air Warfare Center are consistent with the contract numbering / awarding office pattern observed.",
+      "interpretation": "Mode A clean PASS: Coastal Defense has substantive, multi-year, multi-service-branch DoD obligations consistent with the named-customer disclosures. Per heuristic 9 (DoD-specific claim test) — named DoD customers are confirmed by registry. JTAC training, ISR support, and tactical services line up with the brand positioning."
+    }
+  ],
+  "severity_counts": {
+    "PASS": 4,
+    "MODERATE_UNDERDELIVERY": 2,
+    "SEVERE_UNDERDELIVERY": 2,
+    "RED_FLAG_NEGATIVE": 1,
+    "UNVERIFIABLE": 1
+  }
+}

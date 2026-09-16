@@ -1,0 +1,98 @@
+{
+  "ticker": "mkfg",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Markforged operates an in-house manufacturing facility in greater Boston, Massachusetts where it produces consumables (composite/metal materials).",
+      "severity": "PASS",
+      "supports": [
+        "EPA FRS: 3 facilities registered to MARKFORGED INC in Massachusetts (Cambridge - 10 Fawcett St; Billerica - 4 Suburban Park Dr; Watertown - 85 School St). All in Middlesex County, all in greater Boston metro."
+      ],
+      "M_check": "epa_frs.query_facilities(facility_name='Markforged', state_abbr='MA')",
+      "M_value": "n_facilities=3 (Cambridge HQ, Watertown, Billerica)",
+      "interpretation": "PASS. Three EPA-registered Markforged facilities in greater Boston confirms the disclosed manufacturing/HQ footprint. Note: 480 Pleasant Street facility was impaired/exited in 2023 per filing \u2014 consistent with a contraction footprint of three remaining sites."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Markforged has a design and manufacturing facility in Hoganas, Sweden (acquired via Digital Metal AB) for metal binder jetting.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "EDGAR fulltext 'Digital Metal' returned 19 hits, ALL from Markforged's own filings (8-Ks announcing/discussing the acquisition + 10-Ks). No external US-listed corroboration, but the acquisition itself is recorded in MKFG's own SEC docs (8-K dated 2022-08-31 announcing closing) so the corporate transaction is verified."
+      ],
+      "M_check": "edgar_fts.query_fulltext(search_term='Digital Metal', forms='10-K,10-Q,8-K,DEF 14A,20-F,40-F')",
+      "M_value": "total_hits=19, all from MKFG itself",
+      "interpretation": "UNVERIFIABLE for the foreign-facility claim itself (EPA FRS is US-only; recipe explicitly notes foreign factories are unverifiable through this pipeline). The August 2022 closing 8-K independently corroborates the acquisition transaction; what's not externally verifiable from public US registries is whether the Hoganas physical site is currently operating at the disclosed scale."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Markforged invented and patented the Continuous Fiber Reinforcement (CFR) additive manufacturing process and asserts a proprietary IP portfolio in composite/metal 3D printing.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "USPTO ODP query_assignee('Markforged', cutoff=2024-03-31)",
+      "M_value": "n_total=196, n_granted=72, category_counts={'continuous_fiber': 63, 'metal_printing': 50, 'software_workflow': 0}",
+      "interpretation": "USPTO ODP shows 72 granted patents pre-cutoff with at least one match in claimed categories ({'continuous_fiber': 63, 'metal_printing': 50, 'software_workflow': 0}). Real portfolio exists."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Markforged has 'blue chip customers' in aerospace, military and defense, automotive, healthcare, space exploration, and food and beverage industries.",
+      "severity": "PASS",
+      "supports": [
+        "EDGAR fulltext 'Markforged' (no CIK filter): 232 hits across 10-K/10-Q/8-K/DEF 14A/20-F/40-F since 2018.",
+        "Top hits are dominated by Markforged's own filings (expected for a US-listed company), but the 232 total is high enough to indicate a real public-company footprint."
+      ],
+      "M_check": "edgar_fts.query_fulltext(search_term='Markforged', forms='10-K,10-Q,8-K,DEF 14A,20-F,40-F')",
+      "M_value": "total_hits=232 (mix of MKFG self-filings + external)",
+      "interpretation": "PASS for footprint test (>10 threshold is satisfied many times over). Industrial 3D printer customer relationships typically flow through VAR channels and are not material enough to appear in Fortune-500 customers' 10-Ks (a printer purchase is immaterial to a defense prime). The aggregate footprint is consistent with a real industrial-tooling vendor."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Markforged operates a global fleet of 'thousands of connected printers' generating data for an AI-powered closed-loop additive manufacturing software offering (Eiger / Digital Forge).",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "EDGAR fulltext 'Digital Forge': 39 hits, ALL from Markforged itself (no external corroboration of platform branding).",
+        "EDGAR fulltext 'Eiger': 632 hits but dominated by Eiger BioPharmaceuticals (CIK 0001305253) \u2014 name collision, not external validation of MKFG's software."
+      ],
+      "M_check": "edgar_fts.query_fulltext(search_term='Digital Forge'); edgar_fts.query_fulltext(search_term='Eiger')",
+      "M_value": "Digital Forge: 39 hits all MKFG. Eiger: 632 hits, ~all biopharma collision.",
+      "interpretation": "MODERATE. The platform branding ('Digital Forge', 'Eiger') doesn't appear in any other US-listed company's filings, which is somewhat below expectation for a 'fleet of thousands of connected printers' running an AI software subscription. That said, industrial 3D printer customers typically don't disclose specific software platforms used by tooling teams, so this is at the soft end of MODERATE rather than SEVERE. The 'thousands of connected printers' figure cannot be independently quantified from public registries."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Markforged customers in the automotive industry rely on the platform (testable via Ford / GM 10-K mentions of Markforged or distinctive products).",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "EDGAR fulltext 'Markforged' restricted to Ford CIK 0000037996: 0 hits since 2018.",
+        "EDGAR fulltext 'Markforged' restricted to GM CIK 0001467858: 0 hits since 2018."
+      ],
+      "M_check": "edgar_fts.query_fulltext(search_term='Markforged', cik=Ford/GM)",
+      "M_value": "Ford: 0 hits. GM: 0 hits.",
+      "interpretation": "MODERATE per heuristic 4/7. Automotive OEMs purchasing 3D printers for tooling and prototyping would not typically disclose individual equipment vendors in 10-Ks (printers are de minimis capex relative to a $150B+ automaker). The claim of 'automotive customers' is generic-industry rather than naming a specific OEM, so a 0 hit doesn't rise to RED_FLAG. Marked MODERATE rather than PASS because the company's own marketing has historically named specific automotive customers but their disclosures are absent."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Markforged customers in the aerospace / defense industry rely on the platform (testable via Lockheed / Raytheon 10-K mentions of Markforged).",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "EDGAR fulltext 'Markforged' restricted to Lockheed Martin CIK 0000936468: 0 hits since 2018.",
+        "EDGAR fulltext 'Markforged' restricted to Raytheon Tech CIK 0000101829: 0 hits since 2018.",
+        "EDGAR fulltext 'Markforged' restricted to Boeing CIK 0000012927: 0 hits since 2018."
+      ],
+      "M_check": "edgar_fts.query_fulltext(search_term='Markforged', cik=LMT/RTX/BA)",
+      "M_value": "LMT: 0. RTX: 0. BA: 0.",
+      "interpretation": "MODERATE per heuristic 4/7. Defense primes do not disclose individual equipment-vendor relationships in their 10-Ks (Markforged would be a buried supplier among thousands). The claim is industry-generic ('aerospace, military and defense') without naming a specific prime, so 0 hits is consistent with a real but immaterial-to-the-counterparty relationship rather than fabrication. Note: published case studies on Markforged.com historically name USAF, US Marines, Vestas, etc., but these don't generate 10-K disclosures."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Industry context: 3D printing competitors Stratasys / Nano Dimension / Materialise reference Markforged in their public filings (competitive footprint test).",
+      "severity": "PASS",
+      "supports": [
+        "EDGAR fulltext 'Markforged' restricted to Stratasys (CIK 0001517396): 7 hits across 20-F filings 2018, 2019, 2020, 2021, 2022, 2023, 2024 (every annual report).",
+        "Nano Dimension (CIK 0001643303): 0 hits.",
+        "Materialise (CIK 0001091223): 0 hits."
+      ],
+      "M_check": "edgar_fts.query_fulltext(search_term='Markforged', cik=SSYS/NNDM/MTLS)",
+      "M_value": "SSYS: 7 hits (every 20-F since 2018). NNDM: 0. MTLS: 0.",
+      "interpretation": "PASS. Stratasys \u2014 the dominant US-listed FFF 3D printing OEM \u2014 names Markforged as a competitor in every single annual report from 2018 through the 2024 filing. This is the strongest external validation in the entire screen: a peer with reason to know (and litigation incentive) acknowledges Markforged as a real, competing OEM in the same product category. NNDM and MTLS focus on different product categories (PCB additive and software respectively), so 0 hits there is non-informative."
+    }
+  ]
+}

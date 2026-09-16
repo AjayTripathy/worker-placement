@@ -1,0 +1,79 @@
+{
+  "ticker": "KTOS",
+  "cutoff": "2026-05-16",
+  "filing": "0001069258-26-000013_10-K.txt",
+  "scores": [
+    {
+      "claim_id": "KTOS-1",
+      "claim_text": "68%/67%/69% of FY2025/2024/2023 revenues from U.S. Government contracts (all military branches + FMS); FY2025 total revenue $1,346.8M implies ~$915M USG.",
+      "severity": "PASS",
+      "supports": "USAspending DoD contracts under 'Kratos' substring: 242 awards totaling $1.666B obligated for periods active 2023-01-01 to 2026-05-16; all-federal recipient query returns 304 awards / $1.993B. Recipient name variants include KRATOS DEFENSE & SECURITY SOLUTIONS, KRATOS UNMANNED AERIAL SYSTEMS, KRATOS TECHNOLOGY & TRAINING SOLUTIONS, KRATOS SPACE & MISSILE DEFENSE SYSTEMS, KRATOS S1, MICRO SYSTEMS — all consistent with claimed structure. Order-of-magnitude matches stated $915M of annual USG revenue (USAspending shows obligation amounts on award lifetime, not annualized, so $1.67B over ~3y window is consistent with $915M/yr).",
+      "M_check": "usaspending.query_dod_contracts(recipient_name='Kratos', start=2023-01-01, end=2026-05-16); usaspending.query_recipient_contracts (all federal)",
+      "M_value": {"dod_n_awards": 242, "dod_total_obligated": 1665681097, "all_fed_n_awards": 304, "all_fed_total": 1992890304},
+      "interpretation": "DoD revenue is independently corroborated at scale — no signal."
+    },
+    {
+      "claim_id": "KTOS-2",
+      "claim_text": "Kratos is establishing a new facility related to the Sentinel ICBM program (Northrop Grumman is Sentinel prime), implying on-program subcontractor role.",
+      "severity": "UNVERIFIABLE",
+      "supports": "Kratos has 11 prior filings mentioning 'Sentinel' (consistent multi-year self-disclosure). Kratos Space & Missile Defense Systems has $48M obligated under 'ORIOLE MOTORS AND HARDWARE' (N6339416C0007) — consistent with the SRM/missile-defense work described in the filing but NOT a Sentinel-specific contract. Northrop Grumman EDGAR filings do NOT name Kratos (0 hits in NOC CIK 0001133421). Calibration Heuristic 3 (planned vs operational): the filing describes the facility as being 'established' — i.e., capital build phase, not yet executing on a named Sentinel contract. Calibration Heuristic 7: per cohort guidance, absence of a DoD program in USAspending IS a hard contradiction — BUT Sentinel is a Northrop Grumman prime, not a direct Kratos award; Kratos would appear as a subcontractor, which USAspending tracks only with significant lag/lower fidelity. NOC's failure to name Kratos in 10-K is weak evidence (primes routinely do not list subcontractors publicly). Net: claim is forward-looking + supplier-status, not directly testable yet from the listed sources.",
+      "M_check": "edgar_fts (KTOS self / NOC counterparty); usaspending.query_dod_contracts (Kratos Space)",
+      "M_value": {"ktos_self_sentinel_filings": 11, "noc_mentions_kratos": 0, "kratos_space_dod_awards": 2, "kratos_space_total": 48100499},
+      "interpretation": "Investment-stage claim, no direct contract test possible; mark UNVERIFIABLE rather than RED_FLAG given Layer-3 weak-evidence caveat for sub-tier disclosures."
+    },
+    {
+      "claim_id": "KTOS-3",
+      "claim_text": "June 3, 2025 formal teaming agreement with GE Aerospace for engines for next-generation affordable UAS and CCA-type aircraft; $31.5M cumulative revenue recognized under arrangement through Dec 28, 2025.",
+      "severity": "PASS",
+      "supports": "GE Aerospace (CIK 0000040545 — note: GE retains CIK post-split) filed an 8-K on 2026-04-21 mentioning 'Kratos' (1 hit, recent post-teaming-announcement filing). Two market filings reference 'Kratos teaming'. The teaming agreement is corroborated by an independent counterparty disclosure.",
+      "M_check": "edgar_fts.query_fulltext('Kratos', cik=GE); edgar_fts.query_fulltext('Kratos teaming')",
+      "M_value": {"ge_filings_mentioning_kratos": 1, "ge_earliest_mention_8K": "2026-04-21", "market_kratos_teaming_filings": 2},
+      "interpretation": "Counterparty self-disclosure corroborates the partnership — PASS."
+    },
+    {
+      "claim_id": "KTOS-4",
+      "claim_text": "Kratos describes itself as IP-centric with proprietary products across drones, hypersonics, jet engines, microwave electronics, C5ISR, training — implying material patent portfolio.",
+      "severity": "PASS",
+      "supports": "USPTO ODP returns 137 patent applications, 43 granted under 'Kratos' assignee + 84 applications, 25 granted under 'Florida Turbine' (KTT Core, the wholly-owned propulsion subsidiary) = 68 combined granted patents. Title categorization on the Kratos portfolio: 41 c5isr_satellite (command/control/communication/satellite), 10 microwave_rf — directly matching two of Kratos' four claimed primary tech areas. Drone/hypersonic title hits are 0 under the Kratos parent name (likely filed under subsidiary names or as trade secrets — common for classified defense IP), but Florida Turbine's 25 granted patents cover the propulsion/engine area. Calibration Heuristic 8 (n_granted >= 5 with any claimed-category hit) is satisfied by both microwave_rf (10) and c5isr_satellite (41).",
+      "M_check": "uspto_odp.query_assignee('Kratos', categorize=...); uspto_odp.query_assignee('Florida Turbine')",
+      "M_value": {"kratos_n_total_applications": 137, "kratos_n_granted": 43, "ftt_n_total": 84, "ftt_n_granted": 25, "combined_granted": 68, "categories": {"drone_unmanned": 0, "hypersonic": 0, "microwave_rf": 10, "c5isr_satellite": 41, "other": 86}},
+      "interpretation": "IP claim well-supported. Note absence of drone/hypersonic hits in title text under parent name is consistent with classified IP / subsidiary-level assignments common in defense — not a contradiction."
+    },
+    {
+      "claim_id": "KTOS-5",
+      "claim_text": "Kratos operates US manufacturing footprint at named sites in CA (San Diego/McClellan/Roseville/Sacramento), AL (Huntsville/Birmingham), and plans a new turbofan facility in OK.",
+      "severity": "PASS",
+      "supports": "EPA Facility Registry Service hits: CA = 6 facilities (KRATOS DEFENSE & SECURITY SOLUTIONS in San Diego; KRATOS UNMANNED AERIAL SYSTEMS in McClellan and Sacramento — two Sacramento addresses; ROGERSON KRATOS in Pasadena — RF subsidiary). AL = 2 (Kratos Huntsville on Research Drive, Kratos SRE Birmingham). OK = 0, which is consistent with the filing's own description of the Oklahoma turbofan facility as 'planned' and 'expected to begin to ramp up during 2026' (Heuristic 1 + Heuristic 3 — investment-stage, not operational at cutoff). Locations cleanly map to claimed footprint.",
+      "M_check": "epa_frs.query_facilities('Kratos', state='CA' | 'AL' | 'OK')",
+      "M_value": {"CA_facilities": 6, "AL_facilities": 2, "OK_facilities": 0, "CA_cities": ["San Diego","McClellan","Sacramento","Pasadena"], "AL_cities": ["Huntsville","Birmingham"]},
+      "interpretation": "Operational US manufacturing footprint corroborated; OK absence is consistent with claim that OK facility is in build phase."
+    },
+    {
+      "claim_id": "KTOS-6",
+      "claim_text": "Kratos Unmanned Systems is a producer of jet-powered tactical drones (XQ-58 Valkyrie, BQM-167, BQM-177, Mako); US segment FY2025 revenue $292M.",
+      "severity": "PASS",
+      "supports": "USAspending 'Kratos Unmanned' substring returns 130 DoD awards totaling $1.0998B obligated (lifetime, 2022-01-01 to 2026-05-16). Top awards explicitly name claimed drone platforms: BQM-177A SSAT Full Rate Production ($238.8M + $118.8M + $105.9M), BQM-167A Air Force Sub-scale Aerial Target Lots 14-21 ($119M + $79M + $58M + $42M), 'Low Cost Attritable Strike Unmanned Aerial System Demonstration' ($46.6M — this is the Valkyrie/XQ-58 lineage), 'Skyborg Prototyping, Experimentation & Autonomy Development' ($37.8M — Valkyrie was the inaugural Skyborg test platform). Legacy 'Composite Engineering' (KUAS's pre-acquisition name) returns only $86K, consistent with the migration to the Kratos-branded recipient name post-2012 acquisition. Annual segment revenue ($292M) is consistent with $1.1B of lifetime obligations.",
+      "M_check": "usaspending.query_dod_contracts('Kratos Unmanned'); legacy 'Composite Engineering'",
+      "M_value": {"kuas_n_awards": 130, "kuas_total": 1099769051, "named_programs_in_top_10": ["BQM-177A","BQM-167A","Skyborg","Low Cost Attritable Strike UAS","AFSAT"], "composite_eng_legacy": 86581},
+      "interpretation": "Drone OEM status independently and quantitatively confirmed — PASS."
+    },
+    {
+      "claim_id": "KTOS-7",
+      "claim_text": "Definitive merger agreement Nov 4 2025 to acquire Orbit Technologies Ltd. (Israeli, TASE-listed) for $356.3M cash, expected close 1H 2026.",
+      "severity": "PASS",
+      "supports": "Kratos 10-K and other own filings reference 'Orbit Technologies' 12 times (deep cross-filing consistency — 8-Ks, 10-Q, 10-K). 'Orbit Merger' has 3 market filings — likely Orbit's own SEC-registered statements or related transaction filings. Self-disclosure is detailed (consideration, funding source, timing). No counterparty-disclosure red flag; the cross-filing consistency over multiple quarters since November 2025 announcement is a strong PASS signal.",
+      "M_check": "edgar_fts.query_fulltext('Orbit Technologies', cik=KTOS); edgar_fts.query_fulltext('Orbit Merger')",
+      "M_value": {"ktos_self_orbit_filings": 12, "market_orbit_merger_filings": 3},
+      "interpretation": "Pending acquisition adequately disclosed and corroborated; status as of cutoff is announced/pending, not closed — claim is forward-looking but consistently stated."
+    },
+    {
+      "claim_id": "KTOS-8",
+      "claim_text": "Feb 20, 2026 entered $300M 5-year revolving credit facility with PNC Bank as admin agent; replaced 2022 Credit Facility (which had $200M Term Loan A + $200M revolver).",
+      "severity": "PASS",
+      "supports": "Kratos filings reference 'PNC Bank' 25 times — consistent with PNC being the long-standing lead bank. '2026 Credit Agreement' returns 2 KTOS filings (the 10-K disclosing the agreement and the 8-K filed concurrently). Cross-reference to 2022 Credit Facility termination is internally consistent. Cash balance of $560.6M on balance sheet ample for $300M revolver; no draws disclosed.",
+      "M_check": "edgar_fts.query_fulltext('PNC Bank', cik=KTOS); edgar_fts.query_fulltext('2026 Credit Agreement', cik=KTOS)",
+      "M_value": {"ktos_pnc_filings": 25, "ktos_2026ca_filings": 2},
+      "interpretation": "Credit-facility refinancing fully self-disclosed and internally consistent — PASS."
+    }
+  ]
+}

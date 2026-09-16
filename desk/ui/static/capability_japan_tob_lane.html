@@ -1,0 +1,1406 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>japan_tob_lane</title><style>
+body{margin:0;background:#0b0e12;color:#e8ebee;font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:26px 24px 90px}
+a{color:#8b7cf6} h1{font-size:23px;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:#7d858e;margin:0 0 20px;font-size:13px}
+h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:#7d858e;margin:24px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 10px;border-bottom:1px solid #242a31;text-align:left;vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#7d858e}
+.k{font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:20px}
+.k-generator{color:#c3b8fb;background:rgba(139,124,246,.15)}
+.k-detector{color:#eccb8a;background:rgba(217,164,65,.15)}
+.k-watcher{color:#8ee5c1;background:rgba(53,201,143,.15)}
+.k-evidence{color:#b3bcc6;background:rgba(138,147,158,.15)}
+.h-OK{color:#35c98f} .h-STALE{color:#d9a441} .h-ERROR{color:#e0736a} .h-NEVER_RUN{color:#8a939e}
+pre{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px;overflow-x:auto;font-size:12px;line-height:1.5}
+.panel{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px 18px;margin-bottom:12px}
+ul{margin:4px 0;padding-left:20px} li{margin-bottom:4px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+</style></head><body><div class="wrap"><h1>japan_tob_lane</h1><p class="sub">registered capability · japan_tob_lane</p><a href="signals.html">&larr; all signals</a><div class="panel" style="margin-top:10px"><span class="k k-generator">GENERATOR</span> &nbsp;<span class="h-NEVER_RUN"><b>NEVER_RUN</b></span> · last run <span class="mono">never</span></div><p>the Japan take-private / tender-offer (TOB) lane.</p><form method="POST" action="/signals/run" style="margin:10px 0"><input type="hidden" name="name" value="japan_tob_lane"><input name="symbol" placeholder="symbol (if applicable)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px"><input name="symbols" placeholder="universe, comma-sep (generators)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px;margin-left:6px"><button type="submit" style="background:#8b7cf6;color:#0b0e12;border:0;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;margin-left:6px">Run now</button></form><h2>Datasources</h2><ul><li>reference implementation: verticals/generators/japan_tob_lane.py (see the code section for the feeds it touches)</li></ul><h2>Applies to</h2><ul><li><b>strategies:</b> custom_japan, japan_value</li></ul><h2>The code</h2><pre>#!/usr/bin/env python3
+&quot;&quot;&quot;japan_tob_lane — the Japan take-private / tender-offer (TOB) lane.
+
+WHY THIS LANE. TSE&#x27;s governance program (the 2023 &quot;management conscious of cost of capital
+and share price&quot; directive + the parent-subsidiary listing cleanup) turned Japan into the
+densest take-private pond in the developed world. A TOB pays on a DATED, contractual event
+(the offer settles or it does not) rather than on the tape level, which is exactly the
+kind of return the house wants when it does not want more beta.
+
+TWO BOOKS. THEY NEVER MIX.
+  A. ANNOUNCED  — a live tender offer exists. This is a SPREAD book: offer price vs market,
+                  minimum-tender condition, expiry, squeeze-out mechanics. Deal risk only.
+  B. ANTICIPATORY — no offer exists. This is a FINGERPRINT book: names whose structure looks
+                  like the ones that get taken out. Pure speculation on an undated event.
+     An anticipatory name is NEVER counted as a spread, never annualized, and never carried
+     in the same return table. Doing so is the single easiest way to fabricate an edge.
+
+CHANNELS THAT ACTUALLY WORK (documented because two obvious ones do not):
+  * TDnet (release.tdnet.info) — WORKS, plain HTTP, no key, no browser. Daily disclosure
+    index at I_list_&lt;page&gt;_&lt;YYYYMMDD&gt;.html, 100 rows/page, ~850 rows on a busy day. Titles
+    are formulaic enough to classify, and every row links a public PDF. THIS IS THE
+    ANNOUNCED CHANNEL. Retention is only ~31 days, so THE STORE IS THE HISTORY (the
+    broken_print_radar lesson): a day we never crawled is gone forever.
+  * EDINET API v2 — DOES NOT WORK unkeyed. api.edinet-fsa.go.jp returns
+    {&quot;StatusCode&quot;: 401, &quot;message&quot;: &quot;Access denied due to invalid subscription key&quot;}.
+    docTypeCode 240 (公開買付届出書) is the authoritative statutory TOB filing and would be
+    the better channel; it needs a free subscription key we do not have. Gap is honest.
+  * EDINET viewer (disclosure2.edinet-fsa.go.jp) — works via Playwright (the existing
+    edinet_browser_crawl transport) but is slow and only needed for the anticipatory side,
+    which we serve OFFLINE from the 1,525 annual-report XBRL fact sets already cached.
+  * JPX follow-up (&quot;cost of capital&quot;) page — publishes PDFs, not a machine-readable company
+    list. We derive the improvement-plan flag from the issuer&#x27;s OWN annual report text
+    instead (arguably the stronger primary source; see anticipatory notes).
+
+ANTICIPATORY FINGERPRINT — all of it from local cached primary filings, zero network:
+  * FIEA Art.24-7(1) parent disclosure (jpcrp_cor:InformationAboutParentCompanyEtc...) —
+    a HARD statutory binary: the filing either names a controlling parent or says
+    「親会社等はありません」. This is the parent-subsidiary-listing universe, defined by law
+    rather than by our guess.
+  * 【関係会社の状況】 (OverviewOfAffiliatedEntities) — the 被所有 (owned-by) percentage.
+  * 【大株主の状況】 (MajorShareholders) — top-holder name and percentage.
+  * 【役員の状況】 (InformationAboutOfficers) — director birthdates -&gt; founder age, and
+    same-surname directors -&gt; family succession (or its absence).
+  * cash / equity / market cap from the existing EDINET fundamentals store.
+
+GUARDS (house doctrine, each enforced in code, not just described):
+  * MINIMUM-TENDER CONDITION. Nearly every Japanese TOB carries a 買付予定数の下限. If it is
+    not met the offer is withdrawn and the spread goes to zero AND the stock re-rates down.
+    We surface the floor in shares and the required tender rate among non-bidder holders.
+  * SQUEEZE-OUT TIMELINE. A Japanese take-private is two-step. Step 2 (株式売渡請求 for a
+    &gt;=90% holder, or 株式併合 below that) runs MONTHS after the tender settles. We annualize
+    to the TENDER settlement date for a tendering holder, and separately state the step-2
+    date risk for a non-tendering holder. We NEVER annualize a pre-conditional offer whose
+    start date is not yet fixed — those are labelled TIMING_UNBOUNDED with no annual number.
+  * ADIG THIN-PRINT RULE. A spread struck on a thin or stale print is not a quote. Every
+    spread carries a liquidity verdict and a thin/stale spread is marked NOT_QUOTABLE.
+  * JPY. Spreads are JPY-denominated. The book already holds unhedged JPY; every added
+    position is an ADDITIONAL unhedged JPY exposure and the report states the add in JPY
+    and USD at the run&#x27;s spot.
+  * TAXABLE ACCOUNT. Tender proceeds are a SALE, not a merger rollover: short-term capital
+    gain for anything held under a year, and Japan withholds nothing from a US holder on
+    a TOB tender through a US broker (it is an on-market-equivalent disposition), but the
+    holding-period clock is what kills the after-tax return on a 4% gross / 90-day spread.
+    Stated per deal, never assumed away.
+  * HELD-BOOK OVERLAP. Every announced target and every anticipatory candidate is checked
+    against the held Japan book and flagged loudly.
+
+USAGE
+  python3 verticals/generators/japan_tob_lane.py                    # both books
+  python3 verticals/generators/japan_tob_lane.py --mode announced --days 45
+  python3 verticals/generators/japan_tob_lane.py --mode anticipatory --top 40
+  python3 verticals/generators/japan_tob_lane.py --intake            # also write the .md
+
+Outputs
+  verticals/generators/data/JAPAN_TOB.json          machine state (MERGE-ONLY event store)
+  desk/data/JAPAN_TOB_INTAKE_&lt;YYYYMMDD&gt;.md          analyst intake
+&quot;&quot;&quot;
+from __future__ import annotations
+
+import argparse
+import csv
+import datetime as dt
+import io
+import json
+import os
+import re
+import subprocess
+import sys
+import time
+import urllib.request
+import zipfile
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(os.path.dirname(HERE))
+DATA = os.path.join(HERE, &quot;data&quot;)
+STORE = os.path.join(DATA, &quot;JAPAN_TOB.json&quot;)
+PDF_CACHE = os.path.join(DATA, &quot;japan_tob_pdfs&quot;)
+EDINET_CACHE = os.path.join(ROOT, &quot;verticals&quot;, &quot;deep_value&quot;, &quot;global&quot;, &quot;data&quot;, &quot;edinet_cache&quot;)
+EDINET_STORE = os.path.join(ROOT, &quot;verticals&quot;, &quot;deep_value&quot;, &quot;global&quot;, &quot;data&quot;, &quot;edinet_store.json&quot;)
+EDINET_CODES = os.path.join(ROOT, &quot;verticals&quot;, &quot;deep_value&quot;, &quot;global&quot;, &quot;data&quot;, &quot;Edinetcode.zip&quot;)
+PX_CACHE = os.path.join(ROOT, &quot;verticals&quot;, &quot;deep_value&quot;, &quot;global&quot;, &quot;data&quot;, &quot;japan_px_cache.json&quot;)
+DESK_DATA = os.path.join(ROOT, &quot;desk&quot;, &quot;data&quot;)
+
+UA = (&quot;Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 &quot;
+      &quot;(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36&quot;)
+TDNET = &quot;https://www.release.tdnet.info/inbs&quot;
+
+# The Japan book we already hold at IBKR (TSEJ). Announced targets and anticipatory names are
+# checked against this — a take-private on a name we own is a RESULT, not a new idea.
+HELD_JAPAN = {&quot;3388&quot;: &quot;Meiji Electric Industries&quot;, &quot;6229&quot;: &quot;Okada Aiyon&quot;,
+              &quot;7222&quot;: &quot;Nissan Shatai&quot;, &quot;8750&quot;: &quot;Dai-ichi Life&quot;}
+
+# Custodian / trust-bank nominees are NOT strategic parents. Any fingerprint that treats
+# 日本マスタートラスト as a controlling holder is broken.
+NOMINEES = (&quot;日本マスタートラスト&quot;, &quot;日本カストディ&quot;, &quot;カストディ銀行&quot;, &quot;資産管理サービス&quot;,
+            &quot;ステート・ストリート&quot;, &quot;ＪＰモルガン&quot;, &quot;JPMORGAN&quot;, &quot;STATE STREET&quot;, &quot;THE BANK OF NEW YORK&quot;,
+            &quot;MSIP&quot;, &quot;BNYM&quot;, &quot;証券株式会社&quot;, &quot;持株会&quot;, &quot;共栄会&quot;, &quot;共伸会&quot;, &quot;自己株式&quot;, &quot;信託口&quot;)
+
+# ---------------------------------------------------------------------------------------
+# small utilities
+# ---------------------------------------------------------------------------------------
+
+Z2H = str.maketrans(&quot;０１２３４５６７８９．，％－&quot;, &quot;0123456789.,%-&quot;)
+
+
+def _n(s: str) -&gt; str:
+    &quot;&quot;&quot;full-width -&gt; half-width for the numeric characters that matter, whitespace squashed.&quot;&quot;&quot;
+    return re.sub(r&quot;[\s　]+&quot;, &quot;&quot;, (s or &quot;&quot;).translate(Z2H))
+
+
+def _get(url: str, tries: int = 3, binary: bool = False):
+    for i in range(tries):
+        try:
+            req = urllib.request.Request(url, headers={&quot;User-Agent&quot;: UA})
+            raw = urllib.request.urlopen(req, timeout=30).read()
+            return raw if binary else raw.decode(&quot;utf-8&quot;, &quot;replace&quot;)
+        except Exception:
+            if i == tries - 1:
+                return b&quot;&quot; if binary else &quot;&quot;
+            time.sleep(1.5 * (i + 1))
+    return b&quot;&quot; if binary else &quot;&quot;
+
+
+def _load_store() -&gt; dict:
+    if os.path.exists(STORE):
+        try:
+            return json.load(open(STORE))
+        except Exception:
+            os.replace(STORE, STORE + &quot;.corrupt_%s&quot; % dt.datetime.now().strftime(&quot;%Y%m%d%H%M%S&quot;))
+    return {&quot;events&quot;: {}, &quot;deals&quot;: {}, &quot;anticipatory&quot;: [], &quot;runs&quot;: []}
+
+
+def _save_store(st: dict) -&gt; None:
+    os.makedirs(DATA, exist_ok=True)
+    tmp = STORE + &quot;.tmp&quot;
+    json.dump(st, open(tmp, &quot;w&quot;), ensure_ascii=False, indent=1)
+    os.replace(tmp, STORE)
+
+
+def tdnet_code_to_ticker(code: str) -&gt; str:
+    &quot;&quot;&quot;TDnet publishes 5-char codes: a 4-digit code gets a trailing 0 (&#x27;91100&#x27; -&gt; &#x27;9110&#x27;);
+    the new alphanumeric codes behave the same (&#x27;472A0&#x27; -&gt; &#x27;472A&#x27;).&quot;&quot;&quot;
+    c = (code or &quot;&quot;).strip()
+    return c[:4] if len(c) == 5 and c.endswith(&quot;0&quot;) else c
+
+
+# ---------------------------------------------------------------------------------------
+# MODE A — ANNOUNCED: TDnet crawl
+# ---------------------------------------------------------------------------------------
+
+ROW_RE = re.compile(
+    r&#x27;&lt;td class=&quot;\w+-L kjTime&quot; noWrap&gt;([^&lt;]*)&lt;/td&gt;\s*&#x27;
+    r&#x27;&lt;td class=&quot;\w+-M kjCode&quot; noWrap&gt;([^&lt;]*)&lt;/td&gt;\s*&#x27;
+    r&#x27;&lt;td class=&quot;\w+-M kjName&quot; noWrap&gt;([^&lt;]*)&lt;/td&gt;\s*&#x27;
+    r&#x27;&lt;td class=&quot;\w+-M kjTitle&quot; align=&quot;left&quot;&gt;&lt;a href=&quot;([^&quot;]+)&quot;[^&gt;]*&gt;([^&lt;]*)&lt;/a&gt;&#x27;, re.S)
+
+# Title keywords that put a disclosure in this lane at all.
+LANE_KW = (&quot;公開買付&quot;, &quot;ＭＢＯ&quot;, &quot;MBO&quot;, &quot;株式売渡請求&quot;, &quot;株式併合&quot;, &quot;非公開化&quot;, &quot;上場廃止&quot;)
+
+
+def _classify(title: str) -&gt; str:
+    &quot;&quot;&quot;Event kind. Order matters — 結果 (result) beats 開始 (start) when both appear.&quot;&quot;&quot;
+    t = title
+    if &quot;結果&quot; in t:
+        return &quot;RESULT&quot;
+    if &quot;撤回&quot; in t:
+        return &quot;WITHDRAWN&quot;
+    if &quot;売渡請求&quot; in t:
+        return &quot;SQUEEZEOUT_STEP2&quot;
+    if &quot;株式併合&quot; in t:
+        return &quot;SQUEEZEOUT_STEP2&quot;
+    if &quot;開始&quot; in t or &quot;実施&quot; in t:
+        return &quot;START&quot;
+    if &quot;延長&quot; in t or &quot;変更&quot; in t or &quot;訂正&quot; in t:
+        return &quot;AMEND&quot;
+    if &quot;意見表明&quot; in t or &quot;応募推奨&quot; in t or &quot;賛同&quot; in t:
+        return &quot;OPINION&quot;
+    if &quot;買集め&quot; in t:
+        return &quot;STAKEBUILD&quot;
+    return &quot;OTHER&quot;
+
+
+CODE_IN_TITLE = re.compile(r&quot;[（(]?証券コード[：: ]?\s*([0-9A-Z]{4})[）)]?&quot;)
+CODE_PAREN = re.compile(r&quot;[（(]コード[：: ]?\s*([0-9A-Z]{4})[）)]&quot;)
+
+
+def _resolve_target(filer_code: str, title: str) -&gt; tuple[str, str]:
+    &quot;&quot;&quot;Who is being bought? Bidder-side titles name the target with its 証券コード; target-side
+    titles say 当社株式 (our shares). Returns (target_code, basis).&quot;&quot;&quot;
+    t = _n(title)
+    m = CODE_IN_TITLE.search(t) or CODE_PAREN.search(t)
+    if m:
+        return m.group(1), &quot;code-in-title&quot;
+    if &quot;当社株&quot; in t or &quot;当社の株&quot; in t:
+        return filer_code, &quot;filer-is-target&quot;
+    return &quot;&quot;, &quot;unresolved&quot;
+
+
+def crawl_tdnet(days: int, store: dict, verbose: bool = True) -&gt; int:
+    &quot;&quot;&quot;Crawl the last `days` TDnet daily indexes, MERGE lane-relevant rows into the event
+    store. Returns count of NEW events. Weekend/holiday pages return a stub and are skipped.&quot;&quot;&quot;
+    ev = store.setdefault(&quot;events&quot;, {})
+    new = 0
+    today = dt.date.today()
+    for i in range(days):
+        day = today - dt.timedelta(days=i)
+        ds = day.strftime(&quot;%Y%m%d&quot;)
+        if any(k.startswith(ds) for k in store.get(&quot;_days_done&quot;, [])) and i &gt; 2:
+            continue  # already crawled a settled day; re-crawl only the most recent 3
+        html = _get(f&quot;{TDNET}/I_list_001_{ds}.html&quot;)
+        if &quot;kjTitle&quot; not in html:
+            continue
+        m = re.search(r&quot;全(\d+)件&quot;, html)
+        total = int(m.group(1)) if m else 0
+        pages = max(1, (total + 99) // 100)
+        rows = []
+        for p in range(1, pages + 1):
+            hp = html if p == 1 else _get(f&quot;{TDNET}/I_list_{p:03d}_{ds}.html&quot;)
+            rows += ROW_RE.findall(hp)
+            time.sleep(0.12)
+        hits = 0
+        for tm, code, name, pdf, title in rows:
+            if not any(k in title for k in LANE_KW):
+                continue
+            # 完全子会社化 of an UNLISTED sub is ordinary M&amp;A, not our lane — those titles
+            # carry no 公開買付/売渡請求/MBO. LANE_KW already excludes them.
+            key = pdf.replace(&quot;.pdf&quot;, &quot;&quot;)
+            hits += 1
+            if key in ev:
+                continue
+            fc = tdnet_code_to_ticker(code)
+            tgt, basis = _resolve_target(fc, title)
+            ev[key] = {&quot;date&quot;: day.isoformat(), &quot;time&quot;: tm.strip(), &quot;filer_code&quot;: fc,
+                       &quot;filer&quot;: name.strip(), &quot;title&quot;: title.strip(),
+                       &quot;kind&quot;: _classify(title), &quot;target_code&quot;: tgt, &quot;target_basis&quot;: basis,
+                       &quot;pdf&quot;: f&quot;{TDNET}/{pdf}&quot;}
+            new += 1
+        store.setdefault(&quot;_days_done&quot;, [])
+        if ds not in store[&quot;_days_done&quot;]:
+            store[&quot;_days_done&quot;].append(ds)
+        if verbose:
+            print(f&quot;  tdnet {day} : {total:&gt;4} disclosures, {hits:&gt;2} lane rows&quot;)
+    return new
+
+
+# ---------------------------------------------------------------------------------------
+# MODE A — term extraction from the TOB PDF
+# ---------------------------------------------------------------------------------------
+
+# The offer price MUST be read anchored to its own label. A TOB notice frequently recites a
+# PRIOR offer&#x27;s price in the background section — 7523 アールビバン&#x27;s 2026 MBO notice quotes the
+# FAILED 2025 offer at ¥1,670 in prose before ever stating the live price. An unanchored
+# &quot;first ¥N per share in the document&quot; regex silently books the dead price as the live one.
+PRICE_LABEL_RE = re.compile(r&quot;買付け?等の価格|買付価格|本公開買付価格|売渡対価|本売渡対価&quot;)
+PRICE_VAL_RE = re.compile(r&quot;[0-9]?株(?:当たり)?につき[、,，]?\s*金?\s*([0-9,]+)\s*円&quot;)
+# floor appears in three layouts: label:value, label value（株）, and a header-row table where
+# the three numbers follow the three headers in order (予定数 / 下限 / 上限).
+FLOOR_DIRECT_RE = re.compile(r&quot;買付予定数の下限[：:\s]*([0-9,]{4,})&quot;)
+FLOOR_TABLE_RE = re.compile(r&quot;買付予定数の下限買付予定数の上限[^0-9]{0,20}([0-9,]{4,})\s*[（(]?株[）)]?\s*([0-9,]{4,})&quot;)
+CAP_RE = re.compile(r&quot;買付予定数の上限[：:\s]*([0-9,]{4,})&quot;)
+PERIOD_RE = re.compile(r&quot;(\d{4})年\s*(\d{1,2})月\s*(\d{1,2})日.{0,12}?から\s*(\d{4})年\s*(\d{1,2})月\s*(\d{1,2})日&quot;)
+POST_PCT_RE = re.compile(r&quot;([0-9]{1,3}\.[0-9]{1,2})\s*[%％]&quot;)
+ACQ_DATE_RE = re.compile(r&quot;(?:取得日|効力発生日)[^0-9]{0,20}(\d{4})年(\d{1,2})月(\d{1,2})日&quot;)
+DELIST_RE = re.compile(r&quot;(?:上場廃止日|最終売買日)[^0-9]{0,30}(\d{4})年(\d{1,2})月(\d{1,2})日&quot;)
+
+
+def fetch_pdf_text(url: str, pages: int = 12) -&gt; str:
+    &quot;&quot;&quot;Download + pdftotext the first `pages` pages. Cached on disk (filings are immutable).&quot;&quot;&quot;
+    os.makedirs(PDF_CACHE, exist_ok=True)
+    fn = os.path.join(PDF_CACHE, os.path.basename(url))
+    txt_fn = fn + f&quot;.p{pages}.txt&quot;
+    if os.path.exists(txt_fn):
+        return open(txt_fn, encoding=&quot;utf-8&quot;, errors=&quot;replace&quot;).read()
+    if not os.path.exists(fn):
+        raw = _get(url, binary=True)
+        if not raw or not raw.startswith(b&quot;%PDF&quot;):
+            return &quot;&quot;
+        open(fn, &quot;wb&quot;).write(raw)
+    try:
+        out = subprocess.run([&quot;pdftotext&quot;, &quot;-layout&quot;, &quot;-f&quot;, &quot;1&quot;, &quot;-l&quot;, str(pages), fn, &quot;-&quot;],
+                             capture_output=True, timeout=90).stdout.decode(&quot;utf-8&quot;, &quot;replace&quot;)
+    except Exception:
+        return &quot;&quot;
+    open(txt_fn, &quot;w&quot;).write(out)
+    return out
+
+
+def parse_tob_terms(txt: str) -&gt; dict:
+    &quot;&quot;&quot;Parse the standardised 「買付け等の概要」 summary table that every TOB commencement
+    notice carries. Anything not found stays None — never guessed.&quot;&quot;&quot;
+    t = _n(txt)
+    out = {&quot;offer_price&quot;: None, &quot;price_anchor&quot;: None, &quot;tender_floor_sh&quot;: None,
+           &quot;tender_cap_sh&quot;: None, &quot;period_start&quot;: None, &quot;period_end&quot;: None, &quot;purpose&quot;: None,
+           &quot;target_opinion&quot;: None, &quot;post_deal_pct&quot;: None, &quot;preconditional&quot;: False,
+           &quot;step2_mechanic&quot;: None, &quot;settlement_start&quot;: None, &quot;acq_date&quot;: None,
+           &quot;delist_date&quot;: None, &quot;competing_bid&quot;: False}
+
+    # ---- price: ANCHORED. Take the first per-share figure that follows a price LABEL within
+    # 120 chars. A recital of a superseded/failed prior offer never sits behind that label.
+    for lm in PRICE_LABEL_RE.finditer(t):
+        seg = t[lm.end():lm.end() + 120]
+        pm = PRICE_VAL_RE.search(seg)
+        if pm:
+            out[&quot;offer_price&quot;] = float(pm.group(1).replace(&quot;,&quot;, &quot;&quot;))
+            out[&quot;price_anchor&quot;] = t[lm.start():lm.end()] + &quot; -&gt; &quot; + seg[:40]
+            break
+
+    m = FLOOR_TABLE_RE.search(t)
+    if m:
+        out[&quot;tender_floor_sh&quot;] = int(m.group(2).replace(&quot;,&quot;, &quot;&quot;))
+    else:
+        m = FLOOR_DIRECT_RE.search(t)
+        if m:
+            out[&quot;tender_floor_sh&quot;] = int(m.group(1).replace(&quot;,&quot;, &quot;&quot;))
+    m = CAP_RE.search(t)
+    if m:
+        out[&quot;tender_cap_sh&quot;] = int(m.group(1).replace(&quot;,&quot;, &quot;&quot;))
+
+    # a rival bid changes the risk sign completely: the downside is no longer &quot;spread -&gt; 0&quot;
+    if (&quot;対抗&quot; in t and &quot;公開買付&quot; in t) or len(set(re.findall(r&quot;([^\s]{2,20}?)公開買付けに応募する義務&quot;, t))) &gt; 1:
+        out[&quot;competing_bid&quot;] = True
+
+    m = ACQ_DATE_RE.search(t)
+    if m:
+        try:
+            out[&quot;acq_date&quot;] = dt.date(int(m.group(1)), int(m.group(2)), int(m.group(3))).isoformat()
+        except Exception:
+            pass
+    m = DELIST_RE.search(t)
+    if m:
+        try:
+            out[&quot;delist_date&quot;] = dt.date(int(m.group(1)), int(m.group(2)), int(m.group(3))).isoformat()
+        except Exception:
+            pass
+
+    # purpose: 非公開化 (go-private) vs 連結子会社化 (consolidate, stays listed)
+    for kw, lab in ((&quot;非公開化&quot;, &quot;GO_PRIVATE&quot;), (&quot;完全子会社&quot;, &quot;GO_PRIVATE&quot;),
+                    (&quot;連結子会社&quot;, &quot;CONSOLIDATE&quot;), (&quot;持分法&quot;, &quot;CONSOLIDATE&quot;)):
+        if kw in t[:4000]:
+            out[&quot;purpose&quot;] = lab
+            break
+    if &quot;賛同&quot; in t[:4000] and &quot;応募&quot; in t[:4000]:
+        out[&quot;target_opinion&quot;] = &quot;SUPPORT_AND_RECOMMEND&quot;
+    elif &quot;中立&quot; in t[:4000]:
+        out[&quot;target_opinion&quot;] = &quot;NEUTRAL&quot;
+    elif &quot;反対&quot; in t[:4000]:
+        out[&quot;target_opinion&quot;] = &quot;OPPOSE&quot;
+
+    # A pre-conditional offer (competition clearance etc.) has NO fixed start date. This is
+    # the timing-honesty fork: we must not annualize these.
+    if &quot;前提条件&quot; in t and (&quot;開始することを予定&quot; in t or &quot;開始予定&quot; in t or &quot;決定次第&quot; in t):
+        out[&quot;preconditional&quot;] = True
+        # the bidder usually guides a target window (&quot;2026年11月下旬から同年12月下旬を目途に開始&quot;).
+        # That guided date + a 20-business-day period + ~5bd settlement is the ONLY defensible
+        # scenario input; without it we refuse to put a number on it at all.
+        gm = re.search(r&quot;(\d{4})年(\d{1,2})月(上旬|中旬|下旬)?.{0,40}?目途に.{0,30}?開始&quot;, t)
+        if gm:
+            y, mo = int(gm.group(1)), int(gm.group(2))
+            dd = {&quot;上旬&quot;: 5, &quot;中旬&quot;: 15, &quot;下旬&quot;: 25}.get(gm.group(3) or &quot;&quot;, 15)
+            try:
+                start = dt.date(y, mo, dd)
+                out[&quot;precond_guided_start&quot;] = start.isoformat()
+                # 20 business days ~= 28 calendar days, plus ~7 days to settlement
+                out[&quot;precond_guide_days&quot;] = max(1, (start - dt.date.today()).days + 35)
+            except Exception:
+                pass
+
+    m = PERIOD_RE.search(t)
+    if m and not out[&quot;preconditional&quot;]:
+        try:
+            out[&quot;period_start&quot;] = dt.date(int(m.group(1)), int(m.group(2)), int(m.group(3))).isoformat()
+            out[&quot;period_end&quot;] = dt.date(int(m.group(4)), int(m.group(5)), int(m.group(6))).isoformat()
+        except Exception:
+            pass
+
+    m = re.search(r&quot;決済の開始日.{0,60}?(\d{4})年(\d{1,2})月(\d{1,2})日&quot;, t)
+    if m:
+        try:
+            out[&quot;settlement_start&quot;] = dt.date(int(m.group(1)), int(m.group(2)), int(m.group(3))).isoformat()
+        except Exception:
+            pass
+
+    # post-deal ownership AT THE FLOOR — the notice states it explicitly, so we read it
+    # rather than derive it (deriving needs the special-related-party share count we do not have)
+    m = re.search(r&quot;買付け等後の株券等所有割合[^0-9]{0,90}?([0-9]{1,3}\.[0-9]{1,2})\s*[%％]&quot;, t)
+    if not m and &quot;買付予定数の下限&quot; in t:
+        i = t.find(&quot;買付予定数の下限&quot;)
+        m = POST_PCT_RE.search(t[i:i + 900])
+    if m:
+        v = float(m.group(1))
+        out[&quot;post_deal_pct&quot;] = v if 0 &lt; v &lt;= 100 else None
+
+    if &quot;株式売渡請求&quot; in t:
+        out[&quot;step2_mechanic&quot;] = &quot;CASH_OUT_DEMAND_90PCT&quot;   # Companies Act 179, fast (~1mo)
+    elif &quot;株式併合&quot; in t:
+        out[&quot;step2_mechanic&quot;] = &quot;REVERSE_SPLIT_EGM&quot;       # needs an EGM, ~3-4 months
+    return out
+
+
+# ---------------------------------------------------------------------------------------
+# MODE A — price join + spread math
+# ---------------------------------------------------------------------------------------
+
+# TSE daily price-limit (値幅制限) table: (base price below, limit in yen). A stock that opens
+# and closes at exactly base±limit with O==H==L is LOCKED — bids are queued and unfilled.
+PRICE_LIMITS = [(100, 30), (200, 50), (500, 80), (700, 100), (1000, 150), (1500, 300),
+                (2000, 400), (3000, 500), (5000, 700), (7000, 1000), (10000, 1500),
+                (15000, 3000), (20000, 4000), (30000, 5000), (50000, 7000), (70000, 10000),
+                (100000, 15000), (150000, 30000), (200000, 40000), (300000, 50000)]
+
+
+def price_limit(base: float) -&gt; float:
+    for lo, lim in PRICE_LIMITS:
+        if base &lt; lo:
+            return lim
+    return base * 0.3
+
+
+def fetch_quotes(codes: list[str]) -&gt; dict:
+    &quot;&quot;&quot;Spot + 20d turnover + LIMIT-LOCK state for each &lt;code&gt;.T.
+
+    Two traps this function exists to defuse, both of which manufacture huge fake spreads:
+
+    1. NaN-close fallback. yfinance leaves Close NaN on an in-progress or locked session, so
+       naively taking the last non-NaN Close silently reaches back to the PRE-ANNOUNCEMENT
+       price. On 9110 that turned a real +1.2% spread into a fictional +11.1%.
+    2. Limit-up lock (ストップ高). A Japanese stock bid at a big TOB premium goes limit-up with
+       O==H==L and an unfilled buy queue. The print is real; it is not a price you can pay.
+       This is the ADIG thin-print rule in its Japanese form and it is the dominant failure
+       mode of this lane — every large &quot;spread&quot; on day 1-3 of a deal is this.
+    &quot;&quot;&quot;
+    out = {}
+    if not codes:
+        return out
+    try:
+        import yfinance as yf
+    except Exception:
+        return {c: {&quot;px&quot;: None, &quot;err&quot;: &quot;yfinance-unavailable&quot;} for c in codes}
+    tick = [f&quot;{c}.T&quot; for c in codes]
+    try:
+        df = yf.download(tick, period=&quot;1mo&quot;, interval=&quot;1d&quot;, progress=False,
+                         auto_adjust=False, threads=True, group_by=&quot;column&quot;)
+    except Exception as ex:
+        return {c: {&quot;px&quot;: None, &quot;err&quot;: f&quot;download-failed:{ex}&quot;} for c in codes}
+    import statistics as st
+    for c, t in zip(codes, tick):
+        try:
+            sub = (df.xs(t, axis=1, level=1) if len(tick) &gt; 1 else df)[
+                [&quot;Open&quot;, &quot;High&quot;, &quot;Low&quot;, &quot;Close&quot;, &quot;Volume&quot;]].dropna(how=&quot;all&quot;)
+            sub = sub[sub[&quot;Volume&quot;].fillna(0) &gt; 0]
+            if not len(sub):
+                out[c] = {&quot;px&quot;: None, &quot;err&quot;: &quot;no-prints&quot;}
+                continue
+            last = sub.iloc[-1]
+            prev = sub.iloc[-2] if len(sub) &gt; 1 else last
+            o, h, lo_, cl = (float(last[k]) if last[k] == last[k] else None
+                             for k in (&quot;Open&quot;, &quot;High&quot;, &quot;Low&quot;, &quot;Close&quot;))
+            # spot: the close if the session settled, else the last real trade level we can
+            # see. NEVER fall back to an older session&#x27;s close.
+            px = cl if cl else (h if (o and h and lo_ and o == h == lo_) else
+                                ((h + lo_) / 2 if (h and lo_) else o))
+            last_dt = sub.index[-1].date()
+            med_v = float(st.median(sub[&quot;Volume&quot;].tail(20)))
+            pc = float(prev[&quot;Close&quot;]) if prev[&quot;Close&quot;] == prev[&quot;Close&quot;] else None
+
+            q = {&quot;px&quot;: px, &quot;asof&quot;: last_dt.isoformat(),
+                 &quot;close_settled&quot;: cl is not None,
+                 &quot;stale_days&quot;: (dt.date.today() - last_dt).days,
+                 &quot;med_vol_20d&quot;: med_v, &quot;notional_20d_jpy&quot;: med_v * (px or 0),
+                 &quot;prev_close&quot;: pc, &quot;locked&quot;: False, &quot;limit_dir&quot;: None}
+            if pc and px:
+                q[&quot;move_1d_pct&quot;] = round((px / pc - 1) * 100, 2)
+                lim = price_limit(pc)
+                q[&quot;limit_price_up&quot;] = pc + lim
+                q[&quot;limit_price_dn&quot;] = pc - lim
+                at_limit = abs(abs(px - pc) - lim) &lt; 1e-6 or abs(px - pc) &gt;= lim - 0.5
+                flat_bar = (o and h and lo_ and o == h == lo_)
+                if at_limit:
+                    q[&quot;limit_dir&quot;] = &quot;UP&quot; if px &gt; pc else &quot;DOWN&quot;
+                    q[&quot;locked&quot;] = bool(flat_bar)
+            out[c] = q
+        except Exception as ex:
+            out[c] = {&quot;px&quot;: None, &quot;err&quot;: str(ex)[:80]}
+    return out
+
+
+def liquidity_verdict(q: dict) -&gt; tuple[str, str]:
+    &quot;&quot;&quot;The thin-print gate. A spread is only a spread if you could have paid for it.
+    LIMIT_LOCKED / NO_PRINT / STALE / THIN / QUOTABLE_SMALL / QUOTABLE.&quot;&quot;&quot;
+    if not q or not q.get(&quot;px&quot;):
+        return &quot;NO_PRINT&quot;, &quot;no usable print — do not quote a spread&quot;
+    if q.get(&quot;locked&quot;):
+        return (&quot;LIMIT_LOCKED&quot;,
+                f&quot;stock is LOCKED limit-{q[&#x27;limit_dir&#x27;].lower()} at ¥{q[&#x27;px&#x27;]:,.0f} &quot;
+                f&quot;(prev close ¥{q[&#x27;prev_close&#x27;]:,.0f}, TSE limit ±¥{price_limit(q[&#x27;prev_close&#x27;]):,.0f}); &quot;
+                f&quot;the bar is O=H=L on a queued book. Any spread struck here is PHANTOM — you &quot;
+                f&quot;cannot buy at the locked price, and the stock will gap again next session.&quot;)
+    if q.get(&quot;limit_dir&quot;) == &quot;UP&quot;:
+        return (&quot;AT_LIMIT&quot;,
+                f&quot;trading AT the daily upper limit (¥{q[&#x27;px&#x27;]:,.0f}) though not fully locked — &quot;
+                f&quot;fills are partial and the quote is not a reliable entry&quot;)
+    if q.get(&quot;stale_days&quot;, 0) &gt; 4:
+        return &quot;STALE&quot;, f&quot;last print {q[&#x27;stale_days&#x27;]}d old — spread struck on a stale tape&quot;
+    n = q.get(&quot;notional_20d_jpy&quot;) or 0
+    if n &lt; 20_000_000:
+        return (&quot;THIN&quot;, f&quot;20d median turnover ¥{n/1e6:.1f}M/day — a quoted spread here is not &quot;
+                        f&quot;fillable at size; this is a delisting stub, not a position&quot;)
+    if n &lt; 100_000_000:
+        return &quot;QUOTABLE_SMALL&quot;, f&quot;20d median turnover ¥{n/1e6:.0f}M/day — small clips only&quot;
+    return &quot;QUOTABLE&quot;, f&quot;20d median turnover ¥{n/1e6:.0f}M/day&quot;
+
+
+def build_announced(store: dict, refresh_terms: bool = True) -&gt; list[dict]:
+    &quot;&quot;&quot;Collapse the event stream into per-target DEALS with a status, then price them.&quot;&quot;&quot;
+    ev = store.get(&quot;events&quot;, {})
+    by_target: dict[str, list] = {}
+    for k, e in ev.items():
+        tc = e.get(&quot;target_code&quot;)
+        if not tc:
+            continue
+        by_target.setdefault(tc, []).append(e)
+
+    deals = []
+    for tc, evs in by_target.items():
+        evs.sort(key=lambda x: (x[&quot;date&quot;], x[&quot;time&quot;]))
+        kinds = {e[&quot;kind&quot;] for e in evs}
+        # ---- status machine ------------------------------------------------------------
+        if &quot;WITHDRAWN&quot; in kinds:
+            status = &quot;WITHDRAWN&quot;
+        elif &quot;RESULT&quot; in kinds and &quot;SQUEEZEOUT_STEP2&quot; in kinds:
+            status = &quot;SQUEEZE_OUT&quot;      # tender done, step-2 cash-out running -&gt; delisting
+        elif &quot;RESULT&quot; in kinds:
+            status = &quot;CLOSED&quot;
+        elif kinds &amp; {&quot;START&quot;, &quot;OPINION&quot;, &quot;AMEND&quot;}:
+            status = &quot;OPEN&quot;
+        elif &quot;STAKEBUILD&quot; in kinds:
+            status = &quot;STAKEBUILD_ONLY&quot;  # 買集め行為 disclosure — NOT an offer, do not price
+        else:
+            status = &quot;UNCLASSIFIED&quot;
+
+        starts = [e for e in evs if e[&quot;kind&quot;] in (&quot;START&quot;, &quot;OPINION&quot;)]
+        src = starts[0] if starts else evs[0]
+        # target name: prefer the event where the filer IS the target
+        tn = next((e[&quot;filer&quot;] for e in evs if e[&quot;filer_code&quot;] == tc), None) or src[&quot;filer&quot;]
+        # bidder: the other filer if one disclosed, else read it out of the target&#x27;s own title
+        # (「&lt;bidder&gt;による当社株式に対する公開買付け…」 is the standard construction)
+        bidder = next((e[&quot;filer&quot;] for e in evs if e[&quot;filer_code&quot;] != tc), None)
+        if not bidder:
+            for e in evs:
+                bm = re.match(r&quot;^(?:[（(][^）)]*[）)])?\s*(.{2,40}?)による&quot;, _n(e[&quot;title&quot;]))
+                if bm:
+                    bidder = bm.group(1).lstrip(&quot;「（(【 &quot;)
+                    break
+
+        d = {&quot;target_code&quot;: tc, &quot;target_name&quot;: tn, &quot;bidder&quot;: bidder, &quot;status&quot;: status,
+             &quot;first_seen&quot;: evs[0][&quot;date&quot;], &quot;last_event&quot;: evs[-1][&quot;date&quot;],
+             &quot;n_events&quot;: len(evs), &quot;kinds&quot;: sorted(kinds),
+             &quot;primary_pdf&quot;: src[&quot;pdf&quot;], &quot;primary_title&quot;: src[&quot;title&quot;],
+             &quot;held&quot;: HELD_JAPAN.get(tc)}
+        # ---- terms, only for live books -------------------------------------------------
+        if status in (&quot;OPEN&quot;, &quot;SQUEEZE_OUT&quot;) and refresh_terms:
+            best = {}
+            # amendments supersede: walk newest-first, take the first PDF that yields a price
+            for e in sorted(evs, key=lambda x: x[&quot;date&quot;], reverse=True):
+                if e[&quot;kind&quot;] in (&quot;RESULT&quot;, &quot;STAKEBUILD&quot;):
+                    continue
+                txt = fetch_pdf_text(e[&quot;pdf&quot;])
+                if not txt:
+                    continue
+                t = parse_tob_terms(txt)
+                if t[&quot;offer_price&quot;]:
+                    best = t
+                    best[&quot;terms_from&quot;] = e[&quot;pdf&quot;]
+                    best[&quot;terms_date&quot;] = e[&quot;date&quot;]
+                    break
+            d.update(best)
+        deals.append(d)
+
+    live = [d for d in deals if d[&quot;status&quot;] in (&quot;OPEN&quot;, &quot;SQUEEZE_OUT&quot;)]
+    q = fetch_quotes([d[&quot;target_code&quot;] for d in live])
+    today = dt.date.today()
+    for d in live:
+        qq = q.get(d[&quot;target_code&quot;], {})
+        d[&quot;spot&quot;] = qq.get(&quot;px&quot;)
+        d[&quot;spot_asof&quot;] = qq.get(&quot;asof&quot;)
+        d[&quot;med_vol_20d&quot;] = qq.get(&quot;med_vol_20d&quot;)
+        d[&quot;turnover_20d_jpy&quot;] = qq.get(&quot;notional_20d_jpy&quot;)
+        d[&quot;liquidity&quot;], d[&quot;liquidity_why&quot;] = liquidity_verdict(qq)
+
+        d[&quot;spot_settled&quot;] = qq.get(&quot;close_settled&quot;)
+        d[&quot;limit_state&quot;] = (&quot;LOCKED_&quot; + (qq.get(&quot;limit_dir&quot;) or &quot;&quot;) if qq.get(&quot;locked&quot;)
+                            else (qq.get(&quot;limit_dir&quot;) or &quot;NORMAL&quot;))
+        op, sp = d.get(&quot;offer_price&quot;), d.get(&quot;spot&quot;)
+        if op and sp:
+            d[&quot;gross_spread_pct&quot;] = round((op / sp - 1) * 100, 3)
+        else:
+            d[&quot;gross_spread_pct&quot;] = None
+
+        # A spread you cannot pay for is not a spread. Locked / stale / no-print lines are
+        # reported but never ranked, and never carried into a return table.
+        d[&quot;spread_quotable&quot;] = d[&quot;liquidity&quot;] in (&quot;QUOTABLE&quot;, &quot;QUOTABLE_SMALL&quot;, &quot;THIN&quot;)
+        if qq.get(&quot;locked&quot;) and op and sp:
+            # how many more limit sessions before the tape can even reach the offer
+            n, p = 0, sp
+            while p &lt; op and n &lt; 12:
+                p += price_limit(p)
+                n += 1
+            d[&quot;sessions_to_converge&quot;] = n
+            d[&quot;quotable_note&quot;] = (
+                f&quot;PHANTOM SPREAD: the {d[&#x27;gross_spread_pct&#x27;]:+.1f}% shown is measured against a &quot;
+                f&quot;locked limit-{(qq.get(&#x27;limit_dir&#x27;) or &#x27;&#x27;).lower()} print. The tape needs ~{n} more &quot;
+                f&quot;session(s) of limit moves to reach ¥{op:,.0f}. Nothing is buyable until the &quot;
+                f&quot;lock breaks — re-read this name once it trades two-sided.&quot;)
+        elif not d[&quot;spread_quotable&quot;]:
+            d[&quot;quotable_note&quot;] = f&quot;not quotable: {d[&#x27;liquidity_why&#x27;]}&quot;
+        else:
+            d[&quot;quotable_note&quot;] = None
+
+        # ---- HONEST annualization ------------------------------------------------------
+        # tendering holder is paid at 決済の開始日; absent that, expiry + 5 business days
+        # (the statutory settlement lag runs ~5bd after the period closes).
+        d[&quot;annualized_pct&quot;] = None
+        d[&quot;annualized_scenario_pct&quot;] = None
+        d[&quot;days_to_cash&quot;] = None
+        if d[&quot;status&quot;] == &quot;SQUEEZE_OUT&quot;:
+            # tender already settled; the residual stub is cashed out at the 取得日 under
+            # Companies Act 179. Short and near-certain, but the float is a stub — the
+            # thin-print gate is what decides whether this is real.
+            ac = d.get(&quot;acq_date&quot;)
+            if ac:
+                days = (dt.date.fromisoformat(ac) - today).days
+                d[&quot;days_to_cash&quot;] = days
+                d[&quot;timing&quot;] = &quot;DATED_STEP2&quot;
+                d[&quot;timing_why&quot;] = (f&quot;step-2 cash-out effective {ac} ({days}d); delisting &quot;
+                                   f&quot;{d.get(&#x27;delist_date&#x27;) or &#x27;date not parsed&#x27;}&quot;)
+                if d[&quot;gross_spread_pct&quot;] is not None and days &gt; 0:
+                    d[&quot;annualized_pct&quot;] = round(d[&quot;gross_spread_pct&quot;] * 365.0 / days, 1)
+                elif days &lt;= 0:
+                    d[&quot;timing&quot;] = &quot;PAST_STEP2&quot;
+                    d[&quot;timing_why&quot;] = (f&quot;cash-out date {ac} has passed — the line is almost &quot;
+                                       f&quot;certainly delisted; any &#x27;spot&#x27; is a dead print&quot;)
+            else:
+                d[&quot;timing&quot;] = &quot;TIMING_UNPARSED&quot;
+                d[&quot;timing_why&quot;] = &quot;step-2 running but 取得日 not parsed&quot;
+        elif d.get(&quot;preconditional&quot;):
+            d[&quot;timing&quot;] = &quot;TIMING_UNBOUNDED&quot;
+            d[&quot;timing_why&quot;] = (&quot;offer is PRE-CONDITIONAL (competition clearance etc.); the &quot;
+                               &quot;commencement date is NOT fixed, so a computed annualized &quot;
+                               &quot;number would be manufactured. Gross only.&quot;)
+            # a labelled SCENARIO is honest; a computed annualization is not. The company&#x27;s
+            # own guided window is the only defensible input.
+            guide = d.get(&quot;precond_guide_days&quot;) or 180
+            gsrc = (&quot;the bidder&#x27;s own guided commencement window &quot;
+                    f&quot;({d[&#x27;precond_guided_start&#x27;]})&quot; if d.get(&quot;precond_guided_start&quot;)
+                    else &quot;a house default 180d, since the bidder guided no window&quot;)
+            if d[&quot;gross_spread_pct&quot;] is not None:
+                d[&quot;annualized_scenario_pct&quot;] = round(d[&quot;gross_spread_pct&quot;] * 365.0 / guide, 1)
+                d[&quot;timing_why&quot;] += (f&quot; SCENARIO ONLY: at {guide}d to cash (from {gsrc}) the &quot;
+                                    f&quot;gross {d[&#x27;gross_spread_pct&#x27;]:+.2f}% annualizes to &quot;
+                                    f&quot;{d[&#x27;annualized_scenario_pct&#x27;]:+.0f}%/yr — an assumption, &quot;
+                                    f&quot;NOT a term of the offer, and it goes to zero if the &quot;
+                                    f&quot;conditions fail.&quot;)
+        else:
+            end = d.get(&quot;settlement_start&quot;) or d.get(&quot;period_end&quot;)
+            if end:
+                try:
+                    ed = dt.date.fromisoformat(end)
+                    if not d.get(&quot;settlement_start&quot;):
+                        ed = ed + dt.timedelta(days=7)  # ~5 business days
+                    days = (ed - today).days
+                    d[&quot;days_to_cash&quot;] = days
+                    if days &lt;= 0:
+                        d[&quot;timing&quot;] = &quot;EXPIRED_NO_RESULT&quot;
+                        d[&quot;timing_why&quot;] = (f&quot;parsed settlement {ed.isoformat()} is in the past &quot;
+                                           f&quot;but no result disclosure seen — stale terms or a &quot;
+                                           f&quot;missed crawl day, do NOT price this&quot;)
+                    else:
+                        d[&quot;timing&quot;] = &quot;DATED&quot;
+                        d[&quot;timing_why&quot;] = f&quot;cash expected {ed.isoformat()} ({days}d)&quot;
+                        if d[&quot;gross_spread_pct&quot;] is not None:
+                            d[&quot;annualized_pct&quot;] = round(d[&quot;gross_spread_pct&quot;] * 365.0 / days, 1)
+                except Exception:
+                    d[&quot;timing&quot;] = &quot;TIMING_UNPARSED&quot;
+                    d[&quot;timing_why&quot;] = &quot;period end present but unparseable&quot;
+            else:
+                d[&quot;timing&quot;] = &quot;TIMING_UNPARSED&quot;
+                d[&quot;timing_why&quot;] = &quot;no period/settlement date parsed from the notice&quot;
+
+        # ---- minimum-tender condition risk ---------------------------------------------
+        if d.get(&quot;tender_floor_sh&quot;):
+            d[&quot;min_tender_note&quot;] = (
+                f&quot;floor {d[&#x27;tender_floor_sh&#x27;]:,} sh&quot;
+                + (f&quot;; post-deal ownership at the floor = {d[&#x27;post_deal_pct&#x27;]}%&quot;
+                   if d.get(&quot;post_deal_pct&quot;) else &quot;&quot;)
+                + &quot;. If the floor is missed the offer FAILS: spread -&gt; 0 and the stock &quot;
+                  &quot;re-rates to the un-bid level, so this is a two-sided, not a capped, risk.&quot;)
+        else:
+            d[&quot;min_tender_note&quot;] = &quot;no floor parsed — treat as UNVERIFIED, not as &#x27;no condition&#x27;&quot;
+
+        # ---- squeeze-out timeline ------------------------------------------------------
+        mech = d.get(&quot;step2_mechanic&quot;)
+        d[&quot;squeezeout_note&quot;] = {
+            &quot;CASH_OUT_DEMAND_90PCT&quot;: (&quot;step 2 = 株式売渡請求 (Companies Act 179): available &quot;
+                                      &quot;only at &gt;=90% voting; ~1-2 months post-settlement, no EGM.&quot;),
+            &quot;REVERSE_SPLIT_EGM&quot;: (&quot;step 2 = 株式併合 reverse split; requires an EGM special &quot;
+                                  &quot;resolution, so a NON-tendering holder waits ~3-5 months &quot;
+                                  &quot;beyond tender settlement for the same cash.&quot;),
+        }.get(mech, &quot;step-2 mechanic not parsed — assume the slower 株式併合 (3-5mo) path &quot;
+                    &quot;for any non-tendered stub.&quot;)
+    return deals
+
+
+# ---------------------------------------------------------------------------------------
+# MODE B — ANTICIPATORY: the take-private fingerprint, from cached primary filings
+# ---------------------------------------------------------------------------------------
+
+TB = {&quot;jpcrp_cor:InformationAboutParentCompanyEtcOfReportingCompanyTextBlock&quot;: &quot;parent&quot;,
+      &quot;jpcrp_cor:MajorShareholdersTextBlock&quot;: &quot;major&quot;,
+      &quot;jpcrp_cor:OverviewOfAffiliatedEntitiesTextBlock&quot;: &quot;affil&quot;,
+      &quot;jpcrp_cor:InformationAboutOfficersTextBlock&quot;: &quot;officers&quot;,
+      &quot;jpcrp_cor:BusinessPolicyBusinessEnvironmentIssuesToAddressEtcTextBlock&quot;: &quot;policy&quot;,
+      &quot;jpcrp_cor:ShareholdingByShareholderCategoryTextBlock&quot;: &quot;holders_by_cat&quot;}
+
+
+def read_textblocks(zpath: str) -&gt; dict:
+    &quot;&quot;&quot;Pull the governance/ownership text blocks out of one cached annual-report fact set.&quot;&quot;&quot;
+    out = {}
+    try:
+        zf = zipfile.ZipFile(zpath)
+        names = [n for n in zf.namelist() if &quot;jpcrp030000-asr&quot; in n and n.endswith(&quot;.csv&quot;)]
+        if not names:
+            return out
+        raw = zf.read(names[0]).decode(&quot;utf-16&quot;, errors=&quot;replace&quot;)
+        for r in csv.reader(io.StringIO(raw), delimiter=&quot;\t&quot;):
+            if r and r[0] in TB:
+                out[TB[r[0]]] = r[-1]
+    except Exception:
+        pass
+    return out
+
+
+PARENT_NAME_RES = [
+    re.compile(r&quot;親会社等の会社名[はは、,:：]?\s*([^\s。、0-9（(]{3,30})&quot;),
+    re.compile(r&quot;親会社等は[、,]?\s*((?:株式会社)?[^\s。、0-9（(]{2,25}(?:株式会社|ホールディングス)?)&quot;),
+]
+# 「親会社等はありません」「親会社等はない」「該当事項はありません」「存在しません」— the same statement
+# appears in at least four wordings and a missed one manufactures a FALSE controlling parent.
+NO_PARENT_PATS = (&quot;親会社等はありません&quot;, &quot;親会社等はない&quot;, &quot;親会社等はございません&quot;,
+                  &quot;該当事項はありません&quot;, &quot;該当ありません&quot;, &quot;存在しません&quot;, &quot;親会社等はありませ&quot;)
+OWNED_RE = re.compile(r&quot;被所有\s*[（(]?\s*([0-9]{1,3}\.[0-9]{1,2})&quot;)
+# Every number in the 大株主 table is CONCATENATED to its neighbour (&quot;267,72650.00&quot; is
+# 267,726 thousand shares at 50.00%). A digit-lookbehind regex therefore finds nothing, and a
+# naive one reads 650.00%. See parse_major_pcts.
+NUM_TOKEN_RE = re.compile(r&quot;[0-9][0-9,]*\.[0-9]{1,2}&quot;)
+BIRTH_RE = re.compile(r&quot;(\d{4})年\s*(\d{1,2})月\s*(\d{1,2})日生&quot;)
+
+
+UNIT_RE = re.compile(r&quot;所有株式数[（(](千株|百株|株)[）)]&quot;)
+
+
+def parse_major_pcts(body: str, shares_issued: float | None, unit_mult: int) -&gt; list[float]:
+    &quot;&quot;&quot;Recover the ownership percentages from the run-together 大株主 table.
+
+    Each row renders &lt;shares&gt;&lt;pct&gt; with NO separator, so &quot;6086.88&quot; is either 608 thousand
+    shares at 6.88% or 60 thousand at 86.88%. Ordering constraints alone do NOT resolve this
+    — a first pass that took &quot;the largest admissible reading&quot; reported Mizuho Bank owning
+    86.88% of TOSO (真: 6.88%) and turned a dozen ordinary lender/employee-association stakes
+    into fake controlling positions, which would have put pure noise at the top of the book.
+
+    The disambiguation has to come from OUTSIDE the string: the share count itself. The table
+    header declares its unit (千株 / 百株 / 株) and we know shares issued from the same filing,
+    so for every candidate split we can check whether shares/total actually equals the stated
+    percentage. The split that reconciles is the true one.
+
+    Without a share count we return NOTHING rather than a guess — a fabricated control
+    percentage is far more damaging here than a missing one.
+    &quot;&quot;&quot;
+    if not shares_issued or shares_issued &lt;= 0:
+        return []
+    out: list[float | None] = []
+    cap = 100.0
+    for tok in NUM_TOKEN_RE.findall(body):
+        ip, _, frac = tok.partition(&quot;.&quot;)
+        ip = ip.replace(&quot;,&quot;, &quot;&quot;)
+        best, best_err = None, 1e9
+        for k in range(1, min(len(ip), 3) + 1):
+            suf, head = ip[-k:], ip[:-k]
+            if (len(suf) &gt; 1 and suf[0] == &quot;0&quot;) or not head:
+                continue
+            v = float(f&quot;{suf}.{frac}&quot;)
+            if not (0 &lt; v &lt;= cap):
+                continue
+            # The holder&#x27;s ADDRESS ends in digits that run into the share column
+            # (&quot;...宝町2&quot; + &quot;67,726&quot; reads as &quot;267,726&quot;), so the head needs trimming from the
+            # left as well. Try every suffix of the head and keep the best reconciliation.
+            for j in range(len(head), 0, -1):
+                hs = head[-j:]
+                if len(hs) &gt; 1 and hs[0] == &quot;0&quot;:
+                    continue
+                implied = float(hs) * unit_mult / shares_issued * 100.0
+                err = abs(implied - v) / max(v, 0.5)
+                if err &lt; best_err:
+                    best, best_err = v, err
+        # 35% tolerance: the filing&#x27;s denominator excludes treasury stock while our share
+        # count includes it, and the share column is rounded to the stated unit
+        if best is not None and best_err &lt; 0.35:
+            out.append(best)
+            cap = best
+        else:
+            out.append(None)   # unreconcilable row — recorded as unknown, never guessed
+            cap = 100.0
+    return out
+
+
+def parse_ownership(tbs: dict, shares_issued: float | None = None) -&gt; dict:
+    &quot;&quot;&quot;The FIEA parent flag, the parent %, and the top non-nominee holder.
+    `shares_issued` comes from the SAME filing and is what makes the 大株主 table parseable.&quot;&quot;&quot;
+    o = {&quot;has_statutory_parent&quot;: None, &quot;parent_name&quot;: None, &quot;parent_pct&quot;: None,
+         &quot;top_holder&quot;: None, &quot;top_pct&quot;: None, &quot;top_is_nominee&quot;: None, &quot;top2_pct&quot;: None,
+         &quot;ownership_basis&quot;: None}
+
+    p = _n(tbs.get(&quot;parent&quot;, &quot;&quot;))
+    if p:
+        if any(k in p for k in NO_PARENT_PATS):
+            o[&quot;has_statutory_parent&quot;] = False
+        else:
+            o[&quot;has_statutory_parent&quot;] = True
+            for rx in PARENT_NAME_RES:
+                m = rx.search(p)
+                if m and len(m.group(1)) &gt;= 3:
+                    o[&quot;parent_name&quot;] = re.sub(r&quot;(である|です|であります)$&quot;, &quot;&quot;, m.group(1))
+                    break
+
+    a = _n(tbs.get(&quot;affil&quot;, &quot;&quot;))
+    if a and &quot;（親会社）&quot; in a:
+        seg = a[a.find(&quot;（親会社）&quot;):a.find(&quot;（親会社）&quot;) + 400]
+        m = OWNED_RE.search(seg)
+        if m:
+            o[&quot;parent_pct&quot;] = float(m.group(1))
+
+    mj = _n(tbs.get(&quot;major&quot;, &quot;&quot;))
+    if mj:
+        i = mj.find(&quot;割合&quot;)
+        body = mj[i + 2:] if i &gt;= 0 else mj
+        um = UNIT_RE.search(mj)
+        unit_mult = {&quot;千株&quot;: 1000, &quot;百株&quot;: 100, &quot;株&quot;: 1}.get(um.group(1) if um else &quot;株&quot;, 1)
+        pcts = parse_major_pcts(body, shares_issued, unit_mult)
+        o[&quot;ownership_basis&quot;] = (f&quot;大株主 table reconciled against {shares_issued:,.0f} issued &quot;
+                                f&quot;shares, unit {um.group(1) if um else &#x27;株&#x27;}&quot;
+                                if pcts else
+                                &quot;大株主 table NOT reconcilable (missing share count or unit) — &quot;
+                                &quot;top-holder % deliberately left blank rather than guessed&quot;)
+        if pcts and pcts[0] is not None:
+            o[&quot;top_pct&quot;] = pcts[0]
+            o[&quot;top2_pct&quot;] = pcts[1] if len(pcts) &gt; 1 else None
+            # holder name = the text run before the top holder&#x27;s address; Japanese addresses
+            # open with a prefecture/metropolis token, which is a reliable right boundary
+            mm = re.match(r&quot;\s*([^0-9]{2,40}?)(?=東京都|北海道|大阪府|京都府|[^\s]{2,3}県|[A-Z0-9]{3})&quot;, body)
+            if mm:
+                # the column header&#x27;s trailing &quot;(%)&quot; bleeds into the first cell
+                o[&quot;top_holder&quot;] = re.sub(r&quot;^[^\w㐀-鿿ぁ-ヿ]*[（(]?%[）)]?&quot;, &quot;&quot;, mm.group(1)).strip()
+            o[&quot;top_is_nominee&quot;] = bool(o[&quot;top_holder&quot;] and
+                                       any(k in o[&quot;top_holder&quot;] for k in NOMINEES))
+    return o
+
+
+def parse_succession(tbs: dict) -&gt; dict:
+    &quot;&quot;&quot;Founder-age / succession channel. The 役員の状況 table carries every director&#x27;s
+    birthdate, so &#x27;aged owner-operator with no visible successor&#x27; is DERIVABLE, not guessed.&quot;&quot;&quot;
+    s = {&quot;oldest_dir_age&quot;: None, &quot;top_dir_age&quot;: None, &quot;n_directors&quot;: None,
+         &quot;family_surname_share&quot;: None, &quot;succession_visible&quot;: None}
+    t = _n(tbs.get(&quot;officers&quot;, &quot;&quot;))
+    if not t:
+        return s
+    births = BIRTH_RE.findall(t)
+    if not births:
+        return s
+    today = dt.date.today()
+    ages = []
+    for y, mo, dd in births:
+        try:
+            b = dt.date(int(y), int(mo), int(dd))
+            ages.append((today - b).days / 365.25)
+        except Exception:
+            pass
+    if not ages:
+        return s
+    s[&quot;n_directors&quot;] = len(ages)
+    s[&quot;oldest_dir_age&quot;] = round(max(ages), 1)
+    # the FIRST director listed is the 代表取締役会長/社長 in every filing we sampled
+    s[&quot;top_dir_age&quot;] = round(ages[0], 1)
+    # surname concentration: names sit immediately before each 生年月日
+    surnames = []
+    for m in BIRTH_RE.finditer(t):
+        head = t[max(0, m.start() - 24):m.start()]
+        mm = re.search(r&quot;([一-龥]{1,4})[ 　]?([一-龥ぁ-んァ-ヶ]{1,5})$&quot;, head)
+        if mm:
+            surnames.append(mm.group(1))
+    if surnames:
+        from collections import Counter
+        top, n = Counter(surnames).most_common(1)[0]
+        s[&quot;family_surname_share&quot;] = round(n / len(surnames), 2)
+        s[&quot;family_surname&quot;] = top
+        s[&quot;family_n&quot;] = n
+        # a same-surname director materially younger than the patriarch = visible succession
+        if n &gt;= 2:
+            fam_ages = [a for a, sn in zip(ages, surnames) if sn == top]
+            s[&quot;succession_visible&quot;] = bool(fam_ages and (max(fam_ages) - min(fam_ages)) &gt;= 15)
+        else:
+            s[&quot;succession_visible&quot;] = False
+    return s
+
+
+CAPCOST_KW = (&quot;資本コスト&quot;, &quot;株価を意識した経営&quot;, &quot;ＰＢＲ&quot;, &quot;PBR&quot;, &quot;株主資本コスト&quot;, &quot;ROICを&quot;)
+
+
+def parse_tse_plan(tbs: dict) -&gt; dict:
+    &quot;&quot;&quot;TSE improvement-plan flag. JPX publishes only PDFs, so we read the issuer&#x27;s OWN annual
+    report instead: 「資本コストや株価を意識した経営」 language in 経営方針 is the primary-source
+    version of the same disclosure and cannot be stale relative to the JPX list.&quot;&quot;&quot;
+    t = tbs.get(&quot;policy&quot;, &quot;&quot;) or &quot;&quot;
+    hits = [k for k in CAPCOST_KW if k in t]
+    return {&quot;tse_plan_language&quot;: bool(hits), &quot;tse_plan_kw&quot;: hits[:4],
+            &quot;tse_plan_basis&quot;: &quot;issuer annual report 経営方針 text (JPX list is PDF-only)&quot;}
+
+
+def load_codelist() -&gt; dict:
+    z = zipfile.ZipFile(EDINET_CODES)
+    txt = z.read(z.namelist()[0]).decode(&quot;cp932&quot;, errors=&quot;replace&quot;)
+    rows = list(csv.reader(io.StringIO(&quot;\n&quot;.join(txt.splitlines()[1:]))))
+    hdr = rows[0]
+    ix = {k: hdr.index(k) for k in (&quot;ＥＤＩＮＥＴコード&quot;, &quot;上場区分&quot;, &quot;提出者業種&quot;,
+                                    &quot;証券コード&quot;, &quot;提出者名（英字）&quot;, &quot;提出者名&quot;)}
+    out = {}
+    for r in rows[1:]:
+        if len(r) &lt;= max(ix.values()):
+            continue
+        out[r[ix[&quot;ＥＤＩＮＥＴコード&quot;]]] = {
+            &quot;sec_code&quot;: r[ix[&quot;証券コード&quot;]].strip(), &quot;listed&quot;: r[ix[&quot;上場区分&quot;]] == &quot;上場&quot;,
+            &quot;industry&quot;: r[ix[&quot;提出者業種&quot;]].strip(),
+            &quot;name_en&quot;: r[ix[&quot;提出者名（英字）&quot;]].strip(), &quot;name_ja&quot;: r[ix[&quot;提出者名&quot;]].strip()}
+    return out
+
+
+# A regulated utility&#x27;s or a bank&#x27;s balance-sheet cash is not buyout funding, and these
+# sectors are not the parent-subsidiary cleanup cohort. Excluded from the fingerprint.
+MIN_MCAP_JPY = 3_000_000_000   # ~$19M: below this a fingerprint is real but unownable
+
+EXCLUDE_INDUSTRIES = {&quot;銀行業&quot;, &quot;保険業&quot;, &quot;証券、商品先物取引業&quot;, &quot;その他金融業&quot;,
+                      &quot;不動産業&quot;, &quot;電気・ガス業&quot;}
+
+
+def score_fingerprint(r: dict) -&gt; tuple[int, str, list[str]]:
+    &quot;&quot;&quot;GATED channels, not a summed composite.
+
+    The first version of this scored cash + low P/B + old directors additively, and the top of
+    the list came back as cash-rich sub-book small caps — i.e. it had quietly reproduced the
+    deep-value screen we already run, which is exactly the overfit-composite failure the house
+    warns about. Cheapness is NOT a take-private signal; cheapness plus a party who can
+    actually execute a buyout is.
+
+    So a name must first clear a CONTROL gate before anything else is allowed to score:
+      TIER A  parent-subsidiary cleanup — a controlling corporate holder &gt;=50% (or &gt;=33.4%,
+              the special-resolution blocking level). TSE&#x27;s explicit target cohort.
+      TIER B  succession MBO — an aged owner-operator/founder-family top holder with no
+              visible successor on the board.
+    Cash, P/B and the TSE improvement-plan language are MODIFIERS inside a tier. They can
+    never put a name on the list by themselves.
+    &quot;&quot;&quot;
+    why = []
+    if r.get(&quot;industry&quot;) in EXCLUDE_INDUSTRIES:
+        return 0, &quot;EXCLUDED_SECTOR&quot;, [f&quot;{r.get(&#x27;industry&#x27;)} — regulated/financial balance &quot;
+                                      f&quot;sheet; cash is not buyout funding and the sector is &quot;
+                                      f&quot;not the parent-sub cleanup cohort&quot;]
+
+    pp = r.get(&quot;parent_pct&quot;)
+    tp = r.get(&quot;top_pct&quot;) if not r.get(&quot;top_is_nominee&quot;) else None
+    ctrl = max([x for x in (pp, tp) if x] or [0])
+
+    tier = None
+    score = 0
+    # ---- GATE: TIER A, parent-subsidiary cleanup ---------------------------------------
+    if ctrl &gt;= 50:
+        tier, score = &quot;A_PARENT_SUB&quot;, 4
+        who = r.get(&quot;parent_name&quot;) or r.get(&quot;top_holder&quot;) or &quot;the top holder&quot;
+        why.append(f&quot;{who} holds {ctrl:.1f}% — a majority-controlled listed subsidiary. This is &quot;
+                   f&quot;the exact cohort the TSE is pressuring to resolve, and the controller can &quot;
+                   f&quot;execute a squeeze-out unilaterally once past 90%&quot;
+                   + (&quot;&quot; if r.get(&quot;has_statutory_parent&quot;) else
+                      &quot;; note the filing declares NO statutory 親会社等, which at exactly 50.0% &quot;
+                      &quot;is legally consistent — control without the FIEA parent label&quot;))
+    elif ctrl &gt;= 33.4:
+        tier, score = &quot;A_PARENT_SUB&quot;, 3
+        who = r.get(&quot;parent_name&quot;) or r.get(&quot;top_holder&quot;) or &quot;the top holder&quot;
+        why.append(f&quot;{who} holds {ctrl:.1f}% — above the one-third special-resolution blocking &quot;
+                   f&quot;level. The holder already controls the outcome of any squeeze-out vote, so &quot;
+                   f&quot;a top-up TOB is the cheapest route to 100%&quot;)
+
+    # ---- GATE: TIER B, succession MBO ---------------------------------------------------
+    age = r.get(&quot;top_dir_age&quot;)
+    fam = (r.get(&quot;family_surname_share&quot;) or 0) &gt;= 0.15 or (ctrl &gt;= 15 and not r.get(&quot;top_is_nominee&quot;))
+    if tier is None and age and age &gt;= 72 and fam and r.get(&quot;succession_visible&quot;) is False:
+        tier, score = &quot;B_SUCCESSION&quot;, 3
+        why.append(f&quot;lead director is {age:.0f} with no same-surname successor on the board and &quot;
+                   f&quot;a concentrated founder/family register ({ctrl:.1f}% top holder) — the &quot;
+                   f&quot;classic estate-driven MBO setup, where the buyer is management itself&quot;)
+    elif tier == &quot;A_PARENT_SUB&quot; and age and age &gt;= 75 and r.get(&quot;succession_visible&quot;) is False:
+        score += 1
+        why.append(f&quot;lead director is {age:.0f} with no visible successor — a second, &quot;
+                   f&quot;independent reason for the register to be resolved&quot;)
+
+    if tier is None:
+        return 0, &quot;NO_CONTROL_CHANNEL&quot;, []
+
+    # ---- MODIFIERS (only inside a tier) -------------------------------------------------
+    cm = r.get(&quot;cash_to_mcap&quot;)
+    if cm and cm &gt;= 0.40:
+        score += 2
+        why.append(f&quot;cash = {cm*100:.0f}% of market cap — the target&#x27;s own balance sheet funds &quot;
+                   f&quot;much of the consideration, so the controller needs little outside money&quot;)
+    elif cm and cm &gt;= 0.25:
+        score += 1
+        why.append(f&quot;cash = {cm*100:.0f}% of market cap&quot;)
+
+    pb = r.get(&quot;pb&quot;)
+    if pb and pb &lt; 0.8:
+        score += 2
+        why.append(f&quot;P/B {pb:.2f} — below the TSE 1.0x line; taking in the minority below stated &quot;
+                   f&quot;book is accretive to the acquirer on day one&quot;)
+    elif pb and pb &lt; 1.0:
+        score += 1
+        why.append(f&quot;P/B {pb:.2f} — below book&quot;)
+
+    if r.get(&quot;tse_plan_language&quot;):
+        score += 1
+        why.append(&quot;the annual report itself carries 資本コスト / 株価を意識した経営 language — &quot;
+                   &quot;management is already on the TSE improvement track and has committed to &quot;
+                   &quot;closing the discount one way or another&quot;)
+    return score, tier, why
+
+
+def build_anticipatory(top: int = 40, limit_zips: int | None = None) -&gt; list[dict]:
+    import glob
+    zips = sorted(glob.glob(os.path.join(EDINET_CACHE, &quot;*_t5.zip&quot;)))
+    if limit_zips:
+        zips = zips[:limit_zips]
+    codes = load_codelist()
+    fund = json.load(open(EDINET_STORE)) if os.path.exists(EDINET_STORE) else {}
+    px = json.load(open(PX_CACHE)) if os.path.exists(PX_CACHE) else {}
+
+    rows = []
+    for i, z in enumerate(zips):
+        ec = os.path.basename(z).split(&quot;_&quot;)[0]
+        cl = codes.get(ec, {})
+        sec = (cl.get(&quot;sec_code&quot;) or &quot;&quot;).strip()
+        if not sec or not cl.get(&quot;listed&quot;, True):
+            continue
+        tick = sec[:4]
+        tbs = read_textblocks(z)
+        if not tbs:
+            continue
+        f0 = fund.get(ec, {})
+        r = {&quot;code&quot;: tick, &quot;edinet&quot;: ec, &quot;name_en&quot;: cl.get(&quot;name_en&quot;),
+             &quot;name_ja&quot;: cl.get(&quot;name_ja&quot;), &quot;industry&quot;: cl.get(&quot;industry&quot;)}
+        r.update(parse_ownership(tbs, f0.get(&quot;_SharesIssued&quot;)))
+        r.update(parse_succession(tbs))
+        r.update(parse_tse_plan(tbs))
+
+        f = fund.get(ec, {})
+        q = px.get(f&quot;{tick}.T&quot;, {})
+        mc = q.get(&quot;mcap&quot;)
+        cash = f.get(&quot;CashAndCashEquivalentsAtCarryingValue&quot;)
+        eq = f.get(&quot;StockholdersEquity&quot;) or f.get(&quot;_ShareholdersEquityJP&quot;)
+        r[&quot;spot_cached&quot;] = q.get(&quot;px&quot;)
+        r[&quot;mcap_jpy&quot;] = mc
+        r[&quot;cash_jpy&quot;] = cash
+        r[&quot;equity_jpy&quot;] = eq
+        r[&quot;cash_to_mcap&quot;] = round(cash / mc, 3) if (cash and mc) else None
+        r[&quot;pb&quot;] = round(mc / eq, 3) if (mc and eq and eq &gt; 0) else None
+        r[&quot;px_stale_days&quot;] = round((time.time() - q[&quot;ts&quot;]) / 86400, 1) if q.get(&quot;ts&quot;) else None
+        r[&quot;held&quot;] = HELD_JAPAN.get(tick)
+        r[&quot;score&quot;], r[&quot;tier&quot;], r[&quot;why&quot;] = score_fingerprint(r)
+        rows.append(r)
+        if i % 300 == 0:
+            print(f&quot;  edinet fingerprint {i}/{len(zips)}&quot;, file=sys.stderr)
+
+    gated = [r for r in rows if r[&quot;score&quot;] &gt; 0]
+    # SIZE FLOOR. Several top-scoring names are ~¥300M market caps — structurally perfect
+    # fingerprints that cannot be bought in any size and whose cash/mcap ratios are dominated
+    # by rounding. Excluded from the ranked book, but COUNTED and reported, never dropped
+    # silently.
+    kept = [r for r in gated if (r.get(&quot;mcap_jpy&quot;) or 0) &gt;= MIN_MCAP_JPY]
+    toosmall = [r for r in gated if (r.get(&quot;mcap_jpy&quot;) or 0) &lt; MIN_MCAP_JPY]
+    nomcap = [r for r in gated if not r.get(&quot;mcap_jpy&quot;)]
+    print(f&quot;  universe {len(rows)} listed non-financial issuers -&gt; {len(gated)} clear a control gate &quot;
+          f&quot;(A_PARENT_SUB {sum(1 for r in gated if r[&#x27;tier&#x27;]==&#x27;A_PARENT_SUB&#x27;)}, &quot;
+          f&quot;B_SUCCESSION {sum(1 for r in gated if r[&#x27;tier&#x27;]==&#x27;B_SUCCESSION&#x27;)})&quot;)
+    print(f&quot;  size floor ¥{MIN_MCAP_JPY/1e9:.0f}bn: {len(kept)} ranked, {len(toosmall)} excluded as &quot;
+          f&quot;too small to own ({len(nomcap)} of those had no cached market cap at all)&quot;)
+    kept.sort(key=lambda x: (-x[&quot;score&quot;], -(x.get(&quot;cash_to_mcap&quot;) or 0)))
+    for r in kept:
+        r[&quot;_excluded_too_small&quot;] = len(toosmall)
+    return kept[:top] if top else kept
+
+
+# ---------------------------------------------------------------------------------------
+# report
+# ---------------------------------------------------------------------------------------
+
+def usdjpy() -&gt; float:
+    try:
+        import yfinance as yf
+        h = yf.download(&quot;JPY=X&quot;, period=&quot;5d&quot;, progress=False, auto_adjust=False)[&quot;Close&quot;].dropna()
+        return float(h.iloc[-1])
+    except Exception:
+        return 0.0
+
+
+def write_intake(deals: list[dict], antic: list[dict], fx: float, path: str) -&gt; None:
+    live = [d for d in deals if d[&quot;status&quot;] in (&quot;OPEN&quot;, &quot;SQUEEZE_OUT&quot;)]
+    priced = [d for d in live if d.get(&quot;gross_spread_pct&quot;) is not None
+              and d.get(&quot;spread_quotable&quot;)]
+    blocked = [d for d in live if d.get(&quot;gross_spread_pct&quot;) is not None
+               and not d.get(&quot;spread_quotable&quot;)]
+    priced.sort(key=lambda d: (-(d.get(&quot;annualized_pct&quot;) if d.get(&quot;annualized_pct&quot;) is not None
+                                 else -999), -(d.get(&quot;gross_spread_pct&quot;) or 0)))
+    L = []
+    A = L.append
+    A(f&quot;# Japan TOB / take-private lane — intake {dt.date.today().isoformat()}&quot;)
+    A(&quot;&quot;)
+    A(f&quot;USD/JPY {fx:.2f} at run. Announced book (spreads) and anticipatory book (fingerprints) &quot;
+      f&quot;are separate and are never summed.&quot;)
+    A(&quot;&quot;)
+    A(&quot;## Channel note&quot;)
+    A(&quot;&quot;)
+    A(&quot;- **Announced deals: TDnet** (`release.tdnet.info/inbs/I_list_NNN_YYYYMMDD.html`) — plain &quot;
+      &quot;HTTP, no key, no browser, ~850 disclosures/day, formulaic titles, public PDF per row. &quot;
+      &quot;Terms are read out of the standardised 「買付け等の概要」 table in the commencement notice.&quot;)
+    A(&quot;- **EDINET API v2 does not work unkeyed** — returns `401 invalid subscription key`. The &quot;
+      &quot;statutory TOB filing (docTypeCode 240 公開買付届出書) is the better authority and we should &quot;
+      &quot;get a key; until then TDnet is the channel and the company&#x27;s own notice is the source.&quot;)
+    A(&quot;- **TDnet retains ~31 days.** The event store is therefore the history — a day we never &quot;
+      &quot;crawled cannot be recovered. Run daily.&quot;)
+    A(&quot;- **Anticipatory side is fully offline**, read from 1,525 cached EDINET annual-report XBRL &quot;
+      &quot;fact sets: the FIEA Art.24-7 parent declaration, 【関係会社の状況】 owned-by %, 【大株主の状況】, &quot;
+      &quot;and director birthdates.&quot;)
+    A(&quot;&quot;)
+    A(&quot;## Held-book cross-check&quot;)
+    A(&quot;&quot;)
+    ov = sorted({d[&quot;target_code&quot;] for d in deals} &amp; set(HELD_JAPAN))
+    ov2 = [r for r in antic if r.get(&quot;held&quot;)]
+    A(f&quot;- Announced targets vs the held Japan book ({&#x27;, &#x27;.join(f&#x27;{k} {v}&#x27; for k, v in HELD_JAPAN.items())}): &quot;
+      + (&quot;, &quot;.join(ov) if ov else &quot;**no overlap** — no live tender touches anything we own.&quot;))
+    for r in ov2:
+        A(f&quot;- **{r[&#x27;code&#x27;]} {r[&#x27;held&#x27;]} appears in the ANTICIPATORY book** (tier {r.get(&#x27;tier&#x27;)}, &quot;
+          f&quot;score {r[&#x27;score&#x27;]}). We are already long a take-private candidate. Treat this as &quot;
+          f&quot;position context, not a new idea: it means part of the Japan book&#x27;s return is &quot;
+          f&quot;already levered to this lane&#x27;s thesis, and it caps how much more of the same &quot;
+          f&quot;exposure the lane should add.&quot;)
+    A(&quot;&quot;)
+    A(&quot;## A. ANNOUNCED — spread book&quot;)
+    A(&quot;&quot;)
+    A(f&quot;{len(deals)} deals tracked in the window; {len(live)} live; {len(priced)} with a computable spread.&quot;)
+    A(&quot;&quot;)
+    A(&quot;| target | name | bidder | offer ¥ | spot ¥ | gross % | ann. % | days | liquidity | timing |&quot;)
+    A(&quot;|---|---|---|---|---|---|---|---|---|---|&quot;)
+    for d in priced:
+        A(&quot;| {c} | {n} | {b} | {o} | {s} | {g} | {a} | {dd} | {lq} | {tm} |&quot;.format(
+            c=d[&quot;target_code&quot;], n=(d[&quot;target_name&quot;] or &quot;&quot;)[:16],
+            b=(d.get(&quot;bidder&quot;) or &quot;n/d&quot;)[:16],
+            o=f&quot;{d[&#x27;offer_price&#x27;]:,.0f}&quot; if d.get(&quot;offer_price&quot;) else &quot;n/p&quot;,
+            s=f&quot;{d[&#x27;spot&#x27;]:,.0f}&quot; if d.get(&quot;spot&quot;) else &quot;n/p&quot;,
+            g=f&quot;{d[&#x27;gross_spread_pct&#x27;]:+.2f}&quot; if d.get(&quot;gross_spread_pct&quot;) is not None else &quot;—&quot;,
+            a=f&quot;{d[&#x27;annualized_pct&#x27;]:+.0f}&quot; if d.get(&quot;annualized_pct&quot;) is not None else &quot;—&quot;,
+            dd=d.get(&quot;days_to_cash&quot;) if d.get(&quot;days_to_cash&quot;) is not None else &quot;—&quot;,
+            lq=d.get(&quot;liquidity&quot;, &quot;?&quot;), tm=d.get(&quot;timing&quot;, &quot;?&quot;)))
+    A(&quot;&quot;)
+    for d in priced[:8]:
+        A(f&quot;### {d[&#x27;target_code&#x27;]} {d[&#x27;target_name&#x27;]} — {d[&#x27;status&#x27;]}&quot;)
+        A(&quot;&quot;)
+        A(f&quot;- **Bidder / purpose**: {d.get(&#x27;bidder&#x27;) or &#x27;n/d&#x27;} · {d.get(&#x27;purpose&#x27;) or &#x27;purpose not parsed&#x27;} · &quot;
+          f&quot;target opinion {d.get(&#x27;target_opinion&#x27;) or &#x27;not parsed&#x27;}&quot;)
+        A(f&quot;- **Terms**: offer ¥{d.get(&#x27;offer_price&#x27;):,.0f} vs spot ¥{d.get(&#x27;spot&#x27;):,.0f} = &quot;
+          f&quot;{d.get(&#x27;gross_spread_pct&#x27;):+.2f}% gross&quot;
+          if d.get(&quot;offer_price&quot;) and d.get(&quot;spot&quot;) else &quot;- **Terms**: incomplete&quot;)
+        A(f&quot;- **Timing**: {d.get(&#x27;timing&#x27;)} — {d.get(&#x27;timing_why&#x27;)}&quot;)
+        A(f&quot;- **Minimum-tender condition**: {d.get(&#x27;min_tender_note&#x27;)}&quot;)
+        A(f&quot;- **Squeeze-out**: {d.get(&#x27;squeezeout_note&#x27;)}&quot;)
+        A(f&quot;- **Liquidity (thin-print gate)**: {d.get(&#x27;liquidity&#x27;)} — {d.get(&#x27;liquidity_why&#x27;)}&quot;)
+        if d.get(&quot;spot&quot;) and fx:
+            A(f&quot;- **JPY add**: a ¥1,000,000 clip here is ${1_000_000/fx:,.0f} of ADDITIONAL &quot;
+              f&quot;unhedged JPY on top of the existing Japan book.&quot;)
+        A(f&quot;- **Taxable**: tender proceeds are a disposition, not a rollover — short-term gain &quot;
+          f&quot;unless held &gt;1y. On a {d.get(&#x27;gross_spread_pct&#x27;) or 0:+.2f}% gross spread the &quot;
+          f&quot;after-tax return at a ~50% marginal rate is roughly half the headline.&quot;)
+        A(f&quot;- Source: {d.get(&#x27;terms_from&#x27;) or d.get(&#x27;primary_pdf&#x27;)}&quot;)
+        if d.get(&quot;held&quot;):
+            A(f&quot;- **HELD-BOOK OVERLAP: we own {d[&#x27;target_code&#x27;]} ({d[&#x27;held&#x27;]}).**&quot;)
+        A(&quot;&quot;)
+    if blocked:
+        A(&quot;### Live, but the spread is NOT quotable — do not put these in a return table&quot;)
+        A(&quot;&quot;)
+        for d in blocked:
+            A(f&quot;- **{d[&#x27;target_code&#x27;]} {d[&#x27;target_name&#x27;]}** — headline &quot;
+              f&quot;{d[&#x27;gross_spread_pct&#x27;]:+.2f}% vs offer ¥{d.get(&#x27;offer_price&#x27;):,.0f}. &quot;
+              f&quot;{d.get(&#x27;quotable_note&#x27;)}&quot;)
+        A(&quot;&quot;)
+    other = [d for d in live if d.get(&quot;gross_spread_pct&quot;) is None]
+    if other:
+        A(&quot;### Live but not priceable&quot;)
+        A(&quot;&quot;)
+        for d in other:
+            A(f&quot;- {d[&#x27;target_code&#x27;]} {d[&#x27;target_name&#x27;]} — {d.get(&#x27;timing&#x27;,&#x27;?&#x27;)}; &quot;
+              f&quot;{d.get(&#x27;liquidity&#x27;,&#x27;?&#x27;)}; terms {&#x27;parsed&#x27; if d.get(&#x27;offer_price&#x27;) else &#x27;NOT parsed&#x27;}. &quot;
+              f&quot;{d.get(&#x27;primary_title&#x27;,&#x27;&#x27;)[:80]}&quot;)
+        A(&quot;&quot;)
+    A(&quot;## B. ANTICIPATORY — fingerprint book (NOT spreads, NOT annualized)&quot;)
+    A(&quot;&quot;)
+    A(&quot;No offer exists for any name below. These are structural candidates only. An anticipatory &quot;
+      &quot;name that is later bid moves to book A; until then it carries equity risk with an undated, &quot;
+      &quot;uncertain catalyst and must be sized as equity, not as arbitrage.&quot;)
+    A(&quot;&quot;)
+    A(&quot;| code | name | tier | score | controller | % | float % | cash/mcap | P/B | lead age |&quot;)
+    A(&quot;|---|---|---|---|---|---|---|---|---|---|&quot;)
+    for r in antic[:25]:
+        pp = r.get(&quot;parent_pct&quot;) or r.get(&quot;top_pct&quot;)
+        A(&quot;| {c} | {n} | {t} | {s} | {p} | {pc} | {fl} | {cm} | {pb} | {ag} |&quot;.format(
+            c=r[&quot;code&quot;], n=(r.get(&quot;name_en&quot;) or r.get(&quot;name_ja&quot;) or &quot;&quot;)[:22],
+            t=(r.get(&quot;tier&quot;) or &quot;&quot;)[:1], s=r[&quot;score&quot;],
+            p=(r.get(&quot;parent_name&quot;) or r.get(&quot;top_holder&quot;) or &quot;—&quot;)[:20],
+            pc=f&quot;{pp:.1f}&quot; if pp else &quot;—&quot;, fl=f&quot;{100-pp:.0f}&quot; if pp else &quot;—&quot;,
+            cm=f&quot;{r[&#x27;cash_to_mcap&#x27;]:.2f}&quot; if r.get(&quot;cash_to_mcap&quot;) else &quot;—&quot;,
+            pb=f&quot;{r[&#x27;pb&#x27;]:.2f}&quot; if r.get(&quot;pb&quot;) else &quot;—&quot;,
+            ag=f&quot;{r[&#x27;top_dir_age&#x27;]:.0f}&quot; if r.get(&quot;top_dir_age&quot;) else &quot;—&quot;))
+    A(&quot;&quot;)
+    for r in antic[:10]:
+        pp = r.get(&quot;parent_pct&quot;) or r.get(&quot;top_pct&quot;)
+        A(f&quot;### {r[&#x27;code&#x27;]} {r.get(&#x27;name_en&#x27;) or r.get(&#x27;name_ja&#x27;)} — {r.get(&#x27;tier&#x27;)}, score {r[&#x27;score&#x27;]}&quot;
+          + (f&quot;  **[HELD: {r[&#x27;held&#x27;]}]**&quot; if r.get(&quot;held&quot;) else &quot;&quot;))
+        for w in r[&quot;why&quot;]:
+            A(f&quot;- {w}&quot;)
+        if pp and pp &gt;= 90:
+            A(f&quot;- **Float warning**: only ~{100-pp:.0f}% is outside the controller. A &gt;=90% holder &quot;
+              f&quot;can file a 株式売渡請求 unilaterally at any time — highest structural readiness, but &quot;
+              f&quot;the tradeable float may be too small to build a position in.&quot;)
+        elif pp:
+            A(f&quot;- Minority float ~{100-pp:.0f}% of shares; the controller needs to reach 90% to &quot;
+              f&quot;squeeze out without an EGM.&quot;)
+        if r.get(&quot;px_stale_days&quot;):
+            A(f&quot;- Inputs: annual-report balance sheet, price cached {r[&#x27;px_stale_days&#x27;]:.0f}d ago — &quot;
+              f&quot;screen-grade, not valuation-grade. {r.get(&#x27;ownership_basis&#x27;) or &#x27;&#x27;}&quot;)
+        A(&quot;&quot;)
+    A(&quot;## Structural findings from the first run&quot;)
+    A(&quot;&quot;)
+    A(&quot;1. **The Japanese limit-up lock is this lane&#x27;s dominant failure mode.** A target bid at a &quot;
+      &quot;real premium goes limit-up (ストップ高) with an O=H=L bar and an unfilled buy queue for one &quot;
+      &quot;to three sessions. Any screen that reads that print books a spread that never existed. &quot;
+      &quot;On the first run this was worth 22 percentage points on one name and 10 on another — &quot;
+      &quot;both would have been fictional. The lane now carries the TSE 値幅制限 table, detects the &quot;
+      &quot;lock, and refuses to rank a locked name.&quot;)
+    A(&quot;2. **Real Japanese TOB spreads are thin.** Once the phantom spreads are removed, every &quot;
+      &quot;live quotable deal sits at +0.1% to +0.9% gross. This is an efficiently arbitraged &quot;
+      &quot;market; the return lives in the annualization of very short dated-cash events, not in &quot;
+      &quot;the headline spread, and it is entirely eaten by a taxable short-term rate unless the &quot;
+      &quot;days-to-cash is genuinely small.&quot;)
+    A(&quot;3. **The residual step-2 stub is where the yield is, and it is nearly untradeable.** The &quot;
+      &quot;highest annualized numbers all come from post-tender squeeze-out stubs, which trade a &quot;
+      &quot;few hundred to a few thousand shares a day. The spread is real; the capacity is not.&quot;)
+    A(&quot;4. **A cheapness screen is not a take-private screen.** The first version of the &quot;
+      &quot;anticipatory scorer summed cash + low P/B + old directors and simply reproduced the &quot;
+      &quot;deep-value shelf. Requiring a control channel first — a &gt;=33.4% holder, or an aged &quot;
+      &quot;owner-operator with no successor — is what makes the book distinct from the value book.&quot;)
+    A(&quot;5. **Japan&#x27;s parent-subsidiary cohort is enormous.** 320 of 1,316 listed non-financial &quot;
+      &quot;issuers with a cached annual report clear a control gate (238 parent-subsidiary, 82 &quot;
+      &quot;succession). The constraint on this lane is not finding candidates; it is that the &quot;
+      &quot;catalyst is undated, so the anticipatory book is an equity position with optionality, &quot;
+      &quot;never an arbitrage.&quot;)
+    A(&quot;&quot;)
+    A(&quot;## Gaps, honestly&quot;)
+    A(&quot;&quot;)
+    A(&quot;- No EDINET API key: we read the company&#x27;s TDnet notice, not the statutory 公開買付届出書. &quot;
+      &quot;Terms should agree; where a notice was amended we take the newest PDF that parses.&quot;)
+    A(&quot;- TDnet 31-day retention means the deal book is only as deep as our crawl history.&quot;)
+    A(&quot;- Anticipatory fundamentals come from the last ANNUAL report and a cached close, so &quot;
+      &quot;cash/mcap and P/B can be several months stale; treat as a screen, not a valuation.&quot;)
+    A(&quot;- JPX publishes the improvement-plan list as PDFs only; the TSE-plan flag is derived from &quot;
+      &quot;the issuer&#x27;s own annual-report language instead and is a proxy for list membership.&quot;)
+    A(f&quot;- Anticipatory names below ¥{MIN_MCAP_JPY/1e9:.0f}bn market cap are excluded as unownable; &quot;
+      f&quot;the count is printed every run so the exclusion is never silent.&quot;)
+    A(&quot;- The minimum-tender floor did not parse on the step-2 squeeze-out notices, which is &quot;
+      &quot;expected (the condition already resolved) but is reported as UNVERIFIED rather than as &quot;
+      &quot;&#x27;no condition&#x27;.&quot;)
+    A(&quot;- Bidder identity is read from the disclosure title when only the target filed; it is a &quot;
+      &quot;label, not a verified counterparty, and a competing-bid situation (2371) makes &#x27;the &quot;
+      &quot;offer price&#x27; genuinely ambiguous — that name is flagged, not priced.&quot;)
+    open(path, &quot;w&quot;).write(&quot;\n&quot;.join(L) + &quot;\n&quot;)
+
+
+# ---------------------------------------------------------------------------------------
+
+def main() -&gt; int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument(&quot;--mode&quot;, choices=[&quot;both&quot;, &quot;announced&quot;, &quot;anticipatory&quot;], default=&quot;both&quot;)
+    ap.add_argument(&quot;--days&quot;, type=int, default=40, help=&quot;TDnet lookback (retention ~31d)&quot;)
+    ap.add_argument(&quot;--top&quot;, type=int, default=40)
+    ap.add_argument(&quot;--limit-zips&quot;, type=int, default=None)
+    ap.add_argument(&quot;--intake&quot;, action=&quot;store_true&quot;, help=&quot;also write the desk intake .md&quot;)
+    ap.add_argument(&quot;--no-terms&quot;, action=&quot;store_true&quot;, help=&quot;skip PDF term parsing&quot;)
+    a = ap.parse_args()
+
+    st = _load_store()
+    deals, antic = [], []
+
+    if a.mode in (&quot;both&quot;, &quot;announced&quot;):
+        print(f&quot;[announced] crawling TDnet, {a.days}d lookback&quot;)
+        n = crawl_tdnet(a.days, st)
+        print(f&quot;[announced] {n} new lane events; {len(st[&#x27;events&#x27;])} in store&quot;)
+        deals = build_announced(st, refresh_terms=not a.no_terms)
+        st[&quot;deals&quot;] = {d[&quot;target_code&quot;]: d for d in deals}
+        live = [d for d in deals if d[&quot;status&quot;] in (&quot;OPEN&quot;, &quot;SQUEEZE_OUT&quot;)]
+        print(f&quot;[announced] {len(deals)} deals, {len(live)} live&quot;)
+        for d in sorted(live, key=lambda x: -(x.get(&quot;annualized_pct&quot;) or -999)):
+            print(f&quot;  {d[&#x27;target_code&#x27;]:&gt;5} {(d[&#x27;target_name&#x27;] or &#x27;&#x27;)[:16]:&lt;16} &quot;
+                  f&quot;offer={d.get(&#x27;offer_price&#x27;)} spot={d.get(&#x27;spot&#x27;)} &quot;
+                  f&quot;gross={d.get(&#x27;gross_spread_pct&#x27;)} ann={d.get(&#x27;annualized_pct&#x27;)} &quot;
+                  f&quot;{d.get(&#x27;timing&#x27;)} {d.get(&#x27;liquidity&#x27;)}&quot;)
+
+    if a.mode in (&quot;both&quot;, &quot;anticipatory&quot;):
+        print(&quot;[anticipatory] scanning cached EDINET annual reports&quot;)
+        antic = build_anticipatory(top=a.top, limit_zips=a.limit_zips)
+        st[&quot;anticipatory&quot;] = antic
+        print(f&quot;[anticipatory] top {len(antic)}&quot;)
+        for r in antic[:15]:
+            print(f&quot;  {r[&#x27;code&#x27;]:&gt;5} score={r[&#x27;score&#x27;]} {(r.get(&#x27;name_en&#x27;) or &#x27;&#x27;)[:28]:&lt;28} &quot;
+                  f&quot;pp={r.get(&#x27;parent_pct&#x27;) or r.get(&#x27;top_pct&#x27;)} cm={r.get(&#x27;cash_to_mcap&#x27;)} &quot;
+                  f&quot;pb={r.get(&#x27;pb&#x27;)}&quot; + (&quot;  [HELD]&quot; if r.get(&quot;held&quot;) else &quot;&quot;))
+
+    # held-book overlap, loudly
+    tgt = {d[&quot;target_code&quot;] for d in deals}
+    ov = sorted(tgt &amp; set(HELD_JAPAN))
+    print(f&quot;[held-overlap] announced targets vs held Japan book: &quot;
+          f&quot;{&#x27;, &#x27;.join(ov) if ov else &#x27;NONE&#x27;}&quot;)
+    ov2 = [r[&quot;code&quot;] for r in antic if r.get(&quot;held&quot;)]
+    print(f&quot;[held-overlap] anticipatory candidates already held: &quot;
+          f&quot;{&#x27;, &#x27;.join(ov2) if ov2 else &#x27;NONE&#x27;}&quot;)
+
+    fx = usdjpy()
+    st[&quot;runs&quot;] = (st.get(&quot;runs&quot;, []) + [{&quot;ts&quot;: dt.datetime.now().isoformat(timespec=&quot;seconds&quot;),
+                                         &quot;mode&quot;: a.mode, &quot;n_deals&quot;: len(deals),
+                                         &quot;n_antic&quot;: len(antic), &quot;usdjpy&quot;: fx}])[-60:]
+    st[&quot;asof&quot;] = dt.date.today().isoformat()
+    st[&quot;usdjpy&quot;] = fx
+    st[&quot;held_japan&quot;] = HELD_JAPAN
+    _save_store(st)
+    print(f&quot;[store] {STORE}&quot;)
+
+    if a.intake:
+        os.makedirs(DESK_DATA, exist_ok=True)
+        p = os.path.join(DESK_DATA, f&quot;JAPAN_TOB_INTAKE_{dt.date.today().strftime(&#x27;%Y%m%d&#x27;)}.md&quot;)
+        write_intake(deals, antic, fx, p)
+        print(f&quot;[intake] {p}&quot;)
+    return 0
+
+
+if __name__ == &quot;__main__&quot;:
+    sys.exit(main())
+</pre></div></body></html>

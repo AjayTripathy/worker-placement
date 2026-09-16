@@ -1,0 +1,148 @@
+{
+  "ticker": "RKLB",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Backlog grew from $1.067B to $1.847B; increase attributed to SDA Tranche 3 contract (Dec 2025) and GEOST acquisition. Filing names 'SDA Tranche 3' without disambiguating Transport vs Tracking sub-layer.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook on PE 1206410SF returns 3 matched sub-programs: Tranche 3 Transport Layer (UNFUNDED_TWO_PLUS_YEARS, replacement_sole_source = SpaceX Starshield), SDA Transport Tranches 0-2 (FUNDED_SHRINKING), Tranche 3 Tracking Layer/PWSA (FUNDED_STEADY).",
+        "Rocket Lab is explicitly listed in primary_contractors for the Tracking Layer (FUNDED_STEADY) but NOT for the Transport Layer (UNFUNDED).",
+        "Cohort metadata: 'SDA Tracking Layer T3 prime exposure' confirms the company's actual exposure is to the FUNDED sub-layer."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(pe_number='1206410SF', cutoff_date='2026-05-20')",
+      "M_value": "Tracking Layer = FUNDED_STEADY; Transport Layer = UNFUNDED_TWO_PLUS_YEARS (RKLB not contracted on Transport)",
+      "interpretation": "pentagon_jbook fired and resolved the apparent ambiguity in the company's favor: their actual contracted role is on the funded Tracking sub-line, not the zeroed Transport sub-line. PASS. However, this is the kind of disclosure that should be flagged for investor-clarity: the filing language 'SDA Tranche 3' is materially imprecise because the same PE houses one funded and one zeroed line. NOTE coverage-gap to add precision in future disclosures."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "SDA Tracking Layer T3 prime exposure (cohort-flagged).",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook returns Tranche 3 Tracking Layer (PWSA) with status FUNDED_STEADY.",
+        "primary_contractors list explicitly includes 'Rocket Lab' alongside Lockheed Martin, Northrop Grumman, L3 Harris.",
+        "No replacement program, no termination flag."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Tranche 3 Tracking Layer (PWSA)', cutoff_date='2026-05-20')",
+      "M_value": "FUNDED_STEADY, RKLB named primary_contractor",
+      "interpretation": "Forward exposure on the named Tranche 3 Tracking Layer is supported by the J-Book. PASS."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "MDA Corporation procurement agreement for 17 spacecraft buses (Feb 2022).",
+      "severity": "PASS",
+      "supports": [
+        "Entity-resolution check: 'MDA Corporation' here is MDA Ltd. (Canadian space prime), not the U.S. Missile Defense Agency. No PE search applicable.",
+        "usaspending.query_dod_contracts(recipient_name='Rocket Lab') returns 7 DoD awards totaling $27.5M including STP-S30 ($14.5M), R3D2 DARPA ($6.8M), NSSL Phase 3 Lane 1 ($5M under 'Rocket Lab National Security LLC'), Archimedes digital engineering ($960K). This is orthogonal verification of the customer-set the company names."
+      ],
+      "M_check": "usaspending.query_dod_contracts(recipient_name='Rocket Lab')",
+      "M_value": "n_awards=7, total=$27.5M",
+      "interpretation": "MDA contract is commercial (Canadian customer), not a Pentagon program. USAspending confirms the broader DoD relationship narrative the company describes. PASS as control."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Continue to expand into new launch service verticals, such as Hypersonic Accelerator Suborbital Test Electron (HASTE).",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "PE 0604033F (Hypersonics Prototyping, USAF RDT&E) shows status UNFUNDED_TWO_PLUS_YEARS: $27.9M in FY24, $0 in FY25 and FY26. This was the flagship Air Force hypersonics RDT&E line.",
+        "Companion PE 0604183F (Hypersonics Prototyping - HACM) is FUNDED_GROWING: $333M FY24 → $467M FY25 → $803M FY26. So the funding has consolidated into HACM specifically, not the broader prototyping line.",
+        "HASTE is a derived suborbital testbed; the relevant procurement vehicles (e.g., MACH-TB, EWAAC) are not in the J-Book corpus. usaspending shows only $1,000 obligated under EWAAC on-ramp to RKLB."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(pe_number='0604033F' AND '0604183F')",
+      "M_value": "0604033F=UNFUNDED_TWO_PLUS_YEARS; 0604183F=FUNDED_GROWING ($803M FY26)",
+      "interpretation": "Mixed signal. The forward hypersonic test cadence the company is positioning toward is real (HACM is growing), but the broader prototyping budget line (where HASTE rides) is zeroed. Forward narrative is load-bearing on a market that has consolidated to a single program (HACM) where RKLB is not a named prime. MODERATE_UNDERDELIVERY."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Photon spacecraft positioned to fly as secondary payload on NSSL rockets of the U.S. Space Force.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook PE 1206853SF (NSSL Program EMD/RDT&E line): FUNDED_SHRINKING — $157M FY24 → $103M FY25 → $6.6M FY26. The RDT&E development line is winding down (expected — EMD complete).",
+        "However, this RDT&E line is NOT where production launches are funded; NSSL Phase 3 procurement happens through P-40 / O&M / Procurement appropriations not in this PE.",
+        "usaspending.query_dod_contracts returns NSSL Phase 3 Lane 1 award $5,000,000 to 'ROCKET LAB NATIONAL SECURITY LLC' (FA881125FB007) — RKLB has actually won an NSSL Phase 3 Lane 1 contract."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(pe_number='1206853SF') + usaspending.query_dod_contracts(recipient_name='Rocket Lab')",
+      "M_value": "RDT&E PE FUNDED_SHRINKING (expected for EMD-end); production NSSL contract booked",
+      "interpretation": "The RDT&E line shrinkage is structural (program transitioned to production), not a divergence signal. RKLB has a real NSSL Phase 3 Lane 1 award. Forward positioning is supported. PASS."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "STP-S30 launch contract (cohort metadata) + named DoD/NASA/DARPA/NRO customers.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook PE 1206864SF (Space Test Program): FUNDED_STEADY — $29.1M FY24 → $30.3M FY25 → $28.8M FY26.",
+        "usaspending.query_dod_contracts confirms STP-S30 award FA881824FB016 of $14,496,100 to 'ROCKET LAB USA INC' with description matching the cohort hint exactly: 'THE OBJECTIVE OF THE STP-S30 MISSION IS TO DELIVER SCIENTIFIC RESEARCH AND DEVELOPMENT EXPERIMENTS TO SPACE...'.",
+        "Also confirms R3D2 (DARPA HR001118C0103, $6.8M) — orthogonal verification of the DARPA customer claim."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Space Test Program') + usaspending.query_dod_contracts(recipient_name='Rocket Lab')",
+      "M_value": "PE FUNDED_STEADY ~$29M/yr; STP-S30 award $14.5M and DARPA R3D2 $6.8M confirmed",
+      "interpretation": "Both J-Book and USAspending corroborate the customer narrative. PASS."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "GEOST acquisition (Aug 2025, $132.4M cash) for EO/IR sensor payloads.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "acq_coherence.score_acquisition_coherence required parent_thesis + acquisitions kwargs that this run did not supply in the expected shape; result was a bad_kwargs error and the score did not compute.",
+        "Orthogonal usaspending check: GEOST LLC has $98.35M of DoD obligations across 8 awards (largest: $89.1M hosted-payload BAA contract FA881921C1001; DARPA HR001118C0119 $4.3M; STM, Roboscope STTR-II; P-GESS proliferated GEO EO study). The acquired entity's DoD revenue base is legitimate and aligned with RKLB's space-systems/defense optical thesis.",
+        "GEOST not in pentagon_jbook by_entity index; no PE-level forward funding view available."
+      ],
+      "M_check": "acq_coherence.score_acquisition_coherence (FAILED) + usaspending.query_dod_contracts(recipient_name='GEOST') (succeeded)",
+      "M_value": "GEOST legacy DoD obligations $98.4M (real DoD-aligned customer base)",
+      "interpretation": "Coherence score not computed due to call-shape issue; partial orthogonal validation via usaspending is positive. UNVERIFIABLE on the formal coherence metric; informally PASS-leaning."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Implied dependence on SDA Tranche 3 Transport Layer (PE 1206410SF) for forward backlog conversion.",
+      "severity": "PASS",
+      "supports": [
+        "This claim is investigator-derived (Mode B), testing whether RKLB's SDA exposure is to the unfunded Transport sub-layer.",
+        "pentagon_jbook returns three sub-programs sharing PE 1206410SF. Tranche 3 Transport Layer primary_contractors = [York, Lockheed, Northrop]. Rocket Lab is NOT in that list.",
+        "Rocket Lab IS in primary_contractors for Tranche 3 Tracking Layer (FUNDED_STEADY).",
+        "Replacement note: Transport Layer requirements being rolled into SDN backbone sole-sourced to SpaceX Starshield."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(pe_number='1206410SF')",
+      "M_value": "RKLB exposure on PE 1206410SF is via Tracking Layer (FUNDED_STEADY), not Transport (UNFUNDED_TWO_PLUS_YEARS)",
+      "interpretation": "The framework's entity-resolution-at-PE-level passed: J-Book disambiguates that RKLB is on the funded sub-line. PASS for RKLB. Note: the broader competitive context (SDA dissolution, SpaceX sole-sourced replacement) is a slowly-developing systemic risk to the SDA contracting model, but not a current divergence vs RKLB's specific contracted work."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "Securities class action (C.D. Cal., Feb 2025) re Neutron progress; second MTD filed Jan 2026; Neutron Stage 1 tank rupture Jan 21, 2026.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "edgar_fts.query_fulltext returned 0 hits for 'Rocket Lab Neutron securities class action' under 10-K/10-Q/8-K through 2026-05-20.",
+        "The disclosure is internally consistent in the 10-K (Item 3 Legal Proceedings + Risk Factors). No counterparty disclosure to cross-check (the plaintiffs are unnamed putative class)."
+      ],
+      "M_check": "edgar_fts.query_fulltext(search_term='Rocket Lab Neutron securities class action', cutoff_date='2026-05-20')",
+      "M_value": "0 hits in edgar_fts corpus",
+      "interpretation": "Control claim; corpus did not surface external counterparty filings. UNVERIFIABLE via the FTS tool. Coverage gap, not a red flag."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "Facility footprint: Albuquerque NM solar cells, Stennis MS Archimedes engine test, Middle River MD composites, Tucson AZ optical, Long Beach CA HQ.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "epa_frs.query_facilities(facility_name='Rocket Lab', state_abbr='CA') returned 0 facilities.",
+        "Subsidiary facilities (SolAero in Albuquerque, GEOST in Tucson) would not be indexed under 'Rocket Lab' parent name; querying parent name systematically misses post-acquisition facility presence."
+      ],
+      "M_check": "epa_frs.query_facilities(facility_name='Rocket Lab', state_abbr='CA')",
+      "M_value": "n_facilities=0",
+      "interpretation": "Control claim; entity-resolution miss against the subsidiary names that actually appear in EPA FRS. UNVERIFIABLE via parent-name query; not a red flag. (Memory: 'Entity resolution before verifier dispatch' — querying 'SolAero' / 'GEOST' would have been the right subjects.)"
+    }
+  ],
+  "_summary": {
+    "n_claims": 10,
+    "n_queries_run": 14,
+    "severity_counts": {
+      "PASS": 6,
+      "MODERATE_UNDERDELIVERY": 1,
+      "SEVERE_UNDERDELIVERY": 0,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 3
+    },
+    "jbook_grounded_claims": ["C1", "C2", "C4", "C5", "C6", "C8"],
+    "jbook_hits": 6,
+    "jbook_grounded_total": 6,
+    "headline": "Pentagon J-Book disambiguated RKLB's SDA Tranche 3 exposure as Tracking Layer (FUNDED_STEADY) not Transport Layer (UNFUNDED_TWO_PLUS_YEARS, replaced by SpaceX Starshield). STP-S30 ($14.5M) and NSSL Phase 3 Lane 1 ($5M) procurement confirmed via USAspending. Hypersonics flagship RDT&E PE 0604033F is zeroed but companion HACM PE 0604183F is funded-growing; HASTE is positioned for a market that has consolidated to a specific program where RKLB is not a named prime — single MODERATE flag."
+  }
+}

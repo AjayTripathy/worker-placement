@@ -1,0 +1,147 @@
+{
+  "ticker": "ASPI",
+  "cutoff": "2026-05-16",
+  "filing": "0001193125-26-151294_10-K.txt",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "ASPI/QLE has definitive agreements with TerraPower: a $22M (10% OID) term loan to partially fund construction of a uranium enrichment facility in Pelindaba, South Africa, plus an Initial Supply Agreement and a 10-year Long-Term Supply Agreement of up to 150 metric tons of HALEU (2028-2037).",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "edgar_fts.query_fulltext('ASP Isotopes') -> 340 hits, top hits ASPI self-filings",
+        "edgar_fts.query_fulltext('Quantum Leap Energy') -> 105 hits, top hits ASPI self-filings",
+        "edgar_fts.query_fulltext('TerraPower') -> 155 hits across SEC filings — top hits are Uranium Energy Corp 8-K (2023), Centrus 8-K (2020), and ASPI 10-Q (2025-08-14). TerraPower itself is private (Bill Gates / Cascade Investment)",
+        "TerraPower is privately-held — no counterparty 10-K filings exist for direct corroboration (Heuristic 7 limited)"
+      ],
+      "M_check": "Counterparty disclosure on the TerraPower side is structurally unavailable (private company). The supply window starts 2028 — Heuristic 3 (planned vs operational, extra weight): 150 MT HALEU is large enough to be the entire HALEU output of multiple commercial enrichers for years (US HALEU production is currently <1 MT/year). Promise of 150 MT over 2028-2037 vs ASPI/QLE's status (no operating commercial enrichment facility, no DOE HALEU contract, no NRC enrichment license — see C2) is the classic Heuristic 3 stage gap.",
+      "M_value": {
+        "edgar_asp_isotopes_hits": 340,
+        "edgar_qle_hits": 105,
+        "terrapower_sec_filer": false,
+        "haleu_supply_volume_mt": 150,
+        "supply_window_start": "2028",
+        "aspi_currently_operating_enrichment": false
+      },
+      "interpretation": "Term loan ($22M with 10% OID = $19.8M cash) is verifiable in principle from ASPI cash flow disclosure (not part of M-source check here). The HALEU supply agreement is a binding contract per the filing, but is conditioned on facility construction completing and on commercial enrichment capability that ASPI does not yet have. Counterparty silence is structural, not adverse. Heuristic 3 stage gap is the binding concern: 150 MT HALEU by 2037 from a pre-construction facility is aggressive. MODE — not RED, because the binding term loan provides some discipline that the deal is real, but the production-volume claim is far ahead of operating stage."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "ASPI is engaged with U.S. DOE, the NRC, and the UK ONR regarding construction of a nuclear fuel plant; in 2020 the DOE selected two companies under ARDP Pathway 1 (HALEU-fueled) and ~$2.7B has been awarded by DOE to jump-start commercial HALEU production (industry context). ASPI itself has not received any DOE HALEU contract or NRC enrichment license.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending.query_recipient_contracts('ASP Isotopes', 2020-2026) -> 0 contracts ($0 total)",
+        "usaspending.query_recipient_contracts('Quantum Leap Energy', 2020-2026) -> 0 contracts ($0 total)",
+        "usaspending.query_recipient_grants('ASP Isotopes') -> 0 grants",
+        "Filing EXPLICITLY self-discloses: 'ASPI itself has not received any DOE HALEU contract or NRC enrichment license'"
+      ],
+      "M_check": "USAspending confirms zero federal contracts / grants to ASP Isotopes or Quantum Leap Energy. This is EXACTLY what the filing self-discloses. Per Heuristic 9 (DOE-CONTRACT-SPECIFIC): a claim of a specific DOE program with absence in USAspending would be RED — but ASPI explicitly says it has NOT received any such contract. The claim is properly framed as 'engaged with' (discussions, regulatory dialogue), not 'awarded' or 'contracted'.",
+      "M_value": {
+        "usaspending_contracts_asp_isotopes": 0,
+        "usaspending_contracts_qle": 0,
+        "usaspending_grants_asp_isotopes": 0,
+        "filing_disclaims_doe_contract": true
+      },
+      "interpretation": "Textbook honest stage-disclosure. The framework rewards claims that accurately characterize what is and is not held. ASPI separates 'engagement / discussions' from 'awarded contract / issued license' — and USAspending confirms the latter is zero. PASS — disciplined disclosure of an adverse fact."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "ASP Isotopes has a commercial Pre-Implementation Services Contract with Necsa (South African state nuclear company) for siting an enrichment facility at Pelindaba, South Africa; QLE has a non-binding MoU with Necsa to collaborate on advanced nuclear fuel.",
+      "severity": "PASS",
+      "supports": [
+        "edgar_fts.query_fulltext('Necsa') -> 44 hits, all ASPI filings",
+        "edgar_fts.query_fulltext('Pelindaba') -> 29 hits, all ASPI filings"
+      ],
+      "M_check": "Necsa (South African Nuclear Energy Corporation) is a foreign state-owned entity — not an SEC filer. Per Heuristic 2 (foreign-issuer / foreign-jurisdiction caveat), the M-source catalog has no coverage for South African regulatory filings, JSE disclosures, or Necsa public reports. EDGAR FTS hits are uniformly ASPI self-disclosure, which is the structural expectation.",
+      "M_value": {
+        "necsa_sec_filer": false,
+        "edgar_necsa_hits_all_aspi": 44,
+        "edgar_pelindaba_hits_all_aspi": 29,
+        "foreign_jurisdiction_caveat": true
+      },
+      "interpretation": "Counterparty is foreign-government — direct corroboration unavailable in catalog. Filing self-stages the Necsa arrangement as a Pre-Implementation Services Contract (pre-construction phase) and a separate non-binding MoU on the QLE side — both honest stage characterizations. PASS — stage discipline preserved despite jurisdictional gap. Process note: a South African government / Necsa connector would close this gap."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "ASPI has an offtake supply agreement with a Canadian customer for the entire capacity of its C-14 production facility; the Company commenced commercial production of enriched C-14 in H1 2025 and is targeting initial commercial shipments of C-14 in mid-2026.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "edgar_fts.query_fulltext('ASP Isotopes') -> 340 hits (ASPI consistently discusses C-14 production in subsequent filings)",
+        "Customer is unnamed ('a Canadian Customer') — cannot test counterparty disclosure",
+        "Cutoff (2026-05-16) is before the targeted 'initial commercial shipments' window (mid-2026), so the milestone has not yet matured for verification"
+      ],
+      "M_check": "Customer identity is withheld from the filing, blocking any counterparty disclosure check (Heuristic 7). The C-14 commercial production claim ('commenced H1 2025') is past-tense and would in principle leave traces (Health Canada radioactive materials licensing, CNSC imports/exports records, Statistics Canada trade data) — none of which are in the M-source catalog (Heuristic 5 source-jurisdiction gap).",
+      "M_value": {
+        "customer_named_in_filing": false,
+        "initial_shipment_target": "mid-2026",
+        "cutoff_date": "2026-05-16",
+        "milestone_matured_by_cutoff": false,
+        "canadian_radioactive_materials_connector_in_catalog": false
+      },
+      "interpretation": "Two reinforcing reasons for UNVERIFIABLE: (1) the named-counterparty test is blocked because the customer is unnamed; (2) the catalog has no Canadian radioactive-materials registry connector. The claim is stage-disciplined ('targeting initial commercial shipments in mid-2026' is future-tense and modest given the rest of the deck) — would lean PASS on stage grounds, but on M-check grounds genuine UNVERIFIABLE. Note: if shipment date slips materially past mid-2026, the next filing's narrative becomes the natural verification point."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "ASPI cites granted patents/IP for its ASP enrichment technology and acquired IP from Klydon; ASP Isotopes UK Ltd is the owner of the enrichment technology. The filing concedes patent protection in the U.S. for SA-developed nuclear technology would be 'unusual, if even possible.'",
+      "severity": "PASS",
+      "supports": [
+        "uspto_odp.query_assignee('ASP Isotopes') -> 0 total applications, 0 granted",
+        "uspto_odp.query_assignee('Klydon') -> 0 total applications, 0 granted",
+        "uspto_odp.query_assignee('Quantum Leap Energy') -> 0 total applications, 0 granted",
+        "Filing EXPLICITLY concedes US patent protection is 'unusual, if even possible' for SA-developed sensitive nuclear technology"
+      ],
+      "M_check": "USPTO yields zero applications or granted patents under any of the three plausible assignee names. Per the ASPI-special heuristic in the input rubric (export-control regime, particularly Atomic Energy Act § 57(b) and SA's NNR-controlled tech transfer, generally precludes US patenting of SA-developed enrichment technology), the absence is consistent with the explicit disclosure rather than a contradiction. Per Heuristic 8, the SEVERE threshold is the Nikola pattern (large patent portfolio in unrelated areas); ASPI's pattern is 'no US patents claimed' + 'no US patents found' = consistent.",
+      "M_value": {
+        "uspto_asp_isotopes": {"n_total": 0, "n_granted": 0},
+        "uspto_klydon": {"n_total": 0, "n_granted": 0},
+        "uspto_qle": {"n_total": 0, "n_granted": 0},
+        "filing_disclaims_us_patent_protection": true,
+        "uk_ip_owner_named": "ASP Isotopes UK Ltd"
+      },
+      "interpretation": "Honest stage-disclosure of an inherent IP-protection limitation. Verification of UK / South African patents would require connectors not in the catalog (UK IPO, SA CIPC). PASS — claim accurately describes the IP regime it operates in."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "In January 2026 ASPI acquired Renergen (formerly JSE:REN / ASX:RLT), South Africa's leading onshore natural gas explorer and first integrated producer of liquid helium and LNG; Renergen has IDC and DFC indebtedness and the DFC has conditionally approved up to $500M senior secured debt for Phase 2 of the Virginia Gas Project (~$1B+ build).",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "edgar_fts.query_fulltext('Renergen') -> 75 hits across SEC filings — top hits are ASPI 8-Ks announcing the deal",
+        "Renergen was a JSE / ASX dual-listed entity prior to acquisition — foreign-listing record not in catalog (Heuristic 2)",
+        "DFC (US International Development Finance Corporation) loans are not flowed through USAspending in the standard contract/grant pipeline — coverage gap (Heuristic 5)"
+      ],
+      "M_check": "Renergen's pre-acquisition existence as a JSE/ASX filer is verifiable in principle from those exchanges (not in catalog). The $500M DFC debt is 'conditionally approved' — a stage characterization that is one step short of 'committed' or 'drawn'. DFC conditional approvals are commitments contingent on satisfaction of conditions precedent that frequently take 12-24+ months to satisfy, and the Virginia Gas Project Phase 2 build cost (~$1B+) means the DFC tranche covers <50% — equity / mezz gap of $500M+ needs to be raised on top.",
+      "M_value": {
+        "edgar_renergen_hits": 75,
+        "dfc_status": "conditionally approved",
+        "dfc_amount_usd": 500000000,
+        "phase_2_build_cost_usd_approx": "1000000000+",
+        "additional_capital_required": "~500000000+",
+        "renergen_was_foreign_listed": true
+      },
+      "interpretation": "Acquisition is internally consistent across ASPI filings and verifiable via foreign-exchange delisting records. The pivot concern is the Heuristic 3 stage gap on the DFC funding: 'conditionally approved up to $500M' is being narrated alongside Phase 2 of a $1B+ build — without disclosure of the conditions precedent or the unfunded equity gap. MODE — not on the acquisition itself, but on the implied DFC-funded build pathway. Watch list: next 10-K disclosure of DFC conditions satisfaction is the natural follow-up."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "ASPI states it is in discussions with customers interested in long-term supply agreements for kilogram quantities of Si-28 plus larger quantities of Xe-129, Ge-72, Ge-74, Zn-68, and Cl-37, with the second (larger) ASP facility designed to enrich kilogram-quantities of heavier isotopes; initial Si-28 shipments targeted Q2 2026 and Yb-176 mid-2026 / Q3-2026.",
+      "severity": "PASS",
+      "supports": [
+        "edgar_fts.query_fulltext('ASP Isotopes') -> 340 hits (consistent self-disclosure across filings)",
+        "edgar_fts.query_fulltext('Silicon-28') -> 85 hits, top hits ASPI 8-Ks",
+        "Customers explicitly unnamed; claim is staged as 'in discussions' (not signed)"
+      ],
+      "M_check": "Claim is uniformly stage-disciplined: 'discussions with customers' (not signed), 'targeting initial commercial shipments' (not commenced), specific quarterly timing (Q2 2026 / mid-2026 / Q3 2026). Heuristic 3 (planned vs operational) — claim accurately stages the production plan as targeted-future, not currently-shipping. Customers unnamed blocks Heuristic 7 counterparty check by design, but the filing makes a clear distinction between this stage and the binding TerraPower HALEU agreement (C1).",
+      "M_value": {
+        "edgar_silicon_28_hits": 85,
+        "edgar_asp_hits": 340,
+        "customers_named": false,
+        "claim_stage": "in discussions / targeting initial shipments",
+        "cutoff_minus_si28_target_months": 1
+      },
+      "interpretation": "Honest staging — 'in discussions' and 'targeting' are appropriate verbs for the stage. The Q2 2026 Si-28 milestone is essentially at the cutoff (2026-05-16 is in Q2 2026) — the next quarterly filing will be the natural verification point. PASS on stage discipline."
+    }
+  ],
+  "summary": "ASPI: 7 claims, 15 M-source queries (deduped). Severity counts: PASS=4 MODE=2 SEVE=0 RED=0 UNVE=1.",
+  "process_rules_discovered": [
+    "Foreign-jurisdiction connector gaps materially limit coverage for issuers like ASPI (South African operations, foreign-listed acquisition targets like Renergen, foreign state counterparties like Necsa). Priority adds: (a) JSE / ASX delisting + corporate-action registry; (b) UK IPO / SA CIPC patent registries; (c) Health Canada / CNSC radioactive materials licensing; (d) DFC (US Int'l Development Finance Corp) commitment registry, which is NOT in USAspending standard contract flow.",
+    "Customer-unnamed disclosures (C4, C7) are common in early-commercial-stage isotope/enrichment contracts and structurally block Heuristic 7 (counterparty-disclosure threshold). The framework should distinguish 'unnamed customer in filing' (UNVERIFIABLE per design, score on stage discipline only) from 'named customer where counterparty 10-K is silent' (MODE/SEVE per Heuristic 7)."
+  ]
+}

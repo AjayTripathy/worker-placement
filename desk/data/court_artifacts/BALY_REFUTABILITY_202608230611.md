@@ -1,0 +1,34 @@
+## Context
+
+Cause-check first, per the LEVERED STUB flag: BALY's −57% dd52 is **not** the cohort narrative. On 2026-08-14 Bally's filed a Q2 10-Q carrying a management-asserted **going-concern** disclosure; the stock fell 31% (to $9.68) on 2026-08-17 while Caesars fell 0.3% and MGM 1% — the repricing is idiosyncratic capital structure, not sector demand. (`COHORT: ?` remains unresolved — `knowledge_graph/cohorts.json` read was permission-denied, so the cohort narrative is inferred from the sector/industry tags in the event record.)
+
+| ticker | class | refuting metric | current value/trend (cited) | next print date | note |
+|---|---|---|---|---|---|
+| BALY | **STRUCTURAL** | Credit-agreement **minimum liquidity vs. the $325.0M test at 9/30/26** ($300.0M at 12/31/26), against 1H26 operating cash flow and the October revolver commitment step-down | 6/30/26: cash **$390.2M** + revolver availability **$195.8M**; 1H26 **OCF −$265.9M**; 1H26 net loss attributable **−$307.98M**; LT debt incl. current **$4,506.7M**; lease-adj. leverage **8.4x**; revolver commitments step **$519M → $319M in October 2026**. Management states that **on current forecasts it does not expect to satisfy the lender liquidity or leverage requirements** — "substantial doubt about the Company's ability to continue as a going concern." ([10-Q, acc. 0001747079-26-000084](https://www.sec.gov/Archives/edgar/data/0001747079/000174707926000084/baly-20260630.htm); [8-K Q2 release, acc. 0001747079-26-000082](https://www.sec.gov/Archives/edgar/data/0001747079/000174707926000082/ex991q22026earningsrelease.htm)) | **2026-11-09 — UNCONFIRMED** (yfinance-derived; no company PR names it). The *decisive* dated event is earlier: the **9/30/26 covenant test**. | Confirming, not refuting: the metric that would have exonerated the stub already printed against it. Prior signal was in the pack — **NT 10-Q filed 2026-08-11** (Rule 12b-25, "additional time to complete the review"), 3 days ahead of the going-concern disclosure. |
+
+**Two-narrative breakout** (the cohort test and the price test are different questions here):
+
+| narrative tested | verdict | evidence |
+|---|---|---|
+| Cohort: consumer-discretionary demand weakness in Hotels/Resorts | **damage-absent** | Casinos & Resorts revenue **$401.0M, +2.0% YoY**; segment Adj. EBITDAR **$109.6M, +3.4% YoY**. The one segment that declined — Bally's Intralot B2C, EBITDAR $64.7M vs $75.2M — fell on a **UK RGD tax step from 21%→40%** (~$39M headwind), a regulatory event, not consumer demand. |
+| Operative: capital-structure insolvency | **TRUE — discount is correct** | Going-concern assertion; $4.51B debt vs ~$0.5B equity; forecast covenant breach. |
+
+Because the routing question is "is the discount correct," **STRUCTURAL** is the correct class. The cohort-narrative refutation is real but non-actionable: it is buried under a residual claim behind $4.5B of debt.
+
+## COURT-WORTHY (damage-absent, ranked):
+
+**None.** BALY is the only member and it does not qualify. Its operating damage-absence (Casinos & Resorts +3.4% EBITDAR) sits behind a management-disclosed going concern, so the dispersion the market "ignored" is dispersion it is correctly refusing to pay for. Three doctrine gates each independently close this:
+
+- **Forced-seller adverse selection** — the fulcrum here is the revolver and the 2029/2031 notes, not the equity. The party with the mechanical cliff is senior to us; the stub is the payer, not the beneficiary.
+- **Levered-stub self-trigger** — the event card's own warning. Equity is ~11% of EV on funded debt ($0.5B equity / ~$4.62B EV net of cash) and materially less lease-adjusted at 8.4x. A price gate here buys beta into a solvency event.
+- **Cash-burn theta** — −$265.9M 1H operating cash makes this a decaying option, not a free one. Chicago ($1.7B, construction slowed 8/8/26, ~200 of 1,500 workers idled) and the Bronx ($4B, 2030) are calls on capital the company has told lenders it may not have.
+
+Metadata correction for the pipeline: the event record's `mcap` of $449.7M understates — press reporting puts market cap ≈**$500M** at $9.68 on 8/17 (~51.7M shares), so equity is ~10–11% of funded EV, not 5%. The 5% figure is only reachable by capitalizing the leases. The stub conclusion is unchanged; the input is stale.
+
+**COURT-WORTHINESS BALY: 2/10** — a full red/blue court cannot change the sizing decision, because management's own filed forecast already answers the only question that matters and the answer is FLAT.
+
+**PRINT PROXIMITY: 2026-11-09 — UNKNOWN/UNCONFIRMED (yfinance-derived only; no company PR names it). NOT within 5 trading days (~55 calendar days out).** The print that mattered already landed on 2026-08-14 and resolved the loudest bear claim in the bears' favor. Two nearer dated events supersede it: the **9/30/2026 minimum-liquidity covenant test at $325.0M**, and the **withheld ~$4M September payment to Chicago** pending the video-gambling-terminal dispute. **PRE-PRINT POSITION: FLAT** — book confirms NO POSITION and NONE staged; a going-concern name with a forecast covenant breach inside 6 weeks is a credit instrument wearing an equity ticker, and nothing between now and 11/09 makes the stub ownable.
+
+Sources: [10-Q Q2 2026 (SEC)](https://www.sec.gov/Archives/edgar/data/0001747079/000174707926000084/baly-20260630.htm) · [8-K Q2 2026 earnings release (SEC)](https://www.sec.gov/Archives/edgar/data/0001747079/000174707926000082/ex991q22026earningsrelease.htm) · [NT 10-Q](https://www.stocktitan.net/sec-filings/BALY/nt-10-q-bally-s-corp-sec-filing-495a51df089e.html) · [10-Q going-concern detail](https://www.stocktitan.net/sec-filings/BALY/10-q-bally-s-corp-quarterly-earnings-report-7893731350ee.html) · [Q2 segment detail](https://www.stocktitan.net/sec-filings/BALY/8-k-bally-s-corp-reports-material-event-ffb9de7fae96.html) · [Bloomberg: going-concern warning](https://www.bloomberg.com/news/articles/2026-08-14/bally-s-warns-of-going-concern-doubt-as-it-seeks-fresh-liquidity) · [31% drop, peer non-reaction](https://finance.yahoo.com/markets/stocks/articles/bally-drops-31-liquidity-warning-162627735.html) · [Chicago slowdown](https://finance.yahoo.com/real-estate/articles/bally-issues-going-concern-warning-175500346.html) · [revolver step-down / 8.4x lease-adj.](https://earningsandmore.substack.com/p/the-house-of-ballys) · [Sept-2025 revolver amendment](https://www.ballys.com/news/news-details/2025/Ballys-Corporation-Announces-Amendments-to-Its-Revolving-Credit-Facility/default.aspx)
+
+One caveat on provenance: `sec.gov` returned **HTTP 403** to every direct fetch this session (no header fingerprint available to WebFetch), so the SEC URLs above are cited as the canonical primary source but their text was read through filing mirrors. Every number in the table traces to filed 10-Q/8-K content; if you want them re-pulled straight from EDGAR, the pack's full-fingerprint fetcher is the path.

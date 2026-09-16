@@ -1,0 +1,77 @@
+{
+  "_meta": {
+    "pilot": "Frontrun Engine v0 — CEF/BDC NAV re-mark",
+    "phase": 1,
+    "as_of": "2026-06-24",
+    "spec": "PILOT_SPEC.md (LOCKED 2026-06-24)",
+    "moat_metric": "% of fund NAV (CEF) or % of total investments (BDC) in Level-3 fair-value assets, from primary SEC filings",
+    "classifier_rule_locked": "Arm A: L3>=50%; Arm B: L3<=10%; EXCLUDE 10%<L3<50%",
+    "primary_sources": {
+      "CEF_L3_and_holdings": "EDGAR NPORT-P primary_doc.xml (fair-value-hierarchy + portfolio)",
+      "BDC_L3": "EDGAR XBRL companyfacts: FairValueMeasurementWithUnobservableInputsReconciliationRecurringBasisAssetValue / InvestmentOwnedAtFairValue (authoritative figure = the 10-Q fair-value table; confirm in Phase 2)",
+      "turnover": "N-CSR financial-highlights 'Portfolio turnover rate'",
+      "dxyz_official_nav": "DXYZ 424B3 filed 2026-05-12, accession 0001575872-26-000288"
+    },
+    "live_price_check": {"DXYZ_last": 25.38, "DXYZ_bid_ask": "25.27/25.44", "source": "IBKR", "ts": "2026-06-24"}
+  },
+
+  "arm_A_high_moat": {
+    "rule": "Level-3 >= 50%",
+    "tractable_now": [
+      {
+        "ticker": "DXYZ", "cik": 1843974, "name": "Destiny Tech100 Inc.",
+        "type": "pre-IPO/venture CEF", "files_nport": true,
+        "l3_pct_nav": 67.9, "l1_pct_nav": 31.3, "l2_pct_nav": 0.0,
+        "l1_note": "L1 is a Treasury MMF cash-sweep (First American Treasury Obligations), not an equity book",
+        "turnover_pct": 5.71, "turnover_source": "N-CSR 2026-03-10 (FY2025); prior yrs 0.00-0.24%",
+        "official_nav_per_share": 24.56, "official_nav_date": "2026-03-31",
+        "net_assets": 748360972, "shares_outstanding_implied": 30470724,
+        "nport": {"accession": "0000894189-26-016628", "filing_date": "2026-05-29", "rep_pd_date": "2026-03-31", "n_holdings": 48},
+        "classification": "ARM_A", "verdict": "CLEAN ARM A — the moat anchor; runnable now",
+        "moat_evidence": "entire L3 sleeve = private/pre-IPO (Anthropic, SpaceX x3, OpenAI x2, Databricks x2, Stripe, Shield AI, Revolut) — no liquid feed re-marks these"
+      }
+    ],
+    "bdc_moat_confirmed_but_not_engine_tractable": [
+      {"ticker": "ARCC", "cik": 1287750, "name": "Ares Capital Corp", "l3_value_usd": 28838000000, "total_invest_usd": 29499300000, "l3_pct_invest": 97.8, "l3_as_of": "2026-03-31", "files_nport": false, "classification": "ARM_A_moat", "engine_blocked_reason": "no NPORT-P; holdings only in 10-Q Schedule of Investments (image/HTML table, ~quarterly, not daily-markable)"},
+      {"ticker": "FSK", "cik": 1422183, "name": "FS KKR Capital Corp", "l3_value_usd": 12440000000, "total_invest_usd": 12270000000, "l3_pct_invest": 101.4, "l3_as_of": "2025-03-31 (companyfacts; newer qtrs tagged dimensionally)", "files_nport": false, "classification": "ARM_A_moat", "engine_blocked_reason": "no NPORT-P"},
+      {"ticker": "GBDC", "cik": 1476765, "name": "Golub Capital BDC", "l3_value_usd": 8320000000, "total_invest_usd": 8320000000, "l3_pct_invest": 100.0, "l3_as_of": "2026-03-31", "files_nport": false, "classification": "ARM_A_moat", "engine_blocked_reason": "no NPORT-P"},
+      {"ticker": "OBDC", "cik": 1655888, "name": "Blue Owl Capital Corp (was ORCC, renamed 2024)", "total_invest_usd": 15344201000, "l3_pct_invest": "near-100 (sector-structural; L3 tagged dimensionally, confirm in 10-Q)", "files_nport": false, "classification": "ARM_A_moat_pending_10Q", "engine_blocked_reason": "no NPORT-P; L3 not in standard companyfacts tag"},
+      {"ticker": "MAIN", "cik": 1396440, "name": "Main Street Capital", "total_invest_usd": 5674751000, "l3_pct_invest": "near-100 pending 10-Q confirm", "files_nport": false, "classification": "ARM_A_moat_pending_10Q", "engine_blocked_reason": "no NPORT-P; L3 not in standard companyfacts tag"},
+      {"ticker": "PSEC", "cik": 1287032, "name": "Prospect Capital", "total_invest_usd": 6302465000, "l3_pct_invest": "near-100 pending 10-Q confirm", "files_nport": false, "classification": "ARM_A_moat_pending_10Q", "engine_blocked_reason": "no NPORT-P; L3 not in standard companyfacts tag"}
+    ]
+  },
+
+  "arm_B_low_moat_control": {
+    "rule": "Level-3 <= 10% (>=90% Level-1 public equity)",
+    "funds": [
+      {"ticker": "ADX", "cik": 2230, "name": "Adams Diversified Equity Fund", "l3_pct_nav": 0.0, "l1_pct_nav": 100.0, "turnover_pct": 55.6, "turnover_source": "N-CSR FY2025; prior 61.4%", "nport": {"accession": "0001104659-26-053137", "filing_date": "2026-04-30", "rep_pd_date": "2026-03-31", "n_holdings": 102}, "net_assets": 2854922339, "classification": "ARM_B", "turnover_flag": "HIGH turnover (>cap) — gate per amendment A-2; keep as control with caveat or drop"},
+      {"ticker": "USA", "cik": 799195, "name": "Liberty All-Star Equity Fund", "l3_pct_nav": 0.0, "l1_pct_nav": 100.0, "turnover_pct": null, "turnover_source": "N-CSR (financials exhibit; large doc, fetch pending)", "nport": {"accession": "0001049169-26-001565", "filing_date": "2026-06-01", "rep_pd_date": "2026-03-31", "n_holdings": 139}, "net_assets": 1878740500, "classification": "ARM_B"},
+      {"ticker": "RVT", "cik": 804116, "name": "Royce Small-Cap Trust", "l3_pct_nav": 0.0, "l1_pct_nav": 94.7, "l2_pct_nav": 5.3, "turnover_pct": 14, "turnover_source": "N-CSR FY2025 (range 14-52% over 5yr)", "nport": {"accession": "0001410368-26-049631", "filing_date": "2026-05-21", "rep_pd_date": "2026-03-31", "n_holdings": 482}, "net_assets": 2230623172, "classification": "ARM_B"},
+      {"ticker": "GAB", "cik": 794685, "name": "Gabelli Equity Trust", "l3_pct_nav": 0.0, "l1_pct_nav": 117.0, "l2_pct_nav": 3.1, "l1_note": "L1>100% because the fund is levered (holdings exceed NAV)", "turnover_pct": 11, "turnover_source": "N-CSR FY2025 (8-12% range)", "nport": {"accession": "0000940400-26-022964", "filing_date": "2026-06-01", "rep_pd_date": "2026-03-31", "n_holdings": 682}, "net_assets": 1732641569, "classification": "ARM_B"}
+    ]
+  },
+
+  "excluded_middle_band": [
+    {"ticker": "CET", "cik": 18748, "name": "Central Securities Corp", "l3_pct_nav": 24.2, "l1_pct_nav": 73.8, "l2_pct_nav": 2.0, "turnover_pct": 4.64, "reason": "10% < L3 < 50% (holds private stake e.g. Plymouth Rock) -> EXCLUDED by locked rule, keeps arms clean"},
+    {"ticker": "RVI", "cik": 2085091, "name": "Robinhood Ventures Fund I", "type": "pre-IPO/venture CEF (files NPORT-P)", "l3_pct_nav": 48.3, "l1_pct_nav": 53.0, "l3_pct_ex_cash": "~100 (L1 is a Treasury MMF cash-sweep; investment book is ~all L3: Revolut, Databricks, Mercor)", "net_assets": 655315945, "nport": {"rep_pd_date": "2026-03-31", "n_holdings": 12}, "reason": "L3 48.3% of NAV -> just BELOW the locked 50% Arm-A threshold (cash-sweep distortion). EXCLUDED by the letter of the rule; see amendment A-3. Strongest Phase-2 candidate to enlarge tractable Arm A."},
+    {"ticker": "BTX", "cik": 1836057, "name": "BlackRock Technology & Private Equity Term Trust", "type": "tech/PE term trust (files NPORT-P)", "l3_pct_nav": 31.2, "l1_pct_nav": 49.8, "l2_pct_nav": 17.7, "net_assets": 895062810, "nport": {"rep_pd_date": "2026-03-31", "n_holdings": 86}, "reason": "10% < L3 < 50% (PsiQuantum etc private; large liquid-tech L1 sleeve incl NVDA) -> EXCLUDED by locked rule"}
+  ],
+
+  "proposed_amendments": [
+    {"id": "A-1", "param": "moat denominator for BDCs", "locked_text": "% of fund NAV in Level-3", "proposed": "for levered BDCs use L3 / total-investments (not L3/NAV), because L3/NAV exceeds 100% under leverage and the moat is about the fraction of the markable book the market cannot re-mark", "reason": "literal L3/NAV gives 205-236% for ARCC/FSK/GBDC, which is meaningless; L3/investments (97.8/101.4/100.0%) is the economically correct moat figure. Original L3/NAV still recorded.", "status": "PROPOSED, original parameter kept"},
+    {"id": "A-2", "param": "turnover gate cap", "locked_text": "annualized holdings turnover below a pre-set cap (cap not numerically fixed in spec)", "proposed": "set cap = 30%/yr (DXYZ 5.7%, RVT 14%, GAB 11%, CET 4.6% pass; ADX 55.6% fails). Pre-register the 30% number before Phase 2 scoring.", "reason": "spec §6 requires a cap but did not fix the number; must be set pre-data to avoid fishing. 30% cleanly separates the low-turnover NPORT-lag-safe funds from ADX.", "status": "PROPOSED — needs sign-off before Phase 2"},
+    {"id": "A-3", "param": "Arm-A threshold vs cash-sweep distortion", "locked_text": "Arm A: Level-3 >= 50% of NAV", "proposed": "report BOTH L3/NAV and L3/(NAV minus Treasury-MMF-cash-sweep); RVI is 48.3% raw but ~100% ex-cash. Do NOT change the locked 50%/NAV rule for the primary test; add the ex-cash figure as a labeled secondary classification so RVI can enter an exploratory Arm-A-extended set.", "reason": "venture CEFs (DXYZ, RVI) hold large Treasury MMF sweeps that mechanically dilute the L3/NAV ratio; the moat lives in the deployed book. RVI is the single best lever to fix Arm-A's low-N problem. Keeping the locked rule for the primary test preserves pre-registration integrity.", "status": "PROPOSED, original parameter kept for primary test"}
+  ],
+
+  "survivorship_dead_funds": [
+    {"ticker": "BKCC", "cik": 1326003, "name": "BlackRock Capital Investment Corp", "fate": "merged into TCPC (BlackRock TCP Capital) Mar 2024", "last_edgar_filing": "2024-03-28", "evidence": "EDGAR submissions CIK0001326003 last filing 2024-03-28; absent from current company_tickers.json", "arm": "would-be ARM_A (BDC, L3 ~100%) — but engine-blocked (no NPORT) like all BDCs", "note": "documents the survivorship trap: a today-only screen never sees BKCC"},
+    {"ticker": "ORCC->OBDC", "cik": 1655888, "name": "Owl Rock Capital Corp -> Blue Owl Capital Corp", "fate": "RENAME 2024 (survives, not a death) — flagged so the spec's 'ORCC' ticker resolves correctly", "arm": "ARM_A_moat"},
+    {"ticker": "OBDC_II", "cik": 1655887, "name": "Blue Owl Capital Corp II", "fate": "non-traded BDC, still filing (8-K/tender) — not a clean traded comparable", "note": "Owl Rock Capital Corp II / Blue Owl Capital Corp III consolidations into OBDC occurred 2024-2025; relevant for a BDC-arm dead list IF the BDC arm were tractable"}
+  ],
+
+  "dead_fund_list_sources": [
+    "EDGAR company_tickers.json (presence/absence in current map)",
+    "EDGAR submissions CIK###.json last-filing-date as death evidence",
+    "BDC merger 8-Ks / N-14 (registration of merger securities) on each acquirer's CIK"
+  ]
+}

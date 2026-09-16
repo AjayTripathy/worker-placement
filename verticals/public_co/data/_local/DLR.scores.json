@@ -1,0 +1,112 @@
+{
+  "ticker": "DLR",
+  "scores": [
+    {
+      "claim_id": "DLR-1",
+      "claim_text": "310 data centers across 7 regions, ~57.6M rsf, 84.7% leased as of 12/31/2025.",
+      "severity": "PASS",
+      "supports": [
+        "EDGAR fulltext: 'Digital Realty' returns 1,583 hits across 8-K/10-K/10-Q since 2018, consistent with continuous, granular property-level disclosure typical of mature global REIT.",
+        "DLR 10-K filed 2026-02-13 itemizes properties metro-by-metro in Item 2 with sq ft and occupancy %; no rounding inconsistencies."
+      ],
+      "M_check": "edgar_fts.query_fulltext(search_term='Digital Realty', cutoff=2026-05-16)",
+      "M_value": "total_hits=1583; recurring DLR self-filings 2018-2026",
+      "interpretation": "Routine REIT property-portfolio disclosure with deep filing trail. No discriminative red flag. Calibration heuristic 3 N/A (operational, not planned)."
+    },
+    {
+      "claim_id": "DLR-2",
+      "claim_text": "769 MW underway, 64% pre-leased; 2.9 GW in-place IT capacity; 5 GW future capacity.",
+      "severity": "PASS",
+      "supports": [
+        "EDGAR fulltext '769 megawatts' returns 1 hit — the DLR 10-K itself (no other issuer plagiarizing or contradicting the number).",
+        "Stage ladder is properly broken out (operational vs under-construction vs future development capacity) per heuristic 3.",
+        "Pre-lease percentage (64%) disclosed transparently — discrimines from term-sheet/MOU stage to lease stage."
+      ],
+      "M_check": "edgar_fts.query_fulltext(search_term='769 megawatts')",
+      "M_value": "1 hit (DLR's own 10-K)",
+      "interpretation": "Properly staged capacity disclosure that distinguishes operating / under construction / future. No TCV-vs-recognized-revenue conflation (heuristic 9). Mature DC-REIT disclosure quality."
+    },
+    {
+      "claim_id": "DLR-3",
+      "claim_text": "Oracle = #2 customer at $424M ARR (9.0%), 42 locations, 10.2yr WALT.",
+      "severity": "PASS",
+      "supports": [
+        "Oracle is named explicitly (not behind 'Global Cloud Provider' descriptor).",
+        "Oracle 10-Ks (FY19-FY25, 7 filings) mention 'colocation' in their data-center capacity discussion — counterparty-side language consistent with leasing relationship.",
+        "$424M ARR at the customer's $50B+ revenue level is not individually material to Oracle (~0.8%), so heuristic 7 absence-of-named-disclosure threshold is NOT triggered.",
+        "WALT 10.2yr indicates definitive lease, not MOU."
+      ],
+      "M_check": "edgar_fts.query_fulltext(search_term='Digital Realty', cik=ORCL); edgar_fts.query_fulltext(search_term='colocation', cik=ORCL)",
+      "M_value": "DLR-name hits in ORCL: 0; 'colocation' hits in ORCL: 8 (FY18-FY25 10-Ks)",
+      "interpretation": "Hyperscalers generally do not name landlords in 10-K (commercially confidential); Oracle's repeated colocation discussion is the expected corroboration. Below counterparty-disclosure threshold of heuristic 7."
+    },
+    {
+      "claim_id": "DLR-4",
+      "claim_text": "Meta Platforms = #8 customer, 49 locations, $73.5M ARR (1.6%), 2.8yr WALT.",
+      "severity": "PASS",
+      "supports": [
+        "Meta named explicitly with location count and WALT.",
+        "$73.5M ARR is tiny relative to Meta capex; far below disclosure-materiality threshold under heuristic 7.",
+        "Shorter WALT (2.8yr) consistent with Meta's stated build-own preference for new sites with colocation as bridging capacity."
+      ],
+      "M_check": "edgar_fts.query_fulltext(search_term='Digital Realty', cik=META)",
+      "M_value": "0 hits — below materiality threshold; expected null result.",
+      "interpretation": "Per calibration heuristic 7 exception: counterparty-side absence not a red flag when claim sub-threshold. PASS."
+    },
+    {
+      "claim_id": "DLR-5",
+      "claim_text": "Largest customer (unnamed 'Fortune 50 Software Company') = 11.7% of ARR, $547M, 76 locations, 9.4yr WALT.",
+      "severity": "PASS",
+      "supports": [
+        "Disclosed as 'Fortune 50 Software Company' descriptor (commonly understood = Microsoft) — consistent with hyperscaler-customer NDAs.",
+        "11.7% concentration is disclosed transparently (not hidden behind aggregate buckets).",
+        "9.4yr WALT signals definitive long-term lease, not MOU; not subject to heuristic 3 stage-ladder concern.",
+        "Cross-checks: MSFT, AMZN, GOOGL 10-Ks have 0 hits for 'Digital Realty' — but per heuristic 7 hyperscalers routinely do not name landlords in 10-K narratives even when leases are material to DLR side; absence on counterparty side is consistent with industry norm, not a contradiction.",
+        "DLR has aggregate lease-distribution disclosures (>1MW deployments = 59.7% of ARR) and lease-expiration ladder that reconciles to the customer table."
+      ],
+      "M_check": "edgar_fts.query_fulltext(search_term='Digital Realty', cik=MSFT/AMZN/GOOGL)",
+      "M_value": "MSFT:0, AMZN:0, GOOGL:0, META:0",
+      "interpretation": "Counterparty-side silence on landlord identity is the industry norm; absence does not contradict an existing operational lease relationship. Sub-threshold under heuristic 7 (hyperscaler 10-K capex commentary references unnamed colocation providers, not specific landlords). PASS — but flagged as a structural disclosure-blind spot inherent to the AI-DC space."
+    },
+    {
+      "claim_id": "DLR-6",
+      "claim_text": "Jan 2024 Blackstone JV: 4 hyperscale campuses, 10 data centers, ~500 MW, $3.0B Phase 1 cost; DLR retained 20%.",
+      "severity": "PASS",
+      "supports": [
+        "Counterparty Blackstone (CIK 0001393818) filed an 8-K dated 2024-01-25 with an exhibit confirming the Digital Realty JV — independent EDGAR corroboration from the named partner.",
+        "DLR 10-K transparently splits Phase 1 / Phase 2, identifies proceeds ($231M + $385M), discloses gain/loss on derecognition.",
+        "$3.0B development cost is properly tagged as future investment, not current revenue (heuristic 9 satisfied)."
+      ],
+      "M_check": "edgar_fts.query_fulltext(search_term='Digital Realty', cik=BX)",
+      "M_value": "1 hit: BX 8-K dated 2024-01-25 (accession 0001193125-24-014831)",
+      "interpretation": "Strong bi-directional corroboration of named partnership claim. Clean disclosure with proper accounting splits."
+    },
+    {
+      "claim_id": "DLR-7",
+      "claim_text": "Cash $3.45B; total debt $18.56B (78% fixed-rate incl swaps); FY26 capex guide $3.25-$3.75B.",
+      "severity": "PASS",
+      "supports": [
+        "DLR is investment-grade rated, has $4.5B undrawn Global Revolving Credit Facility maturing 2029.",
+        "Net debt / 2025 Adj EBITDA target ratio 5.5x with floating-rate cap at 20% — standard mature REIT capital structure.",
+        "DLR raised $4.8B equity capital 2024-2025; balance-sheet capacity easily covers $3.5B/yr capex plan.",
+        "No distress markers (no Form 15, no reverse split, no going-concern qualifier, no large dilutive convertible)."
+      ],
+      "M_check": "Internal MD&A + EDGAR filings index review",
+      "M_value": "Investment grade; ample revolver; no distress markers",
+      "interpretation": "Per heuristic 10, none of the delisting / going-concern fingerprints present. Mature scaled REIT with predictable lease-based cash flows. PASS."
+    },
+    {
+      "claim_id": "DLR-8",
+      "claim_text": ">3,500 MW future capacity in land bank, including >1,000 MW developable in Northern Virginia.",
+      "severity": "PASS",
+      "supports": [
+        "Land-bank claim is supported by 9.7M sq ft active development + 4.7M sq ft held-for-development in the Item 2 property table, which is metro-by-metro itemized.",
+        "Northern Virginia portfolio alone = 16 owned + 15 unconsolidated buildings with 3,581k + 5,200k sq ft, plus 2,325k + 309k sq ft held/active development — physically consistent with >1,000 MW build potential at modern DC density.",
+        "Patent corroboration: USPTO ODP returns 3 granted patents (Pervasive Data Center Architecture) — light estate, expected per heuristic 8, not a red flag."
+      ],
+      "M_check": "uspto_odp.query_assignee(assignee_name='Digital Realty')",
+      "M_value": "3 granted patents (PDx architecture)",
+      "interpretation": "Land/MW math reconciles with itemized property table. No conflict between marketing language and audited disclosures. PASS."
+    }
+  ]
+}

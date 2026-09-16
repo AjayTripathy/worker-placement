@@ -1,0 +1,157 @@
+# PITCH — RELY — VERDICT
+**PROPOSED — PENDING ADJUDICATION** — minimum half-starter (0.50% of book) at/below $22.50 with hard gated adds; the expected-value line is dead flat versus the tape, so this is a foot-in-the-door, not a conviction buy.
+
+---
+
+## What we believe
+
+Remitly is a healthy digital remittance operator that the tape is de-rating for growth deceleration, not for damage. Revenue is still growing ~20% with a Q3 guide of $505–507M and an FY26 guide of $1.978–1.988B. Unit economics got *better*, not worse, in the quarter the bears call a price war: transaction margin dollars grew +25% against revenue +20%, send volume per active customer set a record (~$2.3k, +6% y/y), and management's own disclosed take rate was 2.11%. The US send side — the epicenter of the immigration-crackdown and 1%-excise-tax fear — grew +24% versus +18% for the rest of the world. Profitability guidance moved up in *rate* terms, from "approximately 19%" FY adjusted-EBITDA margin at Q1 to $410–415M on ~$1.983B, about 20.8% ([company Q1 release, ir.remitly.com](https://ir.remitly.com/news-releases/news-release-details/remitly-reports-record-first-quarter-results-and-raises-full)).
+
+At $22.23 and ~220M diluted shares that is about a $4.9B cap, roughly 11.8x FY26 guided adjusted EBITDA *before* stock comp and roughly 24–29x after it. That is a fair-to-cheapish multiple for a 20% grower with expanding margin dollars. It is not a distressed multiple, and we are not going to pretend it is.
+
+## What the market believes
+
+The market believes two things at once, and both are defensible. First, the growth ladder is broken: y/y revenue went 34% → 34% → 25% → 20%, with the Q3 guide at 20–21% and the FY math implying ~19% in Q4. Second, the second half is a margin step-down: H1 adjusted EBITDA was $216.3M (22.8% margin) and the FY guide implies roughly $196–200M in H2 on ~$1.035B, about 19.3% — call it 350bp half-over-half.
+
+The street's *numbers* are our numbers. FY26 consensus revenue of $1.97–1.99B is simply the guidance. Sell-side price targets cluster at $26.50–$32.22, all above the tape, so the disagreement between us and the street is not about estimates — it is about the multiple. The market is also carrying, correctly, that the headline Q2 net income of $205.9M included a $140.6M discrete tax benefit, that stock comp ran ~$62M in Q2 (~12.5% of revenue, ~54% of adjusted EBITDA), and that operating cash flow got easier-looking because customer-fund flows were reclassified from operating to financing ([Q2 8-K earnings release, sec.gov](https://www.sec.gov/Archives/edgar/data/1782170/000162828026053361/rely2q26-earningspr.htm)).
+
+## Why we might have edge
+
+1. **The bear signature is a denominator artifact and we can show it.** Falling take rate plus faster-growing transaction margin dollars plus record volume per customer is a funding-mix and ticket-size shift (bank-funded, higher-ticket senders), not price compression. Whoever is selling this as disintermediation-by-price is reading the wrong line.
+2. **Arithmetic nobody publishes.** The H2 "compression" is versus an easier-looking H1, but H2'26 adjusted EBITDA of ~$196M against ~$132M a year ago is still ~+48% y/y. Half-over-half compression and y/y expansion are both true; only the first one gets quoted.
+3. **Corridor decomposition.** Mexico industry data for 1H26 was +3.1% in dollars with transaction counts −1.8% and average ticket $386 → $405. Remitly grew actives +20% and US revenue +24% into a shrinking-count market. That is share gain, and most readers of the Banxico headline will draw the wrong conclusion in either direction.
+4. **Classification error.** RELY carries SIC 7389 and a consumer-discretionary tag, which is why our own detector library fired almost nothing useful on it. Mis-shelved names are systematically under-covered by mechanical screens.
+
+## Why it might be priced in
+
+Bluntly: mostly, it is. Our FY26 number equals guidance equals consensus. Nine of ten sell-side targets sit above the tape, so "cheap versus street" is not a private observation. The re-rating claim is a *multiple* claim with no catalyst that the street doesn't already have on its calendar. The stock is −19.1% off its 52-week high but **+84.0% off its low** after a +39.7% April, so the "dislocation" framing flatters a momentum de-rate. Crowding is a sizing-and-timing input for us, never a rejection — but it is a real one here, and it is why this is a half starter rather than a full one.
+
+## What could go wrong
+
+**Failure narrative 1 — The excise-tax comp (has a tripwire, but a late one).** The 1% US excise tax on cash remittances, effective 2026-01-01, penalized a *rival channel* and pushed senders into digital. Management attributed Q1 and Q2 outperformance to "regulatory shifts toward digital remittances." That means a one-off channel migration is sitting *inside* the growth rate, and it anniversaries in Q1'27 — a quarter that also loses the elevated tax-refund demand tailwind. If FY27 is framed at 12–14% growth instead of ~18%, this multiple is not cheap, it is correct. Tripwire: FY27 framing (Feb 2027) and Q1'27 actuals. That is 5+ months of carry before the bell rings. This is the single best piece of work either bench produced and our original brief never priced it.
+
+**Failure narrative 2 — The mix story turns into the price story (tripwire exists and is near).** If take rate drops below 2.00% *and* transaction margin dollars stop outgrowing revenue, the mix defense collapses and the price-war read becomes the right read. Tripwire: Q3 take rate and transaction-margin disclosure on the print. Cut rule, not a trim rule.
+
+**Failure narrative 3 — NO MONITORABLE TRIPWIRE.** We cannot explain the 09-04 → 09-11 drawdown (about −8.9% in a day, ~−17% over five sessions). There is no 8-K, no PR, and no company event in the pack window. The candidate causes — a factor/momentum unwind, a large holder de-risking behind the five Form 144s filed 08-25 → 09-09, an index or basket flow, or a private read by someone with better corridor data than we have — are **not separable with any sensor we own**. If the cause is information we don't have and can't subpoena, our entry is simply early into someone else's distribution.
+**Unknown-unknown class named: UNOBSERVED SELLER MANDATE** — a holder-side liquidation or mandate change (fund closure, risk-limit breach, factor-model exit, 10b5-1 program acceleration) whose existence is only visible after the fact in 13F/Form 4 lags. There is no pre-event instrument for it. Adjacent named class: **PRIVATE-CORRIDOR INFORMATION ASYMMETRY** — someone with real-time corridor pricing sees a competitor's price cut before it reaches a filing.
+
+**Reflexive / structural leg.**
+- *Our own size vs liquidity:* we are proposing 0.50% of book with adds to a 2.00% cap. On a $50M book that is a $250k initial clip, ~11k shares at $22.23, and ~$1.0M / ~45k shares fully built. **We did not pull ADV — the IBKR bars rail was offline on both benches.** Estimated ADV 3–5M shares/day from a $4.9B mid-cap with active options interest, which would put a full build at roughly 1% of one day's volume. That is immaterial to price and we do not have a reflexivity problem of our own making. If real ADV comes back under 500k shares, the sizing cap must be cut; that is a drain-queue item, not an assumption.
+- *Predicted flow against us:* five Form 144s in 16 days plus serial Form 4s, under a CEO who took over 2026-02-19, while management guides H2 margin down. Intent is UNVERIFIED and 10b5-1 programs explain most insider selling most of the time. Offsetting: the issuer bought back ~4M shares YTD ($21M in Q2) — but $21M/quarter is about a third of quarterly stock comp of ~$62M, so **net dilution continues**. Diluted shares went 175M → 219M over eight quarters. The buyback is a bid, not a shrink.
+- *Doctrine interactions:* (a) DIVERGENCE-NOT-COVERAGE — consensus crowding sizes us down, it never rejects; that doctrine is the only reason this deck isn't a REJECT, and it cuts both ways because it lets a no-edge trade survive as a small one. (b) PRINT PROXIMITY — the 2026-11-04 date is yfinance-derived and UNCONFIRMED; last confirmed print was 2026-08-05. At ~37 sessions out we are outside the 5-day window, so no print-decisive reconstruction is mandatory — meaning we are sizing in the dark on the most important resolver. (c) NO-NET-CASH-CREDIT — balance-sheet cash is largely customer funds and permissible-investment collateral for money-transmitter licenses, so none of it nets against the multiple; the exact split is unverified.
+
+If this position loses money, the most likely reason will be that the 2026 growth rate was rented from a policy-driven channel shift that anniversaries in Q1'27, and we paid a 20%-grower multiple for a 13%-grower — with the 09-04→09-11 seller, whose identity we never established, having known it first.
+
+## What we checked ourselves
+
+| Claim | How checked | Found | Confirmed? |
+|---|---|---|---|
+| Tape is "$22.00, −19.9% off high, +82.1% off low" (RED BENCH) | Compared to evidence pack | Pack says **$22.23, −19.1%, +84.0%**. Red accused the brief of off-pack tape while quoting off-pack tape itself | **NO — our own red bench erred** |
+| Q2 take rate 2.06%, −5.5% y/y (RED BENCH) | Company Q2 call/slides | CFO stated **2.11%**; red divided revenue by a rounded "$24B" when actual send volume was $23.5B. Red's own reversal bar was "take rate ≥2.05%" — already met | **NO — our own red bench erred, and its own kill switch was already reset** |
+| "RPAC mid-to-high-single-digit" is transcript-only, so VENUE-DIVERGENT (RED BENCH) | Company Q2 deck | The figure is forward guidance in the company's own deck; the brief's attribution stands | **NO — bench error** |
+| "The raise is beat flow-through, not a rate improvement" (RED BENCH) | Guide-to-guide comparison | FY adj-EBITDA guide went $370–385M → **$410–415M**; FY margin framing ~19% → ~20.8%. That is a ~180bp rate raise | **NO — bench error; partially overturned** |
+| Insider supply is the whole flow picture (RED BENCH) | Pack filings + Q2 PR | Red omitted the issuer buyback (~4M shares YTD, $21M in Q2) | **NO — material omission** |
+| App-review fade is "adverse to the brief" (RED BENCH) | Detector re-read | MX 4.58 recent vs 4.868 lifetime at 1.67 reviews/day is noise, and 4.58/5 is excellent in absolute terms; US storefront returned nothing | **NO — over-read; reduced to NOT-FIRED** |
+| Blue's per-share and multiple math | Blue's own caveat | All of it rests on an **assumed ~220M share count** with no 10-Q pull; blue flagged this itself | **Partially — our own blue bench's math is unverified at the denominator** |
+| H2'26 adj EBITDA level | Both benches' arithmetic | Red $200M / 19.3%; blue $196M / ~19%. Close but not identical — neither reconciled to the other | **Partially — unreconciled ±$4M between our own benches** |
+| Evidence-pack XBRL is usable for SBC/share/OCF math | Inspected the series | Newest row is **Q2 2025**, and the series skips December quarters entirely. Pack instruction to "use THESE" is wrong for this name | **NO — pack defect; both benches correctly superseded it with company primaries** |
+| Deceleration ladder 34%→34%→25%→20%→~20%→~19% | PRs + guidance arithmetic | Confirmed, but the curve **flattens** at 19–21% rather than continuing down | **YES (severity reduced)** |
+| H2 margin ~350bp below H1 | Guidance arithmetic | Confirmed. Also confirmed that H2 is still ~+48% y/y | **YES (both legs)** |
+| $205.9M net income includes $140.6M discrete tax benefit | 8-K PR | Confirmed. Note: the brief never leaned on net income | **YES (but non-load-bearing)** |
+| OCF/FCF basis shift | PR footnote | Customer-fund components reclassified operating → financing. FCF "tripling" is partly definitional | **YES** |
+| Banxico "six straight months of improvement" confirms the corridor | Banxico via press | 1H26 +3.1% in **dollars**, transactions **−1.8%**, ticket $386→$405. The brief's "corridor confirms" was sloppy; red's correction was right | **NO — our brief erred; red's correction sustained** |
+| Excise tax was pure damage-vector-refuted | Q1'26 and Q2'26 calls | It was a **tailwind** from a rival-channel penalty; company-sourced. Anniversaries Q1'27 | **YES — sustained and strengthened against us** |
+| Transaction margin dollars +25% vs revenue +20% | Q2 call | Confirmed — the cleanest refutation of disintermediation-by-price | **YES** |
+| US +24% vs RoW +18% | Q2 call | Confirmed — the "damaged" geography is the faster one | **YES** |
+| No estimate divergence from street | Consensus aggregators | Confirmed: FY26 street $1.97–1.99B = guidance = ours; PTs $26.50–32.22 | **YES — fatal to estimate edge, not to the company** |
+| Seasonality shape | Attempted | **Tool absent on both benches.** Hand-computed sequentials show no strong shape — that is not a substitute for the check | **NO — mandatory check not run** |
+| Short interest / crowding / ADV | Attempted | discovery_state and IBKR bars offline on both benches | **NO — not run** |
+| Cause of the 09-04→09-11 drawdown | Pack filings scan | No 8-K or PR in the window. Only 144/Form 4 supply | **NO — unresolved** |
+| Lockup overhang | lockup_expiration_calendar | NOT-FIRED: IPO 2021, no follow-on in pack. The 144 cluster is a different mechanism | **YES (no lockup)** |
+| Detector library coverage | Full dispatch review | Most matches were physical-goods/beauty/construction connectors from a wrong SIC tag. Almost no operational ground truth on this name | **Confirmed as a reportable coverage gap** |
+
+## PROPOSED ENTRY BANDS
+
+All levels are derived from the benches' own arithmetic: FY26 guided adjusted EBITDA $415M ÷ ~220M diluted shares = **$1.886 of EBITDA per share (pre-SBC)**. So each multiple turn is worth about $1.89 of stock.
+
+| Action | Level / condition | Multiple math | Size |
+|---|---|---|---|
+| **Starter (now)** | Buy at **≤ $22.50** (tape $22.23) | ~11.8x FY26 pre-SBC | **0.50% of book** (half the intended starter) |
+| **Add 1 — corridor gate** | Banxico ~2026-10-01 shows **transaction counts flat-to-positive y/y**, price ≤ $23.50 | pays up to ~12.5x on confirmed corridor | +0.50% |
+| **Add 2 — print gate** | Q3 (≈2026-11-04): **take rate ≥ 2.10%** AND transaction margin dollars still growing faster than revenue | the mix-not-price test, re-run | +0.75% |
+| **Add 3 — valuation gate** | **$18.50–19.00** on no adverse fundamental news (i.e. tape only) | ~9.8–10.1x pre-SBC | +0.50%, cap total at **2.00%** |
+| **Trim** | **$26.50+** (the *lowest* street PT) | ~14.0x pre-SBC | trim one third |
+| **Trim** | **$28.00+** before FY27 framing exists | ~14.8x, pays for growth we can't yet underwrite | trim to starter |
+| **CUT (thesis break, not a stop)** | Take rate **< 2.00%** with transaction margin growth **≤** revenue growth | mix defense is gone | exit in full |
+| **CUT (framing break)** | FY27 revenue framed **below ~15%** growth without a stated offset for the excise comp | 20%-grower multiple is wrong | exit in full |
+| **Review, do not auto-sell** | **< $17.50** with still no explainable cause | ~9.3x | halve and write the post-mortem on the unobserved-seller class |
+
+**Catalyst dates:** Banxico monthly remittances ~**2026-10-01** (demand *both* dollars and transaction counts — dollars alone is not a confirm); Q3'26 print **2026-11-04 — UNCONFIRMED**, yfinance-derived, no company PR or 8-K names it, last confirmed print 2026-08-05; Q3 10-Q roughly **2026-11-13** (customer-funds split, share count, SBC trajectory); excise-tax anniversary **2027-01-01** with the comp landing in the Q1'27 print (~May 2027); FY27 guidance framing at the Q4 print (~Feb 2027).
+
+**Minority position on the record:** the red bench recommends **FLAT until 2026-10-01**, on the grounds that our number equals guidance equals consensus and management has already guided H2 margin down. Given the EV line below, that position is not unreasonable and the adjudicator should see it as a live option.
+
+## ARMED SENSORS
+
+(armed provisionally with this deck; session adjudication ratifies)
+
+- price alert: fires below 17.5 (deck-provisional: ~9.3x; halve and write the unobserved-seller post-mortem if cause still unknown)
+- filing watch: 8-K until 2027-03-10 (deck-provisional: Any 8-K covering or after the 09-04 to 09-11 drawdown rewrites the cause-check, which is currently unr)
+- dated pack RELY|2026-10-01: RELY: Banxico monthly Mexico remittances - demand transaction counts and average ticket, not dollars alone (date confirmed=False)
+- dated pack RELY|2026-11-04: RELY: Q3 2026 print - yfinance-derived, UNCONFIRMED by any company PR or 8-K; last confirmed print was 2026-08-05 (date confirmed=False)
+- dated pack RELY|2026-11-13: RELY: Estimated Q3 10-Q filing - customer-funds split, share count, SBC (date confirmed=False)
+- dated pack RELY|2027-01-01: RELY: One-year anniversary of the 1% US excise tax on cash remittances; the channel-shift tailwind rolls off (date confirmed=False)
+- dated pack RELY|2027-02-15: RELY: Estimated Q4/FY26 print with first FY27 guidance framing - the excise-comp quantification gate (date confirmed=False)
+
+
+## What remains unverified
+
+1. **Q3'26 take rate and transaction margin dollars.** Not drainable now — gated to the print (~2026-11-04, itself unconfirmed). Estimate: take rate **2.05–2.12%**, p(≥2.10%) ≈ 0.55; p(margin dollars still outgrowing revenue) ≈ 0.60, based on the Q2 print (2.11%, +25% vs +20%) and the stated bank-funded/high-ticket mix shift continuing.
+2. **Banxico August/September Mexico transaction counts.** Not drainable now — release ~2026-10-01. Estimate: **−2.5% to +1.0% y/y**, p(flat-to-positive) ≈ 0.40, from the 1H26 run rate of −1.8% with a decelerating decline.
+3. **Customer-funds vs. corporate-cash split on the balance sheet.** Drainable now via a Q2'26 10-Q / XBRL pull. Until pulled, we assume **zero** net cash credit in all per-share math.
+4. **Post-Q2'26 diluted share count.** Drainable now via XBRL; the evidence pack tops out at Q2 **2025**. Every multiple in this deck assumes ~220M. Estimate: **219–224M**, from 218.98M at Q2'25 plus ~1.5–2.5M/quarter net issuance minus ~4M buyback.
+5. **Cause of the 09-04 → 09-11 drawdown.** Not drainable — no 8-K, no PR, and holder-side data lags. Estimate: p ≈ 0.55 factor/momentum de-rate with no company event, p ≈ 0.30 a single holder de-risking behind the 144 cluster, p ≈ 0.15 an informed private read. **Unknown-unknown class: UNOBSERVED SELLER MANDATE.**
+6. **Intent behind the five 144s and the Form 4 cluster.** Not drainable — 10b5-1 plan adoption dates are not in the pack. Estimate: p ≈ 0.75 routine pre-scheduled program (base rate for post-IPO founder/exec selling), p ≈ 0.25 discretionary. Aggregate share count of the cluster: **not yet counted** — that is a one-hour job nobody did.
+7. **Short interest, crowding, and ADV.** Drainable now via IBKR / discovery_state. Estimate ADV **3–5M shares/day**, short interest **4–8% of float**, from comps at similar cap and float.
+8. **Whether a liquid options chain exists and where chain-level IV sits.** Drainable now via IBKR. Estimate: a chain almost certainly exists at this cap; 30-day chain-midpoint IV **45–65%**, p(chain-level IV below the 45.6% the table implies) ≈ 0.30.
+9. **FY27 revenue and margin framing, and whether management quantifies the excise-tax comp.** Not drainable — company event, ~Feb 2027. Estimate: initial FY27 revenue framing **14–18%** growth, p(explicit quantification of the channel-shift comp) ≈ 0.35.
+10. **Seasonality shape of the business.** Drainable now via desk/seasonality.py. Estimate: mild Q4/Q1 remittance seasonality (holiday and tax-refund driven), ±3% sequential effect, from industry base rates.
+11. **FY26 SBC as a percent of revenue.** Partly gated. Management guides it **down** as a percent of revenue and calls Q2 the elevated quarter (leadership-change grants, hiring shift, prior-year forfeiture comp). Estimate: FY26 SBC **$205–225M**, 10.3–11.3% of revenue, from Q2's ~$62M annualized and discounted for the stated one-offs.
+
+## PRIZE TABLE + VOL READ
+
+Both benches wrote "PRIZE TABLE: N/A — revenue-generating operator, not a pre-revenue project developer." That is the wrong test. The trigger is a genuinely time-gated or private unverified item, and items 1, 2, 5, 6 and 9 above are exactly that. So we build it. **Anchor-and-adjust: anchor is the tape at $22.23 and the street PT band of $26.50–$32.22; we adjust down from the PT band because the PT band and our estimates come from the same guidance.**
+
+Horizon: to the Q3 print, ~54 days, T = 0.148 years. Prices are FY26 guided adjusted EBITDA per share of $1.886 × a multiple.
+
+| # | Scenario | p | Price | Multiple (pre-SBC) | p × price |
+|---|---|---|---|---|---|
+| A | Both gates pass: Banxico counts flat-to-positive, Q3 take rate ≥2.10% with margin dollars still leading, FY guide nudged again | 0.35 | **$26.50** | ~14.0x | 9.275 |
+| B | Muddle: guide met, ~19–21% growth confirmed, H2 margin as advertised, no re-rate, FY27 still unframed | 0.35 | **$22.50** | ~11.9x | 7.875 |
+| C | Excise-comp fear prices in and/or take rate slips toward 2.00% | 0.20 | **$18.00** | ~9.5x | 3.600 |
+| D | Mix defense breaks: take rate <2.00%, margin dollars ≤ revenue growth, FY27 framed low teens | 0.10 | **$15.00** | ~8.0x | 1.500 |
+
+**EV = $22.25 versus a tape of $22.23. Edge = +0.1%. That is nothing.** We are stating that plainly: on our own honest probabilities there is no expected-value case for a full position. The case for the half starter is conditional, not unconditional — the A branch carries the adds, and the starter buys the right to be there without chasing a +18% move. If the adjudicator wants to size this purely off EV, the correct size is zero.
+
+**Table dispersion:** σ_table = **$3.90** = **17.6% of spot** over 54 days, which annualizes to **45.6%** (17.6% ÷ √0.148).
+
+**Bimodality:** the table is fork-dated — it resolves at two separate points (~10-01 corridor data, then ~11-04 print). The A vs. C/D branches are genuinely separated, with B as a broad middle; distribution is mildly bimodal with fat left tail rather than lognormal. A single-strike option structure would misprice that.
+
+**Expression math (candidate strikes priced off the table itself):**
+- C_ours(K = $22.50) = Σ pᵢ × max(Sᵢ − K, 0) = 0.35 × $4.00 = **$1.40**
+- C_ours(K = $25.00) = 0.35 × $1.50 = **$0.525**
+- Both are undiscounted terminal expectations from a four-point table, so they **understate** true option value by omitting all within-branch diffusion. Treat them as floors.
+
+**IV vs RV, and the instrument decision:** **no options chain existed in either bench's inputs** — no strikes, no midpoints, no IV percentile, no realized-vol series. We therefore **cannot** complete the comparison, and we will not substitute the aggregate underlying IV feed for chain-level midpoints. That feed diverges from the chain badly and we have been burned by exactly this (TSSI: 71 vs 101). The VRP (IV − RV) is **UNCOMPUTED**, and the IV percentile is **UNCOMPUTED**.
+
+What the arithmetic *does* output, with the chain missing:
+- Table-implied vol is **45.6%** annualized. **Decision rule, pre-committed:** if chain-midpoint 45-60 DTE IV prints **below ~40%**, the table says options are cheap relative to our own dispersion and the gated adds may be expressed as Nov/Dec $22.50 calls versus a $1.40 model floor. If chain-midpoint IV prints **above ~55%**, premium is rich relative to our dispersion and the gated adds route to the premium-selling gates — cash-secured puts struck at the $18.50–19.00 add band, which is where we want to be long anyway.
+- **Because the chain is absent, the output of this arithmetic is: COMMON STOCK, small.** No calls, no covered calls, no cash-secured puts, until a chain-level pull exists. An instrument recommendation that can't show its own inputs is not a recommendation.
+- Also against options here: EV edge is ~zero and the distribution is bimodal across two resolution dates. Cheap-IV call expression requires an edge to lever; we don't have one yet.
+
+**TAX OVERLAY.** The loss branch (C/D, combined p = 0.30) must land in the intended tax year. If 2026 is a harvest year for this book, any expression must resolve by **2026-12-31** — that admits Nov 2026 and Dec 2026 expiries and **excludes January 2027 and later**, which would defer the loss into 2027. Note the ugly interaction: the *largest* unverified item (FY27 framing and the excise comp, item 9) resolves in **February 2027**, i.e. structurally outside any 2026-harvest-compatible option expiry. So the trade whose main risk is a 2027 event cannot be expressed in a 2026-expiring option without accepting a timing mismatch. The carve-out requires the edge to numerically dominate; with EV edge at +0.1%, **it does not**. Long stock, which realizes its loss whenever we choose to sell, is the tax-correct instrument here — and that is the second independent reason the answer is stock, not options.
+
+---
+
+```json
+{"price_gates": [{"level": 22.50, "direction": "below", "basis": "Starter zone, ~11.8x FY26 guided adj EBITDA pre-SBC on ~220M shares"}, {"level": 23.50, "direction": "below", "basis": "Max pay-up for Add 1 if Banxico ~10-01 shows transaction counts flat-to-positive"}, {"level": 19.00, "direction": "below", "basis": "Add 3 valuation gate, ~10.1x pre-SBC, only if no adverse fundamental news"}, {"level": 17.50, "direction": "below", "basis": "~9.3x; halve and write the unobserved-seller post-mortem if cause still unknown"}, {"level": 26.50, "direction": "above", "basis": "Lowest street PT and ~14.0x pre-SBC; trim one third"}, {"level": 28.00, "direction": "above", "basis": "~14.8x prices FY27 growth we cannot underwrite before Feb-2027 framing; trim to starter"}], "event_gates": [{"forms": ["8-K"], "why": "Any 8-K covering or after the 09-04 to 09-11 drawdown rewrites the cause-check, which is currently unresolved"}, {"forms": ["8-K", "EX-99.1"], "why": "Q3 print date confirmation and the take-rate / transaction-margin-dollar disclosure that is the cut trigger"}, {"forms": ["10-Q"], "why": "Customer-funds vs corporate-cash split, post-Q2 diluted share count, SBC trajectory - all three underpin every multiple in this deck"}, {"forms": ["4", "144"], "why": "Escalating insider supply under a six-month-old CEO; cluster share count never sized"}, {"forms": ["8-K"], "why": "Item 5.02 management change or any guidance revision; FY27 framing is the largest unpriced risk"}], "catalyst_dates": [{"date": "2026-10-01", "what": "Banxico monthly Mexico remittances - demand transaction counts and average ticket, not dollars alone", "confirmed": false}, {"date": "2026-11-04", "what": "Q3 2026 print - yfinance-derived, UNCONFIRMED by any company PR or 8-K; last confirmed print was 2026-08-05", "confirmed": false}, {"date": "2026-11-13", "what": "Estimated Q3 10-Q filing - customer-funds split, share count, SBC", "confirmed": false}, {"date": "2027-01-01", "what": "One-year anniversary of the 1% US excise tax on cash remittances; the channel-shift tailwind rolls off", "confirmed": false}, {"date": "2027-02-15", "what": "Estimated Q4/FY26 print with first FY27 guidance framing - the excise-comp quantification gate", "confirmed": false}], "immediate_entry": {"action": "BUY", "approx_price": 22.23, "size_pct_of_book": 0.5, "basis": "Half the intended starter; EV line is flat (+0.1%) so this buys optionality on the gated adds, not conviction"}, "unverified": [{"item": "Q3 2026 take rate and transaction margin dollars - the cut trigger", "instrument": "Q3 print 8-K / EX-99.1 and earnings call, est 2026-11-04 (date unconfirmed)", "drainable_now": false, "estimate": {"range": "take rate 2.05-2.12%; margin dollars +22-27% y/y", "basis": "Q2 2026 printed 2.11% with margin dollars +25% vs revenue +20%; bank-funded/high-ticket mix shift assumed to persist", "p": 0.55}}, {"item": "Banxico Aug/Sep Mexico remittance TRANSACTION COUNTS (not dollars)", "instrument": "Banxico monthly remittance release ~2026-10-01", "drainable_now": false, "estimate": {"range": "-2.5% to +1.0% y/y counts", "basis": "1H26 industry counts -1.8% y/y with decelerating decline; May 2026 -1.7%", "p": 0.40}}, {"item": "Customer-funds vs corporate-cash split on the balance sheet", "instrument": "XBRL pull / Q2 2026 10-Q", "drainable_now": true, "estimate": null}, {"item": "Post-Q2 2026 diluted share count (pack XBRL stops at Q2 2025)", "instrument": "XBRL pull on dei/us-gaap diluted shares, Q2 2026 10-Q", "drainable_now": true, "estimate": {"range": "219-224M diluted shares", "basis": "218.98M at Q2 2025 plus ~1.5-2.5M/qtr net issuance less ~4M YTD buyback", "p": 0.7}}, {"item": "Cause of the 09-04 to 09-11 drawdown - no 8-K or PR exists", "instrument": "Not drainable: no filing; 13F/Form 4 lags only. Walk-around = broker flow colour", "drainable_now": false, "estimate": {"range": "p 0.55 factor/momentum de-rate, p 0.30 single-holder de-risk behind the 144 cluster, p 0.15 informed private read", "basis": "Base rate for unexplained single-day -8.9% moves in $5B fintech with no filing; UNOBSERVED SELLER MANDATE class", "p": 0.55}}, {"item": "Intent and aggregate share count behind the five 144s and Form 4 cluster", "instrument": "Form 144 body parse for plan adoption dates (partial); IBKR/13F lag for holder side", "drainable_now": false, "estimate": {"range": "p 0.75 routine 10b5-1; cluster size est 0.8-2.0M shares", "basis": "Base rate for post-IPO founder/exec 10b5-1 programs; five 144s in 16 days at typical clip sizes", "p": 0.75}}, {"item": "Short interest, crowding and ADV - blocks the reflexivity check and the 2.00% size cap", "instrument": "IBKR / discovery_state short-interest and bars pull", "drainable_now": true, "estimate": {"range": "ADV 3-5M shares/day; short interest 4-8% of float", "basis": "Comps at ~$4.9B cap with similar float and options activity", "p": 0.6}}, {"item": "Whether a liquid options chain exists and chain-level midpoint IV / IV percentile / RV", "instrument": "IBKR options chain pull - chain midpoints only, never the aggregate underlying IV feed (TSSI 71 vs 101)", "drainable_now": true, "estimate": {"range": "30-60 DTE chain-midpoint IV 45-65%; table-implied vol is 45.6%", "basis": "sigma_table 17.6% of spot over T=0.148y annualised; comp IV for $5B fintech pre-print", "p": 0.3}}, {"item": "FY27 revenue/margin framing and whether management quantifies the excise-tax comp", "instrument": "Q4/FY26 print and guidance call, est 2027-02-15", "drainable_now": false, "estimate": {"range": "FY27 revenue framing 14-18% growth", "basis": "Q4 2026 implied ~19% exit rate less 300-500bp for the anniversarying channel shift", "p": 0.35}}, {"item": "Seasonality shape - a mandatory check neither bench ran", "instrument": "desk/seasonality.py", "drainable_now": true, "estimate": {"range": "+/-3% sequential seasonal effect, mild Q4/Q1 skew", "basis": "Remittance industry holiday and US tax-refund base rates", "p": 0.5}}, {"item": "FY26 SBC as a percent of revenue and its trajectory", "instrument": "10-Q XBRL ShareBasedCompensation series plus FY guide language on next print", "drainable_now": true, "estimate": {"range": "$205-225M FY26, 10.3-11.3% of revenue", "basis": "Q2 2026 ~$62M annualised, discounted for company-stated one-offs (leadership grants, hiring shift, forfeiture comp)", "p": 0.6}}]}
+```

@@ -1,0 +1,107 @@
+{
+  "ticker": "MRCY",
+  "cutoff": "2026-05-20",
+  "filing": "0001049521-25-000024_10-K.txt",
+  "company": "Mercury Systems, Inc.",
+  "scoring_notes": "MRCY is a Tier-2 supplier; named programs (LTAMDS, KC-46, MH-60R/S, THAAD, SCAR, ADTS) are mostly PROCUREMENT line items, while the J-Book corpus is RDT&E-heavy. KC-46A (RDT&E PE 0401221F) and Electronic Warfare Development (PE 0604270F) are in corpus; LTAMDS/MH-60R-S/THAAD/SCAR/ADTS are not (corpus coverage gap, per J-Book heuristic #7 → UNVERIFIABLE, not red flag). The single PE we could verify (KC-46A) is FUNDED_GROWING, supporting MRCY's claim. CRITICAL CONTEXT: MRCY explicitly discloses no single program is >=10% of revenue, so the divergence-pattern materiality test (#2) does not trigger anywhere even if a program were unfunded.",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "LTAMDS was a top FY2025 revenue growth driver for MRCY.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["pentagon_jbook.query_program_funding"],
+      "M_check": "pentagon_jbook NOT_FOUND on 'LTAMDS' and 'Lower Tier Air and Missile Defense Sensor'. usaspending confirms MRCY DoD relationships incl. radar modulator production.",
+      "M_value": {"jbook_signal": "NOT_FOUND", "n_matches": 0, "usaspending_total_dod": 141929915.94, "usaspending_n_awards": 157},
+      "interpretation": "LTAMDS is a Procurement P-40 line item (Raytheon/RTX prime) likely outside the 410-PE RDT&E-leaning corpus. Per heuristic #7, NOT_FOUND ≠ red flag. Tier-2 supplier role, no >=10% concentration, so even unfunding would not trigger materiality. Coverage gap, not divergence."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "KC-46 was among the largest FY2025 program revenue increases.",
+      "severity": "PASS",
+      "supports": ["pentagon_jbook.query_program_funding"],
+      "M_check": "pentagon_jbook matched PE 0401221F 'KC-46A Tanker Squadrons' with signal FUNDED_GROWING (FY26 AF RDT&E Vol II).",
+      "M_value": {"jbook_signal": "FUNDED_GROWING", "matched_program": "KC-46A Tanker Squadrons", "pe_number": "0401221F"},
+      "interpretation": "Pentagon J-Book directly corroborates the claim. KC-46A program is funded and growing in FY26 budget, consistent with MRCY's narrative of FY25 growth and forward expectation."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "MH-60R/S Seahawk was a top FY2025 revenue growth driver.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["pentagon_jbook.query_program_funding"],
+      "M_check": "pentagon_jbook NOT_FOUND on 'MH-60R', 'MH-60S', 'Seahawk' (3 query variants).",
+      "M_value": {"jbook_signal": "NOT_FOUND", "n_matches": 0},
+      "interpretation": "MH-60R/S is Navy aircraft procurement (Sikorsky/Lockheed). Procurement P-40 line item outside corpus. Per heuristic #7, NOT_FOUND alone is not negative; coverage gap noted."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "THAAD was a top FY2025 revenue growth driver.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["pentagon_jbook.query_program_funding"],
+      "M_check": "pentagon_jbook NOT_FOUND on 'THAAD' and 'Terminal High Altitude Area Defense'.",
+      "M_value": {"jbook_signal": "NOT_FOUND", "n_matches": 0},
+      "interpretation": "THAAD is MDA Procurement (Lockheed prime). Corpus has Aegis BMD / Sea-Based X-Band / LRDR but not THAAD interceptor line. Coverage gap, not divergence. Per heuristic #7, UNVERIFIABLE."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "SCAR and ADTS programs were FY2025 revenue DECLINE drivers (rolling off).",
+      "severity": "UNVERIFIABLE",
+      "supports": ["pentagon_jbook.query_program_funding"],
+      "M_check": "pentagon_jbook NOT_FOUND on 'SCAR' and 'ADTS' (both acronyms — likely Mercury-internal program shorthand for sub-system / Air Defense Test Set or similar).",
+      "M_value": {"jbook_signal": "NOT_FOUND", "n_matches": 0},
+      "interpretation": "This is a DISCLOSED roll-off, not hidden divergence — company is volunteering decline information, which is the OPPOSITE of the j-book-exposure-divergence pattern we look for. Cannot positively verify in corpus; treat as UNVERIFIABLE. Self-disclosure is mildly exculpatory."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "No single program comprised >=10% of MRCY revenue in FY2025 or FY2024.",
+      "severity": "PASS",
+      "supports": ["usaspending.query_dod_contracts"],
+      "M_check": "usaspending shows MRCY received 157 DoD awards totaling $141.9M — diffuse across many awards (top 5 awards: $24.9M, $23.5M, $20.3M, $19.1M, $9.6M; no single award dominates). Top award $24.97M is ~17% of total but spans many years; consistent with 'no program >=10% of FY revenue' against $912M total revenue base.",
+      "M_value": {"usaspending_n_awards": 157, "usaspending_total": 141929915.94, "top_award": 24968371.0, "top_award_share_of_total_revenue": 0.027},
+      "interpretation": "Diffuse customer base confirmed. The single largest DoD award MRCY has ever received is only ~2.7% of FY25 revenue. Concentration claim is credible and orthogonally verified. This is also the KEY DEFENSE against the j-book-divergence thesis: even if specific programs got unfunded, MRCY's diffuse program base limits per-program existential risk."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "MRCY pivoted to full-rate production on 'common processing architecture' programs in FY2025.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["pentagon_jbook.query_program_funding", "usaspending.query_dod_contracts"],
+      "M_check": "pentagon_jbook NOT_FOUND on contractor_name='Mercury Systems'. usaspending confirms 157 awards exist; descriptions include 'RADAR MODULATOR PRODUCTION' (Navy), 'DARPA RESEARCH PROJECT', 'AWARD UNDER THE DIRECT ENERGY' — mix of dev + production consistent with claimed pivot.",
+      "M_value": {"jbook_signal": "NOT_FOUND", "usaspending_top_award_descriptions": ["LABOR FUNDING", "DARPA RESEARCH PROJECT", "RADAR MODULATOR PRODUCTION", "DIRECT ENERGY"]},
+      "interpretation": "Claim refers to internal product architecture (CPA), not a specific PE — by design not testable via J-Book. usaspending shows production-coded awards exist (Navy radar modulator), consistent with the pivot narrative. UNVERIFIABLE but plausibly supported by orthogonal evidence."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "MRCY products are deployed across 300+ programs in 35 countries.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["usaspending.query_dod_contracts"],
+      "M_check": "usaspending shows 157 distinct DoD awards (US only). Foreign Military Sales / commercial subcomponent sales are invisible to usaspending so the '300 programs / 35 countries' figure cannot be confirmed or denied through this M-source.",
+      "M_value": {"usaspending_n_dod_awards": 157},
+      "interpretation": "Marketing-level diversification claim. Cannot rigorously verify number-of-programs metric. No red flag — usaspending count is consistent direction (high diffusion)."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "EW end-application revenue DECLINED $10.3M in FY2025; radar up $67.7M, C4I up $15.1M.",
+      "severity": "PASS",
+      "supports": ["pentagon_jbook.query_program_funding"],
+      "M_check": "pentagon_jbook matched PE 0604270F 'Electronic Warfare Development' with signal FUNDED_GROWING. Federal EW budget is GROWING but MRCY's EW revenue declined — this could be a competitive-position warning (losing share in a growing pocket), but MRCY is small Tier-2 supplier and EW is one of multiple end-applications.",
+      "M_value": {"jbook_signal": "FUNDED_GROWING", "matched_program": "Electronic Warfare Development", "pe_number": "0604270F"},
+      "interpretation": "Mild yellow flag at most: MRCY's EW revenue is shrinking while AF EW Development PE is growing. Magnitude is small ($10.3M, ~1% of revenue) and EW is only one segment of one PE; not material at portfolio level. PASS on directional/material grounds with note."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "MRCY supplies top US/European defense primes (LMT, RTX, NOC, LHX, BA, GD, HON).",
+      "severity": "UNVERIFIABLE",
+      "supports": ["edgar_fts.query_fulltext"],
+      "M_check": "edgar_fts shows ZERO mentions of 'Mercury Systems' in LMT (CIK 936468) or RTX (CIK 101829) SEC filings. This is expected for Tier-2 supplier (primes do not name-check sub-suppliers in 10-Ks) but cannot be positively verified.",
+      "M_value": {"LMT_mentions": 0, "RTX_mentions": 0},
+      "interpretation": "Asymmetric: counterparty silence is normal for Tier-2 suppliers and not a red flag. usaspending separately confirms MRCY does receive DoD prime awards directly, consistent with serving primes (and going direct to government). UNVERIFIABLE through counterparty channel — methodological control claim."
+    }
+  ],
+  "summary": {
+    "n_claims": 10,
+    "n_jbook_grounded_claims": 7,
+    "pentagon_jbook_fired_on": 2,
+    "pentagon_jbook_not_found": 5,
+    "severity_counts": {"PASS": 3, "MODERATE_UNDERDELIVERY": 0, "SEVERE_UNDERDELIVERY": 0, "RED_FLAG_NEGATIVE": 0, "UNVERIFIABLE": 7},
+    "thesis_assessment": "No j-book-divergence pattern detected. All 2 J-Book hits (KC-46A, EW Development) returned FUNDED_GROWING. Remaining 5 J-Book NOT_FOUND results reflect corpus coverage gaps for Procurement P-40 line items (LTAMDS, MH-60R/S, THAAD, SCAR, ADTS) rather than program disappearance. MRCY explicitly discloses no >=10% concentration, neutralizing the materiality dimension of the divergence thesis. Net: framework correctly identifies this as a LOW-DIVERGENCE Tier-2 supplier — no actionable short signal from this filing on the j-book-exposure-divergence pattern."
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "ticker": "FTAI",
+  "cutoff": "2026-05-20",
+  "filing": "0001628280-26-012940_10-K.txt",
+  "cohort": "jbook_exposure_divergence",
+  "extraction_note": "FTAI's 10-K describes a commercial aerospace aftermarket business focused on CFM56-5B / CFM56-7B / V2500 engines powering 737NG and A320ceo aircraft. Despite the cohort metadata flagging 'some military adjacency via leasing structures' and 'LM2500 marine', the FY2025 10-K contains NO specific Pentagon Program Element references, NO named DoD programs of record, NO PE-number citations, and NO DoD-customer revenue concentration disclosures. Customer concentration (13%, 10%, 23% AR) is disclosed only at the Aerospace Products segment level without naming customers. The two prior LM2500-marine and offshore-energy lines are referenced only as legacy/wind-down items in commitments/contingencies. As a result, J-Book-grounded claims are absent and the J-Book divergence pattern is structurally inapplicable to this filing. Claims below capture the narrative drivers actually present (commercial engine MRE, Strategic Capital Initiative, leasing utilization) plus the residual offshore-energy contingency for completeness.",
+  "claims": [
+    {
+      "claim_id": "C1",
+      "claim_text": "FTAI is a leading independent engine maintenance platform focused on the CFM56-5B, CFM56-7B and V2500 commercial aircraft engines powering 737NG and A320ceo aircraft.",
+      "subject": "FTAI Aviation Ltd.",
+      "predicate": "business_focus",
+      "object_value": "CFM56-5B / CFM56-7B / V2500 commercial engines (737NG / A320ceo)",
+      "source_quote": "We are a leading independent engine maintenance platform focused on the CFM56-5B, CFM56-7B and V2500 aircraft engines which power the 737NG and A320ceo aircraft.",
+      "category": "other",
+      "queries": [
+        {"source": "pentagon_jbook", "method": "query_program_funding", "kwargs": {"program_name": "CFM56", "cutoff_date": "2026-05-20"}, "rationale": "Sanity check that the corpus does NOT carry CFM56 / V2500 as DoD program elements (commercial engines)."},
+        {"source": "usaspending", "method": "query_dod_contracts", "kwargs": {"recipient_name": "FTAI Aviation Ltd."}, "rationale": "Test whether FTAI received material DoD obligations at all under this name."}
+      ]
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "As of December 31, 2025, FTAI's Aviation Leasing segment owned/managed 290 aviation assets (47 commercial aircraft + 243 engines), with weighted-average remaining lease terms of 44 months (aircraft) / 38 months (engines) and ~77% utilization in Q4 2025.",
+      "subject": "FTAI Aviation Leasing segment",
+      "predicate": "fleet_composition_utilization",
+      "object_value": "290 assets; 77% utilization Q4 2025",
+      "source_quote": "we own and manage 290 aviation assets, consisting of 47 commercial aircraft and 243 engines ... Our aviation equipment was approximately 77% utilized during the three months ended December 31, 2025",
+      "category": "rollup_thesis",
+      "queries": [
+        {"source": "usaspending", "method": "query_dod_contracts", "kwargs": {"recipient_name": "FTAI Aviation"}, "rationale": "Confirm the leasing fleet is commercial (no DoD lessee disclosure)."}
+      ]
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "The 2025 Partnership under the Strategic Capital Initiative completed its fundraise in October 2025 with $2.0 billion of equity commitments and agreed to acquire 45 on-lease narrowbody aircraft from FTAI for an estimated net purchase price of $549 million.",
+      "subject": "FTAI Strategic Capital Initiative (2025 Partnership)",
+      "predicate": "capital_raised_and_purchase_commitment",
+      "object_value": "$2.0B equity / $549M for 45 aircraft",
+      "source_quote": "The 2025 Partnership completed its fundraise in October 2025 with $2.0 billion of equity commitments. ... the 2025 Partnership agreed to acquire 45 on-lease narrowbody aircraft from us for an estimated net purchase price of $549 million",
+      "category": "rollup_thesis",
+      "queries": [
+        {"source": "edgar_fts", "method": "query_fulltext", "kwargs": {"query": "FTAI Strategic Capital Initiative 2025 Partnership $2.0 billion"}, "rationale": "Counterparty/co-investor disclosure check on the $2B raise."}
+      ]
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "On December 30, 2025, FTAI announced the launch of FTAI Power, a platform focused on converting CFM56 engines to power turbines.",
+      "subject": "FTAI Power",
+      "predicate": "platform_launch",
+      "object_value": "CFM56 to power-turbine conversion platform (announced 2025-12-30)",
+      "source_quote": "On December 30, 2025, the Company announced the launch of FTAI Power, a platform focused on converting CFM56 engines to power turbines.",
+      "category": "other",
+      "queries": [
+        {"source": "uspto_odp", "method": "query_patents", "kwargs": {"assignee": "FTAI Aviation"}, "rationale": "Test whether FTAI holds patents supporting an aero-derivative CFM56 power-turbine conversion claim."}
+      ]
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "FTAI owns and/or leases maintenance facilities in Florida, California, Canada, and Portugal for its Aerospace Products business; ~71% of 494 full-time employees in Canada are covered by collective bargaining agreements.",
+      "subject": "FTAI maintenance footprint",
+      "predicate": "facility_locations",
+      "object_value": "FL / CA / Canada (Montreal area, unionized) / Portugal",
+      "source_quote": "we own and/or lease maintenance facilities in Florida, California, Canada, and Portugal for our Aerospace Products business",
+      "category": "facility",
+      "queries": [
+        {"source": "epa_frs", "method": "query_facilities", "kwargs": {"operator_name": "FTAI Aviation"}, "rationale": "Confirm declared facilities exist on environmental registries (control claim)."}
+      ]
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Within FTAI's offshore energy business, a lessee did not fulfill its obligation under its charter arrangement; range of potential losses is $0.0M to $3.3M and the company believes the risk of loss is remote.",
+      "subject": "FTAI offshore energy legacy",
+      "predicate": "contingent_loss_range",
+      "object_value": "$0.0M-$3.3M; risk of loss remote",
+      "source_quote": "Within the Company s offshore energy business, a lessee did not fulfill its obligation under its charter arrangement, therefore the Company is pursuing rights afforded to it under the charter and the range of potential losses against the obligation is $ 0.0 million to $ 3.3 million.",
+      "category": "other",
+      "queries": [
+        {"source": "edgar_fts", "method": "query_fulltext", "kwargs": {"query": "FTAI offshore energy charter LM2500"}, "rationale": "Test whether the legacy offshore-energy/LM2500 (the cohort-metadata military-adjacency hook) shows up in any forward-looking commitment."}
+      ]
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "As of and for the year ended December 31, 2025, one customer represented 23% of total accounts receivable, net; two customers in the Aerospace Products segment each represented 13% and 10% of total revenue (customers unnamed).",
+      "subject": "FTAI customer concentration",
+      "predicate": "revenue_concentration",
+      "object_value": "23% AR / 13% + 10% Aerospace Products revenue (unnamed)",
+      "source_quote": "there was one customer representing 23% of total accounts receivable, net, and we earned 13% and 10% of total revenue from two customers in the Aerospace Products segment.",
+      "category": "dod_customer_concentration",
+      "queries": [
+        {"source": "usaspending", "method": "query_dod_contracts", "kwargs": {"recipient_name": "FTAI Aviation"}, "rationale": "Determine whether any of the unnamed >=10% customers are DoD-affiliated (would convert this from commercial concentration to a J-Book-relevant claim)."}
+      ]
+    }
+  ]
+}

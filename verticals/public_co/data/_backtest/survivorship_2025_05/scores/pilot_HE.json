@@ -1,0 +1,137 @@
+{
+  "ticker": "HE",
+  "company": "Hawaiian Electric Industries, Inc.",
+  "cutoff": "2025-05-15",
+  "filing": "0000354707-25-000013_10K.txt",
+  "filing_date": "2025-02-24",
+  "cik": "0000354707",
+  "sector": "Utilities",
+  "industry": "Regulated Electric Utility (HECO/Maui Electric/Hawaii Electric Light) + 9.9% retained noncontrolling stake in American Savings Bank (sold 90.1% on Dec 31, 2024)",
+  "group": "control_survivor",
+  "drawdown_context": {
+    "price_2025_05_15": 10.59,
+    "price_2026_05_15": 13.67,
+    "forward_return": 0.2908,
+    "drawdown_2025_05_15": -0.3952,
+    "false_positive_flag": "deterministic_local going_concern_signal = EXPLICIT_GOING_CONCERN (n_matches=14), but qualitative read shows MITIGATED-GC status as of 10-K filing date (Feb 24, 2025). The 14 matches are dominated by risk-factor / forward-looking conditional language ('future conditions that may cause substantial doubt'), not a live going-concern paragraph."
+  },
+  "rfm_tuples": [
+    {
+      "claim_id": "C1",
+      "category": "going_concern_mitigated_vs_explicit",
+      "R": "'The plans that have been implemented have mitigated the conditions that previously caused the substantial doubt about HEI's and the Utilities' ability to continue as a going concern as of the date of filing their 2024 second quarter financial statements.' 'Management believes the Company's cash and cash equivalents amount of $751 million and GLST1's restricted cash amount of $479 million... effectively alleviate any conditions that may cause substantial doubt regarding HEI's and Utilities' ability to continue as a going concern.'",
+      "f": "Mode A: going_concern_local triggered EXPLICIT_GOING_CONCERN (n=14, n_cure=0). Re-read in context to determine whether the 14 hits are (a) a live, currently-asserted GC paragraph, or (b) historical/conditional/risk-factor language describing a previously-cured condition. Mode B: derive whether the cure language is plausibly anchored in real, executed financing (vs aspirational).",
+      "M_source": "going_concern_local + self_text manual re-read",
+      "M_value": "DETERMINISTIC FALSE POSITIVE — the EXPLICIT_GOING_CONCERN trigger fires on forward-looking risk-factor language ('future conditions that may cause substantial doubt'), but the actual MD&A and Note 2 explicitly state the GC condition was raised in Q2 2024 and has been MITIGATED through: (i) $557.7M Sep 2024 equity raise (62.2M shares); (ii) $479M cash transferred into bankruptcy-remote GLST1 subsidiary to fund first installment; (iii) $405.5M ASB sale completed Dec 31, 2024; (iv) dividend suspension; (v) $250M ATM program available; (vi) $1.153B total liquidity at year-end. The detector's failure to recognize the cure word 'mitigated' / 'alleviate' is the bug. CORRECT REGISTRY VALUE: MITIGATED_GC, not EXPLICIT_GC.",
+      "severity": "PASS",
+      "interpretation": "This is exactly the calibration case the framework needs. The deterministic detector should be augmented with a 'mitigated GC' classifier — explicit statements of cure ('plans... have mitigated...', 'alleviate any conditions') backed by completed cash transactions should down-weight the EXPLICIT_GOING_CONCERN signal. The 10-K is not lying about cure prospects; the cure is documented with closed transactions."
+    },
+    {
+      "claim_id": "C2",
+      "category": "settlement_accrual_completeness",
+      "R": "'Under the Settlement Agreements, HEI and Hawaiian Electric are obligated to contribute a total of $1.99 billion (out of a total defendant contribution of approximately $4.04 billion), which includes $75 million previously contributed for the One ‘Ohana Initiative.' 'The Utilities recorded a settlement accrual of $1.92 billion which reflects their best estimate of the loss contingency.' '...four equal annual installments of approximately $479 million, with the first installment expected to be made no earlier than the fourth quarter of 2025.'",
+      "f": "Mode A: cross-check accrual = quoted total. Mode B: derive what is NOT included in the $1.99B (i.e., what residual liability survives the settlement).",
+      "M_source": "self_text (Note 2) + reconciliation",
+      "M_value": "Settlement Agreements EXPLICITLY EXCLUDE: (i) securities-fraud class actions (separate Securities Action); (ii) shareholder derivative actions; (iii) the ~160 subrogation insurer lawsuits which assert independent recovery rights (the filing notes 'litigation activities between the plaintiffs (individual and class) and the subrogation insurers' continue); (iv) the Spectrum Oceanic, LLC lawsuit; (v) the County of Maui lawsuit. The $1.92B accrual is the BEST ESTIMATE for the tort settlement only, and Note 2 explicitly warns 'the amount of any liability arising from the Maui windstorm and wildfires (which could exceed amounts currently reserved for the settlement liability)...could have a material adverse impact.' Insurance coverage remaining: only $13M HEI / $0 Hawaiian Electric / $122M utilities subsidiaries excess + $499M property insurance.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Settlement framing is largely honest but the headline '$1.99B settles the Maui matter' obscures the survival of subrogation, securities, derivative, and municipal claims that could materially add to the liability. The 10-K acknowledges these in legal proceedings notes but the MD&A 'cure path' narrative does not subtract estimated subrogation exposure from the cure math."
+    },
+    {
+      "claim_id": "C3",
+      "category": "capital_actions_executed_vs_promised",
+      "R": "'On September 25, 2024, HEI completed the sale of 62.2 million shares of common stock... net proceeds... approximately $557.7 million.' 'On September 19, 2024, HEI filed... at-the-market (ATM) offering program... up to $250 million. To date, HEI has not sold any common stock [under the ATM].' 'On December 31, 2024, HEI completed the sale of 90.1% of the common stock of ASB, amounting to $405.5 million... The proceeds from the sale will be used to pay down HEI's debt in 2025.' 'On February 7, 2025, Pacific Current entered into a Securities Purchase Agreement to sell all the membership interests in Hamakua Holdings, LLC.'",
+      "f": "Mode A: verify the equity raise and ASB sale closed (both executed pre-cutoff). Mode B: derive whether the capital actions math actually covers all four $479M installments, not just the first.",
+      "M_source": "self_text + edgar_fts (8-Ks confirm Sep 25, 2024 closing; Dec 31, 2024 ASB sale; Feb 7, 2025 Pacific Current SPA)",
+      "M_value": "EXECUTED: $557.7M equity (Sep 2024) + $405.5M ASB sale (Dec 2024) + $44.6M retained ASB stake + Hamakua sale pending. UNCOMMITTED: $250M ATM untapped + 'currently working with its financial advisors on a financing plan to raise the additional capital necessary to fund the remaining settlement of wildfire tort claims.' MATH: First installment $479M is FUNDED (sitting in GLST1 restricted cash). Remaining three installments total $1.44B, against which the only identified sources are (a) $405M ASB proceeds (earmarked for debt paydown, not settlement), (b) $250M ATM, (c) future operating cash flow, (d) 'TBD' financing plan. There is a $700M-$900M unsourced gap for installments 2-4 (2026-2028) at filing date.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Disclosure is candid that only the first installment is funded and that financing for remaining installments is 'TBD.' This is honestly framed — but the GC-mitigation language relies on the one-year horizon (only the first installment falls in that window). The 'cure path' is genuine for FY2025 but the multi-year financing path is described in deliberately vague language. Forward outcome (+29% return through 2026-05-15) suggests markets accepted the staged execution; framework correctly identifies this as a MITIGATED-GC name with residual financing risk in years 2-4."
+    },
+    {
+      "claim_id": "C4",
+      "category": "credit_rating_below_investment_grade",
+      "R": "'In August 2023, HEI and Hawaiian Electric received multiple downgrades to their debt, including to ratings below investment grade, by Fitch, Moody's and S&P. As of February 14, 2025... HEI: B / B1 / B-... Outlook Stable / Stable / Negative.'",
+      "f": "Mode A: confirm credit ratings as quoted. Mode B: derive what this constrains operationally (capital costs, IPP financing, rate-base growth).",
+      "M_source": "self_text (filing-internal table)",
+      "M_value": "All three agencies have HEI deep below investment grade (B/B1/B-) for ~21 months at cutoff. Hawaiian Electric utilities: B/Ba3/B- (senior unsecured B+/Ba3/NR). S&P maintains NEGATIVE outlook at the operating utility level even after the settlement and equity raise. Concrete operational impact disclosed: 'The downgrade of Hawaiian Electric's credit ratings... makes it more difficult for independent power producers to procure low-cost financing, has added an additional impediment to completion of new renewable energy and storage projects.' Rate-base capex for wildfire mitigation plan, grid modernization explicitly threatened.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Disclosure is direct about the ratings (no euphemism), but the second-order implications for the REGULATED-UTILITY ROE recovery story are understated. A utility cannot earn its authorized ROE if it cannot finance the rate base at reasonable cost. The 'cure path' on the tort liability does not automatically cure the cost-of-capital problem that constrains the regulated business going forward."
+    },
+    {
+      "claim_id": "C5",
+      "category": "dividend_suspension_capital_discipline",
+      "R": "'the Hawaiian Electric Board of Directors suspended its quarterly dividends to HEI, starting with the second quarter 2024 dividend... based upon the size of the proposed settlement of wildfire tort litigation and the fact that, although HEI and the Utilities have sufficient liquidity to fund the first settlement payment, no definitive funding plan currently exists for the remaining settlement payment liability.' 'The Company does not currently intend to pay dividends on HEI Common Stock and currently intends to retain future earnings.'",
+      "f": "Mode A: verify dividend suspension. Mode B: derive whether the suspension is consistent with management's stated cure-path math.",
+      "M_source": "self_text (filing-internal)",
+      "M_value": "Dividend suspended both at HEI parent AND at the subsidiary upstream level. Hawaiian Electric Board cited explicitly that 'no definitive funding plan currently exists for the remaining settlement payment liability' as rationale. This is the same disclosure that contradicts the optimistic MD&A summary language. Two-source-of-truth check: dividend-suspension rationale is the more conservative and accurate framing of the multi-year liquidity picture.",
+      "severity": "PASS",
+      "interpretation": "Capital action (suspension) is consistent with the underlying liquidity facts and is appropriately aggressive. Pass. Forward outcome (no dividend through 2026) means the +29% return came from EPS recovery + multiple expansion, not from dividend yield."
+    },
+    {
+      "claim_id": "C6",
+      "category": "auditor_critical_audit_matter",
+      "R": "'/s/ Deloitte & Touche LLP, Honolulu, Hawaii, February 24, 2025. We have served as the Company's auditor since 2017.' Critical Audit Matter: 'the evaluation of the loss contingencies related to the tort-related legal claims, and related disclosures... auditing management's judgments... required significant auditor judgment.'",
+      "f": "auditor_change_tracker (deterministic) + read auditor report for CAMs and any going-concern emphasis paragraph.",
+      "M_source": "auditor_change_tracker + self_text",
+      "M_value": "CLEAN_AUDITOR_TENURE per deterministic (0 Big 4 resignations, 0 disagreements, 0 Item 4.01 8-Ks lookback to 2020-05-16). Deloitte tenure 8 years. Two Critical Audit Matters: (1) rate regulation accounting, (2) tort-related loss contingency. NO going-concern emphasis-of-matter paragraph in the auditor's report — Deloitte concurred with management's MITIGATED-GC conclusion. ICFR opinion was UNQUALIFIED.",
+      "severity": "PASS",
+      "interpretation": "Strong validation signal: a Big 4 auditor concurred with the mitigated-GC framing and disclosed the loss contingency as a CAM rather than as a going-concern uncertainty. This is the single most important second-source corroboration that management's cure narrative is not deceptive."
+    },
+    {
+      "claim_id": "C7",
+      "category": "asb_disposal_proceeds_reconciliation",
+      "R": "'On December 31, 2024, HEI completed the sale of 90.1% of the common stock of ASB, amounting to $405.5 million, to various investors including certain officers and directors of ASB, while retaining a 9.9% noncontrolling investment in ASB amounting to $44.6 million.'",
+      "f": "Mode A: verify ASB sale completion + accounting treatment (discontinued ops). Mode B: derive whether the implied ASB valuation ($450.1M total = $405.5M / 0.901) is reasonable for a $9.7B-asset Hawaii community bank, or whether the sale price reflects distressed-seller dynamics that materially eroded shareholder value at the parent.",
+      "M_source": "self_text + implied valuation cross-check",
+      "M_value": "Implied 100% ASB equity value = $449.9M. Pre-distress comparable: ASB historically contributed ~$70-80M annual net income to HEI, implying a multi-billion-dollar standalone valuation at peer P/E of 10-12x. The $450M implied total value suggests ASB was sold at a steep discount to intrinsic value, AND that no single strategic buyer would acquire >9.9% (per BHCA limits or to avoid regulatory complications) — i.e., it was sold to a syndicate of small minority investors, not to a strategic acquirer paying control premium. Includes 'certain officers and directors of ASB' among buyers (insider participation in distressed sale). Net proceeds earmarked for debt paydown, not settlement.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Honest disclosure of structure, but the framing 'sold ASB for $405.5M' does not address (a) the distressed-sale discount vs. ASB intrinsic value, (b) the loss of an annuity-like ~$70M earnings stream, (c) the related-party (ASB officers/directors as buyers) optics. The disposal is a real cash inflow but at a value-destructive multiple — a kind of partial 'fire sale' to the bank's own management team that converts a strategic asset to cash."
+    },
+    {
+      "claim_id": "C8",
+      "category": "subrogation_and_excluded_claims_residual",
+      "R": "'other lawsuits were filed by approximately 160 subrogation insurers against HEI, the Utilities, a private landowner, and telecommunications companies' '...litigation activities between the plaintiffs (individual and class) and the subrogation insurers' continue; 'The aggregate damages and costs associated with the Maui windstorm and wildfires could significantly exceed the Company's policy limits.'",
+      "f": "Mode B: derive whether the subrogation insurers' claims (independent of the tort class) constitute a non-zero residual liability NOT in the $1.92B accrual.",
+      "M_source": "self_text + edgar_fts (160 subrogation suits acknowledged)",
+      "M_value": "The Settlement Agreements RESOLVE the individual-and-class tort claims. They do NOT resolve the ~160 subrogation insurer suits, which assert independent recovery for amounts the insurers paid to their policyholders. Subrogation claims in California wildfire precedents (PG&E 2018-19) ran into the multi-$B range. The 10-K provides no quantitative reserve for subrogation exposure beyond the $1.92B tort accrual, stating 'any possible loss in excess of the amount recorded cannot reasonably be estimated at this time.' Insurance coverage remaining: $122M utilities-level excess + $499M property. Maximum identifiable insurance recovery: <$650M.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Strongest Mode B finding. The +29% forward return suggests markets believed the subrogation overhang would be resolved at modest incremental cost (which proved true in the forward window), but at cutoff date the residual exposure was material and only acknowledged in legal-proceedings notes, not in MD&A liquidity tables. Framework correctly notes a real residual risk that the mitigated-GC narrative downplays."
+    },
+    {
+      "claim_id": "C9",
+      "category": "insider_behavior_vs_capital_event",
+      "R": "Incorporated by reference: 'Insider Trading Arrangements and Policies... incorporated herein by reference to the Insider Trading Policies and Procedures section in HEI's 2025 Proxy Statement.' 'ASB officers and directors of ASB' included as buyers in the Dec 31, 2024 ASB sale.",
+      "f": "insider_vs_calendar with cutoff_date='2025-05-15' against capital events: (1) Sep 25, 2024 equity offering; (2) Nov 1, 2024 Settlement Agreements; (3) Dec 31, 2024 ASB sale; (4) Feb 24, 2025 10-K filing.",
+      "M_source": "self_text (Form 4 fetch not available offline; derived from filing)",
+      "M_value": "Two Mode B observations from the filing itself: (1) ASB INSIDERS (officers/directors) BOUGHT the bank from HEI on Dec 31, 2024 at $405.5M for 90.1% — i.e., the ASB management team was on the BUY side of a deal HEI's CEO/CFO authorized as a distressed-cure transaction. This is structurally consistent with ASB insiders perceiving the bank as significantly undervalued at the transaction price. (2) HEI executive Section 16 transactions not retrievable offline; but the Sep 2024 dilutive issuance (62.2M shares) at depressed prices would normally be accompanied by minimal-to-zero insider buying if executives expected continued downside, vs. concentrated insider buying if executives believed in mitigation. The 10-K does not surface this in the filing itself.",
+      "severity": "UNVERIFIABLE",
+      "interpretation": "Cannot fully verify offline. The single derivable insider signal — ASB management buying ASB from HEI at $405.5M — is mildly negative for HEI shareholders (the buyers think they got a good price) but does not bear directly on HEI common-stock direction. Mode B note for the framework: when management of a divested subsidiary participates as buyers, that is INFORMATION about the subsidiary's intrinsic value, not about the parent's go-forward equity."
+    },
+    {
+      "claim_id": "C10",
+      "category": "claim_evolution_10K_vs_prior_10Q",
+      "R": "'The Company previously disclosed in its Quarterly Report on Form 10-Q for the quarter ending June 30, 2024, that based on its financial and liquidity condition, and because it had not yet implemented a capital financing plan to address proposed wildfire settlement payments, there was substantial doubt about HEI's and the Utilities' ability to continue as a going concern.' '...The plans that have been implemented have mitigated the conditions that previously caused the substantial doubt...'",
+      "f": "claim_evolution (Mode B): trace the going-concern language from Q2 2024 10-Q (EXPLICIT GC) through Q3 2024 10-Q (post-settlement, mid-equity raise) to Q4 2024 / 10-K (MITIGATED GC).",
+      "M_source": "claim_evolution (10-K self-reports the trajectory; prior 10-Qs not loaded offline)",
+      "M_value": "DOCUMENTED EVOLUTION (from the 10-K's own narrative): Q2 2024 10-Q = EXPLICIT going-concern doubt; Q3 2024 = Settlement Agreements reached Nov 1, 2024 + equity raise completed Sep 25, 2024 + ASB sale agreements executed; Q4 2024 10-K = MITIGATED going-concern language. The progression maps 1:1 to identifiable cash transactions ($557.7M raise, $479M restricted-cash transfer, $405.5M ASB sale closing, Settlement Agreements execution). NO evidence of language drift unsupported by transactional reality.",
+      "severity": "PASS",
+      "interpretation": "Claim evolution is internally coherent and externally validated by completed transactions. This is the GOLD-STANDARD pattern for honest cure-path disclosure: each quarter's narrative shift is anchored to a closed cash event. Framework should treat this trajectory as the calibration baseline for what 'honest mitigated GC' looks like, and contrast against names where the cure language softens without accompanying transactional evidence."
+    }
+  ],
+  "supplemental_signals": {
+    "going_concern_deterministic": "EXPLICIT_GOING_CONCERN (n_matches=14, n_cure=0) — FALSE POSITIVE on cure detection. Manual read: MITIGATED-GC.",
+    "going_concern_qualitative": "MITIGATED_GC — explicit cure language tied to executed cash transactions; Deloitte auditor concurred (no emphasis-of-matter paragraph; tort contingency designated as Critical Audit Matter only).",
+    "auditor_signal": "CLEAN_AUDITOR_TENURE (Deloitte & Touche since 2017; ICFR unqualified; two CAMs: rate regulation + tort contingency)",
+    "auditor_firm": "Deloitte & Touche LLP",
+    "credit_ratings_at_cutoff": "HEI: Fitch B / Moody's B1 / S&P B- (Outlook Stable/Stable/Negative). Hawaiian Electric: B / Ba3 / B-. Below investment grade since Aug 2023.",
+    "settlement_total_obligation": "$1.99B HEI contribution (of $4.04B total defendant pool) in 4 equal annual installments of ~$479M starting no earlier than Q4 2025; accrual $1.92B; first installment fully funded via $479M restricted cash in GLST1 LLC",
+    "capital_actions_executed_pre_cutoff": "$557.7M equity raise (Sep 25, 2024, 62.2M shares); $405.5M ASB 90.1% sale (Dec 31, 2024); dividend suspended Q2 2024; $250M ATM filed (untapped at year-end); Hamakua Holdings sale pending (Feb 7, 2025 SPA)",
+    "liquidity_at_year_end_2024": "Total available liquidity $1,153M ($751M cash + $479M GLST1 restricted + $150M utility credit available + $252M parent/All-Other credit available + $250M ATM capacity)",
+    "wildfire_liability_excluded_from_settlement": "~160 subrogation insurer lawsuits + securities-fraud class action + shareholder derivative actions + County of Maui suit + Spectrum Oceanic, LLC suit + punitive damages claims",
+    "insurance_recoveries_remaining": "$13M HEI / $0 Hawaiian Electric / $122M utilities excess + $499M property insurance — minimal vs ~$1.92B tort accrual",
+    "asb_disposal_economics": "$405.5M for 90.1% (implied 100% value ~$450M); ASB officers/directors among buyers; treated as discontinued ops; retained 9.9% stake at $44.6M; proceeds earmarked for debt paydown",
+    "2024_loss_from_continuing_operations": "$1.32B (HEI consolidated); $1.23B (Utilities) — primarily Q2/Q3 wildfire accrual",
+    "insider_signal_derived": "ASB officers/directors among purchasers of ASB at distressed-sale price — informative about ASB intrinsic value, neutral for HEI common; HEI parent-level Form 4 data not loaded offline"
+  },
+  "summary": "HE is a textbook FALSE POSITIVE for the deterministic EXPLICIT_GOING_CONCERN detector. The 10-K explicitly states 'plans... have mitigated the conditions that previously caused the substantial doubt' — and that mitigation is anchored to FOUR closed cash transactions: $557.7M Sep 2024 equity raise, $479M restricted-cash transfer into bankruptcy-remote GLST1 subsidiary, $405.5M ASB divestiture (Dec 31, 2024), and dividend suspension. Deloitte (auditor since 2017) issued a CLEAN ICFR opinion and designated the tort contingency as a Critical Audit Matter rather than a going-concern uncertainty — a strong second-source corroboration that the cure narrative is not deceptive. The 10-K does this PROPERLY: each quarter's softening of GC language maps 1:1 to a documented cash event (C10). The framework's strongest Mode B findings against HE are NOT lying detection but residual-risk identification: (i) the $1.99B settlement EXCLUDES ~160 subrogation insurer suits, securities/derivative actions, and municipal claims (C2, C8); (ii) only the FIRST $479M installment is sourced — installments 2-4 ($1.44B total, 2026-2028) are explicitly 'TBD' financing (C3); (iii) ASB sold to its own officers/directors at a distressed multiple, sacrificing long-term earnings power for near-term liquidity (C7); (iv) below-investment-grade ratings constrain the regulated utility's rate-base growth (C4). +29% forward return is consistent with markets recognizing the genuine mitigation while pricing residual subrogation risk modestly. CALIBRATION VALUE: HE should anchor the framework's MITIGATED_GC reference class — explicit cure word ('mitigated', 'alleviate') + completed cash transactions + auditor concurrence + auditor CAM (vs emphasis-of-matter) is the highest-quality cure pattern. Composite should be LOW (honest disclosure, executed cure).",
+  "composite": 0.22
+}

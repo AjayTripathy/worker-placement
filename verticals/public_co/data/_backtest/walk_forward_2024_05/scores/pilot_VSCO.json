@@ -1,0 +1,130 @@
+{
+  "ticker": "VSCO",
+  "company": "Victoria's Secret & Co.",
+  "cutoff": "2024-05-15",
+  "filing": "0001856437-24-000005_10K.txt",
+  "filing_date": "2024-03-22",
+  "cik": "0001856437",
+  "sector": "Consumer Cyclical",
+  "industry": "Apparel Retail",
+  "group": "walk_forward_2024",
+  "evidence_base": {
+    "primary_10k": "0001856437-24-000005 (FY2023, FY end 2024-02-03, filed 2024-03-22)",
+    "pre_cutoff_10qs": [
+      "0001856437-23-000033 (Q3 FY2023, period 2023-10-28, filed 2023-12-01)",
+      "0001856437-23-000026 (Q2 FY2023, period 2023-07-29, filed 2023-09-01)",
+      "0001856437-23-000021 (Q1 FY2023, period 2023-04-29, filed 2023-06-02)"
+    ],
+    "no_10q_between_10k_and_cutoff": "Next 10-Q (Q1 FY2024) filed 2024-06-07 > cutoff; 10-K dated 2024-03-22 is the most recent disclosure available."
+  },
+  "rfm_tuples": [
+    {
+      "claim_id": "C1",
+      "R": "\"As of February 3, 2024, we were in compliance with all covenants under our long-term debt and borrowing facilities.\" (10-K, Note re ABL + Term Loan + 2029 Notes)",
+      "f": "MODE A: verify auditor/registry corroboration of clean covenant status. m-source: auditor_change_tracker.query_auditor_changes(cik='0001856437', cutoff_date='2024-05-15') + reading audit opinion text for emphasis-of-matter / GC paragraph.",
+      "M_source": "auditor_change_tracker + going_concern_detector (pre-cutoff 10-K text scan)",
+      "M_value": "auditor signal=CLEAN_AUDITOR_TENURE, n_8k_item_401=0, n_big4_resignations=0, n_disagreements=0; 10-K text scan: 0 occurrences of 'going concern' or 'substantial doubt'; Ernst & Young (PCAOB ID 42, Big 4) issued unqualified opinion; covenants 'in compliance' restated identically in Q3 2023 10-Q (Oct 28, 2023).",
+      "severity": "PASS",
+      "interpretation": "Compliance claim corroborates across 10-K + most recent 10-Q + auditor history. No registry-side red flag on covenants or audit relationship."
+    },
+    {
+      "claim_id": "C2",
+      "R": "\"In September 2023, we entered into a delayed draw term loan agreement, secured by certain real estate assets owned by us, to increase available liquidity in consideration of potential seasonal working capital needs ... maximum borrowing capacity of $75 million. We did not draw any amounts under this term loan and the agreement terminated in December 2023.\" (10-K Liquidity section, also disclosed in Q3 2023 10-Q)",
+      "f": "MODE B: derive — if 'seasonal working capital' framing is genuine, an investment-grade-style retailer should not need a NEW secured real-estate-backed facility on top of a $750M ABL with $423M available at year-end. Cross-check: did management pre-position a distressed liquidity backstop they later did not need? Read alongside (i) prior-year liquidity, (ii) ABL availability, (iii) operating cash flow, (iv) capex.",
+      "M_source": "10-K Liquidity and Capital Resources + Q3 2023 10-Q Note on Long-Term Debt (self-text)",
+      "M_value": "ABL availability $423M (Feb 3, 2024) vs $259M (Jan 28, 2023); ABL borrowed $405M YTD then largely repaid by FYE; cash declined $157M YoY to $270M; FY23 op cash flow $389M vs $437M; capex $238M; bought back $125M of stock in 2023. They simultaneously: (i) put real-estate collateral up for an extra $75M secured backstop in Sept 2023 (peak inventory build), AND (ii) executed $125M of buybacks during the same year, AND (iii) authorized a new $250M buyback (March 2024 Share Repurchase Program) just before filing.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "MODE B finding. The delayed-draw real-estate-backed term loan in Sept 2023 is a defensive distressed-style maneuver. It was not strictly necessary (never drawn), but a healthy retailer with $259M of YE22 ABL headroom would not normally encumber real estate for a $75M contingency. Combined with buybacks at the same time, this signals management's internal liquidity scenario was tighter than their narrative — without crossing into outright dishonesty."
+    },
+    {
+      "claim_id": "C3",
+      "R": "\"In 2023, our net sales decreased $162 million, or 3%, to $6.182 billion compared to $6.344 billion in 2022 and comparable sales decreased 9% in 2023. Our North America store sales decreased 11% ... primarily driven by a decrease in traffic, average unit retail and conversion.\" (10-K MD&A)",
+      "f": "MODE A: verify trajectory by reading the three pre-cutoff 10-Qs to see whether sales/comp deterioration was disclosed contemporaneously or only crystallized in 10-K.",
+      "M_source": "claim_evolution across pre-cutoff 10-Qs (self-text scan of /tmp/vsco_10q_*.txt)",
+      "M_value": "YTD Q3 2023 (39 weeks ending 2023-10-28): Net Sales $4,099M vs $4,323M YTD 2022 (-5.2%); YTD Op income/(loss) -$13M vs +$234M; Q3 2023 standalone Op loss -$67M vs +$43M prior year. The FY2023 comp -9% follows FY2022 comp -8% (also disclosed in 10-K). Two consecutive years of mid-single-to-low-double-digit comp declines confirmed contemporaneously.",
+      "severity": "PASS",
+      "interpretation": "Sales/operating deterioration was disclosed contemporaneously in each 10-Q — not buried or surfaced only at year end. Bad fundamentals, honestly reported. This is a HONESTY-ALPHA PASS (the framework specifically rewards transparent disclosure of bad news)."
+    },
+    {
+      "claim_id": "C4",
+      "R": "\"Adjusted Operating Income $327\" vs reported GAAP $246 (10-K). Adjustments include 'Adore Me Acquisition-related Items $45' (2023) and 'Amortization of Intangible Assets $25'.",
+      "f": "MODE B: derive — when 'one-time' acquisition adjustments recur for a SECOND year and include $41M of compensation expense for retaining 'a certain Adore Me employee' (the founder), the adjustments are arguably operating costs. Check whether Adore Me-related adjustments are growing, persistent, and material relative to GAAP op income.",
+      "M_source": "10-K Non-GAAP reconciliation + Note 2 (Acquisition) + balance sheet (contingent consideration $74M vs $30M YoY)",
+      "M_value": "Adore Me adjustments: $45M in 2023 vs $15M in 2022 (3x larger in year 2 of a year-1-closed deal). 2023 total Adore Me-related cost $75M ($41M comp + change in contingent consideration FV + step-up amort). Contingent consideration liability rose from $30M to $74M YoY. Adjusted op income $327M vs GAAP $246M means $81M of adjustments — a third of which are non-cash Adore Me items that are GROWING. Adjusted EPS $2.27 vs GAAP $1.39 (63% gap).",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "The Adore Me 'acquisition-related items' are turning into a structural drag — contingent consideration is INCREASING (suggesting Adore Me is performing well enough that earn-outs are reaccruing), but management presents the cost as 'adjusted away.' Real economic cost of Adore Me deal is being progressively excluded from the headline 'adjusted' metric. Not deceptive in the GAAP sense (all disclosed), but the adjustment quality is degrading."
+    },
+    {
+      "claim_id": "C5",
+      "R": "\"On March 6, 2024, our Board of Directors approved a share repurchase program (March 2024 Share Repurchase Program), authorizing the repurchase of up to $250 million of our common stock.\" (10-K, filed 2024-03-22)",
+      "f": "MODE B: derive — board authorizing a NEW $250M buyback 16 days before filing a 10-K showing op income down 49% YoY, comp -9%, AND having just put real estate up as collateral for a $75M emergency facility 6 months earlier. Test internal coherence of capital allocation.",
+      "M_source": "10-K Item 5 + Note 18; Form 4 cluster check via edgar.list_filings",
+      "M_value": "Capital paradox: 2023 used $125M of cash for buybacks while operating cash flow fell $48M YoY, cash balance dropped $157M, and a real-estate-backed standby loan was opened. The new March 2024 $250M authorization comes immediately after this. Form 4 review (2023-08 to 2024-05-15, n=20): all dispositions are code 'F' (tax-withholding on RSU vest) — NO discretionary insider sales by Waters, Johnson, Unis, McAfee, Rupp. CEO/CFO are not personally selling into the buyback.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "MODE B finding with MIXED signal. Aggressive buyback authorization against deteriorating fundamentals and tightened liquidity is a capital-allocation red flag — management is using cash to support the stock through a downturn rather than building defensive cash. HOWEVER, the absence of discretionary insider selling argues management believes in the long-term thesis and is not personally cashing out (a stronger negative signal would be 'authorize buyback + insiders unload')."
+    },
+    {
+      "claim_id": "C6",
+      "R": "Auditor: \"Ernst & Young LLP ... PCAOB ID: 42\" — Big 4, signing the FY2023 audit with no emphasis-of-matter / no GC paragraph.",
+      "f": "MODE A: verify auditor identity, tenure, and any change/disagreement history via auditor_change_tracker over 5-year lookback.",
+      "M_source": "auditor_change_tracker.query_auditor_changes",
+      "M_value": "signal=CLEAN_AUDITOR_TENURE; n_8k_item_401=0 (no auditor changes since IPO/spin-off 2021); n_big4_resignations=0; n_disagreements=0; lookback start 2019-05-17.",
+      "severity": "PASS",
+      "interpretation": "Big 4 EY since spin-off, no resignations, no disagreements, no GC qualification. Tier-1 auditor relationship is intact through a clearly distressed equity period."
+    },
+    {
+      "claim_id": "C7",
+      "R": "\"Our disclosure controls and procedures were effective ... as of the end of the period covered by this report.\" (10-K Item 9A)",
+      "f": "MODE A: verify there is no concurrent material-weakness or remediation language; cross-check Q3 2023 10-Q for any control-deficiency disclosures.",
+      "M_source": "self-text scan of 10-K Item 9A and Q3 2023 10-Q",
+      "M_value": "10-K: 'were effective' (single occurrence, no remediation/material-weakness language nearby). Q3 2023 10-Q: same effective conclusion. No restatements during fiscal year. ICFR audit report by EY (PCAOB ID 42) is not negated.",
+      "severity": "PASS",
+      "interpretation": "Internal controls assertion holds. No corroborating evidence of accounting fragility."
+    },
+    {
+      "claim_id": "C8",
+      "R": "\"International net sales accounted for $687 million, or 11%, of our revenue in 2023.\" Joint venture in China with Regina Miracle (51/49) since April 2022. (10-K Business + Note 6)",
+      "f": "MODE B: derive — China JV partner Regina Miracle is publicly listed in Hong Kong. If JV economics are as disclosed, the partner's filings should reference VSCO consistently. Counterparty mirror via edgar_fts is limited to SEC-filed counterparties (HK-listed partner is out of scope), so falls back to internal-evidence-only.",
+      "M_source": "edgar_fts.query_fulltext('Regina Miracle', cutoff='2024-05-15') + ('Adore Me', cutoff='2024-05-15')",
+      "M_value": "Regina Miracle hits in SEC EDGAR full-text: 0 non-VSCO mentions in pre-cutoff window (expected — HK-listed partner does not file with SEC). 'Adore Me' hits: 30, all VSCO filings (also expected — formerly private company). 'Victoria's Secret' counterparty mirror: 181 hits, top results are VSCO's own filings; no surprising counterparty disclosure surfaces.",
+      "severity": "UNVERIFIABLE",
+      "interpretation": "Counterparty mirror is structurally limited here because the China JV partner is HK-listed (not in SEC FTS) and Adore Me was private pre-acquisition. Not a red flag — just absence of external corroboration channels. Internal disclosure consistent."
+    },
+    {
+      "claim_id": "C9",
+      "R": "\"We did not draw any amounts under this term loan and the agreement terminated in December 2023.\" (10-K, describing the Sept 2023 delayed-draw real-estate-backed loan, $75M capacity)",
+      "f": "MODE A: verify what happened to the facility by reading the Q3 2023 10-Q (which discloses the facility before termination) and the 10-K (which discloses the termination).",
+      "M_source": "claim_evolution: Q3 2023 10-Q (2023-12-01) vs FY2023 10-K (2024-03-22)",
+      "M_value": "Q3 2023 10-Q: discloses entry into delayed-draw term loan in Sept 2023, capacity $75M, fees $1M, secured by real estate, no draw to date. FY2023 10-K: confirms agreement terminated in December 2023, no draw, $1M fees amortized. Coherent across periods.",
+      "severity": "PASS",
+      "interpretation": "Specific factual claim verified across two disclosures. The substantive concern remains under C2 (why was the facility needed) — but the descriptive claim is true and consistent."
+    },
+    {
+      "claim_id": "C10",
+      "R": "Implicit going-concern claim — by issuing an unqualified opinion and using going-concern basis of accounting without any 'substantial doubt' language. (10-K, audit report + Note 1)",
+      "f": "MODE A: verify no GC language present; run going_concern_detector for any text-scan flags.",
+      "M_source": "going_concern_detector.query_going_concern + manual text scan of 10-K",
+      "M_value": "Manual scan of /tmp/vsco_10k.txt: 0 occurrences of 'going concern', 0 of 'substantial doubt'. Auditor opinion is unqualified. Working capital positive ($270M cash + $423M ABL availability vs ~$4M current debt + lease/AP obligations). Debt maturities (Term Loan Aug 2028, ABL Aug 2026, 2029 Notes) are not near-term.",
+      "severity": "PASS",
+      "interpretation": "Despite -29% YoY equity drawdown and operating-income halving, the balance sheet position does not warrant going-concern language and none is present. The cohort-level question is whether the stock decline reflects forensic fraud/obscuring (NO here) or simply cyclical earnings compression (YES here)."
+    }
+  ],
+  "supplemental_signals": {
+    "insider_form4_summary": "20 Form 4 filings between 2023-08-01 and 2024-05-15. Disposition codes: ALL 'F' (mandatory withholding on RSU vesting). Code 'A' entries are RSU grants (px=$0). NO open-market discretionary sales by CEO Waters, CFO Johnson, CGO Unis, CHRO/CLO McAfee, or CCO Rupp. Cluster around 2024-03-19 to 2024-03-22 corresponds to annual RSU grant + vest cycle at 10-K filing date.",
+    "buyback_vs_distress": "Bought back $125M in FY2023 (used ~32% of FY23 op cash flow), authorized new $250M program March 2024 — aggressive return-of-capital posture against -29% drawdown and -49% operating income YoY.",
+    "adore_me_overhang": "Contingent consideration liability grew from $30M to $74M YoY (good news for Adore Me sellers, ongoing cost for VSCO); 2023 Adore Me-related charges $75M total. Adjusted-vs-GAAP gap widening.",
+    "covenant_structure": "Term Loan & 2029 Notes: consolidated coverage ratio + consolidated total leverage ratio. ABL: fixed charge coverage + debt/EBITDAR. Compliance confirmed Feb 3, 2024.",
+    "comparable_sales_trajectory": "FY2022 comp -8%, FY2023 comp -9%, YTD Q3 2023 op loss -$13M vs +$234M PY — sustained operational pressure but contemporaneously disclosed.",
+    "delayed_draw_real_estate_loan": "September 2023 — encumbered real estate for $75M standby capacity in 'consideration of potential seasonal working capital needs.' Never drawn. Terminated Dec 2023. The DECISION to encumber real estate, not the outcome, is the signal."
+  },
+  "severity_counts": {
+    "PASS": 6,
+    "UNVERIFIABLE": 1,
+    "MODERATE_UNDERDELIVERY": 3,
+    "SEVERE_UNDERDELIVERY": 0,
+    "RED_FLAG_NEGATIVE": 0
+  },
+  "summary": "VSCO at 2024-05-15 is a struggling but TRANSPARENT consumer-discretionary name. The fundamentals are clearly deteriorating (comp -9% second straight year, operating income halved, China JV diluting NA weakness), and management took a defensive step in Sept 2023 (real-estate-backed $75M standby — never drawn) that signals an internal liquidity worry not matched by the headline narrative. Buyback program continuing through the downturn is a capital-allocation concern. However: Big 4 auditor (EY) with no resignations/disagreements, no GC language, covenants compliant, ICFR effective, no discretionary insider selling (all Form 4 dispositions are tax-withholding code F), and quarter-by-quarter disclosures match year-end disclosures. Adore Me adjustments are growing but fully disclosed. This is honesty-alpha NEUTRAL territory: real distress but not concealed. Verdict: NEUTRAL with a mild lean toward NEUTRAL-LONG given disclosure quality, offset by capital-allocation concern.",
+  "verdict": "NEUTRAL",
+  "composite": 0.55
+}

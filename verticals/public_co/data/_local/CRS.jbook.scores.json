@@ -1,0 +1,120 @@
+{
+  "ticker": "CRS",
+  "cik": "0000017843",
+  "cutoff": "2026-05-20",
+  "filing": "0000017843-25-000021_10-K.txt",
+  "cohort": "jbook_exposure_divergence",
+  "framework_meta_note": "CRS is a commercial-aerospace-heavy specialty alloy producer (Tier-3 defense per cohort metadata). The 10-K does not name any specific Pentagon Program Element (PE number), program-of-record, IDIQ, or DoD prime customer. Defense exposure is only stated at the aggregate end-market level (62% A&D in FY2025). The J-Book divergence framework therefore has nothing to verify against — the dominant signal is UNVERIFIABLE-by-disclosure-design, not RED_FLAG_NEGATIVE. USAspending shows only ~$3.3M of direct DoD prime obligations across multiple years for Carpenter + Latrobe Specialty Metals subsidiary — confirming Carpenter is primarily a sub-tier material supplier into prime contractors (commercial OEMs + defense OEMs), not a named DoD program counterparty.",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Aerospace and Defense end-use market accounted for $1,768.6M (62%) of FY2025 net sales.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook(contractor='Carpenter Technology') → NOT_FOUND (no PE in the 410-PE corpus names Carpenter as a prime/sub).",
+        "usaspending DoD-prime obligations to 'Carpenter Technology Corporation' + 'Latrobe Specialty Metals' total only ~$3.14M across 5 awards (steel buffer / bearing grade material for strategic stockpile, agency_slug 'department-of-defense'). Vastly below the $1,768.6M A&D bucket → confirms revenue flows through commercial-aerospace OEMs and tier-1/2 defense primes, NOT direct DoD prime contracts."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding + usaspending.query_dod_contracts",
+      "M_value": "NOT_FOUND in J-Book; $3.14M / 5 awards direct DoD prime",
+      "interpretation": "The 62% A&D claim is factually disclosed and quantified, but the J-Book framework cannot grade it because Carpenter never names a specific DoD program. The orthogonal USAspending check shows direct DoD prime exposure is immaterial (~0.1% of revenue), consistent with the cohort metadata 'mostly commercial A&D exposure'. Score UNVERIFIABLE per J-Book heuristic 7 (NOT_FOUND ≠ red flag when no specific PE was named to look up)."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Specialty alloys for critical applications in aerospace, defense, medical, transportation, energy, industrial and consumer markets.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook(contractor='Carpenter Technology Corporation') → NOT_FOUND.",
+        "pentagon_jbook(program='F-35') → 2 matches: F-35 C2D2 PE 0604840F (RDT&E) FUNDED_STEADY, FY24 $1,236.7M → FY25 $1,134.2M → FY26 $1,182.1M; F-35 Squadrons PE 0207142F (procurement) returned but with null status data in the result.",
+        "Carpenter is not named as a primary_contractor on the F-35 C2D2 PE; the J-Book lists this at the prime-integrator level (LM Aero / P&W / Northrop) rather than at sub-tier specialty-alloy suppliers."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding (contractor + program)",
+      "M_value": "NOT_FOUND by contractor; F-35 program FUNDED_STEADY (downstream proxy)",
+      "interpretation": "The narrative is generic ('aerospace and defense') and names no specific program. The closest downstream-proxy program (F-35) is FUNDED_STEADY in the J-Book, which would map to PASS for a direct prime — but Carpenter is too far downstream for that signal to be a direct verification. Heuristic 7 applies: UNVERIFIABLE because no specific PE was claimed."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Dynamet titanium business supplies aerospace/defense titanium applications.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook(contractor='Dynamet') → NOT_FOUND.",
+        "usaspending(recipient='Dynamet', DoD) → 0 awards / $0. Dynamet has no direct DoD prime obligations on record."
+      ],
+      "M_check": "pentagon_jbook + usaspending",
+      "M_value": "NOT_FOUND + $0 DoD prime",
+      "interpretation": "Dynamet revenue flows through downstream OEMs (titanium fasteners / medical / sub-tier aerospace), not as a named DoD prime. Filing makes no specific program claim to falsify. UNVERIFIABLE."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Carpenter Additive produces alloys for additive-manufacturing applications.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook(contractor='Carpenter Additive') → NOT_FOUND.",
+        "pentagon_jbook(program='additive manufacturing') → NOT_FOUND. The 410-PE corpus does not include a standalone AM PE in scope."
+      ],
+      "M_check": "pentagon_jbook (contractor + program)",
+      "M_value": "NOT_FOUND both queries",
+      "interpretation": "The AM growth narrative is forward-looking but does not name any DoD AM PE (e.g., AFRL AM programs, Navy AM Centers of Excellence). Heuristic 7: corpus coverage gap → UNVERIFIABLE, NOT RED. Note this as a coverage gap for the J-Book corpus."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Athens, Alabama powder-products manufacturing facility.",
+      "severity": "PASS",
+      "supports": [
+        "epa_frs returned 5 facilities under 'Carpenter Technology' in AL, including 'CARPENTER TECHNOLOGY CORP' (Tanner, Limestone County, AL — adjacent to Athens) and 'CARPENTER TECHNOLOGY CORP - ATHENS SOUTH FACILITY'."
+      ],
+      "M_check": "epa_frs.query_facilities(facility_name='Carpenter Technology', state_abbr='AL')",
+      "M_value": "5 EPA-registered AL facilities (Tanner / Athens South)",
+      "interpretation": "Physical-existence claim externally verified. PASS (control claim — works as intended)."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Carpenter owns US and international patents but is not materially dependent on any single one.",
+      "severity": "PASS",
+      "supports": [
+        "uspto_odp(assignee='Carpenter Technology Corporation', cutoff=2026-05-20) → 30 total applications, 7 granted patents pre-cutoff. Active recent filings include 'High Molybdenum Duplex Stainless Steel' (2025-10-22) and 'Low Coefficient of Thermal Expansion Alloys' (CPC C22C 19/052 — nickel superalloy class used in jet engines)."
+      ],
+      "M_check": "uspto_odp.query_assignee",
+      "M_value": "30 applications, 7 granted; nickel-superalloy + duplex stainless filings active",
+      "interpretation": "Patent portfolio confirmed and consistent with the alloy product narrative. PASS."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "No single customer accounted for >=10% of net sales in FY2023-FY2025.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "edgar_fts(cik=Lockheed 0000936468, 'Carpenter Technology') → 0 hits.",
+        "edgar_fts(cik=RTX 0000101829, 'Carpenter Technology') → 0 hits.",
+        "Absence of counterparty disclosure at LM and RTX is consistent with sub-tier supplier status (no individual prime would name a specialty-alloy mill in 10-K unless it were a material concentration), but does not directly verify or refute the 10% claim."
+      ],
+      "M_check": "edgar_fts.query_fulltext on prime CIKs",
+      "M_value": "0 hits Lockheed; 0 hits RTX",
+      "interpretation": "Counterparty disclosure is silent in both directions — consistent with a non-concentrated sub-tier relationship. UNVERIFIABLE (no falsifying evidence either way)."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Forward-looking statements depend on combined 'commercial aerospace and defense' cyclicality without breaking out defense.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "usaspending(recipient='Carpenter Technology Corporation') → 8 total federal awards, $3.26M cumulative (DoD steel buffer / strategic stockpile + small Latrobe Specialty Metals contracts). Direct federal contracting is ~0.1% of FY2025 revenue.",
+        "Combined with C1 finding (62% A&D end-market but zero named programs), the disclosure is structurally vague: it bundles cyclical commercial aerospace + cyclical defense as a single ~62% bucket without telling investors what share is DoD-budget-sensitive vs commercial-build-rate-sensitive."
+      ],
+      "M_check": "usaspending.query_recipient_contracts cross-checked against MD&A disclosure granularity",
+      "M_value": "$3.26M direct federal / 8 awards across all federal agencies",
+      "interpretation": "This is the Mode-B finding (implied-verification derivation, per the entity-resolution / two-mode DD heuristic): the 10-K presents a 'defense' narrative leaning on a 62% A&D bucket, but USAspending shows essentially no direct DoD prime relationship. The forward narrative is therefore commercial-aerospace-driven (Boeing / Airbus build rates, engine OEM ramps), not Pentagon-budget driven. Investors who price CRS as a defense beneficiary on rising DoD topline would be misreading the exposure. MODERATE_UNDERDELIVERY — the disclosure is not false, but the framing combines two structurally different demand drivers into one bucket, and the J-Book divergence pattern this cohort tests for is NOT applicable here (no programs named to diverge from). This is a structural disclosure-granularity flag, not a program-funding flag."
+    }
+  ],
+  "severity_counts": {
+    "PASS": 2,
+    "MODERATE_UNDERDELIVERY": 1,
+    "SEVERE_UNDERDELIVERY": 0,
+    "RED_FLAG_NEGATIVE": 0,
+    "UNVERIFIABLE": 5
+  },
+  "jbook_fire_summary": {
+    "jbook_grounded_claims": ["C1", "C2", "C3", "C4"],
+    "n_jbook_grounded_claims": 4,
+    "n_pentagon_jbook_fires": 4,
+    "n_pentagon_jbook_nonempty_results": 1,
+    "note": "pentagon_jbook was queried on all 4 J-Book-grounded claims (C1-C4); only the F-35 program-name query returned a non-empty result. All 4 contractor-name queries returned NOT_FOUND, which per heuristic 7 is UNVERIFIABLE (corpus coverage gap for sub-tier alloy suppliers), not a red flag. Carpenter never names a specific PE in the filing, so the J-Book divergence pattern is structurally inapplicable. The findings re-frame as: CRS forward narrative is commercial-aerospace-build-rate-driven, not DoD-program-driven — investors should not price this as a defense-budget beneficiary."
+  }
+}

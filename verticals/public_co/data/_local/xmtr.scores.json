@@ -1,0 +1,96 @@
+{
+  "ticker": "xmtr",
+  "scores": [
+    {
+      "claim_id": "C-001",
+      "claim_text": "Xometry's distinctive brand name should appear in US-listed-filer disclosures (counterparties, suppliers, customers, competitors).",
+      "severity": "PASS",
+      "supports": "external_brand_validation recipe: total_hits >= 10 \u2192 PASS.",
+      "M_check": "edgar_fts.query_fulltext(search_term='Xometry', forms='10-K,10-Q,8-K,DEF 14A', start=2018-01-01, cutoff=2024-03-31)",
+      "M_value": {
+        "total_hits": 175
+      },
+      "interpretation": "Strong public-filing footprint of 175 hits. Top filings include both XMTR's own 8-Ks/10-Ks and (per heuristic 7) the brand has substantial real presence in EDGAR. PASS \u2014 brand exists and is real. Note: a deeper analysis would partition own-filings vs counterparty mentions, but 175 raw hits clearly clears the recipe threshold."
+    },
+    {
+      "claim_id": "C-002",
+      "claim_text": "Thomasnet is a 'leading industrial sourcing platform in North America' covering 70,000+ industrial processes.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": "external_brand_validation recipe: 1-9 hits = MODERATE; here 15 hits but all top-10 are Xometry's own filings \u2014 zero independent counterparty corroboration of the 'leading platform' claim.",
+      "M_check": "edgar_fts.query_fulltext(search_term='Thomasnet', forms='10-K,10-Q,8-K,DEF 14A', start=2018-01-01, cutoff=2024-03-31)",
+      "M_value": {
+        "total_hits": 15,
+        "external_filers_in_top10": 0,
+        "all_top10_are_xmtr_own_filings": true
+      },
+      "interpretation": "Total hit count is just over the PASS threshold (15 vs 10), but ALL top-10 hits are XMTR's own filings. For a self-described 'leading' B2B sourcing platform with 70K industrial processes, near-zero independent counterparty disclosure is a soft underdelivery \u2014 industrial buyers/suppliers don't appear to be referencing Thomasnet in their own SEC filings. Could simply reflect that Thomasnet usage is operational/marketing rather than disclosure-worthy; not a fraud signal, but tempers the 'leading' descriptor."
+    },
+    {
+      "claim_id": "C-003",
+      "claim_text": "Xometry has proprietary AI/ML patents covering its Instant Quoting Engine, manufacturability analysis, and marketplace matching.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "USPTO ODP query_assignee('Xometry', cutoff=2024-03-31)",
+      "M_value": "n_total=12, n_granted=12, category_counts={'ai_pricing_quoting': 0, 'manufacturability': 12, 'marketplace_matching': 0}",
+      "interpretation": "USPTO ODP shows 12 granted patents pre-cutoff with at least one match in claimed categories ({'ai_pricing_quoting': 0, 'manufacturability': 12, 'marketplace_matching': 0}). Real portfolio exists."
+    },
+    {
+      "claim_id": "C-004",
+      "claim_text": "Xometry acquired Tridi Teknoloji A.S. (Istanbul, Turkey) on January 2, 2023.",
+      "severity": "PASS",
+      "supports": "named_acquisition: 13 hits in EDGAR including XMTR's own 10-K disclosures of the acquisition (and a small number from System1, an unrelated filer that happens to use the substring). Acquisition is consistently disclosed.",
+      "M_check": "edgar_fts.query_fulltext(search_term='Tridi', cutoff='2024-03-31', start='2022-01-01')",
+      "M_value": {
+        "total_hits": 13,
+        "xmtr_own_filings_in_top10": 8,
+        "system1_unrelated_in_top10": 2
+      },
+      "interpretation": "Acquisition appears disclosed across multiple XMTR filings (8-Ks/10-Q/10-K). Tridi is a private Turkish startup so external corroboration would be minimal by design (per heuristic 4). PASS."
+    },
+    {
+      "claim_id": "C-005",
+      "claim_text": "Xometry integrated the Gravity Climate API into its marketplace in 2022 for carbon emissions calculation.",
+      "severity": "PASS",
+      "supports": "Per heuristic 4 (investment/tech partners often don't disclose); 3 EDGAR hits, all from XMTR's own filings, indicating internal disclosure of the integration. Gravity Climate is a private startup \u2014 external corroboration not expected.",
+      "M_check": "edgar_fts.query_fulltext(search_term='Gravity Climate', cutoff='2024-03-31', start='2021-01-01')",
+      "M_value": {
+        "total_hits": 3,
+        "all_xmtr_own": true
+      },
+      "interpretation": "3 hits, all XMTR's own filings, consistent with the company internally disclosing the integration. The counterparty (Gravity Climate, private VC-backed climate-tech startup) would not be an SEC filer. PASS \u2014 claim is modestly disclosed and the absence of external corroboration is the expected baseline."
+    },
+    {
+      "claim_id": "C-006",
+      "claim_text": "Xometry leases all of its US offices and does NOT own any real property \u2014 no owned manufacturing facilities. The company is a marketplace platform, not a factory operator.",
+      "severity": "PASS",
+      "supports": "Per heuristic 1 (EPA FRS = EPA-regulated facilities only; office/marketplace sites EXPECTED absent). 0 facilities is the correct expected result and CORROBORATES the office-only / marketplace business model.",
+      "M_check": "epa_frs.query_facilities(facility_name='Xometry', state_abbr='MD')",
+      "M_value": {
+        "n_facilities": 0
+      },
+      "interpretation": "EPA FRS returns 0 hits for Xometry in Maryland (HQ state). This is exactly what is expected for a software-marketplace platform that explicitly states it owns no real property. The claim and the registry are consistent \u2014 the company is NOT mis-claiming factory operations. PASS."
+    },
+    {
+      "claim_id": "C-007",
+      "claim_text": "Xometry serves the Defense industry vertical; large defense primes (Lockheed Martin) are plausible buyers/suppliers.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": "named_counterparty_order recipe scoring hint: 0 hits = RED_FLAG_NEGATIVE for material commitments, BUT caveat applies: 'some commitments are immaterial relative to the counterparty's size.' Xometry never explicitly named LMT \u2014 this is an indirect inference from the 'Defense' vertical claim.",
+      "M_check": "edgar_fts.query_fulltext(search_term='Xometry', cik='0000936468' (LMT), cutoff='2024-03-31', start='2018-01-01')",
+      "M_value": {
+        "total_hits": 0
+      },
+      "interpretation": "Lockheed Martin's filings make 0 reference to Xometry. Marketplace vendors are typically immaterial to a $60B defense prime \u2014 absence is consistent with normal procurement-disclosure patterns and does not contradict the 'we serve Defense industry' claim (which is non-specific). MODERATE \u2014 the claim is plausibly true but lacks any specific named-customer evidence."
+    },
+    {
+      "claim_id": "C-008",
+      "claim_text": "Xometry serves Aerospace industry buyers (first-named industry vertical); Boeing is a plausible counterparty.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": "Same logic as C-007. Boeing CIK 0000012927 returns 0 Xometry mentions; counterparty is too large for a marketplace vendor to be materially disclosed. Xometry never explicitly named Boeing.",
+      "M_check": "edgar_fts.query_fulltext(search_term='Xometry', cik='0000012927' (BA), cutoff='2024-03-31', start='2018-01-01')",
+      "M_value": {
+        "total_hits": 0
+      },
+      "interpretation": "Boeing's filings make 0 reference to Xometry. Same calibration as C-007: marketplace-vendor-to-marquee-OEM relationships are typically immaterial-disclosure. The Aerospace-industry claim is generic and not falsified by 0 hits. MODERATE."
+    }
+  ]
+}

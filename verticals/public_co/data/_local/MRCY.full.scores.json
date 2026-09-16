@@ -1,0 +1,81 @@
+{
+  "ticker": "MRCY",
+  "cutoff": "2026-05-20",
+  "filing": "0001049521-25-000024_10-K.txt",
+  "filing_date": "2025-08-11",
+  "filing_age_days": 282,
+  "scores": [
+    {
+      "claim_id": "MRCY-001",
+      "claim_text": "Mercury's products deployed on 300+ programs including named DoD programs LTAMDS, KC-46, MH-60R/S, THAAD (largest FY2025 revenue increases)",
+      "severity": "PASS",
+      "supports": ["Mode A: usaspending.query_dod_contracts confirms direct DoD obligations to MERCURY SYSTEMS INC (e.g. N0042119F6104 LABOR FUNDING $24.97M); 588 total DoD awards in catalog query; total federal presence ~$550M for the recipient-name search."],
+      "M_check": "usaspending.query_dod_contracts + pentagon_jbook.query_program_funding(LTAMDS) + pentagon_jbook.query_program_funding(THAAD)",
+      "M_value": "DoD: confirmed direct awards including $24.97M N0042119F6104 to MERCURY SYSTEMS INC. J-Book: LTAMDS NOT_FOUND in J-Book corpus, THAAD NOT_FOUND in J-Book corpus (catalog coverage gap - hand-curated set does not yet include these programs).",
+      "interpretation": "Mode A clean PASS - as Tier-2 supplier flowing largely through primes, the presence of direct DoD awards is itself confirmatory. Mode B is UNVERIFIABLE due to J-Book corpus coverage gap on LTAMDS/THAAD; do NOT red-flag absence in a hand-curated catalog (heuristic 1 analogue)."
+    },
+    {
+      "claim_id": "MRCY-002",
+      "claim_text": "Mercury sells to top U.S. and European defense prime contractors (Raytheon for LTAMDS/THAAD, Lockheed for KC-46/THAAD integration, Northrop, L3Harris).",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["Mode A confirms federal contractor status (588 DoD awards). Mode B edgar_fts(Mercury Systems, RTX cik 0000101829) total_hits=0; edgar_fts(Mercury Systems, LMT cik 0000936468) total_hits=0."],
+      "M_check": "edgar_fts.query_fulltext for Mercury Systems within RTX and LMT 10-K/10-Q/8-K filings",
+      "M_value": "RTX hits: 0; LMT hits: 0",
+      "interpretation": "Heuristic 7 calibration: 0 mentions in primes' filings is consistent with Tier-2 supplier status (Mercury is below typical disclosure threshold for primes naming a sub-supplier in their 10-K). Mercury is not a sole-source critical-path vendor large enough to warrant named-vendor disclosure in $60B+ primes. MODERATE because the company emphasized 'directed source' status implying material exposure to specific primes - some referencing would still be reasonable. Not SEVE since claim is non-material at prime's scale."
+    },
+    {
+      "claim_id": "MRCY-003",
+      "claim_text": "Mercury operates 145,262 sq ft HQ in Andover MA, 125,756 sq ft Phoenix AZ, and 19 OSHA-registered electronics manufacturing establishments under the 'trusted onshore' supply chain claim.",
+      "severity": "PASS",
+      "supports": ["Mode A EPA FRS confirmed 1 facility: MERCURY SYSTEMS INC at 50 MINUTEMAN RD ANDOVER MA 01810 (registry_id 110072120232). Mode B OSHA returned 19 establishments under NAICS 334111 (Microcomputers manufacturing) including Phoenix AZ (546 employees, 812K hours), Huntsville AL, Cypress CA, Fremont CA, Oxnard CA - directly corroborating 10-K Item 2 properties table."],
+      "M_check": "epa_frs.query_facilities(MA) + osha_establishments.query_establishments",
+      "M_value": "EPA FRS: 1 facility (Andover HQ); OSHA: 19 establishments confirmed, all NAICS 334111",
+      "interpretation": "Strong PASS. Onshore manufacturing footprint confirmed across multiple states matching the 10-K Item 2 disclosure. NAICS 334111 confirms electronics manufacturing nature."
+    },
+    {
+      "claim_id": "MRCY-004",
+      "claim_text": "Mercury completed Star Lab asset acquisition ($4.5M cash FY2025) and divested Switzerland Plan-Les-Ouates manufacturing operations to Cicor Group in FY2025.",
+      "severity": "PASS",
+      "supports": ["Mode A sec_filings 8-K count=50 (recent 8-Ks dated 2025-10-28, 2025-11-04, 2026-02-03, 2026-05-05 etc.) including the FY2025 acquisition disclosure cadence. Mode B acq_coherence returned 'low_coherence' on the single Star Lab acquisition but its reasoning was 'cannot evaluate without complete information' - effectively neutral/uninformative rather than negative."],
+      "M_check": "sec_filings.list_filings_by_form(8-K) + acq_coherence.score_acquisition_coherence",
+      "M_value": "8-K count: 50 over multi-year history; acq_coherence: mean_coherence=0 (uninformative due to insufficient acq metadata)",
+      "interpretation": "Modest single asset acquisition ($4.5M) + a divestiture - this is not a 'roll-up rollup-thesis' company. Star Lab (Linux kernel hardening for embedded systems) is thematically consistent with Mercury's BuiltSECURE / cybersecurity positioning. Aggregate coherence-on-rollup not a meaningful test when n=1 small acquisition. PASS."
+    },
+    {
+      "claim_id": "MRCY-005",
+      "claim_text": "Mercury claims patented IP in processing including BuiltSECURE, BuiltSAFE, RF/microwave, and contributions to open standards.",
+      "severity": "PASS",
+      "supports": ["Mode A uspto_odp(Mercury Systems): n_granted=7, n_total_applications=20 covering Die-to-Die Physical Layer, Intra-Pulse Frequency Estimation Against Agile Emitters (EW signal processing), Interleaved Multi-Layer Redistribution Layer, etc. Mode B uspto_odp(Mercury Mission Systems): n_granted=9, n_total_applications=11 - Data Network for Safety-Critical Applications, Redundant Resistive Touch Panel (granted 2024-10-22, US12124667), LCD luminance/contrast displays."],
+      "M_check": "uspto_odp.query_assignee (Mercury Systems + Mercury Mission Systems subsidiary)",
+      "M_value": "Parent: 7 granted / 20 applications; Subsidiary Mercury Mission Systems: 9 granted / 11 applications. Combined: 16 granted across RF/EW, secure compute, avionics displays. Categories directly match claimed building blocks.",
+      "interpretation": "Heuristic 8: PASS since n_granted >= 5 with multiple claimed-category hits. EW signal processing patents (intra-pulse frequency estimation) directly corroborate the electronic warfare claim. Not the Nikola pattern."
+    },
+    {
+      "claim_id": "MRCY-006",
+      "claim_text": "Mercury maintains effective ICFR per KPMG as of June 27 2025, while facing an active securities class action with 3 of 17 challenged statements proceeding to discovery (Court order Feb 20 2025).",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["Mode A 10-K narrative confirms KPMG clean ICFR opinion (Item 9A); no 10-K/A amendments (sec_filings 10-K/A returned 0). Mode B claim_evolution(material weakness) returned SILENT_POST_CLAIM (n_subsequent_mentions=0) - no new material weakness language in filings between 2025-08-12 and cutoff."],
+      "M_check": "claim_evolution.query_claim_evolution(material weakness) + sec_filings.list_filings_by_form(10-K/A)",
+      "M_value": "10-K/A count: 0 (no restatements). claim_evolution: SILENT_POST_CLAIM. However, active Sec 10(b) class action with 3 challenged statements proceeding (lead plaintiff: Carpenters Pension Trust Fund for Northern California), Special Investigation Committee formed May 20 2025 over James Jones/Robert Sawyer/Pauline McKinnon derivative demands.",
+      "interpretation": "Heuristic split: ICFR opinion is clean (Mode A passes), but governance overhang is material - three separate derivative demands, SIC formed only 3 months before this filing, securities class action surviving partial motion to dismiss. This is MODERATE rather than PASS because the absence of an ICFR finding does not eliminate the disclosure-fraud allegations that are factually proceeding. Not SEVE because the court actually dismissed the bulk (14/17) of challenged statements."
+    },
+    {
+      "claim_id": "MRCY-007",
+      "claim_text": "Mercury filed S-3ASR shelf October 4, 2023 with unlimited capacity for equity raises; $591.5M drawn on $900M revolver; FY2025 net loss $37.9M.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": ["Mode A sec_filings(S-3ASR) confirms 2 filings (2020-09-14 and 2023-10-04) - shelf is on file as claimed. Mode B insider_vs_calendar(cik=1049521, window_days=14, start_date=2024-01-01, end_date=2026-05-20): signal=CLUSTERED_DISCRETIONARY. 27 total sales ($206.9M); 4 proximate sales ($1.12M); 4 discretionary (non-10b5-1) proximate including 3 sales clustered around the 2026-04-28 FY27 J-Book release."],
+      "M_check": "sec_filings.list_filings_by_form(S-3ASR) + insider_vs_calendar.query_insider_sales_near_budget_events(cik='0001049521', window_days=14, start_date='2024-01-01', end_date='2026-05-20')",
+      "M_value": "Insider Mode B CLUSTERED_DISCRETIONARY: Carvalho Orlando D (director, sold $625,527 on 2026-05-12, +14 days after FY27 J-Book), Farnsworth David E. (CFO, sold $307,661 on 2026-04-16, -12 days BEFORE FY27 J-Book), Ratner Steven (CHRO, sold $184,920 on 2026-05-11, +13 days after FY27 J-Book). All non-10b5-1. Total $1.12M discretionary proximate.",
+      "interpretation": "Per prompt: 'If the call returns CLUSTERED_DISCRETIONARY signal: that is the highest-signal flag -> SEVE or RED.' CFO selling 12 days BEFORE the FY27 J-Book publication is particularly notable. Three insiders (director, CFO, CHRO) all selling discretionary shares within +/-14 days of FY27 budget release suggests informed selling around a known event. SEVE rather than RED because the dollar magnitudes are modest at the share/equity level and pre-clearance windows could explain partial clustering, but the pattern is clear."
+    },
+    {
+      "claim_id": "MRCY-008",
+      "claim_text": "Mercury disclosed no single customer/program over 10% of FY2025/FY2024 revenues despite naming LTAMDS/KC-46/MH-60R/S/THAAD as the largest growth programs.",
+      "severity": "PASS",
+      "supports": ["Mode A 10-K text confirms 'There were no programs comprising 10% or more of our revenues for fiscal 2025 or 2024.' Mode B usaspending.query_federal_presence(Mercury Mission Systems) and usaspending.query_recipient_contracts(Mercury Systems) confirm direct federal obligations exist but most material flow is via primes (Tier-2 model)."],
+      "M_check": "usaspending.query_recipient_contracts + usaspending.query_federal_presence(Mercury Mission Systems)",
+      "M_value": "Mercury Mission Systems / Mercury Systems Inc direct DoD: hundreds of awards totaling ~$550M cumulative. No single end-customer 'Customer A' identified above the 10% threshold from direct federal data; consistent with sub-tier supplier flow.",
+      "interpretation": "Tier-2 sub-tier model means revenue flows from primes (not directly identifiable to a single program in federal data). The non-concentration claim is consistent with both 10-K text and federal-data structure. PASS - no contradiction."
+    }
+  ]
+}

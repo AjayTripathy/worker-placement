@@ -1,0 +1,283 @@
+<title>Viemed (VMD) — Court Deck</title>
+<style>
+  :root{
+    --ink:#1b1d1f; --muted:#5d6167; --faint:#8d9197; --rule:#dfddd6;
+    --paper:#fffefb; --ground:#f2f0eb;
+    --break:#8a3324; --break-bg:#f6ece8;
+    --floor:#2e5e4e; --floor-bg:#e9f2ee;
+    --rung:#2b4a6f; --rung-bg:#e9eef5;
+  }
+  :root[data-theme="dark"], :root[data-theme="dark"] body{ color-scheme:dark; }
+  @media (prefers-color-scheme: dark){
+    :root{ --ink:#e8e6e1; --muted:#a5a9ae; --faint:#7d8187; --rule:#3a3c3e;
+      --paper:#232527; --ground:#1a1c1e;
+      --break:#d08a72; --break-bg:#3a2b24; --floor:#8fc0ad; --floor-bg:#24332d;
+      --rung:#9db8d8; --rung-bg:#263241; }
+  }
+  :root[data-theme="light"]{ --ink:#1b1d1f; --muted:#5d6167; --faint:#8d9197; --rule:#dfddd6;
+      --paper:#fffefb; --ground:#f2f0eb; --break:#8a3324; --break-bg:#f6ece8;
+      --floor:#2e5e4e; --floor-bg:#e9f2ee; --rung:#2b4a6f; --rung-bg:#e9eef5; }
+  :root[data-theme="dark"]{ --ink:#e8e6e1; --muted:#a5a9ae; --faint:#7d8187; --rule:#3a3c3e;
+      --paper:#232527; --ground:#1a1c1e; --break:#d08a72; --break-bg:#3a2b24;
+      --floor:#8fc0ad; --floor-bg:#24332d; --rung:#9db8d8; --rung-bg:#263241; }
+  body{font-family:Charter,Georgia,serif;color:var(--ink);background:var(--ground);margin:0;padding:0 16px;line-height:1.5;font-size:16.5px;}
+  .deck{max-width:840px;margin:0 auto;padding:40px 0 80px;}
+  .slide{background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:32px 38px 28px;margin:0 0 22px;position:relative;}
+  .sno{position:absolute;top:15px;right:20px;font-family:system-ui,sans-serif;font-size:11px;letter-spacing:.12em;color:var(--faint);}
+  .kicker{font-family:system-ui,sans-serif;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--rung);margin:0 0 10px;font-weight:600;}
+  h1{font-size:31px;line-height:1.12;margin:0 0 12px;text-wrap:balance;font-weight:700;}
+  h2{font-size:23px;line-height:1.2;margin:0 0 12px;text-wrap:balance;font-weight:700;}
+  h3{font-size:16.5px;margin:20px 0 6px;}
+  p{margin:0 0 12px;}
+  .big{font-size:18.5px;line-height:1.45;}
+  .fine{font-size:13px;color:var(--muted);}
+  .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px 22px;margin:14px 0 4px;}
+  .cell{border-top:2px solid var(--ink);padding-top:8px;}
+  .cell .h{font-family:system-ui,sans-serif;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);font-weight:600;margin:0 0 4px;}
+  .cell .v{font-size:16.5px;font-weight:600;font-variant-numeric:tabular-nums;}
+  .cell .s{font-size:12.5px;color:var(--muted);}
+  .tbl{overflow-x:auto;}
+  table{border-collapse:collapse;width:100%;font-family:system-ui,sans-serif;font-size:13px;font-variant-numeric:tabular-nums;}
+  th{text-align:left;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);font-weight:600;padding:5px 12px 5px 0;border-bottom:1px solid var(--ink);}
+  td{padding:7px 12px 7px 0;border-bottom:1px solid var(--rule);vertical-align:top;}
+  td.n{text-align:right;white-space:nowrap;} th.n{text-align:right;}
+  .callout{border-left:3px solid var(--floor);background:var(--floor-bg);padding:12px 16px;margin:14px 0;font-size:14.5px;}
+  .warnout{border-left:3px solid var(--break);background:var(--break-bg);padding:12px 16px;margin:14px 0;font-size:14.5px;}
+  .scale{margin:18px 0 6px;overflow-x:auto;}
+  .scale svg{display:block;min-width:640px;}
+  .ax{stroke:var(--rule);stroke-width:1.5;}
+  .tick-r{stroke:var(--rung);stroke-width:3;}
+  .tick-f{stroke:var(--floor);stroke-width:3;}
+  .tick-s{fill:var(--break);}
+  .lb{font:600 11.5px system-ui,sans-serif;fill:var(--ink);}
+  .lb2{font:500 11px system-ui,sans-serif;fill:var(--muted);}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-family:system-ui,sans-serif;font-size:12px;color:var(--muted);margin:4px 0 0;}
+  .sw{display:inline-block;width:12px;height:4px;border-radius:2px;vertical-align:middle;margin-right:5px;}
+  .bars{margin:16px 0 6px;}
+  .bar{display:flex;align-items:center;gap:12px;margin:7px 0;font-family:system-ui,sans-serif;font-size:13px;}
+  .bar .lab{width:250px;color:var(--muted);text-align:right;flex:none;}
+  .bar .track{flex:1;height:20px;background:var(--rung-bg);border-radius:3px;position:relative;}
+  .bar .fill{height:100%;border-radius:3px;}
+  .bar .val{font-variant-numeric:tabular-nums;font-weight:600;width:72px;flex:none;}
+  ul{margin:0 0 12px;padding-left:20px;} li{margin:0 0 7px;}
+</style>
+<div class="deck">
+
+<div class="slide">
+  <span class="sno">01</span>
+  <p class="kicker">Internal research · August 5, 2026 · full review record of August 4</p>
+  <h1>Viemed Healthcare (VMD): a −15.9% answer to a −1.5% question — worth owning lower, not worth chasing here</h1>
+  <p class="big"><b>Verdict: 5/10 — WATCH, below-market ladder only. This is not an at-market buy.</b> Viemed is a net-cash home-ventilator specialist that fell −15.9% on August 4 against a full-year EBITDA guide trim of exactly $1M (−1.5%) — a revision that was actually <b>free-cash-flow accretive</b>, because the capex guide fell more than the EBITDA give-up. The market's real complaint is legitimate: the unchanged back half requires a margin step with no precedent in the company's own history, and a fresh, dated Medicare documentation rule lands on its largest billing code mid-quarter, unmentioned. So the plan is a three-rung limit ladder that monetizes any <em>further</em> overshoot, with the bottom rung below bear-case fair value — paid for the regulatory risk even if it bites.</p>
+  <div class="grid">
+    <div class="cell"><p class="h">Spot vs value</p><p class="v">$9.84 vs E[FV] $11.20</p><p class="s">bear 7.75 (35%) · base 11.75 (45%) · bull 16.00 (20%) — expected value +13.8%</p></div>
+    <div class="cell"><p class="h">The ladder</p><p class="v">$9.05 / $8.40 / $7.60</p><p class="s">~$24k if all fill = 0.7% of the $3.4M base (cap 1.2%) · GTC to Nov 15</p></div>
+    <div class="cell"><p class="h">What we're paid to carry</p><p class="v">p(guide holds) 0.30–0.35</p><p class="s">plus a CMS documentation rule effective Oct 28 whose first true read is the Q4 print, ~March 2027</p></div>
+  </div>
+  <p class="fine"><b>Position: none; ladder staged Aug 5 pending submission.</b> The CMS pre-condition cleared on August 5 — see the update on the ladder slide.</p>
+</div>
+
+<div class="slide">
+  <span class="sno">02</span>
+  <h2>Anatomy of the dislocation — what the print said vs what the tape did</h2>
+  <div class="tbl"><table>
+    <tr><th>What the release actually said (Aug 3, after close)</th><th>What the tape did (Aug 4)</th></tr>
+    <tr><td>Q2 revenue <b>$78.1M, +23.9% y/y — a record quarter</b> (verified against the audited filing data)</td><td>Gapped open at 10.56 (−9.7%)</td></tr>
+    <tr><td>FY26 adj-EBITDA guide $64–68M vs prior $65–69M: a <b>$1M / −1.5% trim at the midpoint</b></td><td>Fell <b>through</b> the 11:00 ET call to an intraday low of 9.50 — the call made it worse, not better</td></tr>
+    <tr><td>FY26 revenue guide $314–320M vs $312–320M: the low end was <b>raised $2M</b></td><td>Closed <b>9.84, −15.83%</b>, on ~3.5× normal volume (932k consolidated shares)</td></tr>
+    <tr><td>Bought back 530,802 shares in the quarter at a $9.65 average; 1.25M shares still authorized</td><td>Same session: AdaptHealth (AHCO) fell <b>−25.7%</b> on a sales miss, goodwill charge and slashed guide — a sector home-medical-equipment re-rate day, not a purely company-specific event</td></tr>
+  </table></div>
+  <p><b>The path matters.</b> The 52-week high (12.61) was set ~July 22, eight sessions before the print, after a +55% February-to-July run (8.16 → 12.61). At 9.84 the stock is −22% off that high but still +63% off the 52-week low and +32% year-to-date. This close merely returns the tape to the <em>top</em> of the May–June consolidation (9.20–9.90). <b>There is no washout, no forced seller, and no positioning distortion</b> — short interest is 2.26% of float (2.0 days to cover), institutions hold 64.3%. The −15.9% is holders repricing the guide's credibility, and post-print names like this historically drift for 2–6 weeks rather than snap back. That is the whole argument for a ladder below, not a buy at the gap.</p>
+  <p class="fine">Note on the buyback: $9.65 is <em>below</em> the 9.84 close — management's repurchase is at-the-money, not evidence the print is cheap.</p>
+</div>
+
+<div class="slide">
+  <span class="sno">03</span>
+  <h2>Where the review corrected its own opening take — printed here on purpose</h2>
+  <p>Our first note framed this as "a record quarter punished for a rounding-error trim." Three of that note's load-bearing readings did not survive verification against the company's own filings, and the corrected versions are less flattering:</p>
+  <ul>
+    <li><b>"Record census" conceals a three-quarter stall.</b> The 12,635 ventilator-patient census is a record, and the release's +4.0% y/y / +4.5% sequential are accurate. But run the company's own two growth rates backward: June-2025 census was 12,149 and <b>March-2026 was 12,090 — below where it stood nine months earlier</b>. Census was flat-to-down for three quarters, then jumped once in Q2. "Record and accelerating" is true arithmetic that masks a stall.</li>
+    <li><b>62.9% of the revenue growth is resupply, not the ventilator pillar.</b> Of the +$15.0M y/y revenue growth, equipment &amp; supply sales contributed +$9.5M (62.9%); ventilator rentals contributed +$2.6M (17.2%, i.e. +7.7% y/y). The growth engine is the lower-margin resupply business, not the pillar the release leads with.</li>
+    <li><b>Mix explains only about a third of the margin compression.</b> Adjusted EBITDA margin fell 502bp y/y (22.7% → 17.6%). The clean bridge:</li>
+  </ul>
+  <div class="bars">
+    <div class="bar"><span class="lab">Cash-cost mix shift</span><div class="track"><div class="fill" style="width:97%;background:var(--break);"></div></div><span class="val">−181bp</span></div>
+    <div class="bar"><span class="lab">SG&amp;A deleverage (grew +28.9% vs revenue +23.9%)</span><div class="track"><div class="fill" style="width:100%;background:var(--break);"></div></div><span class="val">−187bp</span></div>
+    <div class="bar"><span class="lab">Prior-year one-off disposal gain rolling off</span><div class="track"><div class="fill" style="width:95%;background:var(--break);"></div></div><span class="val">−178bp</span></div>
+    <div class="bar"><span class="lab">R&amp;D</span><div class="track"><div class="fill" style="width:37%;background:var(--floor);"></div></div><span class="val">+69bp</span></div>
+    <div class="bar"><span class="lab">Other</span><div class="track"><div class="fill" style="width:13%;background:var(--break);"></div></div><span class="val">−25bp</span></div>
+  </div>
+  <p class="fine">Bridge components sum to the reported −502bp. One more correction cuts <em>in the company's favor</em>: the y/y swing in the disposal line is $1.23M — larger than the $1.0M the company itself cited — so excluding it, adjusted EBITDA grew +4.9%, not the +3% the release implies. Every figure above reconciles to the audited filing data; the corrections are about takeaway, not arithmetic.</p>
+</div>
+
+<div class="slide">
+  <span class="sno">04</span>
+  <h2>Why −15.9% was mostly deserved: the unchanged back half is arithmetically heroic</h2>
+  <p class="big">Estimates barely moved — the guide trim was $1M. What broke was <b>belief in the bridge</b>. H1 came in at an 18.26% adjusted-EBITDA margin ($28.0M on $153.5M). The unchanged guide midpoint therefore requires H2 to deliver <b>$38.0M on $163.5M — a 23.23% margin, a +497bp half-over-half step</b>. Last year's actual H1→H2 step was <b>+104bp</b>.</p>
+  <div class="tbl"><table>
+    <tr><th>Adj EBITDA by quarter ($M)</th><th class="n">Q3-24</th><th class="n">Q4-24</th><th class="n">Q1-25</th><th class="n">Q2-25</th><th class="n">Q3-25</th><th class="n">Q4-25</th><th class="n">Q1-26</th><th class="n">Q2-26</th></tr>
+    <tr><td>Reported</td><td class="n">13.95</td><td class="n">14.24</td><td class="n">12.77</td><td class="n">14.29</td><td class="n">16.12</td><td class="n"><b>18.20</b></td><td class="n">14.31</td><td class="n">13.72</td></tr>
+  </table></div>
+  <ul>
+    <li>The guide needs H2 quarters <b>averaging $19.0M</b> — 38.6% above Q2's $13.7M, and above the <b>all-time record quarter ($18.2M, Q4-25)</b>. Two consecutive quarters averaging above the record, guided as routine.</li>
+    <li>The eight-quarter read is worse than any single quarter: revenue grew +34.7% over two years (58.0 → 78.1) while adjusted-EBITDA <em>dollars</em> went 13.95 → 13.72, i.e. <b>−1.6%</b>. Two years of revenue growth have produced zero EBITDA dollars, and Q2 is the second consecutive sequential decline off the Q4-25 peak.</li>
+    <li>Apply last year's actual +104bp seasonal step to the H1 base: H2 margin 19.3% → H2 EBITDA $31.6M → <b>FY26 $59.6M, 6.9% below the low end of the guide</b>. Even a generous +200bp step lands at $61.2M — still below the low end.</li>
+  </ul>
+  <div class="warnout"><b>Our number: p(FY26 adjusted EBITDA lands inside the $64–68M guide) = 0.30–0.35.</b> The −15.9% is not an overreaction to a $1M trim; it is the market marking the probability that the unchanged back half is unreachable. The honest offset the market ignored: the capex guide was <em>lowered</em> to 8.5–10.0% of revenue (from 9.0–10.5%) because the growth is shifting to less capital-intensive revenue — at the $317M midpoint that saves ~$1.6M of capex against ~$1.0M of EBITDA given up, so <b>the revision is free-cash-flow accretive and EBITDA is the wrong metric for this mix shift</b>. Real, but not enough to make the name a buy at market.</div>
+</div>
+
+<div class="slide">
+  <span class="sno">05</span>
+  <h2>The regulatory file — the feared channel is refuted; a different one is live and dated</h2>
+  <div class="callout"><b>Bear-refuting, verified on primary sources: competitive bidding is NOT a kill channel on the visible horizon.</b> CMS removed non-invasive ventilators from Round 2021 <em>before</em> implementation, then also removed oxygen and PAP; those contracts expired December 2023. The next bidding round is limited to remote-item-delivery categories — continuous glucose monitors, insulin pumps, urological and ostomy supplies, catheters, off-the-shelf braces. <b>Viemed furnishes none of these.</b> The rate channel is also benign: the CY2026 fee-schedule update is <b>+2.0%</b>. Anyone pitching the bear on bidding rounds or rate cuts is refuted by the rule text itself.</div>
+  <p><b>What IS live — found by the review, not by the company:</b></p>
+  <ul>
+    <li><b>CMS-6109-N (91 FR 47972), published July 30, 2026 — four days before the print.</b> It adds E0466 and E0467 — home ventilators, Viemed's largest revenue code — to the <b>required face-to-face-encounter and written-order-prior-to-delivery list, effective October 28, 2026</b>. CMS's stated rationale: ventilators sit "within the top 20 DMEPOS service types with improper payments in 2025" and were flagged as "vulnerable to fraud." Scoped precisely: this is a <em>documentation condition of payment at setup</em> — it is NOT prior authorization and NOT a rate cut.</li>
+    <li><b>An adverse audit ruling on exactly this code, disclosed only in the 10-Q.</b> A CMS program-integrity contractor (Qlarant) issued an extrapolated overpayment determination on the core operating subsidiary's Medicare claims for <em>monthly rental of non-invasive home ventilators</em>: ~$5.9M, reduced to ~$2.2M on appeal — and in <b>June 2026 an administrative law judge ruled against the company</b> on the remainder. Viemed paid in April 2026 (booked to prepaid expenses, no accrual, further appeal intended). The dollars are immaterial; the mechanism is not: a lost extrapolated audit on ventilator medical-necessity documentation invites further audits, prepayment review, and permanently higher documentation cost per patient.</li>
+    <li><b>Magnitude, bounded from analogues:</b> when home health got a face-to-face requirement in 2013–14, setups slowed 5–15% and denials spiked for 2–4 quarters until referral workflows adapted. Medicare ventilator setups are ~16% of Viemed's revenue; a 10% setup slowdown for 2–3 quarters is ~1.6% of revenue at peak, plus incremental documentation cost on an SG&amp;A line already growing 5pp faster than revenue.</li>
+    <li><b>The latency trap:</b> Q4-26 sees only ~2 months of exposure and the Q3 print (~Nov 3) lands <em>before</em> any of it. <b>The first true read on this channel is the Q4 print, ~March 2027.</b> A good Q3 does not retire the regulatory question.</li>
+  </ul>
+  <div class="callout"><b>The bull counter is real and is the basis of our bull scenario:</b> Viemed's model staffs licensed respiratory therapists who visit patients — it may <em>already collect</em> the face-to-face documentation the rule requires. If commodity DME rivals cannot comply cheaply, the rule becomes a referral-share <b>moat</b> rather than a tax. Nobody knows yet; that is exactly why the position is a ladder with a dated review, not a conviction buy.</div>
+</div>
+
+<div class="slide">
+  <span class="sno">06</span>
+  <h2>The honesty read: every number reconciles — the story is what diverges</h2>
+  <p class="big">This is not a fraud finding. Every figure in the release ties to the audited filing data. The finding is <b>takeaway-vs-data divergence by omission, at the exact moment the omitted risk acquired a date.</b></p>
+  <div class="tbl"><table>
+    <tr><th>The marketed takeaway</th><th>The company's own file, same day</th></tr>
+    <tr><td rowspan="4">CEO: "multiple growth engines… confident in Viemed's ability to deliver consistent and <b>increasingly predictable</b> growth"</td><td>63% of revenue growth came from resupply — not the ventilator pillar the release leads with</td></tr>
+    <tr><td>"Record census" conceals nine months of flat-to-declining census, derivable from the release's own two growth rates</td></tr>
+    <tr><td>The June 2026 adverse judge's ruling on extrapolated Medicare overpayments — on the largest revenue code — appears in the 10-Q filed that evening and <b>nowhere in the press release</b>; it appears zero times in the prior annual report and zero times in the Q1 filing</td></tr>
+    <tr><td>The CMS documentation rule published <b>four days earlier</b> with an effective date inside the guided year: <b>zero mentions</b> of face-to-face or written-order requirements in the release or the 10-Q — while the 10-Q's risk-factor section states verbatim, "There have been no material changes in our risk factors"</td></tr>
+  </table></div>
+  <p>The annual report even carried the contingent version: "<em>if CMS were to</em> implement prior authorization or additional documentation requirements applicable to products we furnish…". That hypothetical materialized on July 30 with a Federal Register citation and a date, and the 10-Q filed August 3 asserts no material change and never names it. Within the letter of the disclosure rules — each item individually defensible — but the pattern is a polished story diverging from its own regulatory file on the one axis that matters.</p>
+  <div class="warnout"><b>We grade this a flag, not fraud — and the flag has a price implication:</b> under our discipline, a management this polished about its file is a name to <b>buy lower</b>, not a name to buy <em>because</em> it fell. It is a core reason the verdict is a ladder and not an entry.</div>
+</div>
+
+<div class="slide">
+  <span class="sno">07</span>
+  <h2>The mix-shift bear, modeled instead of vibed — it's bounded, and SG&amp;A is the real swing</h2>
+  <p>The headline bear ("resupply is diluting the margin, the business is breaking") gets smaller when you put numbers on it. Solving the two segments' gross margins from the disclosed mix shift: rentals-and-services ~59.3% vs equipment/supply sales ~52.8% — only a 650bp reported gap (on a cash basis, adding back equipment depreciation, roughly 72.8% vs 52.8%).</p>
+  <ul>
+    <li>Run resupply hot — +40%/+35%/+30%/+25% over four years — against +6% rentals: blended <b>cash gross margin erodes only ~80bp per year</b> (67.6% FY26 → 65.3% FY29).</li>
+    <li><b>With</b> ~300bp/yr of SG&amp;A leverage: adjusted-EBITDA margin settles at <b>20–22%</b> and EBITDA dollars still compound ~18%/yr (FY26 ~$63M → FY29 ~$105M).</li>
+    <li><b>Without</b> any SG&amp;A leverage (SG&amp;A grows with revenue): margin settles at <b>18–19%</b> and EBITDA compounds ~14%/yr.</li>
+  </ul>
+  <p class="big"><b>Either way, mix alone does not break the business. The swing factor is SG&amp;A</b> — the line that just grew 28.9% against 23.9% revenue growth, and the line the Q3 print will grade first.</p>
+  <p class="fine">Honest caveat: the company does not disclose segment margins. The 59.3%/52.8% split is a two-equation solve from the reported mix shift and blended gross margin, not a disclosed figure — and the three-year model rests on it.</p>
+</div>
+
+<div class="slide">
+  <span class="sno">08</span>
+  <h2>Scenarios and the price scale — expected value +13.8%, against a dated risk we'd carry unpaid until March</h2>
+  <div class="scale">
+    <svg viewBox="0 0 900 128" role="img" aria-label="VMD price scale: ladder rungs 7.60 to 9.05, spot 9.84, bear 7.75, weighted fair value 11.20, bull 16.00">
+      <line class="ax" x1="30" y1="72" x2="870" y2="72"/>
+      <line class="tick-r" x1="83"  y1="72" x2="83"  y2="94"/><text class="lb"  x="83"  y="110" text-anchor="middle">7.60</text>
+      <line class="tick-r" x1="153" y1="72" x2="153" y2="94"/><text class="lb"  x="153" y="110" text-anchor="middle">8.40</text>
+      <line class="tick-r" x1="211" y1="72" x2="211" y2="94"/><text class="lb"  x="211" y="110" text-anchor="middle">9.05</text>
+      <line class="tick-f" x1="96"  y1="50" x2="96"  y2="72"/><text class="lb2" x="96"  y="44" text-anchor="middle">bear 7.75</text>
+      <line class="tick-f" x1="405" y1="50" x2="405" y2="72"/><text class="lb2" x="405" y="44" text-anchor="middle">E[FV] 11.20</text>
+      <line class="tick-f" x1="453" y1="50" x2="453" y2="72"/><text class="lb2" x="453" y="24" text-anchor="middle">base 11.75</text>
+      <line class="tick-f" x1="830" y1="50" x2="830" y2="72"/><text class="lb2" x="830" y="44" text-anchor="middle">bull 16.00</text>
+      <circle class="tick-s" cx="278" cy="72" r="6"/><text class="lb" x="278" y="110" text-anchor="middle">spot 9.84</text>
+    </svg>
+    <div class="legend"><span><span class="sw" style="background:var(--rung)"></span>ladder rungs</span><span><span class="sw" style="background:var(--floor)"></span>scenario fair values</span><span><span class="sw" style="background:var(--break);height:8px;width:8px;border-radius:50%"></span>last close</span></div>
+  </div>
+  <div class="tbl"><table>
+    <tr><th>Scenario</th><th class="n">p</th><th class="n">FV</th><th>Basis</th></tr>
+    <tr><td><b>Bear</b></td><td class="n">0.35</td><td class="n">$7.75</td><td>FY26 EBITDA ~$59–60M (misses the guide); the documentation rule costs 2–3 quarters of ventilator setups; SG&amp;A never levers → FY27 EBITDA ~$62–66M at 5.0–5.5× EV/EBITDA (consistent with where AdaptHealth trades)</td></tr>
+    <tr><td><b>Base</b></td><td class="n">0.45</td><td class="n">$11.75</td><td>FY26 ~$62M (modest miss); the rule is a two-quarter friction absorbed by the existing clinical documentation workflow; partial SG&amp;A leverage → FY27 ~$74M at 6.5×. Cross-check: ~$38M free cash flow on ~$485M of equity = 7.8% FCF yield for a mid-teens grower with regulatory beta</td></tr>
+    <tr><td><b>Bull</b></td><td class="n">0.20</td><td class="n">$16.00</td><td>SG&amp;A was genuinely front-loaded against the Q2 census surge; H2 delivers the guide ($66M); the face-to-face rule proves a moat — the respiratory-therapist model already collects the documentation, commodity rivals don't, Viemed takes referral share → FY27 ~$82M at 8.0–8.5×</td></tr>
+  </table></div>
+  <p><b>E[FV] $11.20 vs spot $9.84 = +13.8% expected</b>, against a 35% branch that loses ~21%. That is risk fairly paid with a thin edge overlay — not a fat pitch. The decisive asymmetry: the dated regulatory trigger (Oct 28) sits <em>before</em> the payoff, and the first quarter that reads it reports ~March 2027. We would be paid ~14% expected to carry an unpriced documentation-regime change for three quarters. That is why this is a 5 and not a 6 — and the refuted bidding/rate channels are why it isn't a 4.</p>
+</div>
+
+<div class="slide">
+  <span class="sno">09</span>
+  <h2>The ladder — every rung an address, the bottom one below bear fair value</h2>
+  <div class="tbl"><table>
+    <tr><th>Rung</th><th class="n">Limit</th><th class="n">Shares</th><th class="n">~$</th><th>Technical anchor</th></tr>
+    <tr><td>1</td><td class="n">$9.05</td><td class="n">880</td><td class="n">7,964</td><td>below the May–June 2026 congestion floor (−8% from the close)</td></tr>
+    <tr><td>2</td><td class="n">$8.40</td><td class="n">950</td><td class="n">7,980</td><td>the Feb–Apr 2026 shelf (−15%)</td></tr>
+    <tr><td>3</td><td class="n">$7.60</td><td class="n">1,050</td><td class="n">7,980</td><td><b>below bear fair value $7.75</b> (−23%) — the 2025 breakout base; at this price the regulatory carry is fully paid even if it bites</td></tr>
+  </table></div>
+  <div class="grid">
+    <div class="cell"><p class="h">Size</p><p class="v">~$24k = 0.7%</p><p class="s">of the $3.4M deployable base; ruled cap 1.2% — deliberately the lower half of the band</p></div>
+    <div class="cell"><p class="h">If everything fills</p><p class="v">2,880 sh @ $8.31 avg</p><p class="s">a −15.5% blended entry vs the close, −26% vs the pre-print price</p></div>
+    <div class="cell"><p class="h">Liquidity</p><p class="v">0.8% of one day</p><p class="s">90-day average dollar volume $2.93M/day — at the low end of the note's "$3–5M/day"; size, not liquidity, is the binding constraint</p></div>
+  </div>
+  <ul>
+    <li><b>Orders:</b> GTC to <b>November 15, 2026</b> — carries through the Q3 print, then cancel and reprice. No market orders, and <b>no chasing the 9.84 gap</b>: the tape has merely returned to the top of the prior base.</li>
+    <li><b>Pre-condition — CLEARED Aug 5, 2026:</b> the CMS listing was re-verified at the primary source (Federal Register doc 2026-15446 via govinfo): E0466 and E0467 appear verbatim in Table 2's additions to the <em>required</em> face-to-face/written-order list, effective October 28, 2026; the prior-authorization table (Table 3) excludes ventilators; the CERT top-20 rationale names ventilators. One softening nuance the first pass missed: CMS cites no ventilator-specific improper-payment rate (orthoses drew 40–48%). The bear datum stands as scoped — documentation burden, not prior authorization.</li>
+    <li><b>The wrong-side test — passed:</b> these rungs are reachable on ordinary drift, the sector's continued pressure, or the pending sell-side downgrade wave — paths that do not by themselves break the thesis. A limit that fills only on thesis-death is a trap dressed as discipline; that is not this ladder.</li>
+  </ul>
+</div>
+
+<div class="slide">
+  <span class="sno">10</span>
+  <h2>Tripwires — all dated, none discretionary</h2>
+  <div class="tbl"><table>
+    <tr><th>Clock</th><th>When</th><th>Rule</th></tr>
+    <tr><td>Q3-26 print</td><td class="n">~Nov 3 · graded Nov 10</td><td>The decisive read: adj-EBITDA margin <b>≥21%</b>, FY guide held <b>≥$64M</b>, Sept-30 census <b>&gt;12,635</b>, and <b>no new audit / prepayment review / prior-auth requirement</b>. It settles the SG&amp;A-leverage question only — it lands before the documentation rule can show up in the numbers</td></tr>
+    <tr><td>CMS rule effective</td><td class="n">Oct 28</td><td>No move expected on the date itself; the effect shows in the Q4 print (~March 2027), which is the first true read on setup friction</td></tr>
+    <tr><td>Ladder expiry</td><td class="n">Nov 15</td><td>All rungs die; reprice only after the Q3 evidence is graded — never roll blind through a verdict date</td></tr>
+    <tr><td>Any Federal Register master-list update</td><td class="n">continuous</td><td>E0466/E0467 added to the required <em>prior-authorization</em> list (our p ≈ 0.20 by end-2027) → <b>kill immediately</b> — that escalates a documentation condition into a pre-approval queue, worth −20–30%</td></tr>
+  </table></div>
+  <h3>What kills vs what merely re-sizes</h3>
+  <div class="tbl"><table>
+    <tr><th>Trigger (at or before the Q3 print)</th><th>Action</th></tr>
+    <tr><td>Q3 adj-EBITDA margin below 20.0%</td><td>the H2 ramp is dead — cancel the ladder, close the file</td></tr>
+    <tr><td>Sept-30 census reported below 12,635 (sequential decline)</td><td>the one genuinely good datum reverses — kill</td></tr>
+    <tr><td>FY26 guide cut below $62M</td><td>kill</td></tr>
+    <tr><td>Any new or expanded program-integrity audit, prepayment review, or an accrual on the audit matter</td><td>kill</td></tr>
+    <tr><td>SG&amp;A above 48.5% of revenue in Q3</td><td>the "deliberate investment" framing is refuted; the deleverage is structural — kill</td></tr>
+    <tr><td>Net capex guide revised back above 10.0% of revenue</td><td>the FCF-accretive offset anchoring the bull case is gone — kill</td></tr>
+  </table></div>
+  <p class="fine"><b>Why the instrument is a sized-down ladder and not a price gate:</b> the finding type picks the tool. A business-risk finding cuts <em>size</em> — that is why this is 0.7%, the lower half of the 1.2% cap. A timing finding tranches the entry — that is why it is three dated rungs, not one order. Only a data failure kills a file outright, and every number here reconciled. A price gate alone would be the wrong tool: getting the price does not retire the regulatory question.</p>
+</div>
+
+<div class="slide">
+  <span class="sno">11</span>
+  <h2>The verification table — including where our own first note was wrong</h2>
+  <div class="tbl"><table>
+    <tr><th>Claim</th><th>Checked against</th><th>Finding</th></tr>
+    <tr><td>"Fell −15.9%, closed ~$9.40"</td><td>Exchange bars + live quote</td><td><b>CONFIRMED on magnitude, REFUTED on level</b> — −15.83%, closed 9.84; 9.50 was the intraday low, it never closed at 9.40</td></tr>
+    <tr><td>NYSE-listed (our first note)</td><td>Broker contract record</td><td><b>REFUTED — NASDAQ</b></td></tr>
+    <tr><td>Net cash "$10.7M cash vs $7.1M debt" read as a fortress</td><td>Q2 balance sheet, capital structure pulled in full</td><td><b>CORRECTED — net cash is $3.6M, thin not fortress</b>; no preferred, converts or warrants (8.0% option/RSU overhang); real liquidity is the $46M undrawn revolver</td></tr>
+    <tr><td>Guide: EBITDA trimmed $1M, revenue low end raised</td><td>Earnings-release exhibit, verbatim</td><td><b>CONFIRMED</b> — $64–68M vs $65–69M; $314–320M vs $312–320M</td></tr>
+    <tr><td>Q2 revenue +23.9% to a record $78.1M</td><td>Audited filing data (XBRL)</td><td><b>CONFIRMED</b> — 78.097 vs 63.056</td></tr>
+    <tr><td>Trailing FCF $34.4M ≈ 9% of market cap</td><td>Cash-flow statement + release reconciliation</td><td><b>CONFIRMED with a caveat</b> — the company nets $5.2M of disposal proceeds against capex; gross-capex FCF is $29.2M, and it's 8.5% of the <em>diluted</em> cap</td></tr>
+    <tr><td>"63% of growth is the ventilator pillar"</td><td>10-Q revenue disaggregation</td><td><b>REFUTED</b> — 62.9% of growth is equipment/supply sales; ventilator rentals +7.7% y/y</td></tr>
+    <tr><td>Medicare exposure is a single-code kill shot</td><td>Payer notes, 10-Q and annual report</td><td><b>OVERSTATED</b> — Medicare 35% of H1 revenue and falling; Medicare ventilator rental realistically 20–25% of revenue: real but bounded</td></tr>
+    <tr><td>Competitive bidding threatens the book</td><td>Annual report bidding section, verbatim</td><td><b>REFUTED</b> — the next round's categories exclude everything Viemed sells</td></tr>
+    <tr><td>A dated CMS rule touches the core code</td><td>Federal Register, primary rule text</td><td><b>CONFIRMED</b> — CMS-6109-N, published Jul 30, effective Oct 28; documentation condition of payment, not prior auth, not a rate cut</td></tr>
+  </table></div>
+  <div class="warnout"><b>The two known gaps, stated as gaps:</b> (1) the <b>Q2 earnings-call transcript is UNREAD</b> — three retrieval routes failed. Management's own explanation of the SG&amp;A step and the H2 bridge is therefore unheard; the stock falling <em>through</em> the call suggests the Q&amp;A didn't reassure, but that is inference from the tape, and the transcript gets read before any rung fills. (2) The claim that AdaptHealth's supplier price increase transmits to Viemed's costs is <b>UNVERIFIED</b> — the "$30M manufacturer hike" could not be sourced anywhere, nothing shows in Viemed's Q2 cost bridge, and if real it bounds at ≤4% of EBITDA (rental-device costs are capitalized, not expensed). Bounded, invisible so far, and genuinely unverified — we don't size on it, and we don't pretend it's clean. Also unverified: the sell-side consensus (the "41.7% EPS miss" headline is a secondary source) and the analyst count (estimated 4–6).</div>
+</div>
+
+<div class="slide">
+  <span class="sno">12</span>
+  <h2>The frozen prediction — graded in public against our own number on November 10</h2>
+  <p class="big">Frozen August 4, never revised: <b>p = 0.28</b> that <b>all four</b> of the following hold as of the Q3 report. The market's implied probability after a −15.9% day is arguably 0.45–0.55; we are materially below it because leg 1 alone requires a +344bp margin step off the Q2 exit rate in a single quarter.</p>
+  <div class="tbl"><table>
+    <tr><th>Leg</th><th>Bar</th><th class="n">Our leg-wise p</th></tr>
+    <tr><td>1</td><td>Q3 adjusted-EBITDA margin ≥ 21.0%</td><td class="n">0.40</td></tr>
+    <tr><td>2</td><td>FY26 adjusted-EBITDA guide maintained ≥ $64M</td><td class="n">0.85</td></tr>
+    <tr><td>3</td><td>Sept-30 ventilator census above 12,635</td><td class="n">0.75</td></tr>
+    <tr><td>4</td><td>No new Medicare prepayment review, program-integrity audit, or E0466 prior-authorization requirement disclosed</td><td class="n">0.80</td></tr>
+  </table></div>
+  <p class="fine">Naive joint probability 0.20, adjusted to 0.28 for positive correlation among legs 1–3 (a quarter strong enough to clear the margin bar likely clears census and keeps the guide).</p>
+  <div class="tbl"><table>
+    <tr><th>Branch</th><th>Consequence</th></tr>
+    <tr><td><b>All four hold (HIT)</b></td><td>The SG&amp;A-leverage thesis is validated — guide credibility restored; conviction rises to 6–7 and the ladder converts toward at-market tranches. The regulatory question stays OPEN until the Q4 print regardless</td></tr>
+    <tr><td><b>Leg 1 fails, legs 2–4 hold (MISS)</b></td><td>The ramp is back-loaded into Q4 alone, which is not credible — hold the ladder but cut the target to 0.5% and drop the top rung to 8.60</td></tr>
+    <tr><td><b>Leg 2 or 3 fails</b></td><td>A kill trigger fires — the proposal cancels the ladder and closes the file; the armed record allows one softer census-only branch (bottom rung only). The stricter reading governs until reconciled at grading</td></tr>
+    <tr><td><b>Leg 4 fails</b></td><td><b>Regulatory kill — close the file regardless of the other legs.</b> The documentation channel is the thesis-breaker</td></tr>
+  </table></div>
+  <p class="fine">A MISS is our <em>expected</em> path (p = 0.28 means we expect the four-leg parlay to fail ~72% of the time) — in that world the ladder stands and the deep rungs are the expression. Either way the number grades against the tape on November 10, in public, next to this deck.</p>
+  <p class="fine"><b>Position: none; ladder staged Aug 5 pending submission.</b> The CMS re-verification cleared the same day at the primary source.</p>
+  <p class="fine"><b>Disclaimer.</b> This document is personal research, prepared for internal decision-making and informational purposes only. It is not financial, investment, tax, or legal advice, and it is not an offer or a solicitation to buy or sell any security. The author is not a financial advisor, registered investment adviser, or broker-dealer. Figures reflect a good-faith effort at verification against primary sources (the Aug-3 earnings release and 10-Q, audited XBRL filing data, the Federal Register rule text, and live exchange data as of August 4, 2026), but errors are possible and numbers go stale; where something could not be verified, it is labeled unverified rather than assumed. Positions may change without notice. Do your own research and consult a licensed professional before making any investment decision.</p>
+</div>
+
+</div>

@@ -1,0 +1,279 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>cef_term_liquidation_scanner</title><style>
+body{margin:0;background:#0b0e12;color:#e8ebee;font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:26px 24px 90px}
+a{color:#8b7cf6} h1{font-size:23px;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:#7d858e;margin:0 0 20px;font-size:13px}
+h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:#7d858e;margin:24px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 10px;border-bottom:1px solid #242a31;text-align:left;vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#7d858e}
+.k{font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:20px}
+.k-generator{color:#c3b8fb;background:rgba(139,124,246,.15)}
+.k-detector{color:#eccb8a;background:rgba(217,164,65,.15)}
+.k-watcher{color:#8ee5c1;background:rgba(53,201,143,.15)}
+.k-evidence{color:#b3bcc6;background:rgba(138,147,158,.15)}
+.h-OK{color:#35c98f} .h-STALE{color:#d9a441} .h-ERROR{color:#e0736a} .h-NEVER_RUN{color:#8a939e}
+pre{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px;overflow-x:auto;font-size:12px;line-height:1.5}
+.panel{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px 18px;margin-bottom:12px}
+ul{margin:4px 0;padding-left:20px} li{margin-bottom:4px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+</style></head><body><div class="wrap"><h1>cef_term_liquidation_scanner</h1><p class="sub">registered capability · cef_term_liquidation_scanner</p><a href="signals.html">&larr; all signals</a><div class="panel" style="margin-top:10px"><span class="k k-generator">GENERATOR</span> &nbsp;<span class="h-NEVER_RUN"><b>NEVER_RUN</b></span> · last run <span class="mono">never</span></div><p>Stage 0b CARRY generator: TERM / TARGET-TERM CEFs converging to NAV.</p><form method="POST" action="/signals/run" style="margin:10px 0"><input type="hidden" name="name" value="cef_term_liquidation_scanner"><input name="symbol" placeholder="symbol (if applicable)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px"><input name="symbols" placeholder="universe, comma-sep (generators)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px;margin-left:6px"><button type="submit" style="background:#8b7cf6;color:#0b0e12;border:0;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;margin-left:6px">Run now</button></form><h2>Datasources</h2><ul><li>reference implementation: verticals/generators/cef_term_liquidation_scanner.py (see the code section for the feeds it touches)</li></ul><h2>Applies to</h2><ul><li><b>strategies:</b> bonds</li></ul><h2>The code</h2><pre>&quot;&quot;&quot;cef_term_liquidation_scanner — Stage 0b CARRY generator: TERM / TARGET-TERM CEFs converging to NAV.
+
+THE TERMINATION DATE IS THE EDGE. A TERM (or target-term) closed-end fund has a STATED
+termination/liquidation date baked into its prospectus. On that date the fund winds down and returns
+its NET ASSET VALUE per share to holders (target-term funds are structured to return ~the original
+$ offering NAV; plain term funds return the then-current NAV). So a term CEF&#x27;s discount-to-NAV is a
+DATED, MECHANICAL convergence: buy the discount, and as the termination date approaches the discount
+is pulled to ~zero (you collect (nav - price)/nav on top of the fund&#x27;s distributions). The nearer the
+term date and the wider the discount, the higher the annualized convergence carry.
+
+Institutions ignore the small/illiquid odd-lot names in this universe — exactly the office-thesis
+capacity edge (fee-replication CARRY, capacity-ceilinged). A small investor + AI screening the whole
+term-CEF universe IS the edge.
+
+MECHANISM NOTE (why this is a NEW leg): our prior frontrun_engine CEF work REFUTED the pre-IPO NAV
+re-mark leg (price LEADS the sponsor&#x27;s mark — no frontrun there). THIS is a DIFFERENT mechanism: the
+term date is a hard contractual forcing event that pulls price to NAV regardless of who leads the
+daily mark. Untested here — this generator surfaces the candidates; the convergence itself is the DD.
+
+v1 screens a SEED universe of KNOWN term / target-term CEFs (ticker + VERIFIED stated termination
+date) on the two things computable from live data:
+  1. PRICE  — live last close (yfinance)
+  2. NAV    — the fund&#x27;s daily NAV, via the &#x27;X&lt;TICKER&gt;X&#x27; NAV pseudo-quote (e.g. XBTTX for BTT);
+              fall back to yfinance navPrice. If NAV won&#x27;t resolve cleanly, discount is left NULL
+              and FLAGGED (honest coverage gap) — a NAV is NEVER fabricated.
+  → discount_to_nav = (nav - price)/nav ; days_to_term ; annualized_convergence = discount / (days/365).
+
+The universe is a SEED to EXPAND + VERIFY; unresolvable tickers self-drop (reported, never silent).
+Term dates are hardcoded from PRIMARY sources (prospectus/fact sheet) with a per-name source note —
+NO term date is guessed; a name whose date can&#x27;t be verified is dropped from the seed, not invented.
+
+    python3 verticals/generators/cef_term_liquidation_scanner.py
+Writes data/CEF_TERM.json. READ-ONLY. (A CARRY generator — never an order.)
+&quot;&quot;&quot;
+from __future__ import annotations
+
+import datetime
+import json
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+OUT = HERE / &quot;data&quot; / &quot;CEF_TERM.json&quot;
+HDRS = {&quot;User-Agent&quot;: &quot;signalos-research 4tripathy@gmail.com&quot;}
+
+# ---------------------------------------------------------------------------------------------------
+# SEED universe of TERM / TARGET-TERM CEFs. Each row: ticker | name | term_date (YYYY-MM-DD) | source.
+# term_date is the STATED termination/liquidation date from a PRIMARY source (prospectus/fact sheet).
+# Where only a month is disclosed, the date is set to the disclosed end-of-term month-end (noted).
+# A SEED to EXPAND (v2: auto-discover the term-CEF universe via N-2/N-CEN filings). Names that have
+# already terminated, or whose date can&#x27;t be verified, are DROPPED — never guessed. Unresolvable
+# tickers self-drop at scan time (reported in `dropped`).
+# ---------------------------------------------------------------------------------------------------
+SEED = [
+    # nearest-dated first. All dates verified from a PRIMARY source (prospectus/N-2/N-CSR/sponsor page).
+    # NOTE: for most of these the stated date is a SOFT target — boards can extend or, after an
+    # &quot;Eligible Tender Offer&quot;, convert to perpetual (esp. all RiverNorth, NMCO, NDMO, BGB, BSL, WDI, ETX).
+    # Treat the term as a schedule with embedded optionality, not a hard bond maturity (see caveats).
+    (&quot;BSL&quot;,  &quot;Blackstone Senior Floating Rate 2027 Term Fund&quot;,      &quot;2027-05-31&quot;, &quot;src: Blackstone fund page / Businesswire 2026-05-29&quot;),
+    (&quot;BGB&quot;,  &quot;Blackstone Strategic Credit 2027 Term Fund&quot;,          &quot;2027-09-15&quot;, &quot;src: Blackstone fund page (dissolves absent extension)&quot;),
+    (&quot;ETX&quot;,  &quot;Eaton Vance Municipal Income 2028 Term Trust&quot;,        &quot;2028-06-30&quot;, &quot;src: Eaton Vance fund page + N-CSR (15y term, Board may extend &lt;=12mo)&quot;),
+    (&quot;RMI&quot;,  &quot;RiverNorth Opportunistic Municipal Income Fund&quot;,      &quot;2030-10-25&quot;, &quot;src: N-CSR / RiverNorth page (extendable to 2031-10 / 2032-04)&quot;),
+    (&quot;BTT&quot;,  &quot;BlackRock Municipal 2030 Target Term Trust&quot;,          &quot;2030-12-31&quot;, &quot;src: prospectus / N-CSR (targets return of $25.00/sh)&quot;),
+    (&quot;PDX&quot;,  &quot;PIMCO Dynamic Income Strategy Fund&quot;,                  &quot;2031-01-29&quot;, &quot;src: PIMCO CEF release (ex-NRGX, renamed Nov-2023)&quot;),
+    (&quot;RMM&quot;,  &quot;RiverNorth Managed Duration Municipal Income Fund&quot;,   &quot;2031-07-25&quot;, &quot;src: N-CSR (extendable +1yr / +6mo)&quot;),
+    (&quot;NMCO&quot;, &quot;Nuveen Municipal Credit Opportunities Fund&quot;,          &quot;2031-10-01&quot;, &quot;src: N-2 (Board may extend 2x1yr)&quot;),
+    (&quot;NDMO&quot;, &quot;Nuveen Dynamic Municipal Opportunities Fund&quot;,         &quot;2032-09-01&quot;, &quot;src: N-2 / prospectus (Board may extend 2x1yr)&quot;),
+    (&quot;PDO&quot;,  &quot;PIMCO Dynamic Income Opportunities Fund&quot;,             &quot;2033-01-27&quot;, &quot;src: PIMCO CEF press release&quot;),
+    (&quot;WDI&quot;,  &quot;Western Asset Diversified Income Fund&quot;,               &quot;2033-06-24&quot;, &quot;src: Franklin/FT N-2 (dissolution date)&quot;),
+    (&quot;PAXS&quot;, &quot;PIMCO Access Income Fund&quot;,                            &quot;2034-01-27&quot;, &quot;src: PIMCO CEF press release&quot;),
+    (&quot;RFM&quot;,  &quot;RiverNorth Flexible Municipal Income Fund&quot;,           &quot;2035-03-26&quot;, &quot;src: prospectus (extendable to 2036-03 / 2036-09)&quot;),
+    (&quot;RFMZ&quot;, &quot;RiverNorth Flexible Municipal Income Fund II&quot;,        &quot;2036-02-26&quot;, &quot;src: N-2 / prospectus&quot;),
+    (&quot;BMN&quot;,  &quot;BlackRock 2037 Municipal Target Term Trust&quot;,          &quot;2037-01-23&quot;, &quot;src: BlackRock fund page / N-2&quot;),
+    (&quot;RMMZ&quot;, &quot;RiverNorth Managed Duration Municipal Income Fund II&quot;,&quot;2037-02-16&quot;, &quot;src: N-2 / prospectus (extendable +1yr / +6mo)&quot;),
+]
+
+WIDE_DISCOUNT = 0.03      # &gt;=3% below NAV = a convergence candidate worth flagging
+NEAR_TERM_DAYS = 365 * 3  # &lt;=~3y to term = the convergence pull is meaningfully annualized
+
+
+def _nav_price_via_yf(ticker: str):
+    &quot;&quot;&quot;Live price + NAV for a CEF. price from yfinance; NAV via the &#x27;X&lt;TICKER&gt;X&#x27; NAV pseudo-quote
+    (the data-vendor convention CEF NAVs publish under), falling back to yfinance navPrice.
+    Returns (price, nav, nav_source) — any of price/nav may be None (self-prune / honest NULL).&quot;&quot;&quot;
+    import yfinance as yf
+
+    def _last(sym):
+        try:
+            tk = yf.Ticker(sym)
+            fi = getattr(tk, &quot;fast_info&quot;, {}) or {}
+            px = fi.get(&quot;last_price&quot;) or fi.get(&quot;lastPrice&quot;)
+            if px:
+                return float(px), tk
+            info = tk.info or {}
+            px = info.get(&quot;regularMarketPrice&quot;) or info.get(&quot;previousClose&quot;)
+            if px:
+                return float(px), tk
+            hist = tk.history(period=&quot;5d&quot;)
+            if len(hist):
+                cl = hist[&quot;Close&quot;].dropna()
+                if len(cl):
+                    return float(cl.iloc[-1]), tk
+        except Exception:
+            return None, None
+        return None, None
+
+    price, tk = _last(ticker)
+
+    # NAV: try yfinance navPrice first (rarely populated for CEFs), then the X&lt;TICKER&gt;X pseudo-quote.
+    nav, nav_source = None, None
+    try:
+        if tk is not None:
+            info = tk.info or {}
+            npv = info.get(&quot;navPrice&quot;)
+            if npv:
+                nav, nav_source = float(npv), &quot;yfinance navPrice&quot;
+    except Exception:
+        pass
+    if nav is None:
+        nav_sym = f&quot;X{ticker.upper()}X&quot;
+        navpx, _ = _last(nav_sym)
+        if navpx:
+            nav, nav_source = navpx, f&quot;NAV pseudo-quote {nav_sym}&quot;
+    return price, nav, nav_source
+
+
+def scan() -&gt; dict:
+    today = datetime.date.today()
+    resolved, dropped, rows = 0, [], []
+
+    for ticker, name, term_date, source in SEED:
+        # drop names already past their term date (nothing left to converge)
+        try:
+            td = datetime.date.fromisoformat(term_date)
+        except Exception:
+            dropped.append({&quot;ticker&quot;: ticker, &quot;why&quot;: f&quot;unparseable term_date {term_date!r}&quot;})
+            continue
+        days_to_term = (td - today).days
+        if days_to_term &lt; 0:
+            dropped.append({&quot;ticker&quot;: ticker, &quot;why&quot;: f&quot;already terminated ({term_date})&quot;})
+            continue
+
+        price, nav, nav_source = _nav_price_via_yf(ticker)
+        if price is None:
+            dropped.append({&quot;ticker&quot;: ticker, &quot;why&quot;: &quot;no live price (yfinance unresolved)&quot;})
+            continue
+        resolved += 1
+
+        note_bits = []
+        discount_pct, annualized = None, None
+        if nav is not None and nav &gt; 0:
+            disc = (nav - price) / nav
+            discount_pct = round(disc * 100, 2)
+            yrs = days_to_term / 365.0
+            if yrs &gt; 0:
+                annualized = round((disc / yrs) * 100, 2)
+            note_bits.append(f&quot;NAV from {nav_source}&quot;)
+        else:
+            note_bits.append(&quot;NAV UNRESOLVED (no X&lt;ticker&gt;X pseudo-quote / navPrice) — discount NULL, &quot;
+                             &quot;FLAG: pull NAV from the sponsor&#x27;s daily fact sheet&quot;)
+        note_bits.append(source)
+
+        rows.append({
+            &quot;ticker&quot;: ticker, &quot;name&quot;: name,
+            &quot;term_date&quot;: term_date, &quot;days_to_term&quot;: days_to_term,
+            &quot;price&quot;: round(price, 2),
+            &quot;nav&quot;: round(nav, 4) if nav is not None else None,
+            &quot;discount_pct&quot;: discount_pct,
+            &quot;annualized_convergence&quot;: annualized,
+            &quot;note&quot;: &quot; | &quot;.join(note_bits),
+        })
+
+    # candidates = a KNOWN wide discount within the near-term window (the annualized convergence trade).
+    cands = [r for r in rows
+             if r[&quot;discount_pct&quot;] is not None
+             and r[&quot;discount_pct&quot;] &gt;= WIDE_DISCOUNT * 100
+             and r[&quot;days_to_term&quot;] &lt;= NEAR_TERM_DAYS]
+    cands.sort(key=lambda r: -(r[&quot;annualized_convergence&quot;] or -99))
+
+    priced = [r for r in rows if r[&quot;discount_pct&quot;] is not None]
+    nav_gap = [r[&quot;ticker&quot;] for r in rows if r[&quot;discount_pct&quot;] is None]
+
+    return {
+        &quot;asof&quot;: today.isoformat(),
+        &quot;n_universe&quot;: len(SEED),
+        &quot;n_resolved&quot;: resolved,
+        &quot;n_nav_resolved&quot;: len(priced),
+        &quot;nav_coverage_pct&quot;: round(100 * len(priced) / resolved, 1) if resolved else None,
+        &quot;candidates&quot;: cands,
+        &quot;all_priced&quot;: sorted(priced, key=lambda r: -(r[&quot;discount_pct&quot;] or -99)),
+        &quot;nav_coverage_gap&quot;: nav_gap,
+        &quot;dropped&quot;: dropped,
+        &quot;distribution&quot;: {
+            &quot;n_priced&quot;: len(priced),
+            &quot;n_wide_disc_near_term&quot;: len(cands),
+            &quot;median_discount_pct&quot;: round(sorted(r[&quot;discount_pct&quot;] for r in priced)[len(priced) // 2], 2) if priced else None,
+        },
+        &quot;caveats&quot;: [
+            &quot;TARGET-TERM vs PLAIN TERM: a TARGET-term fund is STRUCTURED to return ~the original $ NAV &quot;
+            &quot;at termination (e.g. $25); a plain TERM fund returns the then-current NAV (which can drift). &quot;
+            &quot;This scanner converges price-&gt;CURRENT NAV; for target-term names also compare price to the &quot;
+            &quot;target return-of-capital amount, which is the harder floor.&quot;,
+            &quot;NAV COVERAGE IS THE KEY LIMITATION: NAV comes from the &#x27;X&lt;ticker&gt;X&#x27; pseudo-quote (a data-vendor &quot;
+            &quot;convention) or yfinance navPrice; neither is guaranteed per name. Names with no NAV are in &quot;
+            &quot;nav_coverage_gap with discount NULL — never a fabricated NAV. v2 needs a robust NAV feed.&quot;,
+            &quot;DISTRIBUTIONS ERODE NAV: term/muni CEFs pay out; the NAV you converge to is net of the &quot;
+            &quot;distribution stream. Total return = convergence + distributions - any NAV drift. Don&#x27;t count &quot;
+            &quot;the discount as pure alpha on top of a NAV that is itself declining from over-distribution.&quot;,
+            &quot;TERM CAN BE EXTENDED / CONVERTED: boards can extend the term, convert to perpetual, or run a &quot;
+            &quot;tender at &lt;100% of NAV — read the latest N-CSR/proxy. An &#x27;eligible tender offer&#x27; (common in the &quot;
+            &quot;target-term series) may repurchase only a slice at ~98-100% of NAV, not the whole position.&quot;,
+            &quot;LEVERAGE UNWIND + ILLIQUIDITY at termination: the fund sells assets into the wind-down; muni &quot;
+            &quot;names especially can realize NAV below the last mark in a stressed tape. The convergence is to &quot;
+            &quot;the REALIZED liquidation NAV, not necessarily today&#x27;s struck NAV.&quot;,
+            &quot;PRIOR CEF FRONTRUN LEG WAS REFUTED: the pre-IPO NAV re-mark frontrun failed (price LEADS the &quot;
+            &quot;mark). This is the term-EVENT leg (a hard contractual forcing date), a different mechanism — &quot;
+            &quot;untested; the term-convergence itself is the DD, not a proven alpha.&quot;,
+        ],
+        &quot;note&quot;: &quot;CARRY class — TERM / TARGET-TERM CEFs converge their discount-to-NAV to ~zero on a DATED &quot;
+                &quot;termination event (prospectus liquidation date). Buy the discount, collect the mechanical &quot;
+                &quot;pull-to-NAV; nearer the date + wider the discount = higher annualized convergence. &quot;
+                &quot;Odd-lot / illiquid names institutions ignore = the office capacity edge. Price live from &quot;
+                &quot;yfinance; NAV from the X&lt;ticker&gt;X pseudo-quote (honest NULL where it won&#x27;t resolve). Term &quot;
+                &quot;dates are hardcoded from PRIMARY sources (prospectus/fact sheet) per the source note — a &quot;
+                &quot;SEED to EXPAND (v2: auto-discover via N-2/N-CEN filings + a robust NAV feed + an &quot;
+                &quot;activist-tender leg). NOT proven alpha: the term-convergence mechanism is untested here &quot;
+                &quot;(distinct from the REFUTED pre-IPO frontrun leg) — the convergence is the DD.&quot;,
+    }
+
+
+def main():
+    res = scan()
+    OUT.write_text(json.dumps(res, indent=1))
+    d = res[&quot;distribution&quot;]
+    print(f&quot;=== CEF TERM / TARGET-TERM LIQUIDATION SCANNER  {res[&#x27;asof&#x27;]}  &quot;
+          f&quot;({res[&#x27;n_resolved&#x27;]}/{res[&#x27;n_universe&#x27;]} resolved, NAV {res[&#x27;n_nav_resolved&#x27;]}/{res[&#x27;n_resolved&#x27;]} &quot;
+          f&quot;= {res[&#x27;nav_coverage_pct&#x27;]}% coverage) ===&quot;)
+    print(f&quot;  distribution: {d[&#x27;n_priced&#x27;]} priced | {d[&#x27;n_wide_disc_near_term&#x27;]} WIDE-disc &amp; near-term | &quot;
+          f&quot;median disc {d[&#x27;median_discount_pct&#x27;]}%&quot;)
+    if res[&quot;candidates&quot;]:
+        print(&quot;  WIDE-DISCOUNT NEAR-TERM CANDIDATES (buy the discount; verify term/tender terms in the proxy):&quot;)
+        for r in res[&quot;candidates&quot;][:15]:
+            yrs = r[&quot;days_to_term&quot;] / 365.0
+            print(f&quot;    {r[&#x27;ticker&#x27;]:6} {r[&#x27;name&#x27;][:34]:34} px ${r[&#x27;price&#x27;]:6.2f} nav ${r[&#x27;nav&#x27;]:7.4f} &quot;
+                  f&quot;{r[&#x27;discount_pct&#x27;]:+5.2f}% disc  term {r[&#x27;term_date&#x27;]} ({yrs:4.1f}y)  &quot;
+                  f&quot;~{r[&#x27;annualized_convergence&#x27;]:+5.2f}%/yr&quot;)
+    else:
+        print(&quot;  no wide-discount near-term names this run — tightest of the priced set:&quot;)
+        for r in res[&quot;all_priced&quot;][:10]:
+            print(f&quot;    {r[&#x27;ticker&#x27;]:6} {r[&#x27;name&#x27;][:34]:34} px ${r[&#x27;price&#x27;]:6.2f} nav ${r[&#x27;nav&#x27;]:7.4f} &quot;
+                  f&quot;{r[&#x27;discount_pct&#x27;]:+5.2f}% disc  term {r[&#x27;term_date&#x27;]}&quot;)
+    if res[&quot;nav_coverage_gap&quot;]:
+        print(f&quot;  NAV coverage gap (discount NULL, FLAGGED): {res[&#x27;nav_coverage_gap&#x27;]}&quot;)
+    if res[&quot;dropped&quot;]:
+        print(f&quot;  dropped (unresolved/terminated, {len(res[&#x27;dropped&#x27;])}): {[x[&#x27;ticker&#x27;] for x in res[&#x27;dropped&#x27;]]}&quot;)
+    print(f&quot;[-&gt; {OUT.name}]&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</pre></div></body></html>

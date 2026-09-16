@@ -1,0 +1,147 @@
+{
+  "ticker": "PLUG",
+  "scores": [
+    {
+      "claim_id": "PLUG-1",
+      "claim_text": "Plug has deployed more than 74,000 fuel cell systems and operates more than 275 fueling stations.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["nrel_fuel: 0 stations matching 'Plug' operator name out of 93 hydrogen stations pre-cutoff"],
+      "M_check": "nrel_fuel.query_alt_fuel_stations (HY, Plug)",
+      "M_value": "matching_stations_count=0 / total_stations_pre_cutoff=93",
+      "interpretation": "Source-jurisdiction mismatch (Calibration Heuristic 5/6). NREL Alt Fuel Stations Locator covers PUBLIC-retail hydrogen stations (heavily California, True Zero, Shell, Iwatani). Plug's 275 'fueling stations' are overwhelmingly on-site material-handling fueling at Walmart/Amazon/Home Depot DCs, not retail. Absence in NREL is expected and does not contradict. Cannot independently corroborate cumulative deployed count at this source — UNVERIFIABLE rather than RED."
+    },
+    {
+      "claim_id": "PLUG-2",
+      "claim_text": "Walmart accounted for 24.2% ($171.8M) of total consolidated revenues in FY2025, but on December 30, 2025, Plug forfeited all vested Walmart warrants and Walmart received only a contingent limited-use license to GenKey escrowed materials.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": [
+        "Walmart 10-K/10-Q (CIK 0000104169) since 2024-01-01 contains ZERO hits for 'Plug Power' AND ZERO hits for 'GenKey'",
+        "10-K self-disclosure: Walmart warrant fully forfeited/cancelled 12/30/2025; Plug ALSO gave Walmart a contingent license to GenKey escrowed materials (a customer-protection / source-code escrow trigger — typical of vendor distress / change-of-control or quality-failure scenarios)",
+        "Revenue contains a $29.2M warrant non-cash provision charge, meaning headline $171.8M Walmart revenue is partially non-cash"
+      ],
+      "M_check": "edgar_fts.query_fulltext (search_term in {'Plug Power','GenKey'}, cik=Walmart 0000104169)",
+      "M_value": "total_hits=0 for both queries",
+      "interpretation": "Counterparty-disclosure threshold (Layer 3 Rule 7): Walmart's $681B revenue makes $171.8M Plug spend immaterial, so Walmart silence is not by itself a hard contradiction. HOWEVER: the 10-K self-disclosure of warrant cancellation AND grant of a contingent limited-use license to GenKey escrowed materials on 12/30/2025 is a major adverse signal — source-code/IP-escrow release to a customer typically triggers on vendor financial distress, breach, or wind-down events. Combined with warrant cancellation and the disclosed customer-concentration risk in Risk Factors that 'a limited number of customers may delay, reduce, cancel, or renegotiate orders,' this materially elevates the customer-concentration risk on Plug's #1 customer. Apply Heuristic 11 (warrant-revenue obscuring cash conversion). SEVERE_UNDERDELIVERY: the warrant-cancellation + escrow-license + non-cash warrant charge structure on the largest customer is itself a leading distress signal."
+    },
+    {
+      "claim_id": "PLUG-3",
+      "claim_text": "Amazon entered a 2022 Transaction Agreement under which Amazon agreed to purchase hydrogen fuel through August 24, 2029, with warrant vesting tied to up to $2.1B aggregate Amazon payments.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "EDGAR Amazon (CIK 0001018724) 'Plug Power' fulltext since 2022-01-01: only 1 hit (the October 2022 8-K when the deal was first signed). No subsequent Amazon 10-K/10-Q/8-K mentions Plug Power.",
+        "Plug 10-K reports the 2022 Amazon warrant is exercisable through August 2029 and would fully vest at $2.1B aggregate Amazon payments — but Plug does NOT disclose the cumulative Amazon payment progress toward that $2.1B trigger in the FY2025 10-K."
+      ],
+      "M_check": "edgar_fts.query_fulltext (search_term='Plug Power', cik=AMZN 0001018724)",
+      "M_value": "total_hits=1 (2022 deal-announcement 8-K only); 0 mentions since",
+      "interpretation": "Calibration Heuristic 7 (counterparty-disclosure threshold) softened by scale: Amazon at ~$640B revenue and ~$80B+ capex makes a hydrogen fuel supply contract not necessarily 10-K-material on its own. The single 2022 hit is the original deal announcement; absence thereafter does not by itself = contradiction. However, the framework's interest is the STAGE LADDER from the original 2022 framework to 2025 cumulative-payment progress: Plug omits any update on aggregate Amazon payments toward the $2.1B warrant trigger after 3+ years. Combined with the Walmart warrant cancellation in the same quarter, and Plug's overall revenue stagnation (Amazon would have to be paying ~$300M/year to be on pace, vs. total Plug fuel-delivery revenue of $133M FY2025 across ALL customers), the math implies Amazon payments are running far below the original framework. MODERATE_UNDERDELIVERY: planned-vs-operational stage gap, with conservative scoring because Amazon revenue could be partly captured in 'second largest customer' (14.3% / $101.7M) which is unnamed."
+    },
+    {
+      "claim_id": "PLUG-4",
+      "claim_text": "Hidrogenii JV with Olin commissioned its 15-ton-per-day liquid hydrogen plant in St. Gabriel, Louisiana in April 2025, alongside existing pre-existing plants in Tennessee and Georgia.",
+      "severity": "PASS",
+      "supports": [
+        "EPA FRS Hidrogenii LA: 2 facility registrations, both at 4205/4207 HIGHWAY 75, ST GABRIEL, LA 70776, Iberville Parish (registry_ids 110072151836 and 110071513441)",
+        "EPA FRS Plug TN: 'PLUG POWER CHARLESTON' at 1230 OLD LOWER RIVER RD NW, CHARLESTON, TN 37310, Bradley County (registry_id 110071860625)"
+      ],
+      "M_check": "epa_frs.query_facilities (Hidrogenii/LA; Plug Power/LA; Plug/TN)",
+      "M_value": "Hidrogenii LA: 2 hits; Plug Power LA direct: 0 hits (JV is registered as Hidrogenii, not Plug); Plug TN: 1 hit",
+      "interpretation": "Calibration Heuristic 1 (EPA FRS scope is real for H2 plants) + Heuristic 6 (name-variant fragility): the LA plant is correctly registered under the JV name 'Hidrogenii' not 'Plug Power' — both records corroborate. TN Charleston plant also confirmed. PASS: physical-facility claim independently corroborated in EPA FRS."
+    },
+    {
+      "claim_id": "PLUG-5",
+      "claim_text": "On January 16, 2025, Plug Power Energy Loan Borrower LLC finalized a $1.66 billion DOE Loan Program Office loan guarantee; on November 7, 2025, Plug announced suspension of activities related to the DOE loan program and recorded a $13.2M charge.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": [
+        "USAspending grants for 'Plug Power' since 2024-01-01: 7 DOE non-loan awards totaling ~$84M (largest DEEE0011303 = $42.7M, DEEE0011343 = $28.2M, DEEE0011328 = $3.8M, etc.) — confirms ongoing DOE R&D relationship but NOT the $1.66B LPO loan guarantee (LPO loan guarantees report separately)",
+        "USAspending grants for 'Plug Power Energy Loan' (the named borrower entity): 0 awards — not surprising, LPO loan guarantees use distinct reporting channels",
+        "Plug 10-K self-discloses the $1.66B loan was finalized 1/16/2025 and SUSPENDED on 11/7/2025 with $13.2M charge to capitalized closing fees in SG&A"
+      ],
+      "M_check": "usaspending.query_recipient_contracts/grants (Plug Power; Plug Power Energy Loan)",
+      "M_value": "contracts=0; grants=7 awards ~$84M total to PLUG POWER INC.; LPO loan-guarantee record not surfaced in standard USAspending feed",
+      "interpretation": "Heuristic 5 (jurisdiction): USAspending captures DOE assistance/grants but not all loan guarantees. The 7 DOE grants confirm a real DOE working relationship. The CRITICAL signal is Plug's own disclosure: a $1.66B federal loan guarantee FINALIZED in January 2025 was VOLUNTARILY SUSPENDED ten months later in November 2025 with a write-off of capitalized closing fees. This is a regulatory-milestone REVERSAL of a marquee 2024-era catalyst that bull thesis writers had cited as de-risking the green-H2 build-out. The likely interpretation is that Plug could not meet the LPO's draw/covenant conditions, could not raise its required equity match, or saw the underlying project economics (especially under the renegotiated 45VH2-PTC rules) become uneconomic. Either way, walking away from $1.66B in financing is a hard distress signal. SEVERE_UNDERDELIVERY: not a fabrication (the 10-K is candid), but the trajectory is from headline-grade regulatory milestone to self-suspended catalyst — a planned-vs-operational stage-ladder collapse for the centerpiece of Plug's hydrogen-production buildout."
+    },
+    {
+      "claim_id": "PLUG-6",
+      "claim_text": "Plug qualified for the IRA Section 45V Clean Hydrogen PTC at its Georgia hydrogen production plant; recognized $7.1M PTC in 2025 ($4.0M in 2024) via elective pay.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "EPA FRS Plug Power GA: 1 facility 'PLUG POWER WOODBINE' at 291 COMMERCIAL DRIVE, WOODBINE, GA 31569, Camden County (registry_id 110071860630). 10-K calls it 'Kingsland, GA' but Woodbine and Kingsland are adjacent municipalities in Camden County — same plant.",
+        "10-K self-disclosure: $7.1M PTC recognized FY2025 (up from $4.0M FY2024)"
+      ],
+      "M_check": "epa_frs.query_facilities (Plug Power/GA)",
+      "M_value": "n_facilities=1 (PLUG POWER WOODBINE)",
+      "interpretation": "The PHYSICAL facility exists in EPA FRS (Heuristic 1 confirmed). The PTC eligibility claim is itself accurate (IRS direct-pay election). But the dollar scale is the analytical issue: $7.1M of 45V PTC at $3/kg implies only ~2,367 metric tons of qualifying H2 produced for the year at one of Plug's 3 supposedly operational plants. The Georgia plant is rated meaningfully larger; this implies it ran at a very small fraction of nameplate capacity for the year, or only a small fraction of output met the 45V emissions threshold. Combined with the DOE loan suspension (PLUG-5), this strongly suggests Plug's hydrogen production network is operating far below the marketing-headline capacity. MODERATE_UNDERDELIVERY on the implied scale of green-H2 production (Heuristic 9: announced-vs-operating capacity conflation)."
+    },
+    {
+      "claim_id": "PLUG-7",
+      "claim_text": "Plug holds 52 issued active US patents (expiring 2026-2044) with 23 US patent applications pending; IP covers fuel-cell components, system designs, manufacturing processes, and control strategies.",
+      "severity": "PASS",
+      "supports": [
+        "USPTO ODP: n_total_applications=79, n_granted=26 (USPTO ODP only indexes filings from ~2018 forward, so older grants in Plug's 52 'active' count are not surfaced — the claim is a superset that's reasonable)",
+        "Category counts among Plug's USPTO portfolio: fuel_cell=29, electrolyzer=10, hydrogen=21, other=19 — strongly aligned with claimed technology areas",
+        "Recent grants include electrochemical hydrogen compression (12508542, 2025), cryogenic transport trailer (12092266, 2024), fuel-cell diagnostics IC (12278410, 2025)"
+      ],
+      "M_check": "uspto_odp.query_assignee (Plug Power, with categorize fuel_cell/electrolyzer/hydrogen)",
+      "M_value": "n_granted=26, n_total_applications=79; fuel_cell=29, electrolyzer=10, hydrogen=21 hits",
+      "interpretation": "Heuristic 8 (patent rubric): >=10 granted with claimed-technology hits = PASS. Plug's patent portfolio is real and squarely in fuel-cell / electrolyzer / hydrogen storage/handling technology. 26 USPTO-ODP-indexed grants is consistent with 52 total active when accounting for the ODP's filing-date floor. No Nikola-pattern (>=30 grants with 0 in claimed area). PASS."
+    },
+    {
+      "claim_id": "PLUG-8",
+      "claim_text": "Plug built a state-of-the-art electrolyzer gigafactory in Rochester, NY and a fuel cell manufacturing facility in Slingerlands, NY; targeting gigawatt-scale electrolyzer market via 5MW + 10MW building blocks.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "EPA FRS Plug Power NY: 6 facilities including Slingerlands (125 Vista Blvd, 110071432660), Plug Power Innovation Center (1025 John St, West Henrietta = suburb of Rochester, 110071082118), Plug Power Warehouse (1000 John St, Henrietta, 110072082683), and three Latham legacy locations (the original 968 Albany Shaker Rd campus)",
+        "Properties table in 10-K corroborates the same: Rochester 155,979 sqft + Slingerlands 350,000 sqft",
+        "Electrolyzer revenue FY2025 = $187.8M, FY2024 = $135.5M, FY2023 = $82.6M — growing but at a level consistent with hundreds of MW shipped/year, not GW/year"
+      ],
+      "M_check": "epa_frs.query_facilities (Plug Power/NY)",
+      "M_value": "n_facilities=6 in NY; Slingerlands and West Henrietta/Rochester both registered",
+      "interpretation": "Physical facilities are real and registered in EPA FRS (PASS on physical-facility existence). However the headline 'gigafactory' label combined with stated ambition to 'reach into the gigawatt-scale electrolyzer market' is a classic Heuristic 9 announced-vs-operating conflation: $187.8M of FY2025 electrolyzer revenue at typical PEM electrolyzer ASPs ($600-1,500/kW) implies roughly 125-300 MW/year of shipments, an order of magnitude below the 'gigawatt-scale' framing. Per Heuristic 3 stage ladder, 'targeting' the GW market while shipping a few hundred MW is MODERATE_UNDERDELIVERY (not SEVERE because Plug does qualify the language as targeting / building blocks, not as operating GW capacity)."
+    },
+    {
+      "claim_id": "PLUG-9",
+      "claim_text": "AccionaPlug S.L. (50/50 JV with Acciona in Spain) intends to develop clean hydrogen projects in Spain and Portugal and 'has received initial project financing commitments'; Plug is also 'actively advancing multi-megawatt electrolyzer projects' in Portugal, Europe, Australia.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "EDGAR fulltext 'AccionaPlug' since 2018: 29 hits — but ALL 29 are Plug Power's own filings (10-K/10-Q/8-K). No counterparty (Acciona is Spanish-listed only, so EDGAR absence is expected).",
+        "No specific FID or commissioning disclosure for any AccionaPlug project after 4+ years; 10-K language remains 'continues to evaluate potential projects' and 'initial project financing commitments'"
+      ],
+      "M_check": "edgar_fts.query_fulltext (AccionaPlug)",
+      "M_value": "total_hits=29 all from Plug Power Inc.; 0 external corroborators",
+      "interpretation": "Heuristic 6 (name-variant): AccionaPlug is the correct project name and is searchable. Heuristic 4 (investment vs operating): Acciona is a partner contributing 50% equity, not a firm offtaker. Heuristic 3 (stage ladder): JV formed Q4 2021, in 2026 10-K still described as 'continues to evaluate' with only 'initial project financing commitments' — no FID, no construction commissioning of any AccionaPlug-named plant disclosed in 4+ years. This is classic announced-not-built positioning. MODERATE_UNDERDELIVERY: not fabricated, but the partnership has not advanced past the 'evaluating' stage despite original Q4 2021 framework."
+    },
+    {
+      "claim_id": "PLUG-10",
+      "claim_text": "Plug sold its 49% equity interest in SK Plug Hyverse to SK Innovation for $6.5M cash on December 31, 2025; this terminated the marquee Korean/Asian hydrogen JV which generated $0 related-party revenue in 2025 vs $6.4M in 2024 and $2.3M in 2023.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": [
+        "EDGAR fulltext 'SK Plug Hyverse' since 2018: 21 hits — all from Plug Power's own filings (SK Innovation is Korean-listed, not SEC registrant)",
+        "Related-party revenue trajectory: $13.9M (2023, with HyVia included) → $6.4M (2024 SKPH only) → $0 (2025); AR went from $3.5M (2024) → $0 (2025)",
+        "Companion data point: HyVia (50/50 European FCE-LCV JV with Renault) entered receivership 12/10/2024 and judicial liquidation 2/18/2025 — Plug's two flagship international JVs both collapsed within ~12 months of each other"
+      ],
+      "M_check": "edgar_fts.query_fulltext (SK Plug Hyverse)",
+      "M_value": "total_hits=21 all Plug filings; SK Innovation files via Korean DART not SEC EDGAR (Heuristic 6 jurisdiction limit)",
+      "interpretation": "Heuristic 4 (investment vs operating): the $6.5M sale price for a 49% stake originally valued at ~$70M+ implies a ~90% write-down on the JV value. Coupled with HyVia bankruptcy (the European FCE-LCV partnership with Renault), Plug's TWO largest international partnerships have collapsed in 12 months. This is not a single-issuer disclosure problem — Plug discloses it candidly — but the framework treats the COLLAPSE of marquee strategic partnerships as a strong forward signal that the cross-equity 'partnership' tier has not converted to operating revenue. Heuristic 10 (distress fingerprints): partnership unwinds at deeply discounted prices belong in the distress-marker set. SEVERE_UNDERDELIVERY: not a fabrication but a major reversal of the multi-year Asian/European growth narrative."
+    },
+    {
+      "claim_id": "PLUG-11",
+      "claim_text": "Plug recorded net losses of $1.7B (2025), $2.1B (2024), and $1.4B (2023). Working capital $799.7M (incl. $368.5M unrestricted cash, $186.7M current restricted cash). $944.1M ATM equity capacity remaining (B. Riley + Yorkville); $1.0B SEPA with Yorkville. Authorized shares increased 1.5B→3.0B in February 2026. Sold 34.6M shares in 2025 at $1.62 weighted average price for $55.9M gross.",
+      "severity": "RED_FLAG_NEGATIVE",
+      "supports": [
+        "Cumulative net losses 2023-2025: $5.2B vs $368.5M unrestricted cash on hand at YE2025",
+        "FY2025 stock price index: $5.81 vs $100 base 2020 (-94% over 5 years per 10-K performance graph)",
+        "Two open securities class actions (2023 PLUG Securities Action and 2024 Adote/Lee consolidated) both allege misstatements about hydrogen production capacity construction and supply chain management — pre-existing forensic-disclosure litigation overhang",
+        "$40.3M FY2025 charge for renegotiating a supplier minimum-purchase obligation (take-or-pay distress)",
+        "Authorized share count doubled to 3 billion in February 2026 — explicit dilution runway expansion",
+        "ATM equity sales at $1.62 weighted average in 2025 (penny-stock-tier pricing) with $944.1M of further capacity authorized",
+        "SEPA standby with Yorkville to 2027 for additional $1.0B — classic micro-cap dilution scaffolding",
+        "DOE LPO loan suspended (PLUG-5) and both major international JVs collapsed (PLUG-10) in the same 12 months",
+        "Walmart warrant cancellation + GenKey escrow license (PLUG-2) on the #1 customer — relationship deterioration",
+        "Going-concern auditor language: the 12-month liquidity conclusion explicitly depends on the ATM and SEPA continuing to function"
+      ],
+      "M_check": "self-disclosure (10-K Liquidity & Capital Resources, Subsequent Events, Legal Proceedings, Concentrations); cross-corroborated by PLUG-2,3,5,10",
+      "M_value": "Net losses 2023-2025: $1.4B + $2.1B + $1.7B = $5.2B against $368.5M unrestricted cash; share authorization doubled 2/12/2026; $1.62 ATM average; pending securities class actions on disclosure of H2 production capacity",
+      "interpretation": "Heuristic 10 (distress fingerprints) is fully triggered: massive recurring losses, dilution scaffolding (ATM + SEPA + share authorization expansion), penny-stock ATM pricing, supplier renegotiation charges, two pending securities class actions on the EXACT framework concerns (overstated hydrogen capacity, supply chain management), DOE loan walk-away, two flagship JVs collapsed, largest customer warrant cancellation + IP-escrow license. The forward-revenue claims and capacity-build claims that this framework would normally test for veracity must be ELEVATED in severity per Heuristic 10. This is the strongest single forensic signal in the analysis. RED_FLAG_NEGATIVE: capital structure + accumulating distress markers + active securities litigation about precisely the disclosure topics this framework examines."
+    }
+  ]
+}

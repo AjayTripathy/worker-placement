@@ -1,0 +1,781 @@
+{
+  "_doc": "BLIND 2016 universe — filing dates + payor mix as of FY2016. Data collected blind to 2018+ events for back-test of late-filing and payor-concentration detectors.",
+  "_methodology_warning": [
+    "Late-filing detector cutoff = FYE + 270 days. For Dec-31 FYE obligors, cutoff = 2017-09-27/30. For June-30 FYE, cutoff = 2017-03-27. For Sep-30 FYE, cutoff = 2017-06-27. For May-31 FYE, cutoff = 2017-02-25.",
+    "Many EMMA continuing-disclosure-filed-date timestamps are NOT directly retrievable via WebSearch — the EMMA UI is JS-rendered. Instead, I used: (1) audit opinion sign-off date from the audited FS itself as a PROXY for 'audit was completed by date X' (typically EMMA filing within 5-15 days of opinion date); (2) state regulator portals (CT-OHS, MD-HSCRC, IN-DOH, MS Hospital Transparency, FL-flauditor) which timestamp filings; (3) Fitch/Moody's/S&P 2016-2017 surveillance press releases which often cite annual financials being unavailable or recently received.",
+    "Payor mix figures are reported at multiple bases (gross patient revenue vs net patient service revenue). I have noted the basis for each. The detector definition (single-payor Medicaid > 65%) needs gross-revenue payor concentration; net-revenue figures understate Medicaid share given contractual write-offs are larger for Medicaid.",
+    "CONTAMINATION DISCLOSURE: I deliberately did NOT search for any 2018+ events, distress, downgrades, M&A consummations, or restructuring outcomes for these names while collecting this data. I did encounter (but did not use): (a) Presence Health -> Ascension acquisition closed early 2018; (b) Trinity Mother Frances -> CHRISTUS combined as of May 1, 2016 (this is 2016 in-period — included as fact); (c) ETMC -> Ardent Health sale 2017+; (d) Centegra -> NW Medicine merger 2018; (e) NYU Winthrop -> NYU Langone full integration Jan 2017 (in-period for some metrics).",
+    "Where the audit-completion date is shown but EMMA submission date is unknown, I report the opinion date with a _notes annotation. EMMA submissions typically follow opinion dates by 0-14 days for active issuers.",
+    "Mary Washington Healthcare, South Shore Hospital, Carson Tahoe, Central Washington, Erlanger, Owensboro, Eisenhower, Tufts MC, Centegra, Tallahassee Memorial, NYU Winthrop, CHLA, Baxter Regional, Hospital for Special Care, Jackson, Milford Regional, Memorial North Conway, Nanticoke, ETMC, Oaklawn, Yavapai, Palmetto, Houston County HCA were NOT directly retrievable as 2016-vintage audited FS PDFs via the methods available. Confidence is therefore LOW or MEDIUM for these on filing date, and payor mix is inferred from contemporaneous Fitch/Moody's/S&P 2016 surveillance reports."
+  ],
+  "verified_at": "2026-05-27",
+  "as_of_date": "2017-09-30",
+  "_detector_cutoffs": {
+    "dec_31_fye": "2017-09-27",
+    "june_30_fye": "2017-03-27",
+    "sep_30_fye": "2017-06-27",
+    "may_31_fye": "2017-02-25"
+  },
+  "obligors": {
+    "Mary Washington Healthcare": {
+      "late_filing": {
+        "fiscal_year_end": "2016-06-30",
+        "latest_audited_fs_filed_date": null,
+        "as_of_date": "2017-09-30",
+        "cutoff_date": "2017-03-27",
+        "source_url": "https://www.marywashingtonhealthcare.com/about-us/regulatory-documents/",
+        "confidence": "LOW",
+        "_notes": "Could not retrieve specific EMMA filing date or opinion date for FY16 audit. MWHC issued Series 2016 (~$115M) in mid-2016 via Stafford County EDA, so continuing disclosure was active. As an active issuer with new bond proceeds in 2016, on-time filing is highly likely. Default assumption: on-time. Marked LOW confidence given no direct evidence of filing date.",
+        "_warning": "Detector cannot be evaluated for this obligor without primary EMMA timestamp."
+      },
+      "payor_concentration": {
+        "medicaid_pct_of_npr": null,
+        "medicare_pct_of_npr": null,
+        "commercial_pct_of_npr": null,
+        "fiscal_year": "FY2016",
+        "basis": null,
+        "source_url": "https://www.businesswire.com/news/home/20160408005852/en/Fitch-Rates-Mary-Washington-Healthcare-VAs-Bonds-BBB-Stable-Outlook",
+        "confidence": "LOW",
+        "_warning": "Fitch 4/8/2016 BBB+ rating action cited 61% market share in 8-county PSA but did not publish payor mix percentages in search-accessible snippets. VA is a non-Medicaid-expansion state through 2018, so commercial share likely higher than national average."
+      }
+    },
+    "South Shore Hospital": {
+      "late_filing": {
+        "fiscal_year_end": "2016-09-30",
+        "latest_audited_fs_filed_date": null,
+        "as_of_date": "2017-09-30",
+        "cutoff_date": "2017-06-27",
+        "source_url": "https://projects.propublica.org/nonprofits/organizations/42769210",
+        "confidence": "LOW",
+        "_notes": "South Shore Hospital FYE September 30. Series H 2016 bonds issued Q1 2016 (active issuer in continuing-disclosure compliance). EIN 04-2769210 Form 990 for FY ending Sep 30 2016 filed Aug 2017 per ProPublica — supports timely audit availability. Default: on-time.",
+        "_warning": "No direct EMMA timestamp retrieved."
+      },
+      "payor_concentration": {
+        "medicaid_pct_of_npr": null,
+        "medicare_pct_of_npr": null,
+        "commercial_pct_of_npr": null,
+        "fiscal_year": "FY2016",
+        "basis": "gross",
+        "source_url": "https://chiamass.gov/assets/docs/r/hospital-profiles/2016/Massachusetts-Hospitals-Profiles-Compendium-2016.pdf",
+        "confidence": "MEDIUM",
+        "_notes": "CHIA 2016 MA Hospital Profiles compendium shows South Shore is a Non-HPP hospital (public payer <63% gross). PDF table-extraction did not yield clean percentages but CHIA classifies it as below the high-public-payer threshold. Detector for >65% Medicaid would NOT fire."
+      }
+    },
+    "Halifax Health": {
+      "late_filing": {
+        "fiscal_year_end": "2016-09-30",
+        "latest_audited_fs_filed_date": null,
+        "as_of_date": "2017-09-30",
+        "cutoff_date": "2017-06-27",
+        "source_url": "https://www.halifaxhealthdistrict.org/wp-content/uploads/Halifax_Health_Audit_And_Finance_Committee_Meeting_-_March_1_2017_v3.pdf",
+        "confidence": "MEDIUM",
+        "_notes": "Halifax Health is a hospital district (special district) with FYE September 30. Audit & Finance Committee met March 1, 2017 to review FY2016 audit — consistent with on-time filing (cutoff June 27, 2017). Fitch upgraded BBB+ -> A- in Oct 2017 (in-period contamination disclosed in universe file but does not affect this snapshot). Filing on-time."
+      },
+      "payor_concentration": {
+        "medicaid_pct_of_npr": null,
+        "medicare_pct_of_npr": null,
+        "commercial_pct_of_npr": null,
+        "medicaid_plus_self_pay_pct_of_gross": 0.22,
+        "fiscal_year": "FY2015",
+        "basis": "gross",
+        "source_url": "https://www.businesswire.com/news/home/20160302006564/en/Fitch-Rates-Halifax-Health-FLs-Series-2016",
+        "confidence": "MEDIUM",
+        "_warning": "Fitch 3/2/2016 cited Medicaid + self-pay = 22% of gross revenues through Dec 31, 2015. Specific Medicaid-only and Medicare percentages not retrieved. As Volusia County safety-net provider, Medicare share likely 40-45%. Detector Medicaid>65% — does NOT fire."
+      }
+    },
+    "Carson Tahoe Health System": {
+      "late_filing": {
+        "fiscal_year_end": "2016-09-30",
+        "latest_audited_fs_filed_date": null,
+        "as_of_date": "2017-09-30",
+        "cutoff_date": "2017-06-27",
+        "source_url": "https://www.businesswire.com/news/home/20160204006382/en/Fitch-Rates-Carson-Tahoe-Health-System-NV-Revs-BBB-Outlook-Stable",
+        "confidence": "MEDIUM",
+        "_notes": "Fitch Feb 2016 BBB+ rating action cited CTHS covenants to provide annual audited disclosure to EMMA within 150 days of FYE. With Sep 30 FYE, that means by Feb 27. As of 2017-09-30 cutoff, FY16 audit should be filed. Active bond issuer with covenant compliance — default on-time."
+      },
+      "payor_concentration": {
+        "medicaid_pct_of_npr": null,
+        "medicare_pct_of_npr": null,
+        "commercial_pct_of_npr": null,
+        "governmental_pct_of_gross": 0.68,
+        "fiscal_year": "FY2015 interim",
+        "basis": "gross",
+        "source_url": "https://www.businesswire.com/news/home/20160204006382/en/Fitch-Rates-Carson-Tahoe-Health-System-NV-Revs-BBB-Outlook-Stable",
+        "confidence": "MEDIUM",
+        "_notes": "Fitch cites 68% governmental payor mix at interim 2015 (Medicare+Medicaid combined). CTHS is the Sole Community Hospital for Carson City — Medicare-heavy. Medicaid alone likely ~12-15%. Detector Medicaid>65% — does NOT fire."
+      }
+    },
+    "Central Washington Hospital": {
+      "late_filing": {
+        "fiscal_year_end": "2016-12-31",
+        "latest_audited_fs_filed_date": null,
+        "as_of_date": "2017-09-30",
+        "cutoff_date": "2017-09-27",
+        "source_url": "https://doh.wa.gov/data-statistical-reports/healthcare-washington/hospital-and-patient-data/hospital-financial-data",
+        "confidence": "LOW",
+        "_notes": "Central Washington Hospital is part of Confluence Health. WA DOH collects hospital financials annually. No direct 2016 audit opinion date retrieved. Default: on-time given regulatory filing requirement.",
+        "_warning": "No EMMA timestamp or audit opinion date verified."
+      },
+      "payor_concentration": {
+        "medicaid_pct_of_npr": null,
+        "medicare_pct_of_npr": null,
+        "commercial_pct_of_npr": null,
+        "fiscal_year": "FY2016",
+        "basis": null,
+        "source_url": null,
+        "confidence": "LOW",
+        "_warning": "Could not retrieve specific payor mix. Wenatchee market — Medicare share likely elevated given regional demographics. Detector unevaluable."
+      }
+    },
+    "Palmetto Health": {
+      "late_filing": {
+        "fiscal_year_end": "2016-09-30",
+        "latest_audited_fs_filed_date": null,
+        "as_of_date": "2017-09-30",
+        "cutoff_date": "2017-06-27",
+        "source_url": "https://www.beckershospitalreview.com/finance/palmetto-health-swings-into-the-black-in-fy-2016",
+        "confidence": "MEDIUM",
+        "_notes": "Becker's reported Palmetto Health FY2016 results in Jan-Feb 2017 from 'recently released bondholder documents'. This implies audited FS filed late Jan or Feb 2017 — well within 270-day cutoff. Default: on-time."
+      },
+      "payor_concentration": {
+        "medicaid_pct_of_npr": null,
+        "medicare_pct_of_npr": null,
+        "commercial_pct_of_npr": null,
+        "fiscal_year": "FY2016",
+        "basis": null,
+        "source_url": null,
+        "confidence": "LOW",
+        "_warning": "Could not retrieve specific Palmetto Health 2016 payor mix percentages. SC is non-Medicaid-expansion (as of 2016), so Medicaid share likely lower than expansion-state peers. Columbia-Richland County safety-net role. Detector likely does NOT fire."
+      }
+    },
+    "Yavapai Regional Medical Center": {
+      "late_filing": {
+        "fiscal_year_end": "2016-09-30",
+        "latest_audited_fs_filed_date": null,
+        "as_of_date": "2017-09-30",
+        "cutoff_date": "2017-06-27",
+        "source_url": "https://www.businesswire.com/news/home/20160620006357/en/Fitch-Affirms-Yavapai-Regional-Medical-Center-AZ-Rev-Bonds-BBB-Outlook-to-Positive",
+        "confidence": "LOW",
+        "_notes": "Fitch June 2016 affirmation cites FY2015 ratios. Active continuing disclosure issuer. Default: on-time.",
+        "_warning": "No direct opinion date or EMMA timestamp."
+      },
+      "payor_concentration": {
+        "medicaid_pct_of_npr": null,
+        "medicare_pct_of_npr": null,
+        "commercial_pct_of_npr": null,
+        "governmental_pct_of_gross": 0.73,
+        "fiscal_year": "FY2015",
+        "basis": "gross",
+        "source_url": "https://www.businesswire.com/news/home/20160620006357/en/Fitch-Affirms-Yavapai-Regional-Medical-Center-AZ-Rev-Bonds-BBB-Outlook-to-Positive",
+        "confidence": "MEDIUM",
+        "_notes": "Fitch June 2016 cites Medicare+Medicaid = 73% of gross revenue FY2015 — high governmental exposure. Prescott AZ market — senior-heavy demographic, Medicare likely 50-55%, Medicaid 15-20%. Detector Medicaid>65% — does NOT fire (Medicare-dominant)."
+      }
+    },
+    "Erlanger Health System": {
+      "late_filing": {
+        "fiscal_year_end": "2016-06-30",
+        "latest_audited_fs_filed_date": null,
+        "as_of_date": "2017-09-30",
+        "cutoff_date": "2017-03-27",
+        "source_url": "https://comptroller.tn.gov/content/dam/cot/la/advanced-search/2023/health-care/1357-2023-cn-erlangerhealth-rpt-cpa209-4-05-24-rev1.pdf",
+        "confidence": "LOW",
+        "_notes": "Tennessee Comptroller maintains audited FS for hospital authorities. Erlanger is a Chattanooga-Hamilton County Hospital Authority — subject to state audit oversight. Default: on-time.",
+        "_warning": "No direct 2016 EMMA timestamp or opinion date."
+      },
+      "payor_concentration": {
+        "medicaid_pct_of_npr": null,
+        "medicare_pct_of_npr": null,
+        "commercial_pct_of_npr": null,
+        "fiscal_year": "FY2016",
+        "basis": null,
+        "source_url": null,
+        "confidence": "LOW",
+        "_warning": "TN non-Medicaid-expansion. Level-1 trauma safety-net. TennCare share likely 18-25%, Medicare 40%, commercial 30%. Detector Medicaid>65% — does NOT fire."
+      }
+    },
+    "Trinity Mother Frances Health System / CHRISTUS": {
+      "late_filing": {
+        "fiscal_year_end": "2016-06-30",
+        "latest_audited_fs_filed_date": null,
+        "as_of_date": "2017-09-30",
+        "cutoff_date": "2017-03-27",
+        "source_url": "https://www.businesswire.com/news/home/20160908006695/en/Fitch-Affirms-Trinity-Mother-Frances-Health-System-at-BBB-Outlook-Remains-Positive",
+        "confidence": "LOW",
+        "_notes": "CHRISTUS acquisition closed May 1, 2016 in-period. TMFHS likely filed standalone FY2016 audit in Q1-Q2 2017, then rolled into CHRISTUS consolidation. Active continuing disclosure. Default: on-time.",
+        "_warning": "M&A timing complication — FY2016 may have been partial-year standalone."
+      },
+      "payor_concentration": {
+        "medicaid_pct_of_npr": null,
+        "medicare_pct_of_npr": null,
+        "commercial_pct_of_npr": null,
+        "medicare_plus_medicaid_pct_of_gross": 0.65,
+        "fiscal_year": "FY2016",
+        "basis": "gross",
+        "source_url": "https://www.businesswire.com/news/home/20160908006695/en/Fitch-Affirms-Trinity-Mother-Frances-Health-System-at-BBB-Outlook-Remains-Positive",
+        "confidence": "MEDIUM",
+        "_notes": "Fitch Sept 2016 cites TMFHS gross payor mix approximately 65% Medicare/Medicaid combined for FY2016 (June 30). Texas non-Medicaid-expansion — Medicaid <10%. Medicare ~50-55%. Detector Medicaid>65% — does NOT fire."
+      }
+    },
+    "Owensboro Health": {
+      "late_filing": {
+        "fiscal_year_end": "2016-05-31",
+        "latest_audited_fs_filed_date": null,
+        "as_of_date": "2017-09-30",
+        "cutoff_date": "2017-02-25",
+        "source_url": "https://projects.propublica.org/nonprofits/organizations/611286361",
+        "confidence": "LOW",
+        "_notes": "Owensboro Health Regional Hospital FYE May 31. ProPublica shows 990 filings on regular schedule. Active continuing disclosure issuer. Default: on-time.",
+        "_warning": "No direct EMMA timestamp."
+      },
+      "payor_concentration": {
+        "medicaid_pct_of_npr": null,
+        "medicare_pct_of_npr": null,
+        "commercial_pct_of_npr": null,
+        "fiscal_year": "FY2016",
+        "basis": null,
+        "source_url": null,
+        "confidence": "LOW",
+        "_warning": "Could not retrieve specific Owensboro 2016 payor mix. KY is Medicaid-expansion state — Medicaid share likely 18-22%, Medicare 45%. Detector Medicaid>65% — does NOT fire."
+      }
+    },
+    "Houston County Health Care Authority / Southeast Alabama Medical Center": {
+      "late_filing": {
+        "fiscal_year_end": "2016-09-30",
+        "latest_audited_fs_filed_date": null,
+        "as_of_date": "2017-09-30",
+        "cutoff_date": "2017-06-27",
+        "source_url": "https://alison.legislature.state.al.us/files/pdf/eopa/audit_reports/",
+        "confidence": "MEDIUM",
+        "_notes": "Alabama EOPA (Examiners of Public Accounts) requires annual audit submission. Houston County HCA issued $94M Fitch BBB+ revenue bonds June 2016 — active continuing disclosure. Default: on-time per state audit requirement."
+      },
+      "payor_concentration": {
+        "medicaid_pct_of_npr": null,
+        "medicare_pct_of_npr": null,
+        "commercial_pct_of_npr": null,
+        "governmental_pct_of_gross": 0.543,
+        "blue_cross_pct_of_gross": 0.193,
+        "fiscal_year": "FY2015",
+        "basis": "gross",
+        "source_url": "https://www.businesswire.com/news/home/20160613006456/en/Fitch-Rates-Houston-County-Health-Care-Authority",
+        "confidence": "MEDIUM",
+        "_notes": "Fitch June 2016 cites governmental funding = 54.3% of gross revenues FY2015, BCBS = 19.3%. AL non-Medicaid-expansion. Medicare ~42%, Medicaid ~12%. Detector Medicaid>65% — does NOT fire."
+      }
+    },
+    "Major Hospital Shelbyville": {
+      "late_filing": {
+        "fiscal_year_end": "2016-12-31",
+        "latest_audited_fs_filed_date": "2017-04-24",
+        "as_of_date": "2017-09-30",
+        "cutoff_date": "2017-09-27",
+        "source_url": "https://secure.in.gov/health/files/2016_Major_Hospital_AFS.pdf",
+        "confidence": "HIGH",
+        "_notes": "Direct evidence: audit opinion dated April 24, 2017 (auditor: Indianapolis CPA firm via Indiana State Board of Accounts). Posted to Indiana DOH portal. Well within cutoff. ON-TIME."
+      },
+      "payor_concentration": {
+        "medicaid_pct_of_npr": 0.20,
+        "medicare_pct_of_npr": 0.43,
+        "commercial_pct_of_npr": 0.33,
+        "self_pay_pct_of_npr": 0.04,
+        "medicare_plus_medicaid_pct_of_gross": 0.63,
+        "medicare_plus_medicaid_pct_of_net": 0.46,
+        "fiscal_year": "FY2016",
+        "basis": "gross",
+        "source_url": "https://secure.in.gov/health/files/2016_Major_Hospital_AFS.pdf",
+        "confidence": "HIGH",
+        "_notes": "From MDA payor table: Medicare 43%, Medicaid 20%, Anthem 15%, Commercial 18%, Self Pay 4% (gross). Medicare+Medicaid = 63% of gross, 46% of net. IN is Medicaid-expansion (HIP 2.0). Commercial split = Anthem + other commercial = 33%. Detector Medicaid>65% — does NOT fire."
+      }
+    },
+    "Eisenhower Medical Center": {
+      "late_filing": {
+        "fiscal_year_end": "2016-06-30",
+        "latest_audited_fs_filed_date": null,
+        "as_of_date": "2017-09-30",
+        "cutoff_date": "2017-03-27",
+        "source_url": "https://hcai.ca.gov/facility/eisenhower-medical-center/",
+        "confidence": "LOW",
+        "_notes": "Eisenhower Medical Center FYE June 30. CA HCAI requires hospital financial filings. Active continuing disclosure issuer (CHFFA bonds). Default: on-time.",
+        "_warning": "No direct EMMA timestamp."
+      },
+      "payor_concentration": {
+        "medicaid_pct_of_npr": null,
+        "medicare_pct_of_npr": null,
+        "commercial_pct_of_npr": null,
+        "fiscal_year": "FY2016",
+        "basis": null,
+        "source_url": null,
+        "confidence": "LOW",
+        "_warning": "Rancho Mirage CA market — retirement community demographic. Medicare share likely 60%+, Medi-Cal 10-15%. Detector Medicaid>65% — does NOT fire."
+      }
+    },
+    "Tufts Medical Center": {
+      "late_filing": {
+        "fiscal_year_end": "2016-09-30",
+        "latest_audited_fs_filed_date": null,
+        "as_of_date": "2017-09-30",
+        "cutoff_date": "2017-06-27",
+        "source_url": "https://access.tufts.edu/audited-financial-statements-tax-documents",
+        "confidence": "LOW",
+        "_notes": "Tufts Medical Center FYE September 30. Active continuing disclosure issuer. Default: on-time.",
+        "_warning": "No direct EMMA timestamp."
+      },
+      "payor_concentration": {
+        "medicaid_pct_of_npr": null,
+        "medicare_pct_of_npr": null,
+        "commercial_pct_of_npr": null,
+        "fiscal_year": "FY2016",
+        "basis": "gross",
+        "source_url": "https://chiamass.gov/assets/docs/r/hospital-profiles/2016/Massachusetts-Hospitals-Profiles-Compendium-2016.pdf",
+        "confidence": "MEDIUM",
+        "_notes": "CHIA 2016 MA Hospital Profiles classifies Tufts MC as Non-HPP (public payer <63%). 2022 reference (Medicare 38%, Medicaid 23%, commercial 33%) suggests 2016 likely similar — Medicare 36-40%, Medicaid 18-22%, commercial 35-40%. Detector Medicaid>65% — does NOT fire."
+      }
+    },
+    "Centegra Health System": {
+      "late_filing": {
+        "fiscal_year_end": "2016-12-31",
+        "latest_audited_fs_filed_date": null,
+        "as_of_date": "2017-09-30",
+        "cutoff_date": "2017-09-27",
+        "source_url": "https://www.nm.org/-/media/northwestern/resources/about-us/community-health-needs-assessments/mchenry-chna/centegra-health-system-annual-report-2016.pdf",
+        "confidence": "LOW",
+        "_notes": "Centegra Health System (McHenry County IL) FYE Dec 31. Annual Report 2016 published. Bond Buyer reports financial pressure 2016-2017 — Northwestern merger languishing. Default: on-time but in distress.",
+        "_warning": "Financial distress context noted but does NOT necessarily imply late audit filing for FY2016."
+      },
+      "payor_concentration": {
+        "medicaid_pct_of_npr": null,
+        "medicare_pct_of_npr": null,
+        "commercial_pct_of_npr": null,
+        "fiscal_year": "FY2016",
+        "basis": null,
+        "source_url": null,
+        "confidence": "LOW",
+        "_warning": "Could not retrieve. IL is Medicaid-expansion. Suburban Chicago — Medicaid 15-20%, Medicare 40%, commercial 40%. Detector Medicaid>65% — does NOT fire."
+      }
+    },
+    "Presence Health Network": {
+      "late_filing": {
+        "fiscal_year_end": "2016-12-31",
+        "latest_audited_fs_filed_date": null,
+        "as_of_date": "2017-09-30",
+        "cutoff_date": "2017-09-27",
+        "source_url": "https://www.bbvasecurities.com/wp-content/uploads/2021/05/Audited-Financial-Statements-as-of-December-31-2016.pdf",
+        "confidence": "MEDIUM",
+        "_notes": "Audited FS as of December 31, 2016 PDF found on BBVA Securities (broker-dealer site). PDF text-not-extractable (image-scanned) but presence on broker-dealer site by 2017 indicates filing was completed. Crain's Chicago Business reported Presence 2015 operating loss in March 2016 — typical reporting cadence. Default: on-time."
+      },
+      "payor_concentration": {
+        "medicaid_pct_of_npr": null,
+        "medicare_pct_of_npr": null,
+        "commercial_pct_of_npr": null,
+        "fiscal_year": "FY2016",
+        "basis": null,
+        "source_url": "https://www.businesswire.com/news/home/20160713006462/en/Fitch-Affirms-Presence-Health-Network-IL-BBB",
+        "confidence": "LOW",
+        "_warning": "Fitch July 2016 affirmation cited 'unfavorable payor mix' driving the BBB Negative-Outlook rating, but specific percentages not retrieved. IL Medicaid-expansion. Catholic safety-net network — Medicaid likely 22-28%, Medicare 45%. Detector Medicaid>65% — does NOT fire."
+      }
+    },
+    "Mississippi Baptist Health System": {
+      "late_filing": {
+        "fiscal_year_end": "2016-09-30",
+        "latest_audited_fs_filed_date": null,
+        "as_of_date": "2017-09-30",
+        "cutoff_date": "2017-06-27",
+        "source_url": "http://kingfish1935.blogspot.com/2017/01/mississippi-baptist-health-systems.html",
+        "confidence": "MEDIUM",
+        "_notes": "Jackson Jambalaya (local watchdog blog) published audited FY2016 figures in January 2017 — suggests audit completed late 2016 or very early 2017. Default: ON-TIME with early filing."
+      },
+      "payor_concentration": {
+        "medicaid_pct_of_npr": 0.08,
+        "medicare_pct_of_npr": 0.54,
+        "commercial_pct_of_npr": 0.305,
+        "self_pay_pct_of_npr": 0.077,
+        "fiscal_year": "FY2016",
+        "basis": "net",
+        "source_url": "http://kingfish1935.blogspot.com/2017/01/mississippi-baptist-health-systems.html",
+        "confidence": "MEDIUM",
+        "_notes": "Per FY2016 financial statements (Jackson Jambalaya excerpt): Medicare 54%, Medicaid 8%, Blue Cross 15%, HMO/PPO 14%, Private 1.5%, No Insurance 7.7%. Commercial total = BCBS 15% + HMO/PPO 14% + Private 1.5% = 30.5%. MS is non-Medicaid-expansion. Detector Medicaid>65% — does NOT fire (Medicare-dominant)."
+      }
+    },
+    "Mercy Health Services Baltimore": {
+      "late_filing": {
+        "fiscal_year_end": "2016-06-30",
+        "latest_audited_fs_filed_date": "2016-09-14",
+        "as_of_date": "2017-09-30",
+        "cutoff_date": "2017-03-27",
+        "source_url": "https://hscrc.maryland.gov/Documents/Hospitals/ReportsFinancial/Audited/FY-2016/MERCY_AFS_FY16.pdf",
+        "confidence": "HIGH",
+        "_notes": "Direct evidence: audit opinion dated September 14, 2016 (Tysons, VA — Ernst & Young or similar). 76 days post-FYE — VERY FAST. Posted to MD HSCRC portal. ON-TIME."
+      },
+      "payor_concentration": {
+        "medicaid_pct_of_npr": null,
+        "medicare_pct_of_npr": null,
+        "commercial_pct_of_npr": 0.443,
+        "federal_programs_combined_pct_of_npr": 0.520,
+        "self_pay_pct_of_npr": 0.036,
+        "fiscal_year": "FY2016",
+        "basis": "net",
+        "source_url": "https://hscrc.maryland.gov/Documents/Hospitals/ReportsFinancial/Audited/FY-2016/MERCY_AFS_FY16.pdf",
+        "confidence": "HIGH",
+        "_notes": "Patient service revenue (net): Federal programs (Medicare+Medicaid combined) $344.3M (52.0%), Other 3rd party (commercial) $293.6M (44.3%), Self-pay $24.1M (3.6%). Total $662.1M. MD all-payer model. Mercy combines Medicare+Medicaid in disclosure — Medicaid likely 12-15%, Medicare 37-40%. Detector Medicaid>65% — does NOT fire."
+      }
+    },
+    "Tallahassee Memorial HealthCare": {
+      "late_filing": {
+        "fiscal_year_end": "2016-09-30",
+        "latest_audited_fs_filed_date": null,
+        "as_of_date": "2017-09-30",
+        "cutoff_date": "2017-06-27",
+        "source_url": "https://www.moodys.com/research/Moodys-affirms-Tallahassee-Memorial-Healthcares-FL-Baa1-stable-outlook--PR_905955654",
+        "confidence": "LOW",
+        "_notes": "TMH FYE September 30. Issued Series 2016A/B bonds (Baa1) in 2016. Active continuing disclosure issuer. Default: on-time.",
+        "_warning": "No direct opinion date or EMMA timestamp retrieved."
+      },
+      "payor_concentration": {
+        "medicaid_pct_of_npr": null,
+        "medicare_pct_of_npr": null,
+        "commercial_pct_of_npr": null,
+        "fiscal_year": "FY2016",
+        "basis": null,
+        "source_url": null,
+        "confidence": "LOW",
+        "_warning": "FL non-Medicaid-expansion. Tallahassee market — state-employee-heavy commercial base. Medicare ~45%, Medicaid ~12%. Detector Medicaid>65% — does NOT fire."
+      }
+    },
+    "NYU Winthrop Hospital": {
+      "late_filing": {
+        "fiscal_year_end": "2016-11-30",
+        "latest_audited_fs_filed_date": null,
+        "as_of_date": "2017-09-30",
+        "cutoff_date": "2017-08-27",
+        "source_url": "https://www.crainsnewyork.com/assets/pdf/CN114100126.PDF",
+        "confidence": "MEDIUM",
+        "_notes": "NYU Winthrop FYE November 30 (per Crain's-hosted audit). Crain's NY hosted the audited FS through their public PDF library, dated within 2017. Affiliated with NYU Langone effective Jan 1 2017 (in-period for FY2017, post-period for FY2016). Default: on-time."
+      },
+      "payor_concentration": {
+        "medicaid_pct_of_npr": null,
+        "medicare_pct_of_npr": null,
+        "commercial_pct_of_npr": null,
+        "fiscal_year": "FY2016",
+        "basis": null,
+        "source_url": "https://www.crainsnewyork.com/assets/pdf/CN114100126.PDF",
+        "confidence": "LOW",
+        "_warning": "Long Island suburban — Medicare ~45%, Medicaid ~15%, commercial ~40%. Detector Medicaid>65% — does NOT fire."
+      }
+    },
+    "Memorial Hospital at Gulfport": {
+      "late_filing": {
+        "fiscal_year_end": "2016-09-30",
+        "latest_audited_fs_filed_date": "2017-03-15",
+        "as_of_date": "2017-09-30",
+        "cutoff_date": "2017-06-27",
+        "source_url": "https://mshospitaltransparency.com/media/1452/2016-mhg-audited-financials.pdf",
+        "confidence": "HIGH",
+        "_notes": "Direct evidence: PDF creation date March 15, 2017 (per pdfinfo metadata). Posted on Mississippi Hospital Transparency Act portal (required filing for MS public hospitals starting 2016). 166 days post-FYE — ON-TIME (cutoff June 27, 2017)."
+      },
+      "payor_concentration": {
+        "medicaid_pct_of_npr": null,
+        "medicare_pct_of_npr": null,
+        "commercial_pct_of_npr": null,
+        "medicaid_pct_of_gross": 0.132,
+        "fiscal_year": "FY2016",
+        "basis": "gross",
+        "source_url": "https://mshospitaltransparency.com/media/1826/mhg-2018-financials-12-17-18.pdf",
+        "confidence": "MEDIUM",
+        "_notes": "FY2018 audit (which discloses FY2016 comparison) shows Medicaid/MS Can = 13.2% of gross patient revenue FY2016. MS is non-Medicaid-expansion. Medicare share likely 45-50%, commercial 35%. Detector Medicaid>65% — does NOT fire."
+      }
+    },
+    "Children's Hospital Los Angeles": {
+      "late_filing": {
+        "fiscal_year_end": "2016-06-30",
+        "latest_audited_fs_filed_date": null,
+        "as_of_date": "2017-09-30",
+        "cutoff_date": "2017-03-27",
+        "source_url": "https://fdpclearinghouse.org/file/get?id=4508",
+        "confidence": "LOW",
+        "_notes": "CHLA FYE June 30. Federal Audit Clearinghouse holds the FY2016 audit. Active continuing disclosure issuer (CHFFA bonds). Default: on-time.",
+        "_warning": "No direct EMMA timestamp."
+      },
+      "payor_concentration": {
+        "medicaid_pct_of_npr": null,
+        "medicare_pct_of_npr": null,
+        "commercial_pct_of_npr": null,
+        "medicaid_pct_of_npr_estimate": 0.55,
+        "fiscal_year": "FY2016",
+        "basis": "net",
+        "source_url": "https://www.chla.org/sites/default/files/2024-02/1117444-Annual-Report-CHLA-FY23-WEB.pdf",
+        "confidence": "MEDIUM",
+        "_notes": "FY2024 CHLA disclosure: Medi-Cal = 65% NPR. FY2016 likely 50-58% Medi-Cal given growing Medi-Cal share post-ACA. Pediatric children's hospital in CA — very high Medi-Cal exposure. Detector Medicaid>65% — borderline/possibly fires (FY2024 it would). FY2016 likely just below threshold."
+      }
+    },
+    "Baxter Regional Medical Center": {
+      "late_filing": {
+        "fiscal_year_end": "2016-06-30",
+        "latest_audited_fs_filed_date": null,
+        "as_of_date": "2017-09-30",
+        "cutoff_date": "2017-03-27",
+        "source_url": "https://projects.propublica.org/nonprofits/organizations/710561765",
+        "confidence": "LOW",
+        "_notes": "Baxter Regional FYE June 30. Mountain Home AR. Federal Audit Clearinghouse hosts post-2015 audits. Default: on-time.",
+        "_warning": "No direct EMMA timestamp."
+      },
+      "payor_concentration": {
+        "medicaid_pct_of_npr": null,
+        "medicare_pct_of_npr": null,
+        "commercial_pct_of_npr": null,
+        "fiscal_year": "FY2016",
+        "basis": null,
+        "source_url": null,
+        "confidence": "LOW",
+        "_warning": "Rural Ozark Arkansas — senior-heavy demographic. AR is Medicaid-expansion (Private Option). Medicare ~50%, Medicaid ~18%. Detector Medicaid>65% — does NOT fire."
+      }
+    },
+    "Hospital for Special Care": {
+      "late_filing": {
+        "fiscal_year_end": "2016-09-30",
+        "latest_audited_fs_filed_date": null,
+        "as_of_date": "2017-09-30",
+        "cutoff_date": "2017-06-27",
+        "source_url": "https://portal.ct.gov/OHS/Health-Systems-Planning/Hospital-Financial-Data/Specialty-Hospital-Filings",
+        "confidence": "LOW",
+        "_notes": "Hospital for Special Care (long-term acute care/rehab) — CT OHS Specialty Hospital filings. NOT in CT acute hospital 2016 AFS list (per direct check of CT-OHS 2016 AFS page). Default: on-time per state requirement.",
+        "_warning": "Specialty hospital — may have different fiscal year. Could not verify FYE definitively."
+      },
+      "payor_concentration": {
+        "medicaid_pct_of_npr": null,
+        "medicare_pct_of_npr": null,
+        "commercial_pct_of_npr": null,
+        "fiscal_year": "FY2016",
+        "basis": null,
+        "source_url": null,
+        "confidence": "LOW",
+        "_warning": "LTAC/rehab — Medicare-dominant (typically 60%+), Medicaid 20-30%, commercial 10-15%. Detector Medicaid>65% — does NOT fire."
+      }
+    },
+    "Boston Medical Center": {
+      "late_filing": {
+        "fiscal_year_end": "2016-09-30",
+        "latest_audited_fs_filed_date": "2017-01-25",
+        "as_of_date": "2017-09-30",
+        "cutoff_date": "2017-06-27",
+        "source_url": "https://www.bmc.org/sites/default/files/Research/uniform-guidance/Final_Boston_Medical_Center_FY16_Uniform_Guidance_Report.pdf",
+        "confidence": "HIGH",
+        "_notes": "Direct evidence: audit opinion dated January 25, 2017 (PwC, Boston). 117 days post-FYE — VERY FAST. ON-TIME (cutoff June 27, 2017). Subsequent events evaluated through Jan 25, 2017."
+      },
+      "payor_concentration": {
+        "medicaid_pct_of_npr": null,
+        "medicare_pct_of_npr": null,
+        "commercial_pct_of_npr": null,
+        "public_payer_pct_of_gross": 0.769,
+        "fiscal_year": "FY2016",
+        "basis": "gross",
+        "source_url": "https://chiamass.gov/assets/docs/r/hospital-profiles/2016/Massachusetts-Hospitals-Profiles-Compendium-2016.pdf",
+        "confidence": "HIGH",
+        "_notes": "CHIA 2016 MA Hospital Profile: BMC public payer = 76.9% of gross (HIGHEST in MA, designated HPP — High Public Payer hospital). MassHealth (Medicaid) likely 35-40%, Medicare 25-30%, free care/HSN 10-15%. Detector Medicaid>65% — does NOT fire (combined MA share is high but Medicaid-only is below 65% threshold)."
+      }
+    },
+    "Jackson Hospital & Clinic": {
+      "late_filing": {
+        "fiscal_year_end": "2016-12-31",
+        "latest_audited_fs_filed_date": null,
+        "as_of_date": "2017-09-30",
+        "cutoff_date": "2017-09-27",
+        "source_url": "https://projects.propublica.org/nonprofits/organizations/636001820",
+        "confidence": "LOW",
+        "_notes": "Jackson Hospital & Clinic Inc (Montgomery AL). ProPublica notes 'did not e-file for 2016-2019' for Form 990 — may indicate paper-filing pattern. Audited FS for bondholders would still be required. Default: on-time but flag for monitoring.",
+        "_warning": "Non-e-filer of 990 — possible weak disclosure discipline. POTENTIAL early warning."
+      },
+      "payor_concentration": {
+        "medicaid_pct_of_npr": null,
+        "medicare_pct_of_npr": null,
+        "commercial_pct_of_npr": null,
+        "fiscal_year": "FY2016",
+        "basis": null,
+        "source_url": null,
+        "confidence": "LOW",
+        "_warning": "AL non-Medicaid-expansion. Montgomery market. Medicare ~45%, Medicaid ~12%, commercial ~35%. Detector Medicaid>65% — does NOT fire."
+      }
+    },
+    "Milford Regional Medical Center": {
+      "late_filing": {
+        "fiscal_year_end": "2016-09-30",
+        "latest_audited_fs_filed_date": null,
+        "as_of_date": "2017-09-30",
+        "cutoff_date": "2017-06-27",
+        "source_url": "https://projects.propublica.org/nonprofits/organizations/42103602",
+        "confidence": "LOW",
+        "_notes": "Milford Regional Medical Center MA FYE September 30. Federal Audit Clearinghouse hosts post-2015 audits. CHIA 2016 profile published. Default: on-time.",
+        "_warning": "No direct EMMA timestamp."
+      },
+      "payor_concentration": {
+        "medicaid_pct_of_npr": null,
+        "medicare_pct_of_npr": null,
+        "commercial_pct_of_npr": null,
+        "fiscal_year": "FY2016",
+        "basis": "gross",
+        "source_url": "https://chiamass.gov/assets/docs/r/hospital-profiles/2016/Massachusetts-Hospitals-Profiles-Compendium-2016.pdf",
+        "confidence": "LOW",
+        "_warning": "CHIA 2016 profile present but PDF table extraction did not yield clean percentages. MA Medicaid-expansion. Suburban community hospital. Medicare ~45%, MassHealth ~18%, commercial ~35%. Detector Medicaid>65% — does NOT fire."
+      }
+    },
+    "Memorial Hospital at North Conway": {
+      "late_filing": {
+        "fiscal_year_end": "2016-09-30",
+        "latest_audited_fs_filed_date": null,
+        "as_of_date": "2017-09-30",
+        "cutoff_date": "2017-06-27",
+        "source_url": "https://www.guidestar.org/profile/02-0222156",
+        "confidence": "LOW",
+        "_notes": "Critical Access Hospital (25-bed), MaineHealth affiliate. Smaller obligor — disclosure cadence less rigorous than larger systems. Default: on-time but lower confidence.",
+        "_warning": "Small hospital — potential weak disclosure."
+      },
+      "payor_concentration": {
+        "medicaid_pct_of_npr": null,
+        "medicare_pct_of_npr": null,
+        "commercial_pct_of_npr": null,
+        "fiscal_year": "FY2016",
+        "basis": null,
+        "source_url": null,
+        "confidence": "LOW",
+        "_warning": "Mt Washington Valley NH — tourist/retirement market. Medicare ~55-60%, Medicaid ~12% (NH non-expansion through 2018), commercial ~25%. Detector Medicaid>65% — does NOT fire."
+      }
+    },
+    "Nanticoke Health Services": {
+      "late_filing": {
+        "fiscal_year_end": "2016-06-30",
+        "latest_audited_fs_filed_date": null,
+        "as_of_date": "2017-09-30",
+        "cutoff_date": "2017-03-27",
+        "source_url": "https://www.businesswire.com/news/home/20160407006441/en/Fitch-Affirms-Nanticoke-Health-Services-DE-BBB-",
+        "confidence": "LOW",
+        "_notes": "Nanticoke Health Services (Seaford DE) FYE June 30. Fitch April 2016 BBB- affirmation. Active continuing disclosure issuer. Default: on-time."
+      },
+      "payor_concentration": {
+        "medicaid_pct_of_npr": null,
+        "medicare_pct_of_npr": null,
+        "commercial_pct_of_npr": null,
+        "fiscal_year": "FY2016",
+        "basis": null,
+        "source_url": null,
+        "confidence": "LOW",
+        "_warning": "Sussex County DE rural. Medicare ~50%, Medicaid ~18% (DE Medicaid-expansion), commercial ~25%. Detector Medicaid>65% — does NOT fire."
+      }
+    },
+    "East Texas Medical Center / ETMC": {
+      "late_filing": {
+        "fiscal_year_end": "2016-12-31",
+        "latest_audited_fs_filed_date": null,
+        "as_of_date": "2017-09-30",
+        "cutoff_date": "2017-09-27",
+        "source_url": "https://www.businesswire.com/news/home/20150924006077/en/Fitch-Downgrades-East-Texas-Medical-Center-Revs",
+        "confidence": "LOW",
+        "_notes": "ETMC Regional Health System (Tyler TX). Fitch had downgraded to BBB- in 2015 with Negative Outlook. Active continuing disclosure but financial pressure. Default: on-time but FLAG potential late filing risk.",
+        "_warning": "Distressed credit — heightened risk of late filing or covenant breach disclosure."
+      },
+      "payor_concentration": {
+        "medicaid_pct_of_npr": null,
+        "medicare_pct_of_npr": null,
+        "commercial_pct_of_npr": null,
+        "governmental_pct_of_gross": 0.62,
+        "fiscal_year": "FY2014",
+        "basis": "gross",
+        "source_url": "https://www.businesswire.com/news/home/20150924006077/en/Fitch-Downgrades-East-Texas-Medical-Center-Revs",
+        "confidence": "MEDIUM",
+        "_notes": "Fitch Sept 2015 cited 62% governmental payor mix FY2014. TX non-Medicaid-expansion. East Texas market. Medicare ~50%, Medicaid ~12%, commercial ~25%. ETMC expected $43.7M Medicare/Medicaid DSH/UPL in FY2016. Detector Medicaid>65% — does NOT fire (Medicare-dominant)."
+      }
+    },
+    "Hurley Medical Center": {
+      "late_filing": {
+        "fiscal_year_end": "2016-06-30",
+        "latest_audited_fs_filed_date": null,
+        "as_of_date": "2017-09-30",
+        "cutoff_date": "2017-03-27",
+        "source_url": "https://us-east-1.storage.lumen.com/dac-prod-bucket-dacbond-dynamic/0000bbc7/80/18/72/99.pdf",
+        "confidence": "MEDIUM",
+        "_notes": "Hurley Medical Center (Flint MI) FYE June 30. Fitch affirmed BBB- November 2016 with FY2016 ratios — implies FY2016 audit available by Nov 2016 = ON-TIME (filed within ~5 months post-FYE, well under 270-day cutoff). DAC continuing disclosure repository."
+      },
+      "payor_concentration": {
+        "medicaid_pct_of_npr": null,
+        "medicare_pct_of_npr": null,
+        "commercial_pct_of_npr": null,
+        "medicaid_pct_of_gross": 0.453,
+        "medicare_pct_of_gross": 0.298,
+        "fiscal_year": "FY2016",
+        "basis": "gross",
+        "source_url": "https://www.businesswire.com/news/home/20161109005826/en/Fitch-Affirms-Hurley-Medical-Center-MIs-Revenue",
+        "confidence": "HIGH",
+        "_notes": "Fitch Nov 2016 cites Hurley FY2016 payor mix: Medicaid 45.3% of gross, Medicare 29.8% of gross. Combined govt = 75.1%. MI Medicaid-expansion (Healthy Michigan). Flint poverty/Medicaid-eligible population. Commercial ~22%. Detector Medicaid>65% — does NOT fire (Medicaid 45.3% < 65% threshold), but FLAG: very high Medicaid exposure relative to peers."
+      }
+    },
+    "Adventist HealthCare Maryland": {
+      "late_filing": {
+        "fiscal_year_end": "2016-12-31",
+        "latest_audited_fs_filed_date": "2017-04-27",
+        "as_of_date": "2017-09-30",
+        "cutoff_date": "2017-09-27",
+        "source_url": "https://hscrc.maryland.gov/Documents/Hospitals/ReportsFinancial/Audited/FY-2016/Adventist-ALL_AFS_FY16.pdf",
+        "confidence": "HIGH",
+        "_notes": "Direct evidence: audit opinion dated April 27, 2017 (Wilkes-Barre PA — Baker Tilly or similar). Posted to MD HSCRC portal. 117 days post-FYE. ON-TIME (well within Sept 27 cutoff)."
+      },
+      "payor_concentration": {
+        "medicaid_pct_of_npr": 0.084,
+        "medicare_pct_of_npr": 0.379,
+        "commercial_pct_of_npr": 0.495,
+        "self_pay_pct_of_npr": 0.042,
+        "fiscal_year": "FY2016",
+        "basis": "net",
+        "source_url": "https://hscrc.maryland.gov/Documents/Hospitals/ReportsFinancial/Audited/FY-2016/Adventist-ALL_AFS_FY16.pdf",
+        "confidence": "HIGH",
+        "_notes": "Patient service revenue net of contractual allowances: Medicare $304.1M (37.9%), Medicaid $67.4M (8.4%), Other 3rd party $396.8M (49.5%), Self-pay/Other $33.5M (4.2%). Total $801.7M. MD all-payer model. Detector Medicaid>65% — does NOT fire."
+      }
+    },
+    "Oaklawn Hospital": {
+      "late_filing": {
+        "fiscal_year_end": "2016-09-30",
+        "latest_audited_fs_filed_date": null,
+        "as_of_date": "2017-09-30",
+        "cutoff_date": "2017-06-27",
+        "source_url": "https://projects.propublica.org/nonprofits/organizations/381368347",
+        "confidence": "LOW",
+        "_notes": "Oaklawn Hospital (Marshall MI). 77-bed acute + 17-bed psych. Smaller community hospital. Default: on-time but lower disclosure visibility.",
+        "_warning": "Small hospital — limited public disclosure footprint."
+      },
+      "payor_concentration": {
+        "medicaid_pct_of_npr": null,
+        "medicare_pct_of_npr": null,
+        "commercial_pct_of_npr": null,
+        "fiscal_year": "FY2016",
+        "basis": null,
+        "source_url": null,
+        "confidence": "LOW",
+        "_warning": "Calhoun County MI (Battle Creek metro). MI Medicaid-expansion. Medicare ~48%, Medicaid ~18%, commercial ~30%. Detector Medicaid>65% — does NOT fire."
+      }
+    }
+  },
+  "_coverage_summary": {
+    "total_obligors": 33,
+    "filing_date_confidence": {
+      "HIGH": 5,
+      "MEDIUM": 9,
+      "LOW": 19
+    },
+    "payor_mix_confidence": {
+      "HIGH": 5,
+      "MEDIUM": 10,
+      "LOW": 18
+    },
+    "detector_fires_on_late_filing": 0,
+    "detector_fires_on_medicaid_gt_65pct": 0,
+    "detector_borderline_on_medicaid_gt_65pct": 1,
+    "_borderline_obligors": ["Children's Hospital Los Angeles (FY2024 65% Medi-Cal but FY2016 likely lower)"],
+    "high_govt_concentration_but_below_threshold": [
+      "Hurley Medical Center (75.1% combined Medicare+Medicaid, Medicaid alone 45.3% — high)",
+      "Yavapai Regional (73% combined gov)",
+      "Boston Medical Center (76.9% public payer)",
+      "Trinity Mother Frances (65% combined Medicare+Medicaid)",
+      "Carson Tahoe (68% governmental)"
+    ]
+  },
+  "_data_collection_notes": [
+    "Best sources discovered: (1) state regulator portals — MD HSCRC, IN DOH, MS Hospital Transparency, CT OHS, FL flauditor have direct PDF AFS archives by fiscal year; (2) Fitch/Moody's/S&P 2016 rating action press releases on BusinessWire give point-in-time payor mix metrics with citations; (3) CHIA MA Hospital Profiles Compendium 2016 provides public-payer percentages for all MA acute hospitals.",
+    "Methods that failed: (1) general WebSearch for EMMA-hosted audits — the EMMA UI requires JS rendering, so direct timestamp retrieval impossible without browser automation; (2) WebFetch on scanned/image PDFs (e.g., Memorial Gulfport 2016) — text layer absent; (3) WebFetch on JSON-rendered EMMA pages.",
+    "If recompute is desired: download EMMA continuing disclosure XML via msrb.org/EMMA-API for each obligor's CUSIP — this is the only source for exact filing timestamps."
+  ]
+}

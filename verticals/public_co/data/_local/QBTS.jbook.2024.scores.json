@@ -1,0 +1,109 @@
+{
+  "ticker": "QBTS",
+  "cutoff": "2024-09-01",
+  "filing": "0001907982-24-000049_10-K.txt",
+  "scoring_notes": "QBTS's FY23 10-K and Q2-2024 10-Q DO NOT name specific Pentagon Program Elements, IDIQ ceilings, or DoD programs-of-record as material revenue contributors. The J-Book divergence pattern requires PE-grounded claims to attack; QBTS does not provide them. Most claims therefore score UNVERIFIABLE through pentagon_jbook (NOT_FOUND), with the caveat that NOT_FOUND in the corpus is not by itself a red flag (per Calibration Rule 7). The most material finding comes from a CROSS-CHECK via usaspending: D-Wave Government Inc. is registered (UEI: PATGKJM747F7) but shows ZERO contracts and ZERO grants in the federal recipient database pre-cutoff — INFLATION_SUSPECT signal. This is a meaningful finding because the parent uses 'D-Wave Government Inc.' as a named federal contracting entity in its loan structure and entity narrative, yet there is no detectable federal award flow through that UEI as of 2024-09-01.",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Approximately 70 percent of FY 2023 revenue comes from commercial customers across financial services, manufacturing, automotive, pharmaceutical, IT, retail, and professional services.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["Implies remaining ~30% is government/academic/research — non-commercial. The filing does NOT decompose this remainder into named DoD PEs, so the J-Book corpus has nothing direct to attack."],
+      "M_check": "pentagon_jbook.query_program_funding(contractor_name='D-Wave', cutoff_date='2024-09-01'); pentagon_jbook.query_program_funding(contractor_name='D-Wave Government', cutoff_date='2024-09-01')",
+      "M_value": "NOT_FOUND for both contractor queries (corpus coverage gap; J-Book v1 is hand-curated and does not include any quantum-annealing programs)",
+      "interpretation": "Cannot verify or refute through pentagon_jbook. Per Calibration Rule 7, NOT_FOUND alone is not a red flag — the corpus simply doesn't cover quantum-annealing R&D PEs. Score UNVERIFIABLE. The 70/30 disclosure does, however, mean the company's narrative is not heavily J-Book-load-bearing — limiting the divergence-pattern's leverage on this name."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Davidson Technologies, a DoD/aerospace technology services firm, is co-developing a phased-array radar-scheduling quantum-hybrid application with D-Wave.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "usaspending CONFIRMS Davidson Technologies is a real DoD contractor (UEI NNGENQ7VK3M7, ~10 DoD contracts, ~$199M lifetime obligations) — counterparty plausibility intact",
+        "BUT: pentagon_jbook NOT_FOUND for 'phased array radar scheduling' as a program; no PE attached to the Davidson-D-Wave joint app",
+        "Davidson's top awards are unrelated (ACC DTC CMCC at $104M; cyber-secure IT virtual desktop work at $14M; mentorship/warfighter training $47M) — no apparent radar-scheduling line of business in the public award profile",
+        "No contract value, no PE number, no DoD prime program-of-record tied to the joint application in the disclosure"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(contractor_name='Davidson Technologies', cutoff_date='2024-09-01') + pentagon_jbook.query_program_funding(program_name='phased array radar scheduling', cutoff_date='2024-09-01') + usaspending.query_federal_presence(name_variants=['Davidson Technologies'], end_date='2024-09-01')",
+      "M_value": "pentagon_jbook=NOT_FOUND (Davidson and phased-array-radar-scheduling both); usaspending=RECURRING_FEDERAL ($199.39M, 10 DoD contracts) — but top-3 awards are NOT radar-scheduling-themed",
+      "interpretation": "The Davidson partnership is real on the prime side, but the QBTS narrative does not tie it to a budgeted DoD program. There is no forward J-Book pipeline visible; this is a research / co-development demo, not a PE-funded program of record. The narrative load-bearing weight is small (one bullet in customer narrative, no revenue concentration disclosed), so MODERATE_UNDERDELIVERY rather than SEVERE — the claim is materially weaker than implied (no contract, no PE) but not load-bearing enough to be existential."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "D-Wave has had a long-standing engagement with Lockheed Martin going back to the early commercial era of D-Wave Systems.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "edgar_fts.query_fulltext on Lockheed's CIK (0000936468) for 'D-Wave' returns 0 hits — Lockheed does NOT disclose D-Wave as a vendor, partner, or material counterparty in any filing pre-cutoff",
+        "pentagon_jbook: Lockheed appears in 7 PE matches (e.g., Technology Maturation Initiatives PE 0604115C, FUNDED_STEADY) — but those PEs do NOT name D-Wave anywhere; primary contractors listed are Boeing, Lockheed, General Atomics, Raytheon, University of Rochester",
+        "Filing positions Lockheed as historical ('Since the Lockheed Martin engagement...') — past, not forward — but the listing of Lockheed in the customer roster implies an ongoing-customer character that the counterparty disclosure does not corroborate"
+      ],
+      "M_check": "edgar_fts.query_fulltext(cik='0000936468', search_term='D-Wave', cutoff_date='2024-09-01') + pentagon_jbook.query_program_funding(contractor_name='Lockheed Martin', cutoff_date='2024-09-01')",
+      "M_value": "edgar_fts=0 hits in Lockheed filings; pentagon_jbook=7 Lockheed-prime PE matches, FUNDED_STEADY (none mention D-Wave)",
+      "interpretation": "The Lockheed relationship is real historically (well-documented from 2011-era D-Wave commercialization) but absent from current counterparty disclosure. Listing Lockheed in the customer roster alongside present-tense customers overstates the current engagement. MODERATE_UNDERDELIVERY: the framing is misleading but the historical fact is real."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "D-Wave systems have been used at Los Alamos National Laboratory and Oak Ridge National Laboratory for research and academic applications.",
+      "severity": "PASS",
+      "supports": [
+        "Filing is careful: 'research and academic applications' — does not claim ongoing revenue or forward production deployment",
+        "doe_budget shows Advanced Computing Technologies / ASCR program funded going forward (FY25 $105.1M, FY26 $112.6M) — DOE quantum/HPC envelope is GROWING, so the national-lab access channel itself is not de-funded",
+        "However, the program corpus has no DOE entry where D-Wave is named as a prime; this is access not contract revenue"
+      ],
+      "M_check": "doe_budget.query_program_funding(program_name='Quantum Information Science', cutoff_date='2024-09-01') + doe_budget.query_program_funding(contractor_name='D-Wave', cutoff_date='2024-09-01')",
+      "M_value": "doe_budget: primary match 'Advanced Computing Technologies' (ASCR) FUNDED with growth FY25→FY26 (105→112 $M); contractor query NOT_FOUND",
+      "interpretation": "Claim is properly hedged in the filing ('research/academic'). DOE QIS envelope is growing, supporting national-lab access continuity. No divergence between disclosure and DOE budget reality."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "D-Wave Government Inc. is the primary federal contracting entity for D-Wave; named in the venture/term loan structure as a co-borrower.",
+      "severity": "RED_FLAG_NEGATIVE",
+      "supports": [
+        "usaspending federal-presence: D-Wave Government Inc. UEI PATGKJM747F7 is registered, but has ZERO contracts ($0M) and ZERO grants ($0M) lifetime through 2024-09-01 — signal INFLATION_SUSPECT",
+        "The entity exists on paper (UEI registered) but has no detectable federal award activity",
+        "Parent's narrative positions D-Wave Government Inc. as the federal contracting subsidiary; absence of federal award flow through it is a hard contradiction to the implied federal channel",
+        "When combined with C1 (~30% of revenue is non-commercial), the non-commercial bucket must therefore flow through DIFFERENT entities (academic grants to D-Wave Systems, foreign govt e.g. Australia SIF Loan, NRC Canada, etc.) — not via a US DoD federal channel"
+      ],
+      "M_check": "usaspending.query_federal_presence(name_variants=['D-Wave Government Inc.','D-Wave Government','D-Wave Systems','D-Wave Quantum','D-Wave US Inc.','D-Wave Commercial Inc.'], end_date='2024-09-01')",
+      "M_value": "signal=INFLATION_SUSPECT; 1 UEI resolved (D-WAVE GOVERNMENT INC.); 0 contracts; $0M contract obligations; 0 grants; $0M grant obligations; no agency activity",
+      "interpretation": "This is the strongest finding in the analysis. The federal-contracting-subsidiary framing in the loan agreement and Item 1A risk-factor language implies a federal channel that does not exist in the federal-recipient registry as of cutoff. RED_FLAG_NEGATIVE per Calibration Rule 6 (USAspending shows ZERO obligations under the claimed channel → claim itself was inflated). Caveat: this is a STRUCTURAL FRAMING finding, not a J-Book PE-divergence finding — the company's structure suggests US-federal exposure that the recipient registry does not support."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "D-Wave participates in NASA Quantum Artificial Intelligence Laboratory and USC ISI as long-standing system hosts.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook NOT_FOUND for both NASA QuAIL and quantum-AI program-name queries — corpus does not have NASA programs in scope (J-Book is DoD-centric)",
+        "These are research host sites, not federal contracts — no PE expectation"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='NASA QuAIL', cutoff_date='2024-09-01') + pentagon_jbook.query_program_funding(program_name='quantum artificial intelligence', cutoff_date='2024-09-01')",
+      "M_value": "NOT_FOUND for both",
+      "interpretation": "Corpus scope mismatch — NASA programs are outside the J-Book DoD corpus by design. UNVERIFIABLE; claim is non-load-bearing (no revenue tied to QuAIL)."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "D-Wave is the only company developing both annealing quantum computers and gate-model quantum computers; gate-model development is in early stages with high-coherence fluxonium qubits.",
+      "severity": "PASS",
+      "supports": [
+        "uspto_odp: 480 total applications, 197 granted patents pre-cutoff under D-Wave Systems Inc. — substantial dual-modality IP footprint",
+        "Recent (2024) applications include qubit-control / kinetic-inductance / energy-scale improvements — consistent with both annealing fab and gate-model coherence R&D",
+        "Claim is properly hedged ('gate-model not yet commercialized') — admits the milestone gap"
+      ],
+      "M_check": "uspto_odp.query_assignee(assignee_name='D-Wave Systems', cutoff_date='2024-09-01')",
+      "M_value": "n_total_applications=480; n_granted=197 pre-cutoff; recent filings include qubit-control + inductance + I/O work consistent with gate-model R&D in addition to annealing fab",
+      "interpretation": "Patent footprint supports the dual-modality narrative. PASS — claim is appropriately hedged and the IP record is consistent."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "D-Wave operates three facilities: Burnaby BC, Richmond BC, and Palo Alto CA, total ~55,000 sf.",
+      "severity": "PASS",
+      "supports": [
+        "EPA FRS search for 'D-Wave' in CA returns 31 records but all are unrelated names (carwashes, broadband, publications) — D-Wave's Palo Alto facility is a fabrication clean-room that likely does not trigger EPA registration thresholds for the small footprint described (6,000 sf)",
+        "Two of three facilities are in Canada (Burnaby/Richmond BC) — outside EPA jurisdiction entirely",
+        "Filing's facility description is specific and consistent with a small superconducting circuit fab operation"
+      ],
+      "M_check": "epa_frs.query_facilities(facility_name='D-Wave', state_abbr='CA')",
+      "M_value": "No D-Wave facility located in EPA FRS for CA; 31 false-positive hits for unrelated names — absence is consistent with sub-threshold superconducting fab footprint, not a contradiction",
+      "interpretation": "Non-finding (EPA-FRS scope mismatch). No basis to challenge the facility disclosure. PASS."
+    }
+  ]
+}

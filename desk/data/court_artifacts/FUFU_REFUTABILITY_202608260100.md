@@ -1,0 +1,29 @@
+## Context
+
+FUFU's cohort membership is itself the first finding: BitFuFu is a Bitcoin miner / cloud-mining reseller tagged "Finance: Consumer Services" by the exchange industry map, so the -55.8% "excess drawdown vs Finance sector median" is a **classification artifact**, not a dislocation. The correct comparand is the BTC mining complex, where a -64% dd52 against a -27.5% YoY BTC price is ordinary beta-bleed. Cause-check therefore fails before refutability begins — and the company's own Q2 disclosure confirms the damage rather than refuting it.
+
+| ticker | class | refuting metric | current value/trend (cited) | next print date | note |
+|---|---|---|---|---|---|
+| FUFU | **STRUCTURAL** | Cloud-Mining net dollar retention (Cloud Mining = 58.2% of revenue) | **24.1%** — surviving customers re-contracted at under a quarter of prior volume; cloud revenue $24.9M vs $94.3M YoY ([Q2 6-K PR, 8/17](https://www.sec.gov/Archives/edgar/data/1921158/000121390026090474/ea030213301ex99-1.htm); NDR figure disclosed on the call, [call summary](https://finance.yahoo.com/markets/crypto/articles/bitfufu-q2-earnings-call-highlights-130222645.html) — **not in the PR, wants primary confirmation**) | **~Sept 4–9** (Aug monthly production 6-K); Q3 ~2026-11-12 unconfirmed | The metric that would have proven damage-absent instead confirms it. NDR of 24% is demand destruction, which directly contradicts management's "deliberate optimization of deployed hashrate" framing |
+
+**Corroborating primary trend** (all from the 8/17 Q2 PR and the [8/7 July production 6-K](https://www.sec.gov/Archives/edgar/data/1921158/000121390026086407/ea030108701ex99-1.htm)): managed hashrate 36.2 → 15.3 (6/30) → **14.2 EH/s (7/31)** — still falling *after* the quarter management called deliberate; power capacity 728 → 273 → **255 MW**; BTC treasury 1,792 → 1,671 → **1,314** (−357 BTC, −21% in one month, sold to prepay hashrate); revenue −62.9%.
+
+**The one genuinely damage-absent leg** (anti-masking finding, worth recording): the *leverage* limb of the miner narrative is testably false here. Total debt is **$5.4M** ($2.0M current + $3.4M non-current) against $119.5M cash+digital at 6/30; they repaid $10M of BTC-backed loans in H1 and swapped $3M into unsecured. There is no margin-call cliff. But an unlevered balance sheet does not make the equity cheap.
+
+**Valuation, marked to today.** Digital assets were $97.3M on 1,671 BTC at 6/30 (implied ~$58.2k/BTC, cross-checks the $58.5k 6/30 tape). Marking the remaining 1,314 BTC at today's ~$79,038 gives ~$103.9M — the +35% BTC rally roughly offset the 21% treasury liquidation. Book equity ≈ $95–100M vs a **$248M market cap ≈ 2.5x book**, on a business with negative adjusted EBITDA ex-fair-value (≈ −$1.5M), 24% NDR, and no guidance. The "discount" is not a discount.
+
+**Tape check, and it points the wrong way.** BTC printed its highest open in three months today (~$79,038, +10% since 8/20) while **FUFU traded −6.3%**. A high-beta miner declining into a BTC breakout is the market pricing idiosyncratic damage over crypto beta — the inverse of the dispersion this triage was hunting.
+
+**Float constraint:** 166.65M shares outstanding, ~135M of them insider Class B (Chipring / CEO Liang Lu). Public float ≈ 31M shares ≈ **$47M** — under the desk's ≤1% ADV ladder doctrine this is size-constrained to irrelevance even if the thesis were right.
+
+## COURT-WORTHY (damage-absent, ranked)
+
+**None.** No member qualifies. FUFU's candidate refuting metric resolved against the name — NDR 24.1% and a still-declining July hashrate/power print confirm the narrative is true of this business model. The residual damage-absent leg (no leverage) is real but non-actionable at 2.5x book with negative operating EBITDA.
+
+**PRINT PROXIMITY: ~2026-09-04 to 09-09 (August monthly production 6-K) — 8–10 trading days out, NOT within 5.** Verified from filing cadence, not yfinance: May-update 6/9, June-update 7/10, July-update 8/7 (accession 0001213900-26-086407). The pack's 2026-11-12 is the Q3 print and remains **UNCONFIRMED** — no company PR names it. No pre-print reconstruction is owed at this distance; for the record the position is **FLAT**, and the September 6-K is the honest tripwire: management spent 357 BTC (21% of treasury) buying the ~20 EH/s mid-August restoration, so an August print materially below 20 EH/s collapses the "deliberate" story outright.
+
+**COURT-WORTHINESS FUFU: 2/10 — cohort membership is a sector-misclassification artifact and the name's own NDR disclosure confirms the narrative, so a court would burn a bench to re-derive FLAT.**
+
+One caveat I'd flag rather than bury: the pivotal 24.1% NDR figure comes from call coverage, not the filed exhibit, and the pack's XBRL block came back empty (BitFuFu is a foreign private issuer — quarterly XBRL only arrives with the annual 20-F). The classification does not depend on it: the filed hashrate, power-capacity, BTC-treasury and segment-revenue series carry STRUCTURAL on their own. But if this name is ever re-triaged, the NDR should be pulled from a primary transcript first.
+
+Sources: [Q2 2026 6-K exhibit](https://www.sec.gov/Archives/edgar/data/1921158/000121390026090474/ea030213301ex99-1.htm) · [July 2026 production 6-K exhibit](https://www.sec.gov/Archives/edgar/data/1921158/000121390026086407/ea030108701ex99-1.htm) · [Q2 balance-sheet detail](https://www.stocktitan.net/news/FUFU/bit-fu-fu-reports-unaudited-second-quarter-2026-financial-l7usfssfgxpk.html) · [Q2 call highlights](https://finance.yahoo.com/markets/crypto/articles/bitfufu-q2-earnings-call-highlights-130222645.html) · [BTC 8/25/26 price](https://fortune.com/article/price-of-bitcoin-08-24-2026/) · [BTC 6/30/26 price](https://fortune.com/article/price-of-bitcoin-06-30-2026/) · [FUFU quote/shares](https://stockanalysis.com/stocks/fufu/)

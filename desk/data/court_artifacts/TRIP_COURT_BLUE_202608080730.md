@@ -1,0 +1,24 @@
+## BLUE BENCH — TRIP — RED CASE: SUSTAINED (one mechanism claim REDUCED)
+
+PACK: acknowledged. Superseded: live mark is now $10.78 (pack/yahoo 08-08) vs red's $10.57 — spreads below restruck. Pack XBRL rev rows are 2016–18 vintage, unusable; ignored. IBKR snapshot permission denied this session; SEC EDGAR 403'd WebFetch and no shell was available, so verbatim both-period re-pull was partially completed via secondary reprints — declared per finding.
+
+**#1–6 (catalyst)** {red: $700M Amex EPA, end-2026 close, $35M reverse fee, tax UNVERIFIABLE | pack + 8-K acc 0001193125-26-330742 | consistent | **SUSTAINED**}. Selling a zero-net-income asset at ~3× revenue is genuinely good.
+
+**#7–10 (denominator)** {red: FY26e ~$193M, not $305.6M | independent re-derivation: Q1 = 92.8−76.4 = $16.4M; H1-25/FY25 = 143.5/298.3 = 48.1%; 92.8/0.481 = $193M; implied H2-26 −35% y/y = internally consistent with H1 | arithmetic CONFIRMED | **SUSTAINED** — this kill is decisive and the triage number is dead}.
+
+**#18g–18i (recast — doctrine-gated check)**: EDGAR blocked, but corroborated independently: Viator FY24 revenue **$840M**, Brand TA **$949M**, and the gross-of-intersegment footnote structure confirmed via [the FY2024 release reprint](https://www.tradingview.com/news/tradingview:0ccacdd5d7e34:0-tripadvisor-reports-fourth-quarter-and-full-year-2024-financial-results/) and Q4 call coverage (Viator+TheFork "+$52M incremental EBITDA" ⇒ Viator ~$33M from ~$0M FY23). Primary: https://www.sec.gov/Archives/edgar/data/1526520/000095017025023733/trip-ex99_1.htm (Q4-2024 8-K Ex-99.1); recast basis: https://www.sec.gov/Archives/edgar/data/1526520/000119312526336693/ (Q2-2026 10-Q). Reconciliation arithmetic verifies (334.0 old ≈ 333.2 new). **But red's own table refutes its mechanism purity: marketing fell only $62M (562→~500) against a $135M charge removal — so ~$73–89M of costs were simultaneously allocated INTO Experiences.** Net flattering = **+$46M (+5.5pp)**, not $135M. The innocent explanation is half-right: the recast is *closer* to full-cost presentation than "subsidy dropped" implies. **18h REDUCED; 18i SUSTAINED** (0.0%/3.9% fully-charged history stands, and §2.3b's unification rests on current-basis H1-26 data — marketing 64.8%, $2.30/$1 — independent of the recast).
+
+**#13** self-correction accepted; TTM compression ~60bps SUSTAINED. **#19–26** internally consistent with pack filings; SUSTAINED. **#27** {red: "bought aggressively at $14–16" | LTRIP $436.5M was a negotiated structural merger removing the controlled-company overhang, not an open-market price call | **REDUCED** — but $40M open-market at $14.22 and $0 at $9–13 stands, and #28–29 are decisive}. **#36–42** tape (hi52 20.16, dd52 −46.5% per pack) and 13D/A mechanics consistent; SUSTAINED. **§5 honesty**: with 18h reduced, ELEVATE softens toward a strong review_flag; direction-of-strategy point survives.
+
+**Selection judgment:** red attacked its own strongest legs (denominator, recast, B8 steelman) — no cherry-picking. Orphan discipline: not applicable — TRIP is a covered, liquid mid-cap and red's ruling is business-risk, not "priced-in." RP_FAIR ownability fails its own bar: fairness cannot be VERIFIED while earnings power compounds down un-guided.
+
+NEW FINDINGS RED MISSED:
+1. **Diluted-cap understatement**: SOTP uses 117.2M basic; 11.9M unvested RSU/PSU cuts per-share values ~5–8% — bull $16.27 → ~$15.1 (unadjusted), ~$13 (recast-adjusted). Strengthens REJECT.
+2. **Equity-FCF omission**: $76M "EBITDA−SBC−capex" ignores ~$18M net interest (6.39% on $836M TLB less cash yield) and cash taxes — true equity FCF nearer $50M pre-close. Strengthens.
+3. At $10.78 the restruck distribution is ~**−13% / +26%** (recast-adjusted bull) — thinner than red's stated +54%.
+
+NET POSITION AFTER BOTH BENCHES: REJECT the long, no position, no short — sustained. The triage's sub-2× multiple does not exist; 88% of profit sits in an accelerating structural melt the issuer itself attributes to AI-overview channel loss; the growth stub is downstream of the melting segment's traffic. Single re-look gate unchanged: Q3-2026 10-Q Note 13, Experiences marketing ≤58% of segment revenue (~early Nov 2026); a ≥$300M repurchase authorization at TheFork close is the secondary reversal trigger.
+
+**Conviction: 8/10.**
+
+Sources: [TradingView FY2024 release reprint](https://www.tradingview.com/news/tradingview:0ccacdd5d7e34:0-tripadvisor-reports-fourth-quarter-and-full-year-2024-financial-results/), [SEC 8-K Ex-99.1](https://www.sec.gov/Archives/edgar/data/1526520/000095017025023733/trip-ex99_1.htm), [Yahoo Finance Q4-2024 call highlights](https://finance.yahoo.com/news/tripadvisor-inc-trip-q4-2024-070726278.html)

@@ -1,0 +1,97 @@
+{
+  "ticker": "QTWO",
+  "cik": "0001410384",
+  "company": "Q2 Holdings, Inc.",
+  "sector": "Technology (banking-software SaaS)",
+  "cutoff": "2026-05-20",
+  "filing": "0001410384-26-000006_10-K.txt",
+  "filing_date": "2026-02-11",
+  "drawdown_pct": -51.6,
+  "above_52w_low_pct": 3.0,
+  "rfm_tuples": [
+    {
+      "claim_id": "C1",
+      "R": "Audit/control integrity \u2014 clean 10-K issued by Ernst & Young, ICFR effective, no going-concern language; CEO/CFO certified controls as of 12/31/25.",
+      "f": "If true: no ASC 205-40 'substantial doubt' phrasing, no Item 4.01 auditor change, no Big-4 resignation in 5-yr lookback.",
+      "M_source": "going_concern_detector.query_going_concern(CIK=0001410384, cutoff=2026-05-20) + auditor_change_tracker.query_auditor_changes(CIK=0001410384, cutoff=2026-05-20).",
+      "M_value": "going_concern: NO_GOING_CONCERN (0 matches in 10-K filed 2026-02-11). auditor_change_tracker: CLEAN_AUDITOR_TENURE (0 Item 4.01 disclosures in 5-yr lookback to 2021-05-21; 0 Big-4 resignations; 0 disagreements).",
+      "severity": "PASS",
+      "interpretation": "Clean universal-quality screen; no audit/control red flags."
+    },
+    {
+      "claim_id": "C2",
+      "R": "$304.0M of 0.75% 2026 Notes mature June 1, 2026 \u2014 must be repaid within ~10 days of the cutoff. MD&A asserts liquidity ($432.7M cash+investments at 12/31/25) plus $125M revolver is adequate.",
+      "f": "If liquidity is genuinely adequate, post-cutoff disclosures should show stable cash, no emergency refi, no covenant breach, and the 2026 Notes commitment should remain on schedule.",
+      "M_source": "claim_evolution.query_claim_evolution(cik=0001410384, search_term='2026 Notes', base=2026-02-11, cutoff=2026-05-20) + Q1 2026 10-Q (filed 2026-04-29) balance-sheet pull via edgar.fetch_filing_text.",
+      "M_value": "claim_evolution: REAFFIRMED_IN_STRUCTURED_DISCLOSURE (1 mention in Q1 26 10-Q, AFFIRMED). Q1 26 10-Q: cash + investments $378M vs $304M principal = 1.24x coverage. BUT Q1 26 also consumed $97.2M on buybacks against the new $150M Oct-25 authorization, decelerating coverage at exactly the moment redemption approaches. Coverage still sufficient; coverage trend tightening (1.55x at YE25 \u2192 1.24x at Q1 26 after $97M buyback + $5M Q4 buyback).",
+      "severity": "PASS",
+      "interpretation": "Maturity wall fully cash-covered with no signs of distress refi; aggressive buyback consumption during weak quarter tightens coverage but does not threaten redemption."
+    },
+    {
+      "claim_id": "C3",
+      "R": "Subscription ARR was $780.1M FY25 vs $681.9M FY24 (+14.4% YoY), positioning core digital-banking SaaS as growth engine; Total ARR $921.4M vs $824.2M (+11.8%).",
+      "f": "If genuine, post-cutoff disclosures (Q1 26 10-Q) should show ARR continuing to grow at a similar pace, not decelerating sharply.",
+      "M_source": "edgar.fetch_filing_text Q1 2026 10-Q (0001410384-26-000037).",
+      "M_value": "Q1 26 Subscription ARR $802.3M vs $702.4M Q1 25 = +14.2% YoY. Q1 26 Total ARR $944.9M vs $846.6M = +11.6% YoY. Subscription growth rate sustained essentially flat (14.4% \u2192 14.2%). Q1 26 revenue $216.5M vs $189.7M = +14.1%, subscription +16.6%. Forward-looking ARR claim corroborated in structured disclosure.",
+      "severity": "PASS",
+      "interpretation": "ARR growth claim is real, durable, and reaffirmed post-cutoff; SaaS core is genuinely scaling."
+    },
+    {
+      "claim_id": "C4",
+      "R": "Revenue churn metric framed as evidence of customer satisfaction and effectiveness of business solutions \u2014 investor narrative emphasizes loyalty and platform stickiness.",
+      "f": "If satisfaction is improving as narrative implies, revenue-churn rate should be stable or declining YoY.",
+      "M_source": "Filing-internal Key Operating Measures section + Q1 26 10-Q reaffirmation.",
+      "M_value": "Annual revenue churn: 5.2% FY25 vs 4.4% FY24 vs 6.1% FY23 \u2014 churn INCREASED 80 bps YoY (4.4 \u2192 5.2), an 18% relative deterioration. Disclosed in metric-definition footnote, not the MD&A narrative; investors searching MD&A for 'churn' find only definitional text. The 2024 trough (4.4%) is implicitly framed as the new baseline; 2025 reversion to 5.2% is presented without commentary on direction.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Quiet deterioration in retention metric YoY, disclosed but de-emphasized \u2014 not catastrophic (still below 2023) but contradicts the customer-satisfaction narrative without commentary."
+    },
+    {
+      "claim_id": "C5",
+      "R": "Stable leadership \u2014 10-K cover lists Matthew Flake as President/CEO/Chairman; severance disclosed neutrally as 'incurred for the departure of executive officers' included within lease-and-other-restructuring; no leadership concerns flagged in MD&A.",
+      "f": "If leadership were genuinely stable, there should be minimal 8-K Item 5.02 activity and no large 2H 2025 severance line.",
+      "M_source": "sec_filings.list_filings_by_form(forms='8-K', start=2025-01-01) + edgar.fetch_filing_text on 2025-11-05 8-K (0001410384-25-000157).",
+      "M_value": "Nov 5, 2025 8-K Item 5.02 discloses: (1) Mr. Coleman RESIGNED as President effective Nov 6, 2025; (2) Mr. Volanoski DEPARTED (8-K explicitly notes 'not due to dispute'); (3) Himagiri Mukkamala PROMOTED from CDO to new COO role. Three concurrent executive changes in one 8-K. Q4 2025 buybacks of only $5.0M (vs $145M still authorized) coincided with leadership upheaval. Filing's 'severance-related expenses for departure of executive officers' line item buried inside 'lease and other restructuring charges' ($4.5M FY25); investors reading the MD&A see restructuring, not exec turnover.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Material 2H 2025 executive-suite reshuffle (President resignation + another departure + new COO) is disclosed (8-K filed) but framed as routine leadership refresh and the cash impact is hidden inside a restructuring line item rather than broken out \u2014 narrative-light, line-item-obscure."
+    },
+    {
+      "claim_id": "C6",
+      "R": "Insider trading discipline \u2014 Q4 2025 10-Q Item 5(c) discloses Kirk Coleman (then-CBO/President) adopted a Rule 10b5-1 plan Nov 17, 2025, plans operate under standard policy.",
+      "f": "If insider activity reflects confidence in business trajectory, sales should be modest and not abnormally clustered around adverse events.",
+      "M_source": "insider_vs_calendar.query_insider_sales_near_budget_events(CIK=0001410384, contractor_name='Q2 Holdings', cutoff=2026-05-20) + sec_filings.list_filings_by_form(forms='4').",
+      "M_value": "Last 365d: 44 Form 4 filings, 45 sales totaling $30.2M. NO_PROXIMATE_SALES vs federal-budget calendar (expected for SaaS). MONTHLY DISTRIBUTION: 11 Form 4s in June 2025, then 21 Form 4s clustered in March 2026 (a single month accounting for ~48% of the year's filings). The March 2026 cluster occurs AFTER the 10-K (Feb 11, 2026) and DURING the deepening drawdown to 52w-low, signaling planned distribution at trough prices including post-resignation Coleman 10b5-1 execution. Coleman's adoption of new 10b5-1 plan Nov 17 (immediately after his Nov 6 resignation as President) pre-commits selling.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "10b5-1 plans are procedurally clean but the post-resignation/post-10-K cluster of 21 Form 4s in March 2026 at trough prices signals insiders are distributing at the bottom rather than buying the dip \u2014 undermines management-conviction narrative."
+    },
+    {
+      "claim_id": "C7",
+      "R": "Bank-partner relationships material \u2014 '50% of top 100 U.S. Banks and 50% of top 100 U.S. Credit Unions' use Q2 solutions, framed as dominant market position.",
+      "f": "If material partnerships exist with megacap banks/customers, those entities should mention Q2 in their own disclosures (10-K vendor/risk discussion).",
+      "M_source": "megacap_namecheck.query_megacap_mentions(small_cap_name='Q2 Holdings', cutoff=2026-05-20, megacap_subset=['Amazon','Microsoft','Google']) + edgar_fts.query_fulltext('Q2 Holdings').",
+      "M_value": "megacap_namecheck: INFLATION_SUSPECT signal (0 hits across Amazon/MSFT/GOOG). edgar_fts on 'Q2 Holdings': 120 total hits but ALL are QTWO's own filings (self-references) \u2014 zero hits in non-QTWO 10-Ks/10-Qs. Verifier architecturally misaligned: top 100 US banks (PNC, Fifth Third, US Bank, etc.) are not in the megacap_namecheck issuer-set, and vendor disclosures in customer 10-Ks are typically aggregated. Cannot adjudicate via available connectors.",
+      "severity": "UNVERIFIABLE",
+      "interpretation": "Bank-customer concentration claim cannot be verified via megacap-namecheck (megacaps aren't Q2 customers) or edgar_fts (vendor names don't appear in customer 10-Ks). Excluded from denominator."
+    },
+    {
+      "claim_id": "C8",
+      "R": "Q2's addressable market includes 8,741 RCFIs with $9.6T in combined assets, plus the top 100 US banks \u2014 narrative implies a deep, fragmented buyer pool justifying $23.0B TAM.",
+      "f": "If true, the top US banks Q2 sells into should have multi-billion-dollar consumer-loan portfolios consistent with material digital-banking spend \u2014 validating the TAM's existence.",
+      "M_source": "fdic_call_reports.query_multi_bank_originations(bank_names=['PNC Bank','Fifth Third','Citizens Bank'], quarters=4).",
+      "M_value": "PNC: $26.0B consumer loans (LNCON), 11.4% nonaccrual; Fifth Third: $26.7B, 4.0% nonaccrual; Citizens (small CT bank, name-collision artifact): $19M. Aggregate top-2 = $52.7B consumer-loan portfolio. Top US bank balance-sheet scale ($20-30B each in consumer loans) confirms the addressable spend opportunity for digital-banking SaaS is materially real; TAM claim is consistent with FDIC-confirmed bank scale.",
+      "severity": "PASS",
+      "interpretation": "FDIC sample confirms top US banks have balance sheets large enough to support the digital-banking spend Q2 targets; TAM claim is corroborated at the macro level."
+    }
+  ],
+  "composite": 0.375,
+  "summary": "QTWO is a high-quality SaaS franchise priced for distress: ARR growth durable (+14% YoY through Q1 26), revenue +14% Q1 26, going-concern and audit clean (E&Y, no Item 4.01), $304M 2026 Notes fully cash-covered at 1.24x via $378M Q1 26 liquidity, and TAM corroborated by FDIC bank-scale data. Honesty-alpha catches: (a) revenue churn quietly worsened 4.4% \u2192 5.2% YoY despite satisfaction narrative; (b) material 2H 2025 executive reshuffle (Coleman President resignation + Volanoski departure + Mukkamala promotion to COO) is disclosed via 8-K but cash impact buried in 'lease and other restructuring'; (c) insider cluster of 21 Form 4s in March 2026 (~48% of annual filings) at trough prices, including Coleman 10b5-1 plan adopted 11 days after his resignation. Drawdown reflects multiple-compression from SaaS de-rating + convert-overhang fear, not fraud or distress. Composite 0.429 = MOD-skew with PASS-dominant universal screens. LONG-leaning: structurally sound business with three legitimate but moderate honesty-alpha findings (churn, exec turnover framing, insider distribution timing) that complicate the recovery narrative but do not invalidate the franchise.",
+  "scoring": {
+    "PASS": 4,
+    "UNVERIFIABLE": 1,
+    "MODERATE_UNDERDELIVERY": 3,
+    "SEVERE_UNDERDELIVERY": 0,
+    "RED_FLAG_NEGATIVE": 0,
+    "verifiable_claims": 8,
+    "weighted_sum": "(0*4 + 1*3 + 2*0 + 3*0) / 8 = 3 / 8",
+    "composite": 0.375
+  }
+}

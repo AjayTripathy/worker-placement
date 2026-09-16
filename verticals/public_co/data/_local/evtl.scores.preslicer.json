@@ -1,0 +1,77 @@
+{
+  "ticker": "evtl",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "American Airlines has a conditional pre-order of up to 250 VX4 aircraft (with option for additional 100), and committed to make a pre-delivery payment to reserve delivery slots for the first 50 VX4 aircraft.",
+      "severity": "PASS",
+      "supports": ["edgar_fts AAL CIK 0000006201 'Vertical Aerospace' = 12 hits across 8-K and 10-Q filings 2021-2022+"],
+      "M_check": "edgar_fts.query_fulltext (cik=0000006201/AAL, search_term='Vertical Aerospace')",
+      "M_value": {"total_hits": 12, "VX4_phrase_hits": 0, "first_disclosure_form": "8-K 2021-07-22 earnings presentation"},
+      "interpretation": "American Airlines' own SEC filings disclose Vertical Aerospace as a pre-order partner across multiple 8-K and 10-Q filings dating back to mid-2021. Strong counterparty corroboration. Note 'VX4' as exact phrase yields 0 hits at AAL — they reference the company name, not the aircraft model designator, which is typical."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Marubeni made a pre-delivery payment in January 2023 to reserve delivery slots for the first 25 VX4 aircraft of its conditional pre-order of up to 200 aircraft.",
+      "severity": "PASS",
+      "supports": ["VX4 distinctive product appears in 7 EDGAR filings; VX4 phrase carries Vertical-specific signal"],
+      "M_check": "edgar_fts.query_fulltext (search_term='VX4', no cik)",
+      "M_value": {"total_hits": 7, "non_evtl_filers": ["AERWINS Technologies Inc.", "CAE Inc.", "Anthem (likely false match)", "Qorvo (likely false match)"]},
+      "interpretation": "Marubeni is a Japanese trading house — not in our common-CIK list and not a US-listed direct filer (ADR-registered separately). Cannot directly query Marubeni's filings. External validation of VX4 as a distinctive product shows 3 substantive non-evtl hits including CAE Inc. (40-F, simulator/training company — plausible eVTOL ecosystem partner) and a competitor (AERWINS). MODERATE-PASS: Marubeni-specific verification not feasible in catalog; brand has external footprint."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Avolon, plus through Avolon's VX4 placements, Japan Airlines, Gol, Gozen Holdings and AirAsia.",
+      "severity": "PASS",
+      "supports": ["edgar_fts 'Vertical Aerospace' total = 81 hits across all SEC filings since 2018"],
+      "M_check": "edgar_fts.query_fulltext (search_term='Vertical Aerospace', no cik)",
+      "M_value": {"total_hits": 81, "filers_include": ["Vertical Aerospace itself", "Broadstone Acquisition Corp (deSPAC sponsor)"]},
+      "interpretation": "Strong brand footprint at 81 EDGAR hits. Most of the named partners (Avolon — Irish lessor; JAL, Gol, Gozen, AirAsia) are non-US filers, so direct counterparty corroboration via EDGAR isn't viable. Brand-level external footprint substantiates real activity. PASS by external_brand_validation rubric (>10 hits)."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Vertical has partnered with Microsoft to create a Vertical Cloud to host aircraft data and provide aircraft equipment health monitoring and aftermarket services.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["edgar_fts MSFT CIK 0000789019 'Vertical Aerospace' = 0 hits"],
+      "M_check": "edgar_fts.query_fulltext (cik=0000789019/MSFT, search_term='Vertical Aerospace')",
+      "M_value": {"total_hits": 0},
+      "interpretation": "Microsoft does not mention Vertical Aerospace in its SEC filings. Cloud customer relationships are typically immaterial to MSFT's $200B+ revenue and would not normally appear in 10-K supply chain or partner disclosures, so this is a soft non-finding. Heuristic 4 (investment partners often don't disclose) applies — MODERATE rather than RED_FLAG. The partnership is more marketing-style than a registry-recordable commitment."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "As of December 31, 2023, Vertical Aerospace had fourteen pending patent applications (4 UK / 4 US / 4 EU / 1 JP / 1 CN) covering seven inventions related to vehicle configuration, propulsion systems, thermal management, and propeller arrangements.",
+      "severity": "PASS",
+      "supports": ["uspto_odp 4 US applications, 2 granted, topics: rotor assembly, flying-vehicle rotor, propulsion thermal management, vehicle portion"],
+      "M_check": "uspto_odp.query_assignee (assignee='Vertical Aerospace')",
+      "M_value": {"n_total_applications": 4, "n_granted": 2, "category_counts": {"propulsion": 1, "thermal": 0, "propeller": 2, "battery": 0, "vehicle_config": 0, "other": 1}, "matches_filing_count": "4 US applications matches filing's '4 US applications' claim exactly"},
+      "interpretation": "Filing claim of 'four US patent applications' matches USPTO ODP exactly (4 applications). Topics align: 2 rotor/propeller (= filing's 'propeller arrangements'), 1 propulsion thermal (= 'propulsion systems' + 'thermal management'), 1 vehicle portion (= 'vehicle configuration'). UK-based assignee with small but coherent US portfolio — exactly what calibration heuristic 8 anticipates for UK issuers. PASS."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Vertical operates UK manufacturing/test facilities: Bristol HQ R&D, Kemble flight test centre, Avonmouth battery testing.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["EPA FRS US-only; UK operations are expected absent"],
+      "M_check": "epa_frs.query_facilities (CA, TX)",
+      "M_value": {"n_facilities_any_us_state": 0},
+      "interpretation": "Per calibration heuristic 1, EPA FRS covers only US EPA-regulated facilities. UK-only operations of a Bristol-headquartered foreign issuer are EXPECTED to be absent. UNVERIFIABLE rather than RED_FLAG. To check these facilities one would need UK Companies House / CAA registries not in the catalog."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "VX4 product distinctive enough to appear in counterparty/competitor SEC filings.",
+      "severity": "PASS",
+      "supports": ["edgar_fts 'VX4' = 7 hits including non-evtl filers like CAE Inc. (training/simulators) and AERWINS (eVTOL competitor)"],
+      "M_check": "edgar_fts.query_fulltext (search_term='VX4', no cik)",
+      "M_value": {"total_hits": 7, "evtl_self_filings": 3, "non_evtl_filings": 4},
+      "interpretation": "Some external footprint though modest; 3-letter codes can pull false positives (Anthem proxy, Qorvo proxy). The CAE 40-F mention is a meaningful corroboration since CAE supplies training/simulator services to eVTOL OEMs. Adequate per external_brand_validation rubric for a small-cap clinical-stage analog."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Virgin Atlantic is a named commercial pre-order partner with a Warrant Instrument dated October 2021.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["Virgin Atlantic is private (not US-listed); checked Delta (CIK 0000027904, 49% owner) — 0 hits for 'Vertical Aerospace'"],
+      "M_check": "edgar_fts.query_fulltext (cik=0000027904/DAL, search_term='Vertical Aerospace')",
+      "M_value": {"total_hits_at_DAL": 0, "VertAero_general_total_hits": 81},
+      "interpretation": "Virgin Atlantic is privately held (Delta owns 49%, Air France-KLM 0% post-2022) and does not file with SEC. Checked Delta as proxy: 0 hits. Pre-order with a private regional airline is plausibly immaterial to Delta's disclosures. Heuristic 4 applies. MODERATE: cannot directly corroborate; brand has broad external footprint via other channels (81 hits)."
+    }
+  ]
+}

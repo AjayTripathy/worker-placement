@@ -1,0 +1,113 @@
+{
+  "ticker": "AXON",
+  "cutoff": "2026-05-20",
+  "filing": "0001628280-26-011360_10-K.txt",
+  "filing_date": "2026-02-25",
+  "filing_age_days": 84,
+  "claims": [
+    {
+      "claim_id": "AXON-001",
+      "claim_text": "Axon's largest customer vertical is U.S. federal, state and local law enforcement; entered/will enter contracts with U.S. federal government subject to FAR.",
+      "subject": "Axon Enterprise, Inc.",
+      "predicate": "is_federal_contractor",
+      "object_value": "federal_state_local_law_enforcement_customer_base",
+      "source_quote": "Our largest customer vertical is U.S. federal, state and local law enforcement. ... We have entered and will enter into contracts with U.S. federal, state and local governments ... including the Federal Acquisition Regulation (FAR).",
+      "category": "customer_pipeline",
+      "queries": [
+        {"mode": "A", "source": "usaspending.query_recipient_contracts", "kwargs": {"recipient_name": "Axon Enterprise"}},
+        {"mode": "A2", "source": "sam_entity.query_entity_by_uei", "kwargs": {"legal_name": "Axon Enterprise, Inc."}}
+      ]
+    },
+    {
+      "claim_id": "AXON-002",
+      "claim_text": "Axon has DoD adjacency (subject notes); check whether DoD obligations exist for Axon and how material vs $2.78B revenue.",
+      "subject": "Axon Enterprise, Inc.",
+      "predicate": "has_dod_contracts",
+      "object_value": "some_dod_adjacency",
+      "source_quote": "Mostly law enforcement, some DoD adjacency. ITA inclusion is unusual (consumer/police, not pure defense).",
+      "category": "customer_pipeline",
+      "queries": [
+        {"mode": "A", "source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "Axon Enterprise"}},
+        {"mode": "B", "source": "usaspending.query_federal_presence", "kwargs": {"recipient_name": "Axon Enterprise"}}
+      ]
+    },
+    {
+      "claim_id": "AXON-003",
+      "claim_text": "Axon acquired Carbyne Ltd ($625M base, Feb 2026), Dedrone (Oct 2024, $443.6M goodwill), Fusus (Jan 2024, $249.9M goodwill), Prepared (2025) — multi-acquisition rollup into public-safety / emergency-comms platform. Test aggregate coherence vs parent thesis.",
+      "subject": "Axon Enterprise, Inc.",
+      "predicate": "rollup_acquisitions",
+      "object_value": ["Carbyne", "Dedrone", "Fusus", "Prepared"],
+      "source_quote": "Subsequent to the year ended December 31, 2025, we acquired Carbyne Ltd. ... for a base purchase price of $625.0 million ... On October 1, 2024, we acquired the remaining 79.8% equity interests in Dedrone ... On January 31, 2024, we acquired the remaining 79.7% equity interests in Fusus, LLC ... for approximately $241.3 million.",
+      "category": "rollup_thesis",
+      "queries": [
+        {"mode": "A", "source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Carbyne", "cik": "0001069183"}},
+        {"mode": "B", "source": "acq_coherence.score_acquisition_coherence", "kwargs": {"parent_thesis": "Axon provides integrated hardware (TASER CEDs, body cameras, drones) and software (Evidence.com, Records, real-time operations) for law-enforcement and public-safety markets; acquisitions are intended to extend the end-to-end public-safety ecosystem (situational awareness, emergency comms, drone countermeasures).", "acquisitions": [{"name": "Carbyne", "description": "cloud-native emergency communications and response platform (911/PSAP)"}, {"name": "Dedrone", "description": "counter-UAS / drone airspace security"}, {"name": "Fusus", "description": "real-time crime center / live video, data and sensor feed aggregation for public safety"}, {"name": "Prepared", "description": "next-generation public safety communications and emergency response"}]}}
+      ]
+    },
+    {
+      "claim_id": "AXON-004",
+      "claim_text": "In March 2025 Axon issued $1.75B Senior Notes ($1.0B 2030 + $0.75B 2033) and sold ~0.7M shares via ATM for $494.7M gross proceeds; raised ~$2.25B aggregate in capital markets in 2025. Plus induced conversion of 2027 Notes ($608.9M principal). Test for insider sales clustered around these events.",
+      "subject": "Axon Enterprise, Inc.",
+      "predicate": "large_capital_raise_with_potential_insider_activity",
+      "object_value": "1750000000_senior_notes_plus_494700000_ATM",
+      "source_quote": "In March 2025, we issued $1.0 billion aggregate principal amount of Senior Notes due 2030 ... and $750.0 million aggregate principal amount of Senior Notes due 2033. ... we sold approximately 0.7 million shares of our common stock under our ATM. We generated approximately $494.7 million in aggregate gross proceeds from sales under an at-the-market equity offering program.",
+      "category": "financial_distress",
+      "queries": [
+        {"mode": "A", "source": "sec_filings.list_filings_by_form", "kwargs": {"cik": "0001069183", "form_types": ["S-3", "424B5", "424B2", "FWP"]}},
+        {"mode": "B", "source": "insider_vs_calendar.query_insider_sales_near_budget_events", "kwargs": {"cik": "0001069183", "window_days": 14, "start_date": "2024-01-01", "end_date": "2026-05-20"}}
+      ]
+    },
+    {
+      "claim_id": "AXON-005",
+      "claim_text": "Material weakness in ICFR over revenue recognition for customer contracts as of Dec 31, 2025; PwC issued adverse opinion on ICFR. Also references prior restatement (10-K/A for 2024 filed May 7, 2025).",
+      "subject": "Axon Enterprise, Inc.",
+      "predicate": "icfr_material_weakness_and_restatement",
+      "object_value": "adverse_icfr_opinion_revenue_recognition",
+      "source_quote": "Also in our opinion, the Company did not maintain, in all material respects, effective internal control over financial reporting as of December 31, 2025 ... because a material weakness in internal control over financial reporting existed as of that date as the Company did not design and maintain effective controls related to revenue recognition for its customer contracts.",
+      "category": "icfr",
+      "queries": [
+        {"mode": "A", "source": "sec_filings.list_filings_by_form", "kwargs": {"cik": "0001069183", "form_types": ["10-K/A", "NT 10-K", "10-K"]}},
+        {"mode": "B", "source": "claim_evolution.query_claim_evolution", "kwargs": {"cik": "0001069183", "topic": "material weakness revenue recognition restatement"}}
+      ]
+    },
+    {
+      "claim_id": "AXON-006",
+      "claim_text": "Primary corporate HQ spread across seven facilities, ~900,000 sq ft in the Phoenix, Arizona metropolitan area; largest manufacturing in Arizona. EPA-regulated facilities may exist (TASER is a weapon; firearm product = TASER 10).",
+      "subject": "Axon Enterprise, Inc.",
+      "predicate": "operates_phoenix_az_manufacturing",
+      "object_value": "phoenix_az_900000sqft_seven_facilities",
+      "source_quote": "Our primary corporate headquarters are spread across seven facilities and approximately 900,000 square feet in the Phoenix, Arizona metropolitan area. ... Our largest manufacturing and research spaces are located in Arizona.",
+      "category": "physical_facility",
+      "queries": [
+        {"mode": "A", "source": "epa_frs.query_facilities", "kwargs": {"company_name": "Axon Enterprise", "state": "AZ"}},
+        {"mode": "B", "source": "osha_establishments.query_establishments", "kwargs": {"company_name": "Axon Enterprise", "state": "AZ"}}
+      ]
+    },
+    {
+      "claim_id": "AXON-007",
+      "claim_text": "Axon claims proprietary technology and patent protection covering TASER CEDs and Axon devices/SaaS technology; subject to patent infringement suit by Airspace re Dedrone drone tech; PTAB instituted review on all claims of all three asserted patents.",
+      "subject": "Axon Enterprise, Inc.",
+      "predicate": "patent_portfolio_exists",
+      "object_value": "patents_in_CED_camera_SaaS_areas",
+      "source_quote": "While we have some patent protection in certain key areas of our Axon devices, CEDs and SaaS technology ... Our future success depends upon our proprietary technology. Our protective measures for this proprietary technology include patents, trademarks, copyrights and trade secret protection.",
+      "category": "patent",
+      "queries": [
+        {"mode": "A", "source": "uspto_odp.query_assignee", "kwargs": {"assignee_name": "Axon Enterprise"}},
+        {"mode": "B", "source": "uspto_odp.query_assignee", "kwargs": {"assignee_name": "Dedrone"}}
+      ]
+    },
+    {
+      "claim_id": "AXON-008",
+      "claim_text": "$425M cloud hosting purchase commitment entered June 2022 (six-year term beginning July 1, 2022); $110.6M storage fees in 2025; remaining $154.9M commitment at Dec 31, 2025. Major cloud counterparty likely Microsoft/AWS — counterparty disclosure thresholds.",
+      "subject": "Axon Enterprise, Inc.",
+      "predicate": "material_cloud_vendor_dependency",
+      "object_value": "425M_cloud_commitment_six_year",
+      "source_quote": "In June 2022, we entered into a purchase agreement for cloud hosting with a six year term beginning July 1, 2022. The purchase agreement includes a total commitment of $425.0 million. Storage fees under this agreement were $110.6 million for the year ended December 31, 2025.",
+      "category": "counterparty_disclosure",
+      "queries": [
+        {"mode": "A", "source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Axon Enterprise", "cik": "0000789019"}},
+        {"mode": "B", "source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Axon Enterprise", "cik": "0001018724"}}
+      ]
+    }
+  ]
+}

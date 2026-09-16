@@ -1,0 +1,117 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>MFT Calibration — How Each P Was Set</title>
+<style>
+:root{--bg:#0b0e12;--panel:#14181d;--panel2:#1a1f25;--line:#242a31;--ink:#e8ebee;--dim:#7d858e;--emerald:#35c98f;--violet:#8b7cf6;--amber:#d9a441;--coral:#e0736a;--blue:#4f7cf0}
+*{box-sizing:border-box}body{margin:0}
+.wrap{max-width:1080px;margin:0 auto;padding:26px 22px 90px;font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;color:var(--ink);background:var(--bg)}
+h1{font-size:24px;margin:0 0 4px;letter-spacing:-.02em;font-weight:650}
+.sub{color:var(--dim);font-size:13px;margin:0 0 22px}
+h2{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--dim);margin:30px 0 12px;font-weight:600}
+p{margin:0 0 12px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:12px}
+.callout{border-left:3px solid var(--amber);background:linear-gradient(180deg,rgba(217,164,65,.06),transparent)}
+.good{border-left:3px solid var(--emerald)}
+b{color:#fff}
+.mtxwrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+table{width:100%;min-width:820px;border-collapse:collapse;font-size:12.5px}
+th{text-align:left;color:var(--dim);font-size:10px;text-transform:uppercase;letter-spacing:.05em;padding:9px 10px;border-bottom:1px solid var(--line);font-weight:600}
+td{padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:0}
+.tk{font-weight:700;color:#fff;font-family:ui-monospace,Menlo,monospace}
+.p{font:700 13px ui-monospace,Menlo,monospace}
+.pill{font-size:9px;font-weight:700;letter-spacing:.04em;padding:2px 7px;border-radius:20px;white-space:nowrap}
+.hard{color:#8ee5c1;background:rgba(53,201,143,.15)}
+.well{color:#a9c7f5;background:rgba(79,124,240,.15)}
+.judg{color:#eccb8a;background:rgba(217,164,65,.15)}
+.call{margin:14px 0;padding:14px 16px;background:var(--panel);border:1px solid var(--line);border-radius:12px}
+.call h3{margin:0 0 3px;font-size:15px}.call .gate{font-size:11.5px;color:var(--dim);font-family:ui-monospace,Menlo,monospace;margin-bottom:9px}
+.call .lab{font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--dim);margin:9px 0 3px;font-weight:600}
+.call ul{margin:3px 0 0;padding-left:18px}.call li{margin:2px 0;font-size:12.5px}
+.src{color:var(--dim)}.pos{color:var(--emerald)}.neg{color:var(--coral)}
+.foot{font-size:11px;color:var(--dim);margin-top:26px;border-top:1px solid var(--line);padding-top:14px;line-height:1.6}
+code{font-family:ui-monospace,Menlo,monospace;font-size:11.5px;background:var(--panel2);padding:1px 5px;border-radius:4px}
+</style></head><body>
+<div class="wrap">
+<h1>MFT Calibration Slate — How Each Probability Was Set</h1>
+<p class="sub">The leading indicators we read, the numbers behind each <b>our_p</b>, and an honest disclosure on what was — and wasn't — SignalOS. Frozen 2026-07-10 · event_type <code>monthly_data</code> · grades into the MFT/nowcast cohort.</p>
+
+<h2>The method — and an honest disclosure</h2>
+<div class="panel">
+<p><b>The nowcast method.</b> For each monthly print we find a public <b>leading indicator</b> that precedes it (a peer's print, a weekly sales tracker, an agency data series, or the name's own trailing months), read the latest values, and map them to a probability the <b>gate</b> resolves favorable. The MFT edge is reading the operating trajectory <i>before</i> the print — so the P is only ever as good as the leading indicator behind it. Every P below is grounded in specific, dated numbers, listed per call.</p>
+</div>
+<div class="panel callout">
+<p><b>What we DID use:</b> primary external data — company IR (Costco, Toyota, TSMC), government agencies (Macau DICJ, Illinois Gaming Board, state cannabis departments), <b>peer monthly prints</b> (UMC, ASE), and standard trackers (Johnson Redbook, EIA gasoline, SIA/WSTS billings). Print dates verified against IR calendars. Three parallel research agents did the reads; the <code>freeze_call</code> discipline (reasoning + a plain what/how/conclusion + a closed event-type enum) enforced the write.</p>
+<p style="margin-bottom:0"><b>What we did NOT use — the honest part.</b> We did <b>not</b> run the desk's registered SignalOS <b>connectors/detectors</b> to <i>generate</i> these P's programmatically. This was analyst/agent research reading external sources — reproducible in its reasoning, but not yet a pipeline. The one SignalOS connector we invoked, the <b>conditioning layer</b> (<code>discovery_state</code>, the "is-it-already-priced?" regime tagger), <b>failed on this run</b> (cloud-IP-blocked sources), so even the regime overlay is incomplete. So these are <b>defensible, data-grounded, but hand-read</b> probabilities — not connector-generated ones. That gap is the point of the fix at the bottom.</p>
+</div>
+
+<h2>Per-call — the data behind each P</h2>
+<div class="mtxwrap"><table>
+<tr><th>Print</th><th>Date</th><th>Gate</th><th>our_p</th><th>Leading indicators read (with values)</th><th>Quality</th></tr>
+<tr><td class="tk">TSM</td><td>Jul 13 ✓</td><td>June rev YoY ≥ +30%</td><td class="p">0.90</td><td>Peers already printed June: <span class="pos">UMC +22.9%</span>, <span class="pos">ASE +32.9%</span>; TSMC Q2 guide +10% QoQ USD; May +30.1% (NT$417.0bn); threshold NT$342.8bn = 15–28% cushion vs consensus</td><td><span class="pill hard">HARD</span></td></tr>
+<tr><td class="tk">COST</td><td>Aug 5 ✓</td><td>July total comp ≥ +5%</td><td class="p">0.90</td><td>June total comp <span class="pos">+8.8%</span> (adj +7.0%); Redbook weekly SSI <span class="pos">+9–10%</span> through late June; e-comm +20.9%; EIA gas (deflation risk to the reported line)</td><td><span class="pill hard">HARD</span></td></tr>
+<tr><td class="tk">SIA-BILLINGS</td><td>~Aug 5 est</td><td>June billings MoM +</td><td class="p">0.78</td><td>May $120.6bn <span class="pos">+9.2% MoM, +104% YoY</span>; <b>15 consecutive monthly increases</b>; 3-mo-MA lags known-strong TSMC/Korea data</td><td><span class="pill well">WELL</span></td></tr>
+<tr><td class="tk">TM</td><td>~Aug 3 est</td><td>July US sales DSR YoY ≥ 0%</td><td class="p">0.72</td><td>Every 2026 month positive (Jan +4.0%, May +3.3% DSR, Jun +10.1% vol); Cox SAAR steady 16.1–16.5M</td><td><span class="pill well">WELL</span></td></tr>
+<tr><td class="tk">MLCO</td><td>~Aug 1 est</td><td>July Macau GGR MoM ≥ June</td><td class="p">0.68</td><td>June MOP18.52bn <span class="neg">−12.1% YoY</span> (World Cup diversion); WC <b>final Jul-19</b> → back-third of July recovers off a depressed base</td><td><span class="pill judg">JUDGMENT</span></td></tr>
+<tr><td class="tk">MACAU-GGR</td><td>~Aug 1 est</td><td>July GGR YoY positive</td><td class="p">0.30</td><td>Same June −12.1% on a diversion that runs ~⅔ of July; Macquarie cut Q3 growth 6%→2%; a YoY reversal inside the same headwind is low base-rate</td><td><span class="pill judg">JUDGMENT</span></td></tr>
+</table></div>
+<p style="font-size:11.5px;color:var(--dim);margin-top:8px">Below: the FOR / AGAINST behind the two most and two least confident calls (the full reasoning for all six is in the calibration ledger).</p>
+
+<div class="call"><h3>TSM — June revenue ≥ +30% YoY · <span class="p">0.90</span> <span class="pill hard">HARD</span></h3>
+<div class="gate">gate: reported June revenue ≥ ~NT$342.8bn (=+30% vs the NT$263.7bn base)</div>
+<div class="lab">Why 0.90 — the leading indicator is nearly deterministic</div>
+<ul>
+<li><span class="pos">FOR:</span> Taiwanese peers report monthly by law, and June is already on the tape — <b>UMC +22.9%</b>, <b>ASE +32.9%</b>. TSMC guided +10% QoQ in USD; May already ran +30.1%. Consensus NT$400–440bn sits 15–28% <i>above</i> the +30% threshold.</li>
+<li><span class="neg">AGAINST:</span> the residual 0.10 is almost entirely FX — a strong NT$ could compress the NT$-terms print. The Jun-2025 base is wire-sourced (the 6-K 403'd), but the gate clears at any plausible base.</li>
+<li><b>Read:</b> this is a deliberate <i>high-confidence tail call</i>. Its job isn't to be a hard prediction — it's to test whether we're <b>over-confident at 0.9</b> (a well-calibrated 0.90 should resolve TRUE ~90% of the time).</li>
+</ul></div>
+
+<div class="call"><h3>Macau GGR — MoM ≥ June · <span class="p">0.68</span> &nbsp;/&nbsp; YoY positive · <span class="p">0.30</span> <span class="pill judg">JUDGMENT</span></h3>
+<div class="gate">two gates, one event — to test threshold discrimination</div>
+<div class="lab">Why these are judgment, not extrapolation</div>
+<ul>
+<li>The driver is a <b>readable structural event</b>, not a data trend: the FIFA World Cup diverted Macau demand (June −12.1% YoY), and the <b>final is Jul-19</b> — so the back third of July is post-tournament.</li>
+<li><b>MoM ≥ June (0.68):</b> June was a depressed base; recovery off it as the WC ends is the base case — but the tournament still covers ~⅔ of the month, so it's a genuine mid-range call, not a lock.</li>
+<li><b>YoY positive (0.30):</b> a swing all the way back to <i>growth</i> inside the same headwind, against a tough comp, is a low base-rate — Macquarie cut Q3 growth to +2%.</li>
+<li><b>Read:</b> logging both gates on one event is the point — it tests whether our P's <b>discriminate</b> across thresholds (a good forecaster should separate a 0.68 from a 0.30 on the same print).</li>
+</ul></div>
+
+<h2>Honest grading of the P-quality</h2>
+<div class="panel good">
+<p><b>The slate deliberately spans 0.30 → 0.90.</b> A calibration set clustered at 0.7 teaches you nothing about the tails; a spread tests over/under-confidence across the whole range.</p>
+<p><b>But note the construction bias:</b> several of the high-P calls picked <b>easy-to-clear gates</b> — TSM "+30%" when consensus implies +30–50%; COST "+5%" when it's running +7–8%. Those aren't hard predictions; they're <i>tail-calibration probes</i> (does a 0.90 come true 90% of the time?). The genuine forecasting skill is tested by the <b>judgment</b> calls in the murky middle (Macau, and the contracting-cannabis operators at ~0.45). Read the eventual scorecard with that split in mind: hard-grounded calls grade our <i>discipline</i>, judgment calls grade our <i>edge</i>.</p>
+</div>
+
+<h2>The fix — BUILT: pipeline P vs hand P</h2>
+<div class="panel good">
+<p><b>Done.</b> Each leading-indicator reader is now an encoded connector (<code>desk/leading_indicators.py</code>): cached dated inputs + a live monthly fetch + an <b>a-priori nowcast model</b> (a normal-CDF map from the leading data to P, specified <i>before</i> looking at the hand P — not tuned to match). Re-running the batch on the <b>same inputs</b> isolates model-vs-judgment. Result:</p>
+</div>
+<div class="mtxwrap"><table>
+<tr><th>Call</th><th>Pipeline P</th><th>Hand P</th><th>Δ</th><th>What the delta means</th></tr>
+<tr><td class="tk">TSM ≥+30%</td><td class="p">0.92</td><td class="p">0.90</td><td class="p pos">+0.02</td><td>Mechanical extrapolation — encoded faithfully.</td></tr>
+<tr><td class="tk">COST ≥+5%</td><td class="p">0.88</td><td class="p">0.90</td><td class="p neg">−0.03</td><td>Mechanical — reproduced.</td></tr>
+<tr><td class="tk">SIA MoM+</td><td class="p">0.78</td><td class="p">0.78</td><td class="p">0.00</td><td>Momentum model lands exactly on the hand read.</td></tr>
+<tr><td class="tk">TM DSR≥0</td><td class="p">0.85</td><td class="p">0.72</td><td class="p pos">+0.13</td><td><b>Diverge:</b> pipeline is MORE confident — the human applied a comp-difficulty / gas macro-caution discount the model has no feature for.</td></tr>
+<tr><td class="tk">MLCO MoM</td><td class="p">0.60</td><td class="p">0.68</td><td class="p neg">−0.08</td><td>Human was more optimistic on the post-World-Cup recovery than a naive reversion model.</td></tr>
+<tr><td class="tk">MACAU YoY</td><td class="p">0.09</td><td class="p">0.30</td><td class="p neg">−0.21</td><td><b>Diverge:</b> the human <b>anchored away from the extreme</b> (probability compression — a known bias); the data model says a YoY reversal is ~9% likely. The model is likely better-calibrated at the tail.</td></tr>
+</table></div>
+<div class="panel">
+<p><b>How close did we get?</b> <b>mean |Δ| = 0.078, median 0.081; 3 of 6 within 0.05.</b> The three <i>mechanical</i> calls (TSM/COST/SIA) reproduce to ±0.03 — the reasoning was straightforward and is now faithfully a program. The three <i>judgment</i> calls diverge, and the divergence is the finding: on <b>TM</b> the human added caution the model lacks (encode a comp-difficulty feature next); on <b>MACAU YoY</b> the human anchored toward 0.3 while the model, refusing to compress the tail, says 0.09 — a case where <b>the pipeline is probably the better forecaster.</b></p>
+<p style="margin-bottom:0"><b>Important:</b> this compares the two <i>estimates</i>, not accuracy — which is right is only settled when the prints resolve (Jul-13 → Aug-5). The value already banked: the P is now reproducible, auditable, tail-disciplined, and re-runnable monthly. The frozen calls are NOT revised — they stand at the hand P; the pipeline P is the shadow the next batch will be generated from.</p>
+</div>
+
+<h2>The connector build list</h2>
+<div class="panel">
+<p>Six encoded and comparing now; the remaining leading-indicator readers to wire so the whole MFT cohort is pipeline-generated:</p>
+<ul>
+<li><b>Redbook weekly</b> reader → COST / soft-line comps</li>
+<li><b>DICJ monthly GGR</b> + visitation → Macau operators (MLCO/WYNN/LVS)</li>
+<li><b>Taiwan monthly revenue</b> (TSMC + peers, by-law-by-the-10th) → semis</li>
+<li><b>Illinois Gaming Board VGT</b> monthly → ACEL</li>
+<li><b>State cannabis</b> (AZ / IL / NJ / FL) → operators (with the trend-contracting reality baked in)</li>
+<li><b>SIA/WSTS billings</b> + Cox SAAR → semi & auto macro reads</li>
+</ul>
+<p style="margin-bottom:0">Each becomes a <code>desk/registry.py</code> watcher whose output feeds the frozen call's nowcast — closing the loop from <i>hand-researched probability</i> to <i>connector-generated, forward-tested probability</i>. That is what makes this an MFT <b>system</b> and not a one-off analyst read.</p>
+</div>
+
+<div class="foot">Frozen calls (never revised): TSM, COST, MLCO, MACAU-GGR, SIA-BILLINGS, TM — all <code>monthly_data</code>, grading into the MFT/nowcast cohort. State-data-led adds (ACEL via IL VGT ~0.68, TCNNF via FL weekly THC ~0.62, IL-VGT NTI metric ~0.80, AAWH/CRLBF ~0.45) pending a freeze once their dates/gates are pinned. Sources cited in the calibration ledger reasoning fields. Read-only research artifact — dates for MLCO/SIA/TM are estimated and will be re-verified before their print windows.</div>
+</div></body></html>

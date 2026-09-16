@@ -1,0 +1,115 @@
+{
+  "ticker": "HWM",
+  "cutoff": "2026-05-20",
+  "filing": "0000004281-26-000012_10-K.txt",
+  "filing_date": "2026-02-12",
+  "filing_age_days": 97,
+  "company_name": "Howmet Aerospace Inc.",
+  "cik": "0000004281",
+  "claims": [
+    {
+      "claim_id": "HWM-1",
+      "category": "customer_concentration",
+      "subject": "Howmet Aerospace",
+      "predicate": "has_customer_concentration_above_threshold",
+      "object_value": "RTX Corp ~11% and GE Aerospace ~11% of 2025 third-party sales",
+      "source_quote": "In 2025, RTX Corporation and GE Aerospace each represented approximately 11% of the Company s third-party sales.",
+      "claim_text": "RTX Corporation and GE Aerospace each represented approximately 11% of HWM's 2025 third-party sales (combined ~22%).",
+      "queries": [
+        {"mode": "A", "source": "edgar_fts.query_fulltext", "args": {"search_term": "Howmet", "cik": "0000101829"}, "rationale": "Confirm RTX names Howmet as a material supplier in their filings"},
+        {"mode": "B", "source": "edgar_fts.query_fulltext", "args": {"search_term": "Howmet", "cik": "0000040545"}, "rationale": "Confirm GE Aerospace (formerly GE) names Howmet in disclosures"}
+      ]
+    },
+    {
+      "claim_id": "HWM-2",
+      "category": "rollup_thesis",
+      "subject": "Howmet Aerospace",
+      "predicate": "rollup_acquisitions",
+      "object_value": "CAM ($1.8B) and Brunner Manufacturing (~$120M)",
+      "source_quote": "On December 22, 2025, the Company entered into an agreement with Stanley Black & Decker, Inc. to acquire Consolidated Aerospace Manufacturing, LLC (CAM), a wholly owned subsidiary of Stanley Black & Decker, for a cash purchase price of approximately $1.8 billion ... On February 6, 2026, the Company acquired Brunner Manufacturing Co. Inc., a small privately-held manufacturer of high-quality fastener products located in the U.S., for an all-cash purchase price.",
+      "claim_text": "HWM announced Proposed CAM Acquisition (~$1.8B from Stanley Black & Decker, Dec 22 2025) and completed Brunner Manufacturing acquisition (~$120M, Feb 6 2026), both rolling into Fastening Systems segment.",
+      "queries": [
+        {"mode": "A", "source": "sec_filings.list_filings_by_form", "args": {"cik": "0000004281", "form": "8-K", "limit": 25}, "rationale": "Mode A: confirm 8-K filings disclosed the CAM and Brunner acquisitions"},
+        {"mode": "B", "source": "acq_coherence.score_acquisition_coherence", "args": {"parent_thesis": "Howmet Aerospace is consolidating its aerospace fastening business by acquiring CAM and Brunner to scale Fastening Systems segment.", "acquisitions": [{"name": "Consolidated Aerospace Manufacturing", "rationale": "aerospace fastener systems"}, {"name": "Brunner Manufacturing", "rationale": "aerospace fastener products"}]}, "rationale": "Mode B: aggregate coherence of the two-deal rollup against parent thesis"}
+      ]
+    },
+    {
+      "claim_id": "HWM-3",
+      "category": "customer_pipeline",
+      "subject": "Howmet Aerospace",
+      "predicate": "supplies_defense_aerospace",
+      "object_value": "17% of 2025 revenue from Aerospace - Defense",
+      "source_quote": "Aerospace - Defense 17 % 16 % 15 %",
+      "claim_text": "Defense Aerospace was 17% of 2025 revenue, implying material federal defense exposure via prime contractors and direct DoD contracts.",
+      "queries": [
+        {"mode": "A", "source": "usaspending.query_recipient_contracts", "args": {"recipient_name": "Howmet Aerospace"}, "rationale": "Mode A: confirm direct DoD obligations to Howmet recipient name"},
+        {"mode": "B", "source": "usaspending.query_dod_contracts", "args": {"recipient_name": "Howmet Aerospace"}, "rationale": "Mode B: cross-check DoD-specific contracts (sub-tier confirmation)"}
+      ]
+    },
+    {
+      "claim_id": "HWM-4",
+      "category": "patent",
+      "subject": "Howmet Aerospace",
+      "predicate": "owns_patent_portfolio",
+      "object_value": "~1,020 granted patents and ~180 pending applications worldwide",
+      "source_quote": "As of the end of 2025, the Company s worldwide patent portfolio consisted of approximately 1,020 granted patents and 180 pending patent applications.",
+      "claim_text": "HWM claims worldwide patent portfolio of ~1,020 granted patents and ~180 pending as of YE2025.",
+      "queries": [
+        {"mode": "A", "source": "uspto_odp.query_assignee", "args": {"assignee_name": "Howmet Aerospace"}, "rationale": "Mode A: confirm USPTO assignee record under Howmet name"},
+        {"mode": "B", "source": "uspto_odp.query_assignee", "args": {"assignee_name": "Arconic"}, "rationale": "Mode B: check predecessor / pre-spin assignee (Arconic Inc., the former corporate name) for additional grants"}
+      ]
+    },
+    {
+      "claim_id": "HWM-5",
+      "category": "physical_facility",
+      "subject": "Howmet Aerospace",
+      "predicate": "operates_facilities",
+      "object_value": "Whitehall MI Engine Products (titanium alloy & specialty) and Cleveland OH (Forgings/Castings)",
+      "source_quote": "Whitehall, MI Engine Products Aerospace and Gas Turbine Castings and Coatings, Titanium Alloy and Specialty Products ... Cleveland, OH Engine Products; Engineered Structures; Forged Wheels Forgings, Aerospace and Gas Turbine Castings Tooling, and Aerospace Components",
+      "claim_text": "HWM operates US principal facilities including Whitehall MI (titanium and superalloy castings) and Cleveland OH (forgings/castings) - heavy industrial sites with EPA-regulated exposure.",
+      "queries": [
+        {"mode": "A", "source": "epa_frs.query_facilities", "args": {"facility_name": "Howmet"}, "rationale": "Mode A: confirm EPA FRS records under Howmet name"},
+        {"mode": "B", "source": "osha_establishments.query_establishments", "args": {"company_name": "Howmet"}, "rationale": "Mode B: cross-check OSHA establishments for worksite-level confirmation"}
+      ]
+    },
+    {
+      "claim_id": "HWM-6",
+      "category": "financial_distress",
+      "subject": "Howmet Aerospace",
+      "predicate": "raised_debt_for_acquisition",
+      "object_value": "Issued $500M of 4.550% Notes due 2032 in Nov 2025; plans to finance ~$1.8B CAM with debt/securities + cash",
+      "source_quote": "the November 2025 issuance of $500 aggregate principal amount of the 4.550% Notes due 2032 (the 2032 Notes); ... Howmet intends to finance the Proposed CAM Acquisition ... with debt securities and cash on hand.",
+      "claim_text": "HWM issued $500M 4.55% Notes due 2032 in Nov 2025 and plans to finance the $1.8B CAM acquisition primarily with debt; large near-term financing event around Q1-Q2 2026.",
+      "queries": [
+        {"mode": "A", "source": "sec_filings.list_filings_by_form", "args": {"cik": "0000004281", "form": "8-K", "limit": 30}, "rationale": "Mode A: confirm 8-Ks disclosing debt offerings"},
+        {"mode": "B", "source": "insider_vs_calendar.query_insider_sales_near_budget_events", "args": {"cik": "0000004281", "window_days": 14, "start_date": "2024-01-01", "end_date": "2026-05-20"}, "rationale": "Mode B: check for clustered discretionary insider sales near debt issuance / large fund-raise events"}
+      ]
+    },
+    {
+      "claim_id": "HWM-7",
+      "category": "counterparty_disclosure",
+      "subject": "Howmet Aerospace",
+      "predicate": "exposed_to_boeing_program",
+      "object_value": "Boeing 737 MAX production rate impacts; FAA approval October 2025",
+      "source_quote": "quality control issues at The Boeing Company (Boeing) relating to which the Federal Aviation Administration did not approve production rate increases for the Boeing 737 MAX until October 2025 and a Boeing labor union work stoppage in late 2024 negatively impacted narrow body and wide body production rates. Boeing production rates have had and are expected to have a material impact on the financial performance of Howmet.",
+      "claim_text": "HWM materially exposed to Boeing 737 MAX production rate; affirms Boeing rates have material impact on Howmet financials.",
+      "queries": [
+        {"mode": "A", "source": "edgar_fts.query_fulltext", "args": {"search_term": "Howmet", "cik": "0000012927"}, "rationale": "Mode A: confirm Boeing's filings reference Howmet (named supplier)"},
+        {"mode": "B", "source": "edgar_fts.query_fulltext", "args": {"search_term": "Howmet Aerospace", "cik": "0000012927"}, "rationale": "Mode B: full-name variant in Boeing disclosures"}
+      ]
+    },
+    {
+      "claim_id": "HWM-8",
+      "category": "icfr",
+      "subject": "Howmet Aerospace",
+      "predicate": "icfr_clean_opinion",
+      "object_value": "PwC issued audit report on internal control over financial reporting effective as of Dec 31, 2025; no material changes in Q4 2025",
+      "source_quote": "The effectiveness of Howmet s internal control over financial reporting as of December 31, 2025 has been audited by PricewaterhouseCoopers LLP ... There have been no changes in internal control over financial reporting during the fourth quarter of 2025, that have materially affected, or are reasonably likely to materially affect, the Company s internal control over",
+      "claim_text": "HWM asserts clean ICFR opinion from PwC for FY2025 with no material weaknesses or Q4 changes.",
+      "queries": [
+        {"mode": "A", "source": "claim_evolution.query_claim_evolution", "args": {"cik": "0000004281", "claim_term": "material weakness"}, "rationale": "Mode A: search filing history for any prior material weakness references"},
+        {"mode": "B", "source": "claim_evolution.query_claim_evolution", "args": {"cik": "0000004281", "claim_term": "restatement"}, "rationale": "Mode B: check for prior-year restatement history"}
+      ]
+    }
+  ]
+}

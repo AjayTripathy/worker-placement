@@ -1,0 +1,77 @@
+{
+  "ticker": "ASTS",
+  "scores": [
+    {
+      "claim_id": "ASTS-001",
+      "claim_text": "SDA contract via prime contractor with $43.0M total expected revenue.",
+      "severity": "UNVERIFIABLE",
+      "supports": false,
+      "M_check": "usaspending.query_recipient_contracts(recipient_name='AST SpaceMobile') + DoD-filtered + jbook(SDA Tranche)",
+      "M_value": "0 awards under recipient 'AST SpaceMobile'; 0 DoD awards; jbook NOT_FOUND for SDA Tranche generic search. Claim explicitly says 'through a prime contractor' so sub-tier funds flow under prime's recipient name.",
+      "interpretation": "Per heuristic 2 (entity resolution) and #6 (name-variant fragility), sub-tier flow-through prime contracts are NOT visible in USAspending under the actual performer's name. Cannot confirm or contradict. The disclosure is internally consistent (admits it is via prime) so not RED, but also not corroborated."
+    },
+    {
+      "claim_id": "ASTS-002",
+      "claim_text": "Direct SDA Europa Track 2 commercial solutions agreement, ~$30.0M.",
+      "severity": "UNVERIFIABLE",
+      "supports": false,
+      "M_check": "usaspending.query_recipient_contracts(recipient_name='AST & Science') + jbook(Europa)",
+      "M_value": "Recipient 'AST & Science' returns 1 NASA award for $150K to a different entity (Kongsberg NanoAvionics) — collision on substring not real ASTS award. J-Book 'Europa' NOT_FOUND.",
+      "interpretation": "Europa Track 2 is an SDA commercial solutions vehicle, not a PE-line, so jbook absence is expected. Direct SDA awards should show in USAspending eventually but recipient-name match may need exact UEI. Coverage gap; the corporate legal entity in USAspending is likely 'AST SPACE MOBILE OPERATIONS' or similar TX LLC not searched. Flag as UNVERIFIABLE with low confidence."
+    },
+    {
+      "claim_id": "ASTS-003",
+      "claim_text": "MDA SHIELD IDIQ award (multi-award framework, future task orders).",
+      "severity": "UNVERIFIABLE",
+      "supports": false,
+      "M_check": "usaspending.query_dod_contracts(AST SpaceMobile)=0; jbook(SHIELD)=NOT_FOUND",
+      "M_value": "0 DoD obligations under AST SpaceMobile recipient name; jbook SHIELD NOT_FOUND in corpus.",
+      "interpretation": "IDIQ ceiling-only awards may show $0 obligated until task orders are issued (heuristic 10). MDA SHIELD is a recent multi-award framework that may not be indexed. The claim is for an IDIQ vehicle — being on the vehicle does not require obligations yet — so absence is consistent with claim, not contradictory. Mark UNVERIFIABLE (not RED) per heuristic 10."
+    },
+    {
+      "claim_id": "ASTS-004",
+      "claim_text": "~3,850 patent and patent-pending claims.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "uspto_odp.query_assignee(AST & Science, cutoff 2026-05-20)",
+      "M_value": "123 total applications, 56 granted pre-cutoff; titles include LEO mechanical deployable structures, satellite MIMO/scintillation mitigation, CPRI satellite communications, polarization-transparent channel switching — directly in claimed direct-to-cell satellite domain.",
+      "interpretation": "Per heuristic 8, n_granted >= 5 with claimed-category hits = PASS. ASTS uses 'claims' (per-claim count, not per-patent) for the 3,850 figure which is non-standard but typical of pre-revenue space cos; the 123 applications / 56 grants in directly relevant CPC classes (H04B/B64G/H02S) corroborates the underlying IP investment thesis. Not on Nikola pattern."
+    },
+    {
+      "claim_id": "ASTS-005",
+      "claim_text": "Texas-headquartered satellite AIT facilities; ~450,000 sq ft global footprint.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "epa_frs.query_facilities(AST SpaceMobile, TX) + osha_establishments.query_establishments(AST SpaceMobile)",
+      "M_value": "EPA FRS: 'AST SPACEMOBILE SITE 2', Odessa TX (Midland County). OSHA: 4 establishments — Midland TX (32 employees), Odessa TX (154 employees, 325,747 hrs), Miami FL office, Lanham MD office; NAICS 334220 (Space satellites, communications, manufacturing).",
+      "interpretation": "Independent OSHA + EPA registry confirms TX manufacturing footprint at the addresses described in the 10-K. NAICS 334220 matches the claimed activity. PASS — independent corroboration of physical operations."
+    },
+    {
+      "claim_id": "ASTS-006",
+      "claim_text": "Definitive commercial agreements with AT&T and Verizon (US MNO partners).",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": true,
+      "M_check": "edgar_fts.query_fulltext(search_term='AST SpaceMobile', cik=AT&T 0000732717) and (search_term='SpaceMobile', cik=Verizon 0000732712)",
+      "M_value": "AT&T: 3 hits in 10-K-class filings (two 2023 8-K exhibits + 2025 DEF 14A) referencing AST SpaceMobile. Verizon (CIK 0000732712): 0 hits for 'SpaceMobile' in any disclosure.",
+      "interpretation": "Mode B finding: AT&T does disclose the relationship (PASS for AT&T side). Verizon — for whom ASTS claims a 'definitive commercial agreement' signed Oct 8, 2025 with service starting 2026 — has ZERO mentions of SpaceMobile in EDGAR full-text searches. Per heuristic 7, this is meaningful only if material. The deal is a forward-looking direct-to-cellular agreement for nationwide coverage — material to Verizon's product roadmap. Absence in Verizon's own SEC filings (no 10-Q, no 8-K reference) is a MOD finding (could reflect both that Verizon CIK lookup is off or that it's not yet material enough). Pure check on CIK 0000732712 yielded zero — flag as MOD with note re: counterparty CIK verification."
+    },
+    {
+      "claim_id": "ASTS-007",
+      "claim_text": "Heavy 2025 capital raises (>$2.18B convertibles) plus Feb 2026 registered direct offering.",
+      "severity": "RED_FLAG_NEGATIVE",
+      "supports": true,
+      "M_check": "sec_filings.list_filings_by_form(S-3) + insider_vs_calendar.query_insider_sales_near_budget_events(cik=0001780312, window_days=14, start_date=2024-01-01, end_date=2026-05-20)",
+      "M_value": "Mode A: 4 S-3 filings on file (2022, 2022, 2022, 2024) — shelf authority confirmed; raises are real and registered. Mode B: 65 Form 4 filings; n_total_sales=36; n_total_sale_value=$465.5M; n_proximate_sales=6 near events; n_discretionary_proximate=3; proximate value $277.2M. CLUSTERED_DISCRETIONARY signal: insider Mikitani Hiroshi sold 1.69M shares @ $91.42 ($154.5M) on 2026-04-14 and 1.35M shares @ $86.22 ($116.4M) on 2026-04-15 — both DISCRETIONARY (is_10b5_1=false) — 13-14 days BEFORE the 2026-04-28 FY27 J-Book release event flagged by the source. Additional discretionary sale by director Torres clustered to 2026-04-29 press follow-up.",
+      "interpretation": "This is precisely the heuristic-scenario the framework flags as SEVE-to-RED: discretionary (non-10b5-1) insider sales of $270M+ clustered within 14 days of a Pentagon budget/program event, by a senior director-affiliated holder. Pre-event discretionary windows of this magnitude near a known cohort event are the highest-signal flag in the playbook. RED_FLAG_NEGATIVE."
+    },
+    {
+      "claim_id": "ASTS-008",
+      "claim_text": "ICFR effective Dec 31 2025; clean KPMG opinion; no material weakness.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "claim_evolution.query_claim_evolution(cik=0001780312, search_term='material weakness', base_filing_date='2026-03-02', cutoff_date='2026-05-20')",
+      "M_value": "evolution_status=SILENT_POST_CLAIM; n_subsequent_mentions=0; 0 AFFIRMED/AMENDED/TERMINATED of material weakness narrative in 79-day window post-filing.",
+      "interpretation": "No post-filing restatements, no amendments, no 8-K/A material-weakness corrections in the window. Internal narrative + KPMG attestation + silent post-claim ledger = PASS."
+    }
+  ]
+}

@@ -1,0 +1,118 @@
+{
+  "ticker": "FTAI",
+  "cutoff": "2023-01-15",
+  "filing": "0001590364-22-000002_10-K.txt",
+  "filing_form": "10-K",
+  "filing_filed": "2022-02-28",
+  "extraction_note": "This FY2021 10-K is from Fortress Transportation and Infrastructure Investors LLC (pre-spin-off form of FTAI Aviation). Filing covers Aviation Leasing (commercial aircraft engines), Jefferson Terminal (crude/refined products), Ports and Terminals (Repauno/Long Ridge), and Transtar (freight railroads). The filing contains ZERO references to Pentagon Program Elements, DoD program names, military aircraft engines, military aircraft platforms, J-Book line items, or specific defense customers. The cohort metadata note about 'military adjacency via LM2500 marine engines / CFM56 modules' is NOT borne out in this filing — CFM56 references appear nowhere in the sliced text, LM2500 references appear nowhere, and there are no DoD customers named. Pentagon J-Book is therefore the primary verifier ONLY by absence: no J-Book-grounded claims to verify. We extract the closest analogues (forward-looking commercial-aviation pipeline, infrastructure pipeline) and the spin-off thesis, plus control claims, to exercise the framework. Net result expected: this ticker should fall OUT of the J-Book divergence cohort because the company makes no J-Book-grounded claims.",
+  "claims": [
+    {
+      "claim_id": "FTAI-001",
+      "claim_text": "FTAI announced in Q4 2021 it intends to spin off its infrastructure business as a separate publicly traded entity in Q2 2022, with the infrastructure entity remitting approximately $800 million in cash to FTAI as part of the separation.",
+      "subject": "FTAI Corporate Strategy",
+      "predicate": "intends to spin off",
+      "object_value": "Infrastructure segment as separate public co with $800M cash remit",
+      "source_quote": "In the fourth quarter of 2021, the Company announced that it intends to spin off its infrastructure business as a separate publicly traded entity... The infrastructure entity intends to remit to FTAI approximately $800 million in cash as part of the separation... The spin off transaction is expected to be completed during the second quarter of 2022.",
+      "category": "rollup_thesis",
+      "queries": [
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"q": "FTAI infrastructure spin-off completed", "cutoff_date": "2023-01-15"}}
+      ]
+    },
+    {
+      "claim_id": "FTAI-002",
+      "claim_text": "FTAI's Aviation Leasing segment generates equipment-leasing revenue from commercial aircraft and aircraft engines held for long-term lease (total equipment-leasing revenue of $335.6M in 2021).",
+      "subject": "Aviation Leasing segment",
+      "predicate": "generates",
+      "object_value": "$335.6M equipment leasing revenue in 2021 from commercial aircraft/engines",
+      "source_quote": "The Aviation Leasing segment consists of aircraft and aircraft engines held for lease and are typically held long-term... Total equipment leasing revenues 335,583",
+      "category": "dod_customer_concentration",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "FTAI Aviation", "cutoff_date": "2023-01-15"}},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "Fortress Transportation", "cutoff_date": "2023-01-15"}},
+        {"source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "FTAI Aviation"}}
+      ]
+    },
+    {
+      "claim_id": "FTAI-003",
+      "claim_text": "FTAI's Transtar segment, acquired in July 2021, comprises five freight railroads and one switching company providing rail service to certain manufacturing and production facilities; Transtar represented 16% of total assets and 13% of revenues in 2021.",
+      "subject": "Transtar segment",
+      "predicate": "represents",
+      "object_value": "16% total assets, 13% total revenues in 2021",
+      "source_quote": "In July 2021, we acquired Transtar... Transtar is comprised of five freight railroads and one switching company that provide rail service to certain manufacturing and production facilities... Transtar represented approximately 16% of our total assets and 13% of our total revenues as of and for the year ended December 31, 2021.",
+      "category": "rollup_thesis",
+      "queries": [
+        {"source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "Transtar LLC"}}
+      ]
+    },
+    {
+      "claim_id": "FTAI-004",
+      "claim_text": "FTAI's Jefferson Terminal segment is a multi-modal crude and refined products terminal that had a two-year pipeline capacity agreement obligating fixed marketing fees of $10.2M per year, with crude marketing revenues having dropped to $0 in 2021 (vs $166M in 2019) after Jefferson exited the crude marketing strategy in Q4 2019.",
+      "subject": "Jefferson Terminal segment",
+      "predicate": "exited",
+      "object_value": "crude marketing strategy; revenues went from $166M (2019) to $0 (2021)",
+      "source_quote": "Crude marketing revenues decreased $8.2 million. In 2019, Jefferson directly sourced crude from producers in Canada... Jefferson exited this crude marketing strategy in the fourth quarter of 2019 as a result of unfavorable oil spreads",
+      "category": "other",
+      "queries": [
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"q": "Jefferson Terminal crude throughput volumes", "cutoff_date": "2023-01-15"}}
+      ]
+    },
+    {
+      "claim_id": "FTAI-005",
+      "claim_text": "FTAI's Ports and Terminals segment includes Repauno, a 1,630-acre deep-water port along the Delaware River with an underground storage cavern, multi-purpose dock, rail-to-ship transloading system; the company is redeveloping it as a multi-purpose, multi-modal deepwater port.",
+      "subject": "Repauno (Ports and Terminals)",
+      "predicate": "is being redeveloped as",
+      "object_value": "multi-modal deepwater port (1,630 acres, Delaware River)",
+      "source_quote": "Repauno, which is a 1,630 acre deep-water port located along the Delaware River with an underground storage cavern, a new multipurpose dock, a rail-to-ship transloading system and multiple industrial development opportunities",
+      "category": "facility",
+      "queries": [
+        {"source": "epa_frs.query_facility", "kwargs": {"facility_name": "Repauno", "state": "NJ"}}
+      ]
+    },
+    {
+      "claim_id": "FTAI-006",
+      "claim_text": "FTAI's Long Ridge investment is a 1,660-acre multi-modal port along the Ohio River with rail, dock and multiple industrial development opportunities, including a power plant in operation.",
+      "subject": "Long Ridge (equity-method investment)",
+      "predicate": "operates",
+      "object_value": "1,660-acre multi-modal port + power plant in operation",
+      "source_quote": "an equity method investment (Long Ridge), which is a 1,660 acre multi-modal port located along the Ohio River with rail, dock, and multiple industrial development opportunities, including a power plant in operation.",
+      "category": "facility",
+      "queries": [
+        {"source": "epa_frs.query_facility", "kwargs": {"facility_name": "Long Ridge", "state": "OH"}}
+      ]
+    },
+    {
+      "claim_id": "FTAI-007",
+      "claim_text": "FTAI states a number of aviation lessees have been placed on non-accrual status as of December 31, 2021, with overall portfolio exposure limited by maintenance reserves and security deposits valued at $145.5 million.",
+      "subject": "Aviation Leasing credit risk",
+      "predicate": "is limited by",
+      "object_value": "$145.5M maintenance reserves and security deposits against lessee defaults",
+      "source_quote": "A number of these lessees have been placed on non-accrual status as of December 31, 2021; however, we believe our overall portfolio exposure is limited by maintenance reserves and security deposits which are secured against lessee defaults. The value of these deposits was $145.5 million as of December 31, 2021.",
+      "category": "other",
+      "queries": []
+    },
+    {
+      "claim_id": "FTAI-008",
+      "claim_text": "FTAI has $3.3 billion of outstanding principal debt and $1.2 billion of interest payment obligations as of December 31, 2021, with $100.5M principal and $185.4M interest due in next twelve months.",
+      "subject": "Debt obligations",
+      "predicate": "totals",
+      "object_value": "$3.3B principal / $1.2B interest outstanding at Dec 31 2021",
+      "source_quote": "As of December 31, 2021, we had outstanding principal and interest payment obligations of $3.3 billion and $1.2 billion, respectively, of which, $100.5 million and $185.4 million, respectively, are due in the next twelve months.",
+      "category": "other",
+      "queries": []
+    },
+    {
+      "claim_id": "FTAI-009",
+      "claim_text": "FTAI's cohort metadata flagged 'military adjacency via LM2500 marine engines and CFM56 modules' — but the 10-K text contains no references to LM2500, CFM56, US Navy, DoD program elements, Pentagon contracts, or any named military platform or program.",
+      "subject": "Defense-program exposure (claimed in cohort meta)",
+      "predicate": "is absent from",
+      "object_value": "no DoD program, no PE number, no military platform named in 10-K",
+      "source_quote": "[CONTROL claim — assertion of absence based on full-slice text review; no DoD/PE/military program identifier appears in the sliced 10-K]",
+      "category": "jbook_program_revenue",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"program_name": "LM2500", "cutoff_date": "2023-01-15"}},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"program_name": "CFM56", "cutoff_date": "2023-01-15"}},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "FTAI", "cutoff_date": "2023-01-15"}}
+      ]
+    }
+  ]
+}

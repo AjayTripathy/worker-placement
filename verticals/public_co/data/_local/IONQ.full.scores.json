@@ -1,0 +1,126 @@
+{
+  "ticker": "IONQ",
+  "cutoff": "2026-05-20",
+  "filing": "0001193125-26-071562_10-K.txt",
+  "filing_date": "2026-02-25",
+  "filing_age_days": 84,
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "IonQ acquired Oxford Ionics Limited (Sept 2025, ~$1.6B), expecting EQC + semiconductor scaling to accelerate roadmap.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "uspto_odp.query_assignee(assignee_name='Oxford Ionics')",
+      "M_value": "14 applications, 1 granted; titles include 'CHARGED PARTICLE TRAP APPARATUS', 'METHOD FOR OPERATING A QUANTUM DEVICE', 'QUANTUM LOGIC SPECTROSCOPY SYSTEM', 'A CONTROLLER FOR A TRAPPED ION SYSTEM' — directly on-thesis trapped-ion IP",
+      "interpretation": "Mode A confirms Oxford Ionics is a real trapped-ion IP shop with on-thesis prosecution activity; the 1 granted vs 14 total reflects a young UK lab pre-acquisition, not Nikola-pattern fakery."
+    },
+    {
+      "claim_id": "C1_modeB",
+      "claim_text": "Aggregate-rollup coherence across all 8 IonQ acquisitions vs the quantum platform parent thesis",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": false,
+      "M_check": "acq_coherence.score_acquisition_coherence(parent_thesis='quantum platform company...', acquisitions=[8 deals])",
+      "M_value": "mean_coherence=0.6875, signal=MIXED_COHERENCE; Oxford Ionics 0.95 / Lightsynq 0.85 / Seed 0.85 / id Quantique 0.75 / Vector Atomic 0.75 / Skyloom 0.65 / SkyWater 0.65; **Capella Space 0.05 (low_coherence, is_revenue_synthetic=true; $424.8M of low-coherence value)**",
+      "interpretation": "Mode B: aggregate mean 0.69 is mixed, not >0.5 SEVE threshold — but the Capella deal in particular (SAR satellite imagery DaaS, $424.8M, scoring 0.05 / revenue-synthetic) is a discrete coherence break in an otherwise on-thesis trapped-ion + photonics rollup. Auditor flagged 39% of 2025 revenue is from these four newly acquired subs and excluded them from ICFR — that 39% includes the low-coherence Capella satellite-imagery revenue mixed with on-thesis quantum revenue, materially inflating the 'quantum revenue growth' optic. Roll-up incoherence on a specific large deal = MOD."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "IonQ raised ~$3.3B in 2025 via large secondary offerings + ATM ($1.977B Oct, $977M July, $358M ATM March).",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "sec_filings.list_filings_by_form(cik='0001824920', forms='424B5', start_date='2024-01-01')",
+      "M_value": "5 x 424B5 on file: 2025-10-10 (x2), 2025-07-07 (x2), 2025-02-27 — exactly matching the three raises described (Oct/Jul offerings + Feb ATM)",
+      "interpretation": "Mode A: SEC EDGAR confirms 5 prospectus supplements at the exact dates of the disclosed offerings + ATM program. Clean PASS."
+    },
+    {
+      "claim_id": "C2_modeB",
+      "claim_text": "Insider Form-4 sales clustering near major fund-raise / budget-release windows (window_days=14, start_date='2024-01-01', end_date='2026-05-20').",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "insider_vs_calendar.query_insider_sales_near_budget_events(cik='0001824920', window_days=14, start_date='2024-01-01', end_date='2026-05-20')",
+      "M_value": "n_form4_filings=66; n_total_sales=46 ($382.0M); n_proximate_sales=2; n_discretionary_proximate=0; signal=ROUTINE_10B5_1. Only proximate window was the 2026-04-28 FY27 J-Book release — both nearby sales are 10b5-1 by Robert Cardillo (~$188k total).",
+      "interpretation": "Mode B: insiders did sell ~$382M aggregate across the period (consistent with the very large $3.3B equity raise environment), but the engine finds no discretionary clustering around budget events. Signal is ROUTINE_10B5_1 — not CLUSTERED_DISCRETIONARY. Note: the engine's defined events are J-Book / budget releases, not fund-raise dates, so this is a clean PASS on the framework's criterion."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "IonQ holds an extensive patent portfolio protecting its trapped-ion quantum platform.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "uspto_odp.query_assignee(assignee_name='IonQ')",
+      "M_value": "n_total_applications=375, n_granted=123 (pre-cutoff). Titles include trapped-ion, photonic integrated circuit for individual addressing, mixed-species ion-pair entangling gates, quantum chemistry circuit optimization — heavily on-thesis.",
+      "interpretation": "Mode A: 123 granted patents far exceeds the 5-granted PASS threshold (heuristic 8). Concentration of titles in trapped-ion / quantum networking / quantum algorithms aligns with the stated technology areas — no Nikola pattern."
+    },
+    {
+      "claim_id": "C3_modeB",
+      "claim_text": "Acquired-entity (Oxford Ionics) patent footprint — sub-IP confirmation.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "uspto_odp.query_assignee(assignee_name='Oxford Ionics')",
+      "M_value": "Oxford Ionics: 14 applications (1 granted) on charged-particle traps, quantum device operation, trapped-ion controllers — directly relevant IP",
+      "interpretation": "Mode B confirms the acquired-entity adds real, on-thesis IP. The IP count is low because Oxford Ionics is a young UK spinout; valuation premium is in trade-secret EQC know-how, not patent count."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Leased facilities: College Park MD (32k sqft HQ), Bothell WA (101k sqft), Oxford UK (30k sqft).",
+      "severity": "UNVERIFIABLE",
+      "supports": null,
+      "M_check": "epa_frs.query_facilities(facility_name='IonQ', state_abbr='MD'/'WA') + osha_establishments.query_establishments(company_name='IonQ')",
+      "M_value": "EPA FRS: 0 facilities in MD, 0 in WA. OSHA: 0 establishments. Signal=NO_OSHA_FOOTPRINT",
+      "interpretation": "Per heuristic 1 (EPA FRS scope = EPA-regulated facilities; light electronics / R&D labs typically NOT in FRS) absence is NOT a red flag. Quantum-computing R&D labs are not air/water-emission permittees, and OSHA establishment data has known coverage gaps for small R&D headcounts. UNVERIFIABLE rather than SEVE."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "IonQ has U.S. federal-agency contracts (described as part of growing customer concentration in govt customers).",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": true,
+      "M_check": "usaspending.query_federal_presence(name_variants=['IonQ','IonQ Inc','IonQ Federal','IonQ Federal LLC'])",
+      "M_value": "2 contracts, total obligated $13.4M; only one material award (AFRL FA875022C1022 'TRAPPED ION QUANTUM COMPUTER' for $13.4M); the other is a $500 SHIELD micro-task order. Signal=RECURRING_FEDERAL but tiny scale.",
+      "interpretation": "Mode A: federal footprint exists but is TINY relative to $130M reported total revenue. Only $13.4M in cumulative federal obligations across the entire 2018-2026 window. This is consistent with IonQ's federal customer base being a real but small fraction of revenue — note 39% of revenue is from id Quantique/Capella/Oxford Ionics/Vector Atomic per the auditor, and Capella+Vector Atomic do bring more federal $$ (see C7/C8). MOD because the company emphasizes 'government and large enterprise customers' as a growth pillar yet the parent IonQ federal book is small."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "IonQ reported $130.0M 2025 revenue; auditor disclosed 39% of 2025 revenue came from id Quantique + Capella + Oxford Ionics + Vector Atomic (which were excluded from ICFR scope).",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": false,
+      "M_check": "edgar_fts.query_fulltext(search_term='IonQ', cik=0000936468 Lockheed / 0001133421 Northrop / 0000101829 RTX / 0000202058 L3Harris)",
+      "M_value": "Northrop: 0 hits. RTX: 0 hits. L3Harris: 0 hits. Lockheed: 0 hits. (per heuristic 7, named-prime counterparty disclosure search.)",
+      "interpretation": "Mode B: company does not name a specific prime counterparty in the sliced narrative — but the 39% jump in 2025 revenue is overwhelmingly an acquisition optic, not organic growth. Of $130M revenue, ~$50M is from the four newly consolidated subs (39% of $130M), and Capella's own historical federal book is only ~$19M cumulative across DOD+NASA+Interior+EPA. The economic substance of the 'revenue growth' is acquisition-stuffed Capella SAR-imagery revenue mixed into reported quantum revenue, and the auditor's ICFR carve-out means investors lack assurance over that 39%. SEVE: revenue growth claim is materially less informative than the headline suggests."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "IonQ acquired Capella Space Corp. (July 2025, $424.8M); satellite imagery / data-as-a-service is now part of revenue and the quantum-PNT strategy.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": true,
+      "M_check": "usaspending.query_federal_presence(name_variants=['Capella Space','Capella Space Corp']) + uspto_odp.query_assignee(assignee_name='Capella Space')",
+      "M_value": "USAspending: 21 contracts, $18.95M total obligated (DoD 11, NASA 8, Interior 1, EPA 1); top awards SARGO ($10.0M), SDA Tranche-0 OISL demo ($2.97M), Space Pitch Day ($1.7M). USPTO: 0 patents / 0 applications under 'Capella Space' assignee.",
+      "interpretation": "Mode A confirms Capella as a real DOD/NASA SAR vendor — but $18.9M of cumulative federal contracts is a thin foundation for a $424.8M acquisition (~22x federal book multiple). Mode B: ZERO patents on the assignee — Capella is operating-asset-heavy (satellites + downlink + data ops) not IP-heavy, so absence is expected, but combined with the C1_modeB low-coherence finding (Capella scored 0.05 vs IonQ thesis, is_revenue_synthetic=true) the deal looks more like buying revenue + DOD-vendor optics than a thesis-extending technology acquisition. MOD."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "IonQ acquired id Quantique, Vector Atomic, Lightsynq and announced a pending $1.8B SkyWater acquisition.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "usaspending.query_federal_presence(name_variants=['Vector Atomic','Vector Atomic Inc'])",
+      "M_value": "Vector Atomic: 67 federal contracts, $143.0M cumulative obligated; DOD 40, NASA 4, Commerce 4, Interior 2; top awards SBIR-III SMARTS resilient timing ($11.0M), UFLATPACK photonic accel/gyro ($7.4M). Robust DARPA / DoD R&D vendor.",
+      "interpretation": "Mode A confirms Vector Atomic is a real, established DARPA / DOD quantum-sensing / atomic-clock vendor with $143M in cumulative federal R&D obligations — directly on-thesis for IonQ's quantum sensing/PNT pillar. Strong PASS. (Other named acquisitions confirmed by the auditor's ICFR carve-out language and post-closing share issuance disclosures.)"
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "IonQ had $3,336.8M cash/investments at YE2025; $1.0B cash needed for SkyWater; $1.19B accumulated deficit; $633.7M FY25 operating loss.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "sec_filings.list_filings_by_form(cik='0001824920', forms='424B5')",
+      "M_value": "5 x 424B5 (Oct 2025 x2, July 2025 x2, Feb 2025 ATM) on file — matches the $3.3B 2025 financing-activities inflow line. Accounting figures internally consistent within the 10-K.",
+      "interpretation": "Mode A: cash position and dilutive raise mechanics confirmed by EDGAR prospectus supplements. Mode B (insider_vs_calendar) shows no discretionary clustering — large insider sales ($382M aggregate over 2024-26) are on-trend with the offering windows but not on the framework's discrete budget-event calendar. Going-concern math holds: $3.3B cash vs ~$300M opex burn + $1B SkyWater cash = >2y runway. PASS on factual correctness; investor should still weigh extreme dilution (144M reserved shares vs prior 73M)."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "E&Y issued an unqualified ICFR opinion but excluded id Quantique, Capella, Oxford Ionics, Vector Atomic from ICFR scope (those subs were 39% of 2025 revenue and 6% of total assets).",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": true,
+      "M_check": "claim_evolution.query_claim_evolution(cik='0001824920', search_term='material weakness', base_filing_date='2026-02-25', cutoff_date='2026-05-20')",
+      "M_value": "evolution_status=SILENT_POST_CLAIM; 0 subsequent mentions of 'material weakness' in post-10-K filings within the cutoff window. No adverse classifications.",
+      "interpretation": "Mode A: opinion text confirmed in filing. Mode B: post-filing claim_evolution silence means no observable restatement or material-weakness disclosure since 10-K — that part is neutral. HOWEVER the ICFR carve-out itself is non-trivial: when 39% of consolidated revenue is excluded from ICFR scope on day one (allowed under first-year-of-acquisition SEC accommodation), users of the financial statements lack reasonable assurance over the largest single growth driver of the year. Not a material-weakness finding, but a structural disclosure-quality MOD that the standalone clean-opinion claim does not communicate."
+    }
+  ]
+}

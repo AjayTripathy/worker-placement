@@ -1,0 +1,38 @@
+LRN's cohort tag is a data artifact — the pack sector-labels Stride (NYSE: LRN, online K‑12/career education, SIC 8200) as "Real Estate," so the `excess_dd −0.424 vs Real Estate median` comparator is meaningless; the dislocation is idiosyncratic (‑54% single day on 2025‑10‑28, $153.53→$70.05, on an enrollment-platform failure plus "ghost students" fraud allegations), and I triaged it as a single-name event against its own numbers, using the 2026‑08‑04 FY26 print (the pack's XBRL block is stale — rev through 2018, OCF through 2024 — and was not used).
+
+| ticker | class | refuting metric | current value/trend (cited) | next print date | note |
+|---|---|---|---|---|---|
+| LRN | **DAMAGE-ARRIVING** | Average total enrollment + General Education enrollment, and the FY27 revenue guide issued with it | FY26 avg 243.9K (+4.2%) but **Q4 avg 234.2K (−0.5%)**; GenEd 134.2K (−2.5%), **Q4 GenEd revenue −9.7%**; Q4 rev $636.1M (−2.7%), Q4 adj op income $117.8M (−9.8%), Q4 GM 34.2% (−240bps); mgmt: fall‑2026 applications "trailing slightly behind last year," conversion/re‑registration ahead ([8‑K/PR 2026‑08‑04](https://www.globenewswire.com/news-release/2026/08/04/3338841/0/en/Stride-reports-fourth-quarter-and-full-year-2026-financial-results.html)) | ~2026‑10‑27 (yfinance-derived, **UNCONFIRMED** — no company PR names it; LRN's own FY26 Q1 landed 2025‑10‑28) | Damage is *in* the numbers (exit run-rate is negative revenue + compressing margin), magnitude unresolved because the entire year's enrollment is being set in Aug/Sept and is unobservable until the Oct print |
+
+Sub-claim splits that a court must keep separate, because they classify differently:
+
+| sub-claim | class | evidence |
+|---|---|---|
+| "Ghost students" = accounting fraud / restatement | **DAMAGE-ABSENT (narrow)** | FY26 10‑K cover page: no error corrections requiring restated financials; enrollment-metric limitation and funding-clawback risk are disclosed risk factors, not new events ([10‑K 2026‑08‑05](https://www.sec.gov/Archives/edgar/data/1157408/000110465926090515/lrn-20260630x10k.htm)) — *but* the class action (Macmahon v. Stride, No. 25‑cv‑02019, E.D. Va., class period 2024‑10‑22→2025‑10‑28) is live and I could **not** read Item 3 or Item 9A (2.94MB doc truncated by the fetch proxy) |
+| General Education is in secular decline | **STRUCTURAL** | 56% of revenue, −2.1% FY and −9.7% in Q4 — the deterioration *accelerated* into the exit quarter |
+| Career Learning offsets it | **DAMAGE-ABSENT** | FY26 revenue $1,043.7M MS/HS (+19.1%), enrollment 109.7K (+13.9%) — though Q4 decelerated to +8.0% revenue / +9.7% enrollment |
+
+**COURT-WORTHY (damage-absent, ranked):** *none.* LRN does not qualify — the narrative's predicted damage is present in the most recent print, not absent from it. The only damage-absent finding is the narrow no-restatement datum above, which retires the accounting-fraud tail's worst branch but does not lift the operating classification. Listing LRN as damage-absent on the strength of a cheap multiple would be exactly the aggregation artifact the red template warns about.
+
+What makes it worth a court anyway is the valuation-vs-unresolved-variable tension, not a refutation:
+- 41,559,845 shares out at 2026‑07‑31 ([10‑K cover](https://www.sec.gov/Archives/edgar/data/1157408/000110465926090515/lrn-20260630x10k.htm)); $83.36 × ~49M **fully diluted** (adj EPS $8.33 is already struck on the if-converted count — cross-checks: $498.4M adj EBIT less ~25% tax plus interest on ~$1B cash ≈ $405M ≈ 49M × $8.33) = ~$4.08B, against $1,034.1M cash+investments and $418.0M convertible debt.
+- Treating the converts as converted: **EV ≈ $3.05B → 6.1× FY26 adj EBIT, 4.9× adj EBITDA, 8.6× FCF ($355M), 10.0× adj EPS.**
+- Bear run-rate (GenEd −9.7%, Career +8%) still only takes FY27 revenue to ~$2.46B and EV/EBIT to ~7×. The price is not paying for growth; it is paying for the tail.
+- Governance is unsettled in a way the multiple does not capture: CEO James Rhyu removed effective 2026‑07‑29, replaced by sitting board member Robert Knowling, board chair changed, new audit-committee member added — five days before the print, "not the result of any disagreement" ([8‑K 2026‑07‑30](https://www.sec.gov/Archives/edgar/data/1157408/000114036126030147/ef20079028_8k.htm)).
+
+**PRINT PROXIMITY: ~2026‑10‑27 — yfinance-derived, UNCONFIRMED (no company PR names it; corroborated only by LRN's own FY26 Q1 date of 2025‑10‑28). ~50 trading days out, NOT within 5 — the print-decisive reconstruction is not triggered.** The FY26 print already ran on 2026‑08‑04 (+8.1% after hours to ~$87 from an $80.45 close; now $83.36, i.e. the pop has partly faded). The structurally important point for the court: LRN's decisive variable is *set* during Aug–Sept and *disclosed* in late Oct, so there is a ~10‑week window where the number exists but the market cannot see it — building public leading indicators for it (state authorizer approvals, school-level hiring postings, enrollment-portal traffic) is precisely the work a court can do that the tape cannot.
+
+**COURT-WORTHINESS LRN: 7/10 — cheap on a diluted-EV basis (6.1× adj EBIT, net cash) with the sizing decision hinging on two things a court can partly resolve before October: whether the enrollment-integrity claim carries a funding-clawback/restatement tail (Item 3/9A unread), and whether the fall funnel is tracking behind the "applications trailing slightly" tell.**
+
+Verification gaps a court must close (do not treat these as checked):
+- 10‑K **Item 3 Legal Proceedings** and **Item 9A Controls** unread — fetch proxy truncated the 2.94MB document. ICFR effectiveness and any litigation accrual are UNVERIFIED.
+- The 10‑K carries **two Exhibit 23 consents** (ex23d1, ex23d2), which usually signals an auditor transition during the year. Reason UNVERIFIED — material given the integrity allegation.
+- Convertible note coupon/maturity/conversion price not read from the debt note; only the $418.0M carrying value is sourced.
+- Four Form 4s filed 2026‑08‑11 (post-print) not decoded — openinsider unreachable; whether the new CEO or insiders bought open-market is unknown and would be a real signal.
+- Live price unavailable: the IBKR MCP tools were not permission-granted in this non-interactive session, so the tape is the pack's Yahoo close ($83.36), not a broker quote. Per standing doctrine, re-pull from IBKR before any valuation acted on.
+- `knowledge_graph/cohorts.json` unreadable (path outside the working directory, permission denied) — the cohort narrative was reconstructed from primary sources rather than read.
+- Pack defects to fix upstream: sector mistag (Real Estate → Consumer Defensive/Education Services) and a stale XBRL quarterly block (revenue series ends 2018, OCF 2024, diluted shares 2025‑03).
+
+I could not run the ledger/scanner dashboard step this session — no Bash tool is available here. Since this score is ≥6 and auto-escalates, the dashboard upsert should be carried by the court that picks it up.
+
+Sources: [Stride FY26 results PR, 2026‑08‑04](https://www.globenewswire.com/news-release/2026/08/04/3338841/0/en/Stride-reports-fourth-quarter-and-full-year-2026-financial-results.html) · [FY26 10‑K, 2026‑08‑05](https://www.sec.gov/Archives/edgar/data/1157408/000110465926090515/lrn-20260630x10k.htm) · [CEO succession 8‑K, 2026‑07‑30](https://www.sec.gov/Archives/edgar/data/1157408/000114036126030147/ef20079028_8k.htm) · [Q4 FY26 call transcript](https://www.fool.com/earnings/call-transcripts/2026/08/11/stride-lrn-q4-2026-earnings-call-transcript/) · [Q4 FY26 earnings detail](https://www.tradingkey.com/news/earnings/262076477-tradingkey) · [Securities class action / "ghost students"](https://www.ktmc.com/new-cases/stride-inc/)

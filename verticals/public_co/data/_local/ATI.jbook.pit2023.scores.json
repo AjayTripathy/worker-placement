@@ -1,0 +1,116 @@
+{
+  "ticker": "ATI",
+  "cutoff": "2023-01-15",
+  "cohort": "jbook_exposure_divergence",
+  "scoring_notes": "PIT 2023-01-15. The J-Book corpus is FY2026-vintage; for all named PEs the framework returns NOT_FOUND_IN_TIMERANGE at this cutoff (the corpus has no FY <= 2023 history rows). This is a corpus-coverage limitation at this PIT, NOT a divergence signal. Per heuristic #7 (NOT_FOUND in J-Book is not a red flag) and heuristic #1 (NOT_FOUND_IN_TIMERANGE -> UNVERIFIABLE), all J-Book-grounded claims default to UNVERIFIABLE here. USAspending DIRECT-DoD exposure is materially small (~$1.5M over 5 yrs via Allegheny Ludlum LLC), which is CONSISTENT with the 10-K narrative (ATI sells through aero/defense primes — Boeing/Pratt/GE/Rolls-Royce/RTX — not direct-to-Pentagon). No J-Book divergence catch surfaces for this name at this PIT date because the filing itself does not name specific PEs, programs of record, PE-attributed revenue percentages, or program-of-record forward expectations — i.e., the J-Book cohort pattern does not apply structurally to specialty-materials suppliers.",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Defense applications include naval nuclear products, military jet engines, fixed wing/rotorcraft, armor; expects to increase defense sales.",
+      "severity": "PASS",
+      "supports": [
+        {"M_check": "pentagon_jbook.query_program_funding(contractor_name='ATI')", "M_value": "NOT_FOUND_IN_TIMERANGE; 4 matches are substring false-positives (Lockheed Martin CorporATIon, ARES CORPORATION etc.)"},
+        {"M_check": "pentagon_jbook.query_program_funding(contractor_name='Allegheny Technologies')", "M_value": "NOT_FOUND (n_matches=0)"},
+        {"M_check": "usaspending.query_dod_contracts(recipient_name='Allegheny Technologies', 2018-01-01..2023-01-15)", "M_value": "2 awards, $1,544,089 total (Allegheny Ludlum LLC: 6Al-4V titanium + ATI 425 titanium alloy sheet to Army)"},
+        {"M_check": "usaspending.query_dod_contracts(recipient_name='ATI Specialty Materials')", "M_value": "0 awards"}
+      ],
+      "M_check": "pentagon_jbook + usaspending",
+      "M_value": "no direct-prime DoD program-of-record exposure; modest direct-Army titanium obligations confirm specialty-materials supply role",
+      "interpretation": "The claim is qualitative and modest ('expect to increase defense sales' is forward-looking but unquantified). USAspending confirms direct DoD relationships exist at small scale, consistent with the narrative that DoD revenue flows indirectly through aero primes. No J-Book divergence — claim PASSES the framework at this PIT."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "LTAs with major aero OEMs on current and next-generation jet engines and airframes.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        {"M_check": "pentagon_jbook.query_program_funding(program_name='Next Generation Adaptive Propulsion', cutoff='2023-01-15')", "M_value": "n_matches=1 (PE 0604010F, Air Force); status=NOT_FOUND_IN_TIMERANGE; history_rows=[] at PIT"},
+        {"M_check": "pentagon_jbook.query_program_funding(pe_number='0604010F', cutoff='2023-01-15')", "M_value": "same — NOT_FOUND_IN_TIMERANGE"}
+      ],
+      "M_check": "pentagon_jbook",
+      "M_value": "NGAP PE exists in corpus but corpus is FY26 vintage — no funding rows visible at 2023-01-15 PIT",
+      "interpretation": "Corpus-coverage limitation per heuristic #7 / #1. The claim is genuinely about commercial+military jet engines (commercial dominates — not J-Book scope), so even with corpus coverage this claim would only marginally test against next-gen military propulsion PEs."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "HPMC segment had 72% of 2021 revenues from aerospace & defense (largest portion commercial jet engines).",
+      "severity": "PASS",
+      "supports": [
+        {"M_check": "pentagon_jbook.query_program_funding(contractor_name='ATI')", "M_value": "no genuine matches; substring false-positives only"},
+        {"M_check": "Internal cross-check vs C1/C8", "M_value": "consistent with usaspending direct-DoD obligations being immaterial — i.e., 72% A&D is dominated by commercial aerospace, not DoD-named programs"}
+      ],
+      "M_check": "pentagon_jbook",
+      "M_value": "no PE-attributed revenue claim to verify (segment-level, not program-level)",
+      "interpretation": "Backward-looking segment-level fact. Not J-Book-testable because no PE-attribution is made. Treats as PASS (consistent with disclosed customer mix and indirect-prime structure)."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "[Implied] F-35 program exposure via titanium/nickel into airframe + F135 engine supply chain.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        {"M_check": "pentagon_jbook.query_program_funding(program_name='F-35 Squadrons', cutoff='2023-01-15')", "M_value": "n_matches=1 (PE 0207142F Air Force); status=NOT_FOUND_IN_TIMERANGE at PIT (corpus is FY26)"},
+        {"M_check": "pentagon_jbook.query_program_funding(pe_number='0207142F')", "M_value": "same"},
+        {"M_check": "pentagon_jbook.query_program_funding(pe_number='0604840F')", "M_value": "F-35 C2D2 — also NOT_FOUND_IN_TIMERANGE at PIT"}
+      ],
+      "M_check": "pentagon_jbook",
+      "M_value": "PEs exist in corpus but no FY history visible at 2023-01-15 PIT",
+      "interpretation": "Mode-B implied verification: F-35 is the canonical Pentagon program any A&D titanium supplier is exposed to. Corpus-coverage limit prevents PIT verification. NOTE: the F-35 program (procurement of F-35 Lightning II) is widely understood to be growing through 2023-2027 (LRIP -> FRP transition), so the implied-exposure claim is directionally PASS-like; we mark UNVERIFIABLE due to inability to confirm from corpus at PIT."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "[Implied] Hypersonics specialty-alloy demand growth.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        {"M_check": "pentagon_jbook.query_program_funding(program_name='Hypersonics Prototyping', cutoff='2023-01-15')", "M_value": "n_matches=2; primary=PE 0604033F AF Hypersonics Prototyping; NOT_FOUND_IN_TIMERANGE at PIT"},
+        {"M_check": "pentagon_jbook.query_program_funding(pe_number='0604033F')", "M_value": "same"},
+        {"M_check": "pentagon_jbook.query_program_funding(pe_number='0604181C')", "M_value": "MDA Hypersonic Defense — NOT_FOUND_IN_TIMERANGE at PIT"}
+      ],
+      "M_check": "pentagon_jbook",
+      "M_value": "hypersonics PEs exist in corpus but no PIT-visible funding rows",
+      "interpretation": "Cohort-metadata-derived implied claim (not literally in 10-K). UNVERIFIABLE at PIT due to corpus-vintage limitation. Note: this is the kind of claim that would be verifiable at a later PIT (FY2024+ data)."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "[Implied] Naval-nuclear exposure via Columbia-class/Virginia-class submarine ramps.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        {"M_check": "pentagon_jbook.query_program_funding(program_name='Columbia')", "M_value": "NOT_FOUND (n_matches=0) — Navy procurement Columbia-class SSBN line is outside the 410-PE corpus scope (AF/Space/DARPA/MDA/SOCOM focus)"},
+        {"M_check": "pentagon_jbook.query_program_funding(program_name='Virginia class')", "M_value": "NOT_FOUND (n_matches=0) — same"}
+      ],
+      "M_check": "pentagon_jbook",
+      "M_value": "Navy shipbuilding PEs not in corpus",
+      "interpretation": "Per heuristic #7, NOT_FOUND for a clearly out-of-scope category (Navy SCN ship procurement) -> UNVERIFIABLE, not a red flag. Coverage gap explicitly noted; corpus would need shipbuilding J-Book added to test this Mode-B implication."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "International sales ~45% of total annual sales; direct US-based export ~30% of total sales.",
+      "severity": "PASS",
+      "supports": [
+        {"M_check": "no_query", "M_value": "control claim — non-J-Book quantitative geographic-mix fact"}
+      ],
+      "M_check": "n/a",
+      "M_value": "control claim — accepted as disclosed",
+      "interpretation": "Control claim included to test that non-J-Book quant facts are handled cleanly. PASS (no contradicting M-source signal)."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Customer base includes Boeing, Airbus, Embraer (airframes); GE Aviation, Rolls-Royce, Pratt & Whitney/RTX, Snecma (engines).",
+      "severity": "PASS",
+      "supports": [
+        {"M_check": "usaspending.query_dod_contracts(recipient_name='Allegheny Technologies')", "M_value": "$1.5M direct-DoD over 5 yrs (Army titanium) — small, consistent with the 'indirect via primes' channel structure described"},
+        {"M_check": "usaspending.query_dod_contracts(recipient_name='ATI Specialty Materials')", "M_value": "0 awards — also consistent"}
+      ],
+      "M_check": "usaspending",
+      "M_value": "indirect-prime channel structure confirmed via small direct-DoD obligations",
+      "interpretation": "Counterparty list (the primes listed) is consistent with the small direct-DoD footprint — most DoD revenue would flow through these primes on F-35, F-18, F-22, KC-46, B-21, Columbia, Virginia, etc., not as direct ATI obligations. PASS."
+    }
+  ],
+  "summary": {
+    "n_claims": 8,
+    "n_queries_run": 16,
+    "severity_counts": {"PASS": 4, "MODERATE_UNDERDELIVERY": 0, "SEVERE_UNDERDELIVERY": 0, "RED_FLAG_NEGATIVE": 0, "UNVERIFIABLE": 4},
+    "jbook_grounded_claims": 5,
+    "jbook_fired_count": 0,
+    "jbook_fired_note": "pentagon_jbook returned NOT_FOUND or NOT_FOUND_IN_TIMERANGE for every J-Book-grounded claim at PIT 2023-01-15 — corpus is FY2026-vintage with no visible history at this PIT; also, the filing names ZERO specific PEs/programs-of-record, so the cohort pattern is structurally inapplicable to this name.",
+    "framework_takeaway": "ATI is a defense-adjacent specialty-materials supplier whose 10-K describes DoD exposure in aggregate category language (naval nuclear / military jet engines / rotorcraft / armor) rather than as named Pentagon Program Elements with quantified revenue concentration. The J-Book divergence cohort pattern (named PE -> J-Book shows unfunded) cannot trigger here because the filing surface area provides no PE hooks. USAspending confirms direct-prime DoD obligations are immaterial (~$1.5M / 5yrs), implying ATI's DoD revenue flows almost entirely through aero/defense primes (Boeing, RTX/Pratt, GE, Rolls-Royce, Lockheed) — a structurally different short-thesis target than the YSS/IONQ archetype. NO divergence catch."
+  }
+}

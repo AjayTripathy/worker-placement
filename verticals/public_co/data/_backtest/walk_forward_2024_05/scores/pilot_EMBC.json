@@ -1,0 +1,122 @@
+{
+  "ticker": "EMBC",
+  "company": "Embecta Corp.",
+  "cutoff": "2024-05-15",
+  "filing": "0001872789-23-000031_10K.txt",
+  "filing_date": "2023-11-29",
+  "cik": "0001872789",
+  "sector": "Healthcare",
+  "industry": "Medical Devices",
+  "group": "walk_forward_2024",
+  "rfm_tuples": [
+    {
+      "claim_id": "C1",
+      "R": "'management concluded that internal controls over financial reporting were effective as of September 30, 2023. The financial statements and internal control over financial reporting have been audited by Ernst & Young LLP, an independent registered public accounting firm.' (Item 9A / EY ICFR opinion)",
+      "f": "Mode A — Verify auditor identity and ICFR opinion against m_sources.going_concern_local.auditor_change_from_text; Mode B — derive: did the company file any 10-K/A or 8-K Item 4.02 between original 10-K (2023-11-29) and cutoff (2024-05-15)?",
+      "M_source": "going_concern_local.auditor_change_from_text(10-K text) + edgar.list_filings (10-K/A and 8-K between 2023-11-29 and 2024-05-15)",
+      "M_value": "CLEAN_BIG4_TENURE (Ernst & Young), is_big4=True, n_disagreement_lang=0, n_resignation_lang=0. EDGAR shows one 10-K/A filed 2024-04-05 (accession 0001872789-24-000013) — but the explanatory note states this is solely to correct a 'scrivener's error' in the Sec.302/906 certifications (Exhibits 31.1/31.2) regarding paragraph 4(b) on ICFR; no restatement, no financial information modified. No 8-K Item 4.02 (non-reliance) filed; no Item 4.01 (auditor change). EY remained auditor through 2024-05-15.",
+      "severity": "PASS",
+      "interpretation": "Disclosure verified by registry. The 10-K/A is procedural and not a forensic red flag — it adds missing certification language, not financial corrections. Big-4 continuity, no 4.02, clean."
+    },
+    {
+      "claim_id": "C2",
+      "R": "'The credit agreement and the indentures for the 5.00% Notes and the 6.75% Notes contain customary financial covenants, including a total net leverage ratio covenant ... As of September 30, 2023, we were in compliance with all of such covenants.' (Note 12 — Long-Term Debt)",
+      "f": "Mode A — Verify covenant-compliance language; Mode B — derive: total debt $1,603.4M on FY23 net income $70.4M and EBITDA ~$155M (NI + D&A + interest ≈ $70 + $32 + $89 ≈ proxy) implies net-leverage ratio in the ~7x area on a pre-add-back basis; check for any covenant AMENDMENT filings (8-K Item 1.01) pre-cutoff",
+      "M_source": "10-K Note 12 + Item 7A interest-rate sensitivity (lines on Term Loan B SOFR+300/0.50%-floor) + edgar.list_filings 8-K scan 2023-11-29 → 2024-05-15",
+      "M_value": "Total principal debt $1,635.8M (Term Loan $935.8M + 5.00% Notes $500M + 6.75% Notes $200M Related Party to BD); weighted avg cost of debt 7.1%; SOFR+300bp on $935.8M ≈ ~8.3% all-in; 100bp rate shift = $9.4M annual interest impact. Pre-cutoff 8-K scan (2024-02-09, 2024-03-28, 2024-05-09): zero credit-agreement amendments, zero covenant amendments, zero distressed-debt activity. Only 8-K Item 1.01 was the 2024-03-28 TSA/LSA amendment with BD (transition-services extension), NOT a debt amendment.",
+      "severity": "PASS",
+      "interpretation": "No covenant breach, no amendment, no distressed-debt activity pre-cutoff. Mode-B leverage proxy (debt/EBITDA ~7-8x on FY23 unadjusted) is high for a medical-devices company, but covenant is the gating verifier and it is intact. The 50% drawdown is being driven by market re-rating (GLP-1 narrative / margin compression), not by a verifiable financial-distress event in the filings."
+    },
+    {
+      "claim_id": "C3",
+      "R": "'for the fiscal year ended September 30, 2023, gross sales to McKesson Corporation, Cardinal Health and Cencora, Embecta's three largest distributors, together represented approximately 40% of Embecta's worldwide gross sales.' (Item 1A Risk Factors)",
+      "f": "Mode A — Concentration is self-disclosed with specific %; Mode B — derive: pen needles are 81% of net revenue, sold through three distributors representing 40% of gross sales → effective single-channel single-product exposure",
+      "M_source": "10-K Item 1A + Item 7 Product Mix (lines stating 'pen needles ... accounted for $912 million, or 81%, of total net revenues')",
+      "M_value": "Product concentration: pen needles = 81% of $1.126B net revenue. Customer concentration: top-3 distributors = 40% of gross sales. The intersection (top-3 distributors x pen-needle SKU) likely controls >32% of total revenue. GLP-1 risk language in filing acknowledges 'oral anti-diabetic drugs, GLP-1s and GLP-1 combination products ... have delayed initiation of insulin therapy and contributed to less demand for our products' — first-person acknowledgement of structural headwind on the 81% product.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Concentration is fully disclosed and self-reported — no Mode-A failure. Mode-B finding: management discloses GLP-1 demand erosion on its 81% product line but does NOT quantify the elasticity, and does not break out FY23 pen-needle unit volumes vs price. The honesty-alpha framework's verdict: this is a TRUE-DISCLOSURE case, not a lie. Severity is moderate because the company is correctly flagging the risk that the market is repricing."
+    },
+    {
+      "claim_id": "C4",
+      "R": "'Embecta is currently working on developing an insulin patch pump focused on serving the needs of people with Type 2 diabetes ... Embecta has not yet submitted an application to the FDA seeking marketing authorization for the insulin patch pump.' (Item 1 Business / Item 1A Risk Factors, FY23 10-K dated Nov 2023)",
+      "f": "Mode A — Verify the no-FDA-submission claim was true at FY23 year-end; Mode B — derive: scan post-10-K 10-Qs (Q1 FY24 filed 2024-02-09 and Q2 FY24 filed 2024-05-09) for any inconsistency or claim evolution",
+      "M_source": "FY23 10-K Item 1 + Q1 FY24 10-Q (accession 0001872789-24-000006) + Q2 FY24 10-Q (accession 0001872789-24-000019)",
+      "M_value": "Q1 FY24 10-Q (filed 2024-02-09) and Q2 FY24 10-Q (filed 2024-05-09) BOTH state: 'In December 2023, we submitted our first 510(k) premarket filing to the U.S. Food and Drug Administration (FDA) for our proprietary disposable insulin delivery system.' Filing-trail confirms management ACTED ON the pipeline claim within ~5 weeks of the 10-K and disclosed it promptly in the next quarterly. Slight terminology drift ('insulin patch pump' in 10-K → 'proprietary disposable insulin delivery system' in 10-Qs) but referring to the same program. Q2 R&D expense also up YoY 'increased spending in the current year periods on our insulin patch pump platform'.",
+      "severity": "PASS",
+      "interpretation": "Strong Mode-B PASS. The pipeline claim was not vaporware — they submitted a 510(k) the next month and disclosed it. Terminology drift is minor and consistent with a product-naming evolution, not concealment. This is a credibility-positive signal."
+    },
+    {
+      "claim_id": "C5",
+      "R": "'During the year ended September 30, 2023, the Company recorded approximately $5.6 million of severance costs related to the optimization of certain business functions. These costs were primarily recorded in the U.S. and severance costs were not material to any comparable prior year periods presented.'",
+      "f": "Mode A — Cost-cut self-disclosure; Mode B — derive: optimization expense is the FIRST severance disclosure post-Separation. Net income collapsed FY22 $223.6M → FY23 $70.4M (-69%). Op cash flow collapsed FY22 $412.2M → FY23 $67.7M (-84%). Did management quantify what 'optimization' returns and when?",
+      "M_source": "10-K Item 7 MD&A + Consolidated Statements of Cash Flows + Note disclosure",
+      "M_value": "Severance $5.6M is small relative to $1.126B revenue (50bp). But cash from operations -84% YoY ($412M → $67.7M) is the bigger Mode-B signal — and it is mostly working-capital-driven (inventory build for ERP go-live and EU MDR compliance, factored receivables from BD reversing) rather than core profitability collapse. 10-K explicitly attributes inventory build to 'ERP system platform go-live dates and process to comply with European Union Regulation MDR.' Management does NOT quantify when working capital normalizes — Mode-B gap.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Disclosures are accurate but underdelivered on quantification: the -84% op-CF figure is benignly attributable to working-capital timing per management, but the 10-K provides no roadmap (target inventory days, ERP go-live date confirmed, MDR compliance milestone schedule). Investors would have to wait for Q1/Q2 prints to see normalization. Not a lie; an information gap."
+    },
+    {
+      "claim_id": "C6",
+      "R": "'Embecta and BD and their respective affiliates provide each other, on an interim, transitional basis, various services ... Such services provided pursuant to the TSA were to terminate no later than April 1, 2024, 24 months following the Separation, and such services provided pursuant to the LSA were to terminate no later than January 1, 2024.' + monthly admin fee '1.0% of net revenue (which will increase to 1.25% of net revenue after January 1, 2024).'",
+      "f": "Mode A — Verify the TSA/LSA termination dates; Mode B — derive: did EMBC actually exit TSA/LSA by the stated dates, or did they need extensions? Check 8-K Item 1.01 filings between Nov 2023 and May 2024.",
+      "M_source": "edgar.list_filings 8-K Item 1.01 between 2023-11-29 and 2024-05-15 + 8-K accession 0001872789-24-000010 (2024-03-28)",
+      "M_value": "8-K filed 2024-03-28 (accession 0001872789-24-000010) discloses 'second amendment (the TSA Amendment) to the Transition Services Agreements' and 'second amendment (the LSA Amendment) to the Logistics Services Agreement, dated January 1, 2022 and previously amended as of November 20, 2023.' This means: (1) LSA already amended once before this (Nov 2023, beyond the original Jan 1, 2024 termination) — admitting they could NOT stand up logistics independently by the original deadline; (2) TSA amended again in March 2024 — three days before the Apr 1, 2024 original termination, again admitting incomplete standup. Q2 FY24 10-Q corroborates: 'support the Interim Business Continuity Processes' continue. Admin fee escalates to 1.25% of net revenue post-Jan 1, 2024.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Strongest Mode-B finding for EMBC. The 10-K presented the TSA/LSA exits as on schedule by Apr 1, 2024 / Jan 1, 2024 with a fee step-up as the stick. Reality (verified in March 2024 8-K and May 2024 10-Q): both contracts had to be amended a second time. EMBC could not complete its own ERP/logistics standup on the timeline disclosed in the 10-K. This is a real underdelivery on a verifiable operational claim — though disclosed via 8-K/10-Q within months, so it is INVESTIGATABLE rather than HIDDEN. Severity moderate, not severe, because they did file the amendment 8-K within four business days as required."
+    },
+    {
+      "claim_id": "C7",
+      "R": "Implicit: 'no going-concern doubt; covenants intact; ICFR effective.' (combined posture across Items 8, 9A and Note 12)",
+      "f": "Mode A — Run going_concern_local.going_concern_from_text on the cleaned 10-K body to verify the absence of substantial-doubt language",
+      "M_source": "going_concern_local.going_concern_from_text",
+      "M_value": "Signal: NO_GOING_CONCERN; n_matches=0; n_current_period=0; n_cure=0; n_historical=0. No 'substantial doubt' or 'going concern' qualifier in the 10-K text. Auditor (EY) issued unqualified opinions on both financial statements and ICFR.",
+      "severity": "PASS",
+      "interpretation": "Deterministic verifier confirms the absence of going-concern language. Not lying about distress severity at the corporate-survival level. The 50% drawdown is a multiple-compression story driven by GLP-1 narrative and operating-leverage concerns, not a verifiable solvency issue."
+    },
+    {
+      "claim_id": "C8",
+      "R": "Implicit: 'insider behavior consistent with publicly-disclosed posture' — i.e. no abnormal selling around the FY23 10-K filing or covenant disclosures.",
+      "f": "Mode B — derive: for a name down 50% on multiple-compression, are insiders selling into weakness (a confidence break) or holding/buying (alignment)? Pull all Form 4 filings 2023-01-01 → 2024-05-14.",
+      "M_source": "edgar.list_filings (form='4') + edgar.fetch_form4_xml parsed for transactionCode='S'",
+      "M_value": "36 Form 4 filings filed 2023-01 → 2024-05-14. Manual scan for transactionCode='S' (open-market sales): ZERO. All non-derivative transactions are code 'A' (grants/awards) at $0 — RSU and PSU grants vested for directors and officers. No Rule 10b5-1 plan sales executed in the period. Insiders include CEO Devdatt Kurdikar (multiple 'A' acquisitions Feb 2024 and Apr 2024) and CFO Jacob Elguicze (the 2024-05-14 grant on the eve of cutoff).",
+      "severity": "PASS",
+      "interpretation": "Strong Mode-B PASS. With the stock down 50% and the GLP-1 narrative live, insiders are NOT selling. This is the single most credibility-positive data point for an honesty-alpha screen: management is holding alongside shareholders, including the CFO accepting a grant 24 hours before the cutoff date. Removes the 'insiders knew worse and dumped' hypothesis."
+    }
+  ],
+  "supplemental_signals": {
+    "drawdown_pct_at_cutoff": -50.7,
+    "drawdown_drivers_inferred_from_filings": [
+      "GLP-1 demand-erosion narrative on pen-needle franchise (81% of revenue) — disclosed but not quantified",
+      "FY23 op-CF -84% YoY (working-capital build for ERP go-live + EU MDR + BD-factored-receivable reversal) — disclosed with cause, but no normalization timeline",
+      "Standalone-operating-leverage / dis-synergy cost overruns post-Separation — disclosed as ongoing risk",
+      "Float overhang and post-spin technical pressure (no buybacks; ongoing $34M/year dividend)"
+    ],
+    "deterministic_verifiers_run": {
+      "going_concern_local.going_concern_from_text": "NO_GOING_CONCERN",
+      "going_concern_local.auditor_change_from_text": "CLEAN_BIG4_TENURE (Ernst & Young)",
+      "form4_open_market_sales_2023_to_cutoff": 0
+    },
+    "pre_cutoff_8K_inventory": {
+      "2024-02-09": "Q1 FY24 earnings",
+      "2024-03-28": "TSA/LSA second amendments with BD (Item 1.01) — operational underdelivery confirmed",
+      "2024-05-09": "Q2 FY24 earnings",
+      "no_4_02_item": "Zero Item 4.02 non-reliance filings",
+      "no_4_01_item": "Zero Item 4.01 auditor changes",
+      "no_credit_amendments": "Zero credit-agreement amendments"
+    },
+    "mode_b_strongest_findings": [
+      "C6 — TSA/LSA second amendments confirm EMBC could not complete its standalone ERP/logistics standup by the 10-K-disclosed deadlines; structurally a real underdelivery though promptly 8-K'd",
+      "C3 — Mode-B intersection of 81% pen-needle product concentration and 40% top-3 distributor concentration is the actual investable risk; GLP-1 elasticity not quantified by management",
+      "C5 — Op-CF -84% is benign-explanation-but-no-quantification gap"
+    ]
+  },
+  "summary": "Embecta is a post-spin medical-device pure-play (April 2022 spin-off from BD) whose 50.7% drawdown into cutoff is GLP-1 demand-erosion narrative + post-spin operating-leverage compression rather than a forensic-disclosure failure. Forensic posture is overwhelmingly CLEAN: NO going-concern, Big-4 (Ernst & Young) auditor with effective ICFR opinion, in compliance with all covenants, zero open-market insider sales by any officer or director in the 16 months before cutoff, and the FY23 10-K pipeline claim (insulin patch pump) was followed by a December 2023 510(k) submission disclosed in the next 10-Q. Only meaningful Mode-B finding is C6 — TSA/LSA second amendments with BD (March 2024) showed EMBC could not stand up logistics/services independently on the deadlines disclosed in the FY23 10-K — but this was promptly 8-K'd within four business days. Verdict: LONG-tier on the honesty-alpha framework — high disclosure quality, no liar signature; whatever happens forward is multiple-compression on a transparently-disclosed business, not deception. Note the 10-K/A filed 2024-04-05 is solely a scrivener's-error fix on certifications, not a restatement.",
+  "composite": 0.875,
+  "verdict": "LONG-tier",
+  "severity_counts": {
+    "PASS": 5,
+    "MODERATE_UNDERDELIVERY": 3,
+    "SEVERE_UNDERDELIVERY": 0,
+    "RED_FLAG_NEGATIVE": 0,
+    "UNVERIFIABLE": 0
+  }
+}

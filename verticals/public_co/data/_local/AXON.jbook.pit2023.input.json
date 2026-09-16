@@ -1,0 +1,140 @@
+{
+  "ticker": "AXON",
+  "cik": "0001069183",
+  "cutoff": "2023-01-15",
+  "filing": "0001558370-22-002006_10-K.txt",
+  "filing_form": "10-K",
+  "filing_filed_date": "2022-02-25",
+  "cohort": "jbook_divergence_pit2023",
+  "extract_notes": "Axon's FY2021 10-K is a state/local law-enforcement + SaaS narrative. NO named Pentagon Program Elements (PE numbers) are disclosed, NO named DoD Programs of Record are cited as revenue drivers, NO customer >10% of net sales, no IDIQ ceilings, no Program-of-Record (POR) deliverables, no specific DoD line items. The strongest DoD-adjacent language is generic: 'U.S. federal civilian and defense agencies' as a customer market, and an aspirational mention of 'U.S. federal government and military' as a market we are investing sales personnel into. This means the J-Book divergence pattern (named PE -> J-Book status) is STRUCTURALLY INAPPLICABLE for AXON: the company makes no specific Pentagon program claims for the framework to verify. The expected score profile is therefore dominated by UNVERIFIABLE (no specific PE/program named) plus PASS on control claims (patents/facilities/counterparty/federal-presence). This is itself a useful negative observation: it confirms the framework correctly identifies that AXON is NOT a J-Book-dependent issuer.",
+  "claims": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Axon sells to 'U.S. federal civilian and defense agencies' as one of its customer markets.",
+      "subject": "Axon Enterprise, Inc.",
+      "predicate": "sells_to_customer_market",
+      "object_value": "U.S. federal civilian and defense agencies",
+      "source_quote": "Who we sell to - State and local law enforcement, U.S. federal civilian and defense agencies, justice and court systems, corrections, fire departments and emergency medical services providers, consumers, and commercial enterprises such as private security firms and transportation providers",
+      "category": "dod_customer_concentration",
+      "materiality": "low_unquantified",
+      "queries": [
+        {"source": "usaspending.query_federal_presence", "args": {"name_variants": ["Axon Enterprise", "TASER International", "Axon Enterprise, Inc."], "start_date": "2018-01-01", "end_date": "2023-01-15"}},
+        {"source": "pentagon_jbook.query_program_funding", "args": {"contractor_name": "Axon Enterprise", "cutoff_date": "2023-01-15"}},
+        {"source": "pentagon_jbook.query_program_funding", "args": {"contractor_name": "TASER International", "cutoff_date": "2023-01-15"}}
+      ]
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Axon is 'investing in sales personnel to capture new markets, including the U.S. federal government and military' as a forward growth vector.",
+      "subject": "Axon Enterprise, Inc.",
+      "predicate": "forward_growth_pipeline",
+      "object_value": "U.S. federal government and military",
+      "source_quote": "In recent years, we have been investing in sales personnel to capture new markets, including the U.S. federal government and military, departments of corrections, the fire and emergency medical services markets, and new geographies outside the U.S.",
+      "category": "jbook_program_pipeline",
+      "materiality": "low_unquantified_forward",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "args": {"contractor_name": "Axon", "cutoff_date": "2023-01-15"}},
+        {"source": "usaspending.query_federal_presence", "args": {"name_variants": ["Axon Enterprise", "Axon"], "start_date": "2018-01-01", "end_date": "2023-01-15"}}
+      ]
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "No customer (including any DoD customer) represented more than 10% of total net sales in 2021, 2020, or 2019.",
+      "subject": "Axon Enterprise, Inc.",
+      "predicate": "customer_concentration_below_threshold",
+      "object_value": "no customer >10% of total net sales",
+      "source_quote": "No customer represented more than 10% of total net sales for the years ended December 31, 2021, 2020 or 2019. Our primary customer market is U.S. law enforcement.",
+      "category": "dod_customer_concentration",
+      "materiality": "negative_control_strong",
+      "queries": [
+        {"source": "usaspending.query_federal_presence", "args": {"name_variants": ["Axon Enterprise", "TASER International"], "start_date": "2018-01-01", "end_date": "2023-01-15"}}
+      ]
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Axon derives a significant portion of revenue from sales of TASER conducted-energy-device (CED) products (TASER 7, X26P, X2, etc.); these are commercial CEDs sold primarily to police, not Pentagon programs of record.",
+      "subject": "Axon Enterprise, Inc.",
+      "predicate": "product_revenue_concentration",
+      "object_value": "TASER CEDs (commercial police product, not a J-Book PE)",
+      "source_quote": "In the years ended December 31, 2021, 2020 and 2019, we derived a significant portion of our revenue from sales of our TASER CEDs ... We substantially depend on sales of our TASER CEDs",
+      "category": "jbook_program_revenue",
+      "materiality": "high_but_not_pentagon",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "args": {"program_name": "TASER", "cutoff_date": "2023-01-15"}},
+        {"source": "pentagon_jbook.query_program_funding", "args": {"program_name": "Conducted Energy Device", "cutoff_date": "2023-01-15"}},
+        {"source": "pentagon_jbook.query_program_funding", "args": {"program_name": "TASER 7", "cutoff_date": "2023-01-15"}}
+      ]
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Axon's Software & Sensors segment depends on Axon Body 3 / Axon Fleet body and in-car cameras plus the Axon Evidence (Evidence.com) cloud SaaS subscription — none of which are tied to a named DoD program of record.",
+      "subject": "Axon Enterprise, Inc.",
+      "predicate": "segment_revenue_driver",
+      "object_value": "Axon Body 3, Axon Fleet, Axon Evidence cloud SaaS",
+      "source_quote": "Software and Sensors segment ... sales of sensors, including on-officer body cameras, Axon Fleet cameras, other hardware sensors, warranties on sensors, and other products ... Axon Cloud revenue",
+      "category": "jbook_program_revenue",
+      "materiality": "high_but_not_pentagon",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "args": {"program_name": "Axon Body", "cutoff_date": "2023-01-15"}},
+        {"source": "pentagon_jbook.query_program_funding", "args": {"program_name": "Body Worn Camera", "cutoff_date": "2023-01-15"}},
+        {"source": "pentagon_jbook.query_program_funding", "args": {"program_name": "Evidence.com", "cutoff_date": "2023-01-15"}}
+      ]
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Axon names NO specific Pentagon Program Element (PE) number, Program of Record, or named DoD line item (e.g., Skyborg, CCA, SDA Tracking Layer, Project Maven, Short Range Reconnaissance, etc.) anywhere in its FY2021 10-K as a revenue driver, pipeline item, or backlog component.",
+      "subject": "Axon Enterprise, Inc.",
+      "predicate": "absence_of_pe_disclosure",
+      "object_value": "no named PE / POR in 10-K narrative",
+      "source_quote": "[absence-of-evidence — verified by exhaustive grep of the 120K-char slice for PE numbers (pattern \\d{7}[A-Z]), program names (Skyborg, CCA, Maven, SDA, Valkyrie, BQM-167, Quantum Networking, etc.), and program-of-record language]",
+      "category": "jbook_program_pipeline",
+      "materiality": "structural_absence",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "args": {"contractor_name": "Axon Enterprise", "cutoff_date": "2023-01-15"}},
+        {"source": "pentagon_jbook.query_program_funding", "args": {"contractor_name": "Axon", "cutoff_date": "2023-01-15"}},
+        {"source": "pentagon_jbook.query_program_funding", "args": {"contractor_name": "TASER", "cutoff_date": "2023-01-15"}}
+      ]
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Axon holds patent protection in 'certain key areas' of its CED, Axon device, and SaaS technology.",
+      "subject": "Axon Enterprise, Inc.",
+      "predicate": "owns_patents",
+      "object_value": "patent estate in CED / device / SaaS technology",
+      "source_quote": "While we have some patent protection in certain key areas of our CED, Axon device and SaaS technology, new technology may result in competing products that operate outside our patents",
+      "category": "patent",
+      "materiality": "control_low",
+      "queries": [
+        {"source": "uspto_odp.query_assignee", "args": {"assignee_name": "Axon Enterprise", "cutoff_date": "2023-01-15"}},
+        {"source": "uspto_odp.query_assignee", "args": {"assignee_name": "TASER International", "cutoff_date": "2023-01-15"}}
+      ]
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Axon's corporate headquarters and manufacturing facilities are in an approximately 100,000-square-foot facility in Scottsdale, Arizona that the company owns.",
+      "subject": "Axon Enterprise, Inc.",
+      "predicate": "operates_manufacturing_facility",
+      "object_value": "100,000 sq ft owned facility in Scottsdale, AZ",
+      "source_quote": "Our corporate headquarters and manufacturing facilities are based in an approximately 100,000 square foot facility in Scottsdale, Arizona, which we own.",
+      "category": "facility",
+      "materiality": "control_low",
+      "queries": [
+        {"source": "epa_frs.query_facilities", "args": {"facility_name": "Axon", "state_abbr": "AZ", "city_filter": "Scottsdale"}},
+        {"source": "epa_frs.query_facilities", "args": {"facility_name": "TASER", "state_abbr": "AZ", "city_filter": "Scottsdale"}}
+      ]
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "2021 net sales were $863.4 million, up $182.4 million / 26.8% YoY; U.S. revenue was 80% of the total ($686.9M); revenue from federal civilian/defense customers is not separately disclosed and is implicitly included within the U.S. 80% — implying federal/DoD is a sub-component of an already-non-disclosed customer mix, not material enough to break out.",
+      "subject": "Axon Enterprise, Inc.",
+      "predicate": "revenue_composition",
+      "object_value": "$863.4M FY2021 net sales, 80% US, no federal/DoD revenue breakout",
+      "source_quote": "Total revenues for the year ended December 31, 2021 were $863.4 million, an increase of $182.4 million, or 26.8 ... United States $ 686,914 80 % $ 535,079 79 % Other Countries 176,467 20 145,924 21 Total $ 863,381 100 % $ 681,003 100 %",
+      "category": "dod_customer_concentration",
+      "materiality": "control_negative",
+      "queries": [
+        {"source": "usaspending.query_federal_presence", "args": {"name_variants": ["Axon Enterprise", "TASER International", "Axon"], "start_date": "2018-01-01", "end_date": "2023-01-15"}}
+      ]
+    }
+  ]
+}

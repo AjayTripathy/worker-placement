@@ -1,0 +1,90 @@
+{
+  "ticker": "QBTS",
+  "cutoff": "2023-01-15",
+  "filing": "0001907982-22-000014_10-Q.txt",
+  "filing_form": "10-Q",
+  "filing_date": "2022-11-10",
+  "framework_note": "J-BOOK cohort applied to QBTS. The 10-Q itself contains zero specific Pentagon-program disclosure, so we cannot fire pentagon_jbook on any named-program claim — there are no named programs to test. Instead the J-Book divergence catch here is structural: the cohort metadata asserts 'Government revenue via D-Wave Government Inc.', and the framework's verifiers show that subsidiary has ZERO contract and ZERO grant obligations as of 2023-01-15 (usaspending INFLATION_SUSPECT) and ZERO DoD-program-of-record presence (pentagon_jbook NOT_FOUND across all D-Wave name variants). Quantum programs in the J-Book corpus at this cutoff are all IONQ / IONQ-subcontractor, not D-Wave. So D-Wave's 'government revenue' narrative, to the extent it exists, is Canadian (SIF) — not the J-Book exposure the cohort is built to catch. This is the orthogonal finding: framework correctly identifies QBTS as having NO J-Book exposure to lose.",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "D-Wave Quantum derives the majority of its revenue from the United States; for nine months ended Sept 30 2022 US revenue was $2.461M of $4.778M total (51.5%).",
+      "severity": "PASS",
+      "supports": ["usaspending.query_federal_presence"],
+      "M_check": "usaspending.query_federal_presence resolved D-Wave Government Inc. UEI PATGKJM747F7 but found 0 contracts and 0 grants as of 2023-01-15; signal INFLATION_SUSPECT for federal-presence — but the claim itself was 'US revenue', which is a true geographic-revenue assertion (commercial US customers, not federal). The 10-Q does NOT claim federal-DoD revenue, so this passes as a geographic statement.",
+      "M_value": {"n_ueis": 1, "n_contracts": 0, "n_grants": 0, "signal": "INFLATION_SUSPECT_for_federal_only"},
+      "interpretation": "US is the largest geography by revenue, but it is commercial US revenue (universities, enterprise pilots) — not DoD. No J-Book divergence on the actual claim made."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Three significant customers accounted for 15%/11%/10% of three-month-ended Sept 30 2022 revenue (anonymized as Customer A/B/C). Top customer ~$254K Q3 2022.",
+      "severity": "PASS",
+      "supports": ["pentagon_jbook.query_program_funding"],
+      "M_check": "pentagon_jbook contractor_name lookups across 'D-Wave', 'D-Wave Quantum', 'D-Wave Government' all returned NOT_FOUND (corpus has 0 D-Wave programs). Per J-Book Heuristic 7: NOT_FOUND ≠ red flag — corpus may not cover this PE. But the magnitude ($254K) is too small to plausibly be a tracked Pentagon PE anyway; the absence of any program-of-record disclosure is consistent with absence in the J-Book corpus.",
+      "M_value": {"jbook_signal": "NOT_FOUND", "top_customer_q3_2022_usd": 254000},
+      "interpretation": "Customers are likely commercial / academic, not Pentagon Programs of Record. PASS — no claim to verify."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "D-Wave's only disclosed material government funding is the Canadian Strategic Innovation Fund (SIF) — a C$40M repayable contribution from the CANADIAN (not US) government.",
+      "severity": "PASS",
+      "supports": ["usaspending.query_dod_contracts", "usaspending.query_recipient_contracts"],
+      "M_check": "usaspending.query_dod_contracts(recipient_name='D-Wave') → 0 awards. usaspending.query_recipient_contracts(recipient_name='D-Wave Government') → 0 awards. The disclosed government source (Canadian SIF) is not a USAspending-visible US federal contract — consistent with the filing. There is no contradiction between the 10-Q disclosure and the public federal record.",
+      "M_value": {"dod_awards_n": 0, "dod_amount_usd": 0, "dwave_government_awards_n": 0},
+      "interpretation": "The disclosure is honest about funding source: it's Canadian government (SIF), not US DoD. Framework correctly finds nothing to dispute."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "D-Wave names QCaaS (Quantum Computing as a Service) and professional services as its principal revenue streams; no DoD program-of-record is named as a revenue contributor or pipeline.",
+      "severity": "PASS",
+      "supports": ["pentagon_jbook.query_program_funding"],
+      "M_check": "pentagon_jbook(program_name='quantum') returned 3 matches — all IONQ-related (AFRL Quantum Networking, AFRL Qubitekk, UMD Quantum/IONQ). D-Wave appears as primary contractor on ZERO of them. pentagon_jbook(program_name='AFRL Quantum Networking') returned IONQ as the sole contractor. So at cutoff D-Wave has no presence in the J-Book quantum corpus — consistent with the 10-Q claiming only commercial QCaaS revenue.",
+      "M_value": {"n_quantum_jbook_programs": 3, "dwave_appearances": 0, "ionq_appearances": 3},
+      "interpretation": "QBTS is honest about not being a J-Book Programs-of-Record contractor. PASS. (Asymmetric tell: the J-Book quantum line items are all IONQ-coded — D-Wave is not in the Pentagon's forward funding plan for quantum.)"
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "D-Wave Quantum has substantial doubt about its ability to continue as a going concern; trust-account redemptions reduced SPAC cash to ~$9M of ~$300M.",
+      "severity": "PASS",
+      "supports": ["ucc_proxy.query_ucc_exposure"],
+      "M_check": "ucc_proxy returned MODERATE_LIEN_EXPOSURE (7 secured-debt term hits across 8-K/10-K/10-Q in window, but 0 Item 2.03 events and 0 distress terms). Consistent with the disclosed Venture Loan (repaid at close) and SIF security agreements — no incremental lien activity beyond what's in the 10-Q. Going-concern language is explicitly disclosed by management; framework cannot dispute it.",
+      "M_value": {"ucc_signal": "MODERATE_LIEN_EXPOSURE", "n_item_2_03": 0, "distress_term_hits": 0},
+      "interpretation": "Going-concern is openly disclosed. Lien proxy doesn't escalate it. PASS. (Note: this is the macro risk that backs the negative thesis — financing risk, not J-Book risk.)"
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "D-Wave's quantum computing technology is protected by patents; the company has invested heavily in R&D (control claim).",
+      "severity": "PASS",
+      "supports": ["uspto_odp.query_assignee"],
+      "M_check": "USPTO ODP: D-Wave Systems Inc. has 451 total applications and 183 granted patents as of 2023-01-15, spanning quantum annealing, qubit architecture, DAC compensation, scalable quantum computing. Strong IP corroboration.",
+      "M_value": {"n_total_applications": 451, "n_granted": 183},
+      "interpretation": "Patent portfolio is real and substantial. Strong PASS on control claim — the underlying technology claim is not inflated."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Long-lived assets are substantially located in Canada (~95% of $10.6M) and the United States. Principal operating facility is in Canada — D-Wave is NOT a US defense-industrial-base contractor.",
+      "severity": "PASS",
+      "supports": ["epa_frs.query_facilities"],
+      "M_check": "epa_frs.query_facilities(facility_name='D-Wave', state_abbr='CA') returned 31 fuzzy matches (Verizon Quartzite Microwave, White Wave Foods, etc.) — ZERO actual D-Wave Systems facilities in California. Consistent with the disclosed Canadian-HQ posture; EPA FRS does not register Canadian facilities, so absence is expected.",
+      "M_value": {"n_facilities_substring": 31, "n_dwave_systems_facilities_found": 0},
+      "interpretation": "Facility geography matches disclosure (Canada). D-Wave is structurally not embedded in the US defense industrial base — supports the broader finding that there is no J-Book exposure to test."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "D-Wave has no significant counterparty disclosure naming federal customers; customers are anonymized A/B/C. Control test: does any DoD prime mention 'D-Wave'?",
+      "severity": "PASS",
+      "supports": ["edgar_fts.query_fulltext"],
+      "M_check": "edgar_fts(search_term='D-Wave', cik=Lockheed 0000936468) → 0 hits in Lockheed's own SEC filings through cutoff. edgar_fts(search_term='D-Wave', all filers, through cutoff) → 116 total hits, but visible top-filings are D-Wave Quantum Inc.'s own filings and DPCM Capital (its SPAC). No DoD prime corroborates a D-Wave commercial relationship at the cutoff — consistent with the 10-Q (which does NOT claim a prime-contractor partnership).",
+      "M_value": {"lockheed_hits": 0, "all_filers_hits": 116, "all_filers_unique_companies_observed_in_top10": ["D-Wave Quantum Inc.", "DPCM Capital, Inc."]},
+      "interpretation": "Asymmetric finding: no Tier-1 DoD prime mentions D-Wave in pre-2023-01-15 filings — but the 10-Q never claims a prime relationship, so there's no contradiction. PASS on the (modest) claim made. The takeaway is that QBTS at cutoff has neither claimed nor possessed Pentagon J-Book exposure."
+    }
+  ],
+  "summary": {
+    "n_claims": 8,
+    "n_queries_fired": 14,
+    "severity_counts": {"PASS": 8, "MODERATE_UNDERDELIVERY": 0, "SEVERE_UNDERDELIVERY": 0, "RED_FLAG_NEGATIVE": 0, "UNVERIFIABLE": 0},
+    "jbook_grounded_claims": 4,
+    "pentagon_jbook_fires": 4,
+    "headline_finding": "QBTS has NO disclosed Pentagon J-Book exposure to lose. D-Wave Government Inc. UEI exists but has $0 federal awards as of 2023-01-15 (INFLATION_SUSPECT); D-Wave is absent from the J-Book quantum corpus (all 3 quantum line items are IONQ-coded). The QBTS short thesis is therefore NOT a J-Book divergence pattern — it is a going-concern / dilution / sub-scale-revenue thesis. The J-Book framework correctly returns 'no J-Book mismatch to flag here'."
+  }
+}

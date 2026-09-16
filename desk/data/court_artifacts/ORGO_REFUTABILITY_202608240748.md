@@ -1,0 +1,30 @@
+## Context
+
+The pack's framing is wrong in a way that matters: ORGO's drawdown is not a Health Care beta event. It is a single, dated, regulatory repricing — CMS's CY2026 Physician Fee Schedule reclassified skin substitutes from ASP-based biologic-like products to **incident-to supplies at a flat ~$127.28/cm²**, effective 1/1/2026, cutting the reimbursement pool ~90%. ORGO derived ~84% of revenue from Advanced Wound Care. The pack's XBRL series ends 2025-06-30 and therefore contains **none** of the 2026 collapse (see integrity flag below).
+
+| ticker | class | refuting metric | current value/trend (cited) | next print date | note |
+|---|---|---|---|---|---|
+| ORGO | **STRUCTURAL** | Advanced Wound Care net revenue, YoY and sequential vs. the guide's implied H2 path (≥~$50M total Q3 rev) | AWC Q2'26 **$36.1M, −61% YoY**; total **$42.8M, −58%** (vs $100.8M Q2'25); FY26 guide cut to **$179–215M (−62%/−68%)** from −45%/−52%; adj. EBITDA **−$34.4M**; cash **$46.8M** (−$47.5M in H1); revolver **expired 8/6/26**; $75M ATM opened same day ([8-K 0001193125-26-338022](https://www.sec.gov/Archives/edgar/data/1661181/000119312526338022/), [ATM 8-K Item 1.01 — pack excerpt](https://www.sec.gov/Archives/edgar/data/1661181/000119312526338321/), [CMS CY2026 PFS final rule CMS-1832-F](https://www.cms.gov/newsroom/fact-sheets/calendar-year-cy-2026-medicare-physician-fee-schedule-final-rule-cms-1832-f), [company release 8/6/26](https://www.globenewswire.com/news-release/2026/08/06/3340718/0/en/Organogenesis-Holdings-Inc-Reports-Second-Quarter-2026-Financial-Results.html)) | 2026-11-05 (yfinance-derived, **UNCONFIRMED**) | Narrative is true of the business model. The metric that could have proven damage-absent — AWC revenue — is the one that confirmed it, twice. |
+
+**PRINT PROXIMITY: 2026-11-05 — UNCONFIRMED (yfinance-derived; no company PR names it). ~50 trading days out, NOT within 5. We are 12 trading days POST-print (8/6/26 10-Q + guide cut + ATM), fully digested; no pre-print reconstruction owed.**
+
+## COURT-WORTHY (damage-absent, ranked):
+
+**NONE.** No member qualifies. The one genuine dispersion argument available — that ORGO's PMA/510(k) legacy products (PuraPly, Apligraf, Dermagraft) are not the 361 HCT/P amniotic products that drove Part B spend from $252M (2019) to >$10B (2024), and could therefore *gain* relative price under a volume-weighted flat rate — was directly tested by the Q2 print and refuted: AWC fell 61%. The flat rate cuts the *procedure economics* for the applying clinician, so utilization collapsed regardless of which product sits on the shelf.
+
+## Why a court would not change the sizing decision
+
+- **Damage is arrived and quantified**, not unresolved. Two consecutive guide cuts narrowed the band to −62%/−68% FY; the residual uncertainty is trough depth, not whether the model is impaired.
+- **The dilution is mechanical and adverse.** $75M ATM ≈ 30% of a $251M market cap, opened at ~$1.80 the same day the revolver expired, against $46.8M cash and −$34.4M/qtr adj. EBITDA (~1.4 quarters of runway unfunded). Per the value-ladder flow gate: an active ATM makes the issuer a standing seller into every rally — you would be bidding directly into predicted supply. This also *inverts* the usual forced-seller read; the equity is on the wrong side of the forced seller here.
+- **The reversal path is provider-side, not issuer-side.** A 3/4/26 class action against HHS/CMS and the 12/24/25 LCD withdrawal are real, but they target clawbacks and coverage confusion — neither restores ASP-based pricing, which is what the revenue base needs. That is a legislative fix at best, undated.
+
+**COURT-WORTHINESS ORGO: 2/10 — the discount is mechanically correct and an open ATM at ~30% of market cap makes any long entry a bid into the issuer's own supply.**
+
+---
+
+**Two flags worth routing back:**
+
+1. **Evidence-pack staleness (material).** The XBRL block ends 2025-06-30. Read alone, it shows ~$101M quarterly revenue against a $251M market cap — ~0.6x sales, a screaming value screen. The true run-rate is $42.8M/qtr and falling. Any downstream consumer sizing off pack XBRL for a `dd52 < -0.70` name will be systematically inverted. This is a recall-floor bug in the pack builder, not an ORGO fact.
+2. **Live tape unavailable.** The IBKR `get_price_snapshot` call was denied (permission not granted), so the $1.80 figure is the pack's yahoo tape, not a live quote — flagged per the live-price rail rather than silently reused.
+
+Sources: [CMS CY2026 PFS Final Rule (CMS-1832-F)](https://www.cms.gov/newsroom/fact-sheets/calendar-year-cy-2026-medicare-physician-fee-schedule-final-rule-cms-1832-f) · [Federal Register CY2026 PFS](https://www.federalregister.gov/documents/2025/11/28/2025-21458/medicare-and-medicaid-programs-cy-2026-payment-policies-under-the-physician-fee-schedule-and-other) · [ORGO Q2 2026 release](https://www.globenewswire.com/news-release/2026/08/06/3340718/0/en/Organogenesis-Holdings-Inc-Reports-Second-Quarter-2026-Financial-Results.html) · [ORGO Q2 2026 10-Q summary](https://www.stocktitan.net/sec-filings/ORGO/10-q-organogenesis-holdings-inc-quarterly-earnings-report-a627ccef6e75.html) · [Q2 2026 call transcript](https://www.fool.com/earnings/call-transcripts/2026/08/13/organogenesis-orgo-q2-2026-earnings-call-transcript/) · [Frier Levitt — 2026 skin substitute litigation landscape](https://www.frierlevitt.com/articles/skin-substitutes-2026-cms-reimbursement-cuts-audits-adrs-litigation-risks/) · [MASS Coalition — provider class action](https://saveourwoundcare.org/media/mass-coalition-applauds-medical-providers-class-action-lawsuit-challenging-new-cms-policy-to-claw-back-payments-for-covered-skin-substitutes/) · [Reed Smith — reclassification analysis](https://www.reedsmith.com/our-insights/blogs/health-industry-washington-watch/102lvjz/cms-reclassifies-certain-skin-substitutes-and-dramatically-cuts-payment-under-med/)

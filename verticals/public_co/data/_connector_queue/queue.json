@@ -1,0 +1,290 @@
+[
+  {
+    "name": "finra_brokercheck.query_firm",
+    "description": "FINRA BrokerCheck firm registration lookup",
+    "endpoint": "https://api.brokercheck.finra.org/search/firm",
+    "access_pattern": "api",
+    "auth_required": false,
+    "sample_invocation": "GET https://api.brokercheck.finra.org/search/firm?query=Capital%20One%20Securities&hl=true&nrows=12&start=0&r=25&sort=score+desc",
+    "estimated_cost": "free",
+    "completeness": "all FINRA-member broker-dealers",
+    "referent_type": "entity",
+    "attribute": "registration_status",
+    "rationales": [
+      {
+        "ticker": "COF",
+        "claim_id": "COF-4",
+        "category": "regulatory_milestone",
+        "rationale": "FINRA BrokerCheck is the authoritative, free, public registry of all U.S.-registered broker-dealers. Three named subsidiaries should each return a CRD record with status 'Approved' and SEC# present."
+      }
+    ],
+    "tickers": [
+      "COF"
+    ],
+    "claim_count": 1
+  },
+  {
+    "name": "fdic_bankfind.query_institution",
+    "description": "FDIC BankFind Suite institution registry; resolves an institution name/cert/RSSDID and returns charter class, primary regulator, status, and headquarters.",
+    "endpoint": "https://banks.data.fdic.gov/api/institutions",
+    "access_pattern": "api",
+    "auth_required": false,
+    "sample_invocation": "GET https://banks.data.fdic.gov/api/institutions?filters=NAME:%22SoFi%20Bank%22&fields=NAME,CERT,FED_RSSD,CHRTAGNT,REGAGNT,ACTIVE,STALP,CITY",
+    "estimated_cost": "free",
+    "completeness": "All FDIC-insured US depository institutions",
+    "referent_type": "entity",
+    "attribute": "charter_class",
+    "rationales": [
+      {
+        "ticker": "SOFI",
+        "claim_id": "SOFI-1",
+        "category": "regulatory_milestone",
+        "rationale": "OCC national-bank charter status, primary federal regulator, and FDIC insurance status are authoritative registry attributes that the FDIC BankFind Suite resolves directly by institution name."
+      }
+    ],
+    "tickers": [
+      "SOFI"
+    ],
+    "claim_count": 1
+  },
+  {
+    "name": "sec_abs15g.query_securitizer_filings",
+    "description": "SEC EDGAR ABS-15G / ABS-EE filings registry. Returns asset-backed securitizer disclosures (repurchase activity, pool composition) per CIK with filing date and document URLs.",
+    "endpoint": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&type=ABS-15G&dateb=&owner=include&count=40",
+    "access_pattern": "api",
+    "auth_required": false,
+    "sample_invocation": "GET https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001818874&type=ABS-15G&dateb=20260516&owner=include&count=40",
+    "estimated_cost": "free",
+    "completeness": "All SEC-registered ABS securitizers (federally registered offerings only; 144A private deals partially covered via Form D)",
+    "referent_type": "loan_portfolio",
+    "attribute": "pool_balance",
+    "rationales": [
+      {
+        "ticker": "SOFI",
+        "claim_id": "SOFI-3",
+        "category": "production_volume",
+        "rationale": "Loan-platform third-party origination volume should flow through whole-loan-sale or ABS issuance channels; ABS-15G filings disclose securitizer repurchase activity and pool composition at the asset-pool level, providing a registry analog for claimed origination/transfer volume that catalog's edgar_fts.query_fulltext can only count, not parse."
+      }
+    ],
+    "tickers": [
+      "SOFI"
+    ],
+    "claim_count": 1
+  },
+  {
+    "name": "fhfa_fhlb.query_member_advances",
+    "description": "FHFA Federal Home Loan Bank member-advance disclosures and call-report-derived advance balances per member institution.",
+    "endpoint": "https://www.fhfa.gov/data/dashboard/fhlb-member-data",
+    "access_pattern": "csv_download",
+    "auth_required": false,
+    "sample_invocation": "GET https://www.fhfa.gov/sites/default/files/data-files/fhlb-members.csv  (filter on member_name=='SoFi Bank, National Association')",
+    "estimated_cost": "free",
+    "completeness": "All FHLB member banks (FDIC-insured depository institutions and certain insurance companies)",
+    "referent_type": "loan_portfolio",
+    "attribute": "advance_balance",
+    "rationales": [
+      {
+        "ticker": "SOFI",
+        "claim_id": "SOFI-8",
+        "category": "vendor_relationship",
+        "rationale": "FHLB membership and advance balances are reported by FHFA at the member-institution level; this is the authoritative registry for the FHLB-borrowing-capacity claim that the catalog's fdic_call_reports can only proxy via balance-sheet 'other borrowings'."
+      }
+    ],
+    "tickers": [
+      "SOFI"
+    ],
+    "claim_count": 1
+  },
+  {
+    "name": "fdic_call_reports.consumer_loan_originations",
+    "description": "FDIC Call Report consumer-loan origination volume per institution (RSSDID-keyed quarterly schedules RC-C / RI). Lets analysts see whether named UPST partner banks (Cross River Bank, FinWise Bank, Customers Bank, etc.) show unsecured personal-loan portfolio levels consistent with UPST's reported 83% origination concentration.",
+    "endpoint": "https://banks.data.fdic.gov/api/financials",
+    "access_pattern": "api",
+    "auth_required": false,
+    "sample_invocation": "GET https://banks.data.fdic.gov/api/financials?filters=RSSDID:58978%20AND%20REPDTE:20251231&fields=NAMEFULL,LNCONOTH,LNCON,LNATRESR&sort_by=REPDTE&limit=4",
+    "estimated_cost": "free",
+    "completeness": "FDIC-chartered banks only (Cross River, FinWise, Customers, etc. are covered; non-bank purchasers are not)",
+    "referent_type": "loan_portfolio",
+    "attribute": "consumer_loan_origination_volume",
+    "rationales": [
+      {
+        "ticker": "UPST",
+        "claim_id": "UPST-1",
+        "category": "customer_pipeline",
+        "rationale": "UPST does not name its top lending partners in the 10-K, but bank-partner Call Reports are the registry analog: if UPST's claimed 83% origination concentration is accurate, the partner banks' consumer-loan portfolios should reflect material UPST volume. This is the closest authoritative federal registry to consumer-credit origination concentration."
+      }
+    ],
+    "tickers": [
+      "UPST"
+    ],
+    "claim_count": 1
+  },
+  {
+    "name": "sec_edgar.absee_loan_disclosures",
+    "description": "SEC EDGAR Asset-Backed Securities issuer reports (ABS-EE / 10-D / 424B) including loan-tape XML/XBRL exhibits. UPST is a sponsor of multiple securitization shelves; pool-level outstanding-balance data is filed periodically.",
+    "endpoint": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001647639&type=ABS-EE&dateb=&owner=include&count=40",
+    "access_pattern": "api",
+    "auth_required": false,
+    "sample_invocation": "GET https://data.sec.gov/submissions/CIK0001647639.json then filter forms ABS-EE/10-D/424B5; sum pool_principal_balance across active trusts.",
+    "estimated_cost": "free",
+    "completeness": "SEC-registered ABS only; private-pool sales and whole-loan sales to lending partners are not covered",
+    "referent_type": "loan_portfolio",
+    "attribute": "outstanding_principal_balance",
+    "rationales": [
+      {
+        "ticker": "UPST",
+        "claim_id": "UPST-2",
+        "category": "production_volume",
+        "rationale": "UPST-serviced loans flowing through securitizations are visible in ABS-EE filings (per Regulation AB) \u2014 total outstanding balance across all UPST-sponsored trusts is the registry analog for the serviced-portfolio claim. Applies Calibration Heuristic 3: 'serviced' vs 'originated' vs 'balance-sheet' must not be confused."
+      }
+    ],
+    "tickers": [
+      "UPST"
+    ],
+    "claim_count": 1
+  },
+  {
+    "name": "nv_sos.query_entity",
+    "description": "Nevada Secretary of State business entity search (SilverFlume) \u2014 returns entity status, formation date, entity type, and registered agent for a corporate name.",
+    "endpoint": "https://www.nvsilverflume.gov/businessSearch",
+    "access_pattern": "scrape",
+    "auth_required": false,
+    "sample_invocation": "POST businessSearch with {entityName: 'Affirm Holdings, Inc.'} ; parse status, NV file number, formation/conversion date.",
+    "estimated_cost": "free",
+    "completeness": "All Nevada-domiciled entities",
+    "referent_type": "entity",
+    "attribute": "incorporation_status",
+    "rationales": [
+      {
+        "ticker": "AFRM",
+        "claim_id": "AFRM-5",
+        "category": "regulatory_milestone",
+        "rationale": "Reincorporation is a state-registry event; the only authoritative adjudicator is the destination state's Secretary-of-State business registry. EDGAR shows the filing but not the actual state record that the conversion took legal effect."
+      }
+    ],
+    "tickers": [
+      "AFRM"
+    ],
+    "claim_count": 1
+  },
+  {
+    "name": "nfa_basic.query_swap_dealer_registration",
+    "description": "NFA BASIC registry: provisional and full CFTC swap-dealer registration lookup by firm name or NFA ID",
+    "endpoint": "https://www.nfa.futures.org/basicnet/basic-profile.aspx",
+    "access_pattern": "scrape",
+    "auth_required": false,
+    "sample_invocation": "GET https://www.nfa.futures.org/basicnet/basic-profile.aspx?nfaid=<NFAID>; parse 'Swap Dealer' registration block",
+    "estimated_cost": "free",
+    "completeness": "all CFTC-registered swap dealers and major swap participants",
+    "referent_type": "entity",
+    "attribute": "registration_status",
+    "rationales": [
+      {
+        "ticker": "COF",
+        "claim_id": "COF-3",
+        "category": "regulatory_milestone",
+        "rationale": "CFTC swap-dealer registration is an authoritative, publicly searchable registry maintained by the National Futures Association under CFTC delegation. Claim is binary (registered/not) and registry-adjudicable."
+      }
+    ],
+    "tickers": [
+      "COF"
+    ],
+    "claim_count": 1
+  },
+  {
+    "name": "nmls.query_consumer_access",
+    "description": "NMLS Consumer Access \u2014 Nationwide Multistate Licensing System public registry for state-licensed mortgage companies and individual MLOs.",
+    "endpoint": "https://www.nmlsconsumeraccess.org/EntityDetails.aspx and https://www.nmlsconsumeraccess.org/Home.aspx/CompanySearch",
+    "access_pattern": "scrape",
+    "auth_required": false,
+    "sample_invocation": "GET https://www.nmlsconsumeraccess.org/Home.aspx/CompanySearch with name='Opendoor' -> parse company-detail page for state licenses and license-status fields",
+    "estimated_cost": "free",
+    "completeness": "All state-licensed non-bank mortgage companies and individual MLOs (NMLS-participating states, which is all 50)",
+    "referent_type": "entity",
+    "attribute": "license_status_by_state",
+    "rationales": [
+      {
+        "ticker": "OPEN",
+        "claim_id": "OPEN-6",
+        "category": "regulatory_milestone",
+        "rationale": "State mortgage-origination licensing has no SEC analog; NMLS is the authoritative public registry for non-bank mortgage lender licensing status across all 50 states."
+      }
+    ],
+    "tickers": [
+      "OPEN"
+    ],
+    "claim_count": 1
+  },
+  {
+    "name": "argentina_compras.query_public_tenders",
+    "description": "Argentine federal procurement portal COMPR.AR / Contrataciones del Estado tender registry. Returns public-sector tenders awarded by Banco de la Naci\u00f3n Argentina (a state-owned bank), including vendor name and contract value.",
+    "endpoint": "https://comprar.gob.ar/PublicacionOC.aspx",
+    "access_pattern": "scrape",
+    "auth_required": false,
+    "sample_invocation": "GET https://comprar.gob.ar/PublicacionOC.aspx?qs=BUSCAR&entidad=Banco%20Naci%C3%B3n&proveedor=Technisys&desde=2024-01-01&hasta=2026-05-16",
+    "estimated_cost": "free",
+    "completeness": "Argentine federal public-sector procurement only; provincial coverage incomplete",
+    "referent_type": "entity",
+    "attribute": "vendor_award_status",
+    "rationales": [
+      {
+        "ticker": "SOFI",
+        "claim_id": "SOFI-5",
+        "category": "customer_pipeline",
+        "rationale": "Banco Naci\u00f3n is a state-owned Argentine bank; vendor selections for core-banking modernization at state banks typically appear in the federal procurement registry. Provides authoritative independent confirmation of the named-partnership claim that the catalog cannot adjudicate."
+      }
+    ],
+    "tickers": [
+      "SOFI"
+    ],
+    "claim_count": 1
+  },
+  {
+    "name": "pacer.federal_court_docket",
+    "description": "PACER federal-court case docket lookup. Returns case caption, filing date, current status, certifying orders for a specific federal civil case number.",
+    "endpoint": "https://pacer.uscourts.gov/ or https://www.courtlistener.com/api/rest/v3/dockets/ (RECAP mirror, free)",
+    "access_pattern": "api",
+    "auth_required": false,
+    "sample_invocation": "GET https://www.courtlistener.com/api/rest/v3/dockets/?docket_number=2:22-cv-02935&court=ohsd",
+    "estimated_cost": "free (via CourtListener RECAP) or $0.10/page (direct PACER)",
+    "completeness": "all US federal civil dockets",
+    "referent_type": "event",
+    "attribute": "case_status_and_certification_order",
+    "rationales": [
+      {
+        "ticker": "UPST",
+        "claim_id": "UPST-4",
+        "category": "regulatory_milestone",
+        "rationale": "The class-action existence, caption, court, and certification-order date are public PACER record; CourtListener's RECAP archive provides keyless free access. EDGAR full-text would only find UPST's own self-disclosure, which would be circular."
+      }
+    ],
+    "tickers": [
+      "UPST"
+    ],
+    "claim_count": 1
+  },
+  {
+    "name": "pacer.query_case_docket",
+    "description": "Federal court PACER docket retrieval for case-status and final-judgment verification on named civil cases.",
+    "endpoint": "https://pcl.uscourts.gov/pcl/index.jsf (PACER Case Locator) and per-court CM/ECF (e.g. https://ecf.azd.uscourts.gov)",
+    "access_pattern": "api",
+    "auth_required": true,
+    "sample_invocation": "PACER Case Locator search court=azd, case_no=2:22-CV-01717-MTL -> CM/ECF docket pull -> filter for 'Final Judgment' entry; alternatively use CourtListener RECAP archive (https://www.courtlistener.com/api/rest/v3/dockets/?docket_number=2:22-cv-01717) as a free mirror.",
+    "estimated_cost": "$0.10/page on PACER; free via CourtListener RECAP",
+    "completeness": "All federal district / appellate court cases; bankruptcy and state cases excluded",
+    "referent_type": "event",
+    "attribute": "final_judgment_status",
+    "rationales": [
+      {
+        "ticker": "OPEN",
+        "claim_id": "OPEN-5",
+        "category": "regulatory_milestone",
+        "rationale": "Securities-class-action final disposition is an authoritative status only court dockets adjudicate; SEC filings are issuer-prepared and therefore self-referential. CourtListener / RECAP provides a free public mirror sufficient for binary final-judgment confirmation."
+      }
+    ],
+    "tickers": [
+      "OPEN"
+    ],
+    "claim_count": 1
+  }
+]

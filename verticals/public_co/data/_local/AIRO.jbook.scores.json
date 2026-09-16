@@ -1,0 +1,129 @@
+{
+  "ticker": "AIRO",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "AIRO is in the process of seeking DoD Blue UAS certification, estimated complete by June 2026.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook(program_name='Blue UAS') -> NOT_FOUND",
+        "pentagon_jbook(program_name='Short Range Reconnaissance') -> NOT_FOUND",
+        "usaspending(recipient='Sky-Watch') -> 0 awards",
+        "earmark_detector(program='Blue UAS') -> NOT_EARMARK (corpus gap)"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "NOT_FOUND",
+      "interpretation": "Blue UAS is a DIU vetting program rather than a funded RDT&E/Procurement PE, so absence from the J-Book corpus is expected and does NOT indicate de-funding. However, the CLAIM itself is a forward aspiration (cert target June 2026), not booked revenue — AIRO has zero DoD direct awards under the Sky-Watch name today. Per heuristic #7 (NOT_FOUND != red flag) and the forward-aspiration nature of the claim, score UNVERIFIABLE. Note materially: Blue UAS certification is a gating event; failure to obtain it would zero out the entire U.S. DoD drone-sale pipeline that AIRO uses as a growth driver."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Sky-Watch is a 'key supplier to European NATO countries' with RQ-35 Heidrun and Connected Panel drones.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook(program_name='RQ-35 Heidrun') -> NOT_FOUND",
+        "pentagon_jbook(program_name='Short Range Reconnaissance Program of Record') -> NOT_FOUND",
+        "pentagon_jbook(contractor_name='Sky-Watch') -> NOT_FOUND",
+        "usaspending(recipient='Sky-Watch') -> 0 DoD awards 2020-2026"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "NOT_FOUND",
+      "interpretation": "Sky-Watch's customers are explicitly disclosed as 'European NATO countries' — i.e., NOT the U.S. DoD. The J-Book corpus only covers U.S. Pentagon PEs, so NOT_FOUND is structurally expected (heuristic #7). The orthogonal usaspending confirmation is also zero, which is consistent with non-U.S.-customer revenue. This claim is OUT OF SCOPE for the J-Book divergence pattern and scored UNVERIFIABLE. However, the implicit risk — that 79% of AIRO consolidated revenue is from two un-named European customers buying RQ-35 Heidruns — has no equivalent J-Book to falsify against."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Two customers = 79% of FY2025 consolidated revenue, all in the Drone segment.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "pentagon_jbook(contractor='Sky-Watch') -> NOT_FOUND (= no U.S. PE exposure)",
+        "pentagon_jbook(contractor='AIRO Group') -> NOT_FOUND",
+        "usaspending(recipient='AIRO Drone') -> 0 awards",
+        "usaspending(recipient='Sky-Watch') -> 0 DoD awards"
+      ],
+      "M_check": "usaspending.query_dod_contracts",
+      "M_value": "0 DoD awards across all AIRO drone-segment recipient name variants",
+      "interpretation": "AIRO frames itself as a defense-tech UAS company with 'Pentagon relationships,' but the segment that drives 79% of revenue (Sky-Watch drones) has ZERO U.S. DoD obligations on USAspending. The 79% is entirely European NATO concentration — and AIRO discloses neither the identity of the two customers nor a customer-by-customer breakdown. This is not a J-Book de-funding pattern (per se) but it IS a meaningful concentration/disclosure risk and an underdelivery vs. the framing the company applies to itself ('Pentagon access,' 'top security clearances,' 'DoD opportunities'). Score MODERATE_UNDERDELIVERY: the FORWARD U.S. DoD opportunity that the AIRO narrative requires is unbooked today, and the booked revenue depends on two undisclosed counterparties."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "AIRO Training (Coastal Defense / Agile Defense) provides adversary air, CAS, ISR, JTAC training to U.S. military.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook(program='CAF Adversary Air Training') -> NOT_FOUND",
+        "pentagon_jbook(program='Contracted Air Services') -> NOT_FOUND",
+        "pentagon_jbook(program='JTAC Training') -> NOT_FOUND",
+        "pentagon_jbook(contractor='Coastal Defense') -> NOT_FOUND",
+        "usaspending(recipient='Coastal Defense') -> 474 DoD awards totaling $23.6M ($5.9M in FY25-FY26 alone), with line items literally labeled 'JTAC AIR SERVICES', 'ISR SUPPORT SERVICES Q1/Q2/Q4', 'JTAC SUPPORT SERVICES', 'REMOTE CONTROL VEHICLES'. Awarding office prefixes H9224 (SOCOM USSOCOM contract office) and FA4897 (Eglin AFB).",
+        "usaspending(recipient='Agile Defense') -> 137 awards / $1.02B — but this is a NAME COLLISION with 'Agile Defense, LLC', a separately-owned DARPA IT services prime; NOT the small flight-school subsidiary AIRO acquired (AIRO disclosed only a $1M promissory note for its 'Agile Defense' acquisition)."
+      ],
+      "M_check": "usaspending.query_dod_contracts(recipient_name='Coastal Defense')",
+      "M_value": "REAL DoD revenue confirmed: 474 awards / $23.6M historical, $5.9M in last 18 mo, with task descriptions matching the company's claimed scope (JTAC AIR SERVICES, ISR SUPPORT SERVICES). Customer = SOCOM contracting office + Eglin AFB.",
+      "interpretation": "This is the ONLY J-Book-grounded claim where the company's named scope matches real obligations. The training-segment claims are TRUTHFUL and corroborated by USAspending. Adversary-air / CAS / JTAC contracted services are typically funded via O&M (Operations & Maintenance), which the J-Book corpus does not cover by design (corpus is RDT&E + Procurement PEs only). PASS. Caveat: the absolute size is small ($5.9M run-rate) relative to AIRO's market-cap ambition, and an unrelated $1B 'Agile Defense, LLC' would be incorrectly attributed in a naive name-match — investors must be careful not to conflate."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Jaunt Journey eVTOL is being developed for DoD missions (tactical resupply, ISR); not yet certified, zero deliveries.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook(program='Agility Prime') -> NOT_FOUND",
+        "pentagon_jbook(program='AFWERX Agility Prime') -> NOT_FOUND",
+        "pentagon_jbook(program='eVTOL tactical resupply') -> NOT_FOUND",
+        "pentagon_jbook(contractor='Jaunt') -> NOT_FOUND"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "NOT_FOUND across all eVTOL program queries; corpus may not cover Agility Prime PE.",
+      "interpretation": "Agility Prime is the natural J-Book home for eVTOL tactical-resupply funding, but the 410-PE corpus does not include it. Per heuristic #7, NOT_FOUND is UNVERIFIABLE not negative. However, AIRO's claim is purely forward and aspirational — 'we intend to develop, certify, and commercialize' — and they explicitly state 'we have yet to manufacture or deliver any aircraft to customers.' The risk is therefore framing/timing rather than a J-Book divergence. UNVERIFIABLE."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Aspen Avionics is an avionics supplier to Honeywell, Joby, Robinson, Pilatus.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "edgar_fts(search='Aspen Avionics', cik=Honeywell 0000773840) -> 0 hits",
+        "edgar_fts(search='Aspen Avionics') -> 25 hits but all are AIRO own filings or its Kernel SPAC predecessor; ZERO counterparty (Honeywell/Joby/Robinson/Pilatus) corroboration"
+      ],
+      "M_check": "edgar_fts.query_fulltext (counterparty disclosure cross-check)",
+      "M_value": "Honeywell has 0 SEC mentions of 'Aspen Avionics'; no counterparty disclosure corroboration in EDGAR for any of the four claimed OEM relationships.",
+      "interpretation": "Aspen Avionics is small enough that none of the four claimed OEM counterparties materially disclose it, so absence is consistent with immateriality rather than fabrication. Score UNVERIFIABLE. Note: Joby is the only SEC-registered counterparty in the list of four; if AIRO's relationship were material to Joby it would normally be disclosed. The asymmetric absence is weak negative but not conclusive."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "AIRO entered Oct-2025 Bullet LOI and Nov-2025 Nord Drone Group JV — Ukrainian partners.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "edgar_fts(search='AIRO Nord-Drone') -> 3 hits, ALL AIRO's own filings (no counterparty corroboration in EDGAR universe)",
+        "edgar_fts(search='Degree-Trans Bullet') -> 0 hits"
+      ],
+      "M_check": "edgar_fts.query_fulltext",
+      "M_value": "Pure self-disclosure; Nord Drone Group and Degree-Trans LLC are private Ukrainian entities not in EDGAR, so absence is expected. AIRO's own risk-factor language flags 'operational challenges related to NDG's location in Ukraine during ongoing military conflict, complex export control and sanctions compliance requirements, and potential regulatory scrutiny regarding foreign defense partnerships'.",
+      "interpretation": "Counterparty disclosure is not falsifiable via EDGAR (Ukrainian private LLCs). However, the JV structure is structurally risky: AIRO contributes 'manufacturing facilities in the United States' while the technology and engineering are held by a Ukrainian LLC operating in an active war zone. Bullet is described only as 'combat-proven' — a marketing label, not a J-Book-graded program. The Pentagon JV thesis (interceptor production-of-record path) is not corroborated by any J-Book or earmark match. MODERATE_UNDERDELIVERY: the JV looks load-bearing in the AIRO investment narrative but has no Pentagon-side commitment behind it."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Sky-Watch has critical partnerships with Palantir and Helsing.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "edgar_fts(search='Sky-Watch Palantir') -> 0 hits",
+        "edgar_fts(search='Sky-Watch Helsing') -> 0 hits (Helsing is private; not in EDGAR)"
+      ],
+      "M_check": "edgar_fts.query_fulltext",
+      "M_value": "Zero corroboration from either counterparty (Palantir is public, Helsing is private). Palantir SEC filings do not name Sky-Watch.",
+      "interpretation": "Helsing is private (not in EDGAR) so its silence is structural. Palantir is public — if Sky-Watch were a material counterparty, it could appear in Palantir's risk-factor counterparty lists or customer mentions, but the partnership may be too small to surface. UNVERIFIABLE; weak negative signal that Palantir does not corroborate."
+    }
+  ],
+  "summary": {
+    "n_claims": 8,
+    "n_queries": 23,
+    "n_jbook_grounded_claims": 5,
+    "n_jbook_fired_with_signal": 0,
+    "n_jbook_NOT_FOUND": 13,
+    "severity_counts": {
+      "PASS": 1,
+      "MODERATE_UNDERDELIVERY": 2,
+      "SEVERE_UNDERDELIVERY": 0,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 5
+    },
+    "j_book_divergence_pattern_finding": "AIRO does NOT exhibit the canonical J-Book divergence pattern. The pattern requires (a) the company to name a specific Pentagon PE as material revenue, then (b) that PE to be zeroed out in the forward J-Book. AIRO's 10-K is REMARKABLY VAGUE about Pentagon programs — it names ZERO PE numbers, ZERO Program-of-Record line items, and only generic service categories. The framework therefore cannot fire its primary signal. The orthogonal finding is the inverse: AIRO frames itself as defense-tech, but its only confirmed U.S. DoD revenue (Coastal Defense, $5.9M last 18 months in JTAC/ISR services) is small and routed through O&M, not RDT&E/Procurement. The 79% customer concentration is European NATO, and the Sky-Watch / AIRO Drone subsidiary has zero U.S. DoD obligations on USAspending. This is a 'vague-narrative + counterparty-asymmetric-disclosure' shape rather than a J-Book de-funding shape.",
+    "framework_calibration_note": "Pentagon_jbook fired on 0 of 5 J-Book-grounded claims — corpus coverage gap for small-cap UAS / training / eVTOL programs. This is a true blind-spot of the 410-PE corpus, not a company-specific issue."
+  }
+}

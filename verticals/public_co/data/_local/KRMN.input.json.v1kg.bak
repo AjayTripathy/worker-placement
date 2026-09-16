@@ -1,0 +1,120 @@
+{
+  "ticker": "KRMN",
+  "cutoff": "2025-02-13",
+  "filing": "0001193125-25-026168_424B4.txt",
+  "issuer_features": [
+    "egc_status",
+    "government_customer_concentration_above_5pct",
+    "mentions_dod_customer",
+    "mentions_dod_program",
+    "pe_sponsor_control",
+    "primary_contractor_to_dod_prime"
+  ],
+  "claims": [
+    {
+      "claim_id": "KRMN-1",
+      "claim_text": "Services to U.S. military end-users accounted for approximately $225 million, or ~80%, of revenue for the year ended December 31, 2023; a material portion of revenue derives from U.S. government defense contracts directly or indirectly.",
+      "subject": "Karman Space and Defense (Trive/Karman Holdings)",
+      "predicate": "derives ~80% of revenue from U.S. military / DoD defense contracts",
+      "object_value": "$225M (80%) FY2023 U.S. military revenue",
+      "source_quote": "Services to our U.S. military end-users accounted for approximately $225 million, or approximately 80%, of our revenue for the year ended December 31, 2023.",
+      "category": "customer_pipeline",
+      "queries": [
+        "usaspending.query_federal_presence(name_variants=[Karman Space and Defense, Systima Technologies, AMRO Fabricating, Aerospace Engineering Corporation, American Automated Engineering])",
+        "pentagon_jbook.query_program_funding(contractor_name=Karman)"
+      ]
+    },
+    {
+      "claim_id": "KRMN-2",
+      "claim_text": "Karman is a prime contractor under several U.S. General Services Administration (GSA) contracts and government-wide acquisition contracts (GWACs).",
+      "subject": "Karman Space and Defense",
+      "predicate": "holds prime contractor status on GSA contracts / GWACs",
+      "object_value": "GSA contracts + GWACs as prime",
+      "source_quote": "We are a prime contractor under several U.S. General Services Administration ('GSA') contracts and government-wide acquisition contracts ('GWACs').",
+      "category": "regulatory_milestone",
+      "queries": [
+        "usaspending.query_federal_presence (federal recipient profile / award presence as prime)"
+      ]
+    },
+    {
+      "claim_id": "KRMN-3",
+      "claim_text": "Karman owns 13 issued patents (expiring Dec 2030 - Jun 2044) and has 6 pending/published patent applications, supporting its claimed proprietary, highly-engineered design/IP position in missile/hypersonic structures and propulsion.",
+      "subject": "Karman Space and Defense (subsidiaries: Systima, AMRO, AEC, AAE)",
+      "predicate": "owns 13 issued U.S. patents plus 6 pending applications",
+      "object_value": "13 issued patents, 6 pending",
+      "source_quote": "As of November 1, 2024, we own 13 issued patents, which will expire between December 2030 and June 2044. We currently have 6 pending or published patent applications.",
+      "category": "technology",
+      "queries": [
+        "uspto_odp.query_assignee(Systima)",
+        "uspto_odp.query_assignee(Karman)"
+      ]
+    },
+    {
+      "claim_id": "KRMN-4",
+      "claim_text": "Space & Launch revenue is supported by participation on named next-generation launch-vehicle programs: Blue Origin's New Glenn and ULA's Vulcan.",
+      "subject": "Karman Space and Defense",
+      "predicate": "supplies structures/content on New Glenn (Blue Origin) and Vulcan (ULA) launch programs",
+      "object_value": "New Glenn (Blue Origin), Vulcan (ULA)",
+      "source_quote": "Space and Launch revenues were supported by new launch vehicle programs, including Blue Origin's New Glenn and ULA's Vulcan...",
+      "category": "partnership",
+      "queries": [
+        "edgar_fts.query_fulltext(Karman) counterparty disclosure (Blue Origin/ULA are private/JV - limited registry coverage)",
+        "nasa_ntrs.query_ntrs(Karman / Systima)"
+      ]
+    },
+    {
+      "claim_id": "KRMN-5",
+      "claim_text": "As of December 31, 2023, total funded backlog was $428,719,337 (invoiceable value of existing purchase orders under funded/appropriated contracts).",
+      "subject": "Karman Space and Defense",
+      "predicate": "holds $428.7M funded backlog of contracted, appropriated work",
+      "object_value": "$428,719,337 funded backlog (Dec 31, 2023)",
+      "source_quote": "As of December 31, 2023, our total funded backlog was $428,719,337.",
+      "category": "production_volume",
+      "queries": [
+        "usaspending.query_federal_presence (aggregate obligated/awarded $ as floor under funded backlog)"
+      ]
+    },
+    {
+      "claim_id": "KRMN-6",
+      "claim_text": "Karman is controlled by PE sponsor Trive Capital, which will beneficially own ~56.0% of common stock and >50% of voting power after the offering, making the issuer a 'controlled company' under NYSE rules and relying on governance exemptions.",
+      "subject": "Trive Capital / Karman Holdings",
+      "predicate": "PE sponsor retains >50% control post-IPO (controlled company)",
+      "object_value": "~56.0% Trive ownership; controlled company",
+      "source_quote": "Trive Capital will continue to control approximately 56.0% ... As a result, we will be a 'controlled company' within the meaning of the corporate governance standards of the NYSE.",
+      "category": "other",
+      "queries": [
+        "internal/structural - dispatch dual_class_voting_concentration, pe_dividend_recap_pre_ipo, jobs_act_disclosure_exemption_audit, lockup_expiration_calendar, upc_tra_value_extraction against prospectus governance/cap-structure text"
+      ]
+    },
+    {
+      "claim_id": "KRMN-7",
+      "claim_text": "Karman's three largest customers accounted for approximately 47.3% of revenue for the year ended December 31, 2023 (customer concentration), and one supplier accounted for ~37.5% of accounts payable.",
+      "subject": "Karman Space and Defense",
+      "predicate": "top-3 customer concentration of 47.3% of FY2023 revenue",
+      "object_value": "47.3% top-3 customer concentration; 37.5% top supplier of AP",
+      "source_quote": "Our three largest customers accounted for approximately 47.3% of revenue during the year ended December 31, 2023.",
+      "category": "vendor_relationship",
+      "queries": [
+        "internal/structural - revenue concentration adjudication (customers unnamed; primes, not registry-named)"
+      ]
+    }
+  ],
+  "detector_dispatch": [
+    {"detector": "pentagon_jbook", "status": "dispatched", "reason": "DoD/government-customer features true; query contractor_name=Karman for forward program funding underlying KRMN-1 (~80% DoD revenue). Issuer states no single program >10% (~100 programs), so query is contractor-anchored, not PE-anchored."},
+    {"detector": "doe_budget", "status": "declined", "reason": "government_customer_concentration_above_5pct nominally triggers it, but federal revenue is DoD/space (missiles, hypersonics, launch structures), NOT DOE Office of Science / NQI. No DOE-program revenue claim to test."},
+    {"detector": "multi_venue_disclosure_consistency", "status": "declined", "reason": "Triggered by mentions_dod_program/pe_sponsor_control, but this is a first-time S-1 issuer ('Prior to completion of this offering, we did not file periodic reports'). No prior time-locked multi-venue disclosures of a focal fact pattern to compare."},
+    {"detector": "common_control_merger_accounting", "status": "dispatched", "reason": "UNIVERSAL. Karman is a 7-acquisition roll-up consolidating AEC/AMRO/AAE/Systima + RMS (Feb-2024, $30.8M cash, RMS revenue separately disclosed). No single $1B+ common-control absorption without separate financials. No fire."},
+    {"detector": "comparable_public_company_anchor", "status": "dispatched", "reason": "UNIVERSAL. Reviewed valuation framing; no registry M-source available within blinding. Captured structurally; not scored as a registry claim."},
+    {"detector": "competitor_trial_omission", "status": "not_applicable", "reason": "Requires clinical_trial_program; defense/space issuer, no clinical trials."},
+    {"detector": "clinical_trial_referral_quality", "status": "not_applicable", "reason": "Requires diagnostics/lab/referral features; not a diagnostics business."},
+    {"detector": "clinicaltrials_lookup", "status": "not_applicable", "reason": "Requires clinical_trial_program; not applicable to a defense issuer."},
+    {"detector": "dual_class_voting_concentration", "status": "dispatched", "reason": "UNIVERSAL. Mapped to KRMN-6. Single class of common stock, NO dual-class super-voting. Control concentration (~56%) is via PE-sponsor share count, captured under KRMN-6."},
+    {"detector": "jobs_act_disclosure_exemption_audit", "status": "dispatched", "reason": "UNIVERSAL + egc_status. Mapped to KRMN-6. EGC electing extended transition + controlled-company exemptions; also discloses material weakness in ICFR + restated 2022/2023 financials. Prospectus-text audit (no external registry)."},
+    {"detector": "lockup_expiration_calendar", "status": "dispatched", "reason": "UNIVERSAL. 180-day lock-up; ~56% Trive overhang + registration rights on ~56.0% of shares. No follow-on filed pre-cutoff (first-time issuer). Structural; captured under KRMN-6."},
+    {"detector": "pe_dividend_recap_pre_ipo", "status": "dispatched", "reason": "UNIVERSAL + pe_sponsor_control. Cash-flow/financing reviewed: NO debt-financed special dividend within 24mo pre-IPO; member distributions de minimis ($0.8M FY23, $0.1M FY22); IPO proceeds ($147M) used for general corporate purposes, NOT recap-debt retirement. No fire."},
+    {"detector": "related_party_transaction_velocity", "status": "dispatched", "reason": "UNIVERSAL. RPTs = registration-rights/sponsor agreements with Trive; no operating RPT >10% of revenue or >$1B. No fire."},
+    {"detector": "underwriter_archetype_risk", "status": "dispatched", "reason": "UNIVERSAL. Leads Citigroup + Evercore ISI; syndicate RBC, William Blair, Baird. None on FINRA/HSC-China/SEC-PCAOB watchlist archetype. No fire."},
+    {"detector": "upc_tra_value_extraction", "status": "dispatched", "reason": "UNIVERSAL. C-corp IPO of Karman Holdings Inc., single class common; NO Up-C / Umbrella Partnership and NO Tax Receivable Agreement disclosed. No fire."},
+    {"detector": "chinese_smallcap_ramp_dump_archetype", "status": "not_applicable", "reason": "Requires cayman_or_bvi_holdco / asia_operating_jurisdiction; Delaware C-corp, HQ Dallas TX, US operations. Not applicable."}
+  ]
+}

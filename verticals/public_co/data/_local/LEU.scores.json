@@ -1,0 +1,121 @@
+{
+  "ticker": "LEU",
+  "cutoff": "2026-05-16",
+  "filing": "0001628280-26-007117_10-K.txt",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "DOE HALEU Demonstration Contract (up to $173.0M) and HALEU Operation Contract ($150M base, Phase 2 funding to $170.1M, Option 1a $108.2M) awarded to Centrus / ACO; first HALEU delivery Nov 7, 2023.",
+      "severity": "PASS",
+      "supports": [
+        "USAspending: 'AMERICAN CENTRIFUGE OPERATING, LLC' DOE award 89243223CNE000030 'HIGH ASSAY LOW ENRICHED URANIUM (HALEU) CASCADE DEMO COMPLETION AND EXTENDED PRODUCTION' for $317.0M",
+        "USAspending: 'AMERICAN CENTRIFUGE OPERATING, LLC' DOE award 89303519CNE000005 'LETTER CONTRACT TO FACILITATE THE DEMONSTRATION OF HIGH ASSAY LOW ENRICHED URANIUM (HALEU) PRODUCTION' for $173.0M",
+        "Two HALEU-named DOE awards aggregating $490M, exceeding 10-K's claimed $173.0M Demo + $170.1M Phase 2 + $108.2M Option 1a cumulative scope; quantitative match within plausibility band"
+      ],
+      "M_check": "usaspending.query_recipient_contracts(recipient_name='Centrus' / 'American Centrifuge')",
+      "M_value": "9 awards, $490.6M total; 3 DOE HALEU/LEU-named awards to American Centrifuge Operating LLC totaling $490.5M",
+      "interpretation": "DOE-CONTRACT-SPECIFIC heuristic #9 satisfied: real federal contract record matches and slightly exceeds claimed magnitude. Award IDs, recipient, agency, scope all corroborate. Clean PASS."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Jan 5, 2026 DOE announced ACO selected for $900M HALEU Production Contract task order to expand Piketon for commercial-scale HALEU; options up to $170M.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "USAspending does not yet show a new $900M task order obligation in the 'AMERICAN CENTRIFUGE OPERATING' record (latest LEU IDIQ task order found is the $0.5M April 2025 award)",
+        "The 10-K itself characterizes this as 'subject to negotiation of a definitive agreement and there are no guarantees about whether or when funding by the DOE for such expansion would be awarded'",
+        "Announcement is post-RFP-selection / pre-definitive-agreement: USAspending typically posts obligations only when funds are committed under a signed task order"
+      ],
+      "M_check": "usaspending.query_recipient_contracts (American Centrifuge, 2024+); edgar_fts.query_fulltext",
+      "M_value": "n_awards=3 to American Centrifuge Operating; none reflect $900M obligation as of cutoff",
+      "interpretation": "Not contradicted; expected to be unverifiable in USAspending until definitive agreement signed and funds obligated. Company's own disclosure is calibrated (notes selection vs. award). UNVERIFIABLE rather than RED_FLAG because (a) Jan 5, 2026 announcement is very recent, (b) 10-K itself flags contingency, (c) the underlying HALEU Production IDIQ is real per USAspending record of preceding task orders."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Centrus operates a HALEU production facility in Piketon, Ohio at 3930 U.S. Route 23, on leased DOE land at the American Centrifuge Plant site; NRC-licensed for HALEU enrichment up to 20% U-235.",
+      "severity": "PASS",
+      "supports": [
+        "EPA FRS: 'CENTRUS ENERGY CORP AMERICAN CENTRIFUGE OPERATING LLC' at 3930 US RTE 23 S, Piketon, OH 45661 (registry_id 110070748565) — exact address match to 10-K",
+        "EPA FRS: 'AMERICAN CENTRIFUGE PLANT' x 2 records at same Piketon address",
+        "EPA FRS: 'UNITED STATES ENRICHMENT CORP' and 'US ENRICHMENT CORP PORTSMOUTH GASEOUS DIFFUSION PLANT' at same Piketon site (historic enrichment/cleanup operations)"
+      ],
+      "M_check": "epa_frs.query_facilities (Piketon OH)",
+      "M_value": "5 EPA-registered facilities matching Centrus / American Centrifuge / US Enrichment at Piketon",
+      "interpretation": "Heuristic #1 (Piketon EPA expectation) directly satisfied; exact address registered under both current corporate name and operating subsidiary. Clean PASS."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Centrus owns 440,000 sqft manufacturing facility on 72 acres at 400 Centrifuge Way, Oak Ridge TN; investing $560M+ to transition to high-rate centrifuge manufacturing.",
+      "severity": "PASS",
+      "supports": [
+        "EPA FRS: 'AMERICAN CENTRIFUGE OPERATING, LLC DBA TECHNOLOGY MANUFACTURING CENTER' at 400 CENTRIFUGE WAY, OAK RIDGE, TN 37830 (registry_id 110046102374) — exact address match to 10-K"
+      ],
+      "M_check": "epa_frs.query_facilities (Oak Ridge TN)",
+      "M_value": "1 EPA-registered facility at exact 10-K address under ACO LLC name",
+      "interpretation": "Manufacturing facility exists in EPA registry at stated address. Investment program is a forward commitment (not yet verifiable); facility existence is confirmed. PASS."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Centrus has substantial centrifuge IP portfolio underlying AC100M technology, claimed as 'only deployment-ready U.S. uranium enrichment technology'.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "USPTO ODP query for 'Centrus' returns 18 applications / 2 granted — but all are 'CENTRUS DIAGNOSTICS, INC.' (a different company; cardiovascular monitoring / photoplethysmography), not Centrus Energy",
+        "USPTO ODP queries for 'USEC', 'United States Enrichment', 'American Centrifuge', 'Enrichment Corp' all return 0 applications",
+        "Centrifuge IP at Centrus likely held under historical USEC / DOE-assigned assignee names not indexed by ODP's single-token firstApplicantName match, or under classified / export-controlled non-USPTO filings",
+        "USAspending evidence of $490M+ DOE-funded centrifuge build-out is independent corroboration that the technology and program exist"
+      ],
+      "M_check": "uspto_odp.query_assignee (multiple variants)",
+      "M_value": "0 enrichment-tagged granted patents under any tested name; namespace collision with Centrus Diagnostics",
+      "interpretation": "Per heuristic #8, RED_FLAG only on Nikola pattern (clear contradiction); coverage gap (the M-source doesn't index this assignee well) and confounded namespace make this UNVERIFIABLE not RED. Cohort context confirms LEU has real DOE-funded centrifuge operations; absence of patent index hits is an M-source limitation, not a divergence signal."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Centrus reports $448.7M 2025 revenue with four customers each >10%; top 10 LEU customers = 77% of revenue. Customers described as 'utilities that operate commercial nuclear power plants' (US + Japan + Netherlands).",
+      "severity": "PASS",
+      "supports": [
+        "EDGAR fulltext: 'Centrus' appears in 635 filings across all SEC filers (broad market corroboration as a real industry participant)",
+        "TENEX (Russian supply counterparty): 178 EDGAR mentions",
+        "American Centrifuge: 196 EDGAR mentions",
+        "Individual major US utility CIKs (Constellation, Vistra, Talen, Duke, Exelon, NextEra, Dominion, Southern Co): 0 'Centrus' mentions each"
+      ],
+      "M_check": "edgar_fts.query_fulltext per counterparty CIK and unrestricted",
+      "M_value": "Broad EDGAR mention: 635; per-utility CIK: 0/0/0/0/0/0/0/0",
+      "interpretation": "Heuristic #7 (counterparty-disclosure threshold) applies: nuclear-fuel suppliers are typically not named in IOU utility 10-Ks because purchases of SWU/enriched-uranium fall well below segment-reporting materiality thresholds for the buyer; Centrus also lists its top customers anonymously as A/B/C/D rather than naming them. Broad EDGAR corroboration plus actual reported revenue ($448.7M; 77% LEU segment; foreign revenue split by country including Japan $102.7M) is consistent with a real operating utility supplier. PASS."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Centrus awarded all three DOE IDIQs (HALEU Deconversion, HALEU Production, LEU Production) under $3.4B congressional appropriation; $0.5M T&M task order April 11, 2025 under LEU Production Contract.",
+      "severity": "PASS",
+      "supports": [
+        "USAspending: 'NEW TASK ORDER AWARD UNDER THE LOW-ENRICHED URANIUM (LEU) - ENRICHMENT ACQUISITION IDIQ FOR AMERICAN CENTRIFUGE LLC FOR THE DEVELOPMENT OF A REPORT FOR THE DEPLOYMENT OF NEW ENRICHMENT CAPACITY AND POSSIBLE FOLLOW-ON TASKS' for $500,000 (Award ID 89243225FNE400178, parent IDIQ 89243225DNE000026) — exact match to claimed $0.5M April 2025 task order"
+      ],
+      "M_check": "usaspending.query_recipient_contracts",
+      "M_value": "Exact task order obligation present at correct amount under correct IDIQ structure",
+      "interpretation": "Quantitative, structurally-detailed claim verified to the dollar in USAspending. Clean PASS."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "$2.0B consolidated cash; $402.5M 2.25% convertible notes (Nov 2024) and $805.0M 0% convertible notes (Aug 2025); $3.8B total backlog; $2.9B LEU backlog of which $2.3B contingent.",
+      "severity": "PASS",
+      "supports": [
+        "Capital structure / cash claims are independently verifiable from the same 10-K financial statements (audited) and parallel 8-K/424B filings around the convertible offerings; no external M-source contradicts",
+        "Backlog values are self-reported and prospective (2040 horizon); separately disclosed contingent vs definitive portions are appropriately marked"
+      ],
+      "M_check": "internal coherence with 10-K financials; convertible-note issuance is a public 144A transaction underwritten by BofA + JPM (independent counter-parties)",
+      "M_value": "internally consistent; counterparty underwriters disclosed",
+      "interpretation": "Standard audited financial disclosure; convertible note terms (maturity, principal, underwriters) match form of public 144A offerings. No divergence. PASS."
+    }
+  ],
+  "summary": {
+    "n_claims": 8,
+    "n_queries": 20,
+    "severity_counts": {
+      "PASS": 6,
+      "MODERATE_UNDERDELIVERY": 0,
+      "SEVERE_UNDERDELIVERY": 0,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 2
+    },
+    "overall_signal": "CLEAN_PASS",
+    "rationale": "Per Layer 3 Rule 7 (advanced nuclear / SMR enabler calibration) and cohort metadata (LEU is real-revenue control), divergence engine confirms: (i) DOE HALEU contract record on USAspending matches and slightly exceeds disclosed magnitude under correct subsidiary recipient (American Centrifuge Operating LLC); (ii) Piketon OH and Oak Ridge TN facilities both registered in EPA FRS at exact stated addresses; (iii) $0.5M LEU-Production task order found dollar-for-dollar in USAspending; (iv) absence of utility-customer-CIK Centrus mentions explained by heuristic #7 (sub-materiality threshold for buyer disclosure) and 10-K's own customer-anonymization. The two UNVERIFIABLE claims reflect (a) post-cutoff timing for a Jan 5 2026 task-order announcement awaiting definitive agreement, and (b) USPTO ODP namespace collision with Centrus Diagnostics + single-token assignee-match limitation — neither is a divergence signal. No RED_FLAG_NEGATIVE on any DOE-contract-specific claim, satisfying heuristic #9 expectation."
+  }
+}

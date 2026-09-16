@@ -1,0 +1,118 @@
+{
+  "ticker": "CNS",
+  "company": "Cohen & Steers, Inc.",
+  "cutoff": "2025-05-15",
+  "filing": "0001284812-25-000087_10K.txt",
+  "filing_date": "2025-02-21",
+  "cik": "0001284812",
+  "sector": "Financial Services",
+  "industry": "Asset Management",
+  "group": "boring_middle",
+  "rfm_tuples": [
+    {
+      "claim_id": "C1",
+      "R": "As of December 31, 2024, approximately 65.2% of the assets we managed was concentrated in real estate securities strategies, including approximately 26.2% in the aggregate in Cohen & Steers Real Estate Securities Fund, Inc., Cohen & Steers Realty Shares, Inc. and Cohen & Steers Institutional Realty Shares, Inc.",
+      "f": "Verify single-asset-class concentration risk and check trajectory: did AUM mix toward real estate increase or decrease between YE23 and YE24? Did the company expand or diversify out of real estate? Compare 10-K language YoY (claim_evolution) and to actual AUM tables.",
+      "M_source": "self_text + claim_evolution (10-K FY2024 vs 10-K FY2023) + 10-K AUM by Strategy table",
+      "M_value": "FY23 10-K said 65.4% real estate / 23.2% in top three RE funds; FY24 10-K says 65.2% / 26.2%. Mix barely changed YoY despite global/international real estate AUM falling -17% ($15.8B -> $13.1B, net outflows -$2.67B). U.S. real estate AUM grew to $42.9B (+11.4%) and Total RE strategies remained ~$56B / 65% of AUM. Concentration is honestly disclosed and persistent; ETF launch and CNSREIT are the only meaningful diversification efforts.",
+      "severity": "PASS",
+      "interpretation": "Disclosure matches reality. Real estate concentration is structurally high and openly acknowledged. Mode B note: top-4 affiliated funds together provided 44.9% of total revenue (CPX 13.0%, CSI 11.9%, CSIR 10.1%, CSR 9.9%) per Note 18 — a real and high revenue-concentration risk that the headline 'we serve global investors' framing softens."
+    },
+    {
+      "claim_id": "C2",
+      "R": "From time to time, the Company is involved in legal matters relating to claims arising in the ordinary course of business. There are currently no such matters pending that the Company believes could have a material adverse effect on its consolidated results of operations, cash flows or financial position. (Note 14, Commitments and Contingencies)",
+      "f": "Mode A — verify boilerplate clean-legal language by EDGAR FTS for any third-party filer naming Cohen & Steers as adverse party, regulator (SEC/CFTC/NFA/FCA/SFC/CSSF) enforcement, or class-action mention pre-cutoff.",
+      "M_source": "edgar_fts.query_fulltext('Cohen & Steers') + self_text + Q1 2025 10-Q Note 11",
+      "M_value": "EDGAR FTS service returned status_500 on first attempt (transient). Q1 2025 10-Q Note 11 repeats identical 'no material adverse effect' language. 10-K Item 3 Legal Proceedings is a single sentence pointer to Note 14. No SEC/CFTC enforcement disclosures, no settlement accruals in the financial statements, no contingent liabilities table — consistent with a clean-litigation asset manager.",
+      "severity": "PASS",
+      "interpretation": "Standard boilerplate but corroborated by absence of any contingency accrual, regulatory disclosure, or 8-K legal item. No evidence of obscured litigation exposure."
+    },
+    {
+      "claim_id": "C3",
+      "R": "Deloitte & Touche LLP's report on the effectiveness of our internal control over financial reporting begins on page F-3. (PCAOB ID No. 34)",
+      "f": "auditor_change_tracker — verify Big 4 auditor (Deloitte) tenure, check 8-K Item 4.01 history for resignations, disagreements, or auditor changes in 5-year lookback.",
+      "M_source": "auditor_change_tracker (going_concern_local) + EDGAR 8-K scan",
+      "M_value": "going_concern_local.auditor_change_from_text returns signal='CLEAN_BIG4_TENURE', firms_mentioned=['Deloitte'], n_resignation_lang=0, n_disagreement_lang=0, is_big4=True. EDGAR 8-K scan 2021-01-01 to 2025-05-15 shows zero Item 4.01 filings for CIK 0001284812. Deloitte issued an unqualified opinion plus an ICFR opinion; the sole Critical Audit Matter is valuation of unobservable Level 3 inputs for private real estate (CNSREIT), which is a routine CAM for an asset manager with NAV-priced private vehicles.",
+      "severity": "PASS",
+      "interpretation": "Clean Big 4 auditor tenure with no resignation/disagreement signals. CAM is routine and proportionate. Strong positive forensic signal."
+    },
+    {
+      "claim_id": "C4",
+      "R": "We have a $100.0 million senior unsecured revolving credit facility maturing on January 20, 2026... As of December 31, 2024, the Company was in compliance with these covenants. (10-K Note 13)",
+      "f": "Mode B — derive whether the absence of the explicit 'we have not drawn on the Credit Agreement' affirmation that appeared in the FY2023 10-K (page 188 area: 'To date, we have not drawn on the Credit Agreement') represents an undisclosed drawdown, or merely a drafting change. Verify by cross-checking the Cash Flow Statement financing-activities lines for proceeds/repayments and Q1 2025 10-Q.",
+      "M_source": "claim_evolution (10-K FY24 vs 10-K FY23) + 10-K Consolidated Statement of Cash Flows + Q1 2025 10-Q Note 10",
+      "M_value": "FY23 10-K explicitly stated 'To date, we have not drawn on the Credit Agreement.' FY24 10-K and Q1 2025 10-Q dropped that explicit affirmation. However FY24 Cash Flow Statement (financing activities) shows zero proceeds-from-borrowings and zero repayments-of-borrowings line items (only ESPP +$1.1M, offering +$68.5M, treasury buybacks -$21.1M, dividends -$119.2M, NCI net +$88.9M). Interest expense on the income statement is also absent. Facility maturing in 12 months (Jan 2026) — a renewal/extension event will fall in the next forecast horizon.",
+      "severity": "PASS",
+      "interpretation": "The claim-evolution drift in drawdown language is a Mode B catch but the financial statements rule out an undisclosed draw. Standalone facility is still undrawn. The Jan-2026 maturity is, however, a foreseeable refinancing event during the forward horizon — not a current red flag but a calendar item."
+    },
+    {
+      "claim_id": "C5",
+      "R": "Assets under management at December 31, 2024 increased 3.2% to $85.8 billion from $83.1 billion at December 31, 2023. The increase was due to market appreciation of $5.4 billion, partially offset by net outflows of $171 million and distributions of $2.6 billion. (10-K Item 7)",
+      "f": "Mode B — decompose by channel. Headline 'AUM grew' is partly a market-tailwind story. Verify whether organic flows are negative across the franchise and how persistent the institutional outflow trend is. Compare 10-K FY24 to FY23 institutional flows.",
+      "M_source": "self_text + 10-K AUM rollforward tables (pages 24-27)",
+      "M_value": "Open-end funds: +$2.8B net inflows (good). Institutional accounts: -$2.99B net outflows (FY24) vs -$0.24B (FY23) — deterioration by ~12x. Advisory -$2.21B, Japan subadvisory -$0.56B, Subadvisory ex-Japan -$0.21B. Global/International Real Estate strategy: -$2.67B net outflows (FY24, vs -$0.45B FY23). Q1 2025 10-Q: institutional advisory continues -$108M outflows; AUM ended Q1 2025 at $87.6B (helped by market appreciation $2.1B). Net flows positive only because open-end retail/wealth offset institutional bleed.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Mode B catch — the headline 'AUM grew 3.2%' obscures a $3.0B institutional outflow that is 12x worse than the prior year, concentrated in global/international real estate. Disclosures are complete (tables show all of this) but MD&A framing leads with the favorable composite. Institutional channel deterioration is a real revenue-quality concern: institutional fee rates differ from retail and persistent outflows compound."
+    },
+    {
+      "claim_id": "C6",
+      "R": "The following affiliated funds provided 10% or more of the total revenue of the Company: CPX 13.0% ($67.3M), CSI 11.9% ($61.4M), CSIR 10.1% ($52.3M), CSR 9.9% ($51.4M). (Note 18 Segment Information)",
+      "f": "Verify customer-concentration intensity. Single-fund revenue contribution at 13.0% with top-3 funds combined at 35% is elevated for an asset manager. Check Mode B: are the largest revenue contributors also the funds with the worst flows (would be a leading-indicator amplifier)?",
+      "M_source": "revenue_concentration (manual) + 10-K AUM tables + Note 18 segment table",
+      "M_value": "Top-1 (CPX) at 13.0% is meaningful single-customer exposure but is a 1940-Act open-end mutual fund (so 'customer' is the fund itself, not a single investor). Top-4 affiliated funds combined provided 44.9% of revenue (FY24) vs 43.4% (FY23) — concentration INCREASED YoY despite stated diversification goals. CPX (preferred securities) AUM grew slightly; CSI/CSIR/CSR (U.S. real estate) AUM grew with the market. Each fund individually had an investment advisory contract renewable annually by its board — these are statutorily terminable.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Mode B catch — top-4-fund revenue concentration rose to 44.9% (from 43.4%) despite the firm's stated diversification narrative. While a board non-renewal of any single advisory contract is rare, the structural concentration in a few funds is real and going the wrong direction."
+    },
+    {
+      "claim_id": "C7",
+      "R": "On April 22, 2024, the Company issued 1,007,057 shares of its common stock through a registered public offering. The net proceeds to the Company, after deducting commissions and estimated offering expenses, were approximately $68.5 million. (Note 19)",
+      "f": "Mode B — for a profitable mid-cap with $183M cash and a $100M undrawn revolver, a ~2% dilutive equity raise is unusual. Verify the stated use of proceeds ('seeding track record strategies'), and check the cumulative seed-investment burn vs operating cash generation.",
+      "M_source": "self_text + 10-K Cash Flow Statement + Note 19 + Subsequent Events Note 20",
+      "M_value": "Stated use: 'general corporate purposes, including seeding track record strategies.' Actuals (FY24): $67.0M funded to CNSREIT; net Treasury purchases $48.1M; investing-activity outflow $119.7M (vs $114.8M FY23, $2.9M FY22). Subsequent events: Jan 2025 $8.1M more to CNSREIT + early-2025 $49.8M seed for first active ETFs (3 strategies: U.S. real estate, preferred securities, natural resource equities). Unfunded commitments at YE24 $80M (now $66M after Jan-25 funding). Dividend ran $119.2M in FY24 = essentially 100% of net income to common ($151.3M GAAP / $149.3M as-adjusted; $2.48/yr dividend on $2.93 as-adjusted EPS = 85% payout). Net cash declined $4.9M in FY24 even after the $68.5M raise.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Mode B catch — the equity raise + the 85% dividend payout + the $50M ETF seed + $66M remaining unfunded commitment plus the credit facility maturing Jan 2026 collectively signal a balance sheet that is funding growth bets and a near-full dividend out of operating cash, with limited margin if AUM/fees compress. Not distress, but a 2% dilution at a moderate share price ~$70 to fund self-launched products that may take years to scale is a capital-allocation choice with optical and execution risk. Risk-factor language about 'seed investments may expose us to potential losses' is honest but the magnitude is now meaningful relative to operating cash."
+    },
+    {
+      "claim_id": "C8",
+      "R": "Implied claim — for an asset manager whose narrative is product diversification (ETFs launched 2025, CNSREIT scaling), insider behavior should NOT cluster on selling around capital events or AUM-disappointment milestones.",
+      "f": "insider_vs_calendar / form4 — parse all Form 4 open-market sales (tx_code='S') in the 12 months pre-cutoff (2024-05-15 to 2025-05-15). Identify any sales by CEO, CIO, or other named executive officers and timing relative to the April 2024 equity offering, the YE24 results, and the Q1 2025 print.",
+      "M_source": "form4 (raw XML parse for 92 Form 4 filings) + insider_vs_calendar",
+      "M_value": "12-month pre-cutoff Form 4 tally: 75 grants (A), 18 gifts (G), 15 open-market sales (S), 8 tax-withholdings (F), 2 other (J). Open-market sales (10 distinct filings, ~$14.8M total): Jon Cheigh (CIO, 3 separate sales: 7,799sh @ $72.57 on 2024-05-24; 12,500sh @ ~$84.1 on 2024-07-26; 25,500sh @ $80.01 on 2025-05-12 — three days before cutoff); Francis Poli (15,000sh @ ~$94 on 2024-09-16); Richard Simon (7,000sh @ ~$80.6 on 2024-07-23); Edmond Villani (6,000sh in two sales Aug/Sep 2024 @ ~$86-97); Elena Dulik (1,100sh on 2024-07-26); Peter Rhein (director, 3,100sh on 2024-10-22); Daniel Charles (7,071sh on 2024-12-03). insider_vs_calendar flags 3 sales as proximate to the 2024-09-26 govt CR signing — that is calendar coincidence, not causal, because CNS has no material government revenue. No 10b5-1 plans noted in the parsed records. CEO Joe Harvey is absent from the sale list.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Mode B catch — the CIO (Jon Cheigh) sold open-market three times in the trailing 12 months, including 25,500 shares (~$2.0M) on 2025-05-12, just three days before the cutoff. Multiple other named officers also sold. No CEO selling, no concentrated pattern around a single capital event, but the CIO of an asset manager selling repeatedly into rallies is mildly negative. Severity is MODERATE rather than SEVERE because aggregate sales (~$14.8M / 12 months) are modest relative to a ~$3.5B market cap and the pattern looks like ordinary diversification rather than capital-event-driven flight."
+    },
+    {
+      "claim_id": "C9",
+      "R": "Implied claim — risk factors include going-concern language. Going-concern detector should return NO_GOING_CONCERN for an asset manager with $183M cash, $109M Treasuries, $331M net liquid assets, no debt outstanding, and 33% operating margin.",
+      "f": "going_concern_local.going_concern_from_text on full 10-K body. Mode A existence check.",
+      "M_source": "going_concern_local + self_text",
+      "M_value": "going_concern_from_text returns signal='NO_GOING_CONCERN' (n_matches=0, n_current_period=0, n_cure=0, n_historical=0). Net liquid assets $331.5M (up from $285.5M YE23). Operating margin 33.4% GAAP / 35.4% as-adjusted. Net income to common $151.3M. Q1 2025 net liquid assets continued to expand (AUM end of Q1 $87.6B).",
+      "severity": "PASS",
+      "interpretation": "No going-concern signals. Liquidity and earnings profile is healthy. Capital adequacy at regulated subsidiaries (CSCM, CSUK, CSS) verified per Note 12. Strong positive forensic signal."
+    },
+    {
+      "claim_id": "C10",
+      "R": "Implied claim — no other public filer should be referencing Cohen & Steers as a distressed counterparty (broken sub-advisory contract terminations, board non-renewals, lost mandate disclosures, fund liquidations, sweep-account counterparty distress).",
+      "f": "edgar_fts.query_fulltext for 'Cohen & Steers' as a counterparty mention outside CNS's own filings, 2024-01-01 to 2025-05-15. Mode B counterparty-mirror check.",
+      "M_source": "edgar_fts.query_fulltext (cutoff_date=2025-05-15)",
+      "M_value": "FTS endpoint returned status_500 on initial call (cutoff-aware service issue, not absence). Manual cross-check using 8-K stream and DEF 14A scans of CNS's own filings shows no announcement of lost institutional mandates, broken sub-advisory agreements, or fund-board non-renewals pre-cutoff. CNSREIT had its prospectus updates filed normally; CNS-affiliated mutual fund proxy materials in 2024 routinely renewed advisory agreements. No third-party complaints surfaced in CNS's Legal Proceedings.",
+      "severity": "UNVERIFIABLE",
+      "interpretation": "Counterparty-mirror check is UNVERIFIABLE due to FTS service error rather than absence of evidence. No corroborating signals of distress in CNS's own filing stream. Mode B note: institutional advisory outflows of $2.21B in FY24 imply mandate losses occurred but none were disclosed as individually material — the universe is too diffuse for any single client to require an 8-K."
+    }
+  ],
+  "supplemental_signals": {
+    "auditor_signal": "PASS — Deloitte & Touche LLP (PCAOB ID 34). going_concern_local flagged CLEAN_BIG4_TENURE; zero Item 4.01 events in 5-year lookback; sole CAM (Level 3 unobservable inputs for private real estate) is routine for an asset manager with CNSREIT and Real Estate Opportunities Fund seed positions.",
+    "going_concern": "NO going-concern language. $331.5M net liquid assets; $0 debt; 33-35% operating margin; net income $151.3M; dividend $119.2M (85% as-adjusted payout); credit facility undrawn (no cash flow line items for borrowings/repayments).",
+    "insider_behavior": "Mode B mild flag — 15 open-market sales (~$14.8M aggregate over 12 months pre-cutoff). CIO Jon Cheigh sold 3 times totaling ~45,000 shares (~$3.5M), including 25,500sh on 2025-05-12 (3 days pre-cutoff). CEO Joe Harvey did NOT sell. Pattern is ordinary diversification, not capital-event clustering.",
+    "claim_evolution": "Two evolutions: (1) FY23 10-K explicit 'we have not drawn on the Credit Agreement' was DROPPED in FY24 10-K and Q1 2025 10-Q — but cash flow statements confirm facility is still undrawn. (2) FY23 10-K real estate concentration 65.4% / top-3 RE funds 23.2%; FY24 65.2% / 26.2% — modest mix drift.",
+    "revenue_concentration": "Top single affiliated fund (CPX) = 13.0% of total revenue. Top-4 funds combined = 44.9% of revenue (rose from 43.4% YoY despite stated diversification). All are 1940-Act open-end funds with statutorily terminable contracts.",
+    "AUM_quality": "Headline AUM +3.2% to $85.8B masks Institutional channel net outflows of -$2.99B (vs -$0.24B FY23, ~12x worse) concentrated in Global/International Real Estate (-$2.67B). Open-end retail funds offset institutional bleed. Q1 2025 institutional advisory continued outflowing -$108M; total AUM ended Q1 2025 at $87.6B.",
+    "capital_allocation": "April 2024 $68.5M equity raise (1.0M shares) + 85% dividend payout + $50M Q1 2025 ETF seed + $66M remaining unfunded CNSREIT commitment + Jan-2026 revolver maturity. Funding growth at a ~2% dilution while paying out 85% of EPS — limited margin if AUM/fees compress.",
+    "credit_facility_maturity_calendar": "$100M unsecured revolver matures 2026-01-20 — a foreseeable refinancing event within the 12-month forward horizon. Facility is currently undrawn.",
+    "litigation_regulatory": "Clean. Note 14 boilerplate 'no material pending matters.' Multi-jurisdiction regulated entities (SEC, CFTC/NFA, FCA UK, SFC HK, CSSF Lux, CBI Ireland, FSA Japan) all in compliance per Note 12.",
+    "ten_q_evolution": "Q1 2025 10-Q (filed 2025-05-02): AUM end $87.6B (+2.1% QoQ, market-driven); institutional advisory continued -$108M outflows; ETFs launched Feb 2025; CNSREIT ownership 42.6% (down from 49.4% as third-party capital joined); declared $0.62 dividend May 1 2025; risk factors 'no material changes.'"
+  },
+  "summary": "CNS reads as an honest, conservatively disclosed asset manager with a clean Big-4 auditor, no going-concern language, $331M net liquid assets, zero debt outstanding, and complete (if MD&A-softened) disclosure of its concentration risks. Forensic profile is mostly PASS with three MODERATE_UNDERDELIVERY signals from Mode B reasoning: (1) headline 'AUM +3.2%' obscures institutional channel outflows of -$2.99B (12x worse YoY), concentrated in global/international real estate, fully visible in the rollforward tables but not foregrounded in narrative; (2) top-4-fund revenue concentration rose to 44.9% (from 43.4%) despite stated diversification — concentration moving the wrong direction; (3) CIO Jon Cheigh sold ~$3.5M of stock across three open-market sales including 25,500sh on 2025-05-12, three days pre-cutoff, plus multiple other officer sales totaling ~$14.8M / 12 months. The April-2024 equity raise + 85% dividend payout + $50M ETF seed + $66M unfunded CNSREIT commitments leave limited margin if real-estate sector pressure or institutional outflows accelerate. Credit facility matures Jan 2026 (currently undrawn). The -20.5% drawdown pre-cutoff appears to be sector-correlated REIT/real-estate-AUM-sensitivity weakness amplified by Cheigh-led insider selling, not company-specific fraud or distress. Net: a NEUTRAL name with a slight tilt toward LONG on forensic cleanliness offset by selective MD&A framing and structural revenue concentration in a weakening institutional channel.",
+  "composite": 0.55,
+  "verdict": "NEUTRAL"
+}

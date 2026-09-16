@@ -1,0 +1,233 @@
+{
+  "ticker": "SOFI",
+  "cutoff": "2026-05-16",
+  "filing": "0001818874-26-000013_10-K.txt",
+  "plan_version": 1,
+  "claims": [
+    {
+      "claim_id": "SOFI-1",
+      "claim_text": "SoFi Bank is a nationally chartered bank (national association) regulated by the OCC, FDIC and Federal Reserve, and SoFi Technologies is its bank holding company.",
+      "source_quote": "SoFi Technologies, a bank holding company, and SoFi Bank, a nationally chartered association, are required to comply with regulatory capital rules issued by the Federal Reserve and other U.S. banking regulators, including the OCC and FDIC.",
+      "subject": "SoFi Bank, N.A.",
+      "predicate": "is_chartered_as",
+      "object_value": "national association",
+      "category": "regulatory_milestone",
+      "referent_type": "entity",
+      "m_source_status": "MAPPED",
+      "source_id": "fdic_bankfind.query_institution",
+      "source_params": {
+        "name": "SoFi Bank"
+      },
+      "proposed_connector": {
+        "name": "fdic_bankfind.query_institution",
+        "description": "FDIC BankFind Suite institution registry; resolves an institution name/cert/RSSDID and returns charter class, primary regulator, status, and headquarters.",
+        "endpoint": "https://banks.data.fdic.gov/api/institutions",
+        "access_pattern": "api",
+        "auth_required": false,
+        "sample_invocation": "GET https://banks.data.fdic.gov/api/institutions?filters=NAME:%22SoFi%20Bank%22&fields=NAME,CERT,FED_RSSD,CHRTAGNT,REGAGNT,ACTIVE,STALP,CITY",
+        "rationale": "OCC national-bank charter status, primary federal regulator, and FDIC insurance status are authoritative registry attributes that the FDIC BankFind Suite resolves directly by institution name.",
+        "estimated_cost": "free",
+        "completeness": "All FDIC-insured US depository institutions",
+        "referent_type": "entity",
+        "attribute": "charter_class"
+      },
+      "extraction_notes": "Catalog only exposes fdic_call_reports for credit-history data, not the BankFind institution registry. Authoritative charter-status registry is needed.",
+      "promotion_note": "auto-promoted from proposal 'fdic_bankfind.query_institution' -> 'fdic_bankfind.query_institution' via promote_connectors"
+    },
+    {
+      "claim_id": "SOFI-2",
+      "claim_text": "SoFi Bank had $37.5 billion of total member deposits as of December 31, 2025, up $11.5 billion year-over-year.",
+      "source_quote": "We achieved continued strong growth in member deposits and strong deposit contribution from direct deposit members, ending the year with $37.5 billion of total deposits as of December 31, 2025... Total deposit funds grew over $11.5 billion during the year ended December 31, 2025.",
+      "subject": "SoFi Bank, N.A. deposit portfolio",
+      "predicate": "reports_total_deposits_of",
+      "object_value": "$37.5 billion as of 2025-12-31",
+      "category": "production_volume",
+      "referent_type": "amount",
+      "m_source_status": "MAPPED",
+      "source_id": "fdic_call_reports.query_bank_credit_history",
+      "source_params": {
+        "bank_name": "SoFi Bank",
+        "rssdid_hint": null,
+        "fields": [
+          "NAMEFULL",
+          "DEP",
+          "DEPDOM",
+          "ASSET",
+          "REPDTE"
+        ],
+        "as_of_quarter": "2025Q4",
+        "cutoff_date": "2026-05-16"
+      },
+      "proposed_connector": null,
+      "extraction_notes": "FDIC Call Reports report total deposits (DEP) at the bank-subsidiary level; SoFi Bank consolidates SoFi Technologies' deposit funding so headline deposit total should reconcile to Call Report DEP. Any material gap = divergence signal."
+    },
+    {
+      "claim_id": "SOFI-3",
+      "claim_text": "SoFi sold or transferred through its Loan Platform Business more than $15.6 billion in personal, student, and home loans during 2025, including $11.0 billion of personal loans originated on behalf of third-party partners.",
+      "source_quote": "Overall, we sold, or transferred through our Loan Platform Business, more than $15.6 billion in total of personal loans, student loans and home loans during the year ended December 31, 2025. ... the Loan Platform Business generated $575.9 million in loan platform fees, driven by $11.0 billion of personal loans originated on behalf of third parties, as well as referrals.",
+      "subject": "SoFi Loan Platform Business",
+      "predicate": "originated_for_third_parties",
+      "object_value": "$11.0 billion personal loans in FY2025",
+      "category": "production_volume",
+      "referent_type": "amount",
+      "m_source_status": "MAPPED",
+      "source_id": "sec_filings.list_filings_by_form",
+      "source_params": {
+        "cik": "0001818874",
+        "forms": [
+          "ABS-15G",
+          "ABS-EE",
+          "10-D"
+        ],
+        "cutoff_date": "2026-05-16"
+      },
+      "proposed_connector": {
+        "name": "sec_abs15g.query_securitizer_filings",
+        "description": "SEC EDGAR ABS-15G / ABS-EE filings registry. Returns asset-backed securitizer disclosures (repurchase activity, pool composition) per CIK with filing date and document URLs.",
+        "endpoint": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&type=ABS-15G&dateb=&owner=include&count=40",
+        "access_pattern": "api",
+        "auth_required": false,
+        "sample_invocation": "GET https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001818874&type=ABS-15G&dateb=20260516&owner=include&count=40",
+        "rationale": "Loan-platform third-party origination volume should flow through whole-loan-sale or ABS issuance channels; ABS-15G filings disclose securitizer repurchase activity and pool composition at the asset-pool level, providing a registry analog for claimed origination/transfer volume that catalog's edgar_fts.query_fulltext can only count, not parse.",
+        "estimated_cost": "free",
+        "completeness": "All SEC-registered ABS securitizers (federally registered offerings only; 144A private deals partially covered via Form D)",
+        "referent_type": "loan_portfolio",
+        "attribute": "pool_balance"
+      },
+      "extraction_notes": "Calibration Heuristic 3: 'originated on behalf of third parties' is off-balance-sheet origination volume, not SoFi's balance-sheet loan risk. The $11.0B headline is not a direct credit-risk number; ABS-15G is the closest registry analog because SoFi's traditional securitizations adjudicate similar pool disclosures. Counterparty bank-partner is not named in filing \u2014 this is a structural UNVERIFIABLE candidate without the proposed connector.",
+      "promotion_note": "auto-promoted from proposal 'sec_abs15g.query_securitizer_filings' -> 'sec_filings.list_filings_by_form' via promote_connectors"
+    },
+    {
+      "claim_id": "SOFI-4",
+      "claim_text": "SoFi reported annualized net charge-off rates on personal loans of 2.80% and on student loans of 0.76% in Q4 2025.",
+      "source_quote": "Annualized net charge-off rates on personal loans in the fourth quarter of 2025 were 2.80%, which remained lower than the assumed weighted average default rates in our fair value model of 4.46%. ... Annualized net charge-off rates on student loans in the fourth quarter of 2025 of 0.76% were higher than the assumed weighted average default rates in our fair value model of 0.68%.",
+      "subject": "SoFi Bank consumer loan portfolio",
+      "predicate": "reports_annualized_net_charge_off_rate",
+      "object_value": "personal loans 2.80%, student loans 0.76% (Q4 2025 annualized)",
+      "category": "financial_distress",
+      "referent_type": "quantity",
+      "m_source_status": "MAPPED",
+      "source_id": "fdic_call_reports.query_bank_credit_history",
+      "source_params": {
+        "bank_name": "SoFi Bank",
+        "rssdid_hint": null,
+        "fields": [
+          "NAMEFULL",
+          "LNCONOTH",
+          "NTLNLS",
+          "NCLNLS",
+          "LNATRES"
+        ],
+        "as_of_quarter": "2025Q4",
+        "cutoff_date": "2026-05-16"
+      },
+      "proposed_connector": null,
+      "extraction_notes": "Call Reports adjudicate bank-subsidiary loan losses only \u2014 SoFi's reported NCO is computed at the platform level including loans held for sale and held off-balance-sheet, so reconciliation is partial. Calibration note: consumer-credit-quality claims often score UNVERIFIABLE because there is no per-cohort registry. SoFi is unusual in cohort because as a chartered bank it DOES have a Call Report analog."
+    },
+    {
+      "claim_id": "SOFI-5",
+      "claim_text": "Banco Naci\u00f3n, one of Argentina's largest financial institutions, selected SoFi's Cyberbank Digital platform to modernize their digital banking infrastructure during 2025.",
+      "source_quote": "During the year, SoFi announced that Banco Naci n, one of Argentina s largest financial institutions, selected our Cyberbank Digital platform to modernize their digital banking infrastructure.",
+      "subject": "Banco de la Naci\u00f3n Argentina",
+      "predicate": "selected_vendor",
+      "object_value": "SoFi Technology Platform (Cyberbank Digital, Technisys subsidiary)",
+      "category": "customer_pipeline",
+      "referent_type": "entity",
+      "m_source_status": "PROPOSED",
+      "source_id": null,
+      "source_params": {},
+      "proposed_connector": {
+        "name": "argentina_compras.query_public_tenders",
+        "description": "Argentine federal procurement portal COMPR.AR / Contrataciones del Estado tender registry. Returns public-sector tenders awarded by Banco de la Naci\u00f3n Argentina (a state-owned bank), including vendor name and contract value.",
+        "endpoint": "https://comprar.gob.ar/PublicacionOC.aspx",
+        "access_pattern": "scrape",
+        "auth_required": false,
+        "sample_invocation": "GET https://comprar.gob.ar/PublicacionOC.aspx?qs=BUSCAR&entidad=Banco%20Naci%C3%B3n&proveedor=Technisys&desde=2024-01-01&hasta=2026-05-16",
+        "rationale": "Banco Naci\u00f3n is a state-owned Argentine bank; vendor selections for core-banking modernization at state banks typically appear in the federal procurement registry. Provides authoritative independent confirmation of the named-partnership claim that the catalog cannot adjudicate.",
+        "estimated_cost": "free",
+        "completeness": "Argentine federal public-sector procurement only; provincial coverage incomplete",
+        "referent_type": "entity",
+        "attribute": "vendor_award_status"
+      },
+      "extraction_notes": "SEC edgar_fts won't help (Banco Naci\u00f3n is a foreign state-owned bank, not an SEC filer). Public procurement registry is the cleanest registry analog. Backup: any Argentine central bank (BCRA) public communication about Banco Naci\u00f3n's core-banking project."
+    },
+    {
+      "claim_id": "SOFI-6",
+      "claim_text": "SoFi completed an underwritten public offering on December 8, 2025 totaling 57.8 million shares for approximately $1.6 billion net proceeds, with the underwriters' option exercised on January 2, 2026 and settled January 5, 2026.",
+      "source_quote": "On January 2, 2026, the Underwriters exercised the option, and on January 5, 2026, the Company completed the issuance and sale of the common stock purchased pursuant to the option of 3.2 million shares of common stock, $0.0001 par value, at an offering price of $27.50 per share, for total cash proceeds of approximately $0.1 billion, net of underwriting discounts and commissions paid. Inclusive of the option, the total aggregate number of shares sold in December 2025 and January 2026 related to the offering was 57.8 million shares, for total cash proceeds of approximately $1.6 billion, net of underwriting discounts and commissions paid.",
+      "subject": "SoFi Technologies common stock offering",
+      "predicate": "completed_underwritten_offering",
+      "object_value": "57.8 million shares / ~$1.6 billion net proceeds (Dec 2025 - Jan 2026)",
+      "category": "other",
+      "referent_type": "event",
+      "m_source_status": "MAPPED",
+      "source_id": "edgar_fts.query_fulltext",
+      "source_params": {
+        "search_term": "underwriting agreement",
+        "cik": "0001818874",
+        "forms": [
+          "424B",
+          "8-K"
+        ],
+        "date_from": "2025-12-01",
+        "date_to": "2026-02-01",
+        "cutoff_date": "2026-05-16"
+      },
+      "proposed_connector": null,
+      "extraction_notes": "Capital raise event has a clean EDGAR analog: 424B prospectus supplement and an 8-K announcing completion must exist. Failure to find = filing-discipline signal. Low-conviction divergence claim because issuers rarely misstate completed offerings."
+    },
+    {
+      "claim_id": "SOFI-7",
+      "claim_text": "SoFi's Technology Platform segment operates Technisys (acquired 2022) and Wyndham (acquired 2024) subsidiaries with operations in highly inflationary Argentina.",
+      "source_quote": "Foreign currency charges reflect the impacts of highly inflationary accounting for our operations in Argentina, which are related to our Technology Platform segment and commenced in the first quarter of 2022 with the Technisys Merger. ... Transaction-related expenses in 2024 and 2023 included financial advisory and professional services costs associated with our acquisition of Wyndham.",
+      "subject": "Technisys and Wyndham (Technology Platform subsidiaries)",
+      "predicate": "are_consolidated_subsidiaries_of",
+      "object_value": "SoFi Technologies, acquired 2022 and 2024 respectively",
+      "category": "vendor_relationship",
+      "referent_type": "entity",
+      "m_source_status": "MAPPED",
+      "source_id": "edgar_fts.query_fulltext",
+      "source_params": {
+        "search_term": "Technisys merger",
+        "cik": "0001818874",
+        "forms": [
+          "8-K",
+          "10-K",
+          "S-4"
+        ],
+        "date_from": "2021-01-01",
+        "date_to": "2024-12-31",
+        "cutoff_date": "2026-05-16"
+      },
+      "proposed_connector": null,
+      "extraction_notes": "Both acquisitions should have a definitive merger 8-K (Item 2.01) and an S-4 / 10-K disclosure trail. Wyndham is the cards-issuance-processing acquisition (not the hotel chain); the 8-K record disambiguates."
+    },
+    {
+      "claim_id": "SOFI-8",
+      "claim_text": "SoFi maintains $7.18 billion in warehouse facility capacity and $645 million revolving credit facility, plus FHLB advance capacity of $285.5 million at year-end 2025.",
+      "source_quote": "Warehouse facilities (2) 7,180,000 7,180,000 Revolving credit facility (3) 645,000 497,400 147,600 FHLB advances (4) 285,535 46,700 238,835 ... As of December 31, 2025, we had $219.6 million of investments in AFS debt securities and $63.0 million of loans pledged as collateral to the FHLB to secure undrawn borrowing capacity of $285.5 million.",
+      "subject": "SoFi Bank FHLB membership",
+      "predicate": "holds_fhlb_advance_capacity_of",
+      "object_value": "$285.5 million undrawn (2025-12-31)",
+      "category": "vendor_relationship",
+      "referent_type": "amount",
+      "m_source_status": "PROPOSED",
+      "source_id": null,
+      "source_params": {},
+      "proposed_connector": {
+        "name": "fhfa_fhlb.query_member_advances",
+        "description": "FHFA Federal Home Loan Bank member-advance disclosures and call-report-derived advance balances per member institution.",
+        "endpoint": "https://www.fhfa.gov/data/dashboard/fhlb-member-data",
+        "access_pattern": "csv_download",
+        "auth_required": false,
+        "sample_invocation": "GET https://www.fhfa.gov/sites/default/files/data-files/fhlb-members.csv  (filter on member_name=='SoFi Bank, National Association')",
+        "rationale": "FHLB membership and advance balances are reported by FHFA at the member-institution level; this is the authoritative registry for the FHLB-borrowing-capacity claim that the catalog's fdic_call_reports can only proxy via balance-sheet 'other borrowings'.",
+        "estimated_cost": "free",
+        "completeness": "All FHLB member banks (FDIC-insured depository institutions and certain insurance companies)",
+        "referent_type": "loan_portfolio",
+        "attribute": "advance_balance"
+      },
+      "extraction_notes": "FDIC Call Reports also include FHLB advances as a line item, so partial mapping via the existing fdic_call_reports connector is possible; the proposed FHFA connector is more authoritative for advance-capacity rather than drawn-balance."
+    }
+  ]
+}

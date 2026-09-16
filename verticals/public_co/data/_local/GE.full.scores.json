@@ -1,0 +1,86 @@
+{
+  "ticker": "GE",
+  "scores": [
+    {
+      "claim_id": "GE-001",
+      "claim_text": "GE Aerospace has U.S. government contracts subject to FAR/DFARS via its Defense & Propulsion Technologies segment.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "Mode A: usaspending.query_recipient_contracts(General Electric Company) + Mode B variant: GE Aviation Systems LLC",
+      "M_value": "General Electric Company: 13,752 DoD awards / $12.19B total. Top awards: AETP ($2.09B), F-15EX propulsion ($1.24B), Improved Turbine Engine EMD ($863M), F414-GE-400 LRIP ($834M), F414 EA-18G ($699M), T408 ($673M). GE Aviation Systems LLC: 4,023 awards / $684M. All named engine programs are confirmed.",
+      "interpretation": "Mode A passes cleanly: massive federal contracting footprint with named GE engine programs (F414, F404/F-15EX, T408, AETP/XA100, ITE/T901) directly tied to disclosure. PASS."
+    },
+    {
+      "claim_id": "GE-002",
+      "claim_text": "Total RPO of $190.6B; DPT RPO ~$20.7B at year-end 2025.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "Mode A: sec_filings confirms 2026-01-29 10-K on file; Mode B: usaspending obligations vs RPO gap check",
+      "M_value": "sec_filings.list_filings_by_form returned 10-K filed 2026-01-29 (accession 0000040545-26-000008). DoD obligated to GE Co alone ~$12.19B life-to-date — well below $20.7B DPT RPO (consistent with multi-year ramp + non-DoD defense/international portion). Mode B gap is reasonable given defense + non-US gov mix.",
+      "interpretation": "RPO disclosure passes Mode A; Mode B gap-check shows DoD obligated $$ is meaningfully less than DPT RPO but consistent (RPO includes future deliveries on long-cycle engine LRIP programs not yet obligated, plus foreign military sales). PASS."
+    },
+    {
+      "claim_id": "GE-003",
+      "claim_text": "GE Aerospace maintains a growing patent portfolio underpinning competitive advantage.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "Mode A: uspto_odp.query_assignee(General Electric Company); Mode B: GE Aerospace + GE Aviation variants",
+      "M_value": "General Electric Company: 24,759 applications / 12,617 granted. GE Aviation: 943 / 606 granted. GE Aerospace (new naming after rename): 9 / 2 granted (small because the rebrand is recent). Patents are concentrated on turbofan engines, gas turbine engines, gearbox, propulsor — directly relevant to claimed competitive areas.",
+      "interpretation": "Far exceeds the 5-granted threshold; engine-relevant claims dominate. Note: only 2 granted patents under literal 'GE Aerospace' assignee name (entity-resolution caveat) but legacy 'General Electric Company' and 'GE Aviation Systems' assignments cover the gap. PASS."
+    },
+    {
+      "claim_id": "GE-004",
+      "claim_text": "GE Aerospace operates U.S. manufacturing facilities including Evendale, OH plus $1B U.S. manufacturing investment + 5,000 new U.S. hires in 2025.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "Mode A: epa_frs.query_facilities(GE Aerospace, OH); Mode B: osha_establishments + General Electric OH wider search",
+      "M_value": "EPA FRS confirms 'GE AEROSPACE EVENDALE PLANT' at One Neumann Way, Cincinnati, OH 45215 (registry IDs 110000393191, 110063189927). 'General Electric' in OH returns 51 facilities including Evendale Altitude Test Facility. OSHA returns 2 GE Aerospace establishments in OH (Springdale supply chain; Vandalia GE Aviation Systems / NAICS 336320 engine parts manufacturing, 378 employees).",
+      "interpretation": "Mode A and Mode B both pass. Physical operating footprint confirmed in multiple registries at the named Ohio HQ. PASS."
+    },
+    {
+      "claim_id": "GE-005",
+      "claim_text": "Delivered 2,386 commercial engines (1,802 LEAP) in 2025 with $1B MRO investment in progress.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "Mode A: implicit (no direct unit-count registry); Mode B: corroborating manufacturing-facility OSHA records + EPA presence + DoD contract continuity demonstrates active production",
+      "M_value": "OSHA Vandalia, OH GE Aviation Systems site shows 378 employees in NAICS 336320 (engine parts manufacturing); EPA Evendale flagship plant active; DoD obligation flow (most recent F414 LRIP 2023 N0001923C0013 $673M) consistent with active production. No direct unit-count registry exists for civil engine deliveries — claim is verifiable only via FAA TC data and OEM disclosure.",
+      "interpretation": "Mode B presence/operational verification supports the production claim. Volume specifics are not independently verifiable via M registries. PASS (operationally corroborated)."
+    },
+    {
+      "claim_id": "GE-006",
+      "claim_text": "Two major separations in two years (GE HealthCare Jan 2023; GE Vernova Apr 2024) — material structural reorganization.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "Mode A: sec_filings shows 8-Ks dated 2023-01-04 and 2024-04-02 referencing both separation agreements; Mode B: claim_evolution(material weakness) and (airworthiness directive)",
+      "M_value": "sec_filings returned 50 GE filings 2023-2026 confirming separation 8-Ks. claim_evolution(material weakness) returned 3 mentions, all classified UNRELATED (boilerplate audit-opinion language only; no actual ICFR material weakness has been disclosed). adverse_findings=[], AFFIRMED=0. claim_evolution(airworthiness directive) = SILENT_POST_CLAIM (0 hits).",
+      "interpretation": "Separations verified; ICFR check clean — no material weakness language. Despite the corporate complexity, registry does not show audit-opinion deterioration. PASS."
+    },
+    {
+      "claim_id": "GE-007",
+      "claim_text": "Counterparty disclosure — GE Aerospace is a prime engine supplier to defense primes (LMT, NOC, BA).",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": true,
+      "M_check": "Mode B: edgar_fts.query_fulltext('GE Aerospace', cik=COUNTERPARTY_CIK) for LMT (0000936468), Boeing (0000012927), Northrop Grumman (0001133421)",
+      "M_value": "Lockheed Martin: 10 hits (10-K, 10-Q mentions including 2026-01-29 10-K). Boeing: 1 hit (DEF 14A 2026-03-06 only). Northrop Grumman: 0 hits.",
+      "interpretation": "LMT cross-mentions cleanly verified — strong Mode B confirmation. Boeing's single mention in only a proxy statement is light given GEnx is a Boeing 787/747-8 engine and CFM LEAP powers 737 MAX (via the CFM JV with Safran). Northrop Grumman's zero hits is notable since B-21 engine is widely understood as GE (rumored F118-derivative). However: (a) B-21 program details are classified — NOC may legitimately not disclose engine supplier in public filings, and (b) CFM LEAP appears in Boeing filings under the CFM JV name not 'GE Aerospace' — so this is name-variant fragility (heuristic 6), not a true absence. Per heuristic 7 the disclosure threshold is not met for SEVE. MODERATE."
+    },
+    {
+      "claim_id": "GE-008",
+      "claim_text": "FAA type certificates / production certificate / repair-station certificates held — regulatory status claim.",
+      "severity": "UNVERIFIABLE",
+      "supports": null,
+      "M_check": "Mode A: EPA FRS confirms operating plant footprint; Mode B: claim_evolution for FAA airworthiness directive language",
+      "M_value": "EPA FRS confirms Evendale + other OH facilities. claim_evolution('airworthiness directive') returned SILENT_POST_CLAIM with 0 hits (no AD escalation language in 2024-2026 GE filings). The M-source catalog does not include a direct FAA TC / PC / RS registry source.",
+      "interpretation": "FAA certificate status is not in the catalog (out of M-source scope). Indirect proxy (claim_evolution for AD language) shows no escalation. Catalog coverage gap — UNVERIFIABLE per rubric. (No adverse signal either.)"
+    },
+    {
+      "claim_id": "GE-009",
+      "claim_text": "Insider Form-4 behavior around defense-budget / corporate events.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": false,
+      "M_check": "Mode B: insider_vs_calendar.query_insider_sales_near_budget_events(cik='0000040545', window_days=14, start_date='2024-01-01', end_date='2026-05-20')",
+      "M_value": "Signal: CLUSTERED_DISCRETIONARY. 49 Form-4 filings, 36 total sales, $109M total; 14 proximate sales worth $13.55M; 6 DISCRETIONARY (non-10b5-1) proximate sales by 4 unique insiders (Stokes, Gowder, Procacci, Giglietti) within 14 days of FY26 bipartisan budget signing (2026-01-20). Top single sale: Russell Stokes sold 21,469 shares at $306.46 = $6.58M on 2026-01-30 (just 10 days after the budget event), plus another 8,894 shares same day ($2.73M). Gowder sold $1.22M on 2026-02-02 (13 days post). Giglietti sold $608K on 2026-01-30. None coded as 10b5-1 — all discretionary.",
+      "interpretation": "Per the framework heuristic, CLUSTERED_DISCRETIONARY signal is the highest-signal flag and warrants SEVE-RED. Four insiders selling >$11.7M in discretionary stock within two weeks of the FY26 budget signing — coinciding with the 10-K filing window (2026-01-29) — is the canonical Mode B signal. The CEO of Defense & Systems (Gowder), the CEO of Propulsion & Additive Technologies (Procacci), the CEO of Commercial Engines & Services (Stokes), and the Chief Accounting Officer / Treasurer (Giglietti) all sold. Marking SEVERE_UNDERDELIVERY (Mode B-only Tier-1 signal; not RED because GE has clean Mode A registry coverage and the sales may reflect post-vesting equity rebalancing rather than information asymmetry, but the cluster is unambiguous and per framework rubric is the highest-signal Mode B flag)."
+    }
+  ]
+}

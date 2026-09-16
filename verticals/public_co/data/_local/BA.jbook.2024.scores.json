@@ -1,0 +1,134 @@
+{
+  "ticker": "BA",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Boeing holds the KC-46A Tanker EMD contract plus 10 authorized LRIP lots (139 aircraft) for USAF; EMD + authorized lots ~$27B as of 12/31/2023.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook program_name='KC-46A Tanker' => primary_match KC-46A Tanker Squadrons (PE 0401221F), status FUNDED_STEADY, latest_funded_year 2024, latest_funded_M $78.7M (Air Force RDT&E line; operations-side; LRIP procurement also separately funded as P-40 line).",
+        "usaspending.query_dod_contracts for 'Boeing' returns 98,895 awards / $209B total; top award FA862511C6600 'KC-X MODERNIZATION PROGRAM' $31.96B — confirms the KC-46A contract Boeing claims actually exists in USAspending."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding + usaspending.query_dod_contracts",
+      "M_value": "FUNDED_STEADY (PE 0401221F, FY24 $78.7M RDT&E) + USAspending KC-X $31.96B confirmed",
+      "interpretation": "J-Book confirms KC-46A is a steadily funded USAF program of record at the cutoff; USAspending corroborates Boeing as prime on a $31.96B KC-X modernization award. Boeing's forward narrative on KC-46 is consistent with Pentagon budgets. No divergence detected."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Boeing holds MQ-25 Stingray EMD ($890M, U.S. Navy) for 7 aircraft + test articles.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook program_name='MQ-25 Stingray' => NOT_FOUND (n_matches=0).",
+        "pentagon_jbook program_name='MQ-25' => NOT_FOUND.",
+        "J-Book corpus coverage skews to Air Force RDT&E / Space Force / MDA / DARPA / SOCOM PEs; the corpus does not include the Navy aircraft procurement / RDT&E PE for MQ-25.",
+        "usaspending.query_dod_contracts confirms Boeing has $209B in DoD obligations across 98,895 awards (Navy contracts visible among top awards, e.g. N0001914C0067 P-8A FRP $18.1B), but no MQ-25-specific obligation surfaced in top 5."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding (program_name MQ-25 / MQ-25 Stingray)",
+      "M_value": "NOT_FOUND (coverage gap — corpus does not cover Navy MQ-25 PE)",
+      "interpretation": "Coverage gap: per heuristic #7, NOT_FOUND in J-Book corpus is UNVERIFIABLE, not a red flag. The MQ-25 PE is a Navy line not seeded in the v1 corpus. Boeing has booked reach-forward losses ($231M in 2023) on this fixed-price program, consistent with the disclosed underperformance, but framework cannot judge the forward funding trajectory from J-Book alone."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Boeing holds T-7A Red Hawk EMD ($860M) and 11 production lots covering 346 aircraft; first production option expected 2025.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook program_name='T-7A Red Hawk' => NOT_FOUND.",
+        "pentagon_jbook program_name='T-7A' => NOT_FOUND.",
+        "T-7A is an Air Force RDT&E + procurement program but the v1 J-Book corpus does not include the T-7A PE (likely 0207164F or similar); coverage gap.",
+        "Disclosure itself flags T-7A as a sustained-loss fixed-price development program with $275M reach-forward increase in 2023."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding (T-7A / T-7A Red Hawk)",
+      "M_value": "NOT_FOUND (coverage gap)",
+      "interpretation": "Coverage gap → UNVERIFIABLE. The forward narrative depends on USAF exercising the first production option in 2025; J-Book corpus cannot judge. The reach-forward loss pattern is already disclosed; cohort framework cannot add signal here without T-7A PE seeded."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Boeing holds VC-25B Presidential Aircraft EMD (~$4B firm fixed-price) for two 747-8 modifications.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook pe_number=0401319F => 'VC-25B', FUNDED_STEADY, FY24 latest_funded_M $94.75M (operations-side); 0 consecutive unfunded years.",
+        "Direct PE match — VC-25B is in the corpus as Air Force operations PE."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding pe_number=0401319F",
+      "M_value": "FUNDED_STEADY (PE 0401319F)",
+      "interpretation": "Pentagon continues to fund VC-25B at the cutoff. Boeing's continuing-EMD narrative is coherent with the J-Book line — no divergence. Reach-forward losses are commercial execution risk, not budget risk."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Boeing references F-15 line as a Defense program contributing to current results (with lower earnings disclosed for 2023). Implicit forward exposure to USAF F-15EX procurement.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook pe_number=0207146F => F-15EX, FUNDED_STEADY, FY24 latest_funded_M $101.996M.",
+        "pentagon_jbook pe_number=0207134F => F-15E Squadrons, FUNDED_STEADY, FY24 $40.348M.",
+        "pentagon_jbook pe_number=0207171F => F-15 EPAWSS, FUNDED_STEADY, FY24 $12.975M.",
+        "Initial name-only lookup of 'F-15' returned generic PE F01500 (operations rollup) with $0 funded — known PE-name ambiguity per heuristic #4; the procurement & RDT&E PEs are all FUNDED_STEADY.",
+        "USAspending top awards include F-15-related modernization (e.g., FA863412C2651 RSAF F-15 Fleet Modernization $11.2B), confirming Boeing's F-15 contract base."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding (specific PEs 0207146F / 0207134F / 0207171F)",
+      "M_value": "FUNDED_STEADY across F-15EX, F-15E Squadrons, F-15 EPAWSS",
+      "interpretation": "Apply PE-name-ambiguity heuristic #4: the generic 'F-15' (F01500) is a roll-up showing $0; the actual program-specific PEs are FUNDED_STEADY. Boeing's F-15 narrative is consistent with the J-Book — no divergence. PASS."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Boeing satellites contribute to BDS revenue (with 'lower earnings on satellites' in 2023). Implicit forward exposure to military satellite procurement.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook program_name='Wideband Global SATCOM' => PE 1206433SF, FUNDED_STEADY, FY24 $34.368M (Boeing is historical WGS prime).",
+        "pentagon_jbook contractor_name='Boeing' => Technology Maturation Initiatives (PE 0604115C) FUNDED_STEADY.",
+        "Corpus also shows Boeing-relevant satellite PEs: Advanced EHF MILSATCOM (1206431SF), Protected Tactical Enterprise Service (1206760SF), all funded in the Space Force RDT&E book per direct PE check pattern."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding (Wideband Global SATCOM; contractor_name Boeing)",
+      "M_value": "FUNDED_STEADY across WGS and Boeing-adjacent SATCOM PEs",
+      "interpretation": "Military SATCOM PEs that Boeing has historically supplied are funded steadily at cutoff. No J-Book divergence on satellites. The 'lower earnings on satellites' in 2023 reflects fixed-price commercial program execution losses, not Pentagon defunding."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Boeing holds NASA Commercial Crew (CST-100 Starliner) contract to transport crews to ISS; reach-forward losses $288M in 2023.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook program_name='CST-100 Starliner' => NOT_FOUND.",
+        "pentagon_jbook program_name='Commercial Crew' => NOT_FOUND.",
+        "Commercial Crew is a NASA program, not in DoD J-Book by design. Framework's primary M-source is mis-fit for this claim. (Would need a NASA-budget M-source companion to score.)"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding (CST-100 Starliner / Commercial Crew)",
+      "M_value": "NOT_FOUND — non-DoD program, J-Book corpus does not cover NASA",
+      "interpretation": "Per heuristic #7, NOT_FOUND in this corpus is UNVERIFIABLE. Commercial Crew is a NASA program with separate budget; pentagon_jbook is the wrong tool. Disclosed reach-forward losses + parachute-supplier delays already signal execution risk; framework cannot strengthen or weaken without NASA-budget data."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "'Substantially all contracts at BDS and certain contracts at BGS are long-term contracts with the U.S. government' — entire BDS segment depends on DoD.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending.query_dod_contracts(recipient_name='Boeing'): 98,895 awards, total_amount $209,457,879,754.58. Top 5 awards span KC-X ($31.96B), Ballistic Missile Defense ($18.76B), P-8A FRP-II ($18.13B), RSAF F-15 Fleet Modernization ($11.20B), and an $11.09B undescribed Air Force contract.",
+        "Diverse DoD agency funding (DoD only line shown but underlying awards span USAF, USN, MDA, etc.).",
+        "pentagon_jbook contractor_name='Boeing' confirms Boeing as primary on Technology Maturation Initiatives (PE 0604115C) — limited corpus coverage, but no zero-funding signals."
+      ],
+      "M_check": "usaspending.query_dod_contracts + pentagon_jbook contractor lookup",
+      "M_value": "$209B aggregate DoD obligations; FUNDED_STEADY contractor PE",
+      "interpretation": "USAspending strongly corroborates Boeing's BDS segment dependence on U.S. government long-term contracts — at scale ($209B). No structural divergence from claim."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "(Control) Boeing maintains a 'large portfolio of intellectual property' including numerous patents.",
+      "severity": "PASS",
+      "supports": [
+        "uspto_odp.query_assignee(assignee_name='The Boeing Company', cutoff_date='2024-09-01') returns active Boeing patent activity: sample applications filed 2024-08-30 (e.g., 'PRESCRIPTIVE ALERTING FOR AIRCRAFT COMPONENT FAULT PREDICTIONS', 'SYSTEM AND METHOD FOR PRESENTING AVIATION-FOCUSED WEATHER INFORMATION', 'WHEELCHAIR FOR AN INTERNAL CABIN OF AN AIRCRAFT').",
+        "Active applications under examination at cutoff confirm ongoing patent prosecution."
+      ],
+      "M_check": "uspto_odp.query_assignee",
+      "M_value": "Active Boeing patent applications visible at cutoff",
+      "interpretation": "Control claim verified: Boeing maintains an active patent portfolio with new filings just before cutoff. No divergence."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "(Control) Boeing names defense peers as LMT, NOC, RTX, GD, SpaceX.",
+      "severity": "PASS",
+      "supports": [
+        "edgar_fts.query_fulltext(search_term='Boeing', cik=0000936468 [Lockheed Martin], forms=['10-K']): 8 matching LMT 10-K/10-K/A filings 2018–2024 — confirms LMT discloses Boeing as a peer/competitor in its annual filings across the period."
+      ],
+      "M_check": "edgar_fts.query_fulltext (LMT cik)",
+      "M_value": "8 LMT 10-Ks mention 'Boeing'",
+      "interpretation": "Control claim verified: peer 10-Ks reciprocally name Boeing. No divergence."
+    }
+  ]
+}

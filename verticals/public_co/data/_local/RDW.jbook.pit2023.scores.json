@@ -1,0 +1,177 @@
+{
+  "ticker": "RDW",
+  "cutoff": "2023-01-15",
+  "filing": "0001819810-22-000025_10-K.txt",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Redwire designed and built deployable Link 16 antennas for Tranche 0 of the Space Development Agency's proliferated LEO satellite constellation (1,000+ sats over the next decade).",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "usaspending.query_dod_contracts(recipient_name='Redwire Space') returned 20 awards totaling $47.4M including SCARLET truss + 'Experiment for Long Life Innovative Energy' contracts under FA9453xx series (AFRL contract vehicles), confirming Redwire is a real DoD R&D contractor as of cutoff."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": {
+        "queries_run": [
+          {"params": {"program_name": "SDA Transport Layer Tranche 0"}, "signal": "NOT_FOUND"},
+          {"params": {"program_name": "Tranche 1 Transport Layer"}, "signal": "NOT_FOUND_IN_TIMERANGE", "matched": "SDA Transport Layer Tranches 0-2 (PE 1206410SF), status_declared=FUNDED_SHRINKING but earliest funded FY in corpus is 2025"},
+          {"params": {"pe_number": "1206410SF"}, "signal": "NOT_FOUND_IN_TIMERANGE", "matched_programs_count": 3, "primary": "Tranche 3 Transport Layer status_declared=UNFUNDED_TWO_PLUS_YEARS (replacement: SDN Backbone sole-sourced to SpaceX Starshield)"}
+        ],
+        "cutoff_year": 2023
+      },
+      "interpretation": "PIT-COHERENCE FINDING. The J-Book corpus is hand-extracted from FY2027 books (forward window FY2025-2028). After cutoff_year=2023 filter, every funding row is excluded -> NOT_FOUND_IN_TIMERANGE. At 2023-01-15 PIT, the FY2024 President's Budget had not yet been published; the FY2023 PB showed SDA Tranche 0/1 fully funded and Tranche 2 in early acquisition. The framework correctly returns UNVERIFIABLE rather than firing on look-ahead data. USAspending cross-check confirms Redwire Space Solutions LLC has $47M of real DoD awards including AFRL space-structure contracts. NB: the post-cutoff metadata in the corpus (status_declared=UNFUNDED_TWO_PLUS_YEARS for T3, FUNDED_SHRINKING for T0-T2, SDA being dissolved into SDN sole-sourced to Starshield) is exactly the kind of forward divergence this cohort hunts -- but at 2023-01-15 PIT it is NOT yet observable. Coverage gap, not a red flag."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Redwire's ROSA solar arrays are being delivered for the Power and Propulsion Element of the NASA Lunar Gateway, and are positioned for future DoD satellite projects.",
+      "severity": "UNVERIFIABLE",
+      "supports": [],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": {
+        "queries_run": [
+          {"params": {"program_name": "Lunar Gateway PPE"}, "signal": "NOT_FOUND"},
+          {"params": {"program_name": "HALO"}, "signal": "NOT_FOUND"},
+          {"params": {"contractor_name": "Redwire"}, "signal": "NOT_FOUND"}
+        ]
+      },
+      "interpretation": "Lunar Gateway PPE is a NASA program (Maxar prime), not a DoD PE -- correctly out of pentagon_jbook scope. NOT_FOUND here is expected coverage gap; the J-Book corpus is DoD RDT&E + Procurement only. Treat as UNVERIFIABLE per heuristic #7."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Redwire LoadPath subsidiary has 'a long history of strong relationships and contracts with the Air Force Research Lab at Kirtland AFB.'",
+      "severity": "PASS",
+      "supports": [
+        "usaspending.query_dod_contracts(recipient_name='LoadPath') returned 8 awards totaling $53.5M, including a $19.9M ASSIST contract for 'space structures, integrated sensing, thermal technologies and agile manufacturing' (FA9453xx prefix = AFRL/RV Kirtland). Cross-check fully confirms the AFRL Kirtland relationship is real and material."
+      ],
+      "M_check": "usaspending.query_dod_contracts",
+      "M_value": {
+        "n_awards_pre_cutoff": 8,
+        "total_amount_M": 53.5,
+        "top_award_M": 19.9,
+        "contracting_office_signal": "FA945319C0002 / FA945324CX039 - FA9453 prefix = AFRL Space Vehicles Directorate (RV) at Kirtland AFB",
+        "jbook_query": {"contractor_name": "LoadPath", "signal": "NOT_FOUND", "note": "J-Book corpus does not name LoadPath as primary on any of its 410 PEs -- expected for a sub-tier R&D contractor"}
+      },
+      "interpretation": "Counterparty cross-check passes. LoadPath received substantive AFRL Kirtland contracts pre-cutoff. The claim is descriptive (relationship + past contracts), not forward-pipeline; it does not require J-Book verification."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Redwire's SDA&R portfolio (sensors, robotics, OSAM-leveraged satellite solutions) participates in the National Defense Space Architecture (NDSA) and U.S. Space Force buildout.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook found 'Space Domain Awareness/Planning/Tasking SW' (PE 1208248SF, Space Force) and 'Tranche 3 Tracking Layer (PWSA)' (PE 1206410SF) as matching programs -- but both NOT_FOUND_IN_TIMERANGE at cutoff_year=2023."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": {
+        "queries_run": [
+          {"params": {"program_name": "National Defense Space Architecture"}, "signal": "NOT_FOUND"},
+          {"params": {"program_name": "Space Domain Awareness"}, "signal": "NOT_FOUND_IN_TIMERANGE", "matched": "PE 1208248SF SDA/Planning/Tasking SW"},
+          {"params": {"program_name": "Tracking Layer"}, "signal": "NOT_FOUND_IN_TIMERANGE", "matched": "Tranche 3 Tracking Layer (PWSA) PE 1206410SF status_declared=FUNDED_STEADY"}
+        ]
+      },
+      "interpretation": "Vague marketing-language claim ('we participate in NDSA via SDA&R portfolio') with no specific PE / contract / revenue attribution -- low discriminative power. J-Book matches exist for the named domains but cutoff filter blocks pre-FY2024 view. Per heuristic #1+#7: UNVERIFIABLE."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Roccor subsidiary supplies the solar sail for NASA's upcoming Solar Cruiser mission and provides a foundation in National Security space markets.",
+      "severity": "UNVERIFIABLE",
+      "supports": [],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": {
+        "queries_run": [
+          {"params": {"contractor_name": "Roccor"}, "signal": "NOT_FOUND"},
+          {"params": {"program_name": "Solar Cruiser"}, "signal": "NOT_FOUND"}
+        ]
+      },
+      "interpretation": "Solar Cruiser is a NASA SMD heliophysics mission (subsequently cancelled in 2022 due to schedule overruns -- POST-cutoff knowledge withheld from scoring). Outside DoD J-Book corpus scope. UNVERIFIABLE."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Redwire (Made In Space) is on the approximately $73.8 million Archinaut One / OSAM-2 mission.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending.query_dod_contracts(recipient_name='Made In Space') returned 2 DoD awards totaling $0.9M -- small, consistent with MIS being primarily a NASA contractor (not DoD). The $73.8M Archinaut One is a NASA TDM contract, not DoD; outside the pentagon_jbook corpus by design."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": {
+        "queries_run": [
+          {"params": {"program_name": "OSAM-2"}, "signal": "NOT_FOUND"},
+          {"params": {"program_name": "Archinaut"}, "signal": "NOT_FOUND"}
+        ]
+      },
+      "interpretation": "Claim is past-tense ('completed a 3D printing test') -- backward-looking, not a forward J-Book pipeline claim. The $73.8M figure is the original NASA TDM award value, which is consistent with public NASA contract disclosure. PASS."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Redwire delivered 2 of 5 Orion navigation cameras and won the Firefly Blue Ghost lunar-lander avionics/TRN contract under NASA's Artemis program.",
+      "severity": "UNVERIFIABLE",
+      "supports": [],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": {
+        "queries_run": [
+          {"params": {"program_name": "Artemis"}, "signal": "NOT_FOUND"},
+          {"params": {"program_name": "Orion"}, "signal": "NOT_FOUND"}
+        ]
+      },
+      "interpretation": "NASA exploration programs -- outside DoD J-Book corpus. UNVERIFIABLE for this cohort's primary verifier."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Redwire (DSS) is a prime contractor on NASA's Commercial Lunar Payload Services (CLPS) IDIQ.",
+      "severity": "UNVERIFIABLE",
+      "supports": [],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": {
+        "queries_run": [
+          {"params": {"program_name": "Commercial Lunar Payload Services"}, "signal": "NOT_FOUND"},
+          {"params": {"program_name": "CLPS"}, "signal": "NOT_FOUND"}
+        ]
+      },
+      "interpretation": "CLPS is a NASA SMD IDIQ; not a DoD PE. Outside J-Book scope. UNVERIFIABLE."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "OSAM is protected by 'numerous patents' addressing a $23B satellite-manufacturing market.",
+      "severity": "PASS",
+      "supports": [
+        "uspto_odp.query_assignee(Made In Space): 51 total applications, 25 granted pre-cutoff (e.g., 17699282 'System and method for manufacturing optical fiber'; in-space additive manufacturing portfolio).",
+        "uspto_odp.query_assignee(Redwire): 9 applications, 3 granted pre-cutoff."
+      ],
+      "M_check": "uspto_odp.query_assignee",
+      "M_value": {
+        "made_in_space": {"n_total": 51, "n_granted_pre_cutoff": 25},
+        "redwire": {"n_total": 9, "n_granted_pre_cutoff": 3},
+        "combined_granted_pre_cutoff": 28
+      },
+      "interpretation": "Control claim. 28 granted patents pre-cutoff is consistent with the 'numerous patents' language. PASS."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "Redwire operates US facilities in FL, MD, MA, CO, CA, NM, AL, MI, IN plus Luxembourg.",
+      "severity": "UNVERIFIABLE",
+      "supports": [],
+      "M_check": "epa_frs.query_facilities",
+      "M_value": {
+        "queries_run": [
+          {"params": {"facility_name": "Redwire", "state_abbr": "FL"}, "n_facilities": 0},
+          {"params": {"facility_name": "Made In Space", "state_abbr": "FL"}, "n_facilities": 0}
+        ]
+      },
+      "interpretation": "Control claim. EPA FRS returns zero hits, but space-infrastructure / electronics-assembly facilities are typically below EPA reporting thresholds (no major emissions, hazardous waste, or NPDES discharges) so absence is expected non-coverage rather than a falsification signal. UNVERIFIABLE."
+    }
+  ],
+  "summary": {
+    "n_claims": 10,
+    "n_queries": 26,
+    "severity_counts": {"PASS": 3, "MODERATE_UNDERDELIVERY": 0, "SEVERE_UNDERDELIVERY": 0, "RED_FLAG_NEGATIVE": 0, "UNVERIFIABLE": 7},
+    "jbook_grounded_claims": ["C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8"],
+    "jbook_fired_on": ["C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8"],
+    "jbook_fired_count": 8,
+    "jbook_fired_n_of": 8,
+    "framework_notes": [
+      "PIT-coherence finding: J-Book corpus covers FY2025-FY2028 only. cutoff_year=2023 filter forces NOT_FOUND_IN_TIMERANGE on every match. Correct behavior for a forward-test at 2023-01-15.",
+      "Most RDW programs named in the FY2021 10-K (Lunar Gateway PPE, Solar Cruiser, Artemis/Orion, CLPS, Archinaut/OSAM-2) are NASA programs -- outside DoD J-Book scope by design. The framework cannot fire here even on a fully-stocked DoD corpus.",
+      "The one strong DoD signal -- LoadPath's AFRL Kirtland book ($53.5M USAspending pre-cutoff) -- cross-checks cleanly.",
+      "RDW's 2022 10-K narrative emphasizes civil/NASA programs (ROSA on ISS, Lunar Gateway, Orion, CLPS, Archinaut). DoD/Space Force exposure (Tranche 0 Link 16 antennas, NDSA, SDA&R) is described in marketing terms without specific PE numbers, contract values, or revenue percentages. Low extractive surface area for the J-book divergence pattern as of 2023-01-15."
+    ]
+  }
+}

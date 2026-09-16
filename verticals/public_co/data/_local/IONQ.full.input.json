@@ -1,0 +1,139 @@
+{
+  "ticker": "IONQ",
+  "cutoff": "2026-05-20",
+  "filing": "0001193125-26-071562_10-K.txt",
+  "filing_date": "2026-02-25",
+  "filing_age_days": 84,
+  "claims": [
+    {
+      "claim_id": "C1",
+      "claim_text": "IonQ acquired Oxford Ionics Limited in September 2025 for approximately $1.6 billion, expecting to accelerate its quantum computing roadmap via Electronic Qubit Control (EQC) and semiconductor production scaling.",
+      "subject": "IonQ, Inc.",
+      "predicate": "acquired",
+      "object_value": "Oxford Ionics Limited (~$1.6B)",
+      "source_quote": "in September 2025, we acquired Oxford Ionics Limited ... Oxford Ionics on July 11, 2025 and September 16, 2025, respectively for purchase consideration of approximately $424.8 million and $1.6 billion",
+      "category": "rollup_thesis",
+      "queries": [
+        {"mode": "A", "source": "uspto_odp", "kwargs": {"assignee": "Oxford Ionics"}, "intent": "Verify Oxford Ionics has a real patent footprint consistent with $1.6B in developed technology value"},
+        {"mode": "B", "source": "acq_coherence", "kwargs": {"parent_thesis": "IonQ is a trapped-ion quantum platform company building toward fault-tolerant quantum computing across compute, networking, sensing, security", "acquisitions": ["Oxford Ionics Limited", "Lightsynq Technologies", "id Quantique SA", "Vector Atomic Inc.", "Capella Space Corp.", "Skyloom Global Corp.", "Seed Innovations LLC", "SkyWater Technology Inc. (pending)"]}, "intent": "Aggregate-rollup coherence check across all eight acquired/pending companies versus the quantum platform parent thesis"}
+      ]
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "IonQ raised $1,977.1M net in October 2025 via shares + Series B prefunded + Series B private warrants, and $977.2M net in July 2025 via shares + Series A warrants; insiders also had two large discretionary windows (around July 9 and October 14, 2025 closings).",
+      "subject": "IonQ, Inc.",
+      "predicate": "raised_equity_and_warrant_issuance",
+      "object_value": "$1.977B October 2025 + $977M July 2025 + $358M ATM (March 2025)",
+      "source_quote": "The offering closed on October 14, 2025, for aggregate proceeds of $1,977.1 million ... The offering closed on July 9, 2025, for aggregate proceeds of $977.2 million ... Prior to its termination on March 10, 2025, the Company sold a total of 16,038,460 shares of its common stock through the 2025 ATM Offering Program for an aggregate purchase price of $358.3 million",
+      "category": "financial_distress",
+      "queries": [
+        {"mode": "A", "source": "sec_edgar_fts", "kwargs": {"search_term": "IonQ", "form_types": ["S-3", "424B5"], "limit": 20}, "intent": "Confirm shelf and prospectus supplements were filed corresponding to these raises"},
+        {"mode": "B", "source": "insider_vs_calendar", "kwargs": {"cik": "0001824920", "window_days": 14, "start_date": "2024-01-01", "end_date": "2026-05-20"}, "intent": "Check whether insider Form-4 sales clustered around either the July 2025 or October 2025 closings (large discretionary cluster would be SEVE/RED per heuristic)"}
+      ]
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "IonQ holds an extensive patent portfolio protecting trapped-ion quantum computing technology, with patent protection cited as a core competitive moat.",
+      "subject": "IonQ, Inc.",
+      "predicate": "owns",
+      "object_value": "extensive patent portfolio in quantum computing",
+      "source_quote": "We have an extensive patent portfolio and other intellectual property rights that protect our valuable technology",
+      "category": "patent",
+      "queries": [
+        {"mode": "A", "source": "uspto_odp", "kwargs": {"assignee": "IonQ"}, "intent": "Verify IonQ has a non-trivial granted patent portfolio with trapped-ion / quantum content"},
+        {"mode": "B", "source": "uspto_odp", "kwargs": {"assignee": "Oxford Ionics"}, "intent": "Sanity-check on acquired-entity patent footprint (Oxford Ionics) since the rollup added stated IP"}
+      ]
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "IonQ HQ in College Park MD (32,000 sqft from UMD), Bothell WA (101,000 sqft), Oxford UK (30,000 sqft) — described as sufficient for current needs.",
+      "subject": "IonQ, Inc.",
+      "predicate": "leases",
+      "object_value": "College Park MD HQ + Bothell WA + Oxford UK",
+      "source_quote": "Our corporate headquarters is located in College Park, Maryland, where we lease approximately 32,000 square feet ... 101,000 square feet of space in Bothell, Washington ... 30,000 square feet of space in Oxford, United Kingdom",
+      "category": "physical_facility",
+      "queries": [
+        {"mode": "A", "source": "epa_frs", "kwargs": {"company_name": "IonQ"}, "intent": "Confirm whether IonQ has EPA-regulated facilities (heuristic 1: light electronics frequently absent from FRS, so absence ≠ red)"},
+        {"mode": "B", "source": "osha_establishments", "kwargs": {"company_name": "IonQ"}, "intent": "OSHA establishment lookup as supplementary facility verification"}
+      ]
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "IonQ has federal government and prime contractor customer concentration, including U.S. federal-agency contracts that the company expects to continue growing.",
+      "subject": "IonQ, Inc.",
+      "predicate": "holds_federal_contracts",
+      "object_value": "U.S. federal contracts (including DoD-related)",
+      "source_quote": "Our future growth and success depends in part on our ability to sell effectively to government entities and large enterprises. Contracts with U.S. federal and state and international government and state agencies are subject to a number of challenges and risks ... Contracts with government entities subject us to risks, including early termination, audits, investigations, sanctions and penalties.",
+      "category": "customer_pipeline",
+      "queries": [
+        {"mode": "A", "source": "usaspending", "kwargs": {"recipient_name": "IonQ"}, "intent": "Verify IonQ has federal obligations on record (DoD, AFRL, DOE, NASA, etc.)"},
+        {"mode": "B", "source": "usaspending", "kwargs": {"recipient_name": "IonQ Federal"}, "intent": "Entity-resolution variant — federal contracts are commonly billed through IonQ Federal, LLC"}
+      ]
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "IonQ reported total revenue of $130.0M in 2025 (up from $43.1M in 2024), of which Quantum hardware was $69.9M and Platform/consulting/support was $60.1M; auditor noted that acquired subs (id Quantique, Capella, Oxford Ionics, Vector Atomic) constituted 39% of 2025 revenue.",
+      "subject": "IonQ, Inc.",
+      "predicate": "reported_revenue",
+      "object_value": "$130.0M 2025 total revenue; 39% from recently acquired subs",
+      "source_quote": "Total revenue $ 130,016 $ 43,073 $ 22,042 ... did not include the internal controls of id Quantique SA, Capella Space Corp., Oxford Ionics Limited, and Vector Atomic Inc., which are included in the 2025 consolidated financial statements of the Company and constituted 6% of total assets as of December 31, 2025 and 39% of the Company s total revenue",
+      "category": "production_volume",
+      "queries": [
+        {"mode": "A", "source": "usaspending", "kwargs": {"recipient_name": "IonQ"}, "intent": "Confirm federal obligations are consistent with order-of-magnitude $130M total revenue"},
+        {"mode": "B", "source": "edgar_fts", "kwargs": {"search_term": "IonQ", "cik": "0000936468"}, "intent": "Counterparty-disclosure: search Lockheed Martin filings for IonQ mentions (named-prime sanity check for material customer claims)"}
+      ]
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "IonQ acquired Capella Space Corp. on July 11, 2025 for $424.8M purchase consideration; satellite imagery and data revenue from the Capella constellation is now a stated revenue line and a piece of the quantum-PNT strategy.",
+      "subject": "IonQ, Inc.",
+      "predicate": "acquired",
+      "object_value": "Capella Space Corp. ($424.8M)",
+      "source_quote": "the Company acquired Capella and Oxford Ionics on July 11, 2025 and September 16, 2025, respectively for purchase consideration of approximately $424.8 million and $1.6 billion ... providing satellite imagery and data from our constellation of satellites",
+      "category": "rollup_thesis",
+      "queries": [
+        {"mode": "A", "source": "usaspending", "kwargs": {"recipient_name": "Capella Space"}, "intent": "Capella was a DoD/NRO/IC satellite imagery vendor — verify federal contract footprint"},
+        {"mode": "B", "source": "uspto_odp", "kwargs": {"assignee": "Capella Space"}, "intent": "Verify Capella SAR / satellite IP footprint consistent with $424.8M deal price"}
+      ]
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "IonQ acquired id Quantique SA, Vector Atomic Inc., Lightsynq Technologies (May 2025), and announced the pending $1.8B SkyWater Technology semiconductor foundry acquisition (January 26, 2026).",
+      "subject": "IonQ, Inc.",
+      "predicate": "acquired_or_announced",
+      "object_value": "id Quantique, Vector Atomic, Lightsynq, SkyWater (pending $1.8B)",
+      "source_quote": "in May 2025, we acquired Lightsynq Technologies, Inc. ... acquisitions of id Quantique SA, Vector Atomic, Inc., Capella Space Corp. in 2025, and of Skyloom Global Corp. in January 2026 ... on January 26, 2026, we announced the currently-pending acquisition ... of SkyWater Technologies, Inc.",
+      "category": "rollup_thesis",
+      "queries": [
+        {"mode": "A", "source": "sec_edgar_fts", "kwargs": {"search_term": "SkyWater Technology IonQ", "limit": 10}, "intent": "Confirm SkyWater merger filings exist (proxy/8-K) — establishes Mode-A reality of the named deal"},
+        {"mode": "B", "source": "usaspending", "kwargs": {"recipient_name": "Vector Atomic"}, "intent": "Vector Atomic is DOD/DARPA-funded; verify federal contract footprint for the acquired sub"}
+      ]
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "IonQ states it had cash, cash equivalents and short-term/long-term investments of $3,336.8M as of Dec 31, 2025 and that the SkyWater Acquisition will require ~$1.0B cash, while accumulated deficit reached $1,194.1M and 2025 operating loss was $633.7M.",
+      "subject": "IonQ, Inc.",
+      "predicate": "financial_position",
+      "object_value": "$3.34B cash; $1.19B accumulated deficit; $633.7M operating loss 2025",
+      "source_quote": "As of December 31, 2025, we had cash, cash equivalents, and short-term and long-term investments of $3,336.8 million ... accumulated deficit of $1,194.1 million ... loss from operations of $633.7 million",
+      "category": "financial_distress",
+      "queries": [
+        {"mode": "A", "source": "sec_edgar_fts", "kwargs": {"search_term": "IonQ", "form_types": ["10-K"], "limit": 5}, "intent": "Confirm 10-K filing of record matches the cited figures"},
+        {"mode": "B", "source": "insider_vs_calendar", "kwargs": {"cik": "0001824920", "window_days": 14, "start_date": "2024-01-01", "end_date": "2026-05-20"}, "intent": "Compare insider Form-4 sales clustering to large fund-raise & equity issuance dates (high-cash with very large operating burn + huge dilutive raises)"}
+      ]
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "Auditor (E&Y) excluded id Quantique, Capella Space, Oxford Ionics, and Vector Atomic from ICFR scope (constituted 39% of total revenue, 6% of total assets) yet issued unqualified opinions on both the FS and ICFR.",
+      "subject": "IonQ, Inc.",
+      "predicate": "ICFR_scope",
+      "object_value": "Unqualified ICFR opinion; 39% of revenue excluded from ICFR scope",
+      "source_quote": "expressed an unqualified opinion thereon ... management s assessment of and conclusion on the effectiveness of internal control over financial reporting did not include the internal controls of id Quantique SA, Capella Space Corp., Oxford Ionics Limited, and Vector Atomic Inc., which are included in the 2025 consolidated financial statements of the Company and constituted 6% of total assets as of December 31, 2025 and 39% of the Company s total revenue",
+      "category": "ICFR",
+      "queries": [
+        {"mode": "A", "source": "sec_edgar_fts", "kwargs": {"search_term": "IonQ material weakness OR restatement", "limit": 10}, "intent": "Mode A: search SEC filings narrative for any explicit material weakness, restatement, or adverse ICFR opinion"},
+        {"mode": "B", "source": "claim_evolution", "kwargs": {"ticker": "IONQ", "topic": "internal control over financial reporting", "n_filings": 4}, "intent": "Mode B: track ICFR narrative evolution across recent filings for hidden remediation / adverse-opinion language"}
+      ]
+    }
+  ]
+}

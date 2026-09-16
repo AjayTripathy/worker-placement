@@ -1,0 +1,97 @@
+{
+  "ticker": "RUN",
+  "company": "Sunrun Inc.",
+  "cutoff": "2024-05-15",
+  "filing": "0001469367-24-000024_10K.txt",
+  "filing_date": "2024-02-21",
+  "cik": "0001469367",
+  "sector": "Technology",
+  "industry": "Solar",
+  "group": "walk_forward_2024",
+  "rfm_tuples": [
+    {
+      "claim_id": "C1",
+      "R": "\"Gross Earning Assets [as of December 31, 2023] were approximately $14.2 billion\" ... \"Gross Earning Assets utilize a 6% unlevered discount rate (weighted average cost of capital or 'WACC') to discount future cash flows to the present period.\" (10-K FY2023, MD&A / Key Operating Metrics)",
+      "f": "Mode A: Compare disclosed WACC assumption against actual cost of capital observable in same and subsequent filings; Mode B: Derive: at actual capital cost, what is the implied haircut to the headline KPI? Cross-check Q1 2024 8-K (exhibit991q124.htm) where management itself provides a pro-forma at current capital costs.",
+      "M_source": "edgar_fts.query_fulltext + claim_evolution.query_claim_evolution(cik='0001469367', search_term='discount rate', base_filing_date='2024-02-21', cutoff_date='2024-05-15') + Q1 2024 earnings release exhibit991q124.htm",
+      "M_value": "Q1 2024 8-K (filed 2024-05-08, pre-cutoff) explicitly discloses: at headline 6% WACC, Subscriber Value = $50,776 and Net Subscriber Value = $11,891; on a pro-forma basis 'assuming a 7.6% discount rate, consistent with capital costs observed in Q1', Subscriber Value = $45,477 and Net Subscriber Value = $6,593. NSV haircut: $11,891 -> $6,593 = -44.5%. SV haircut -10.4%. The 10-K Gross Earning Assets sensitivity table (FY2023) shows GEA Contracted Period of $10.80B at 6% drops to $9.68B at 7% and $8.96B at 8% - i.e. each 100 bps adds ~$0.9-1.1B haircut. At an honest 7.6% the Contracted GEA would be ~$9.2B vs $10.8B headline (-15%). Total GEA $14.2B headline -> ~$11.5B at actual WACC. PRIOR-YEAR REVISION: 10-K also restates that 2022 GEA was reported at 5% but 'if we had applied an unlevered discount rate of 6%' the 2022 Contracted period would have been $8.15B (vs $8.88B reported under 5%) - i.e. the 5%->6% rate change alone was an ~8% downward revision to a prior headline KPI.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "interpretation": "Honesty-alpha smoking gun: the company prominently markets a $14.2B Gross Earning Assets KPI and $11,891 Net Subscriber Value under a 6% discount-rate assumption that management itself, in the Q1 2024 release, concedes is below 'capital costs observed in Q1' (7.6%). Their own pro-forma confirms NSV is 45% lower at the honest rate. They also retroactively re-cut 2022's GEA in the FY2023 10-K to disclose what it would have been at 6% - tacit acknowledgement that the prior headline was inflated. This is exactly the kind of disclosed-but-buried adverse fact that the R/f/M framework is designed to catch. Not a 'lying' name (they DID print the 7.6% pro-forma), but a heavy 'obscuring' one - the unit economics under realistic WACC are weak."
+    },
+    {
+      "claim_id": "C2",
+      "R": "\"The Company was in compliance with all debt covenants as of December 31, 2023. In February 2024, the Company extended its working capital ... facility with a new maturity date of November 1, 2025 and a total commitment up to $447.5 million, and repaid approximately $152.3 million in outstanding borrowings.\" Working-capital facility amendment also '(e) revise[s] the margin that accrues on SOFR loans and base rate loans from 3.25% and 2.25%, respectively to 3.25%, 3.50% and 3.75% for SOFR loans and 2.25%, 2.50% and 2.75% for base rate loans'. (10-K FY2023, Note 8 Indebtedness)",
+      "f": "Mode A: Confirm covenant compliance language repeats in Q1 2024 10-Q. Mode B: Derive: if Feb 2024 amendment required (1) stepped-up margins, (2) a NEW 'quarter-end liquidity covenant' that must be tested as of Sept 30 2024, AND (3) maintenance of funds on deposit equal to the full amount of the 2026 Convertible Notes to allow extension to March 2027 - what does that imply about lender appetite?",
+      "M_source": "Local 10-K text + Q1 2024 10-Q (0001469367-24-000092, run-20240331.htm, fetched via edgar.fetch_filing_text) + claim_evolution.query_claim_evolution('liquidity', 'quarter-end liquidity covenant')",
+      "M_value": "Q1 10-Q (filed 2024-05-08) repeats 'in compliance with all debt covenants as of March 31, 2024'. It further discloses that maturity could be extended to March 1, 2027 ONLY 'if, as of September 30, 2024, the Company maintain funds on deposit in a collateral account equal to an amount sufficient to repay at the scheduled maturity all of its 0% Senior Convertible Notes due 2026 that are outstanding on September 30, 2024' (~$194.5M 2026 Convert balance as of 3/31/2024). Stepped-up SOFR margins to 3.25%/3.50%/3.75% (vs old 3.25%) is distressed pricing dynamics. Facility was downsized; the amendment package = covenant relief in exchange for tighter cash collateral. Total recourse + non-recourse debt = $10.67B vs total equity $6.24B (1.7x leverage); $652.9M FY23 net interest expense on $447.5M working capital + $9.7B non-recourse.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Technical PASS on Mode A (covenant compliance literally true). But Mode B derivation shows the Feb 2024 amendment is a covenant-relief / forbearance-adjacent transaction: stepped pricing, new liquidity covenant test point, and a cash-collateral mechanism to extend maturity. This is consistent with a lender base demanding tighter terms - a borderline distress signal that the headline 'in compliance' framing obscures. Note the facility size went DOWN (commitment up to $447.5M from prior level) and $152.3M was repaid as a condition."
+    },
+    {
+      "claim_id": "C3",
+      "R": "\"Goodwill impairment 1,158,000\" (10-K consolidated statements of operations) ... \"During the third quarter of fiscal 2023, consistent with other industry peers, our stock price continued to decline resulting in a decline in our market capitalization after consideration of a reasonable control premium\" triggering a $1.158B goodwill impairment. \"The test concluded that no additional impairment had occurred during the fourth quarter of 2023.\"",
+      "f": "Mode A: Verify quantum and timing. Mode B: Derive: if the Q3 2023 trigger was 'sustained stock-price decline' and a 50 bps higher discount rate would have increased the charge by ~$0.5B, what is the residual goodwill exposure? Cross-reference to balance sheet.",
+      "M_source": "Local 10-K text + claim_evolution.query_claim_evolution('goodwill impairment', base_filing_date='2024-02-21')",
+      "M_value": "FY2023 goodwill impairment $1.158B (75% of $4.28B prior-year balance written down to $3.12B remaining). Disclosed sensitivity: 50 bps higher discount rate would have increased the charge by 'approximately $0.5 billion'. Claim-evolution check: Q1 2024 10-Q reaffirms ('Due to the sustained decline in the Company's market...'). Residual goodwill $3.12B is still 50% of total equity $6.24B - so a further 16% discount-rate-driven adjustment could erase another $0.5B of equity. RUN's market cap at 2024-05-15 (pre-cutoff stock screen at -46.2% drawdown) implies further negative signal vs the September 2023 trigger price.",
+      "severity": "PASS",
+      "interpretation": "Honest disclosure of a $1.2B impairment, with sensitivity, with auditor acceptance. Per the honesty-alpha framework, this is NOT a short signal in itself - re-detecting honestly disclosed bad news is not alpha. However it raises the bar that the SAME 6% WACC assumption underlying C1's Subscriber-Value KPI is the same assumption that drove a $1.2B writedown; using a higher (honest) rate would have meant a bigger writedown AND much lower headline KPIs. The cross-tie between C1 and C3 strengthens C1."
+    },
+    {
+      "claim_id": "C4",
+      "R": "Auditor: \"/s/ Ernst & Young LLP ... We have served as the Company's auditor since 2010. San Francisco, California, February 21, 2024\". Unqualified opinion. CAM: fair value estimates for solar energy systems / customer agreements relying on significant assumptions (discount rates).",
+      "f": "Mode A: Verify auditor tier, tenure, opinion, and whether CAMs align with the riskiest accounting estimates.",
+      "M_source": "Local 10-K text",
+      "M_value": "Big-4 auditor (EY) with 14-year tenure since 2010 - long but not yet rotation-mandate (EY appointment predates SOX rotation pressure; no resignation, no disagreement, no qualification). CAM explicitly covers 'significant assumptions in the fair value estimate' - i.e. the auditor is flagging exactly the same discount-rate-and-cash-flow estimates that drive both the goodwill test and the Subscriber Value KPI.",
+      "severity": "PASS",
+      "interpretation": "Clean auditor signal. EY's CAM puts a public marker around the discount-rate machinery, which slightly raises the cost of any future 'we changed our minds about the WACC' move. Not a red flag, but also no Big-4-to-Tier-2 downgrade or resignation pattern."
+    },
+    {
+      "claim_id": "C5",
+      "R": "Multiple 10b5-1 trading plans adopted by named executive officers during Q4 2023 - shortly after the $1.2B goodwill impairment was announced. CEO Mary Powell adopted plan Nov 13, 2023 (expires Dec 31, 2024, up to 6,463 shares, price-threshold-based); CRO Paul Dickson, Co-Executive Chair, and Chief Legal & People Officer Jeanna Steele all adopted price-threshold-based plans in late 2023 expiring early 2025. Board member Gerald Risk TERMINATED a plan on October 3, 2023 (was to sell up to 135,000 shares).",
+      "f": "Mode A: Verify plan adoption dates and parameters. Mode B: Derive: do insider sale Form 4s spike around (a) the Q3 2023 impairment announcement, (b) the Feb 2024 covenant amendment, (c) the Q1 2024 earnings print? Look at velocity and clustering.",
+      "M_source": "Local 10-K Item 9B/cover insider sections + insider_vs_calendar.query_insider_sales_near_budget_events(cik='0001469367', window_days=30, lookback_days=400, cutoff_date='2024-05-15')",
+      "M_value": "M-source returned n_form4_filings=82, n_total_sales=72 across ~400-day pre-cutoff window - i.e. about 5-6 insider sale transactions/month, very heavy but typical for a name with many NEOs and 10b5-1s. The cluster of new 10b5-1 plans adopted Q4 2023 (post-impairment, when stock was lower) at PRICE-THRESHOLD triggers is mildly bullish-on-recovery (plans only execute if stock RISES to thresholds); Risk's TERMINATION of his 135,000-share plan in October 2023 (after the goodwill writedown trigger) is the opposite signal - he didn't want to be selling into the drop. Mixed.",
+      "severity": "UNVERIFIABLE",
+      "interpretation": "Mixed insider behavior. Mode B catch is the threshold structure - threshold-triggered plans only sell on rallies, so they don't signal active distress liquidation. No SEVERE insider selling pattern detectable from the M-source. Note we cannot run a full per-day Form-4 timeline without a parsed filings_index.json file (M-source returned aggregate count only)."
+    },
+    {
+      "claim_id": "C6",
+      "R": "\"As of December 31, 2023, California represented over 45% of our customer base.\" (10-K, Risk Factors). Combined with NEM 3.0: California 'has moved to a NBT structure in which exported electricity is no longer valued at the retail rate'.",
+      "f": "Mode A: Verify concentration and NEM 3.0 effective date. Mode B: Derive: if 45% of subscribers are in a state where the December 2022 NEM 3.0 ruling materially lowers the value of exported power (and therefore customer payback economics and originations), the headline KPI growth (Customers 797k -> 933k YoY = +17%) is being driven by remaining 55% of the country PLUS pre-NEM-3.0 California vintage. Forward originations in California will face headwinds.",
+      "M_source": "Local 10-K text",
+      "M_value": "10-K Risk Factors disclose California 45%+ concentration AND NEM 3.0 / 'NBT structure' effective from CPUC's Dec 15, 2022 ruling. Subscriber adds for Q1 2024 were 24,038 (per 8-K) - down materially from pre-NEM-3.0 quarters. RUN doesn't break out California Q1 originations.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "RUN discloses both facts (compliance with disclosure rules) but does NOT volunteer a California-specific subscriber-add trend or net-of-NEM-3.0 unit economics. Mode B derivation: at 45% concentration with material rule change to the most profitable state, KPI quality is degrading even if absolute customer counts grow. This compounds the C1 finding (their headline KPIs are not just at the wrong discount rate - the underlying cash flows being discounted are also lower-quality California-NEM-3.0 vintages mixed in)."
+    },
+    {
+      "claim_id": "C7",
+      "R": "Q1 2024 release headline: \"delivered another quarter of strong net subscriber values and an increasing mix of subscription services\" - Mary Powell, CEO. Reported Q1 2024: Customer Additions 24,038 incl 22,058 Subscribers; Cash Generation 'was negative $311 million in the first quarter'.",
+      "f": "Mode A: Verify the directional claim against the same release's numbers. Mode B: Derive: 'strong net subscriber values' must be evaluated at the same 7.6% WACC the company itself flagged.",
+      "M_source": "Q1 2024 8-K (0001469367-24-000091, exhibit991q124.htm)",
+      "M_value": "NSV at headline 6%: $11,891 (vs $10,338 prior year-ish, per the +15% SV growth). NSV at actual 7.6% WACC: $6,593. Cash Generation: NEGATIVE $311M in Q1 2024. Customer Additions only 24,038 (annualized 96k vs prior-year-end Customer base of 933k - so net additions running at ~10%/yr annualized, down from 17% YoY trailing).",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "CEO's 'strong net subscriber values' is true only at the (acknowledged-inflated) 6% rate. At 7.6% the NSV is barely positive after creation cost. Combined with NEGATIVE $311M Q1 cash generation, the lying-detector picks up tonal mismatch: confident growth narrative + 45% NSV haircut at honest rate + sharply negative cash generation."
+    },
+    {
+      "claim_id": "C8",
+      "R": "Going-concern / substantial-doubt language: NONE present in 10-K or Q1 2024 10-Q. Auditor opinion unqualified.",
+      "f": "Mode A: Direct text scan + going_concern_detector.query_going_concern(cik='0001469367', cutoff_date='2024-05-15').",
+      "M_source": "going_concern_local + going_concern_detector",
+      "M_value": "Zero matches for 'going concern' or 'substantial doubt' in either filing. M-source returned signal=NO_GOING_CONCERN. Liquidity = $678.8M unrestricted cash + $308.9M restricted cash at FY end; Q1 2024 'Total Cash' = $783M.",
+      "severity": "PASS",
+      "interpretation": "No going-concern disclosure required, and the M-source agrees. Not a distressed-going-concern name. Limits how short this name can be played - this is a distressed-KPI name with adequate liquidity, NOT a near-term bankruptcy candidate."
+    }
+  ],
+  "supplemental_signals": {
+    "discount_rate_kpi_arbitrage": "Most material framework finding. Headline KPIs (Gross Earning Assets $14.2B, Subscriber Value $50,776, NSV $11,891) all use 6% WACC. Management's own Q1 2024 release pro-forma at 7.6% (actual capital cost) shows NSV haircut of ~45%. 10-K sensitivity table shows GEA Contracted Period drops $10.8B -> $9.7B at 7%, -> $9.0B at 8%.",
+    "prior_period_restatement_by_assumption": "FY2023 10-K discloses that the prior-year (FY2022) reported Gross Earning Assets used a 5% discount rate; restating at 6% would have lowered FY2022 Contracted GEA from $8.88B to $8.15B (-8.2%). Tacit acknowledgement that prior headline KPIs were inflated.",
+    "leverage_profile": "Total debt $10.67B (recourse $932M + non-recourse $9.74B) vs total equity $6.24B. FY2023 net interest expense $652.9M (up 46% YoY from $445.8M).",
+    "california_nem3_exposure": "45% customer concentration in California, with NEM 3.0 (NBT) effective Dec 2022 materially reducing per-customer economics for new originations.",
+    "covenant_amendment_feb2024": "Working capital facility amended Feb 2024: downsized to $447.5M, stepped-up SOFR margins (3.25%/3.50%/3.75%), new quarter-end liquidity covenant test 9/30/2024, and cash-collateral mechanism to extend to March 2027.",
+    "auditor": "EY, 14-year tenure since 2010, unqualified opinion, CAM on fair-value discount-rate assumptions.",
+    "insider_activity": "82 Form 4 filings / 72 sales over ~400 days pre-cutoff. Multiple new 10b5-1 plans adopted Q4 2023 (post-impairment) at price-thresholds. Board member Gerald Risk terminated a 135k-share sale plan in Oct 2023 (contra-signal).",
+    "drawdown_context": "-46.2% pre-cutoff drawdown is consistent with the impairment + rate-environment headwinds, not with imminent bankruptcy."
+  },
+  "summary": "RUN is an 'obscuring distress' name, not a 'lying' name. The headline R/f/M finding is a discount-rate KPI arbitrage: management markets Gross Earning Assets and Net Subscriber Value at a 6% WACC while their own Q1 2024 release admits actual capital costs are 7.6%, at which Net Subscriber Value is ~45% lower. They also retroactively restated FY2022 GEA at 6% (down 8%) in the FY2023 10-K. The 2023 $1.158B goodwill impairment, the Feb 2024 working-capital-facility amendment with stepped pricing and new cash-collateral mechanics, the 45% California concentration into NEM 3.0 headwinds, and the negative $311M Q1 2024 cash generation collectively describe a heavily leveraged (1.7x) business whose marketed unit economics are weak under honest assumptions but whose liquidity ($783M Q1 cash) and Big-4 auditor relationship do NOT support a going-concern thesis. Honesty-alpha read: framework SHOULD penalize the KPI obfuscation but cannot claim the operational deterioration as alpha since it's largely disclosed.",
+  "composite": 0.34
+}

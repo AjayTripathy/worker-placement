@@ -1,0 +1,139 @@
+{
+  "ticker": "CACI",
+  "cutoff": "2026-05-20",
+  "filing": "0001628280-25-038739_10-K.txt",
+  "filing_date": "2025-08-07",
+  "filing_age_days": 286,
+  "claims": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Federal government revenues account for 95.7% of fiscal 2025 total revenue (prime + sub), with DoD revenues representing 75.4% of total revenue.",
+      "subject": "CACI International Inc",
+      "predicate": "derives_revenue_share_from",
+      "object_value": {"federal_pct": 95.7, "dod_pct": 75.4, "fiscal_year": 2025},
+      "source_quote": "revenues from federal government contracts, either as a prime contractor or a subcontractor, accounting for 95.7% and 95.1% of our total revenues in fiscal 2025 and 2024 ... we generated 75.4% and 74.4% of our total revenues in fiscal 2025 and 2024 ... from contracts with agencies of the DoD",
+      "category": "customer_pipeline",
+      "queries": [
+        {"mode": "A", "source": "usaspending.query_recipient_contracts", "kwargs": {"recipient_name": "CACI"}, "intent": "Confirm CACI is a major federal/DoD recipient — registry should show large multi-year contract obligations."},
+        {"mode": "B", "source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "CACI"}, "intent": "Compare DoD-specific obligations vs the asserted ~75% DoD share. Absence of DoD obligations for a company claiming material DoD revenue would be RED per heuristic 9."}
+      ]
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Top-10 revenue-producing contracts accounted for 46.4% of fiscal 2025 revenue, or approximately $4.0 billion.",
+      "subject": "CACI International Inc",
+      "predicate": "concentrates_revenue_in_top_contracts",
+      "object_value": {"top10_pct": 46.4, "top10_dollars_b": 4.0, "fiscal_year": 2025},
+      "source_quote": "For fiscal 2025, the top ten revenue-producing contracts, many of which consist of multiple task orders, accounted for 46.4% of our revenues, or $4.0 billion.",
+      "category": "customer_pipeline",
+      "queries": [
+        {"mode": "A", "source": "usaspending.query_federal_presence", "kwargs": {"recipient_name": "CACI"}, "intent": "Cross-check that there is a federal presence and obligated dollars consistent with $4B from top-10."},
+        {"mode": "B", "source": "usaspending.query_recipient_contracts", "kwargs": {"recipient_name": "CACI"}, "intent": "Identify the top awarding agencies / programs and check whether obligated $$ aggregate is materially below or in-line with disclosed top-10 share."}
+      ]
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "CACI completed seven acquisitions over three fiscal years (3 in FY25, 3 in FY24, 1 in FY23), spending ~$1.68B on FY25 acquisitions alone (Applied Insight $314.2M; Azure Summit $1,310.2M; Identity E2E $58.9M).",
+      "subject": "CACI International Inc",
+      "predicate": "executed_serial_acquisitions",
+      "object_value": {"total_acquisitions": 7, "fy25_acquisitions": ["Applied Insight", "Azure Summit Technology", "Identity E2E"], "fy25_spend_m": 1683.3},
+      "source_quote": "During the past three fiscal years, we completed a total of seven acquisitions ... Applied Insight ... $314.2 million ... Azure Summit Technology ... $1,310.2 million ... Identity E2E ... $58.9 million.",
+      "category": "rollup_thesis",
+      "queries": [
+        {"mode": "A", "source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Azure Summit Technology", "cik": "0000017843"}, "intent": "Confirm individual acquisitions (Applied Insight, Azure Summit, Identity E2E) are disclosed in CACI's own SEC filings."},
+        {"mode": "B", "source": "acq_coherence.score_acquisition_coherence", "kwargs": {"parent_thesis": "CACI provides differentiated Expertise and Technology to defense/intel customers, with focus on C3I, cyber, EW, spectrum superiority, photonics, and cloud transformation.", "acquisitions": ["Applied Insight (cloud migration/transformation for DoD/IC)", "Azure Summit Technology (RF/EMS technologies and engineering)", "Identity E2E (biometrics and cloud engineering for UK customers)"]}, "intent": "Score aggregate rollup coherence; per Mode-B heuristic, incoherence < 0.5 is SEVE even if individual acquisitions are real."}
+      ]
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "CACI raised material new debt during fiscal 2025: $1,528.3M net proceeds from debt instruments including Term Loan B Facility ($750M principal) and 2033 Notes ($1,000M principal); $1,758.9M used in investing activities largely for acquisitions.",
+      "subject": "CACI International Inc",
+      "predicate": "raised_capital_and_deployed_for_M&A",
+      "object_value": {"net_debt_proceeds_m": 1528.3, "term_loan_b_m": 750.0, "notes_2033_m": 1000.0, "investing_outflow_m": 1758.9},
+      "source_quote": "$1,528.3 million of net proceeds under our debt instruments, including the impact of debt issuance costs for the Term Loan B Facility and 2033 Notes ... Term Loan B Facility and 2033 Notes, with a principal amount of $750.0 million and $1,000.0 million, respectively.",
+      "category": "financial_distress",
+      "queries": [
+        {"mode": "A", "source": "sec_filings.list_filings_by_form", "kwargs": {"cik": "0000017843", "form": "8-K"}, "intent": "Confirm the June 2, 2025 Indenture 8-K (exhibit 4.2) and the October 30, 2024 Credit Agreement 8-K (exhibit 10.3) are on file — i.e., the new debt was actually executed and disclosed."},
+        {"mode": "B", "source": "insider_vs_calendar.query_insider_sales_near_budget_events", "kwargs": {"cik": "0000016058", "window_days": 14, "start_date": "2024-01-01", "end_date": "2026-05-20"}, "intent": "Form-4 timing — discretionary (non-10b5-1) insider sales clustered to debt-raise / acquisition-close / earnings dates would be SEVE-RED per Mode B heuristic."}
+      ]
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "CACI delivers software-defined signals intelligence, electronic warfare, and photonics technology across the RF spectrum (named program category: Spectrum Superiority for ISR/EW).",
+      "subject": "CACI International Inc",
+      "predicate": "claims_technology_leadership_in",
+      "object_value": {"areas": ["software-defined signals intelligence", "electronic warfare", "photonics", "RF spectrum / ISR", "EMS"]},
+      "source_quote": "Spectrum Superiority Design and development of software-defined, hardware enabled technologies ... We design and develop differentiated technology across the radio-frequency (RF) spectrum for intelligence, surveillance, reconnaissance (ISR), and electronic warfare (EW) and build specialized photonics, waveforms, and technology to enable secure communications across the battlefield.",
+      "category": "technology",
+      "queries": [
+        {"mode": "A", "source": "uspto_odp.query_assignee", "kwargs": {"assignee_name": "CACI"}, "intent": "Verify CACI holds granted patents — per heuristic 8, PASS if n_granted >= 5 with any claimed-category hit (RF/EW/photonics/ISR)."},
+        {"mode": "B", "source": "uspto_odp.query_assignee", "kwargs": {"assignee_name": "Azure Summit Technology"}, "intent": "Check whether the acquired RF/EMS technology subsidiary (Azure Summit) carries patent IP behind the spectrum-superiority claim."}
+      ]
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "CACI provides comprehensive secure enterprise IT solutions for approximately 50 federal agencies.",
+      "subject": "CACI International Inc",
+      "predicate": "serves_n_federal_agencies",
+      "object_value": {"approx_agencies": 50, "category": "enterprise IT"},
+      "source_quote": "We design, implement, protect, and manage secure enterprise IT solutions for approximately 50 federal agencies to optimize efficiency, enhance performance, and ensure end-user satisfaction.",
+      "category": "customer_pipeline",
+      "queries": [
+        {"mode": "A", "source": "usaspending.query_recipient_contracts", "kwargs": {"recipient_name": "CACI"}, "intent": "Verify spread of awarding agencies — claim is verifiable: roughly 50 distinct federal agency awarding entities."},
+        {"mode": "B", "source": "sam_entity.query_entity_by_uei", "kwargs": {"recipient_name": "CACI"}, "intent": "Confirm SAM.gov entity registration is active and unrestricted (per heuristic 1 of risk factors: suspension/debarment would materially impact business)."}
+      ]
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "CACI leased space at 136 U.S. locations across 27 states + DC totaling ~3.7 million square feet, plus 6 international locations in 4 countries (~0.1M sqft); corporate HQ is 12021 Sunset Hills Road, Reston, Virginia.",
+      "subject": "CACI International Inc",
+      "predicate": "operates_physical_facilities",
+      "object_value": {"us_locations": 136, "us_states": 27, "us_sqft_m": 3.7, "intl_locations": 6, "hq_address": "12021 Sunset Hills Road, Reston, VA"},
+      "source_quote": "As of June 30, 2025, we leased building space (including offices, manufacturing plants, warehouses, laboratories, and other facilities) at 136 U.S. locations ... approximately 3.7 million square feet located in 27 states and the District of Columbia. Outside the U.S., we leased office space at six locations in four countries ... Our corporate headquarters is located at 12021 Sunset Hills Road, Reston, Virginia.",
+      "category": "physical_facility",
+      "queries": [
+        {"mode": "A", "source": "epa_frs.query_facilities", "kwargs": {"facility_name": "CACI"}, "intent": "Look for EPA-regulated facilities (manufacturing plants/laboratories). Per heuristic 1, absence is NOT auto-red because IT services / R&D shops may not be EPA-regulated."},
+        {"mode": "B", "source": "dol_h1b_lca.query_lca_filings", "kwargs": {"employer_name": "CACI"}, "intent": "Cross-check ~25k headcount claim — DOL H1B LCA filings would show worksite/employer presence across multiple US states, consistent with the 136-locations / 27-states facility footprint."}
+      ]
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Management concluded that CACI's internal control over financial reporting (ICFR) was effective as of June 30, 2025, with no material weaknesses or changes; PwC audited and issued an unqualified opinion.",
+      "subject": "CACI International Inc",
+      "predicate": "asserts_icfr_clean",
+      "object_value": {"icfr_effective": true, "auditor": "PricewaterhouseCoopers LLP", "as_of": "2025-06-30"},
+      "source_quote": "management has concluded that CACI International Inc s internal control over financial reporting was effective as of June 30, 2025. The effectiveness of the Company s internal control over financial reporting as of June 30, 2025 has been audited by PricewaterhouseCoopers LLP",
+      "category": "icfr",
+      "queries": [
+        {"mode": "A", "source": "claim_evolution.query_claim_evolution", "kwargs": {"cik": "0000016058", "claim_topic": "internal control material weakness"}, "intent": "Check for prior-year material weakness narrative or remediation language in CACI's own filings."},
+        {"mode": "B", "source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "material weakness restatement adverse opinion", "cik": "0000016058"}, "intent": "Mode B — search across CACI's own filings for adverse-opinion / restatement language; recurring material weakness would be RED."}
+      ]
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "Approximately 25,000 full and part-time employees as of June 30, 2025.",
+      "subject": "CACI International Inc",
+      "predicate": "employs_n_personnel",
+      "object_value": {"headcount_approx": 25000, "as_of": "2025-06-30"},
+      "source_quote": "As of June 30, 2025, we employed approximately 25,000 talented full and part-time employees",
+      "category": "production_volume",
+      "queries": [
+        {"mode": "A", "source": "dol_h1b_lca.query_lca_filings", "kwargs": {"employer_name": "CACI"}, "intent": "Cross-check employer presence and scale via DOL LCA filings. Cleared-IT contractors typically file substantial LCA volume."},
+        {"mode": "B", "source": "osha_establishments.query_establishments", "kwargs": {"establishment_name": "CACI"}, "intent": "OSHA establishment records as another cross-source of facility/headcount footprint."}
+      ]
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "On November 12, 2024, a jury reached a $42 million judgment against CACI in the Al Shimari Abu Ghraib civil suit; CACI has appealed and recognized no liability on its balance sheet.",
+      "subject": "CACI Premier Technology, Inc.",
+      "predicate": "faces_material_litigation_judgment",
+      "object_value": {"judgment_m": 42.0, "judgment_date": "2024-11-12", "recognized_on_books": false, "case": "Al Shimari v. CACI Premier Technology"},
+      "source_quote": "On November 12, 2024, a jury reached a $ 42 million judgment against the Company ... On January 10, 2025, the motion was denied, and the Company filed a notice of appeal ... No amounts have been recognized on our consolidated financial statements.",
+      "category": "regulatory_milestone",
+      "queries": [
+        {"mode": "A", "source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Al Shimari 42 million judgment Abu Ghraib", "cik": "0000016058"}, "intent": "Confirm the disclosure of the judgment and the no-accrual position is consistently disclosed across CACI's filings (10-Q / 8-K)."},
+        {"mode": "B", "source": "claim_evolution.query_claim_evolution", "kwargs": {"cik": "0000016058", "claim_topic": "Al Shimari Abu Ghraib judgment"}, "intent": "Track the claim language across quarters — escalation from contingency to accrual would indicate growing severity."}
+      ]
+    }
+  ]
+}

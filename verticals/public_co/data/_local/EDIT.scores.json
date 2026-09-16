@@ -1,0 +1,77 @@
+{
+  "ticker": "EDIT",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "EDIT-401 is the lead in vivo development candidate; IND target mid-2026 for HeFH.",
+      "severity": "PASS",
+      "supports": ["clinical_trials.query_by_lead_sponsor"],
+      "M_check": "clinical_trials.gov registration test (Heuristic 9)",
+      "M_value": {"editas_studies_total": 5, "edit_401_nct_present": false, "phases_present": ["PHASE1", "PHASE2"]},
+      "interpretation": "EDIT-401 is explicitly described as preclinical with IND targeted mid-2026, so it correctly does NOT appear on clinicaltrials.gov as of cutoff. No conflation of preclinical with clinical phase — disclosure is straightforward and properly hedged ('on track to submit IND or foreign equivalent'). Calibration Heuristic 3 (planned vs operational) is respected: the company explicitly states 'all of our ongoing research programs are still in the preclinical or research stage.' PASS."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Reni-cel (EDIT-301) sickle cell / TDT program discontinued December 2024.",
+      "severity": "PASS",
+      "supports": ["clinical_trials.query_by_lead_sponsor"],
+      "M_check": "ClinicalTrials.gov status of EDIT-301 / reni-cel trials (Heuristic 9)",
+      "M_value": {"NCT05444894_TDT_status": "ACTIVE_NOT_RECRUITING", "NCT04853576_RUBY_SCD_status": "ACTIVE_NOT_RECRUITING", "NCT06363760_LTFU_status": "ENROLLING_BY_INVITATION"},
+      "interpretation": "Trial statuses on ClinicalTrials.gov match the discontinuation narrative: active patients moved to ACTIVE_NOT_RECRUITING (no new enrollment) and a long-term follow-up study is now ENROLLING_BY_INVITATION — consistent with winding down commercial pursuit while monitoring already-dosed patients. Honest disclosure of program termination is a structural fact, not a hidden flag. PASS."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "BMS / Juno collaboration has produced 14 programs; BMS CD19 HD Allo CAR T in Phase 1.",
+      "severity": "MODERATE",
+      "supports": ["edgar_fts.query_fulltext (BMS CIK)", "clinical_trials.query_by_lead_sponsor (Juno)"],
+      "M_check": "Counterparty disclosure threshold (Heuristic 7 / Rule 7)",
+      "M_value": {"BMS_10K_mentions_Editas": 0, "juno_total_studies": 27, "juno_phase1": 11, "juno_collaborators_listed": ["Bristol-Myers Squibb", "Bristol-Myers Squibb Services Unlimited Company", "Celgene Corporation"]},
+      "interpretation": "EDGAR fulltext search of BMS (CIK 0000014272) returns ZERO hits for 'Editas' across all forms — a notable absence given Editas has received $159M cumulative from BMS and claims 14 active programs. Juno's 27 trials on ClinicalTrials.gov list BMS and Celgene as collaborators but NOT Editas in the collaborators_sample, and a specific 'CD19 HD Allo CAR T autoimmune Phase 1' trial cannot be specifically identified in the sponsor's public registry slice. However, Editas's payments from BMS are sublicense / research collaboration fees rather than headline 'milestone-bearing $100M+' partnerships — the dollar materiality threshold of Rule 7 is borderline. The asymmetry (Editas emphasizes the BMS partnership prominently; BMS does not appear to disclose Editas by name in major filings) warrants MODERATE. Not SEVERE because the underlying collaboration economics ($159M cumulative, deferred revenue, accounts receivable activity) are documented in Editas's own audited financials, and BMS's filings may use 'collaboration partners' aggregately."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Vertex License Agreement Dec 2023 for Cas9 IP covering Casgevy; $50M upfront + $10M 2024 fee + future $5-40M annually through 2034.",
+      "severity": "PASS",
+      "supports": ["edgar_fts.query_fulltext (Vertex CIK)", "openfda.query_approved_drugs (Vertex)"],
+      "M_check": "Counterparty disclosure threshold (Heuristic 7)",
+      "M_value": {"vertex_10K_mentions_Editas": 4, "vertex_10K_years": ["2023 10-K (filed 2024-02-15)", "2024 10-K (filed 2025-02-13)", "2025 10-K (filed 2026-02-13)"], "vertex_approved_drugs": 9, "vertex_brands": ["ALYFTREK", "JOURNAVX", "KALYDECO", "ORKAMBI", "SYMDEKO", "TRIKAFTA"]},
+      "interpretation": "Vertex's 10-Ks for 2023, 2024, and 2025 fiscal years all mention Editas explicitly (4 distinct filings) — strong counterparty corroboration of the license agreement on Heuristic 7. Vertex is a major commercial-stage pharma (6 approved brands, 9 NDA applications in Drugs@FDA), and Casgevy is the BLA-cell-therapy product that uses the licensed Cas9 IP (Casgevy itself is regulated by CBER and does not appear in the Drugs@FDA NDA pull — that is expected, not a contradiction). PASS."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "DRI Healthcare Trust paid $57M upfront in Oct 2024 to purchase the Vertex annual license-fee stream.",
+      "severity": "PASS",
+      "supports": ["edgar_fts.query_fulltext"],
+      "M_check": "Royalty-monetization disclosure consistency; planned vs operational (Heuristic 3)",
+      "M_value": {"editas_external_filing_mentions": 723, "sale_of_future_revenues_repayment_2025": "$2.9M (per 10-K cash flow)"},
+      "interpretation": "DRI Healthcare Trust is a Canadian-listed (TSX) royalty buyer not in the counterparty-CIK list. The transaction is recorded as 'sale of future revenues' on the cash flow statement ($55.2M proceeds in 2024 financing; $2.9M repayment in 2025), consistent with the disclosed mechanics. This is a structural transaction (royalty monetization) that effectively turned the Vertex annuity into upfront cash and is fully disclosed in MD&A and Note 9 with offsetting balance-sheet treatment. PASS."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Editas holds foundational CRISPR/Cas9 and CRISPR/Cas12a IP, the only platform combining both.",
+      "severity": "PASS",
+      "supports": ["uspto_odp.query_assignee"],
+      "M_check": "Patent-portfolio test (Heuristic 8)",
+      "M_value": {"n_total_applications": 368, "n_granted": 47, "crispr_categorized": 190, "sample_titles": ["CRISPR-Related Methods Targeting CD70", "CRISPR/Cas9-Mediated Exon-Skipping", "CRISPR-Cpf1-Related Cancer Immunotherapy", "Cas12a Nickase Proteins"]},
+      "interpretation": "USPTO shows 47 granted patents (well above the 10-patent PASS threshold in Heuristic 8) and 190 of 368 applications categorized as CRISPR/Cas9/Cas12a/Cpf1/guide-RNA/gene-editing. Direct hits on Cas9, Cas12a, and Cpf1 in patent titles. Editas's portfolio is augmented by exclusive in-licenses from Broad Institute and Harvard (Cas9-I, Cpf1, Cas9-II License Agreements). The claim of 'only company with both Cas9 + Cas12a foundational IP' is competitive marketing language but the underlying patent footprint is genuine. PASS."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Cash $146.6M at 12/31/2025; runway into Q3 2027; $1.6B accumulated deficit; 2025 net loss $160.1M.",
+      "severity": "MODERATE",
+      "supports": ["edgar_fts.query_fulltext (going concern)"],
+      "M_check": "Going-concern / distress markers (Heuristic 10)",
+      "M_value": {"going_concern_hits_in_editas_filings": 0, "cash_eoy_2025": 146600000, "net_loss_2025": 160100000, "accumulated_deficit": 1600000000, "ATM_remaining_capacity": 106100000, "weighted_avg_ATM_price_2025": 3.07, "lost_WKSI_status": true},
+      "interpretation": "No going-concern qualifier in any Editas filing — consistent with the company's stated 18+ month runway. However, several latent distress markers are present and accurately disclosed: (a) lost well-known seasoned issuer (WKSI) status in March 2025, forcing a downsized shelf and reduced ATM capacity from $300M to $150M; (b) ATM sold at weighted-average $3.07 per share (low absolute price, dilutive); (c) FY2025 cash burn $165M from operations against $146.6M cash means at current burn the runway is ~10-11 months without further financing — the 'into Q3 2027' guidance therefore implicitly assumes meaningful burn reduction post-reni-cel-wind-down (consistent with management's stated cost-structure optimization). The runway claim is forward-looking and depends on burn-reduction execution. Disclosure is fair but the structural picture is distress-adjacent. MODERATE for the inherent cash-runway fragility, not for any misstatement."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Cumulative BMS payments $159.0M; 2025 BMS collaboration revenue $23.2M; $44.5M deferred revenue at YE 2025.",
+      "severity": "MODERATE",
+      "supports": ["edgar_fts.query_fulltext (BMS CIK)"],
+      "M_check": "Revenue-recognition / counterparty corroboration (Heuristics 7, 11)",
+      "M_value": {"BMS_10K_mentions_Editas": 0, "BMS_aggregate_payments": 159000000, "deferred_revenue_eoy_2025": 44509000, "2025_recognized": 23200000, "2024_amendment_extends_to_2026": true},
+      "interpretation": "Revenue is overwhelmingly 'collaboration revenue' rather than product sales (Heuristic 11) — disclosed as such, structural fact. The 2024 Amendment extending the BMS collaboration to November 2026 with one expiring extension option already used reduces forward visibility. BMS's EDGAR filings do not name Editas in fulltext search, but BMS is a $40B+ market-cap pharma where individual sub-license partners can be aggregated. The collaboration revenue is heavily back-loaded onto $44.5M deferred revenue, of which performance obligations 'could be satisfied' within the truncated 2026 collaboration window. MODERATE: not a falsification, but counterparty asymmetry and amendment-driven revenue recognition warrant noting given the cash-runway question. Combined with C7, points to the standard pre-revenue-biotech tension: real IP and partnerships, but lumpy and finite collaboration revenue runway."
+    }
+  ]
+}

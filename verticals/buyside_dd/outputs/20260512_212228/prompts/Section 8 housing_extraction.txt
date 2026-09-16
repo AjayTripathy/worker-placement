@@ -1,0 +1,317 @@
+You are extracting structured claims from a real-estate investment document for due diligence.
+
+Each "claim" is a discrete factual assertion the document makes that could in principle be verified against external evidence. Examples:
+- "We acquired 1234 Main St on June 1 2023 for $500,000"
+- "Current in-place rent for unit 2A is $1,800/mo"
+- "Sponsor previously managed Fund III with 24% net IRR"
+- "Property tax for 2024 will be $4,200"
+- "Unit 5 was renovated in March 2024 with $35,000 in capex"
+
+For each claim, output a JSON object with these fields:
+- claim_id: a short unique identifier (e.g. "c001")
+- subject: what the claim is about (a property address, sponsor entity, deal name, fund vintage, etc.)
+- predicate: the assertion verb in snake_case (acquired_at_price, charges_rent, prior_fund_irr, projects_noi, has_lien, etc.)
+- object_value: the asserted value
+- object_unit: unit if applicable (USD, $/mo, %, ha, etc.)
+- scope: dict with time_period, area, etc. as relevant
+- source_quote: EXACT text from the document supporting this claim. Required. Used to detect hallucination.
+- confidence: 0-1 your confidence that this is a real, intended claim from the doc
+
+Only extract claims that are concrete and externally verifiable. Skip aspirational statements ("we believe..."), generic marketing ("best in class..."), or pure opinion. Skip internal commentary.
+
+Return a JSON array. Aim for completeness — extract every distinct verifiable claim.
+
+DOCUMENT TEXT:
+---
+FLUX CAPITAL
+2026-04-26 4tripathy@gmail.com
+Low Income Housing Investment Offering
+We are raising $30,000,000 to increase the growth of our Real Estate Development strategy.
+This offering will generate consistent cash-on-cash returns via low income housing rental
+revenue while providing social impact through affordable housing.
+Projected Returns
+Loan Amount
+Annual Interest Payment
+Net to Investor
+7 Year Total
+Net to Investor
+14% 98%
+$1,000,000
+$140,000 $980,000
+Projected Returns
+Return of Loan
+7 Year Total
+Net to Investor
++ =
+98%
+$1,000,000
+$980,000
+7 Year Total
+Return to Investor
+$1,980,000
+Our partner is a Real Estate Development Company that has developed a scalable model for
+acquiring, renovating, and managing Real Estate housing properties across multiple markets.
+The company has already built a portfolio of approximately 300 properties over the past 4 years,
+demonstrating their ability to execute on their strategy.
+523 Dornoch Dr, St Louis 63137 2825 Westover Rd, Shreveport 71108 1405 Dianne Dr, Jackson 39204
+At this stage, Real Estate Development Company has overcome several significant potential
+hurdles and materially de-risked the business:
+
+FLUX CAPITAL
+2026-04-26 4tripathy@gmail.com
+1. Successfully acquired and converted ~300 properties to Real Estate housing, demonstrating
+ability to source and manage properties at scale
+2. Established relationships with HUD offices across multiple markets
+3. Built operational infrastructure for property management and tenant screening
+4. Developed expertise in navigating Real Estate requirements and inspections
+5. Created systematic approach to property identification and renovation
+Business Model
+Property Acquisition: Target homes priced $60,000-$90,000, typically 30-40% below
+replacement cost
+Renovation: Full cosmetic renovations (~$25,000) to meet our standards
+Rental Income: $1,325/month on average
+Tenant Quality: Pre-screened tenants with low turnover
+Example Property Summary
+Property Purchase Price: $60,000
+Renovation Cost: $25,000
+Refinance Cost: $5,000
+Total Cost: $90,000
+Appraised Value Post Renovation: $120,000
+Cash Out Refinance: $90,000 (75% LTV)
+Remaining Cash In Property: $0
+Rent: $16,000/year ($1325/month)
+Cashflow: $3,500/year after all expenses and debt payments
+Where We Invest-High Demand, Undersupplied Markets
+Target Areas and Section 8 Waitlist
+Closed (2 years)
+Closed (1-4 years)
+Closed (1-2 years)
+Closed (2-4 years)
+Closed (3-8 years)
+Target Market
+• Undervalued homes with high rent-to-price ratios
+Section 8 waitlists of 2-10 years =guaranteed demand
+Landlord-friendly regulations
+Proximity to job centers, schools, and transportation
+Benefiting from population growth and corporate
+investment
+Infrastructure expansion and local economic development
+What Closed Lists Mean for the Strategy
+Closed= structurally undersupplied, not speculative
+Confirms verified, long-term rental demand
+Landlords gain pricing power and low vacancy
+Ideal entry point for stable, high-yield government-backed
+cash flow
+State Waitlist State Waitlist
+Missouri Closed (3-7 ye Mississippi
+Michigan Closed (5-8 years) Georgia
+Oklahoma Closed (2-4 years Alabama
+Ohio Closed (3 years) Kentucky
+Louisiana Closed (2-3 years) Pennsylvania
+Our Track Record
+
+FLUX CAPITAL
+2026-04-26 4tripathy@gmail.com
+Cash In
+Acquisition
+Address Status Refinance Date
+Purchase
+Price
+Renovation
+Cost
+Appraised
+Price*
+Refinance
+Amount
+Property Post
+Refi
+Annual
+Cashflow
+820 Elias Ave
+Saint Louis
+63147
+In
+Acquisition
+Need to
+Complete
+Rehab First 10/15/2025 $42,000 $27,000 $100,000 $75,000 -$660 $5,312
+433 Hammond
+St Pittsburgh
+15204
+Need to
+Complete
+In Rehab 8/1/2025 $73,000 $36,500 $160,000 $120,000 -$380 $5,086
+8541 College
+Ave Saint Louis
+63136
+2740 6th Ave
+Rock Island
+61201
+2606 Chatsworth
+Ct Macon 31206
+In Rehab
+In Rehab
+Rehab First
+Need to
+Complete
+Rehab First
+Need to
+8/28/2025 $52,000 $27,000 $120,000 $90,000 -$5,088 $3,711
+Complete
+Rehab First 9/17/2025 $62,000 $25,000 $130,000 $97,500 -$3,782 $3,388
+Listed for
+Rent Yes 4/17/2025 $67,000 $25,000 $165,000 $123,750 -$22,650 $3,177
+1405 Dianne Dr
+Jackson 39204
+Listed for
+Rent In Refinance 7/10/2025 $65,000 $18.000 $115,000 $86,250 $3.225 $3.098
+2829 Comfort
+Street Jackson
+39213
+Tenant
+Selected Yes 3/19/2025 $64,000 $2,200 $80,000 $60,000 $12,519 $4,007
+3213 Central Ave
+Pittsburg 15212
+Tenant
+Selected Yes 5/16/2025 $89,500 $17,000 $150.000 $112,500 $5,061 $4.276
+523 Dornoch Dr
+St Louis 63137
+Tenant
+Selected In Refinance 5/21/2025 $70,000 $20,000 $101,000 $75,750 $20,895 $6.185
+2825 Westover
+Rd Shreveport
+71108
+Stabilized
+With
+Tenant Yes 3/19/2025 $74.000 $12,500 $125,000 $93,750 $633 $3,587
+3633 W College
+St Shreveport
+71109
+Stabilized
+With
+Tenant Yes 3/24/2025 $47,000 $24,500 $111,000 $77,700 -$459 $4,154
+200 Stillwood
+Jackson 39206
+Stabilized
+With
+Tenant Yes 4/18/2025 $50.000 $20,000 $100,000 $75,000 $1.000 $5,291
+Stabilized
+813 SW E Ave
+Lawton 73501
+With
+Tenant In Refinance 5/8/2025 $69,500 $32,000 $156,000 $117,000 -$6,395 $3,644
+Average $63,462 $22,054 $124,077 $92,631 $301 $4,224
+
+2026-04-26 4tripathy@gmail.com
+FLUX CAPITAL
+Market Opportunity
+The low income housing market presents a compelling opportunity due to several factors:
+1. Structural Supply Shortage: The US faces a shortage of 4.4-7.3 million affordable housing
+units
+2. Recession Resistance: Low income housing provides stability through economic cycles
+3. Inflation Protection: Annual rent adjustments protect against inflation
+For the last 15 years, the US have struggled to keep up new housing supply with the fast population growth
+Population steadily growing year over year
+In million people
+370
+Lack of new constructions and new housing supply since 2007
+In thousands of units
+Average home price: $218k2,800 Inflation rate: 3.0%
+2.000
+170
+1959 1967 1975 1983 1991 1999
+Entry-Level Supply Declining for Decades
+increase fro
+1967 1975 198
+Home prices are the highest in history
+Case-Shiller U.S. National Home Price NSA
+25dndex
+200
+150
+2007 2015 2023
+1900 1911 1921 1931 1941 1951 1962 1972 1982 1992 2002 2012 2023
+Source: FRED artmen and Urban Development, Institute for Building Technology & Safety, Census and CoreLogic, Robert Shiller. 20
+Myths, Preconceptions and Risk Mitigation with Low Income Housing
+Myth
+Section 8 tenants are
+risky
+2 Section 8 rents are low
+Truth & Risk Mitigation
+Section 8 tenants are just normal people with low-income. We provide a thorough background check,
+criminal record, eviction record and credit check on each tenant, and a quarterly inspection. They lose
+the voucher if not compliant.
+In most markets, excluding appreciated big cities such as Miami, Los Angeles, the Section 8 rents are
+10-30% higher than regular market rate
+3
+Section 8 tenants are
+hard to evict
+Standard leases apply. Section 8 tenants are treated like regular tenants and follow local and federal
+regulations and can be evicted normally
+4
+Section 8 tenants don't
+pay for security deposit
+The government doesn't pay for the security deposit, but landlords are allowed to charge up to 1 month
+of rent in security deposit
+5 The budget could be cut
+This bi-partisan program exists since 1974 and assists millions of families, with millions on waitlists
+waiting for housing. If the federal government decides to cut the budget, it will direct the budget for the
+states to manage, which the ones we invest have over billion-dollar surplus in housing budget
+
+FLUX CAPITAL
+2026-04-26 4tripathy@gmail.com
+While we have demonstrated a viable model, several risks should be considered:
+1. Political Risk: While unlikely given the program's 50-year history and bipartisan support,
+changes to low income housing policy could impact returns
+2. Property Management: Maintaining quality across a growing portfolio requires strong
+operational execution
+3. Interest Rate Risk: Higher rates could impact property acquisition and refinancing strategies
+4. Geographic Concentration: Portfolio currently concentrated in specific markets, though
+diversification is planned
+Team
+Our Development Company's management team brings complementary expertise across real
+estate development, operations, and finance:
+Deep experience in property development
+Track record of managing low income properties (300+ units)
+- Established relationships with local HUD offices and contractors
+Returns Projection
+The investment offers the following yield: 14% annual yield, paid quarterly
+Management Fee: None
+Exit Strategy
+Investors have the option to exit their loan after Year 3, subject to a six-month notice period. The
+first option is to sell the underlying portfolio and the second option is for Flux Capital to source a
+replacement investor. This notice period allows for either the sale to be facilitated or for Flux
+Capital to secure a replacement investor and ensure a smooth transition. The exit process is
+structured to provide investors with flexibility while maintaining operational stability for the
+portfolio.
+
+FLUX CAPITAL
+2026-04-26 4tripathy@gmail.com
+CONFIDENTIAL - FOR INFORMATIONAL PURPOSES ONLY: This memorandum contains confidential information
+and is provided for informational purposes only to the recipient. By accepting and reviewing this document, the
+recipient acknowledges and agrees that: (i) this memorandum does not constitute an offer to sell or a solicitation of
+an offer to buy any securities, and any such offer will be made only through definitive legal documentation; (ii) Flux
+Capital is not a registered investment advisor, broker-dealer, or other regulated financial services entity, and nothing
+in this memorandum constitutes investment, legal, tax, or other advice; (iii) this investment involves significant risks,
+including but not limited to risk of loss of entire investment, illiquidity risk, dependence on government programs and
+regulations, real estate market risks, interest rate risks, management and operational risks, geographic concentration
+risks, construction and development risks, environmental risks, and changes in local, state, or federal laws and
+regulations; (iv) the securities offered hereby have not been registered under the Securities Act of 1933, as amended,
+or any state securities laws, and are being offered and sold in reliance on exemptions from the registration
+requirements of said act and such laws; (v) these securities are "restricted securities" and may not be resold unless
+registered under applicable federal and state securities laws or unless an exemption from registration is available; (vi)
+past performance is not indicative of future results, and any projections, forecasts, or estimates contained herein are
+forward-looking statements based upon certain assumptions, and other events which were not taken into account
+may occur and may significantly affect returns; (vii) while we believe all information provided herein is accurate, we
+have relied upon information provided by our development partner and have not independently verified all claims;
+(viii) recipients must conduct their own due diligence and should not rely solely on information provided in this
+memorandum; (ix) by accepting this document, recipients agree not to duplicate, use, or disclose any portion of this
+information in any manner without prior written consent from Flux Capital; (x) neither Flux Capital nor its
+representatives provide tax or legal advice, and each investor should consult their own tax and legal advisors
+regarding an investment in the FCRE2 LLC; and (xi) this memorandum shall be governed by and construed in
+accordance with the laws of Florida, without regard to conflicts of law principles. © 2025 Flux Capital. All rights
+reserved. This is not investment advice and should not be relied upon to make any investment decision. Each
+prospective investor should consult with their own professional advisors regarding the economic, tax, and other
+consequences of an investment in FCRE2 LLC.
+---
+
+Return ONLY the JSON array, no preamble or commentary.

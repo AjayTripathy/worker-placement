@@ -1,0 +1,108 @@
+{
+  "ticker": "ATI",
+  "cutoff": "2024-09-01",
+  "filing": "0001628280-24-006606_10-K.txt",
+  "_framework_note": "ATI's 10-K narrative does NOT name specific Pentagon Program Elements / PE numbers / programs-of-record. Defense end-markets are described only at the generic platform level ('naval nuclear products, military jet engines, fixed wing and rotorcraft products, armor applications'). This is the OPPOSITE of the YSS/IONQ short-thesis pattern (which depended on small-cap loading forward narrative on a single named, vanishing PE). The J-Book divergence framework therefore has limited bite here — no single named program can fail; risk is diffused across the megacap-prime supply chain. The pentagon_jbook queries below are run against IMPLIED programs (F-35, F-22A, F-15EX, B-21, CV-22, KC-46A, Hypersonics, Columbia, Virginia) that PLAUSIBLY consume ATI titanium/nickel, but the claims do NOT explicitly cite these. Severity reflects this looseness: even an UNFUNDED-status implied program scores at most MODERATE, because the claim binding to that program is weak.",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Defense applications include naval nuclear products as a stated end-market.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["filing source quote present", "no PE named", "naval nuclear programs (Columbia, Virginia class submarines) NOT in J-Book corpus"],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "NOT_FOUND (Columbia Class Submarine, Virginia Class Submarine)",
+      "interpretation": "Naval nuclear shipbuilding is funded primarily through Navy Shipbuilding & Conversion (SCN) — not in the FY26 RDT&E/Aircraft Procurement corpus this tool indexes. Coverage gap, not a divergence signal. Treat as UNVERIFIABLE per heuristic 7."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Defense applications include military jet engines — implicating F-35 (F135), F-22 (F119), F-15EX (F110), B-21 program.",
+      "severity": "PASS",
+      "supports": ["F-35 C2D2 PE 0604840F FUNDED_STEADY ($1,237M FY24)", "B-21 Raider PE B02100 FUNDED_STEADY ($1,879M FY24)", "F-22A PE F02200 (post-production support) UNFUNDED_THIS_YEAR — but normal for retired-production sustainment line", "F-15 PE F01500 UNFUNDED_TWO_PLUS_YEARS — same caveat: post-production sustainment line, F-15EX has its own separate live PE"],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "primary platforms (F-35, B-21) FUNDED_STEADY; legacy sustainment lines (F-22A, F-15) unfunded — explainable by P-40 line-item type (Post Production Aircraft Supt Equipment & Facilities), not program-of-record cancellation.",
+      "interpretation": "The big-ticket military-jet-engine demand drivers ATI implicitly cites are funded at material levels in the FY26 J-Book. Even the F-22A/F-15 'unfunded' signals are P-40 sustainment lines (post-production support), not the live aircraft programs — heuristic 8 (procurement vs RDT&E) applies. ATI's military-engine forward thesis is NOT contradicted by the J-Book."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Defense applications include fixed-wing and rotorcraft products (CV-22, KC-46A as proxies).",
+      "severity": "PASS",
+      "supports": ["CV-22 PE 0401318F FUNDED_STEADY ($16.6M FY24 RDT&E)", "KC-46A Tanker Squadrons PE 0401221F FUNDED_STEADY ($78.7M FY24 RDT&E)"],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "FUNDED_STEADY for both queried tilt-rotor / tanker RDT&E lines.",
+      "interpretation": "Generic rotorcraft / fixed-wing platforms ATI plausibly supplies remain funded in the latest J-Book. No divergence."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "ATI expects to increase sales in government defense applications in future years.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["forward-looking statement", "no specific program named", "ATI not in J-Book by_entity index (58 contractors); contractor_name='Allegheny Technologies' returns NOT_FOUND in J-Book primary-contractor index"],
+      "M_check": "pentagon_jbook.query_program_funding (contractor_name)",
+      "M_value": "NOT_FOUND for 'Allegheny Technologies'; spurious-substring matches for 'ATI'.",
+      "interpretation": "ATI is a sub-tier materials supplier (titanium ingot, nickel superalloy mill products) — it almost never appears as a J-Book primary contractor. The forward-growth assertion is unfalsifiable through the J-Book lens because ATI's revenue is two layers downstream of the line items the J-Book itemizes. Coverage-gap UNVERIFIABLE; not a red flag, but also not externally verifiable as bullish."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Titanium melt capacity (+80% vs FY2022 by late FY2025) sized for aerospace & defense growth.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["usaspending.query_dod_contracts: 'ATI Inc' returned 36 awards / $8.1M total, but the top-listed hits are 'GBI Cincinnati Inc' and 'Cincinnati Incorporated' (machine-tool false positives, NOT ATI Inc the materials company)", "'ATI Specialty Materials' = 0 awards", "'ATI Forged Products' = 0 awards", "'ATI Titanium' = 0 awards", "'Allegheny Technologies' = 1 award worth $1.44M (Allegheny Ludlum LLC, 6Al-4V titanium, contract W15QKN08C0452)"],
+      "M_check": "usaspending.query_dod_contracts",
+      "M_value": "Direct DoD prime contracts to ATI/Allegheny entities are de minimis (<$2M aggregate across 2018-2024) once false-positive Cincinnati matches are excluded.",
+      "interpretation": "The +80% titanium capacity expansion is being justified to investors partly on 'A&D demand growth.' Direct DoD obligations to ATI entities are negligible — confirming ATI is a sub-tier supplier to primes (Boeing, LMT, RTX/Pratt, GE Aerospace), not a direct DoD prime. The risk: if commercial-aerospace build rates (Boeing 737 MAX, 787; Airbus A320neo; LEAP/GTF engine ramps) slip — which is the actual driver of ~60% of HPMC revenue — the capacity could be stranded. The DEFENSE part of the capacity story is thin and unverifiable through usaspending. Score MODERATE_UNDERDELIVERY on the implicit 'defense demand justifies capacity' framing — defense is not where the demand is provable; commercial-aerospace cyclicality is the real exposure (not in scope of this J-Book cohort)."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Fort Lauderdale, FL additive manufacturing facility for aerospace & defense laser powder bed fusion.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["epa_frs.query_facilities (ATI, FL) returned 5 facilities, but all are unrelated businesses (e.g., 'Acquisitions Technologies Inc dba ATI Recycling' in Clearwater) — no FRS hit matching ATI Inc's announced Fort Lauderdale additive site"],
+      "M_check": "epa_frs.query_facilities",
+      "M_value": "5 FL facilities found, none traceable to ATI Inc.",
+      "interpretation": "Facility may be too new (FY2024 startup) or not subject to RCRA/CAA/CWA reporting at scale to appear in FRS. Cannot verify the existence/operationalization of the Fort Lauderdale additive site through FRS at the 2024-09-01 cutoff. UNVERIFIABLE — not a red flag."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Approximately 60% of HPMC revenue from commercial jet engines, long-term supply agreements with current and next-generation jet engines.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["edgar_fts at Boeing (CIK 0000012927) and LMT (CIK 0000936468) for 'ATI Inc' and 'Allegheny Technologies' returned total_hits=0 in 10-K/10-Q filings since 2022-01-01"],
+      "M_check": "edgar_fts.query_fulltext",
+      "M_value": "0 hits naming ATI/Allegheny as supplier in Boeing or LMT public filings.",
+      "interpretation": "Megacap primes do not typically name sub-tier alloy/forging suppliers in 10-Ks, so a 0-hit result is the EXPECTED null — not contradiction. UNVERIFIABLE counterparty-disclosure control claim; consistent with normal disclosure practice."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Aerospace & defense ~60% of total ATI sales.",
+      "severity": "PASS",
+      "supports": ["consistent with internal MD&A narrative", "no contradiction from external sources", "DoD direct exposure (per usaspending) is small — confirming the 'defense' portion is largely INDIRECT via prime supply chains, which is consistent with materials-supplier business model"],
+      "M_check": "usaspending.query_dod_contracts",
+      "M_value": "$1-8M direct DoD; rest of 'A&D' revenue flows through commercial primes / megacap defense primes as sub-tier mill product.",
+      "interpretation": "60% A&D mix claim is plausible at face value; the breakdown (commercial vs defense) is not separately disclosed, but the sub-tier-supplier model is consistent with usaspending direct-contract evidence. PASS."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "Defense end-market includes hypersonics and armor applications.",
+      "severity": "PASS",
+      "supports": ["Hypersonics Prototyping PE 0604033F FUNDED_STEADY ($27.9M FY24)", "Hypersonics Prototyping - HACM PE 0604183F also active", "Long Range Hypersonic Weapon NOT_FOUND in J-Book corpus (Army-side; Navy/Army hypersonic procurement is in separate volumes not fully indexed)"],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "FUNDED_STEADY on Air Force hypersonics PEs; Army LRHW unindexed.",
+      "interpretation": "AF hypersonics PEs remain funded; ATI's titanium/nickel materials are plausibly upstream. No divergence. PASS."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "Long-term supply agreements with megacap aerospace primes (Boeing, Lockheed, Northrop) — control / counterparty-disclosure claim.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["edgar_fts at Boeing/LMT/NOC returned 0 hits naming ATI/Allegheny as supplier"],
+      "M_check": "edgar_fts.query_fulltext",
+      "M_value": "0 megacap-prime 10-K hits.",
+      "interpretation": "Primes do not enumerate sub-tier suppliers in public filings; 0-hit is expected. UNVERIFIABLE control claim."
+    }
+  ],
+  "severity_counts": {
+    "PASS": 4,
+    "MODERATE_UNDERDELIVERY": 1,
+    "SEVERE_UNDERDELIVERY": 0,
+    "RED_FLAG_NEGATIVE": 0,
+    "UNVERIFIABLE": 5
+  },
+  "jbook_grounded_claims": ["C1", "C2", "C3", "C4", "C9"],
+  "jbook_fired_on": ["C1", "C2", "C3", "C4", "C9"],
+  "summary": "ATI on the J-Book cohort: the framework PROBES correctly (pentagon_jbook fires on every J-Book-grounded claim) but the SUBJECT is mis-matched to this pattern. ATI doesn't name PEs; its forward defense narrative is too diffuse for the J-Book divergence test to land. All named-platform proxies the framework can check (F-35, B-21, CV-22, KC-46A, Hypersonics Prototyping) are FUNDED_STEADY. The only signal of any concern is the implicit defense-demand framing of the +80% titanium capacity buildout (C5) — and that risk is more about commercial-aerospace build-rate cyclicality (out of cohort scope) than DoD program risk. NET: no Signal-OS short signal triggered by the J-Book cohort on ATI at the 2024-09-01 cutoff."
+}

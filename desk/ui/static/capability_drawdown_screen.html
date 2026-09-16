@@ -1,0 +1,44 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Drawdown screen</title><style>
+body{margin:0;background:#0b0e12;color:#e8ebee;font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:26px 24px 90px}
+a{color:#8b7cf6} h1{font-size:23px;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:#7d858e;margin:0 0 20px;font-size:13px}
+h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:#7d858e;margin:24px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 10px;border-bottom:1px solid #242a31;text-align:left;vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#7d858e}
+.k{font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:20px}
+.k-generator{color:#c3b8fb;background:rgba(139,124,246,.15)}
+.k-detector{color:#eccb8a;background:rgba(217,164,65,.15)}
+.k-watcher{color:#8ee5c1;background:rgba(53,201,143,.15)}
+.k-evidence{color:#b3bcc6;background:rgba(138,147,158,.15)}
+.h-OK{color:#35c98f} .h-STALE{color:#d9a441} .h-ERROR{color:#e0736a} .h-NEVER_RUN{color:#8a939e}
+pre{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px;overflow-x:auto;font-size:12px;line-height:1.5}
+.panel{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px 18px;margin-bottom:12px}
+ul{margin:4px 0;padding-left:20px} li{margin-bottom:4px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+</style></head><body><div class="wrap"><h1>Drawdown screen</h1><p class="sub">registered capability · drawdown_screen</p><a href="signals.html">&larr; all signals</a><div class="panel" style="margin-top:10px"><span class="k k-generator">GENERATOR</span> &nbsp;<span class="h-NEVER_RUN"><b>NEVER_RUN</b></span> · last run <span class="mono">never</span></div><p>Candidates ranked by drawdown from their 52-week high — the realized-winner entry signature (good businesses at deep discounts to their OWN history; see pnl-attribution doctrine). Quality gate is the COURT&#x27;s job, not the screen&#x27;s.</p><form method="POST" action="/signals/run" style="margin:10px 0"><input type="hidden" name="name" value="drawdown_screen"><input name="symbol" placeholder="symbol (if applicable)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px"><input name="symbols" placeholder="universe, comma-sep (generators)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px;margin-left:6px"><button type="submit" style="background:#8b7cf6;color:#0b0e12;border:0;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;margin-left:6px">Run now</button></form><h2>Datasources</h2><ul><li>Nasdaq free historical endpoint (close-only daily bars)</li></ul><h2>Applies to</h2><ul><li><b>strategies:</b> concentrated, core_equity, quality_drawdown, quality_value, value_band_entry</li></ul><h2>The code</h2><pre>@capability(&quot;drawdown_screen&quot;, &quot;generator&quot;, &quot;Drawdown screen&quot;,
+            desc=&quot;Candidates ranked by drawdown from their 52-week high — the &quot;
+                 &quot;realized-winner entry signature (good businesses at deep &quot;
+                 &quot;discounts to their OWN history; see pnl-attribution doctrine). &quot;
+                 &quot;Quality gate is the COURT&#x27;s job, not the screen&#x27;s.&quot;,
+            datasources=[&quot;Nasdaq free historical endpoint (close-only daily bars)&quot;],
+            applies_to={&quot;strategies&quot;: [&quot;quality_value&quot;, &quot;core_equity&quot;, &quot;concentrated&quot;,
+                                       &quot;value_band_entry&quot;, &quot;quality_drawdown&quot;],
+                        &quot;universal&quot;: False})
+def gen_drawdown_screen(ctx):
+    from officekit_research import SOURCES as EV
+    symbols = [s.upper() for s in (ctx.get(&quot;symbols&quot;) or []) if str(s).strip()]
+    if not symbols:
+        raise RuntimeError(&quot;drawdown_screen needs a symbol universe (ctx[&#x27;symbols&#x27;])&quot;)
+    rows, errors = [], []
+    for sym in symbols[:25]:
+        try:
+            t = EV[&quot;tape&quot;](sym, ctx)
+            rows.append({&quot;symbol&quot;: sym, &quot;last&quot;: t[&quot;last&quot;], &quot;off_high_pct&quot;: t[&quot;off_high_pct&quot;]})
+        except Exception as e:
+            errors.append(f&quot;{sym}: {type(e).__name__}&quot;)
+    rows.sort(key=lambda r: r[&quot;off_high_pct&quot;])
+    return {&quot;candidates&quot;: rows, &quot;errors&quot;: errors,
+            &quot;note&quot;: &quot;rank = % off 52wk high; deepest first; court every pick before sizing&quot;}
+</pre></div></body></html>

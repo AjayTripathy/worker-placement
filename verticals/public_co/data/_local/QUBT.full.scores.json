@@ -1,0 +1,95 @@
+{
+  "ticker": "QUBT",
+  "scores": [
+    {
+      "claim_id": "C1_patents_qci_only",
+      "claim_text": "QCi has three granted United States patents (excluding LSI portfolio).",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "uspto_odp.query_assignee(assignee_name='Quantum Computing Inc.') + (Mode B) assignee_name='QPhoton'",
+      "M_value": "QCI: 3 granted (11436519, 12008436, 12493811); QPhoton: 0 granted. Granted patents match the three listed in 10-K (machine-learning mapping x2 + variational analog quantum oracle learning).",
+      "interpretation": "Mode A exact match: 3 = 3 granted. Mode B reveals QPhoton itself holds no granted USPTO patents under that assignee name — the QPhoton tech IP appears to live via the Stevens Institute license, not native QPhoton issuances. Net: claim PASS. Note caveat below per heuristic 8: total of only 3 native granted patents is thin for a 'quantum-computing company' but matches what they disclosed."
+    },
+    {
+      "claim_id": "C2_lsi_acquired_patents",
+      "claim_text": "LSI acquisition brought 23 issued US patents, 16 pending US patents, 9 foreign publications.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "uspto_odp.query_assignee(assignee_name='Luminar Semiconductor') (Mode A); assignee_name='Freedom Photonics' (Mode B / entity resolution)",
+      "M_value": "Luminar Semiconductor: 0 applications (asset has not yet been re-assigned). Freedom Photonics LLC (predecessor / pre-rebrand entity that LSI subsumes per patent table in 10-K): 60 total applications, 22 granted patents pre-cutoff. The 10-K's patent table lists patents owned by 'Freedom Photonics LLC' but described as LSI's portfolio.",
+      "interpretation": "Per heuristic 6 (name-variant fragility): predecessor name resolves the claim. 22 granted patents in laser diodes, tunable lasers, optical modulators, photonic transmitters — consistent with the 23 'issued' patents claimed (within 1; the 10-K count likely includes one very-recent issuance). PASS via entity resolution. Mode B was load-bearing here."
+    },
+    {
+      "claim_id": "C3_az_chips_facility",
+      "claim_text": "9,261 sq ft TFLN chip fab facility in Tempe, AZ at ASU Research Park, substantially completed March 2025.",
+      "severity": "UNVERIFIABLE",
+      "supports": null,
+      "M_check": "epa_frs.query_facilities(facility_name='Quantum Computing', state_abbr='AZ'); osha_establishments.query_establishments(company_name='Quantum Computing', state='AZ')",
+      "M_value": "EPA FRS: 0 facilities matched. OSHA: 0 establishments matched (NO_OSHA_FOOTPRINT, 2024 data).",
+      "interpretation": "Per calibration heuristic 1 (EPA FRS scope), a small TFLN photonic chip R&D / prototype fab is unlikely to be EPA-regulated and unlikely to register in OSHA establishments for a brand-new (March 2025) lease in shared university research park space. OSHA 2024 data also predates the facility's operational date. Cannot verify nor refute — UNVERIFIABLE rather than RED. The Tempe lease is also confirmed via the Properties section of the 10-K itself."
+    },
+    {
+      "claim_id": "C4_lsi_acquisition_thesis",
+      "claim_text": "Acquired LSI on Feb 2 2026 for $110M as stalking-horse 363 bidder; aggregate rollup thesis (QPhoton + LSI) coherent with quantum-photonics roadmap.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": "partial",
+      "M_check": "sec_filings.list_filings_by_form(form='8-K') confirms Feb 3 2026 8-K accession 0001213900-26-011452 (closing) and earlier Dec 15 2025 announcement; acq_coherence.score_acquisition_coherence (Mode B) on aggregate rollup.",
+      "M_value": "8-K filings confirm the announce (Dec 2025) and close (Feb 3 2026). acq_coherence LLM tool returned INCOHERENT_ROLLUP / mean=0.0 but reasoning text said 'cannot assess... no target name provided' which contradicts the inputs sent. Tool appears to be giving a default low-input fallback rather than a real assessment.",
+      "interpretation": "Mode A confirms the acquisition is real (8-K filings, $110M cash). Mode B aggregate coherence call is unreliable due to apparent tool malfunction. Independent qualitative read: pairing a III-V laser-diode/photodetector fab (LSI/Freedom Photonics) with a TFLN PIC roadmap is plausibly synergistic — these are complementary photonics layers. However, the $110M cash spend (~7.5% of the 2025 equity raise) immediately after a $1.475B raise, on a Chapter 11 stalking-horse asset whose patents read mostly as laser/transmitter products (not quantum), is a thesis-broadening that softens the 'pure quantum' story. MOD: real deal, real assets, but the strategic logic is at the boundary of coherent extension vs. cash-deployment-driven scope creep. acq_coherence verdict treated as unreliable."
+    },
+    {
+      "claim_id": "C5_equity_raise_1475M",
+      "claim_text": "Raised $1,475.1M net via private placement, issuing 86.3M shares in 2025; insider behavior question (Mode B).",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": "mixed",
+      "M_check": "sec_filings (S-1 list) (Mode A); insider_vs_calendar.query_insider_sales_near_budget_events(cik='0001758009', window_days=14, start_date='2024-01-01', end_date='2026-05-20') (Mode B).",
+      "M_value": "Mode A: 5 S-1 filings (Dec 2024, Jan 2025, Jul 2025 x2, Jul 2029) confirm registered resale shelf activity backing the $1.475B raise narrative — capital actually raised. Mode B insider_vs_calendar: n_form4_filings=20, total insider sales=19 transactions totaling $32,144,354. PROXIMATE_DISCRETIONARY signal — 1 discretionary sale (Begliarbekov Milan, $33,891, 2026-01-07, -13 days from FY26 bipartisan-budget signing). Tool clipped to lookback start 2025-05-20.",
+      "interpretation": "Mode A PASS on raise itself. Mode B: only 1 small ($34K) proximate discretionary sale to a budget event in the 12-month lookback, BUT total insider sales ~$32M against the company's $682K full-year 2025 revenue is itself a giant red flag — insider-cash extraction is ~47x the operating revenue. Per heuristic — the PROXIMATE_DISCRETIONARY flag plus the scale of total insider sales relative to operations qualifies this as SEVERE underdelivery. Capital was raised, but the dollar-weighted insider behavior (Form 4 cash-out >> operating revenue) is the kind of pattern the framework specifically targets."
+    },
+    {
+      "claim_id": "C6_revenue_size",
+      "claim_text": "FY2025 total revenue $682K (essentially pre-revenue).",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": true,
+      "M_check": "usaspending.query_recipient_contracts(recipient_name='Quantum Computing Inc') (Mode A); usaspending.query_recipient_grants (Mode B).",
+      "M_value": "USAspending contracts: 2 awards totaling $95,663 ($69,500 DoC for TFLN chips + $26,163 NASA consulting). Grants: 0. Federal share of revenue therefore ~14% of total reported $682K revenue. No DoD contracts.",
+      "interpretation": "Revenue claim is true (and trivially small). The Mode A query confirms the federal share but exposes the SEVERE divergence between the company's positioning ('quantum computing for defense / govt grant pipeline') and reality ($96K obligated across 2 small awards over multiple years, ZERO DoD obligations under the QCi name). The company has a $1.5B war chest deployed against a sub-$1M operating business — classic capital-vehicle-with-no-business pattern. Material absence-where-presence-expected for the asserted defense/govt positioning."
+    },
+    {
+      "claim_id": "C7_securities_class_action",
+      "claim_text": "Active securities class action (Feb 2025) + 4 derivative actions alleging false/misleading statements about customers, contracts, and business operations; class period 2020-03-30 to 2025-01-15.",
+      "severity": "RED_FLAG_NEGATIVE",
+      "supports": true,
+      "M_check": "claim_evolution.query_claim_evolution(cik='0001758009', search_term='customer contracts'); sec_filings.list_filings_by_form(form='10-K/A').",
+      "M_value": "claim_evolution: 8 subsequent mentions across 10-K/10-Q/8-K/8-K/A, status REAFFIRMED_IN_STRUCTURED_DISCLOSURE, but no adverse findings flagged. 10-K/A history: 4 amendments — 3 prior amendments of the FY2022 10-K filed April/June/July 2023 and a Sept 2024 amendment. Multiple-amendment cycle on a single fiscal year's 10-K is a serious restatement footprint.",
+      "interpretation": "Three amendments of one fiscal year's 10-K (FY2022) plus an additional 10-K/A in 2024 demonstrate material disclosure-quality issues. Combined with an active securities class action specifically alleging false statements about customers/contracts/business operations, plus FOUR shareholder derivative suits, the pattern matches the framework's RED_FLAG_NEGATIVE template (governance + truthfulness-of-disclosure stress). Litigation is unresolved but the volume/repetition of amendments is itself a hard signal."
+    },
+    {
+      "claim_id": "C8_federal_govt_grant_loan_funding",
+      "claim_text": "Plans to finance operations through U.S. government grant and loan programs (implied federal funding access).",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": false,
+      "M_check": "usaspending.query_federal_presence(name_variants=[...]) (Mode A); doe_budget.query_program_funding(program_name='Quantum Information Science') (Mode B).",
+      "M_value": "Federal presence: 1 UEI resolved (DMTDV6GZCQZ3), 2 contracts totaling $0.096M, 0 grants. Signal: SUB_MATERIAL_FEDERAL. DOE QIS programs are well-funded across FY25/FY26 (ASCR Advanced Computing Tech FY26 $112.6M, HEP-QIS FY25 $50.6M, BES-QIS FY26 $2.24B) — i.e., the funding exists; QCi is just not in it.",
+      "interpretation": "Mode B is load-bearing: DOE QIS funding is real and growing across primary lines, yet QCi has captured ~$96K total federal $$ vs. peers/competitors who get millions in SBIR-II and PE-line awards (compare to Freedom Photonics' own $25.8M DoD record under the same parent now). Disclosing 'U.S. government grant and loan programs' as a financing source is materially overstated when historical capture is sub-$100K and there is no current obligated pipeline. SEVERE underdelivery on implied federal-funding access."
+    },
+    {
+      "claim_id": "C9_quantum_photonic_aero_defense",
+      "claim_text": "LSI serves aerospace and defense customers; LSI acquisition positions QCi as A&D photonic supplier.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "usaspending.query_dod_contracts(recipient_name='Luminar Semiconductor') (Mode A); recipient_name='Freedom Photonics' (Mode B).",
+      "M_value": "Luminar Semiconductor: 0 DoD awards. Freedom Photonics: 59 DoD awards totaling $25.85M including DARPA, Army (W31P4Q19C0084), Missile Defense Agency (HQ086022C7115), AFRL (FA864921P0779, FA864921P0963), with descriptions naming SBIR Phase II on quantum frequency processors, Rydberg radio receivers, GeSiSn focal plane arrays, GaAs diode lasers.",
+      "interpretation": "Entity resolution under predecessor name confirms the A&D customer base is real and substantial. The $25.8M DoD obligation history is a genuine asset added to QCi via the $110M LSI acquisition. PASS — this is one of the few claims where Mode B materially helped (Mode A under new name = 0). Calibration heuristic 6 confirmed."
+    },
+    {
+      "claim_id": "C10_stevens_license_commercialization",
+      "claim_text": "Began commercializing Stevens Institute licensed technology but recorded zero royalty / zero related revenue.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": "partial",
+      "M_check": "edgar_fts.query_fulltext(search_term='Quantum Computing Inc', cutoff_date='2026-05-20') (Mode A); uspto_odp.query_assignee(assignee_name='Stevens Institute of Technology') (Mode B).",
+      "M_value": "edgar_fts: 474 hits across QCI filings (license referenced extensively). uspto_odp Stevens Institute: 285 applications, 69 granted patents broad — but the snippets shown are biomedical / ETF / actuators, not photonic-quantum-computing. Stevens Institute IP that underlies the License Agreement is held by Stevens but assignments to QCi would not show under QCi assignee.",
+      "interpretation": "The license is real and reaffirmed in 8 years of structured disclosure. However the claim is also a self-disclosed contradiction: 'begun commercialization' but $0 royalties + the broader 10-K shows $682K total revenue. The 3.5% Stevens royalty on net sales of licensed products implies effectively no commercial product sales at all of Stevens-IP-derived devices — modest claim survives because Mode A confirms agreement existence; modest gap because Mode B cannot find Stevens-Institute photonics-quantum patents that map clearly to the asserted commercialization. MOD."
+    }
+  ]
+}

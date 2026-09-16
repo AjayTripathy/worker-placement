@@ -1,0 +1,106 @@
+{
+  "ticker": "ARQQ",
+  "cutoff": "2026-05-20",
+  "cohort": "jbook_exposure_divergence",
+  "filing": "0001104659-25-119500_20-F.txt",
+  "form": "20-F",
+  "filed": "2025-12-09",
+  "scoring_notes": "Arqit's 20-F does not name a specific Program Element (PE number) or named DoD program of record, so pentagon_jbook cannot do a direct line-item lookup. The framework's J-Book signal here is therefore indirect: (a) Arqit's own contractor-name lookup is NOT_FOUND in the J-Book corpus, (b) usaspending shows ZERO direct DoD-prime obligations to Arqit / Arqit Limited 2020-2026 despite the filing claiming a 'first U.S. Department of War contract', and (c) the natural peer/proxy PE for quantum-encryption DoD pool (AFRL Quantum Networking) is UNFUNDED_TWO_PLUS_YEARS with EARMARK_SUNSET (Cardin, Tester out of power). Net: the J-Book divergence pattern here is the absence of a verifiable PE-anchored revenue stream behind hand-wavy 'government and military markets currently represent its largest potential source of revenue' language combined with $0.530M total revenue and 56% one-customer concentration.",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Arqit's first U.S. Department of War contract is delivered via a large U.S. IT vendor partner.",
+      "category": "dod_customer_concentration",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": ["pentagon_jbook contractor 'Arqit' returns NOT_FOUND (no Arqit-prime program in the FY 2026 J-Book corpus of 410 PEs)", "usaspending DoD contracts for recipient 'Arqit' and 'Arqit Limited' both return n_awards=0, total_amount=$0 across 2020-2026"],
+      "M_check": "pentagon_jbook.query_program_funding + usaspending.query_dod_contracts",
+      "M_value": "pentagon_jbook=NOT_FOUND (contractor=Arqit); usaspending DoD obligations=$0 (n_awards=0)",
+      "interpretation": "Arqit claims a 'first U.S. Department of War contract' (framed as integration into a large U.S. IT vendor's product offering), yet USAspending shows zero direct Arqit/Arqit Limited DoD obligations across the 6-year window. If the contract were material, the prime IT vendor would still typically appear as a sub-tier or task-order trail. Combined with $0.530M total FY2025 revenue, the most charitable read is the 'contract' is a sub-component flowing entirely through the IT vendor's books (Arqit not on the recipient side). The narrative implies forward DoD pull without a verifiable prime obligation. Per heuristic 6 (usaspending shows ZERO obligations under the claimed program), this is at minimum SEVERE_UNDERDELIVERY. Not pushed to RED because filing explicitly disclaims direct prime status ('in partnership with a large, leading U.S. IT vendor')."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Government and military markets currently represent Arqit's largest potential source of revenue.",
+      "category": "jbook_program_pipeline",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": ["pentagon_jbook for the natural-proxy PE (AFRL Quantum Networking) returns UNFUNDED_TWO_PLUS_YEARS — the post-quantum-comms federal pool that Arqit's narrative implicitly addresses has been zeroed for FY2025 and FY2026 (FY 2026 bipartisan budget Jan 2026)", "pentagon_jbook for IonQ (closest peer) returns 3 matched programs; the primary AFRL Quantum Networking program is UNFUNDED_TWO_PLUS_YEARS; sister University of Maryland program UNFUNDED_THIS_YEAR; only the smaller Qubitekk acquisition is FUNDED_STEADY", "usaspending shows Arqit has received $0 in direct DoD obligations 2020-2026"],
+      "M_check": "pentagon_jbook.query_program_funding (program=AFRL Quantum Networking; contractor=IonQ) + usaspending.query_dod_contracts",
+      "M_value": "AFRL Quantum Networking signal=UNFUNDED_TWO_PLUS_YEARS (FY2025=$0M, FY2026=$0M; latest funded=$12M FY2024); usaspending Arqit DoD=$0",
+      "interpretation": "Arqit doesn't name a PE, so a direct PE lookup is unavailable — but the most plausibly relevant DoD line for symmetric-key/post-quantum encryption research (AFRL Quantum Networking) is UNFUNDED_TWO_PLUS_YEARS as of the FY 2026 bipartisan budget (Jan 2026). The forward 'government and military markets represent its largest potential source of revenue' claim is narrative-load-bearing for the equity story (small symmetric-key vendor positioning for defense pull), but (a) there is no Arqit-prime DoD revenue today, (b) the obvious upstream federal R&D pool for this segment has been zeroed, and (c) Arqit's only DoD touchpoint is sub-integration via an unnamed IT vendor. Per heuristic 2 (forward not booked, narrative-load-bearing, pool unfunded), score MODERATE; per heuristic 6 (usaspending shows zero obligations on the claimed-pool basis), bump to SEVERE_UNDERDELIVERY."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Arqit's products are aligned with NSA Commercial Solutions for Classified (CSfC) Symmetric Key Management Annex 3.0.",
+      "category": "jbook_program_pipeline",
+      "severity": "UNVERIFIABLE",
+      "supports": ["pentagon_jbook 'Commercial Solutions for Classified' returns NOT_FOUND (CSfC is an NSA accreditation track, not a J-Book budget line; corpus coverage gap rather than a negative signal — per heuristic 7)", "usaspending Arqit Limited DoD obligations = $0"],
+      "M_check": "pentagon_jbook.query_program_funding (CSfC) + usaspending.query_dod_contracts (Arqit Limited)",
+      "M_value": "pentagon_jbook=NOT_FOUND (CSfC is not a PE/J-Book line); usaspending=$0",
+      "interpretation": "CSfC alignment is an NSA standards/architecture compliance claim, not a Pentagon RDT&E or Procurement PE — so the J-Book corpus correctly returns NOT_FOUND. Per heuristic 7 this is UNVERIFIABLE rather than negative. Note that 'alignment with Annex 3.0' is a marketing/architecture claim, not a CSfC component listing — the NSA maintains a public CSfC components list (separate from J-Book) where vendors are explicitly named; the filing notably does NOT claim listing, only 'alignment'. Independent confirmation would require the NSA CSfC components-list lookup (outside J-Book M-source scope)."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Arqit's largest license contract is a multi-year ME license through an IT vendor partner with end-customers being several government agencies of a major Middle Eastern country.",
+      "category": "counterparty_disclosure",
+      "severity": "UNVERIFIABLE",
+      "supports": ["pentagon_jbook scope is U.S. DoD only; Middle East government end-customers fall outside corpus", "Arqit contractor name returns NOT_FOUND in J-Book (consistent with non-U.S.-DoD contract)"],
+      "M_check": "pentagon_jbook (not in scope) — would need foreign-MOD or counterparty disclosure source",
+      "M_value": "out-of-scope for pentagon_jbook",
+      "interpretation": "Foreign-government license cannot be verified via U.S. J-Book. Per heuristic 7, NOT_FOUND is UNVERIFIABLE, not a red flag. This claim is also unnamed (no specific ME country, no specific agencies, no specific IT vendor named) — opacity itself is a softer concern but not within the J-Book M-source's scoring rubric."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Revenue from one customer represents more than 56% of total FY2025 revenues (total revenue = $0.530M).",
+      "category": "dod_customer_concentration",
+      "severity": "PASS",
+      "supports": ["IFRS revenue note: one customer = 56%+ of $0.530M FY2025 revenue (vs. 10% concentration in FY2024 and FY2023)", "usaspending Arqit DoD obligations = $0 — the one-customer is therefore NOT a DoD prime (else it would appear)"],
+      "M_check": "usaspending.query_dod_contracts",
+      "M_value": "usaspending Arqit DoD = $0 awards",
+      "interpretation": "The 56% one-customer concentration is a factual disclosure (PASS as a disclosure), but the M-source cross-check tells us this customer is NOT a U.S. DoD prime. Combined with the modest absolute scale ($0.530M total revenue, so the concentrated customer is ~$0.30M), this is small enough that no J-Book line dependency is implied. PASS on the factual disclosure; the small absolute size also limits how 'load-bearing' any single DoD program could be even if it existed."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Arqit implicitly competes for the DoD post-quantum-comms / AFRL quantum networking budget pool.",
+      "category": "jbook_program_pipeline",
+      "severity": "RED_FLAG_NEGATIVE",
+      "supports": ["pentagon_jbook AFRL Quantum Networking status=UNFUNDED_TWO_PLUS_YEARS (FY2025=$0M, FY2026=$0M; bipartisan budget Jan 20, 2026)", "earmark_detector returns 1 matched earmark for AFRL Quantum Networking with sponsoring lawmakers Cardin (retired post-2024), Tester (lost 2024 re-election as Senate Approps Defense Subcommittee Chair), Van Hollen, Hoyer — sponsor power has shifted (EARMARK_SUNSET signal per heuristic 5)", "Pentagon never requested this line — entirely a congressional add (per earmark detector annual history: FY2022/FY2023 requested_M=0)"],
+      "M_check": "pentagon_jbook.query_program_funding (AFRL Quantum Networking) + earmark_detector.query_earmark_status",
+      "M_value": "AFRL Quantum Networking: UNFUNDED_TWO_PLUS_YEARS + earmark_secured=True + earmark_sponsors_no_longer_in_power=True",
+      "interpretation": "The natural-adjacent federal pool for symmetric-key / post-quantum-comms DoD revenue (AFRL Quantum Networking) is structurally durable in its UNFUNDED status: it was an earmark add (never Pentagon-requested), key sponsors (Cardin, Tester) lost power post-2024, and the FY2026 bipartisan budget (Jan 2026) confirmed a second consecutive zero. Per heuristic 5: UNFUNDED_TWO_PLUS_YEARS + EARMARK_SUNSET bumps severity up one tier from baseline RED_FLAG_NEGATIVE; cap remains RED_FLAG_NEGATIVE. Note this scores the pool, not Arqit directly — Arqit hasn't named the PE; but to the extent the company's 'largest potential source of revenue' narrative depends on the post-quantum federal R&D budget pulse, that pulse has gone flat and is unlikely to revive in the near term."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Arqit's encryption solution is patented and independently validated by GCHQ-accredited center (University of Surrey) and PA Consulting.",
+      "category": "patent",
+      "severity": "PASS",
+      "supports": ["uspto_odp Arqit assignee returns n_total_applications=31, n_granted=17 patents pre-cutoff", "Patent titles confirm symmetric-key/quantum-key-distribution subject matter ('QUANTUM KEY DISTRIBUTION PROTOCOL', 'GROUP KEY SHARING', 'MULTI-ALGORITHM BOOTSTRAPPING')"],
+      "M_check": "uspto_odp.query_assignee (Arqit)",
+      "M_value": "31 applications / 17 granted; titles consistent with claimed technical area",
+      "interpretation": "Patent existence is corroborated. GCHQ-accredited-center validation is a third-party academic/consulting attestation, not an M-source line; out of scope for J-Book verification but no inconsistency detected."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Arqit recorded a $7.0M provision in FY2025 for a U.S. securities class action settlement; term sheet executed October 20, 2025.",
+      "category": "other",
+      "severity": "PASS",
+      "supports": ["edgar_fts 'Arqit Quantum class action' returns 9 hits including the 20-F filing", "Provision is disclosed in the financial statements (Note 25)"],
+      "M_check": "edgar_fts.query_fulltext",
+      "M_value": "9 EDGAR hits for 'Arqit Quantum class action' (cross-filing references confirm disclosure cadence)",
+      "interpretation": "Self-disclosed material legal settlement; PASS on the disclosure side. This is corroborative context: a securities class action being settled in October 2025 indicates the company has acknowledged historical disclosure issues — a separate concern from J-Book divergence."
+    }
+  ],
+  "summary": {
+    "n_claims": 8,
+    "n_queries": 13,
+    "severity_counts": {
+      "PASS": 3,
+      "MODERATE_UNDERDELIVERY": 0,
+      "SEVERE_UNDERDELIVERY": 2,
+      "RED_FLAG_NEGATIVE": 1,
+      "UNVERIFIABLE": 2
+    },
+    "jbook_grounded_claims": ["C1","C2","C3","C4","C5","C6"],
+    "pentagon_jbook_fired_on": ["C1","C2","C3","C4","C6"],
+    "jbook_hits": "pentagon_jbook fired on 5 of 6 J-Book-grounded claims",
+    "headline_finding": "Arqit's forward DoD narrative ('government and military are largest potential revenue source', 'first U.S. Department of War contract') is not corroborated by direct USAspending obligations ($0 across 2020-2026), and the natural-proxy federal R&D pool (AFRL Quantum Networking) is UNFUNDED_TWO_PLUS_YEARS with EARMARK_SUNSET (Cardin / Tester out of power). Combined with $0.530M total revenue and 56% one-customer concentration, the framework flags this as a J-Book divergence pattern of the 'narrative-without-PE-anchor' subtype."
+  }
+}

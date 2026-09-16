@@ -1,0 +1,310 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>spac_trust_arb_scanner</title><style>
+body{margin:0;background:#0b0e12;color:#e8ebee;font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:26px 24px 90px}
+a{color:#8b7cf6} h1{font-size:23px;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:#7d858e;margin:0 0 20px;font-size:13px}
+h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:#7d858e;margin:24px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 10px;border-bottom:1px solid #242a31;text-align:left;vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#7d858e}
+.k{font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:20px}
+.k-generator{color:#c3b8fb;background:rgba(139,124,246,.15)}
+.k-detector{color:#eccb8a;background:rgba(217,164,65,.15)}
+.k-watcher{color:#8ee5c1;background:rgba(53,201,143,.15)}
+.k-evidence{color:#b3bcc6;background:rgba(138,147,158,.15)}
+.h-OK{color:#35c98f} .h-STALE{color:#d9a441} .h-ERROR{color:#e0736a} .h-NEVER_RUN{color:#8a939e}
+pre{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px;overflow-x:auto;font-size:12px;line-height:1.5}
+.panel{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px 18px;margin-bottom:12px}
+ul{margin:4px 0;padding-left:20px} li{margin-bottom:4px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+</style></head><body><div class="wrap"><h1>spac_trust_arb_scanner</h1><p class="sub">registered capability · spac_trust_arb_scanner</p><a href="signals.html">&larr; all signals</a><div class="panel" style="margin-top:10px"><span class="k k-generator">GENERATOR</span> &nbsp;<span class="h-NEVER_RUN"><b>NEVER_RUN</b></span> · last run <span class="mono">never</span></div><p>Stage 0b CARRY generator: SPACs trading BELOW trust value.</p><form method="POST" action="/signals/run" style="margin:10px 0"><input type="hidden" name="name" value="spac_trust_arb_scanner"><input name="symbol" placeholder="symbol (if applicable)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px"><input name="symbols" placeholder="universe, comma-sep (generators)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px;margin-left:6px"><button type="submit" style="background:#8b7cf6;color:#0b0e12;border:0;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;margin-left:6px">Run now</button></form><h2>Datasources</h2><ul><li>reference implementation: verticals/generators/spac_trust_arb_scanner.py (see the code section for the feeds it touches)</li></ul><h2>Applies to</h2><ul><li><b>strategies:</b> cash_mgmt</li></ul><h2>The code</h2><pre>&quot;&quot;&quot;spac_trust_arb_scanner — Stage 0b CARRY generator: SPACs trading BELOW trust value.
+
+THE FLOOR IS THE EDGE. A pre-deal SPAC (blank-check &quot;Acquisition Corp&quot;) holds shareholder cash
+in a segregated trust — invested in T-bills/money-market — and every PUBLIC shareholder has a
+statutory right to REDEEM their shares for the pro-rata trust value (cash + accrued interest) at
+the merger vote, at any extension amendment, or if the SPAC liquidates. So the trust-per-share is
+a near-guaranteed CASH FLOOR: buy below it and you capture (trust_ps − price) by tendering at the
+deadline, PLUS free optionality on any deal / bump / warrant that closes above trust.
+
+Institutions ignore these because the tickets are odd-lot / sub-threshold and the absolute $-edge
+per name is tiny — exactly the office-thesis capacity edge (fee-replication CARRY, capacity-ceilinged).
+
+v1 screens a SEED universe of active pre-deal SPAC tickers on the two things computable from PRIMARY
+data — nothing fabricated:
+  1. TRUST-PER-SHARE  = AssetsHeldInTrust (SEC XBRL companyconcept) / public redeemable shares
+  2. PRICE            = live last close (yfinance)
+  → discount_to_trust_pct = (trust_ps − price) / trust_ps ; annualized to the deadline if known.
+The universe is a SEED to EXPAND + VERIFY; unresolvable tickers self-drop (reported, never silent).
+Trust values are REAL XBRL only — any share-count approximation is FLAGGED in the row note.
+
+    python3 verticals/generators/spac_trust_arb_scanner.py
+Writes data/SPAC_TRUST_ARB.json. READ-ONLY. (A CARRY generator — never an order.)
+&quot;&quot;&quot;
+from __future__ import annotations
+
+import datetime
+import json
+import urllib.request
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+OUT = HERE / &quot;data&quot; / &quot;SPAC_TRUST_ARB.json&quot;
+HDRS = {&quot;User-Agent&quot;: &quot;signalos-research 4tripathy@gmail.com&quot;}
+
+TICKERS_MAP = &quot;https://www.sec.gov/files/company_tickers.json&quot;
+CONCEPT = &quot;https://data.sec.gov/api/xbrl/companyconcept/CIK{cik10}/us-gaap/{tag}.json&quot;
+
+# XBRL tags for the trust balance, most-common first. SPACs classify the trust as noncurrent early
+# (&gt;12mo to deadline) then reclassify to current as the deadline nears — try both + the base tag.
+TRUST_TAGS = [&quot;AssetsHeldInTrustNoncurrent&quot;, &quot;AssetsHeldInTrustCurrent&quot;, &quot;AssetsHeldInTrust&quot;]
+# public redeemable-share concepts (temporary/mezzanine equity — the shares that carry the redemption right).
+# NOTE: SharesSubjectToMandatoryRedemptionSettlementTermsNumberOfShares is deliberately EXCLUDED — it is an
+# IPO-terms disclosure (frozen at the offering count) that does NOT track redemptions, so dividing a
+# post-redemption trust by it fabricates a garbage per-share (SPKL: stale 10M sh vs a 75%-redeemed trust).
+SHARE_TAGS = [
+    &quot;TemporaryEquitySharesOutstanding&quot;,
+    &quot;TemporaryEquitySharesSubjectToPossibleRedemption&quot;,
+]
+# plausibility band for a computed trust-per-share ($); outside this = a stale/mismatched share count -&gt; treat
+# per-share as UNKNOWN rather than emit a fabricated discount. SPACs redeem at ~$10.00-$11.50 (par + accrued).
+TRUST_PS_LO, TRUST_PS_HI = 9.0, 13.0
+
+# SEED universe of ACTIVE pre-deal SPACs (blank-check &quot;Acquisition Corp&quot; not yet merged). ticker | name.
+# A SEED to EXPAND — v2 auto-discovers via SIC 6770. Merged/liquidated/renamed tickers self-drop on
+# resolve (reported in `dropped`, never silently omitted). NO financials hardcoded — all pulled live.
+UNIVERSE = [
+    (&quot;AAC&quot;,   &quot;Ares Acquisition Corp III&quot;),
+    (&quot;CCIX&quot;,  &quot;Churchill Capital Corp IX&quot;),
+    (&quot;CEPF&quot;,  &quot;Cantor Equity Partners IV&quot;),
+    (&quot;CEPV&quot;,  &quot;Cantor Equity Partners V&quot;),
+    (&quot;CLBR&quot;,  &quot;Colombier Acquisition Corp II&quot;),
+    (&quot;DTSQ&quot;,  &quot;DT Cloud Star Acquisition&quot;),
+    (&quot;FGII&quot;,  &quot;FG Imperii Acquisition Corp&quot;),
+    (&quot;GSRF&quot;,  &quot;GSR IV Acquisition Corp&quot;),
+    (&quot;GSRV&quot;,  &quot;GSR V Acquisition Corp&quot;),
+    (&quot;HCIC&quot;,  &quot;Hennessy Capital Investment Corp VIII&quot;),
+    (&quot;HVII&quot;,  &quot;Hennessy Capital Investment Corp VII&quot;),
+    (&quot;IRHO&quot;,  &quot;Iron Horse Acquisition II Corp&quot;),
+    (&quot;LEGO&quot;,  &quot;Legato Merger Corp IV&quot;),
+    (&quot;MACI&quot;,  &quot;Melar Acquisition Corp I&quot;),
+    (&quot;MBAV&quot;,  &quot;M3-Brigade Acquisition V&quot;),
+    (&quot;MBVI&quot;,  &quot;M3-Brigade Acquisition VI&quot;),
+    (&quot;NPAC&quot;,  &quot;New Providence Acquisition Corp III&quot;),
+    (&quot;OACC&quot;,  &quot;Oak Woods Acquisition&quot;),
+    (&quot;PMTR&quot;,  &quot;Perimeter Acquisition Corp I&quot;),
+    (&quot;SPKL&quot;,  &quot;Spark I Acquisition&quot;),
+    (&quot;SVAC&quot;,  &quot;Spring Valley Acquisition Corp III&quot;),
+    (&quot;SVIV&quot;,  &quot;Spring Valley Acquisition Corp IV&quot;),
+    (&quot;VHCP&quot;,  &quot;Vine Hill Capital Investment Corp II&quot;),
+]
+
+DISCOUNT_FLOOR = 0.0        # any positive discount (price &lt; trust) is a candidate — the floor is the edge
+
+
+def _get_json(url):
+    try:
+        with urllib.request.urlopen(urllib.request.Request(url, headers=HDRS), timeout=25) as r:
+            return json.load(r)
+    except Exception:
+        return None
+
+
+def _ticker_cik_map():
+    &quot;&quot;&quot;{TICKER: cik10} from the SEC master file.&quot;&quot;&quot;
+    d = _get_json(TICKERS_MAP)
+    out = {}
+    if isinstance(d, dict):
+        for row in d.values():
+            try:
+                out[str(row[&quot;ticker&quot;]).upper()] = str(int(row[&quot;cik_str&quot;])).zfill(10)
+            except Exception:
+                continue
+    return out
+
+
+def _latest_concept(cik10, tag):
+    &quot;&quot;&quot;Latest reported value of a us-gaap concept for a CIK. Returns (value, end_date) or (None, None).&quot;&quot;&quot;
+    d = _get_json(CONCEPT.format(cik10=cik10, tag=tag))
+    if not isinstance(d, dict):
+        return None, None
+    best_val, best_end = None, None
+    for unit_rows in (d.get(&quot;units&quot;) or {}).values():
+        for f in unit_rows:
+            end = f.get(&quot;end&quot;)
+            val = f.get(&quot;val&quot;)
+            if val is None or end is None:
+                continue
+            if best_end is None or end &gt; best_end:
+                best_end, best_val = end, val
+    return best_val, best_end
+
+
+def _trust_and_shares(cik10):
+    &quot;&quot;&quot;(trust_usd, trust_end, shares, shares_end, shares_tag) — best available from XBRL. shares may be None.&quot;&quot;&quot;
+    trust, trust_end = None, None
+    for tag in TRUST_TAGS:
+        trust, trust_end = _latest_concept(cik10, tag)
+        if trust:
+            break
+    shares, shares_end, shares_tag = None, None, None
+    for tag in SHARE_TAGS:
+        shares, shares_end = _latest_concept(cik10, tag)
+        if shares:
+            shares_tag = tag
+            break
+    return trust, trust_end, shares, shares_end, shares_tag
+
+
+def _price(ticker):
+    &quot;&quot;&quot;Live last close via yfinance. Returns float or None (self-prune on failure).&quot;&quot;&quot;
+    import yfinance as yf
+    try:
+        tk = yf.Ticker(ticker)
+        fi = getattr(tk, &quot;fast_info&quot;, {}) or {}
+        px = fi.get(&quot;last_price&quot;) or fi.get(&quot;lastPrice&quot;)
+        if px:
+            return float(px)
+        hist = tk.history(period=&quot;5d&quot;)
+        if len(hist):
+            return float(hist[&quot;Close&quot;].dropna().iloc[-1])
+    except Exception:
+        return None
+    return None
+
+
+def scan() -&gt; dict:
+    today = datetime.date.today()
+    cikmap = _ticker_cik_map()
+    resolved, dropped, rows = 0, [], []
+
+    for ticker, name in UNIVERSE:
+        t = ticker.upper()
+        cik10 = cikmap.get(t)
+        if not cik10:
+            dropped.append({&quot;ticker&quot;: ticker, &quot;why&quot;: &quot;no SEC CIK (bad/merged/renamed ticker)&quot;})
+            continue
+
+        trust, trust_end, shares, shares_end, shares_tag = _trust_and_shares(cik10)
+        if not trust:
+            dropped.append({&quot;ticker&quot;: ticker, &quot;why&quot;: &quot;no AssetsHeldInTrust in XBRL (not a live SPAC trust?)&quot;})
+            continue
+
+        price = _price(ticker)
+        if not price:
+            dropped.append({&quot;ticker&quot;: ticker, &quot;why&quot;: &quot;no live price (yfinance unresolved)&quot;})
+            continue
+
+        resolved += 1
+        note_bits = []
+        trust_ps = None
+        # trust-per-share from REAL XBRL share count where available; else FLAG per-share UNKNOWN.
+        if shares and shares &gt; 0:
+            cand = trust / shares
+            if TRUST_PS_LO &lt;= cand &lt;= TRUST_PS_HI:
+                trust_ps = cand
+                stale = &quot;&quot; if (shares_end and trust_end and abs((datetime.date.fromisoformat(shares_end)
+                          - datetime.date.fromisoformat(trust_end)).days) &lt;= 100) else &quot; [share/trust periods differ &gt;100d — verify]&quot;
+                note_bits.append(f&quot;trust {trust_end} / {shares:,.0f} redeemable sh ({shares_tag} {shares_end}){stale}&quot;)
+            else:
+                # implausible per-share =&gt; the share count is stale or mismatched (e.g. pre-redemption).
+                # Do NOT emit a fabricated discount; leave per-share NULL and flag it.
+                note_bits.append(f&quot;trust ${trust/1e6:,.1f}M {trust_end}; share count {shares:,.0f} ({shares_tag} &quot;
+                                 f&quot;{shares_end}) implies ${cand:,.2f}/sh — OUTSIDE ${TRUST_PS_LO:.0f}-${TRUST_PS_HI:.0f} &quot;
+                                 f&quot;band (stale/pre-redemption) -&gt; per-share UNKNOWN (FLAG)&quot;)
+        else:
+            note_bits.append(f&quot;trust ${trust/1e6:,.1f}M {trust_end} but NO redeemable-share XBRL concept — &quot;
+                             f&quot;per-share UNKNOWN, approximate at the ~$10.00-$11.50 SPAC redemption par (FLAG)&quot;)
+
+        row = {
+            &quot;ticker&quot;: ticker, &quot;name&quot;: name, &quot;cik&quot;: cik10,
+            &quot;trust_usd&quot;: round(trust),
+            &quot;trust_per_share&quot;: round(trust_ps, 4) if trust_ps else None,
+            &quot;price&quot;: round(price, 2),
+            &quot;discount_pct&quot;: None,
+            &quot;deadline&quot;: None,          # best-effort deadline not parsed in v1 (see caveats)
+            &quot;days_to_deadline&quot;: None,
+            &quot;annualized_yield&quot;: None,
+            &quot;note&quot;: &quot;; &quot;.join(note_bits),
+        }
+        if trust_ps:
+            disc = (trust_ps - price) / trust_ps
+            row[&quot;discount_pct&quot;] = round(disc * 100, 2)
+        rows.append(row)
+
+    # candidates = price strictly below a KNOWN trust-per-share (the floor). Sort by discount desc.
+    cands = [r for r in rows if r[&quot;discount_pct&quot;] is not None and r[&quot;discount_pct&quot;] &gt; DISCOUNT_FLOOR * 100]
+    cands.sort(key=lambda r: -r[&quot;discount_pct&quot;])
+
+    priced = [r for r in rows if r[&quot;discount_pct&quot;] is not None]
+    above = [r for r in priced if r[&quot;discount_pct&quot;] &lt;= 0]
+    approx = [r for r in rows if r[&quot;trust_per_share&quot;] is None]
+
+    return {
+        &quot;asof&quot;: today.isoformat(),
+        &quot;n_universe&quot;: len(UNIVERSE),
+        &quot;n_resolved&quot;: resolved,
+        &quot;candidates&quot;: cands,
+        &quot;all_priced&quot;: sorted(priced, key=lambda r: -(r[&quot;discount_pct&quot;] or -99)),
+        &quot;approx_no_pershare&quot;: [r[&quot;ticker&quot;] for r in approx],
+        &quot;dropped&quot;: dropped,
+        &quot;distribution&quot;: {
+            &quot;n_priced&quot;: len(priced),
+            &quot;n_below_trust&quot;: len(cands),
+            &quot;n_at_or_above_trust&quot;: len(above),
+            &quot;median_discount_pct&quot;: round(sorted(r[&quot;discount_pct&quot;] for r in priced)[len(priced)//2], 2) if priced else None,
+        },
+        &quot;caveats&quot;: [
+            &quot;REDEMPTION IS A TENDER: you only capture the trust floor by tendering shares by the &quot;
+            &quot;redemption deadline (at the merger vote, an extension amendment, or liquidation) — you do &quot;
+            &quot;NOT auto-receive it by holding. Miss the window and you own the post-deal equity at market.&quot;,
+            &quot;You receive TRUST + ACCRUED INTEREST pro-rata; the per-share value grows as T-bill interest &quot;
+            &quot;accrues, so trust_ps rises over time (a small positive carry even absent a discount).&quot;,
+            &quot;EXTENSION AMENDMENTS can erode the floor: sponsors sometimes fund extensions FROM the trust, &quot;
+            &quot;or holders who don&#x27;t redeem get diluted — read the latest 8-K/proxy for the current per-share.&quot;,
+            &quot;WARRANTS are SEPARATE optionality (usually a different ticker, e.g. .WS) and are NOT redeemable &quot;
+            &quot;for trust — do not conflate the common&#x27;s floor with warrant value.&quot;,
+            &quot;A DEAL CLOSING ABOVE TRUST also realizes the discount (the common re-rates), so the edge is &quot;
+            &quot;(floor from redemption) OR (upside from a deal) — a heads-you-win structure, capacity-limited.&quot;,
+            &quot;Trust values are the LATEST XBRL filing (may be a quarter stale); the live per-share can differ &quot;
+            &quot;after redemptions/extensions. Share counts use temporary-equity XBRL where present; names with &quot;
+            &quot;no clean redeemable-share concept are listed in approx_no_pershare with per-share left NULL (never fabricated).&quot;,
+        ],
+        &quot;note&quot;: &quot;CARRY class — SPACs BELOW trust offer a near-guaranteed cash floor (redeem for pro-rata &quot;
+                &quot;trust+interest) plus free deal/extension optionality. Institutions skip them (odd-lot / &quot;
+                &quot;sub-threshold) = the office capacity edge. Trust-per-share from PRIMARY SEC XBRL &quot;
+                &quot;(AssetsHeldInTrust / redeemable shares); price live from yfinance. Seed universe of ~23 &quot;
+                &quot;active pre-deal SPACs — EXPAND (v2: auto-discover via SIC 6770). Deadlines not yet parsed &quot;
+                &quot;from 8-Ks (annualized_yield null until then). Below-trust ≠ free money: verify the current &quot;
+                &quot;per-share and deadline in the latest proxy before sizing.&quot;,
+    }
+
+
+def main():
+    res = scan()
+    OUT.write_text(json.dumps(res, indent=1))
+    d = res[&quot;distribution&quot;]
+    print(f&quot;=== SPAC TRUST-ARB SCANNER  {res[&#x27;asof&#x27;]}  &quot;
+          f&quot;({res[&#x27;n_resolved&#x27;]}/{res[&#x27;n_universe&#x27;]} resolved, {d[&#x27;n_below_trust&#x27;]} below trust) ===&quot;)
+    print(f&quot;  distribution: {d[&#x27;n_priced&#x27;]} priced | {d[&#x27;n_below_trust&#x27;]} BELOW trust | &quot;
+          f&quot;{d[&#x27;n_at_or_above_trust&#x27;]} at/above | median disc {d[&#x27;median_discount_pct&#x27;]}%&quot;)
+    if res[&quot;candidates&quot;]:
+        print(&quot;  BELOW-TRUST CANDIDATES (buy the floor; verify current per-share + deadline in the proxy):&quot;)
+        for r in res[&quot;candidates&quot;][:15]:
+            print(f&quot;    {r[&#x27;ticker&#x27;]:6} {r[&#x27;name&#x27;][:30]:30} px ${r[&#x27;price&#x27;]:6.2f}  trust ${r[&#x27;trust_per_share&#x27;]:7.4f}  &quot;
+                  f&quot;{r[&#x27;discount_pct&#x27;]:+5.2f}% disc&quot;)
+    else:
+        print(&quot;  no below-trust names this run (SPACs commonly trade a hair ABOVE trust — normal).&quot;)
+        print(&quot;  tightest to trust (top of all_priced):&quot;)
+        for r in res[&quot;all_priced&quot;][:8]:
+            ps = f&quot;${r[&#x27;trust_per_share&#x27;]:.4f}&quot; if r[&quot;trust_per_share&quot;] else &quot;n/a&quot;
+            print(f&quot;    {r[&#x27;ticker&#x27;]:6} {r[&#x27;name&#x27;][:30]:30} px ${r[&#x27;price&#x27;]:6.2f}  trust {ps:9}  {r[&#x27;discount_pct&#x27;]:+5.2f}% disc&quot;)
+    if res[&quot;approx_no_pershare&quot;]:
+        print(f&quot;  no redeemable-share XBRL (per-share NULL, FLAGGED): {res[&#x27;approx_no_pershare&#x27;]}&quot;)
+    if res[&quot;dropped&quot;]:
+        print(f&quot;  dropped (unresolved, {len(res[&#x27;dropped&#x27;])}): {[x[&#x27;ticker&#x27;] for x in res[&#x27;dropped&#x27;]]}&quot;)
+    print(f&quot;[-&gt; {OUT.name}]&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</pre></div></body></html>

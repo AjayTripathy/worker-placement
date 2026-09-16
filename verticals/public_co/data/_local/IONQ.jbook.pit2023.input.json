@@ -1,0 +1,109 @@
+{
+  "ticker": "IONQ",
+  "cutoff": "2023-01-15",
+  "filing": "0001193125-22-086738_10-K.txt",
+  "filing_form": "10-K",
+  "filing_filed": "2022-03-28",
+  "extraction_notes": "2021 10-K (filed March 2022). This filing PREDATES IonQ's defense-tech pivot. The MD&A and Business sections do NOT disclose any named DoD program, PE number, AFRL program (despite cohort metadata referencing AFRL Rome FA8750), or DoD customer concentration. Total 2021 revenue was only $2.1M. Government-related mentions are limited to (a) U.S. government Bayh-Dole caveats on IP licensed from UMD/Duke and (b) an investment line item (T-bills as cash equivalents). The disclosure file is essentially pre-defense-revenue. This itself is a finding: a J-Book divergence check against a 2022-vintage filing for IONQ has structurally low coverage because the company had not yet positioned itself as a DoD pure-play. Extracting J-Book-grounded claims yields 1 candidate (UMD National Quantum Lab — federally-aligned but NOT a J-Book PE) plus non-J-Book commercial-partner claims.",
+  "claims": [
+    {
+      "claim_id": "C1",
+      "claim_text": "IonQ entered into a multiyear deal with the University of Maryland (UMD) to provide quantum computing services and facility access related to the National Quantum Lab at UMD in exchange for payments totaling $14 million over 3 years (executed September 2021).",
+      "subject": "IonQ",
+      "predicate": "has multiyear $14M / 3yr revenue contract with",
+      "object_value": "University of Maryland National Quantum Lab ($14M / 3 years)",
+      "source_quote": "In September 2021, the Company entered into a multiyear deal with UMD to provide certain quantum computing services and facility access related to the National Quantum Lab at UMD in exchange for payments totaling $14 million over 3 years.",
+      "category": "dod_customer_concentration",
+      "rationale": "Named federally-aligned customer + quantified $/multi-year commitment. National Quantum Lab is a federal-research initiative aligned with the National Quantum Initiative Act; while not itself a Pentagon PE, the framework should attempt pentagon_jbook + usaspending lookups to test whether the funding stream is observable in Pentagon or federal spend records. Note: this is the ONLY quantified multi-year customer commitment disclosed in the entire 10-K — load-bearing.",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "args": {"program_name": "National Quantum Lab", "cutoff_date": "2023-01-15"}},
+        {"source": "pentagon_jbook.query_program_funding", "args": {"contractor_name": "IonQ", "cutoff_date": "2023-01-15"}},
+        {"source": "usaspending.query_federal_presence", "args": {"recipient_name": "IonQ"}}
+      ]
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "IonQ provides quantum-computing-as-a-service to U.S. federal customers and is contracted to the Air Force Research Laboratory Rome (AFRL) under the AFRL Quantum Networking program (per cohort metadata — investigator-derived since the 2021 10-K itself does not name AFRL).",
+      "subject": "IonQ",
+      "predicate": "is contracted on",
+      "object_value": "AFRL Quantum Networking (FA8750)",
+      "source_quote": "[NOT-DISCLOSED-IN-FILING — cohort metadata states 'AFRL Rome (FA8750) contracting history including named AFRL Quantum Networking program'. Investigator extracts as DERIVED claim to drive J-Book verification.]",
+      "category": "jbook_program_revenue",
+      "rationale": "Mode-B derived claim. The cohort thesis explicitly tests J-Book divergence on AFRL Quantum Networking. The filing itself OMITS any mention of AFRL or FA8750 contract history. Per the workflow rubric, this DISCREPANCY itself is investigation-worthy: if AFRL contracts existed at the cutoff (2023-01-15), the 10-K should have disclosed federal-customer concentration. Querying pentagon_jbook and usaspending lets us test (1) whether the Pentagon was forward-funding Quantum Networking and (2) whether IonQ had federal contracts that the 10-K under-disclosed.",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "args": {"program_name": "AFRL Quantum Networking", "cutoff_date": "2023-01-15"}},
+        {"source": "pentagon_jbook.query_program_funding", "args": {"contractor_name": "IonQ", "cutoff_date": "2023-01-15"}},
+        {"source": "usaspending.query_dod_contracts", "args": {"recipient_name": "IonQ", "start_date": "2020-01-01", "end_date": "2023-01-15"}},
+        {"source": "earmark_detector.query_earmark_status", "args": {"program_name": "AFRL Quantum Networking"}}
+      ]
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "IonQ generated $2.099M of total revenue in FY 2021 and $0 in FY 2020; the company has commercialized a quantum computer with 20 algorithmic qubits and offers QCaaS access via three commercial cloud platforms (AWS Braket, Microsoft Azure Quantum, Google Cloud Marketplace).",
+      "subject": "IonQ",
+      "predicate": "had FY 2021 revenue of",
+      "object_value": "$2.099M total / commercial-cloud-mediated QCaaS",
+      "source_quote": "Revenue $ 2,099 ... We currently make access to our quantum computers available via three major cloud platforms, Amazon Web Services (AWS) Amazon Braket, Microsoft s Azure Quantum and Google s Cloud Marketplace.",
+      "category": "rollup_thesis",
+      "rationale": "Anchors the entire forward narrative. If by cutoff (Jan 2023) IonQ had not transitioned from commercial-cloud-mediated revenue to a defense-prime model, the cohort's J-Book divergence pattern would not yet apply. Cross-check with usaspending (do they appear as a DoD prime/sub?) and edgar_fts (do the three hyperscaler counterparties disclose IonQ?).",
+      "queries": [
+        {"source": "usaspending.query_dod_contracts", "args": {"recipient_name": "IonQ", "start_date": "2020-01-01", "end_date": "2023-01-15"}},
+        {"source": "usaspending.query_federal_presence", "args": {"recipient_name": "IonQ"}}
+      ]
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "IonQ holds exclusively licensed core technology from the University of Maryland and Duke University, and some of that in-licensed IP was conceived or developed through government-funded research and therefore is subject to federal Bayh-Dole rights (march-in, U.S.-based-preference, reporting).",
+      "subject": "IonQ",
+      "predicate": "in-licenses Bayh-Dole-encumbered IP from",
+      "object_value": "University of Maryland, Duke University",
+      "source_quote": "Some of our in-licensed intellectual property, including the intellectual property licensed from the University of Maryland and Duke University, has been conceived or developed through government-funded research and thus may be subject to federal regulations providing for certain rights for the U.S. government or imposing certain obligations on us, such as a license to the U.S. government under such intellectual property, march-in rights, certain reporting requirements and a preference for U.S.-based companies.",
+      "category": "patent",
+      "rationale": "Patents / IP claim — verifier is uspto_odp. Government IP encumbrance is a structural feature (Bayh-Dole) and not a J-Book funding signal, so this serves as a control claim.",
+      "queries": [
+        {"source": "uspto_odp.query_assignee", "args": {"assignee_name": "IonQ"}},
+        {"source": "uspto_odp.query_assignee", "args": {"assignee_name": "University of Maryland"}}
+      ]
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "IonQ's sole physical facility is a ~32,000 sq ft headquarters in College Park, Maryland, leased from the University of Maryland through 2030 — used for research, development, and manufacturing of trapped-ion quantum computers.",
+      "subject": "IonQ",
+      "predicate": "operates",
+      "object_value": "32,000 sq ft College Park MD facility (UMD-leased through 2030)",
+      "source_quote": "Our only current facility is our corporate headquarters, located in College Park, Maryland, where we lease approximately 32,000 square feet of space from the University of Maryland under an agreement that expires in 2030. Most of the facility is used for research and development and manufacturing.",
+      "category": "facility",
+      "rationale": "Facility claim — verifier is epa_frs. Control claim. Notably, '32,000 sq ft as the ONLY facility' bounds the manufacturing capacity narrative and is in tension with any later claim of becoming a defense-prime at scale.",
+      "queries": [
+        {"source": "epa_frs.query_facilities", "args": {"company_name": "IonQ"}}
+      ]
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "IonQ's three cloud-distribution counterparties (Amazon, Microsoft, Alphabet/Google) are the only named go-to-market channels for QCaaS; one of them holds an 8.3M-share warrant (struck at $1.38) that vests on revenue milestones — i.e., the warranted customer is contractually incentivized to drive IonQ revenue.",
+      "subject": "IonQ",
+      "predicate": "has GTM dependency on",
+      "object_value": "AWS, Microsoft Azure, Google Cloud (one is warrantholder)",
+      "source_quote": "In November 2019, contemporaneously with a revenue arrangement, the Company entered into a contract, pursuant to which the Company agreed to issue to a customer a warrant to acquire shares of Legacy IonQ Series B-1 preferred stock ... The remaining Warrant Shares will vest and become exercisable upon satisfaction of certain milestones based on revenue generated under the commercial agreement with the customer.",
+      "category": "counterparty_disclosure",
+      "rationale": "Counterparty test — does any of Amazon (CIK 0001018724), Microsoft (CIK 0000789019), or Alphabet/Google (CIK 0001652044) disclose a material IonQ relationship? edgar_fts can test corroboration. Control / non-J-Book.",
+      "queries": [
+        {"source": "edgar_fts.query_fulltext", "args": {"q": "IonQ", "cik": "0001018724"}},
+        {"source": "edgar_fts.query_fulltext", "args": {"q": "IonQ", "cik": "0000789019"}}
+      ]
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "IonQ states that ITS 32-QUBIT SYSTEM is an important milestone for its technical roadmap and commercialization but is NOT YET available for customers and 'may never be available'; significant production is not expected to occur until 2025 at the earliest, and may occur later, or never.",
+      "subject": "IonQ",
+      "predicate": "self-discloses production timeline of",
+      "object_value": "32-qubit system not before 2025, may never ship; significant production not before 2025",
+      "source_quote": "Our 32-qubit system, which is an important milestone for our technical roadmap and commercialization, is not yet available for customers and may never be available. ... we will continue to incur operating and net losses each quarter until at least the time we begin significant production of our quantum computers, which is not expected to occur until 2025, at the earliest.",
+      "category": "jbook_program_pipeline",
+      "rationale": "Forward-product timeline claim. Materiality test: a 2022-vintage filing that explicitly tells investors 'production not before 2025, may never happen' is structurally NOT a J-Book-divergence pattern at this point in time. By the cutoff (Jan 2023), only ~10 months had elapsed against this multi-year roadmap. pentagon_jbook would have no PE to verify against. Score as PASS / UNVERIFIABLE — important to flag that the framework's J-Book divergence signal cannot yet apply because IonQ has not yet claimed program-of-record-level revenue.",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "args": {"contractor_name": "IonQ", "cutoff_date": "2023-01-15"}}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,179 @@
+{
+  "ticker": "FCEL",
+  "cutoff": "2024-05-17",
+  "filing": "0001558370-23-019892_10K.txt",
+  "plan_version": 1,
+  "claims": [
+    {
+      "claim_id": "FCEL-1",
+      "claim_text": "For FY2023, FCEL's top four customers (Korea Southern Power Company (KOSPO), Korea Fuel Cell Co. (KFC), Connecticut Light and Power, and EMTEC) accounted for 68% of total consolidated revenue, with KOSPO alone at 31%.",
+      "source_quote": "For the years ended October 31, 2023, 2022 and 2021, our top customers, KOSPO, KFC, Connecticut Light and Power, and EMTEC, accounted for an aggregate of 68%, 74% and 61%, respectively, of our total annual consolidated revenue. ... Korea Southern Power Company (KOSPO) 31 %",
+      "subject": "Korea Southern Power Company, Korea Fuel Cell Co., Connecticut Light and Power, EMTEC",
+      "predicate": "is_top_customer_of",
+      "object_value": "68% aggregate of FY2023 revenue; KOSPO 31%",
+      "category": "customer_pipeline",
+      "referent_type": "entity",
+      "m_source_status": "MAPPED",
+      "source_id": "edgar_fts.query_fulltext",
+      "source_params": {
+        "search_term": "FuelCell Energy",
+        "cutoff_date": "2024-05-17",
+        "start_date": "2018-01-01",
+        "forms": "10-K,10-Q,8-K,DEF 14A,20-F,40-F"
+      },
+      "proposed_connector": null,
+      "extraction_notes": "Three of the four named top customers are NOT US SEC filers: KOSPO (Korea Southern Power, subsidiary of state-owned KEPCO; no direct US filings), KFC/Korea Fuel Cell (Korean), and EMTEC (ExxonMobil Technology and Engineering Company is a private affiliate of XOM, not a separate filer). Connecticut Light and Power is a subsidiary of Eversource Energy (CIK 0000072741); their 10-K may reference fuel-cell tariff projects but not as a customer-supplier relationship. The right adjudication is a generic FuelCell Energy fulltext mention count to test whether named counterparties show up across ALL filers (XOM-affiliated EMTEC the most plausible). Counterparty-CIK-anchored variants (cik=Eversource 0000072741 for CL&P; cik=XOM 0000034088 for EMTEC) should be the executor's follow-up. Layer 3 Rule 7 caveat: foreign state-owned utility counterparties (KOSPO) intentionally weakened."
+    },
+    {
+      "claim_id": "FCEL-2",
+      "claim_text": "FCEL signed a 14-year service agreement with Noeul Green Energy Co., Ltd. valued at approximately $75.6 million during fiscal 2023, covering O&M of a 20 MW fuel cell park in South Korea, and reports its platform technology deployed across South Korea at six additional sites totaling more than 100 MW.",
+      "source_quote": "During the year ended October 31, 2023, the Company entered into a 14-year service agreement with Noeul Green Energy for their 20 MW plant in South Korea. The contract value totaled approximately $75.6 million. ... as of October 31, 2023, our platform technology was deployed across South Korea at an additional six sites totaling more than 100 MW.",
+      "subject": "Noeul Green Energy Co., Ltd.",
+      "predicate": "is_long_term_service_customer_of",
+      "object_value": "14-year, $75.6M service agreement; 20 MW plant; +100 MW across six other Korean sites",
+      "category": "customer_pipeline",
+      "referent_type": "entity",
+      "m_source_status": "PROPOSED",
+      "source_id": null,
+      "source_params": {},
+      "proposed_connector": {
+        "name": "krx_dart.query_disclosures",
+        "description": "Korea Financial Supervisory Service DART (Data Analysis, Retrieval and Transfer System) full-text disclosure search across Korean public-company filings. Adjudicates whether a Korean counterparty (Noeul Green Energy, KOSPO, KFC) discloses material long-term service/supply contracts with a U.S. fuel-cell vendor.",
+        "endpoint": "https://opendart.fss.or.kr/api/list.json",
+        "access_pattern": "api",
+        "auth_required": true,
+        "sample_invocation": "GET https://opendart.fss.or.kr/api/list.json?crtfc_key=KEY&corp_code=<NOEUL_CORP_CODE>&bgn_de=20230101&end_de=20240517 and POST fulltext search 'FuelCell Energy' to https://dart.fss.or.kr/dsab007/main.do",
+        "rationale": "FCEL's three largest revenue concentrations are Korean (KOSPO 31%, KFC, Noeul). U.S. EDGAR fulltext does not index Korean filings (DART is the Korean SEC analog). A Korean-counterparty disclosure registry is structurally required to test Layer 3 Rule 7 corroboration for Korea-anchored revenue.",
+        "estimated_cost": "free",
+        "completeness": "All KOSPI / KOSDAQ / Konex listed companies plus material reporting subsidiaries",
+        "referent_type": "entity",
+        "attribute": "contract_disclosure"
+      },
+      "extraction_notes": "No catalog connector indexes Korean (DART) disclosures. SEC EDGAR fulltext is the closest cross-border test but Korean utilities are not US filers and won't appear; an absence in EDGAR is uninformative here, which is why a DART connector is structurally required. The proposed connector returns corp_code-keyed disclosure records."
+    },
+    {
+      "claim_id": "FCEL-3",
+      "claim_text": "FCEL has an EMTEC Joint Development Agreement with ExxonMobil Technology and Engineering Company (an ExxonMobil affiliate) covering carbonate-fuel-cell carbon-capture demonstration projects.",
+      "source_quote": "our privately funded Advanced Technologies contracts, including our EMTEC Joint Development Agreement, contracted demonstration projects undertaken with EMTEC or other ExxonMobil affiliates, and our government research and development contracts are subject to the risk of termination at the convenience of the contracting party",
+      "subject": "ExxonMobil Technology and Engineering Company (EMTEC)",
+      "predicate": "has_joint_development_agreement_with",
+      "object_value": "EMTEC JDA for carbonate carbon-capture technology",
+      "category": "partnership",
+      "referent_type": "entity",
+      "m_source_status": "MAPPED",
+      "source_id": "edgar_fts.query_fulltext",
+      "source_params": {
+        "search_term": "FuelCell Energy",
+        "cutoff_date": "2024-05-17",
+        "cik": "0000034088",
+        "start_date": "2019-01-01",
+        "forms": "10-K,10-Q,8-K,DEF 14A"
+      },
+      "proposed_connector": null,
+      "extraction_notes": "ExxonMobil Corporation (CIK 0000034088) is the parent of EMTEC. Layer 3 Rule 7: a multi-year JDA with a publicly disclosed XOM subsidiary should be referenced in XOM's 10-K technology / Low Carbon Solutions disclosures if material to the counterparty. ABSENCE in any XOM filing across 2019-cutoff while FCEL counts EMTEC as a top-4 customer is a Layer 3 Rule 7 hard contradiction trigger. Search_term 'FuelCell Energy' is 2 words and distinctive."
+    },
+    {
+      "claim_id": "FCEL-4",
+      "claim_text": "FCEL operates a 167,000 sq ft carbonate fuel-cell manufacturing facility in Torrington, Connecticut with current annualized capacity of 100 MW/year (expandable to 200 MW/year), plus a Taufkirchen, Germany facility (up to 20 MW/year sub-MW carbonate final assembly) and a Calgary, Alberta facility producing 1 MW/year SOFC or ~4 MW/year SOEC (with expansion to 10 MW SOFC / 40 MW SOEC by FY2024).",
+      "source_quote": "We operate a 167,000 square-foot manufacturing facility in Torrington, Connecticut ... The maximum annualized capacity (module manufacturing, final assembly, testing and conditioning) is 100 MW per year under the Torrington facility's current configuration when being fully utilized. The Torrington facility is sized to accommodate the eventual annualized production capacity of up to 200 MW per year with additional capital investment ... We have a manufacturing and service facility in Taufkirchen, Germany that has the capability to perform final module assembly for up to 20 MW per year of carbonate sub-megawatt fuel cell power platforms ... As of October 31, 2023, this facility is capable of producing 1 MW per year of SOFC or approximately 4 MW per year of SOEC. We are investing in expanding this facility with the goal of increasing its production capacity to 10 MW per year of SOFC or 40 MW per year of SOEC, and we expect this expansion to be complete in fiscal year 2024.",
+      "subject": "Torrington, CT manufacturing facility",
+      "predicate": "has_nameplate_capacity_of",
+      "object_value": "Torrington 100 MW/yr (current) up to 200 MW/yr; Taufkirchen 20 MW/yr; Calgary 1 MW SOFC / 4 MW SOEC (10/40 MW post-expansion)",
+      "category": "physical_facility",
+      "referent_type": "physical_object",
+      "m_source_status": "MAPPED",
+      "source_id": "epa_frs.query_facilities",
+      "source_params": {
+        "facility_name": "FuelCell Energy",
+        "state_abbr": "CT",
+        "city_filter": "Torrington"
+      },
+      "proposed_connector": null,
+      "extraction_notes": "EPA Facility Registry Service is authoritative for U.S. industrial facility existence (Clean Air Act permits, Title V). A 167,000 sq ft carbonate manufacturing site at Torrington must be EPA-registered. Calibration Heuristic 3 (announced-not-built): Torrington's 100 MW current capacity is the operational figure; the 200 MW number is announced-not-built. Plan_executor should also re-query state_abbr='CT' city_filter='Danbury' (HQ/R&D) and consider that German (Taufkirchen) and Canadian (Calgary) plants are outside EPA FRS coverage. Calgary SOEC capacity expansion is the highest-discriminative claim because it underwrites all the company's hydrogen-electrolyzer narrative; absence would gut the SOEC story but FRS is US-only."
+    },
+    {
+      "claim_id": "FCEL-5",
+      "claim_text": "FCEL holds 139 U.S. patents (parent entity) plus 24 U.S. patents through subsidiary Versa Power Systems Ltd. (covering SOFC technology), totaling 163 U.S. issued patents, with 34 U.S. patent applications pending at the parent and 9 pending at Versa.",
+      "source_quote": "As of October 31, 2023, we (excluding our subsidiaries) had 139 U.S. patents and 282 patents in other jurisdictions covering our fuel cell technology ... we also had 34 patent applications pending in the U.S. and 98 patent applications pending in other jurisdictions. ... As of October 31, 2023, our subsidiary, Versa Power Systems, Ltd. ('Versa'), had 24 U.S. patents and 86 international patents covering SOFC technology ... Versa also had 9 pending U.S. patent applications and 26 patent applications pending in other jurisdictions.",
+      "subject": "FuelCell Energy + Versa Power Systems",
+      "predicate": "has_count_of_us_patents",
+      "object_value": "163 U.S. issued (139 FCEL + 24 Versa); 43 U.S. applications pending",
+      "category": "technology",
+      "referent_type": "intangible",
+      "m_source_status": "MAPPED",
+      "source_id": "uspto_odp.query_assignee",
+      "source_params": {
+        "assignee_name": "FuelCell Energy",
+        "cutoff_date": "2024-05-17",
+        "categorize": {
+          "carbonate": ["carbonate", "molten carbonate", "MCFC"],
+          "solid_oxide": ["solid oxide", "SOFC", "SOEC", "oxide fuel cell"],
+          "carbon_capture": ["carbon capture", "CO2", "carbon dioxide", "sequestration"],
+          "electrolysis": ["electrolysis", "electrolyzer", "hydrogen production"]
+        }
+      },
+      "proposed_connector": null,
+      "extraction_notes": "USPTO ODP is authoritative for US patent counts. n_granted should be comparable to the 139 figure. Categorization is the key Calibration Heuristic 3 signal: carbonate (MCFC) is FCEL's legacy strength; solid-oxide / SOEC / electrolyzer is the announced growth pivot. If the granted-patent distribution is skewed toward carbonate with thin solid-oxide IP, the announced SOEC strategy is under-IP'd at the parent level (Versa adds 24 more; runner should also query assignee_name='Versa Power Systems'). Per planner conventions, n_granted ~ legacy patent-count claim."
+    },
+    {
+      "claim_id": "FCEL-6",
+      "claim_text": "FCEL's commissioned 2.8 MW Tri-gen platform at the Port of Long Beach for Toyota Motor North America produces electricity, hydrogen and water, was placed in service on November 7, 2023 under the California BioMAT program with Southern California Edison, and operates under a 20-year hydrogen power-purchase agreement (HPPA) with Toyota.",
+      "source_quote": "Long Beach, CA The Toyota Project. This 2.8 MW Tri-gen platform produces electricity (at a net output of 2.3 MW), hydrogen and water. We have successfully completed the commissioning of this Tri-gen project at the Port of Long Beach for Toyota (the 'Toyota project'), and it is producing power and water and delivering hydrogen that meets the stringent purity specifications required for mobility applications. On November 7, 2023, the Toyota project met the requirements to be placed in service under the BioMAT program with Southern California Edison and began exporting power. ... the initial two years of the twenty year hydrogen power purchase agreement for our Toyota project",
+      "subject": "Toyota Motor North America / Port of Long Beach Tri-gen project",
+      "predicate": "is_commissioned_at_capacity_under_PPA_with",
+      "object_value": "2.8 MW gross / 2.3 MW net Tri-gen; placed in service 11/7/2023; 20-year HPPA",
+      "category": "physical_facility",
+      "referent_type": "physical_object",
+      "m_source_status": "MAPPED",
+      "source_id": "nrel_fuel.query_alt_fuel_stations",
+      "source_params": {
+        "fuel_type": "HY",
+        "cutoff_date": "2024-05-17",
+        "name_filter": "Toyota"
+      },
+      "proposed_connector": null,
+      "extraction_notes": "The Tri-gen platform delivers hydrogen for mobility/refueling at the Port of Long Beach Toyota Logistics Services site. NREL Alternative Fueling Stations Locator is the authoritative registry for hydrogen fueling stations open as of cutoff and supporting fuel-cell vehicles. A hydrogen-fueling node at Toyota/Port of Long Beach should appear with name_filter='Toyota' (or as a follow-up, name_filter='Long Beach'). Layer 3 Rule 7 secondary check: Toyota Motor Corp (TM, 20-F filer, CIK 0001094517) FY2023 20-F should mention the Port of Long Beach hydrogen production agreement as a strategic FCEV refueling asset; secondary executor pass should query edgar_fts.query_fulltext search_term='FuelCell' cik='0001094517' forms='20-F,6-K'. Calibration Heuristic 3 stage gate: project moved announced -> commissioned -> placed-in-service Nov 2023, so registry visibility is the rebuttal."
+    },
+    {
+      "claim_id": "FCEL-7",
+      "claim_text": "FCEL has total contracted backlog (generation + service + product + Advanced Technologies) of approximately $1.028 billion at October 31, 2023 ($872.1M generation + $140.8M service + $0 product + $15.3M Advanced Technologies), with the Advanced Technologies backlog largely consisting of DOE-funded research contracts.",
+      "source_quote": "Generation backlog totaled $872.1 million and $944.0 million as of October 31, 2023 and October 31, 2022, respectively. ... Service agreements backlog totaled $140.8 million as of October 31, 2023, compared to $114.0 million as of October 31, 2022. ... Product backlog totaled $0 as of October 31, 2023, compared to $9.1 million as of October 31, 2022. ... Advanced Technologies contract backlog totaled $15.3 million compared to $22.9 million at October 31, 2022. ... Government funding, principally from the DOE, provided 3%, 6% and 9% of our revenue for the fiscal years ended October 31, 2023, 2022, and 2021, respectively.",
+      "subject": "FuelCell Energy, Inc. Advanced Technologies / DOE contracts",
+      "predicate": "has_federal_contract_backlog_of",
+      "object_value": "$15.3M AT backlog; ~3% of FY2023 revenue from DOE",
+      "category": "regulatory_milestone",
+      "referent_type": "amount",
+      "m_source_status": "MAPPED",
+      "source_id": "usaspending.query_recipient_contracts",
+      "source_params": {
+        "recipient_name": "FuelCell Energy",
+        "start_date": "2018-01-01",
+        "end_date": "2024-05-17",
+        "awarding_agency": "Department of Energy"
+      },
+      "proposed_connector": null,
+      "extraction_notes": "USAspending.gov is authoritative for federal contract awards (DOE included). The $15.3M Advanced Technologies backlog should be visible as outstanding award obligations to FCEL across DOE programs. Secondary executor pass: usaspending.query_recipient_grants for recipient_name='FuelCell Energy' to catch cooperative agreements / SBIR / ARPA-E grants that may live in financial-assistance rather than contracts. The Idaho National Laboratory pilot demonstration (separately disclosed) also runs through DOE. ABSENCE of any DOE contracts to FCEL while company claims 3% DOE revenue is a HARD CONTRADICTION."
+    },
+    {
+      "claim_id": "FCEL-8",
+      "claim_text": "FCEL has cumulative net losses since fiscal 1997 (last profitable year), reported $123.0M of total consolidated debt and finance obligations outstanding at October 31, 2023, and relies on project-level tax-equity financing including a $30.2M Franklin Park Infrastructure tax-equity commitment for the Derby Projects (14.0 MW + 2.8 MW SCEF) with $9.1M funded at 10/31/2023 and ~$20.6M remaining contingent on substantial completion.",
+      "source_quote": "We have not been profitable since our year ended October 31, 1997. ... As of October 31, 2023, our total consolidated debt and finance obligations outstanding ('indebtedness') was $123.0 million ($119.5 million, net of deferred finance costs). ... Tax Equity Fund, LLC ('Franklin Park'), a subsidiary of Franklin Park Infrastructure, LLC, for two fuel cell power plant installations -- the 14.0 MW Derby Fuel Cell Project and the 2.8 MW SCEF Fuel Cell Project, both located in Derby, Connecticut (collectively, the Derby Projects). Franklin Park's tax equity commitment with respect to the Derby Projects totals $30.2 million. Of this amount, approximately $9.1 million was received on October 31, 2023. ... Net of estimated additional fees of $0.5 million, the Company anticipates additional funding of approximately $20.6 million.",
+      "subject": "FuelCell Energy, Inc.",
+      "predicate": "is_financing_via_secondary_equity_and_tax_equity_after_persistent_losses",
+      "object_value": "Unprofitable since 1997; $123.0M debt; $30.2M Franklin Park tax equity ($9.1M funded; $20.6M remaining)",
+      "category": "financial_distress",
+      "referent_type": "event",
+      "m_source_status": "MAPPED",
+      "source_id": "sec_filings.list_filings_by_form",
+      "source_params": {
+        "cik": "0000886128",
+        "forms": ["424B5", "S-3", "S-3ASR", "8-K", "10-Q"],
+        "cutoff_date": "2024-05-17",
+        "start_date": "2022-01-01",
+        "limit": 100
+      },
+      "proposed_connector": null,
+      "extraction_notes": "Cohort-typical clean-energy hydrogen pure-play distress pattern. SEC filings list (424B5 prospectus supplements, S-3 shelfs, 8-K materials) for CIK 0000886128 quantifies dilution cadence and ATM utilization since the last 10-K. Calibration: a high count of 424B5 supplements between filing date (Dec 2023) and cutoff (May 17, 2024) is the registry-side signal that FY2024 cash burn is being plugged with secondary equity rather than commercial revenue. Reverse-split history (planner note) and 26 years of net losses make dilution cadence material. NOT distressed if 424B5 count is low and S-3 shelf is dormant."
+    }
+  ]
+}

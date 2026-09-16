@@ -1,0 +1,29 @@
+#!/usr/bin/env python3
+"""Bootstrap the checked-out product, then run its CLI without activation steps."""
+import hashlib
+import os
+from pathlib import Path
+import subprocess
+import sys
+
+ROOT = Path(__file__).resolve().parent
+ENV = ROOT / '.venv-worker-placement'
+PYTHON = ENV / ('Scripts/python.exe' if os.name == 'nt' else 'bin/python')
+
+def main():
+    if sys.version_info < (3, 9):
+        raise SystemExit('Worker Placement needs Python 3.9 or later. Install it, then run this command again.')
+    if not PYTHON.exists():
+        subprocess.run([sys.executable, '-m', 'venv', str(ENV)], check=True)
+    revision = subprocess.check_output(['git','rev-parse','HEAD'], cwd=ROOT).strip()
+    fingerprint = hashlib.sha256(revision + (ROOT/'officekit_dist/pyproject.toml').read_bytes()).hexdigest()
+    stamp = ENV / '.worker-placement-install'
+    if not stamp.exists() or stamp.read_text() != fingerprint:
+        print('Installing Worker Placement and its dependencies…', flush=True)
+        subprocess.run([str(PYTHON), str(ROOT/'officekit_dist/assemble.py'), '--no-wheel'], cwd=ROOT, check=True)
+        subprocess.run([str(PYTHON), '-m', 'pip', 'install', str(ROOT/'officekit_dist/build')+'[ai]'], check=True)
+        stamp.write_text(fingerprint)
+    os.execv(str(PYTHON), [str(PYTHON), '-m', 'officekit.cli', *(sys.argv[1:] or ['start'])])
+
+if __name__ == '__main__':
+    main()

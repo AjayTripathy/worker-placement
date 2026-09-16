@@ -1,0 +1,125 @@
+{
+  "ticker": "QBTS",
+  "cutoff": "2024-09-01",
+  "filing": "0001907982-24-000049_10-K.txt",
+  "filing_date": "2024-03-29",
+  "form": "10-K",
+  "fiscal_year_end": "2023-12-31",
+  "secondary_filing": "0001907982-24-000096_10-Q.txt (2024-08-08, period ending 2024-06-30)",
+  "notes": "QBTS is a quantum-annealing pure-play with NO specific Pentagon PE numbers or named DoD program-of-record claims in either the FY23 10-K or Q2-2024 10-Q. The filing acknowledges D-Wave Government Inc. exists as a federal contracting subsidiary, but no PE-tagged programs, no IDIQ ceilings, no obligated-to-date vs ceiling disclosures are made. Revenue narrative is overwhelmingly commercial (10-K: 'approximately 70 percent of FY23 revenue comes from commercial customers'). The closest J-Book-grounded language is the Davidson Technologies radar-scheduling co-development; no contract value, no PE number, no DoD prime program tied to it. Historic affiliations named (Lockheed Martin, Los Alamos, Oak Ridge, NASA QAIL, USC) are presented as research validation, not forward revenue. This means the J-Book divergence pattern (YSS/IONQ-style PE-zeroing) does NOT have load-bearing claims to attack in this filing. Score profile should therefore be heavy on UNVERIFIABLE / no J-Book hit, with a smaller set of MODERATE / PASS for the narrative-load-bearing commercial and DoD-adjacent claims. Most claims here are non-J-Book by necessity; we still surface the few DoD-adjacent claims for completeness.",
+  "entity_resolution": {
+    "federal_subsidiary": "D-Wave Government Inc.",
+    "domestic_subs": ["D-Wave US Inc.", "D-Wave Commercial Inc.", "Quantum Circuits, LLC"],
+    "exhibit_21_n_subs": 15
+  },
+  "ticker_pe_crosswalk": {
+    "n_contracts_total": 0,
+    "n_pes_matched": 0,
+    "note": "Crosswalk shows ZERO matched DoD PEs for QBTS — consistent with QBTS being a commercial-cloud-first quantum vendor whose federal exposure (if any) flows through small grants and sub-tier engagements, not prime PE-level contracts."
+  },
+  "claims": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Approximately 70 percent of FY 2023 revenue comes from commercial customers across financial services, manufacturing, automotive, pharmaceutical, IT, retail, professional services.",
+      "subject": "D-Wave revenue mix FY2023",
+      "predicate": "commercial_share_pct",
+      "object_value": "70%",
+      "source_quote": "For the year ended December 31, 2023, approximately 70 percent of the Company's revenue comes from commercial customers across various industries such as financial services, manufacturing, automotive, pharmaceutical, information technology, retail, and professional services.",
+      "category": "dod_customer_concentration",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "params": {"contractor_name": "D-Wave", "cutoff_date": "2024-09-01"}, "purpose": "Forward J-Book exposure for D-Wave as contractor"},
+        {"source": "pentagon_jbook.query_program_funding", "params": {"contractor_name": "D-Wave Government", "cutoff_date": "2024-09-01"}, "purpose": "Federal sub-side exposure"}
+      ]
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Davidson Technologies, a DoD/aerospace technology services firm, is co-developing a phased-array radar-scheduling quantum-hybrid application with D-Wave to advance national defense efforts.",
+      "subject": "Davidson Technologies partnership",
+      "predicate": "joint_development_status",
+      "object_value": "active; phased-array radar-scheduling app; ~15% avg utilization gain, up to 42% max",
+      "source_quote": "Davidson Technologies, a technology services company that provides innovative engineering, technical, and management solutions for the Department of Defense, aerospace, and commercial customers, has been working with D-Wave on several quantum-hybrid applications to advance national defense efforts. Most recently, we have built a radar-scheduling application that efficiently manages the time-limited resources of a phased-array radar system...",
+      "category": "jbook_program_pipeline",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "params": {"contractor_name": "Davidson Technologies", "cutoff_date": "2024-09-01"}, "purpose": "Is Davidson tied to any J-Book PE that would carry through to D-Wave?"},
+        {"source": "pentagon_jbook.query_program_funding", "params": {"program_name": "phased array radar scheduling", "cutoff_date": "2024-09-01"}, "purpose": "Is there a DoD radar-scheduling program in the corpus?"},
+        {"source": "usaspending.query_dod_contracts", "params": {"recipient_name": "Davidson Technologies"}, "purpose": "Confirm Davidson actually receives DoD work (counterparty plausibility)"}
+      ]
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "D-Wave has had a long-standing engagement with Lockheed Martin going back to the early commercial era of D-Wave Systems.",
+      "subject": "Lockheed Martin relationship",
+      "predicate": "historical_customer_status",
+      "object_value": "early commercial customer; engagement referenced in narrative",
+      "source_quote": "Since the Lockheed Martin engagement, our technology has been used for a variety of research and academic applications at companies and institutions including Google, the Oak Ridge National Laboratory, Los Alamos National Laboratory, Julich Supercomputing Centre, University of Southern California Information Sciences Institute, and the NASA Quantum Artificial Intelligence Laboratory...",
+      "category": "counterparty_disclosure",
+      "queries": [
+        {"source": "edgar_fts.query_fulltext", "params": {"cik": "0000936468", "q": "D-Wave"}, "purpose": "Does Lockheed disclose D-Wave / quantum-annealing as a vendor or partner?"},
+        {"source": "pentagon_jbook.query_program_funding", "params": {"contractor_name": "Lockheed Martin", "cutoff_date": "2024-09-01"}, "purpose": "Is there any J-Book PE in our corpus where Lockheed is prime AND D-Wave is named?"}
+      ]
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "D-Wave systems have been used at Los Alamos National Laboratory and Oak Ridge National Laboratory for research and academic applications.",
+      "subject": "DOE national-lab footprint",
+      "predicate": "deployed_at_labs",
+      "object_value": "Los Alamos, Oak Ridge (research/academic use)",
+      "source_quote": "our technology has been used for a variety of research and academic applications at companies and institutions including Google, the Oak Ridge National Laboratory, Los Alamos National Laboratory...",
+      "category": "jbook_program_pipeline",
+      "queries": [
+        {"source": "doe_budget.query_program_funding", "params": {"program_name": "Quantum Information Science", "cutoff_date": "2024-09-01"}, "purpose": "Is DOE QIS program funded going forward?"},
+        {"source": "doe_budget.query_program_funding", "params": {"contractor_name": "D-Wave", "cutoff_date": "2024-09-01"}, "purpose": "Direct D-Wave / DOE link"}
+      ]
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "D-Wave Government Inc. is the primary federal contracting entity; the venture loan structure names it as a co-borrower alongside parent D-Wave Quantum.",
+      "subject": "D-Wave Government Inc. (federal contracting sub)",
+      "predicate": "exists_as_federal_subsidiary",
+      "object_value": "Active federal subsidiary co-named on Venture Loan + Term Loan as borrower",
+      "source_quote": "...the Venture Loan and Security Agreement, dated as of March 3, 2022, between D-Wave, D-Wave US Inc., D-Wave Government Inc., D-Wave Commercial Inc., D-Wave International Inc., D-Wave Quantum Solutions Inc. and Omni Circuit Boards Ltd., as borrower, and PSPIB Unitas Investments II Inc., as lender.",
+      "category": "dod_customer_concentration",
+      "queries": [
+        {"source": "usaspending.query_federal_presence", "params": {"recipient_name": "D-Wave Government Inc.", "cutoff_date": "2024-09-01"}, "purpose": "How much federal spend has D-Wave Government actually received pre-cutoff?"},
+        {"source": "pentagon_jbook.query_program_funding", "params": {"contractor_name": "D-Wave Government", "cutoff_date": "2024-09-01"}, "purpose": "J-Book PE linkage"}
+      ]
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "D-Wave participates in NASA Quantum Artificial Intelligence Laboratory (QuAIL) and USC Information Sciences Institute as long-standing system hosts.",
+      "subject": "NASA QuAIL / USC ISI deployment",
+      "predicate": "deployed_systems_active",
+      "object_value": "Continuing research deployment cited in narrative",
+      "source_quote": "...the NASA Quantum Artificial Intelligence Laboratory and University Space Research Organization.",
+      "category": "jbook_program_pipeline",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "params": {"program_name": "NASA QuAIL", "cutoff_date": "2024-09-01"}, "purpose": "Is QuAIL in any DoD/joint J-Book line item?"},
+        {"source": "pentagon_jbook.query_program_funding", "params": {"program_name": "quantum artificial intelligence", "cutoff_date": "2024-09-01"}, "purpose": "Quantum AI PE search"}
+      ]
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "D-Wave is the only company developing both annealing quantum computers and gate-model quantum computers; gate-model development is in early stages with high-coherence fluxonium qubits.",
+      "subject": "Technology roadmap",
+      "predicate": "dual_modality_development",
+      "object_value": "annealing commercialized; gate-model not yet commercialized",
+      "source_quote": "We are a leader in the development and delivery of quantum computing systems, software and services, and we are the world's first commercial supplier of quantum computers and the only company developing both annealing quantum computers and gate-model quantum computers.",
+      "category": "rollup_thesis",
+      "queries": [
+        {"source": "uspto_odp.query_assignee", "params": {"assignee_name": "D-Wave Systems"}, "purpose": "Patent footprint supports dual-modality claim"}
+      ]
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "D-Wave operates three facilities: Burnaby BC (~42,000 sf, R&D + manufacturing), Richmond BC (~7,000 sf, circuit-board fab), and Palo Alto CA (~6,000 sf, in-house fabrication).",
+      "subject": "Facilities footprint",
+      "predicate": "three_facilities_total_sf",
+      "object_value": "~55,000 sf across 3 sites",
+      "source_quote": "We operate three facilities in North America. Our Canadian operations and the Quantum Engineering Center of Excellence is located in Burnaby, B.C... approximately 42,000 square feet... We also lease approximately 7,000 square feet of space in Richmond, B.C... Our in-house fabrication activities are performed in a facility in Palo Alto, California, where we lease approximately 6,000 square feet of space...",
+      "category": "facility",
+      "queries": [
+        {"source": "epa_frs.query_facilities", "params": {"company_name": "D-Wave Systems"}, "purpose": "Verify Palo Alto fab via EPA FRS"}
+      ]
+    }
+  ]
+}

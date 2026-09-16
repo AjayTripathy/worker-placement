@@ -1,0 +1,115 @@
+{
+  "ticker": "LMAT",
+  "company": "LEMAITRE VASCULAR INC",
+  "cutoff": "2025-05-15",
+  "filing": "0001437749-25-005637_10K.txt",
+  "filing_date": "2025-02-28",
+  "cik": "0001158895",
+  "sector": "Healthcare",
+  "industry": "Medical Instruments & Supplies",
+  "group": "boring_middle",
+  "rfm_tuples": [
+    {
+      "claim_id": "C1",
+      "R": "Going-concern / substantial-doubt language (existence check). 10-K dated 2/28/2025 contains no going-concern language, no substantial-doubt language, no cure language, no historical references in audit opinion. Auditor Grant Thornton expressed an unqualified opinion and 'determined that there are no critical audit matters.'",
+      "f": "going_concern_local.going_concern_from_text on full 10-K + audit opinion search",
+      "M_source": "going_concern_local",
+      "M_value": "{'signal':'NO_GOING_CONCERN','n_matches':0,'n_current_period':0,'n_cure':0,'n_historical':0}; auditor opinion unqualified, zero critical audit matters",
+      "severity": "PASS",
+      "interpretation": "Auditor and management both clean. No financial-distress disclosure. This is a non-distressed name appearing in boring-middle on price drawdown only."
+    },
+    {
+      "claim_id": "C2",
+      "R": "Auditor: 'We have served as the Company's auditor since 2015. /s/ GRANT THORNTON LLP' (Boston, Feb 28, 2025). 'Item 9. Changes In and Disagreements with Accountants on Accounting and Financial Disclosure: None.' No material weakness identified; ICFR opinion unqualified.",
+      "f": "auditor_change_from_text + manual ICFR/disagreement scan",
+      "M_source": "auditor_change_tracker",
+      "M_value": "{'signal':'CLEAN_TIER_2_TENURE','firms_mentioned':['Grant Thornton'],'n_firms':1,'n_resignation_lang':0,'n_disagreement_lang':0}; 10-year stable tenure (non-Big-4 mid-tier — appropriate for ~$220M revenue issuer)",
+      "severity": "PASS",
+      "interpretation": "Long-tenured mid-tier auditor with zero disagreements / material weaknesses / restatements. Clean."
+    },
+    {
+      "claim_id": "C3",
+      "R": "MD&A: 'Net sales $219,863 thousand (2024) vs $193,484 (2023), +14%. Operating income grew 42% in 2024 and 37% in 2023. Gross margin 68.6% (2024) vs 65.7% (2023). Net income $44.0M vs $30.1M.'",
+      "f": "claim_evolution: compare 10-K FY24 commentary to Q1 2025 10-Q (filed 2025-05-08, pre-cutoff). Q1 2025 net sales $59.9M vs $53.5M = +12% (decel from +14% FY24 and +20% FY23); income from operations $12.6M vs $11.9M = +6.3% (sharp decel from +42% FY24 op-income growth).",
+      "M_source": "claim_evolution",
+      "M_value": "Revenue growth decelerating (20%->14%->12% Q1'25); operating income growth decelerating SHARPLY (37%->42%->+6.3% Q1'25). Magnitude of operating-income decel is meaningful — could indicate cost pressure / mix shift / one-time prior-period benefits no longer recurring. Not lying — both filings disclose; but trend is softening into 2025.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Q1 2025 10-Q (pre-cutoff) reveals material deceleration in operating leverage vs the 10-K narrative of '42% op-income growth.' Management has not reset expectations in the 10-K filed Feb 28. Mode B catch: the 10-K's headline narrative is stale by Q1."
+    },
+    {
+      "claim_id": "C4",
+      "R": "Convertible Senior Notes (Dec 19, 2024): '$172.5 million aggregate principal amount of 2.50% convertible senior notes due 2030... net proceeds approximately $167.7 million... initial conversion price approximately $119.73 per share, a 30% premium over the closing price on December 16, 2024.' Used for general corporate purposes; no concurrent buyback or capped call disclosed.",
+      "f": "edgar_fts + 10-K Note 6 cross-check: verify terms (rate, conversion price, premium, capped-call existence) match the indenture",
+      "M_source": "edgar_fts",
+      "M_value": "Terms confirmed in 10-K Note 6. Implied stock at pricing ~$92.10 (119.73/1.30). Capped call not disclosed — atypical for a 30%-premium converts; usually issuers buy capped calls to push effective conversion price higher. As of Dec 31 2024 LMAT had $25.6M cash + $274.1M short-term securities = ~$300M total; debt was zero before this issuance. So this is a $172M raise into ~$300M of existing liquidity — defensive/opportunistic, not need-based.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Mode B: issuing $172M of converts when you already have $300M of cash + securities and ZERO debt is unusual. No stated use of proceeds beyond 'general corporate purposes.' Combined with insider distribution (C5), reads as opportunistic capital raise near a stock-price high (~$92-$103 range Dec 2024)."
+    },
+    {
+      "claim_id": "C5",
+      "R": "Form 4 disclosures (2024-01-01 through 2025-05-14, pre-cutoff): aggregate discretionary open-market 'S' sales = ~$37.1 million across multiple insiders. CEO George LeMaitre sold ~$24.7M (largest blocks: $4.97M on 7/18/24, $7.1M on 5/8/24, $6.85M on 3/4/24); CFO Pellegrino sold ~$2.6M on 3/4/24 — BEFORE announcing his retirement (8/2024); directors Ross, Roush, Jasinski, Shadan and SVP-Ops Kamke also sold.",
+      "f": "form4 + insider_vs_calendar: did insiders sell within window of any capital event (convertible note Dec 19 2024) or material disclosure?",
+      "M_source": "form4",
+      "M_value": "40 discretionary 'S' sales totaling ~$37.07M. CEO timing: sold $4.97M on 7/18/24 (~$86.69), $4.66M-$10M waves on 5/8-5/15/24 (~$75-77). Director Bridget Ross sold $312K on 5/14/25 (1 day before cutoff) at $83.20 — at LMAT lows. CFO Pellegrino sold $2.6M on 3/4/24, retirement announced ~5 months later (8/2024). Distribution clusters BEFORE the Dec 2024 convertible-note raise; no insider buying.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "interpretation": "Persistent, multi-officer distribution pattern at $67-$103 range over 14 months. CFO sold heavily before announcing retirement — disclosure timing question. Insider Ross sold one day pre-cutoff. Combined with C4 (convert raise without use-of-proceeds need), suggests insider de-risking ahead of decelerating growth (C3) and known FY25 tariff/MDR/ERP risks (C7-C9)."
+    },
+    {
+      "claim_id": "C6",
+      "R": "Share repurchase program: 'On February 21, 2024, our Board authorized the repurchase of up to $50.0 million... To date, we have not made any repurchases under that program.' On February 18, 2025, Board authorized a NEW $75.0M program. 'To date we have not made any repurchases under this or any prior program.'",
+      "f": "10-K Item 5 + Liquidity section: did the company execute the authorized buybacks during the year insiders were selling?",
+      "M_source": "self_text",
+      "M_value": "$50M authorized Feb 2024; ZERO executed through year-end 2024. New $75M authorized Feb 2025; ZERO executed through 10-K filing date. Meanwhile insiders sold ~$37M in open market.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Mode B: textbook gap — buyback authorization without execution while insiders distribute. Either (a) management doesn't view shares as undervalued at $67-$103 (consistent with insider selling) or (b) the auth is a token signaling device. Either way, the buyback authorization is not corroborated by behavior."
+    },
+    {
+      "claim_id": "C7",
+      "R": "'In August 2024, Mr. Pellegrino announced that he will retire as Chief Financial Officer as of March 7, 2025... Mr. Pellegrino will be replaced by Dorian LeBlanc.' CFO Pellegrino served since 2007 (17 years).",
+      "f": "edgar_fts/self_text: confirm successor LeBlanc disclosure (8-K 2/13/25 offer letter), check for off-cycle CFO departures, check whether ERP transition (D365 Feb 2024) overlaps the CFO change",
+      "M_source": "edgar_fts",
+      "M_value": "CFO replacement disclosed appropriately (8-K 10.8 Offer Letter to Dorian LeBlanc, 2/13/25). However the CFO transition happens during/after: (1) a new D365 ERP go-live (Feb 2024) with disclosed integration issues including a $1M billing-shipping cost incident, (2) a $172.5M convertible note issuance (Dec 2024), (3) heavy insider selling by Pellegrino himself BEFORE the retirement announcement.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Long-tenured CFO retires alongside a fresh ERP rollout and a fresh $172M debt issuance — sequencing is awkward. Pellegrino's $2.6M Mar 2024 sale preceded his Aug 2024 retirement announcement — fully legal if no MNPI but optically unfavorable. Not falsifying anything; flagging adverse pattern."
+    },
+    {
+      "claim_id": "C8",
+      "R": "'In February 2024, we began implementing a new ERP system to replace our financial reporting and planning system... in the U.S., we transitioned from our legacy ERP system to our newly implemented Microsoft Dynamics D365 system in February 2024. We expect to implement this new system in selected countries in Europe in 2025, starting with the UK.' Risk factor discloses one incident: 'a third-party independent service provider that assists us in billing our customers... unexpectedly stopped billing our customers for their portion of shipping costs, which results in an increase in expense to us of $1.0 million.'",
+      "f": "claim_evolution + ICFR opinion: is there any material weakness disclosed? Cross-check Item 9A for ERP-related ICFR caveats.",
+      "M_source": "self_text",
+      "M_value": "ICFR opinion unqualified; no material weakness. One disclosed $1M billing/shipping issue, 'recovered nearly all unbilled customer balances.' UK D365 rollout planned 2025; European rollouts staged through later periods.",
+      "severity": "UNVERIFIABLE",
+      "interpretation": "Disclosed risk that has so far been managed. UK/EU ERP cutover is forward operational risk into 2025-2026 — not a current-period miss. Flag as watch-item but no current evidence of distress."
+    },
+    {
+      "claim_id": "C9",
+      "R": "Q1 2025 10-Q Subsequent Event Note 14 (filed 2025-05-08): 'On April 2, 2025, the U.S. federal government announced a new series of tariffs on a broad range of imported goods... These tariffs are scheduled to take effect beginning June 15, 2025... extent of the financial and operational impact... cannot be reasonably estimated.' 10-K MD&A asserts: 'we believe our U.S. domestic business is unlikely to be materially affected by tariffs as we manufacture our products in the United States.'",
+      "f": "claim_evolution between 10-K (Feb 28) and Q1 2025 10-Q (May 8) tariff posture",
+      "M_source": "claim_evolution",
+      "M_value": "10-K (Feb 28 2025) had no tariff disclosure — pre-announcement. Q1 10-Q (May 8 2025) discloses April 2 tariff announcement as subsequent event but cannot quantify. 27% of revenue is ex-Americas (EMEA $60M + APAC $15M of $220M FY24); imports into LMAT-EU subsidiaries and ex-US distribution may be affected.",
+      "severity": "UNVERIFIABLE",
+      "interpretation": "Forward tariff risk acknowledged but unquantified. Domestic manufacturing limits direct US-import exposure but EU/APAC distribution channels and component sourcing remain at risk. Not a Mode-A misstatement; flag as Mode B forward uncertainty."
+    },
+    {
+      "claim_id": "C10",
+      "R": "Customer concentration: 'No single customer accounted for more than 2% of our net sales in 2024.' 'No single hospital customer accounted for more than 2% of our net sales.' Direct-to-hospital sales 95% of revenue.",
+      "f": "edgar_fts counterparty mirror: search for top-10-customer disclosures or any hospital-chain references; verify lack of concentration claim",
+      "M_source": "edgar_fts",
+      "M_value": "Diversified: ~24 acquired product lines, sales across 95% direct-to-hospital channel and ~12 international subsidiaries; no SEC counterparty filings reference LMAT as 10%+ supplier. Independently confirmed in the audit footnotes ('no single customer accounted for more than 2%').",
+      "severity": "PASS",
+      "interpretation": "True diversification — no customer concentration risk. This is a structurally low-risk top-line."
+    }
+  ],
+  "supplemental_signals": {
+    "dividend_action_bullish": "Quarterly dividend RAISED from $0.16 to $0.20/share (Feb 18 2025) = 25% increase; alongside new $75M buyback authorization (unexecuted).",
+    "liquidity_strength": "$300M cash + short-term securities + $172.5M convertible note proceeds = ~$472M total liquidity vs FY24 op-cash-flow $44M; zero net debt before converts, modestly net-cash after.",
+    "fda_recalls_2024": "1 Class II EU recall + 1 Class III US recall, neither involving patient injury. No FDA warning letters. 7 FDA audits + 18 internal audits with 'no material findings.'",
+    "no_critical_audit_matters": "Grant Thornton (since 2015) found zero CAMs — unusual cleanliness for a 22-acquisition serial acquirer with $65.9M goodwill + $35.8M intangibles.",
+    "goodwill_stable": "$65.9M unchanged 2023->2024; no impairment for years 2022/2023/2024.",
+    "insider_distribution_pattern": "~$37M open-market 'S' sales 2024-01 to 2025-05-14; CEO LeMaitre ~$24.7M; CFO Pellegrino $2.6M pre-retirement announcement; new sale by Director Ross 1 day pre-cutoff.",
+    "convert_overhang": "172.5M / $119.73 conversion = ~1.44M dilutive shares (~6% of share count) at conversion if stock recovers to that level; otherwise put back / cash settlement risk in 2030.",
+    "operating_decel": "FY24 op-income +42%; Q1'25 op-income +6.3% — sharp deceleration not narratively reset in 10-K."
+  },
+  "summary": "LMAT is a fundamentally non-distressed mid-cap medical-device serial acquirer with zero going-concern signals, a 10-year clean Grant Thornton tenure, unqualified ICFR, no critical audit matters, no customer concentration (max 2%), and a 25% dividend hike (Feb 2025). However, multiple Mode-B disclosure gaps merit attention: (1) $172.5M convertible note raise Dec 2024 layered on $300M of existing cash with no specified use of proceeds and no capped call; (2) ~$37M of discretionary insider open-market selling across CEO/CFO/directors 2024-01 to 2025-05-14 with zero corresponding buyback execution despite $50M (2024) and $75M (2025) board authorizations; (3) long-tenured CFO Pellegrino retiring March 2025 coinciding with new D365 ERP rollout and post-issuance of converts, after he sold $2.6M in March 2024; (4) Q1 2025 operating income growth decelerated to +6.3% from +42% FY24 — not reset in MD&A narrative. Tariff exposure to ex-US distribution is acknowledged but unquantified. Read: non-distressed business but adverse insider/capital-raise signals offset bullish dividend hike; net neutral.",
+  "composite": 0.55
+}

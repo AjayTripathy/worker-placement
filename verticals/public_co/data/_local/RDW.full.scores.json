@@ -1,0 +1,121 @@
+{
+  "ticker": "RDW",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Redwire is prime mission integrator on DARPA's Otter (VLEO air-breathing) program leveraging SabreSat.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        {"mode": "A", "source": "usaspending.query_dod_contracts(Redwire)", "result": "26 DoD awards totaling $85.2M; only small-dollar STTR Phase I + SBIR feasibility studies (W911NF22P0020 $172k STTR, FA864920P0922 $50k Deployable Space Radar SBIR). No DARPA Otter / SabreSat award visible under Redwire entity. Mostly Army STTRs through Redwire Defense Tech Energy Systems and minor Space Force / AFRL SBIR."},
+        {"mode": "B", "source": "pentagon_jbook.query_program_funding(Otter)", "result": "NOT_FOUND in J-Book corpus — Otter not in hand-extracted program set. Per calibration heuristic this is genuine coverage gap, not contradiction."}
+      ],
+      "M_check": "DoD + J-Book",
+      "M_value": "DoD obligations $85M across Redwire entities, dominated by sub-$200k STTRs; no obligation visible for DARPA Otter prime-integration award.",
+      "interpretation": "Redwire is a real DoD recipient at modest scale, but registry does not yet show an Otter prime-contract obligation matching the 'prime mission integrator' claim. Heuristic 10 (IDIQ ceiling vs obligated) flags: claim may reference ceiling/option not yet obligated, and DARPA awards often flow through PE budget lines that obligate late. MODERATE — claim plausible but not registry-confirmed."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Rollup thesis: space-infrastructure rollup (Made In Space, Adcole, Roccor, Hera) extended by $1.024B Edge Autonomy (UAS) acquisition in 2025.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": [
+        {"mode": "A", "source": "sec_filings.list_filings_by_form(cik=0001819810, form=8-K)", "result": "Multiple 8-Ks confirm Edge Autonomy deal (Jan 2025 announcement, June 2025 close); each prior acquisition individually documented in SEC filings. Mode A passes — each acquisition is real."},
+        {"mode": "B", "source": "acq_coherence.score_acquisition_coherence(aggregate rollup)", "result": "MIXED_COHERENCE: mean_coherence 0.74 across 5 acquisitions. Made In Space 0.95, Adcole 0.95, Roccor 0.85, Hera 0.80 — all high-coherence with the space-infrastructure thesis. EDGE AUTONOMY coherence 0.15 (low_coherence, is_revenue_synthetic=TRUE), $1.024B deal value. LLM reasoning: 'Edge Autonomy operates ground-based small unmanned aerial systems for terrestrial/EU defense customers; Redwire's thesis is in-space hardware and satellite platform integration. UAS and space-segment infrastructure are distinct technology verticals with no stated integration path or shared stack.'"},
+        {"mode": "context", "source": "10-K Note C", "result": "Edge Autonomy added $107.1M FY25 revenue (32% of consolidated revenue per ICFR exclusion note) and $721M goodwill — i.e. dollar-for-dollar 'revenue synthesis' through a deal whose technology stack does not extend the space-segment thesis."}
+      ],
+      "M_check": "acq_coherence aggregate rollup",
+      "M_value": "Edge Autonomy rollup coherence 0.15 (revenue-synthetic) within an otherwise mixed ~0.73 mean. ICFR adjustment carves out 10% of assets and 32% of revenues from internal-controls assessment — the same Edge Autonomy bucket that the coherence model flags as off-thesis.",
+      "interpretation": "Even though each of Hera/MIS/Adcole/Roccor individually scores >=0.80, the $1.024B Edge Autonomy bolt-on is a classic Mode B finding: parent thesis is in-space hardware, but the largest acquisition is ground-launched small UAS for EU MoD customers. Per the framework heuristic, roll-up incoherence on the AGGREGATE is a distinct SEVE-class signal even when each acquisition is real, especially when the deal supplies the bulk of FY25 revenue growth (revenue-synthetic). Coupling with the material-weakness ICFR exclusion specifically for the Edge bucket amplifies the signal."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "ICFR concluded NOT effective at Dec 31 2025; KPMG issued adverse opinion. Prior Lemen securities class action alleged material weaknesses; $8.0M settlement.",
+      "severity": "RED_FLAG_NEGATIVE",
+      "supports": [
+        {"mode": "A", "source": "claim_evolution.query_claim_evolution(material weakness)", "result": "REAFFIRMED_IN_STRUCTURED_DISCLOSURE: 2 subsequent filings within window (8-K 2026-05-06 and 10-Q 2026-05-07) both AFFIRMED the material-weakness disclosure; LLM-classified as ongoing, not remediated. ICFR weakness persists post-10K."},
+        {"mode": "B", "source": "claim_evolution.query_claim_evolution(restatement)", "result": "1 mention in DEF 14A (clawback boilerplate, classified UNRELATED). No financial-statement restatement triggered (yet)."},
+        {"mode": "context", "source": "10-K Item 9A", "result": "KPMG issued an adverse opinion on ICFR for FY25. Material weaknesses cover (i) inability to fully deploy process-level controls across substantially all US operations; (ii) lack of ITGCs (program change and access controls) in European/remaining US ops. Edge Autonomy excluded from assessment though it represents 10% of assets and 32% of revenue."},
+        {"mode": "context", "source": "10-K Item 3", "result": "Lemen securities class action (alleging material weaknesses in financial reporting) settled for $8.0M cash in 2025; derivative Yingling case settled with corporate governance reforms + $0.9M fees in Aug 2025."}
+      ],
+      "M_check": "claim_evolution + 10-K Item 9A",
+      "M_value": "Adverse ICFR FY25 + REAFFIRMED material weakness in Q1 2026 10-Q + prior $8M Lemen settlement on the SAME material-weakness theme. Recurring pattern.",
+      "interpretation": "This is a textbook RED per the framework rubric: (a) ADVERSE ICFR opinion from auditor (KPMG), (b) recurring material-weakness pattern with prior securities litigation alleging the same, (c) reaffirmed in the very next 10-Q (the company has not remediated post-10K). Per heuristic 'Adverse ICFR or recurring material weakness is RED'."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Heavy 2025 dilution: ATM facility + equity offering proceeds + $5.0M holdback + 49.76M Edge consideration shares + 21.5M shares from preferred conversion. S-3 shelf on file Aug 2025.",
+      "severity": "RED_FLAG_NEGATIVE",
+      "supports": [
+        {"mode": "A", "source": "sec_filings.list_filings_by_form(cik=0001819810, form=S-3)", "result": "Two S-3 shelves on file: 2023-09-06 and 2025-08-07. Mode A passes — equity raise infrastructure exists and was activated for the Edge close + ATM."},
+        {"mode": "B", "source": "insider_vs_calendar.query_insider_sales_near_budget_events(cik=0001819810, window_days=14, start_date=2024-01-01, end_date=2026-05-20)", "result": "Signal: PROXIMATE_DISCRETIONARY. 58 Form-4 filings, 50 sales totaling $1.21B, of which 21 are proximate to budget events and ALL 21 are DISCRETIONARY (non-10b5-1), totaling $858.7M. Concentration: AE RED HOLDINGS (AE Industrial Partners affiliate, sponsor) sold $231.8M on 2026-04-22 (6 days before FY27 J-Book release) and $110.5M on 2026-01-14 (6 days before FY26 budget signed); BAIN CAPITAL CREDIT MEMBER sold $86.1M on 2025-09-17 (FY25 fiscal year end). Sponsors AE Industrial + Bain Capital Credit are dumping concentrated, discretionary blocks ahead of budget-calendar events."}
+      ],
+      "M_check": "Form 4 vs budget calendar",
+      "M_value": "$858M in discretionary, NON-10b5-1 sales by AE Red Holdings and Bain Capital Credit clustered within ~6-14 days of named budget events (FY26 budget signing, FY27 J-Book release, FY25 fiscal year-end). 21 proximate sales / 0 of which are 10b5-1.",
+      "interpretation": "Per the Mode B rubric, CLUSTERED_DISCRETIONARY sponsor sales around budget-calendar events are the highest-signal flag and rate SEVE-RED. The discretionary classification (not 10b5-1) and the proximity of the largest block ($231.8M on 2026-04-22, six days before the FY27 J-Book release that publicly confirmed SDA Transport Layer Tranche 3 unfunded) is the canonical insider-tape pattern. RED."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "28 locations / ~910,000 sq ft across US (23) and Europe (5).",
+      "severity": "PASS",
+      "supports": [
+        {"mode": "A", "source": "epa_frs.query_facilities(Redwire, FL)", "result": "0 EPA-FRS facilities — expected per calibration heuristic 1: light spacecraft electronics / payload assembly is not EPA-regulated industrial."},
+        {"mode": "B", "source": "osha_establishments.query_establishments(Redwire)", "result": "REGISTERED_EMPLOYER: 582 employees across 6 US states (CO 3 sites, FL 2, NM 1, CA 1, IN 1, MA 1). NAICS 334511 (Space vehicle guidance systems and equipment manufacturing) dominant. Confirms physical footprint claimed in 10-K Properties section."}
+      ],
+      "M_check": "OSHA establishments",
+      "M_value": "OSHA-registered space-vehicle-equipment manufacturing employer with 582 employees across 9 US sites matching the geographic distribution disclosed in Item 2 (CO 4 / FL 2 / NM IN MI VA AL MA OR matching the 10-K). PASS.",
+      "interpretation": "Facility claim corroborated. EPA absence is expected and not penalized."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Redwire patented ROSA (Roll-Out Solar Array) tech plus broader IP from acquired entities (Made In Space, Adcole, Roccor) and UAS IP (Edge Autonomy).",
+      "severity": "PASS",
+      "supports": [
+        {"mode": "A", "source": "uspto_odp.query_assignee(Redwire)", "result": "3 granted patents under Redwire Space, Inc. (n_granted=3) including US 12351503 'System and method for rapidly rotating and transferring molten material ... in a micro-gravity environment' (granted 2025-07-08). Several provisionals expired. Patent count light at parent level."},
+        {"mode": "B", "source": "uspto_odp.query_assignee(Made In Space)", "result": "25 granted patents under Made In Space, Inc. — robust IP coverage in in-space manufacturing (additive manufacturing of extended structures, optical-fiber manufacturing in microgravity, recycling in reduced-gravity environments). Acquired-entity assignee is where the IP actually lives."}
+      ],
+      "M_check": "USPTO ODP",
+      "M_value": "Parent Redwire 3 granted + acquired Made In Space 25 granted = 28+ patents in claimed areas (in-space manufacturing, microgravity payloads). Above the Nikola-pattern threshold; granted patents directly hit claimed micrograv / in-space mfg category.",
+      "interpretation": "Per heuristic 8: PASS — n_granted >= 5 across the family with hits in claimed-category. Redwire's IP narrative is anchored on acquired subsidiaries (Made In Space), which is exactly where the patent registry resolves."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "$411.2M backlog ($299.8M Space + $111.4M Defense Tech) via direct federal and prime-contractor relationships.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        {"mode": "A", "source": "usaspending.query_recipient_contracts(Redwire)", "result": "117 federal awards totaling $238.6M, dominated by NASA (18 awards, biggest individual at $2.66M Industrial Crystallization Facility, $2.58M Biofabrication Facility, $2.50M INSPA Phase 2). DoD presence is real but small-dollar STTR/SBIR. Total $238.6M of historical federal obligations vs $411.2M backlog claim — backlog includes ESA / commercial / international (Ukraine/EU MoD via Edge) that USAspending wouldn't capture. Direct federal obligations don't bridge to backlog dollar value."},
+        {"mode": "B", "source": "edgar_fts.query_fulltext(search_term=Redwire, cik=0000936468 Lockheed Martin)", "result": "0 hits in Lockheed Martin's filings for 'Redwire'. Per heuristic 7, this is not penalized as SEVE because (a) Redwire is sub-tier (b) any single subcontractor relationship would be immaterial to LMT (c) Redwire's disclosure does not name LMT as a material counterparty — only generally references 'large prime contractors'."}
+      ],
+      "M_check": "USAspending + edgar_fts(Lockheed)",
+      "M_value": "Federal obligations ($238.6M life-to-date) materially below disclosed $411.2M backlog. Lockheed zero-mention of Redwire is consistent with sub-tier disclosure threshold but does flag that the prime-contractor channel narrative is not corroborated at the named-prime level.",
+      "interpretation": "MODERATE: backlog claim plausibly bridges to international/ESA/commercial sources not in USAspending, but the gap is meaningful and the prime-contractor name-check fails at the Lockheed counterparty. Not RED (no specific named prime in the disclosure to contradict) but the federal obligations / backlog mismatch is a real Mode B underdelivery signal."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Stalker UAS granted DIU Authority to Operate / Blue UAS List on 2025-07-14; Penguin C heritage with Ukraine/Latvia/Lithuania/RSAF.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        {"mode": "A", "source": "usaspending.query_dod_contracts(Edge Autonomy)", "result": "1 DoD award visible — N0001925P1000 to EDGE AUTONOMY SLO, LLC for $2.96M procuring 'VXE30 STALKER UAV ... in support of the Guyana Defence Force, Foreign Military Sales (FMS) case GU-P-LAG'. Confirms Stalker is a real, DoD-procured platform but the largest US contract is an FMS pass-through to Guyana, not a US-services Blue UAS deployment."},
+        {"mode": "B", "source": "USAspending presence", "result": "Only $3M visible US-DoD spend post-acquisition. Blue UAS listing should have produced a step-up in US-services orders if narrative is operative; visible obligations are minimal as of cutoff. Note that DIU/Blue UAS adoption is recent (Jul 2025) so timing-lag is plausible."}
+      ],
+      "M_check": "USAspending DoD + DIU narrative",
+      "M_value": "Stalker is a real DoD-purchased platform (one $2.96M FMS award visible); the broader Blue UAS / U.S.-services adoption claim has not yet produced obligated revenue in USAspending. Foreign customers (Ukraine/Latvia/Lithuania/RSAF) are outside US registries by definition.",
+      "interpretation": "Stalker DIU Authority-to-Operate and Blue UAS listing are operative claims, but only one modest FMS award visible at the cutoff. Per heuristic 3 (planned vs operational) and the recent timing of the AtO, MODERATE rather than RED. Watch for new Edge / Redwire Defense Tech US-DoD awards in next two quarters."
+    }
+  ],
+  "summary": {
+    "n_claims": 8,
+    "n_queries_executed": 16,
+    "severity_counts": {
+      "PASS": 2,
+      "MODERATE_UNDERDELIVERY": 3,
+      "SEVERE_UNDERDELIVERY": 1,
+      "RED_FLAG_NEGATIVE": 2,
+      "UNVERIFIABLE": 0
+    },
+    "headline_mode_b_findings": [
+      "C2 (rollup coherence): Edge Autonomy 0.15 (revenue-synthetic) within mean ~0.74 - MIXED_COHERENCE / SEVE roll-up incoherence",
+      "C4 (insider vs calendar): PROXIMATE_DISCRETIONARY 21 sales / $858M, AE Red Holdings + Bain Capital Credit dumping non-10b5-1 within 6-14 days of FY26 budget signing and FY27 J-Book release - RED",
+      "C3 (ICFR): KPMG adverse opinion FY25, material weakness REAFFIRMED in 2026-Q1 10-Q + 8-K, recurring Lemen $8M settlement on same theme - RED",
+      "C7 (federal $ vs backlog): $238.6M historical federal obligations vs $411.2M backlog disclosure - moderate gap; Lockheed counterparty zero-mention"
+    ]
+  }
+}

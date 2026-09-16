@@ -1,0 +1,37 @@
+## Context
+
+The cohort assignment is wrong, and that is the finding. HCWC is tagged Consumer Staples / Food Chains, but it is three days from ceasing to be a grocer: stockholders approved a reverse merger into **Host Digital Infrastructure LLC** (AI data centers) on 2026-08-27, Host Digital members take **~96%**, and the ticker becomes **HOST**. Its −75.5% dd52 has no relationship to the staples narrative the cohort was sold on.
+
+**Split-artifact check — REFUTED, the tape is clean.** My first hypothesis was the [vendor unadjusted-reverse-split artifact](https://www.rttnews.com/3686952/hcwc-s-host-digital-secures-1-25-billion-ai-lease-reverse-stock-split-takes-effective-today.aspx). It doesn't hold: HCWC closed Friday 2026-08-28 at **$0.24** pre-split, and $0.24 × 35 = $8.40 ≈ the pack's $8.41. The 1-for-35 series is correctly adjusted and dd52 −0.755 is a **real** drawdown ($0.98 → $0.24 pre-split). Absence of the artifact is a positive finding.
+
+**But `mcap` in the pack is unusable.** $272,970,333 ÷ $8.41 ⇒ 32.5M post-split shares ⇒ 1.14B pre-split — irreconcilable with the pack's own 12.18M diluted count. The merger is valued at **$425M** off an exchange ratio derived from **$0.27/HCWC share**, implying a legacy stub of only ~$17M (4% of ~$443M). The screen compared a pro-forma-scale mcap against a legacy-stub drawdown.
+
+| ticker | class | refuting metric | current value/trend (cited) | next print date | note |
+|---|---|---|---|---|---|
+| HCWC | **STRUCTURAL** (cohort assignment INVALID) | Legacy grocery revenue as % of pro-forma entity — the staples narrative can only be refuted if the grocery book still drives the equity | Grocery rev flat (~$20.2M/qtr: 2025-06-30 $20,199,979 vs 2025-03-31 $20,259,606, XBRL in pack) but legacy holders are diluted to **~4%**; 19 stores become a rounding error. Metric goes unobservable at close. [8-K](https://www.sec.gov/Archives/edgar/data/0001948864/000149315226040455/form8-k.htm) · [DEF 14A](https://www.sec.gov/Archives/edgar/data/0001948864/000149315226036418/formdef14a.htm) | Q3 10-Q ≈ mid-Nov 2026 (Q2 10-Q filed 2026-08-14). **Binding event is merger close, Sept 2026.** | Discount to the grocery business is *correct*; the forward security is a different company |
+
+Primary citations: [1-for-35 split PR](https://www.globenewswire.com/news-release/2026/08/27/3352445/0/en/healthy-choice-wellness-corp-announces-1-for-35-reverse-stock-split.html) · [stockholder approval PR](https://www.globenewswire.com/news-release/2026/08/27/3352100/0/en/healthy-choice-wellness-corp-s-stockholders-approve-all-proposals-in-connection-with-merger-with-host-digital.html) · [$1.25B lease PR](https://www.globenewswire.com/news-release/2026/08/31/3353118/0/en/hcwc-announces-host-digital-secures-1-25-billion-15-year-ai-data-center-lease.html)
+
+**COURT-WORTHY (damage-absent, ranked):** *None.* No member qualifies as damage-absent. HCWC's drawdown is real and structurally explained by dilution to a 4% residual, not by an ignorable sector narrative.
+
+### Why the court doesn't change the sizing — four doctrine-level kills
+
+1. **RP_TAINTED — live paid promotion on the exact catalyst.** The "$3.2 Billion… Tiny Public Company Is About to Inherit It" piece is a **paid advertisement**: *"MEL has been paid a fee for Healthy Choice Wellness Corp. advertising and digital media from Creative Direct Marketing Group… This compensation constitutes a conflict of interest… individuals are strongly encouraged not to use this publication as the basis for any investment decision."* ([disclosure](https://www.globenewswire.com/news-release/2026/08/31/3353613/0/en/a-single-ai-data-center-lease-just-locked-in-up-to-3-2-billion-and-a-tiny-public-company-is-about-to-inherit-it.html)) It ran 2026-08-31 — the same day as the lease PR and the first split-adjusted open. Per the RP_TAINTED gate, this name can never be RP_FAIR.
+2. **Maximum-dilution machinery assembled in one week.** Authorized shares raised to **2,000,000,000**, a **new ATM launched 2026-08-27** (the 424B5 in the pack), and the charter amended to **permit action by written consent in lieu of a meeting** — removing future shareholder-meeting friction. A 1-for-35 split already frees 35× headroom; raising authorized *on top of it* is the tell.
+3. **The $1.25B is unverifiable today.** Tenant unnamed ("one of the world's largest privately held cloud infrastructure companies"); backstop counterparty unnamed ("a U.S.-based, investment grade global technology company"); capacity delivers **H1 2027**. Note the internal tension worth a court's time if one ever runs: the site is called "currently energized" yet delivery is ~9 months out.
+4. **No asymmetry even on the bull case.** At $8.41 vs the $9.45 post-split merger reference ($0.27 × 35), you pay ~89% of the deal reference for a ~4% stub — before **up to 12M shares** issued to insiders at closing. Blue-teaming my own rejection: if the lease is fully real, 4% of ~$443M ≈ $17.7M vs a stub already marked near that. Fair, not cheap.
+
+**COURT-WORTHINESS HCWC: 3/10** — a court would be interesting but cannot move the action; the live paid-promo campaign plus 2B authorized shares plus a same-week ATM is a doctrine-level FLAT regardless of what the bench concludes about the lease.
+
+**PRINT PROXIMITY: NONE within 5 trading days** — verified two ways: Q2 10-Q already filed 2026-08-14 (pack filing list), so Q3 lands ~mid-Nov; and no company PR names an earnings date. The *binding* event is the merger close in **September 2026** with ticker change to HOST, which is a corporate action, not a print.
+
+**PRE-EVENT POSITION: FLAT.** Book confirms no position and no orders, which is where this should stay. There is no pre-print reconstruction that resolves the loudest bull claim, because the decisive facts — tenant identity and backstop counterparty — are deliberately withheld and no public pre-close filing carries them; the first document that could is the closing 8-K.
+
+### Two things I could not verify, stated plainly
+
+- **SEC.gov returned 403 to every direct fetch** (the fetch tool sends no custom User-Agent, and the repo's full-fingerprint scraper wasn't reachable — Bash is unavailable and the `signalos` read was denied). SEC URLs above come from search listings; the 8-K text I relied on is the primary excerpt in the evidence pack itself. The 424B5 ATM size and exact legacy share count remain unread.
+- **A possibly-lapsed outside date.** Secondary coverage of the earlier proxy puts the transaction deadline at **2026-08-25**, two days *before* the special meeting. If accurate and not amended, that's a live termination right for either party. This came from a secondary summary of a June draft, so treat it as a flag to check in the merger agreement, not a fact.
+
+### Pipeline defect this run exposed
+
+`class_dislocation` screened HCWC on a **stale SIC/sector tag** and a `mcap` inconsistent with its own share count. The fix is a pre-triage guard: when a member has a pending change-of-control ≥50% (detectable from DEF 14A/PREM14A in the filing list), suppress cohort membership rather than triaging it against a sector narrative the forward entity won't belong to — and reject `mcap` when |mcap ÷ px − dil_sh| exceeds a tolerance instead of passing it through. I don't have write access in this session to wire that, so it's a stated recommendation, not a change I made.

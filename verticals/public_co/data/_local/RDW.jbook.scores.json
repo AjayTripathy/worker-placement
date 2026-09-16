@@ -1,0 +1,128 @@
+{
+  "ticker": "RDW",
+  "cutoff": "2026-05-20",
+  "filing": "0001819810-26-000029_10-K.txt",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Redwire is prime mission integrator on DARPA's Otter program (SabreSat air-breathing VLEO satellite).",
+      "severity": "UNVERIFIABLE",
+      "supports": [],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": {"program_queries": ["Otter", "DARPA Otter", "air-breathing satellite"], "result": "NOT_FOUND_IN_CORPUS_410", "n_matches": 0, "usaspending_redwire_dod_total_USD": 85215959.66, "usaspending_redwire_dod_n_awards": 26},
+      "interpretation": "DARPA Otter is a small/experimental DARPA program almost certainly outside the 410-PE corpus scope (per heuristic #7, NOT_FOUND on niche DARPA exhibits is UNVERIFIABLE, not red). The claim is also forward/positioning rather than booked revenue. However, USAspending shows Redwire's lifetime DoD obligations are only $85M across 26 awards — Otter is not visible as a large standing line. The pipeline narrative is unverifiable but the magnitude check shows DARPA Otter cannot be material to FY2025 revenue of $335M unless it sits in a sub-entity not yet keyed."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Redwire is delivering RF payloads for a national security LEO constellation (implied SDA Transport / Tracking Layer participant).",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": ["pentagon_jbook says Tranche 3 Transport Layer is UNFUNDED_TWO_PLUS_YEARS (PE 1206410SF, FY25/FY26 both zero; Congress added $500M FY25 but Pentagon rejected)", "Tranche 3 Tracking Layer was funded at $3.5B Dec 2025 across 4 contractors — but the J-Book entity index does NOT list Redwire as one of those contractors; primary T3 Transport contractors per corpus are York Space, Lockheed, Northrop", "Replacement program Space Data Network (SDN, PE 1203636SF) is sole-sourced to SpaceX Starshield, not Redwire"],
+      "M_check": "pentagon_jbook.query_program_funding × {T3 Transport, T3 Tracking, T0-T2, SDN}",
+      "M_value": {"T3_Transport": "UNFUNDED_TWO_PLUS_YEARS (PE 1206410SF; replacement_program=SDN; replacement_sole_source=SpaceX Starshield)", "T3_Tracking": "UNFUNDED_TWO_PLUS_YEARS at PE level but Dec-2025 $3.5B award noted; Redwire not on the 4-contractor list", "T0_T2": "NOT_FOUND_IN_TIMERANGE (delivery work continues on existing tranches but no new awards)", "SDN": "UNFUNDED_THIS_YEAR pre-cutoff (FY27 ramp not visible at cutoff)"},
+      "interpretation": "RDW's narrative leans heavily on its position 'delivering multiple advanced RF payloads' for an unnamed 'national security LEO constellation.' If this refers to PWSA/SDA — the most natural read for forward-looking LEO national security RF — pentagon_jbook flags the entire Transport-Layer continuation as structurally dead at the cutoff, with the replacement (SDN) sole-sourced to SpaceX. T3 Tracking is funded, but Redwire is not listed among the four awarded primes (Lockheed, Northrop, York are the corpus contractors). The forward pipeline language is therefore materially over-stated relative to the J-Book at cutoff. Note: the language is deliberately vague ('a national security satellite constellation in LEO'), which is itself a pattern — companies cite an unnamed LEO constellation when the actual underlying program element is impaired."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Redwire's space products have supported the Space Force GPS Satellite program (asserted as core defense flight heritage).",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["pentagon_jbook returns GPS III Follow-On (PE 1203269SF) FUNDED_SHRINKING: FY24 $238M, FY25 $240M, FY26 $179M (-25% Y/Y)", "Heritage claim is backward-looking, not forward-booked, so cushioning the severity"],
+      "M_check": "pentagon_jbook.query_program_funding(GPS III Follow-On / PE 1203269SF)",
+      "M_value": {"status": "FUNDED_SHRINKING", "PE": "1203269SF", "FY24_M": 237.97, "FY25_M": 240.246, "FY26_M": 179.249, "yoy_delta_pct": -25.4},
+      "interpretation": "GPS III Follow-On funding fell 25% from FY25 to FY26 per the J-Book at cutoff. The claim is a heritage/flight-history claim rather than a booked revenue claim, but to the extent investors infer ongoing GPS exposure as a revenue line, the trajectory is shrinking, not stable. Per heuristic #2 (sub or heritage participation), this is MODERATE rather than SEVERE."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Stalker UAS Block 30 + Block 40 serve Marine Corps, Army, Five Eyes; on Blue UAS List (Jul-14-2025); Stalker Block 40 positioned as gap-filler between sUAS and large UAS.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["pentagon_jbook 'Offensive small UAS' (PE 0208201F, AF) shows FY24 $0, FY25 $0, FY26 only $4.985M — the entire Air Force RDT&E sUAS PE is tiny relative to RDW's $111.4M Defense Tech backlog", "Stalker UAS is not present as a named program in the J-Book corpus", "Edge Autonomy (parent recipient of Stalker) shows only 1 DoD contract / $2.96M total federal-action obligations lifetime per usaspending", "Edge Autonomy contributed $107.1M revenue in FY25 (32% of consolidated) per the 10-K but only $3.1M total US federal awards — therefore the overwhelming majority of Edge revenue is foreign/Ukraine, not US DoD"],
+      "M_check": "pentagon_jbook(Offensive sUAS, PE 0208201F) + usaspending(Edge Autonomy)",
+      "M_value": {"Offensive_sUAS_FY26_M": 4.985, "Stalker_in_corpus": false, "Edge_Autonomy_DoD_n_awards": 1, "Edge_Autonomy_DoD_total_USD": 2960820.0, "Edge_Autonomy_all_federal_total_USD": 3102479.62, "Edge_FY25_revenue_contribution_USD_M": 107.1, "Edge_share_of_consolidated_revenue": 0.32},
+      "interpretation": "The Blue UAS / Marine Corps / Army positioning is real (the AF Offensive sUAS PE exists and was funded modestly in FY26) but the magnitude is tiny relative to Redwire's narrative. The bigger signal is the mismatch between Edge Autonomy's $107M revenue contribution and only $3M of lifetime US federal contracting — the Edge thesis is fundamentally a foreign-sales thesis (Ukraine, Latvia, Lithuania, Saudi per the 10-K) and is therefore exposed to the very risk the 10-K flags: 'sales have been declining and may continue to decline.' The U.S. DoD pivot via Blue UAS is plausible but unproven at the materiality of $107M run-rate. MODERATE because the U.S. pipeline is real but small; the foreign-revenue cliff risk is what's load-bearing."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Edge Autonomy customers in Ukraine: sales declining and may continue to decline as war/hostilities change or international support changes.",
+      "severity": "RED_FLAG_NEGATIVE",
+      "supports": ["Edge Autonomy total US federal lifetime obligations: $3.1M (1 DoD award $2.96M + 2 DHS awards) per usaspending", "Edge contributed $107.1M of FY25 revenue per the 10-K Note C — therefore foreign revenue (predominantly Ukraine per the geopolitical risk factor) is roughly the difference: on the order of $100M+ run-rate, ~30% of consolidated", "RDW paid $1.025B ($160M cash + 49.76M shares + holdbacks/assumed) for Edge in June 2025 — purchase price 9.6x of FY25 partial-year contribution; goodwill recorded $721M of $1.025B purchase ($302M net tangible + intangible)", "Disclosure explicitly concedes the revenue stream is declining"],
+      "M_check": "usaspending.query_dod_contracts(Edge Autonomy) + usaspending.query_recipient_contracts(Edge Autonomy)",
+      "M_value": {"edge_all_federal_n_awards": 3, "edge_all_federal_total_USD": 3102479.62, "edge_dod_n_awards": 1, "edge_FY25_revenue_USD_M": 107.1, "edge_revenue_to_us_federal_ratio_lifetime": "~34x (107M FY25 alone vs 3M lifetime federal)"},
+      "interpretation": "This is the structural Pentagon-divergence claim of the cohort, applied to the foreign-aid analog. The company effectively paid $1B+ for a UAS rollup whose 2025 revenue concentration is in Ukraine, while the 10-K admits Ukraine sales are declining and depend on continued international military aid. Independent verification (usaspending) confirms Edge is essentially a non-US-federal vendor. Goodwill of $721M is therefore funded by a thesis (Ukraine UAS demand) that the company itself disclaims in the risk factors. This pairs with C10 (Edge excluded from ICFR scope) and C11 ($12.9M Defense Tech program loss reserve in FY25) — Edge is both the revenue driver AND the impaired-control sub. RED_FLAG_NEGATIVE."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Total backlog $411.2M at FY25 year-end ($299.8M Space, $111.4M Defense Tech); implied ~1.2x TTM revenue coverage at $335M.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["usaspending lifetime DoD obligations across Redwire + Redwire Space + Roccor + Made In Space = $161.3M across 58 awards — well below the $411M backlog, meaning the vast majority of backlog is either non-DoD US government (NASA/ESA), foreign, or commercial", "Space segment backlog $299.8M vs Defense Tech $111.4M, despite Edge contributing 32% of revenue — Defense Tech backlog is materially light relative to revenue contribution, which is consistent with the short-cycle Ukraine sales pattern that the company says is declining"],
+      "M_check": "usaspending.query_dod_contracts × {Redwire, Redwire Space, Roccor, Made In Space}",
+      "M_value": {"total_DoD_lifetime_USD": 161318905.72, "n_awards_combined": 58, "backlog_total_M": 411.2, "backlog_space_M": 299.8, "backlog_defense_tech_M": 111.4, "FY25_revenue_M": 335.381, "backlog_to_revenue_ratio": 1.23},
+      "interpretation": "1.23x backlog/revenue coverage is thin for a contractor that sources roughly half its revenue from long-cycle space programs. Defense Tech backlog (the Edge segment) at $111M vs Edge's $107M H2-2025 revenue contribution is essentially one-quarter forward visibility, which is highly inconsistent with the long-cycle multi-year program-of-record narrative. MODERATE."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Redwire performs directly or via primes for DARPA, NRO, Space Force, Air Force, Army, Marine Corps and allied national security agencies — broad customer base claim.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["pentagon_jbook contractor-name searches for Redwire, Made In Space, Adcole, Roccor return ZERO matches across the 410-PE corpus", "Redwire does not appear as a primary contractor on any J-Book RDT&E or Procurement line item in the corpus", "usaspending confirms 58 awards / $161M lifetime — real but mostly sub-tier, not prime"],
+      "M_check": "pentagon_jbook.query_program_funding(contractor_name=...) × 4 + usaspending cross-check",
+      "M_value": {"redwire_jbook_contractor_matches": 0, "mis_jbook_matches": 0, "adcole_jbook_matches": 0, "roccor_jbook_matches": 0, "usaspending_combined_total_USD": 161318905.72},
+      "interpretation": "Per heuristic #7, NOT_FOUND in J-Book as a contractor is not itself a red flag because the J-Book corpus only lists primary contractors on the 410 sampled PEs. But the combination of (a) zero appearances on any of 410 PEs as a contractor + (b) only $161M lifetime DoD obligations + (c) a 10-K that lists agencies as if Redwire were a major prime to each, points to a sub-tier/component supplier reality dressed as a prime-relationship narrative. MODERATE."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Redwire claims first-ever Link-16-from-space-to-ground transmission, NATO-network compatible, operationally fielded.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["No 'Link-16' specific PE in the corpus", "C2ISR Tactical Data Link (PE 0207448F) shows UNFUNDED_THIS_YEAR (FY24 $0, FY25 $3.5M, FY26 $0) — adjacent line but not directly mappable to RDW's claim"],
+      "M_check": "pentagon_jbook(Link-16, C2ISR Tactical Data Link)",
+      "M_value": {"link16_match": false, "C2ISR_TDL_status": "UNFUNDED_THIS_YEAR", "C2ISR_TDL_PE": "0207448F", "C2ISR_TDL_FY26_M": 0.0},
+      "interpretation": "Link-16 is a network standard rather than a single PE; it's funded through many platform-specific lines and the corpus doesn't have an 'RDW Link-16' line. The C2ISR Tactical Data Link adjacent PE is small and intermittent. The claim is a technology demo, not a booked program — leave as UNVERIFIABLE."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "Redwire's Mason program develops lunar surface infrastructure (berms, landing pads, roads, habitat foundations) in support of NASA Artemis.",
+      "severity": "PASS",
+      "supports": ["NASA-funded, not DoD-J-Book — pentagon_jbook NOT_FOUND is expected and not a negative signal (control claim)"],
+      "M_check": "pentagon_jbook(Mason, Artemis)",
+      "M_value": {"mason_n_matches": 0, "artemis_n_matches": 0, "note": "Civil-space claim; pentagon_jbook is the wrong M-source by design — control claim for the framework"},
+      "interpretation": "Correctly routed as a NASA/civil claim. The J-Book NOT_FOUND result is the expected behavior and confirms the framework does not false-positive on non-DoD claims. PASS."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "KPMG adverse opinion on Redwire's ICFR for FY25 due to material weaknesses (process-level controls not deployed long enough; IT general controls gaps); Edge Autonomy sub (32% of revenue, 10% of assets) excluded from ICFR scope.",
+      "severity": "RED_FLAG_NEGATIVE",
+      "supports": ["Self-disclosed in the filing — auditor adverse opinion + material weakness + carve-out of the largest revenue contributor", "Redwire has a prior class-action settlement (Lemen, $8M paid in FY25 escrow) and pending derivative settlement (Yingling) — both related to internal-controls misstatement allegations from the 2021-2022 period; the same control failure pattern is recurring"],
+      "M_check": "edgar_fts.query_fulltext (deferred — claim is self-disclosed in filing, no need to retrieve; cross-reference is in C11)",
+      "M_value": {"audit_opinion_on_ICFR": "ADVERSE (KPMG)", "material_weaknesses": ["Process-level controls not deployed with sufficient time to demonstrate operating effectiveness", "IT general controls — program change controls + access controls — not effective"], "edge_excluded_from_ICFR_scope_pct_revenue": 0.32, "prior_class_action_settled_USD_M": 8.0, "derivative_pending_settlement": "Yingling — corporate governance reforms + $0.9M fees"},
+      "interpretation": "Adverse ICFR opinion with the largest revenue sub carved out is materially load-bearing. The recurrence of control failures (this is the second wave following the 2021-22 class action) is a structural pattern, not a one-off. Combined with the EAC adjustments in C11, this is a RED_FLAG."
+    },
+    {
+      "claim_id": "C11",
+      "claim_text": "$54.5M net unfavorable EAC adjustments FY25 (15.4x FY23's $3.5M), incl. $12.9M Defense Tech loss reserve + $14.1M Space Europe; gross margin collapsed from 15% → 5%; $34.7M goodwill/PP&E/intangibles impairment.",
+      "severity": "RED_FLAG_NEGATIVE",
+      "supports": ["Self-disclosed; EAC pattern 2023→2024→2025: $3.5M → $17.7M → $54.5M — accelerating unfavorable adjustments on fixed-price contracts", "Operating cash flow worsened from -$17M (FY24) to -$177M (FY25); cash on hand $94.5M against $87.75M JPM Term Loan + $63.9M preferred buyback + $20M Seller Note repayment — minimal margin of safety", "Goodwill of $721M booked from Edge acquisition; only $34.7M impaired in FY25, but loss-reserve cadence + Edge revenue declining puts more impairment risk forward"],
+      "M_check": "claim_evolution.query_claim_evolution (deferred — internal disclosure)",
+      "M_value": {"EAC_2023_M": 3.5, "EAC_2024_M": 17.7, "EAC_2025_M": 54.5, "EAC_growth_2yr": "15.4x", "gross_margin_2024_pct": 15.0, "gross_margin_2025_pct": 5.0, "impairment_2025_M": 34.7, "OCF_2024_M": -17.348, "OCF_2025_M": -177.331, "cash_FY25_end_M": 94.5, "JPM_term_FY27_due_M": 87.75},
+      "interpretation": "The contract-loss trajectory + gross margin halving + operating cash flow swing of ~$160M in one year + adverse ICFR opinion + $721M goodwill resting on a declining Ukraine revenue stream constitute a stacked-risk pattern. This is the company self-disclosing the same divergence the Pentagon J-Book would imply: the forward narrative (Stalker Block 40, Mason, Otter, SDA RF payloads) is being funded by an internal balance sheet that has zero margin for another EAC year like 2025. RED_FLAG_NEGATIVE on financial-condition grounds; the J-Book divergence pattern in C2 is the catalyst."
+    }
+  ],
+  "summary": {
+    "n_claims": 11,
+    "n_queries_executed": 24,
+    "severity_counts": {
+      "PASS": 1,
+      "MODERATE_UNDERDELIVERY": 4,
+      "SEVERE_UNDERDELIVERY": 1,
+      "RED_FLAG_NEGATIVE": 3,
+      "UNVERIFIABLE": 2
+    },
+    "jbook_grounded_claims": ["C1", "C2", "C3", "C4", "C7", "C8"],
+    "jbook_grounded_n": 6,
+    "pentagon_jbook_fired_on": ["C2", "C3", "C4", "C7", "C8"],
+    "pentagon_jbook_fired_n": 5,
+    "headline_findings": [
+      "C2 (SDA RF payloads, implied): T3 Transport UNFUNDED_TWO_PLUS_YEARS; replacement sole-sourced to SpaceX; Redwire not on T3 Tracking awardee list — SEVERE_UNDERDELIVERY",
+      "C5 (Edge Autonomy / Ukraine): Edge has $3M lifetime US federal awards vs $107M FY25 revenue contribution — revenue is overwhelmingly foreign and company concedes declining trajectory — RED_FLAG_NEGATIVE",
+      "C10 (KPMG adverse ICFR opinion + Edge carved out of scope) + C11 ($54.5M EAC adjustments, gross margin halved, -$177M OCF): stacked financial/control risk — RED_FLAG_NEGATIVE",
+      "C7 (broad customer claim): Redwire appears on zero of 410 J-Book PEs as a primary contractor — sub-tier supplier reality vs prime-relationship narrative",
+      "C3 (GPS heritage): GPS III Follow-On FY26 funding -25% Y/Y — FUNDED_SHRINKING"
+    ]
+  }
+}

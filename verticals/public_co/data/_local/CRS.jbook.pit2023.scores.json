@@ -1,0 +1,109 @@
+{
+  "ticker": "CRS",
+  "cutoff": "2023-01-15",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Aerospace and Defense end-use market generated $790.2M in FY22 net sales (43% of total); recovering from $1,313.7M FY20 trough.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "usaspending.query_dod_contracts(recipient_name=Carpenter Technology Corporation) -> 5 awards, $3.14M total, mostly DLA strategic-stockpile bearing-grade steel + ingot production (SP800022C0008, SP800022C0013 via DLA; N0016724P0275 via Navy). Latrobe Specialty Metals (Carpenter subsidiary) also appears with similar DLA stockpile contracts. Direct DoD obligations are <0.2% of the company's reported $790M A&D revenue — confirms thesis that Carpenter is a Tier-3 sub-tier supplier whose DoD exposure flows through commercial-aero primes (Howmet/PW/GE/RR), NOT through named DoD programs of record.",
+        "pentagon_jbook.query_program_funding(contractor_name=Carpenter Technology) -> NOT_FOUND. The J-Book corpus (410 PEs from FY26 books — DARPA/MDA/SOCOM/OSD/AF/SF) does not index Carpenter Technology as a primary contractor on any PE."
+      ],
+      "M_check": "pentagon_jbook + usaspending",
+      "M_value": "NOT_FOUND + $3.14M DoD direct (DLA buffer-bearing steel)",
+      "interpretation": "Claim is NOT a J-Book divergence candidate. Carpenter does not name any specific Pentagon program in this 10-K — A&D revenue is a blended end-use market bucket dominated by COMMERCIAL aerospace (jet engine alloy supply chain via Howmet/GE/Pratt/RR) with sub-tier defense exposure folded in. The J-Book corpus correctly returns NOT_FOUND because this is the right answer: there is no specific PE to verify. Per heuristic #7 (NOT_FOUND ≠ red flag for non-named-PE claims), and heuristic #1 (NOT_FOUND -> UNVERIFIABLE). The pattern this cohort is designed to catch (small-cap names PE X -> J-Book shows X unfunded) has zero surface area here. NOTE: Carpenter's defense exposure is genuine but operates through a *fundamentally different transmission channel* than the J-Book pattern — it tracks commercial OEM engine build rates (LEAP/GE9X/GTF), not Pentagon program-of-record budgets. A different verifier (commercial-aero build rate, Airbus/Boeing backlog) would be the right tool for this risk, not pentagon_jbook."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Forward expectation: continued growth in Aerospace, Defense, and Medical as customers ramp to pre-pandemic levels.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook.query_program_funding(contractor_name=Carpenter Technology Corporation) -> NOT_FOUND. No named PE in claim, no contractor mapping in corpus."
+      ],
+      "M_check": "pentagon_jbook",
+      "M_value": "NOT_FOUND",
+      "interpretation": "Generic forward-looking narrative. No PE, no program, no specific DoD customer named. Not J-Book load-bearing. Per heuristic #7, NOT_FOUND on a claim that does not name a specific PE is the correct answer and is UNVERIFIABLE rather than RED. Forward growth claim is grounded in commercial-aero post-COVID ramp (well-documented industry-wide pattern in 2022 via Boeing/Airbus delivery backlogs), not in any specific DoD program."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Backlog grew nearly 3x YoY to $1,539.3M at June 30 2022, majority shippable in FY23.",
+      "severity": "PASS",
+      "supports": [
+        "Internal consistency: backlog increase ($529M -> $1,539M) is directionally consistent with FY22 net sales recovery ($1,475M -> $1,836M) and the global commercial-aero post-COVID surge. No J-Book exposure asserted."
+      ],
+      "M_check": "narrative_consistency",
+      "M_value": "consistent with reported FY22 sales trajectory",
+      "interpretation": "Control claim. Backlog is aggregate across all 6 end-use markets — not allocated to DoD programs. No divergence signal applies."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Howmet Aerospace ~10% of net sales in FY20 (90% via SAO, 10% via PEP); below 10% threshold in FY21 and FY22.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "edgar_fts.query_fulltext(search_term='Carpenter Technology', cik=0000004281 [Howmet], cutoff=2023-01-15, forms=10-K,10-Q) -> 0 hits. Howmet does not name Carpenter as a supplier in its periodic filings. This is the EXPECTED null result for a customer-supplier relationship: buyers rarely name individual suppliers unless dependency is material to the buyer. Absence does NOT contradict Carpenter's disclosure."
+      ],
+      "M_check": "edgar_fts (counterparty disclosure)",
+      "M_value": "0 hits — expected absence",
+      "interpretation": "Counterparty silence is normal. Howmet is a $5B+ engine-structures consolidator; Carpenter is one of many alloy suppliers and would not be material to Howmet. The dropoff in Howmet share (FY20 ~10% -> FY22 <10%) is consistent with overall A&D revenue dropping from $1,313M to $790M (engine OE shipments collapsed in COVID; Howmet's GEnx/CFM56/V2500/LEAP volumes recovered slower than Carpenter's broader customer base). Not a J-Book signal."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Less than ten major competitors in high-value demanding applications; recognized leader in specialty alloys.",
+      "severity": "PASS",
+      "supports": [
+        "Industry-structure fact widely corroborated: specialty premium alloys (titanium, nickel-based superalloys, cobalt) is an oligopoly with ATI, Haynes, Aubert & Duval, Special Metals, Allegheny, VSMPO-AVISMA, etc. Claim is anodyne."
+      ],
+      "M_check": "industry_structure",
+      "M_value": "consistent with public market structure",
+      "interpretation": "Control claim. No divergence test applies."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Owns U.S. and international patents but does not consider business materially dependent on any single patent.",
+      "severity": "PASS",
+      "supports": [
+        "uspto_odp.query_assignee(assignee_name=Carpenter Technology Corporation, cutoff=2023-01-15) -> 7 granted patents + 24 total applications pre-cutoff. Active prosecution covering stainless steel alloys (Co-free case-hardened), high-Mo duplex stainless, additive manufacturing powders. Patent portfolio exists; immateriality disclaimer is consistent with the modest portfolio size for a $1.8B revenue company."
+      ],
+      "M_check": "uspto_odp",
+      "M_value": "7 granted patents pre-cutoff",
+      "interpretation": "Control claim corroborated. No divergence."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "R&D was $20.4M in FY22 (~1.1% of sales).",
+      "severity": "PASS",
+      "supports": [
+        "R&D scale (~1% of sales) is consistent with a mature materials company. No DoD-funded RDT&E line item claimed; this is company-sponsored R&D."
+      ],
+      "M_check": "scale_check",
+      "M_value": "1.1% of FY22 sales — typical for materials industry",
+      "interpretation": "Control claim. Not J-Book exposed (Carpenter is not on any DARPA/AFRL RDT&E PE per pentagon_jbook NOT_FOUND result)."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Operates mills in Reading and Latrobe, Pennsylvania; SC; AL. PEP segment includes Dynamet titanium and Carpenter Additive.",
+      "severity": "PASS",
+      "supports": [
+        "epa_frs.query_facilities(facility_name=Carpenter Technology, state_abbr=PA) -> 4 registered facilities: Reading (2000 River Rd; 101 W Bern St), Latrobe (2626 Ligonier St). Matches the disclosed footprint exactly. Latrobe Specialty Steel Co. (legacy entity, 2012 acquisition) corroborated via USAspending DLA contracts under that name."
+      ],
+      "M_check": "epa_frs",
+      "M_value": "4 facilities in PA matching disclosed locations",
+      "interpretation": "Control claim corroborated."
+    }
+  ],
+  "summary": {
+    "n_claims": 8,
+    "n_queries_fired": 7,
+    "severity_counts": {
+      "PASS": 5,
+      "MODERATE_UNDERDELIVERY": 0,
+      "SEVERE_UNDERDELIVERY": 0,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 3
+    },
+    "jbook_grounded_claims": 2,
+    "pentagon_jbook_fires": 2,
+    "framework_diagnosis": "Carpenter Technology is the canonical NEGATIVE CONTROL for this cohort: a real A&D-exposed company that nonetheless does not fit the J-Book divergence pattern because it is a Tier-3 specialty alloy supplier whose defense revenue is invisible at the program-element level (it flows through commercial-aero primes and tier-1 engine-structures consolidators like Howmet). The framework correctly returns NOT_FOUND on pentagon_jbook for the only two J-Book-shaped claims, and falls back to UNVERIFIABLE per the calibration heuristics. No false positives. The framework also surfaces the genuine ~$3.1M of direct DoD obligations via usaspending (DLA strategic-stockpile bearing-grade steel via Defense Logistics Agency, plus Navy ingot production), which is too small to be material relative to $790M A&D revenue and confirms the sub-tier-supplier transmission model. A different verifier (commercial-aero build-rate / engine deliveries) would be the appropriate tool here, not pentagon_jbook."
+  }
+}

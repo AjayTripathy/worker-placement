@@ -1,0 +1,24 @@
+### DDOG (usage-based cloud observability & security telemetry) — screen member_dd −0.217, cohort `narrative:agentic_saas_exposed` (excluded_by_tape) — **SCREEN-MISCLASSIFIED**
+
+**KILL FACTS**
+- Not a value/orphan name. Mcap $91.73B, 359.08M sh, EV $88.02B, **fwd EV/S 18.6x, P/FCF 77.6x**, 46 analysts covering, consensus Buy, PT $283.88 (stockanalysis.com, tape 2026-08-14). "Priced by whom" answers itself — the FAIR-CARRY/orphan exemption does not apply, and the deep-value trap-verify template is the wrong instrument here.
+- **Screen metric wrong.** member_dd −0.217 contradicts the pack's own tape: dd52 = −0.127 ($255.46 vs $292.72), −11.3% off the 26w high; the stock is **+98% over 52w and +160% off $98.01**. Corrected value −0.127. Defect: stale-snapshot drawdown — computed at the post-print trough (~$229 after the −15.6% Aug-6 reaction, *Investing.com*), not at row date. Defect family 1 (join/date mismatch).
+- **Pack XBRL is four quarters stale.** Newest rev frame shown = 2025-06-30 $826.76M; actual **Q2 2026 revenue $1.12B, +36% y/y**. The sbc/ocf/`dil_sh` rows are Q1-only CY frames, not a quarterly series. Any TTM, SBC% or OCF math built on this pack is wrong. Defect family 3, generalized to stale-frame XBRL — file against the pack builder, not the issuer.
+
+**LIVE FACTS**
+- **The separating metric is non-AI-native cohort growth**, and it refutes world (a). Q2 FY26 call: "revenue growth for our non-AI customers also accelerated again this quarter to the **high 20s** percent year-over-year, up from the mid-20s last quarter and **18% in the year-ago quarter**." A consolidation victim decelerates; this base is accelerating. One >$30M TCV deal "displacing 4 commercial and internal tools" — DDOG is the consolidator, not the consolidated. NRR low-120s, flat q/q.
+- World (b) mechanism is live and measured: "**MCP tool calls increased fourfold quarter over quarter and 22-fold compared to Q4 2025**" (same call). $100k+ ARR customers ~4,720 vs ~3,850 (secondary).
+- **The real risk is not narrative — it is single-customer concentration.** CFO Obstler: usage reduction at the largest customer despite a nine-figure renewal, "incorporated in our Q3 and full year 2026 guidance" → Q3 guide 28–29% vs Q2 actual 36%. Eight of 750+ AI customers spend >$10M/yr.
+- **Cap structure pulled before the net-cash claim:** $1.0B 0.00% converts due 2029-12-01 ($870M priced 2024-12-09, upsized from $775M, +$130M purchaser option; company PR). Total debt $1.28B, cash+marketable securities $4.99B → **net cash $3.71B = 4% of mcap** — immaterial to the thesis; converts are share-settled dilution, not leverage. Q2 FCF $279M / 25% margin.
+- **UNVERIFIED (do not assert either way):** Q2 2026 diluted share roll-forward and the SBC-vs-dilution tie-out. sec.gov/Archives returned HTTP 403 on the 10-Q (0001628280-26-054458) and the pack omitted the share table. Heavy insider flow is present (8 Form 144s + 6 Form 4s in 21 days) but reads as 10b5-1 program selling — noted, not an integrity finding.
+
+**RESOLVES ON:**
+- **2026-11-05** (Q3 print; yfinance-derived, UNCONFIRMED until a company PR names it): does non-AI growth hold high-20s, and does the largest-customer step-down annualize once or repeat?
+- **Q3 10-Q (~2026-11-06):** diluted share roll-forward + SBC as % of revenue — closes the open dilution check.
+- Any 8-K/PR disclosing a renewal or step-down inside the >$10M AI-native cohort.
+
+**Disposition:** WATCH + tripwire — do **not** advance on this template.
+
+Two corrections to file: (1) the cohort tag. `excluded_by_tape` is right for the wrong reason — DDOG is not a lagging member of `narrative:agentic_saas_exposed`, it is on the opposite side of the mechanism; reclassify to a consumption/beneficiary node so the cohort-vs-consumption spread can be measured rather than assumed. (2) The court question's world (a) is answered NO on primary-adjacent evidence; the live bear case is customer concentration, which is a different tripwire than the one the row was seeded with. Reopen as court-eligible only below a stated price gate (~$160, 12x fwd EV/S) or on a *second* consecutive quarter of largest-customer step-down — the latter is thesis-breaking, not price-gated.
+
+Sources: [Q2 FY26 call transcript, Motley Fool](https://www.fool.com/earnings/call-transcripts/2026/08/13/datadog-ddog-q2-2026-earnings-call-transcript/) · [DDOG statistics, stockanalysis.com](https://stockanalysis.com/stocks/ddog/statistics/) · [$870M convertible pricing PR](https://www.prnewswire.com/news-releases/datadog-announces-pricing-of-upsized-offering-of-870-million-convertible-senior-notes-302327069.html) · [Q2 2026 print reaction, Investing.com](https://www.investing.com/news/transcripts/earnings-call-transcript-datadog-beats-q2-2026-estimates-but-shares-fall-156-93CH-4842560)

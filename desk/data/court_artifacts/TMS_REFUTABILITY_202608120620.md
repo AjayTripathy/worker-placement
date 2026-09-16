@@ -1,0 +1,35 @@
+## PRINT PROXIMITY: 2026-08-14 — CONFIRMED at primary (company PR, GlobeNewswire 2026-07-24: Q2 results before market open Fri Aug 14, call 8:30am ET). 2 trading days out. Reconstruction runs first.
+
+**Cohort caveat:** COHORT is `?` and `sector` is empty, so `excess_dd == dd52` — no cohort median was ever computed. There is no shared narrative to triage against; TMS is a solo `blob_sweep` orphan. I reconstruct the priced narrative below rather than inherit one.
+
+**Evidence-pack defect (must fix before the pack is cited again):** the XBRL block (`ocf 2026-03-31 = -204,942`) is the **Live Oak Acquisition Corp. V shell's** operating cash flow in raw dollars — CIK 2048951 was the SPAC, renamed Teamshares Inc. on the 2026-06-19 close. A shell burning ~$205k/quarter is not Teamshares data. Any "SBC/share/OCF math" off that block is void. Teamshares' own financials live in the S-4 ([sec.gov/Archives/.../d82890ds4.htm](https://www.sec.gov/Archives/edgar/data/2048951/000119312526141314/d82890ds4.htm)), not in this CIK's XBRL history.
+
+### Print-decisive reconstruction (what pre-print public data already resolves)
+
+This is a de-SPAC that closed 2026-06-19 and began trading 2026-06-23 ([GlobeNewswire, 6/19](https://www.globenewswire.com/news-release/2026/06/19/3314730/0/en/teamshares-and-live-oak-acquisition-corp-v-complete-business-combination.html)). Aug 14 is its **first print as a public company** — no prior guide, no revision history, no guide-to-guide math available. What is resolvable:
+
+1. **The dd52 anchor is an artifact.** The $13.20 52-week high printed on **June 23, 2026 — day one of trading**. The −43.4% drawdown is measured off a first-day de-SPAC pop, not a valuation high. Worse, the low ($5.04) hit **July 31**, the day the resale registration went effective, and the stock has since rallied **+39% to $7.47**. The screen fired 8/07 on a stale anchor into an already-recovering tape.
+2. **The mechanical seller is identified and dated.** The 424B3 effective 2026-08-03 registers **19,663,254 existing shares for resale** plus 16,000,000 warrant shares (≈22% of the 90.4M shares out) — the exact window of the $5.04→$7.75 round trip. 16M warrants struck at $11.50 cap the upside path.
+3. **The capital structure is the whole story, and it's already public.** At 3/31/26: total debt **$397.2M vs $236.2M** a year earlier (+68%) while revenue grew +18%; shareholders' equity **$131.9M → $41.9M**; goodwill **$245.4M = 47% of $527.7M total assets**; cash **$37.0M**. Debt grew 3.8x faster than revenue.
+4. **The gap between operating loss and net loss is the tell.** Q1-26 operating loss −$7.6M but net loss −$22.8M (Q1-25: −$9.1M / −$21.3M). Below-the-line cost widened $12.1M → $15.2M/qtr (~$60M annualized) — i.e. the interest accrual is eating the operating improvement roughly 2x over.
+5. **Metric substitution is pre-flagged.** The deal deck guides in **"acquired EBITDA" (non-GAAP)** — $35–40M for 2026, $6M in Q1-26 — which measures annualized run-rate EBITDA of *businesses purchased in the period*, i.e. acquisition volume, not profit. Q1's $6M "acquired EBITDA" sat alongside a −$22.8M GAAP net loss. **The Aug 14 tell:** if the release leads with acquired EBITDA and prints no consolidated Adj. EBITDA and no same-store/organic revenue for businesses owned >12 months, the substitution is confirmed.
+6. **The one number that actually moves the stock:** 6/30 cash and total debt. The deal was marketed as "up to $333M net proceeds"; the closing release names **only the $126.5M PIPE** and does not state trust proceeds — consistent with heavy redemptions (inference, not disclosure). Book equity should snap to ~$150–180M if the trust survived; materially below ~$140M means it didn't.
+
+**PRE-PRINT POSITION: FLAT.** No position, no orders, and every decisive unknown (post-redemption cash, consolidated EBITDA, organic growth) drops for free in 48 hours — paying a coin-flip premium to be early on a first-ever print, into a 19.7M-share shelf that went effective eight days ago and after a 39% bounce, has no edge.
+
+| ticker | class | refuting metric | current value/trend (cited) | next print date | note |
+|---|---|---|---|---|---|
+| TMS | **STRUCTURAL** | Total debt vs. revenue growth, and consolidated Adj. EBITDA / same-store organic revenue (neither yet published) | Debt $236.2M→$397.2M (+68%) y/y vs revenue +18%; equity $131.9M→$41.9M; goodwill $245.4M = 47% of assets; Q1-26 net loss −$22.8M on rev $121.0M ([S-4 financials](https://www.sec.gov/Archives/edgar/data/2048951/000119312526141314/d82890ds4.htm); figures read via stockanalysis.com mirror — sec.gov returned 403 to the fetcher this session, so **not re-verified at primary**) | 2026-08-14 pre-market, confirmed ([company PR](https://www.globenewswire.com/news-release/2026/07/24/3332814/0/en/Teamshares-to-Release-Second-Quarter-2026-Earnings-on-August-14-2026.html)) | Narrative priced = leveraged goodwill-heavy main-street rollup funded by a debt treadmill. That is TRUE of the model. Genuine damage-absent counterpoint: gross margin **37.9%→39.6%** and operating loss **−$9.1M→−$7.6M** on +18% revenue — the portfolio is not rotting, the capital structure is the problem. Drawdown driver is mechanical (day-one pop anchor + 19.66M-share resale shelf effective 8/03, [424B3](https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0002048951&type=424B3)), not a fundamental repricing. |
+
+**COURT-WORTHY (damage-absent, ranked):** *none.* TMS does not qualify — the narrative's predicted damage is present and audited, not absent. The only damage-absent sub-claim (margin expansion, narrowing operating loss) is a segment fact that does not survive the interest line, and it is not what the market is discounting.
+
+**COURT-WORTHINESS TMS: 3/10** — the drawdown anchors on a day-one de-SPAC pop that has already round-tripped +39%, the seller is a dated resale shelf rather than a mispricing, and every fact a court would fight over prints for free on 8/14.
+
+---
+
+Two pipeline defects this triage surfaced, both worth wiring rather than noting:
+
+1. **De-SPAC drawdown guard.** `dd52` is meaningless when the 52w high is the first trading day. The screen should suppress or re-anchor any name whose 52w high date is within ~10 sessions of its listing date — TMS's high and its listing are the *same day*.
+2. **CIK-continuity guard on the XBRL block.** When a SPAC CIK is renamed post-combination, the historical XBRL is shell data. The pack should refuse to emit `XBRL QUARTERLY` when the entity name changed within the covered periods, or label it `PRE-COMBINATION SHELL`.
+
+I could not verify the SEC documents at primary — sec.gov returns 403 to this session's fetcher and Bash/IBKR access was not granted here, so filing contents came from the stocktitan mirror and financial-statement data from stockanalysis.com. The debt and equity figures are load-bearing for the STRUCTURAL call; if you want that hardened before anything is sized, re-pull the S-4 balance sheet with the browser fingerprint path.

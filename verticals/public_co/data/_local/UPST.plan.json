@@ -1,0 +1,198 @@
+{
+  "ticker": "UPST",
+  "cutoff": "2026-05-16",
+  "filing": "0001647639-26-000027_10-K.txt",
+  "plan_version": 1,
+  "claims": [
+    {
+      "claim_id": "UPST-1",
+      "claim_text": "In 2025, Upstart's top three lending partners collectively originated 83% of the loans facilitated through its marketplace, and fees from those three partners accounted for 61% of total revenue.",
+      "source_quote": "In the year ended December 31, 2025, our top three lending partners collectively originated 83% of the loans facilitated through our marketplace and revenue from fees received from these lending partners accounted for 61% of our total revenue.",
+      "subject": "Upstart Holdings, Inc.",
+      "predicate": "has_customer_concentration",
+      "object_value": "top_3_lending_partners=83%_of_originations;61%_of_revenue",
+      "category": "customer_pipeline",
+      "referent_type": "entity",
+      "m_source_status": "MAPPED",
+      "source_id": "fdic_call_reports.consumer_loan_originations",
+      "source_params": {
+        "bank_names": [
+          "Cross River Bank",
+          "FinWise Bank",
+          "Customers Bank"
+        ],
+        "quarters": 4
+      },
+      "proposed_connector": {
+        "name": "fdic_call_reports.consumer_loan_originations",
+        "description": "FDIC Call Report consumer-loan origination volume per institution (RSSDID-keyed quarterly schedules RC-C / RI). Lets analysts see whether named UPST partner banks (Cross River Bank, FinWise Bank, Customers Bank, etc.) show unsecured personal-loan portfolio levels consistent with UPST's reported 83% origination concentration.",
+        "endpoint": "https://banks.data.fdic.gov/api/financials",
+        "access_pattern": "api",
+        "auth_required": false,
+        "sample_invocation": "GET https://banks.data.fdic.gov/api/financials?filters=RSSDID:58978%20AND%20REPDTE:20251231&fields=NAMEFULL,LNCONOTH,LNCON,LNATRESR&sort_by=REPDTE&limit=4",
+        "rationale": "UPST does not name its top lending partners in the 10-K, but bank-partner Call Reports are the registry analog: if UPST's claimed 83% origination concentration is accurate, the partner banks' consumer-loan portfolios should reflect material UPST volume. This is the closest authoritative federal registry to consumer-credit origination concentration.",
+        "estimated_cost": "free",
+        "completeness": "FDIC-chartered banks only (Cross River, FinWise, Customers, etc. are covered; non-bank purchasers are not)",
+        "referent_type": "loan_portfolio",
+        "attribute": "consumer_loan_origination_volume"
+      },
+      "extraction_notes": "Partner identities are not in the 10-K filing itself but are widely identified in industry rate sheets and earlier UPST filings (Cross River Bank historically). Phase 2 may need to triangulate which 3 FDIC-chartered banks dominate; the framework should treat as UNVERIFIABLE if partner identities cannot be tied to the filing text. Applies Calibration Heuristic 3: 'originated' volume here is correct because UPST is reporting marketplace facilitation, not balance-sheet origination.",
+      "promotion_note": "auto-promoted from proposal 'fdic_call_reports.consumer_loan_originations' -> 'fdic_call_reports.consumer_loan_originations' via promote_connectors"
+    },
+    {
+      "claim_id": "UPST-2",
+      "claim_text": "As of December 31, 2025, the outstanding balance of loans Upstart had sold to lending partners and institutional investors (and remains contingently liable to repurchase) totaled $14,290.4 million.",
+      "source_quote": "The maximum potential amount of future payments associated with any repurchase or indemnification obligation is the outstanding balances of the loans held by lending partners and institutional investors, which as of December 31, 2024 and 2025, was $11,237.2 million and $14,290.4 million, respectively.",
+      "subject": "Upstart Holdings, Inc.",
+      "predicate": "has_outstanding_serviced_loan_balance",
+      "object_value": "$14,290.4M as of 2025-12-31",
+      "category": "production_volume",
+      "referent_type": "amount",
+      "m_source_status": "MAPPED",
+      "source_id": "sec_filings.list_filings_by_form",
+      "source_params": {
+        "cik": "0001647639",
+        "forms": [
+          "ABS-15G",
+          "ABS-EE",
+          "10-D"
+        ],
+        "cutoff_date": "2026-05-16"
+      },
+      "proposed_connector": {
+        "name": "sec_edgar.absee_loan_disclosures",
+        "description": "SEC EDGAR Asset-Backed Securities issuer reports (ABS-EE / 10-D / 424B) including loan-tape XML/XBRL exhibits. UPST is a sponsor of multiple securitization shelves; pool-level outstanding-balance data is filed periodically.",
+        "endpoint": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001647639&type=ABS-EE&dateb=&owner=include&count=40",
+        "access_pattern": "api",
+        "auth_required": false,
+        "sample_invocation": "GET https://data.sec.gov/submissions/CIK0001647639.json then filter forms ABS-EE/10-D/424B5; sum pool_principal_balance across active trusts.",
+        "rationale": "UPST-serviced loans flowing through securitizations are visible in ABS-EE filings (per Regulation AB) \u2014 total outstanding balance across all UPST-sponsored trusts is the registry analog for the serviced-portfolio claim. Applies Calibration Heuristic 3: 'serviced' vs 'originated' vs 'balance-sheet' must not be confused.",
+        "estimated_cost": "free",
+        "completeness": "SEC-registered ABS only; private-pool sales and whole-loan sales to lending partners are not covered",
+        "referent_type": "loan_portfolio",
+        "attribute": "outstanding_principal_balance"
+      },
+      "extraction_notes": "ABS-EE will only cover the SEC-registered portion. Phase 2 should treat as PARTIAL VERIFICATION at best. Whole-loan sales held by lending partners are off-registry.",
+      "promotion_note": "auto-promoted from proposal 'sec_edgar.absee_loan_disclosures' -> 'sec_filings.list_filings_by_form' via promote_connectors"
+    },
+    {
+      "claim_id": "UPST-3",
+      "claim_text": "Upstart sponsors asset-backed securitizations of Upstart-powered loans and is required under Regulation RR to retain at least 5% of the credit risk of issued securities.",
+      "source_quote": "When we act as sole sponsor of securitizations, we are required under Regulation RR to retain a portion of the credit risk of the underlying loans for a specified period of time. ... If we are the retaining sponsor of a securitization transaction, we are required by law to retain at least 5% of the credit risk of the securities issued in these securitizations.",
+      "subject": "Upstart Holdings, Inc.",
+      "predicate": "sponsors_securitizations",
+      "object_value": "multiple Upstart-sponsored trusts subject to Reg RR 5% risk-retention",
+      "category": "regulatory_milestone",
+      "referent_type": "event",
+      "m_source_status": "MAPPED",
+      "source_id": "edgar_fts.query_fulltext",
+      "source_params": {
+        "search_term": "Upstart Securitization Trust",
+        "cutoff_date": "2026-05-16",
+        "form_type": "424B5"
+      },
+      "proposed_connector": null,
+      "extraction_notes": "EDGAR fulltext should yield Upstart Securitization Trust 2021-x through 2025-x prospectus supplements if the claim is accurate. Categorical verification \u2014 count of registered securitization filings sponsored by UPST. Companion query: form_type='ABS-15G' to find Reg AB filings."
+    },
+    {
+      "claim_id": "UPST-4",
+      "claim_text": "Upstart is the defendant in In re Upstart Holdings Securities Litigation, a certified class action in the Southern District of Ohio alleging Section 10(b)/Rule 10b-5 violations, with class certification granted March 27, 2025.",
+      "source_quote": "On July 26, 2022, a lawsuit was filed in United States District Court, Southern District of Ohio, captioned Crain v. Upstart Holdings, Inc. et al., Case No. 2:22-cv-02935-ALM-EPD (S.D. Ohio) ... On February 2, 2024, Lead Plaintiff, Universal-Investment-Gesellschaft mbH, and plaintiffs, Kathy Brooks and Kevin Crain, filed a motion for an order to certify this matter, now captioned In re Upstart Holdings Securities Litigation, as a class action ... which motion the Court granted on March 27, 2025.",
+      "subject": "Upstart Holdings, Inc.",
+      "predicate": "is_defendant_in",
+      "object_value": "In re Upstart Holdings Securities Litigation, Case No. 2:22-cv-02935 (S.D. Ohio), class certified 2025-03-27",
+      "category": "regulatory_milestone",
+      "referent_type": "event",
+      "m_source_status": "PROPOSED",
+      "source_id": null,
+      "source_params": {},
+      "proposed_connector": {
+        "name": "pacer.federal_court_docket",
+        "description": "PACER federal-court case docket lookup. Returns case caption, filing date, current status, certifying orders for a specific federal civil case number.",
+        "endpoint": "https://pacer.uscourts.gov/ or https://www.courtlistener.com/api/rest/v3/dockets/ (RECAP mirror, free)",
+        "access_pattern": "api",
+        "auth_required": false,
+        "sample_invocation": "GET https://www.courtlistener.com/api/rest/v3/dockets/?docket_number=2:22-cv-02935&court=ohsd",
+        "rationale": "The class-action existence, caption, court, and certification-order date are public PACER record; CourtListener's RECAP archive provides keyless free access. EDGAR full-text would only find UPST's own self-disclosure, which would be circular.",
+        "estimated_cost": "free (via CourtListener RECAP) or $0.10/page (direct PACER)",
+        "completeness": "all US federal civil dockets",
+        "referent_type": "event",
+        "attribute": "case_status_and_certification_order"
+      },
+      "extraction_notes": "High-conviction adjudicatable claim \u2014 case docket is authoritative. EDGAR-fulltext would also find references in DEF 14A and 10-Q which would be self-referential."
+    },
+    {
+      "claim_id": "UPST-5",
+      "claim_text": "Upstart hosts its AI lending platform on Amazon Web Services (AWS).",
+      "source_quote": "We host our AI lending platform using Amazon Web Services ( AWS ), a provider of cloud infrastructure services.",
+      "subject": "Upstart Holdings, Inc.",
+      "predicate": "uses_vendor",
+      "object_value": "Amazon Web Services (AWS, Amazon CIK 0001018724)",
+      "category": "vendor_relationship",
+      "referent_type": "entity",
+      "m_source_status": "MAPPED",
+      "source_id": "edgar_fts.query_fulltext",
+      "source_params": {
+        "search_term": "Upstart",
+        "cutoff_date": "2026-05-16",
+        "cik": "0001018724",
+        "form_type": "10-K"
+      },
+      "proposed_connector": null,
+      "extraction_notes": "Layer 3 Rule 7: material vendor/customer relationships should sometimes appear in the counterparty's 10-K. Amazon's 10-K would not typically name individual AWS customers however \u2014 this is an asymmetric disclosure (UPST naming AWS, but AWS does not list small SaaS customers). Expect UNVERIFIABLE / not-disconfirmable from AMZN side; the framework should treat the EDGAR null-finding as low-evidentiary-weight."
+    },
+    {
+      "claim_id": "UPST-6",
+      "claim_text": "Upstart has approximately 30 proprietary machine-learning models developed in-house, with its personal-loan underwriting model trained on nearly 104 million repayment events and using over 2,500 variables.",
+      "source_quote": "Our personal loan underwriting model expanded from 23 variables at the end of 2014 to over 2,500 at the end of 2025. ... As of December 31, 2025, this model was trained on nearly 104 million repayment events, and it is only one of approximately 30 proprietary machine learning models that we developed in-house.",
+      "subject": "Upstart Holdings, Inc.",
+      "predicate": "owns_ai_models",
+      "object_value": "~30 proprietary ML models; 2,500+ variables; 104M repayment events",
+      "category": "technology",
+      "referent_type": "intangible",
+      "m_source_status": "MAPPED",
+      "source_id": "uspto_odp.query_assignee",
+      "source_params": {
+        "assignee_name": "Upstart Holdings",
+        "cutoff_date": "2026-05-16"
+      },
+      "proposed_connector": null,
+      "extraction_notes": "Proprietary ML models are not registered in any authoritative registry, but patents covering UPST's underwriting innovations would be. The USPTO assignee search adjudicates the IP-strength claim indirectly. A complete null finding (zero patents under Upstart Network / Upstart Holdings) would call the 'proprietary' framing into question. Companion query: google_patents.query_assignee with assignee_name='Upstart Network' for cross-validation."
+    },
+    {
+      "claim_id": "UPST-7",
+      "claim_text": "Upstart has aggregate convertible senior note principal of $1,687.8 million outstanding as of December 31, 2025 (2026 Notes $66.5M at 0.25%, plus 2029/2030/2032 Notes).",
+      "source_quote": "Our convertible senior notes have an aggregate principal balance of $1,687.8 million and bear interest at a rate of 0.25% per year in the case of the 2026 Notes, 2.00% per year in the case of the 2029 Notes, and 1.00% per year in the case of the 2030 Notes, in each case payable semiannually. ... The 2026 Notes have a principal balance of $66.5 million and are current and due August 2026.",
+      "subject": "Upstart Holdings, Inc.",
+      "predicate": "has_debt_outstanding",
+      "object_value": "$1,687.8M convertible senior notes principal, maturities 2026-2032",
+      "category": "financial_distress",
+      "referent_type": "amount",
+      "m_source_status": "MAPPED",
+      "source_id": "edgar_fts.query_fulltext",
+      "source_params": {
+        "search_term": "convertible senior notes",
+        "cutoff_date": "2026-05-16",
+        "cik": "0001647639",
+        "form_type": "8-K"
+      },
+      "proposed_connector": null,
+      "extraction_notes": "Each note issuance has a corresponding 8-K and 424B indenture filing. Counting issuance/repurchase 8-Ks should reconstruct the $1.69B principal stack. Self-referential SEC filings, but trustee indenture exhibits and 8-K supplemental indentures are authoritative source documents."
+    },
+    {
+      "claim_id": "UPST-8",
+      "claim_text": "Upstart leases facilities in Columbus Ohio, Austin Texas, and New York NY (in addition to its San Mateo California headquarters), with cash requirements for those operating leases totaling $23.6 million plus $66.2 million in leases not yet commenced.",
+      "source_quote": "Our corporate headquarters is currently located in San Mateo, California. In addition to our headquarters, we lease facilities in other parts of the United States, including Columbus, Ohio, Austin, Texas, and New York, NY. ... Our cash requirements related to these lease agreements are $23.6 million ... Our cash requirements related to leases entered into that have not yet commenced is $66.2 million.",
+      "subject": "Upstart Holdings, Inc.",
+      "predicate": "leases_physical_facilities_in",
+      "object_value": "San Mateo CA (HQ); Columbus OH; Austin TX; New York NY",
+      "category": "physical_facility",
+      "referent_type": "geographic_area",
+      "m_source_status": "NONE",
+      "source_id": null,
+      "source_params": {},
+      "proposed_connector": null,
+      "extraction_notes": "No federal facility registry adjudicates corporate office leases \u2014 EPA FRS covers regulated industrial facilities, not financial-services offices. State Secretary-of-State foreign-qualification filings would partially adjudicate but are noisy. Treat as structurally UNVERIFIABLE. Included to document that the claim was considered and intentionally not mapped (per Phase 1 transparency)."
+    }
+  ]
+}

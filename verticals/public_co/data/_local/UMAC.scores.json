@@ -1,0 +1,111 @@
+{
+  "ticker": "UMAC",
+  "scores": [
+    {
+      "claim_id": "umac_01_blue_framework",
+      "claim_text": "Since August 2024, UMAC has had 6 components approved on the Blue Framework / Blue UAS list.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "EDGAR FTS 'Blue Framework' returns 13 hits, all by UMAC itself — no independent SEC counterparty corroboration of UMAC component approval.",
+        "However, Blue UAS / Blue Framework approval is maintained by DIU (Defense Innovation Unit) and is not an SEC-disclosable counterparty event for component vendors — the M-source catalog has no direct hook into the DIU Blue UAS Cleared List or Blue Framework registry.",
+        "USAspending shows Teal Drones (related-party buyer per RP note) executes real Blue UAS DoD contracts including W912LQ25FA019 ('the UAS must be listed on the Blue UAS Certified List') — consistent with a real Blue-UAS-aligned ecosystem in which UMAC components could plausibly sit."
+      ],
+      "M_check": "edgar_fts.query_fulltext('Blue Framework') + edgar_fts.query_fulltext('Unusual Machines') restricted to Red Cat CIK 0000748268",
+      "M_value": "13 'Blue Framework' hits all UMAC; 52 'Unusual Machines' hits in Red Cat filings",
+      "interpretation": "M-source coverage gap (DIU Blue UAS list not indexed in catalog) → UNVERIFIABLE per calibration heuristic 'coverage before scoring'. Do not red-flag absence in a source that does not cover the claimed referent type."
+    },
+    {
+      "claim_id": "umac_02_dod_supplier_pivot",
+      "claim_text": "UMAC supplies NDAA-compliant components to enterprise customers (US drone OEMs and integrators) supporting DoD procurement; enterprise = primary revenue driver 2025.",
+      "severity": "PASS",
+      "supports": [
+        "UMAC's own USAspending shows 0 direct federal contracts (n_awards=0 for 'Unusual Machines' and 'Rotor Riot') — but UMAC explicitly does NOT claim direct DoD prime contracts. They sell components B2B to drone OEMs (per filing: 'enterprise customer base consists primarily of U.S.-based drone manufacturers and system integrators').",
+        "Layer 3 Rule 7 (counterparty-disclosure threshold) does NOT apply as a hard contradiction here because the company is not claiming to be a DoD prime — they're claiming to be an upstream component vendor selling to OEMs that sell to DoD.",
+        "Real downstream demand exists: Teal Drones (a named UMAC related-party customer) has 33 federal contracts totaling $4.77M including Blue UAS DoD awards — substantiating that the customer category UMAC names is real and procurement-active.",
+        "Calibration heuristic 9 (DoD-CONTRACT-SPECIFIC RED FLAG) explicitly requires a SPECIFIC named program claim. UMAC does not claim a specific DoD program — only general NDAA / Blue UAS alignment."
+      ],
+      "M_check": "usaspending.query_dod_contracts('Unusual Machines') + usaspending.query_recipient_contracts('Teal Drones')",
+      "M_value": "UMAC: 0 contracts; Teal Drones: 33 awards, $4.77M, multiple Blue UAS DoD orders",
+      "interpretation": "Generic supplier-pivot claim that does not name a specific DoD program. No hard contradiction; downstream ecosystem (Teal/Red Cat) is verifiable. PASS."
+    },
+    {
+      "claim_id": "umac_03_teal_red_cat_order",
+      "claim_text": "Related-party orders from Teal Drones (Red Cat sub): $2.1M Jan 2026 + $0.8M Oct 2025.",
+      "severity": "PASS",
+      "supports": [
+        "Teal Drones is a real Red Cat subsidiary with verifiable federal contract activity ($4.77M across 33 awards, including Blue-UAS-cited DoD orders).",
+        "Red Cat extensively discloses UMAC: 52 EDGAR hits for 'Unusual Machines' in Red Cat (CIK 0000748268) filings — counterparty corroboration of the relationship.",
+        "The related-party disclosure itself is transparent (RP note specifies Jeff Thompson dual role).",
+        "However: orders are MODEST relative to UMAC's $159M working capital and Teal's parent (Red Cat) sold UMAC the very assets that now manufacture components for Teal — this is circular procurement that should be tracked, though the disclosure quality itself is PASS."
+      ],
+      "M_check": "usaspending.query_recipient_contracts('Teal Drones') + edgar_fts(cik=0000748268, 'Unusual Machines')",
+      "M_value": "Teal: 33 awards $4.77M real; Red Cat discloses UMAC 52 times",
+      "interpretation": "Transparently-disclosed related-party order; counterparty exists and is contract-active. PASS but flag related-party concentration as observation."
+    },
+    {
+      "claim_id": "umac_04_patents",
+      "claim_text": "UMAC / Fat Shark IP holdings — depends on patent rights.",
+      "severity": "PASS",
+      "supports": [
+        "USPTO ODP returns 1 granted patent for 'Unusual Machines' (US 12,294,808 'Apparatus for Attaching Accessories to a First-Person View Headset', granted 2025-05-06) — in-claimed-area (FPV headsets).",
+        "Fat Shark (acquired subsidiary): 5 granted patents including 'SINGLE-PANEL HEAD-MOUNTED DISPLAY' and 2 'UNMANNED AERIAL VEHICLE' patents — directly in claimed FPV / drone domain.",
+        "Total 6 granted patents across UMAC + Fat Shark all in claimed FPV/UAV technology areas — passes calibration heuristic 8 (PASS if n_granted >= 5 with claimed-category hits)."
+      ],
+      "M_check": "uspto_odp.query_assignee('Unusual Machines'), ('Fat Shark'), ('Rotor Riot')",
+      "M_value": "UMAC 1 granted (FPV headset); Fat Shark 5 granted (UAV+headset); all in-domain",
+      "interpretation": "Patent claim is modest and in-claimed-area. PASS."
+    },
+    {
+      "claim_id": "umac_05_orlando_facilities",
+      "claim_text": "Five leased facilities in Orlando + one in Canberra, Australia.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "EPA FRS returns 0 facilities for 'Unusual Machines' in FL — but light electronics assembly (motors, headsets, drone components) is generally not EPA-regulated and would not appear in FRS (calibration heuristic 1).",
+        "Per heuristic 1: 'Light defense electronics / drone assembly often NOT in FRS. Do not red-flag absence in those cases.'",
+        "Lease commitments for 5 Orlando facilities are itemized in Note 16 of the 10-K with execution dates / square footage / expirations — these are auditable lease contracts subject to GAAP-audit (Salberg & Co.)."
+      ],
+      "M_check": "epa_frs.query_facilities('Unusual Machines', 'FL')",
+      "M_value": "n_facilities=0 (expected; out-of-scope source)",
+      "interpretation": "Source-jurisdiction mismatch — drone assembly is not in EPA FRS scope. UNVERIFIABLE via M-catalog; not a red flag."
+    },
+    {
+      "claim_id": "umac_06_rotor_lab_acquisition",
+      "claim_text": "Acquired Rotor Lab Pty. Ltd. (Australian) on Sept 3, 2025; up to $3M earnout on internally-manufactured motor revenue.",
+      "severity": "PASS",
+      "supports": [
+        "EDGAR FTS 'Rotor Lab': 16 hits including UMAC 8-K dated 2025-09-09 (acquisition closing 8-K) — corroborated by event-based filing.",
+        "Disclosed in 2026-03-12 10-K and 2025-11-06 10-Q with consistent dates.",
+        "Earnout structure is contingent on a measurable revenue metric (internally-manufactured motor revenue over 2 years post-close) — falsifiable in future filings."
+      ],
+      "M_check": "edgar_fts.query_fulltext('Rotor Lab')",
+      "M_value": "16 hits, includes 9/9/2025 8-K closing announcement",
+      "interpretation": "Acquisition documented in event-based 8-K and audited 10-K. PASS."
+    },
+    {
+      "claim_id": "umac_07_atm_300m",
+      "claim_text": "$300M ATM with Jones Trading (Aug 2025); ~$69.9M raised in October 2025 at avg $15.46/share.",
+      "severity": "PASS",
+      "supports": [
+        "EDGAR FTS 'Jones Trading' restricted to UMAC CIK = 2 hits (10-K 2026-03-12 + 10-Q 2025-11-06) — internally consistent disclosure across filings.",
+        "$300M ATM facility size is large relative to UMAC's ~$103M cash balance (3x current cash) — suggests management anticipates further dilution. This is a planned-dilution flag but not a contradiction.",
+        "Calibration heuristic 4 (Investment vs operating): ATM is a financing facility, not a customer/operating partnership — not a discoverable signal of distress on its own."
+      ],
+      "M_check": "edgar_fts.query_fulltext('Jones Trading', cik=0001956955)",
+      "M_value": "2 hits, consistent",
+      "interpretation": "ATM facility properly disclosed; size-vs-cash signals appetite for further raises but no contradiction. PASS with observation."
+    },
+    {
+      "claim_id": "umac_08_counterparty_disclosure_red_cat",
+      "claim_text": "Red Cat is a related party (Thompson dual role; sold Fat Shark / Rotor Riot to UMAC; Teal Drones places orders).",
+      "severity": "PASS",
+      "supports": [
+        "Red Cat (CIK 0000748268) filings reference 'Unusual Machines' 52 times via EDGAR FTS — heavy counterparty disclosure consistent with prior asset sale + ongoing related-party.",
+        "Rotor Riot has 169 EDGAR hits — top hits are Red Cat 8-Ks from 2020 (when Red Cat acquired Rotor Riot), confirming Red Cat's prior ownership chain that UMAC describes.",
+        "Bi-directional disclosure (Red Cat discloses UMAC, UMAC discloses Red Cat) passes counterparty corroboration test."
+      ],
+      "M_check": "edgar_fts.query_fulltext('Unusual Machines', cik=0000748268) + ('Rotor Riot')",
+      "M_value": "Red Cat 52 mentions of UMAC; Rotor Riot 169 hits with Red Cat 2020 8-Ks",
+      "interpretation": "Counterparty disclosure threshold (Layer 3 Rule 7) fully passed. PASS."
+    }
+  ]
+}

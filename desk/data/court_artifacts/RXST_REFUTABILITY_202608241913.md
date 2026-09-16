@@ -1,0 +1,31 @@
+## Context
+
+Cohort file `knowledge_graph/cohorts.json` is **not present in this repo**, so the cohort membership and its stated narrative could not be read; I triaged RXST against the narrative implied by the event record itself — *"Ophthalmic Goods premium-elective demand destruction + competitive displacement in adjustable IOLs."* RXST is the sole member listed.
+
+| ticker | class | refuting metric | current value/trend (cited) | next print date | note |
+|---|---|---|---|---|---|
+| RXST | **DAMAGE-ARRIVING** | LAL unit volume (the single metric that is 90% of product revenue) + FY guidance status | **24,917 units in Q2-26, −9% y/y**; product sales ex-Alcon $27.2M, **−19% y/y**; GM 74.9%→71.2%; **FY26 guidance withdrawn**, no formal guide until FY26 year-end report in early 2027. Trend: 29,069 (Q4-24) → 28,611 (Q4-25) → 27,472 (Q1-26) → 24,917 (Q2-26). [8-K/PR 2026-08-05](https://www.sec.gov/Archives/edgar/data/0001111485/000119312526335153/rxst-20260630.htm), [prelim 8-K 2026-07-06](https://www.globenewswire.com/news-release/2026/07/06/3322756/0/en/RxSight-Inc-Announces-Preliminary-Second-Quarter-Financial-Results-and-Product-Pipeline-Updates-Following-Strategic-Collaboration-Agreement.html) | **2026-11-04** (yfinance-derived, UNCONFIRMED — no company PR names it) | Guidance withdrawal is the rubric's own canonical "arriving" marker. Magnitude explicitly unresolved: new CEO Mottiwala (eff. 2026-07-20) is running a business review and is *adding* cost (plans to "double the U.S. sales team"), OpEx already $39.7M/qtr vs $27.2M product revenue |
+
+**Classification is DAMAGE-ARRIVING, not damage-absent.** The narrative's predicted damage is unambiguously in the numbers — units down, revenue down, margin down, guide pulled, CEO replaced, and an underwater-option exchange (SC TO-I, 2026-08-10) covering 4,083,693 options at strikes ≥$6.00. That last item is management pricing its own stock as staying depressed.
+
+## COURT-WORTHY (damage-absent, ranked)
+
+**None. No member qualifies as DAMAGE-ABSENT** — I won't reclassify RXST to populate this section.
+
+But the court-worthiness is high on a *different axis*, and this is the finding: the sizing decision for RXST is not governed by the narrative at all. It is governed by a dated asset-value event the cohort sell-off ignored.
+
+- **Near-zero enterprise value against a live revenue base.** 41.5M shares (derived: Point72's 2,487,468 sh = 6.0%) × $6.32 = **~$262M mcap**. Cash + ST investments were **$208.8M at 6/30/26** and the **$60M Alcon upfront was received in July**, post-quarter → **~$268.8M** today. Net of the $50M refund liability, *firm* cash is ~$218.8M → **EV ≈ $43M** for a ~$110M/yr business at 71% gross margin, with no debt (total liabilities $89.4M, of which $50M refund + $3.5M deferred collab + $10.6M leases). [10-Q 2026-08-05](https://www.sec.gov/Archives/edgar/data/0001111485/000119312526335153/rxst-20260630.htm)
+- **A dated, mechanical de-risking event lands *before* the print.** Of the $60M upfront, only **$10.0M is the initial transaction price** ($6.5M recognized as license revenue, $3.5M deferred); **$50.0M sits as a refund liability**, returnable if Alcon terminates within **120 days of the June 30, 2026 effective date → ~2026-10-28**. If that window lapses un-terminated, cash (~$268.8M) exceeds market cap (~$262M) and **EV goes negative**, with the Q3 10-Q on/around 2026-11-04 carrying the disclosure. [Alcon 8-K 2026-07-06](https://www.sec.gov/Archives/edgar/data/0001111485/000119312526296201/rxst-ex99_1.htm)
+- **The market is paying nothing for the option value.** Up to **$140M** in development/regulatory milestones, a **30% royalty** on Alcon net sales, exclusive manufacture/supply of collaboration products, and U.S. LDD install/service — from the world's #1 IOL franchise. That is a non-trivial validation the tape has scored at roughly zero.
+
+**The bear case a court must actually kill** (why this isn't a free lunch): the Alcon license is **non-exclusive**, and Alcon leading global commercialization of light-adjustable versions of *its own* lenses is a plausible route to cannibalizing RxSight's direct LAL franchise — RxSight may be converting an owned channel into a component-supplier royalty. Guidance is dark until early 2027, so there is no forced re-rating catalyst; OpEx is rising, not being cut; and the two largest disclosed holders (Millennium 7.3%, Point72 6.0% new as of 2026-08-18) are multi-strat pods, which is weak-to-no signal on conviction.
+
+## Retrieval caveat (affects the R2.3 hard rule)
+
+**sec.gov returned HTTP 403 to every direct fetch attempt** in this session (filing index, SC TO-I, 8-K EX-99.1, 10-Q). The canonical SEC URLs above are cited and were surfaced via search, but the 10-Q line items and the refund-window language were read from filing mirrors, **not from a direct read of the primary document**. Two independent summarizers also mis-computed the window as "late September"; **120 days from 2026-06-30 is 2026-10-28**, which is the date I use. Before this escalates to a full court, someone should open Note-level Alcon accounting in the 10-Q with the full-fingerprint fetcher and confirm (a) the exact refund-window anchor date and (b) whether "effective date" is 2026-06-30 or the payment date.
+
+**COURT-WORTHINESS RXST: 8/10** — the narrative-driven discount is directionally correct but the sizing decision hinges on a dated, mechanical refund-liability lapse (~2026-10-28) that would push EV to roughly zero, and a court would resolve whether the non-exclusive Alcon license validates or cannibalizes the core franchise.
+
+**PRINT PROXIMITY: 2026-11-04 — yfinance-derived, UNCONFIRMED; no company PR names it. ~49 trading days out, so the <5-day pre-print reconstruction is NOT triggered.** The nearer dated event is the Alcon refund-window lapse ~2026-10-28, which is not an earnings print and carries no pre-print reconstruction requirement; it should be set as a tripwire, not raced.
+
+One process note: this triage escalates (≥6 auto-routes to a full red/blue court), and the live IBKR quote could not be pulled — `search_contracts` permission was not granted in this session, so the $6.32 tape is the machine pack's yahoo mark stamped 2026-08-24T19:09Z rather than a fresh broker spot. Per the live-price doctrine, the court should re-mark before any sizing.

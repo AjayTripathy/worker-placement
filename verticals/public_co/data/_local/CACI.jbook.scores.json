@@ -1,0 +1,104 @@
+{
+  "ticker": "CACI",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "CACI generated 75.4% of FY2025 revenues from DoD agencies and 95.7% from federal contracts overall.",
+      "severity": "PASS",
+      "supports": ["usaspending.query_dod_contracts: 2662 awards, $7.6B total to CACI entities", "usaspending.query_federal_presence: 19 UEIs resolved; CACI INTERNATIONAL INC parent shows $4.48B FY snapshot"],
+      "M_check": "usaspending.query_dod_contracts",
+      "M_value": "n_awards=2662, total_amount=$7,619,067,209",
+      "interpretation": "Past federal/DoD revenue concentration is structurally confirmed by USAspending. pentagon_jbook does not list CACI as a primary contractor on indexed PEs (defense IT services rarely map to RDT&E PE lines), so this is verified via USAspending not J-Book."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Top ten contracts = 46.4% of FY2025 revenue / $4.0B.",
+      "severity": "PASS",
+      "supports": ["usaspending top awards include W15QKN15C0049 IPPS-A ($733M), HS002123F0020 background investigations ($652M), FA882316C0004 NSS work ($600M)"],
+      "M_check": "usaspending.query_dod_contracts",
+      "M_value": "Top awards by amount: $733M IPPS-A, $652M background-investigation TO, $600M NSS — consistent with a concentrated top-ten composition",
+      "interpretation": "USAspending top-award amounts and recipient structure (CACI-ISS, CACI INC FEDERAL, CACI NSS) corroborate the concentrated top-ten contract narrative. No J-Book hit available because these are large IDIQ task-order vehicles (services) rather than R-2 PE lines."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Spectrum Superiority / EW / photonics positioning as forward DoD revenue driver.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["pentagon_jbook.query_program_funding(program_name='Electronic Warfare') returned 3 candidate Air Force EW PEs; primary match Multi-Platform Electronic Warfare Equipment (0207040F) = UNFUNDED_TWO_PLUS_YEARS, but CACI not listed as a contractor on that PE.", "pentagon_jbook 'Spectrum Superiority' = NOT_FOUND"],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Electronic Warfare')",
+      "M_value": "primary_match PE 0207040F status=UNFUNDED_TWO_PLUS_YEARS (last funded FY24 $14.3M); 2 other EW PEs in corpus (no contractor field)",
+      "interpretation": "CACI's marketing taxonomy ('Spectrum Superiority') does not map to any indexed J-Book PE. The one EW PE the corpus does flag UNFUNDED (Multi-Platform EW Equipment, an AF aircraft EW pod program) is not a CACI line item per the filing — CACI is sub-tier on RF/EW services, not a prime on an R-2 line. Coverage gap, not adverse signal. UNVERIFIABLE."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "C3I / software-defined SIGINT + EW for multi-domain command and control.",
+      "severity": "PASS",
+      "supports": ["pentagon_jbook(program_name='SIGINT') = Airborne SIGINT Enterprise PE 0304260F, FUNDED_STEADY, FY26=$90.65M (FY24 $113M, FY25 $85M, FY26 $91M)"],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='SIGINT')",
+      "M_value": "PE 0304260F Airborne SIGINT Enterprise, status=FUNDED_STEADY, FY26 funded_M=90.65",
+      "interpretation": "Closest J-Book SIGINT PE is FUNDED_STEADY at ~$90M/yr — not large in absolute terms but indicates the SIGINT mission area is not being defunded. CACI is not named as the prime, but as a services subcontractor the SIGINT envelope is steady. PASS."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Space domain awareness, intel fusion, integrated logistics — forward Space Force exposure.",
+      "severity": "PASS",
+      "supports": ["pentagon_jbook(program_name='Space Domain Awareness') = PE 1208248SF SDA/Planning/Tasking SW, FUNDED_GROWING, FY24 $130M, FY25 $146M, FY26 $201M"],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Space Domain Awareness')",
+      "M_value": "PE 1208248SF status=FUNDED_GROWING, FY26 funded_M=200.97 (+54% over 2 yrs)",
+      "interpretation": "Space Force SDA software PE is growing fast — supports CACI's stated forward Space narrative. PASS."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Full-spectrum cyber capabilities — offensive + defensive — forward revenue from DoD/IC cyber programs.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["pentagon_jbook(program_name='Cyber') primary match Rapid Cyber Acquisition PE 0305881F = UNFUNDED_TWO_PLUS_YEARS (FY24 $8.5M then $0/$0). Other matches include Cyber Security Initiative 0305103C (Lockheed/System High primes), Cyber Resiliency Weapon Systems-ACS, Acq Workforce Cyber/Network/Bus Sys."],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Cyber')",
+      "M_value": "primary PE 0305881F (Rapid Cyber Acq) UNFUNDED_TWO_PLUS_YEARS; J-Book corpus does not list CACI as a prime on any indexed Cyber PE",
+      "interpretation": "The narrative-loadbearing 'Cyber' area is mixed in the J-Book: at least one named cyber PE has gone to zero, and the prime-contractor cyber PEs name competitors (Lockheed, System High) not CACI. CACI is a services player in cyber, not a J-Book prime, so the verifiability is partial. Downgrading from SEVERE because CACI's cyber work flows through services task orders that USAspending confirms in aggregate; the J-Book miss is informative but not existential. MODERATE_UNDERDELIVERY."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Enterprise IT solutions for ~50 federal agencies.",
+      "severity": "PASS",
+      "supports": ["usaspending.query_federal_presence resolved 19 distinct UEIs across CACI INTERNATIONAL INC and subsidiaries (CACI INC-FEDERAL, CACI NSS LLC, CACI-ISS LLC, CACI TECHNOLOGIES LLC, etc.) consistent with broad multi-agency footprint", "pentagon_jbook(EITaaS) = NOT_FOUND (procurement contract vehicle, not an R-2 PE)"],
+      "M_check": "usaspending.query_federal_presence",
+      "M_value": "n_ueis_resolved=19; parent CACI INTERNATIONAL INC FY snapshot $4.48B; subsidiary CACI INC-FEDERAL $3.27B",
+      "interpretation": "Multi-agency enterprise IT presence corroborated by 19 resolved UEIs across CACI subsidiaries. Forward demand for federal enterprise IT modernization remains broad-based; J-Book is the wrong instrument for this O&M / services class. PASS."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Seven acquisitions in three fiscal years including Azure Summit (RF/EMS/photonics) — rollup thesis.",
+      "severity": "PASS",
+      "supports": ["usaspending: CACI AZURE SUMMIT TECHNOLOGY LLC = 59 awards / $53M, including DARPA ASCOT phase contracts and Navy RF/tuner integration work — consistent with the stated RF/photonics thesis"],
+      "M_check": "usaspending.query_recipient_contracts(recipient_name='Azure Summit Technology')",
+      "M_value": "n_awards=59, total=$53.09M; top awards N0016419FJ192 ($8.4M VPX/tuner integration), N6523619C8011 ($7.2M DARPA ASCOT Phase 1)",
+      "interpretation": "Azure Summit's USAspending profile (Navy RF integration + DARPA ASCOT) is coherent with CACI's stated reason for acquiring it (electromagnetic spectrum / photonics). Rollup logic checks out at the entity-level. acq_coherence M-source requires additional kwargs not in scope here. PASS."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "Mission and Engineering Support: naval architecture, platform integration, weapons system sustainment.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["pentagon_jbook(program_name='Naval Architecture') = NOT_FOUND", "pentagon_jbook(program_name='Platform Integration') = NOT_FOUND"],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Naval Architecture')",
+      "M_value": "NOT_FOUND (services category, not an R-2 PE)",
+      "interpretation": "Naval architecture and platform modernization are services/sustainment categories that do not appear as discrete PEs in the R-2 J-Book corpus. Per rubric heuristic 7, NOT_FOUND for services categories outside corpus scope is UNVERIFIABLE, not adverse. USAspending shows CACI subs holding large Navy/NAVSEA-style task orders separately, but no J-Book read possible."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "Patents and trade-secret IP exist but are not material to operations (control claim).",
+      "severity": "PASS",
+      "supports": ["uspto_odp.query_assignee(CACI) returned 112 applications, 50 granted patents pre-cutoff under 'CACI, INC.- FEDERAL'; recent grants in radio delay calibration and ceramic waveguide filter consistent with the EMS/RF positioning."],
+      "M_check": "uspto_odp.query_assignee",
+      "M_value": "n_total_applications=112, n_granted=50",
+      "interpretation": "Patent footprint is real and skewed toward RF/EW (consistent with EMS/Spectrum Superiority claims), but small enough that the company's own characterization (IP not materially relied upon) is reasonable. PASS."
+    },
+    {
+      "claim_id": "C11",
+      "claim_text": "~25,000 employees as of 2025-06-30.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["dol_h1b_lca returned only 1 LCA filing for CACI INC-FEDERAL in 2024 (one Software Developer in Cumming, GA, $131,671)"],
+      "M_check": "dol_h1b_lca.query_lca_filings",
+      "M_value": "n_filings=1; signal=SMALL_SPONSOR",
+      "interpretation": "DOL H1B is the wrong instrument to size a 25,000-person US-cleared workforce: CACI's labor force is overwhelmingly US-citizen cleared personnel (security clearances required for IC/DoD work), so H1B undercount is expected and not adverse. Headcount itself was not independently testable with the available M-sources. UNVERIFIABLE."
+    }
+  ]
+}

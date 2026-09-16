@@ -1,0 +1,27 @@
+Both primary pulls came back clean — the Q1 balance sheet and the Tydal PR language are now verified. One number changes the case materially: BTDR held only **31 BTC** at Q1-end (vs 1,156 a year prior), and red's "$320M true burn" exceeds the entire net loss. Composing the blue ruling.
+
+## BLUE BENCH — BTDR — RED CASE: PARTIALLY OVERTURNED (verdict survives, killer-fact magnitude does not)
+
+PACK: acknowledged. Nothing superseded; tape = pack ($10.88). Checks run via WebFetch against the primary PRs below.
+
+**1. Burn composition — REDUCED.** {Red: prepay released, not built; "~$320M is gross loss/opex/interest — true burn" | WebFetch of [Q1 results](https://www.stocktitan.net/news/BTDR/bitdeer-reports-unaudited-financial-results-for-the-first-quarter-of-k8x5si3ll86m.html) | Confirmed: inventories $252.0M→$613.0M, prepayments $698.3M→$341.1M — red's direction is right and the thesis's "wafer prepayments" escape hatch is dead. But red's magnitude is arithmetically impossible: gross loss was −$39.0M and **net loss −$159.5M including non-cash convert remeasurement** — "$320M of P&L burn" exceeds the entire net loss. The residual outflow is other working capital (digital-asset receivables alone +$74.3M, $135.6M→$209.9M). True structural cash burn is bounded ~$100–150M/q | REFUTED-in-part}. The III precedent applies: the kill's direction survives, its headline number is an artifact.
+
+**2. ATM already selling equity — SUSTAINED.** Filing language verbatim: "$568.3 million from our convertible senior note issuance in February, borrowings and ATM program." "Without touching the equity" is already false.
+
+**3. Convert stack / 31% dilution — REDUCED.** Prices confirmed via cited PRs ([Feb-2026 $325M at 5.00%](https://www.globenewswire.com/news-release/2026/2/20/3241841/0/en/bitdeer-announces-pricing-of-upsized-us-325-0-million-convertible-senior-notes-offering.html)). But "31% dilution the per-share math ignores" double-counts: conversion extinguishes ~$1.015B of the $1.92B borrowings already inside the thesis's EV. If-converted at the re-rate: +76M shares, −$1.015B debt — roughly EV-neutral. Real sizing note, not a fatal.
+
+**4. LC milestone-gated / stealth-SPV tenant — SUSTAINED.** [Tydal PR](https://www.globenewswire.com/news-release/2026/08/04/3338255/0/en/bitdeer-announces-4-7-billion-16-year-ai-hpc-data-center-lease-for-tydal-norway-campus.html) verbatim: LCs "subject to customary conditions"; Bitdeer may terminate "if Volta fails to meet certain milestones relating to the credit backstop"; tenant no-fee termination at year 10. The kg_candidate is good — harvest it.
+
+**5. Cap-rate reclass to $0.8–1.0B — REDUCED.** State-contingent, not one number: pre-LC-posting red's 12–15% is right (~$0.8–1.0B, 20–25% of EV); post-posting the credit is bank-grade and 10–12% is defensible. Red priced only the bad state; thesis priced only the good one.
+
+**6. Runway <1 quarter — REDUCED.** Rests on finding 1's inflated burn. At ~$100–150M/q structural burn with demonstrated market access ($568.3M raised in Q1), it's 2–3 quarters — but a raise-with-print remains the base case, so red's TIMING conclusion stands.
+
+**7. Coverage gaps — SUSTAINED** as reported (Form 4s 403'd, no discovery_state, sentinel2_buildout undispatched).
+
+NEW FINDINGS RED MISSED: **(a) The BTC treasury is gone — 31 BTC held vs 1,156 a year ago.** The thesis's EV nets "$0.245B digital assets," but $209.9M of it is *digital assets–receivables* (possibly pledged/lent), not liquid coin. Both the EV cross-check AND red's liquidity math used the wrong cushion; this cuts against the bull. (b) The +$74.3M receivables build is an unexplained drain — named coverage gap for the Q2 filing.
+
+DETECTORS CONSULTED: fdic_call_reports — NOT-FIRED (SIC match spurious, no bank-partner origination). chinese_smallcap_ramp_dump_archetype — NOT-FIRED ($2.65B cap, institutional 13Gs 7/27, no promo tape). clinical_trial_referral_quality / clinicaltrials_lookup / competitor_trial_omission — NOT-FIRED (no clinical business; feature match spurious). common_control_merger_accounting — NOT-FIRED (no new $1B+ absorption in filing inventory). lockup_expiration_calendar — NOT-FIRED (no follow-on filed; ATM in finding 2). upc_tra_value_extraction — NOT-FIRED (Cayman FPI, no TRA). albuquerque/austin/bozeman_permits — UNCHECKABLE (jurisdictions: Tydal Norway, Rockdale TX-county, Clarington OH); concur with red's contest that sentinel2_buildout should have been dispatched for Tydal shell progress. beauty_velocity_poll / beauty_virality — NOT-FIRED (no virality claim). carbon_mapper — NOT-FIRED (hydro grid; no methane claim on the axis).
+
+NET POSITION AFTER BOTH BENCHES: Red's REJECT of the pre-print STARTER survives on corrected grounds — not "$320M/quarter structural burn" (false) but the conjunction of an already-running ATM, a milestone-gated (not posted) $1.3B backstop, and a confirmed Monday print whose most probable financing headline is dilutive, with an ITM $9.93 convert underneath. The asset is real and red's own valuation floor concedes the price isn't absurd, so this is a TIMING rejection, not a kill: **FLAT into the 2026-08-10 print; re-court within 48h.** Entry triggers: signed non-recourse Tydal project debt ≥$400M with no concurrent equity, OR LCs posted, plus Q2 OCF decomposition showing ex-WC burn ≤$150M. Kill triggers: equity/convert raise at the print, or LC milestone slippage.
+
+Conviction: 7/10.

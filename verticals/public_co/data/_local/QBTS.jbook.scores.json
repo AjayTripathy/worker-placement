@@ -1,0 +1,134 @@
+{
+  "ticker": "QBTS",
+  "cutoff": "2026-05-20",
+  "filing": "0001907982-26-000026_10-K.txt",
+  "n_claims": 8,
+  "n_queries_attempted": 19,
+  "n_queries_with_data": 17,
+  "n_jbook_grounded_claims": 4,
+  "n_pentagon_jbook_fired": 4,
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Customer A = 67% of FY2025 revenue (vs 17% in FY2024) — concentration likely driven by the Advantage2 system sold/operationalized at Davidson Technologies in Huntsville, Alabama in Nov 2025.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "usaspending.query_dod_contracts confirms Davidson Technologies has $192.9M of DoD contracts (real defense contractor with FA861222CB005 ACC DTC CMCC contract worth $104.5M, etc.) — the customer is a credible defense end-customer.",
+        "pentagon_jbook NOT_FOUND for Davidson Technologies as a primary contractor on any covered PE — corpus coverage gap.",
+        "usaspending.query_federal_presence with D-Wave name variants returns 0 UEIs resolved, 0 contracts, signal INFLATION_SUSPECT — D-Wave Government Inc. is NOT a direct federal prime contractor of record; the 'government revenue' flows through Davidson Technologies as the intermediary.",
+        "Customer A jumped from 17% to 67% of revenue YoY — a single-system on-prem sale is non-recurring; the framework should flag durability risk because the customer is a reseller/host, not the end-customer."
+      ],
+      "M_check": "usaspending.query_dod_contracts + usaspending.query_federal_presence",
+      "M_value": "Davidson DoD contracts = $192.9M; D-Wave federal_presence = INFLATION_SUSPECT (0 UEIs)",
+      "interpretation": "Customer A revenue concentration (67%) is from a hardware sale to Davidson Technologies — Davidson is a real DoD contractor, but D-Wave's relationship is one step removed (system hosting, not a DoD prime contract). This is a customer-concentration risk: (a) one-time hardware sale won't recur in FY26 absent another system sale; (b) D-Wave Government Inc. has no UEI footprint in USAspending, suggesting the federal pipeline narrative is forward-looking, not booked. Score MODERATE — the FY2025 number is real, but the forward concentration risk is material and the 'D-Wave federal contractor' framing is overstated."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "D-Wave + Davidson + Anduril proof-of-concept for 'complex missile-defense planning scenarios' — Stride solver gives 10x speedup, 9-12% threat-mitigation improvement.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "pentagon_jbook found 4+ Ballistic Missile Defense PEs in J-Book corpus (BMD Terminal 0603881C, Midcourse 0603882C, Sensors 0603884C, C2BMC) but status_declared is null for these — corpus has the PE skeleton but no funding trajectory recorded yet.",
+        "pentagon_jbook NOT_FOUND for 'Anduril' as a contractor — Anduril is real (high-profile defense unicorn) but not yet indexed as a J-Book primary contractor in the corpus.",
+        "usaspending.query_dod_contracts for D-Wave Government returned 0 awards — no actual missile-defense contract booked to D-Wave by USAspending; this is a 'proof-of-concept,' not a program of record.",
+        "The claim is qualitatively framed ('initial proof-of-concept') not as a booked revenue contributor — the narrative-load is forward-looking pipeline, not booked revenue."
+      ],
+      "M_check": "pentagon_jbook (BMD PEs, Anduril contractor) + usaspending.query_dod_contracts (D-Wave Government)",
+      "M_value": "pentagon_jbook: 4 BMD PEs found but null status_declared. NOT_FOUND for Anduril. usaspending D-Wave Government DoD contracts = 0.",
+      "interpretation": "The missile-defense narrative is a forward pipeline claim with a 'proof-of-concept' qualifier — not a booked contract. Without a J-Book PE attributing D-Wave (or D-Wave's primes) as a contractor on a BMD PE with a forward funding trajectory, and with USAspending showing zero D-Wave Government DoD contracts, this is a low-evidence pipeline claim. Pentagon_jbook 'fired' but returned PE-skeleton-only data; the BMD PEs exist but D-Wave is not a named contractor. MODERATE — the narrative is plausible but materiality is unproven and the corpus doesn't yet contain a status-decorated PE that names D-Wave."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "D-Wave achieved CDAO Tradewinds Solutions Marketplace 'awardable' status + formed a new US-government business unit.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook NOT_FOUND for 'Tradewinds', 'CDAO', 'Chief Digital and Artificial Intelligence Office' — CDAO Tradewinds is an acquisition vehicle (not a Program Element with FY funding line), so absence from the J-Book is consistent with how Tradewinds operates (it is a contracting marketplace, not a PE).",
+        "Tradewinds 'awardable' status is a procurement-vehicle qualification (a precondition for being eligible to bid on CDAO contracts), not a contract award itself.",
+        "usaspending.query_federal_presence shows 0 UEIs resolved for any D-Wave name variant — even though D-Wave claims Tradewinds awardable status, no actual CDAO contract has been awarded as of the cutoff."
+      ],
+      "M_check": "pentagon_jbook (Tradewinds/CDAO PE) + usaspending.query_federal_presence",
+      "M_value": "All pentagon_jbook lookups NOT_FOUND for CDAO/Tradewinds. usaspending federal_presence: 0 UEIs / INFLATION_SUSPECT.",
+      "interpretation": "Tradewinds is an acquisition marketplace, not a J-Book PE — so NOT_FOUND in pentagon_jbook is expected (coverage gap, not a flag). However, the absence of any awarded contract in USAspending under any D-Wave subsidiary name means the 'awardable status' has not yet converted to revenue. UNVERIFIABLE at the J-Book layer; investor takeaway is that this is a forward-pipeline claim with no booked revenue yet."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "D-Wave Government Inc. is the federal-contracting entity, positioned in quantum-networking adjacency where competitor primes (IonQ on AFRL Quantum Networking, Qubitekk now part of IonQ) hold the J-Book lines.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": [
+        "pentagon_jbook 'AFRL Quantum Networking' query returns IonQ as the primary contractor with status UNFUNDED_TWO_PLUS_YEARS (latest funded 2024, $12M, then $0 in FY2025 and FY2026; earmark_secured=true).",
+        "pentagon_jbook 'Quantum Networking' query returns IonQ-AFRL UNFUNDED + Qubitekk-AFRL FUNDED_STEADY (Qubitekk was acquired by IonQ Dec 2024 — earmark structure intact).",
+        "pentagon_jbook contractor_name='D-Wave Government' returns NOT_FOUND — D-Wave is NOT a primary contractor on any covered Pentagon quantum PE.",
+        "usaspending.query_federal_presence across all 5 D-Wave name variants returns 0 UEIs resolved, 0 contracts (signal INFLATION_SUSPECT) — D-Wave is not on any visible federal prime contractor list in USAspending.",
+        "Materiality: in a sector where the only J-Book-funded quantum-networking lines are held by IonQ (and going UNFUNDED), D-Wave's forward DoD narrative has no J-Book grounding."
+      ],
+      "M_check": "pentagon_jbook (AFRL Quantum Networking, contractor='D-Wave Government') + usaspending.query_federal_presence",
+      "M_value": "AFRL Quantum Networking = UNFUNDED_TWO_PLUS_YEARS (IonQ); D-Wave Government NOT_FOUND in J-Book; D-Wave federal_presence INFLATION_SUSPECT.",
+      "interpretation": "This is the canonical J-Book divergence pattern with a twist: D-Wave is NOT a primary contractor on any covered quantum PE, and the only quantum PE that DOES exist (AFRL Quantum Networking) is UNFUNDED_TWO_PLUS_YEARS for the actual primary contractor (IonQ). D-Wave's forward government-pipeline narrative depends on a federal demand environment where Pentagon quantum-networking PEs are being de-funded. Combined with USAspending showing zero D-Wave Government UEI resolution / contracts (INFLATION_SUSPECT), the framework reads this as SEVERE: the company is positioning into a category where the J-Book is closing the spigot, and D-Wave hasn't yet established prime-contractor status anywhere visible. Caveat: D-Wave's claimed near-term government revenue is from on-premises system sales to intermediaries like Davidson, not direct prime contracts, so the J-Book divergence is one step removed."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "D-Wave names Los Alamos National Laboratory + NASA Quantum AI Laboratory as historical research customers — implicit federal demand signal.",
+      "severity": "PASS",
+      "supports": [
+        "nasa_ntrs.query_ntrs returns 3 NASA Ames Research Center publications referencing D-Wave Quantum, with NASA funding number NNA14AA60C — corroborates the NASA Quantum AI Laboratory historical engagement.",
+        "doe_budget.query_program_funding for 'Quantum Information Science' shows DOE QIS programs FUNDED_STEADY/GROWING (ASCR Advanced Computing $105M FY25 -> $113M FY26; BES QIS Research $2.24B FY26; HEP QIS $50M FY25) — DOE-side quantum funding is robust, supporting the LANL/research demand environment."
+      ],
+      "M_check": "nasa_ntrs.query_ntrs + doe_budget.query_program_funding",
+      "M_value": "NASA NTRS: 3 publications with NNA14AA60C funding; DOE QIS programs FUNDED_GROWING (multiple billion).",
+      "interpretation": "Historical NASA + LANL engagement is corroborated; DOE-side quantum funding is robust and growing. This is a PASS — the federal-research customer base claim is verified by NASA NTRS publications and DOE budget data. Note this is research-grant revenue, not DoD program revenue, so it doesn't backstop the J-Book pipeline narrative."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "D-Wave acquired Quantum Circuits, Inc. (Jan 2026) — pivot to error-corrected gate-model quantum.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "acq_coherence.score_acquisition_coherence: coherence_score=0.0, category=low_coherence — the acquisition of a gate-model error-correction company is technologically distinct from D-Wave's annealing thesis, classified as low_coherence (signal=MIXED_COHERENCE for cohort).",
+        "Reasoning: 'Cannot assess technology coherence without target identity, business description, or deal details' — model needs more deal-detail context, but on the stated thesis ('annealing' parent + 'gate-model error correction' target) the technologies are distinct architectures.",
+        "Pivot to gate-model is a forward narrative shift away from the core annealing business that generated 67% of FY25 revenue via the Davidson system sale."
+      ],
+      "M_check": "acq_coherence.score_acquisition_coherence",
+      "M_value": "coherence_score=0.0, signal=MIXED_COHERENCE",
+      "interpretation": "The Quantum Circuits acquisition is a technology pivot from annealing to gate-model — acq_coherence flagged low coherence. While management frames it as a strategic dual-platform play, it dilutes the original first-mover-in-annealing narrative. MODERATE: not an inherent red flag (dual-platform strategy is defensible), but it does suggest the core annealing business may have hit a growth ceiling absent the federal pipeline materializing."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Lockheed Martin was D-Wave's first commercial customer (historical reference).",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "edgar_fts.query_fulltext on Lockheed (CIK 0000936468) for 'D-Wave' returned 0 hits in Lockheed's filings — Lockheed does not currently disclose any material D-Wave relationship in EDGAR filings.",
+        "This is historical (Lockheed bought a D-Wave system in 2011) and the relationship has not been material enough to require ongoing disclosure on Lockheed's side."
+      ],
+      "M_check": "edgar_fts.query_fulltext (Lockheed Martin)",
+      "M_value": "0 hits in Lockheed Martin filings for 'D-Wave'",
+      "interpretation": "Historical claim; not relevant to forward J-Book exposure. UNVERIFIABLE on the counterparty side — Lockheed doesn't disclose D-Wave in its filings, but this is consistent with the relationship being immaterial to Lockheed (~$10M historical system sale, no ongoing commitment)."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "D-Wave plans to relocate HQ to Boca Raton, FL by end of 2026 and open key U.S. R&D facility there.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "epa_frs.query_facilities returned 20 generic 'wave'/'D-Wave'-string matches in FL but none clearly attributable to D-Wave Quantum Inc. (mostly waterparks, auto-spa, and unrelated facilities) — no EPA-registered D-Wave facility in Boca Raton as of cutoff.",
+        "This is consistent with a forward-announced relocation that has not yet broken ground."
+      ],
+      "M_check": "epa_frs.query_facilities",
+      "M_value": "0 D-Wave-attributable FL facilities (20 generic 'wave'-name matches, all unrelated)",
+      "interpretation": "Forward-looking facility plan; EPA registration not yet established. UNVERIFIABLE — consistent with the lease being newly executed but no physical facility operating yet. Not a J-Book signal."
+    }
+  ],
+  "summary": {
+    "severity_counts": {
+      "PASS": 1,
+      "MODERATE_UNDERDELIVERY": 3,
+      "SEVERE_UNDERDELIVERY": 1,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 3
+    },
+    "jbook_grounded_claim_ids": ["C1", "C2", "C3", "C4"],
+    "pentagon_jbook_fired_on": ["C1", "C2", "C3", "C4"],
+    "key_findings": [
+      "C4 is the canonical J-Book divergence catch: D-Wave's federal-pipeline narrative depends on a Pentagon quantum-program environment where the only covered quantum PE (AFRL Quantum Networking) is UNFUNDED_TWO_PLUS_YEARS for its primary contractor IonQ. D-Wave Government Inc. is not a primary contractor on any covered PE, and usaspending.query_federal_presence returns INFLATION_SUSPECT (0 UEIs, 0 contracts) across all 5 D-Wave name variants.",
+      "C1 reveals the Davidson Technologies dependency: 67% of FY2025 revenue from Customer A (likely the Davidson Advantage2 system sale) — Davidson is a real DoD contractor ($192.9M of DoD awards), but the relationship is intermediated, not a direct D-Wave federal prime contract. Recurrence risk in FY26 is high.",
+      "The 4 J-Book-grounded claims all returned pentagon_jbook signal — 2 with substantive findings (C4 SEVERE: corpus shows competing IonQ line UNFUNDED while D-Wave NOT_FOUND; C2 MODERATE: BMD PEs exist but no D-Wave contractor attribution) and 2 with corpus gaps (C1 NOT_FOUND for Davidson, C3 NOT_FOUND for CDAO/Tradewinds because Tradewinds is an acquisition vehicle not a PE).",
+      "The bull-case backstop: DOE QIS is FUNDED_GROWING and NASA NTRS confirms historical research engagement (C5 PASS) — D-Wave does have real research-grant exposure, but this is DOE/NASA money, not the DoD J-Book money the cohort tests against."
+    ]
+  }
+}

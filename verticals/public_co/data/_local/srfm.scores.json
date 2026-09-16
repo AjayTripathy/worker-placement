@@ -1,0 +1,77 @@
+{
+  "ticker": "srfm",
+  "scores": [
+    {
+      "claim_id": "C-001",
+      "claim_text": "Surf Air has Textron Aviation partnership: $60M licensing + $40M exclusivity + 90-aircraft Caravan purchase (~$297M) + 38 option (~$125.4M).",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["Textron is a real listed counterparty (CIK 0000217346)", "Surf Air's filings provide detailed contract terms suggesting a real executed instrument"],
+      "M_check": "edgar_fts.query_fulltext (Textron CIK 0000217346 for 'Surf Air', 'Surf Air Mobility', 'SAM Aircraft', 'SAM System')",
+      "M_value": "0 hits across all four search terms in Textron's SEC filings as of 2024-06-30",
+      "interpretation": "Textron has not disclosed Surf Air as a counterparty in any SEC filing. With ~$400M+ aggregate purchase commitments, this is notable but not dispositive — Textron is a $13B revenue conglomerate so Surf Air is immaterial to them. The contract is real (filed as 10-K exhibit) but the counterparty's silence indicates Surf Air is not strategically meaningful to Textron. Per heuristic 4 (investment partners often don't disclose) and heuristic 7 (PASS or MODERATE on 0 disclosure absent strong materiality threshold), MODERATE_UNDERDELIVERY: contract exists but the 'strategic partnership' framing oversells Textron's commitment."
+    },
+    {
+      "claim_id": "C-002",
+      "claim_text": "Surf Air has $50M / 7-year Palantir software-license deal; Dec 2023 settled $2M payable via 1.755M shares.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["Palantir is real (CIK 0001321655)", "Stock-for-services payment to Palantir is a strong indicator the relationship is at least functionally underway"],
+      "M_check": "edgar_fts.query_fulltext (Palantir CIK 0001321655 for 'Surf Air' and 'Surf Air Mobility')",
+      "M_value": "0 hits in Palantir's SEC filings as of 2024-06-30",
+      "interpretation": "Palantir has not disclosed Surf Air as a customer. Palantir does not normally name individual commercial customers in 10-Ks, so absence is consistent with normal disclosure. The fact that SRFM had to settle $2M in payables to Palantir with stock (rather than cash) is a financial-distress signal but does not contradict the partnership. The aggregate $50M/7-yr commitment ($7.1M/yr) is the largest single fixed cost on SRFM's books — worth flagging that a going-concern company is committed to it. MODERATE: real relationship, but stock-for-service payment is a soft red flag indicating SRFM cannot fund the contract."
+    },
+    {
+      "claim_id": "C-003",
+      "claim_text": "Surf Air has $450M / $120M-min Jetstream Aviation Capital sale-leaseback; ZERO transactions executed as of FY2023.",
+      "severity": "RED_FLAG_NEGATIVE",
+      "supports": ["Jetstream is referenced in 7 SEC filings (mostly SRFM's own + the Tuscan SPAC predecessor)"],
+      "M_check": "edgar_fts.query_fulltext ('Jetstream Aviation Capital')",
+      "M_value": "7 hits, but all from SRFM/Tuscan filings — no independent third-party reference",
+      "interpretation": "The filing itself self-discloses the contradiction: '$450M aircraft purchase / leaseback ... No transactions have been executed under this agreement as of December 31, 2023.' Signed October 2022 — 14+ months elapsed without a single executed transaction. With a $120M minimum usage obligation, zero usage means SRFM is on a path toward a contract liability or termination. This is RED_FLAG_NEGATIVE: management headlines a $450M financing facility while the body of the filing concedes 0% of it has been used. Direct contradiction between marketing-tier disclosure and operational reality."
+    },
+    {
+      "claim_id": "C-004",
+      "claim_text": "Southern Airways operates EAS routes under multi-year US DOT contracts; US DOT = 32% of FY2023 consolidated revenue.",
+      "severity": "PASS",
+      "supports": ["US DOT EAS program is a registry-recorded, well-known federal contract program", "Southern Airways appears in 42 SEC filings", "Receivables are typically settled within 12-14 days per filing — consistent with real billing operations", "EPA FRS confirms a Southern Airways Express/Mokulele Airlines facility at 3073 Aolele St, Honolulu HI"],
+      "M_check": "edgar_fts.query_fulltext ('Southern Airways') + epa_frs.query_facilities (Southern Airways, HI)",
+      "M_value": "42 SEC filing hits (mostly SRFM/Tuscan/Southern's own); 1 EPA FRS hit confirming HNL Honolulu facility",
+      "interpretation": "Strong corroboration. Southern is a real long-standing operator with verifiable physical presence (Honolulu) and registry footprint. EAS contracts are a real federal program. The 32% revenue concentration on US DOT is a real, measurable contracted revenue stream. PASS."
+    },
+    {
+      "claim_id": "C-005",
+      "claim_text": "Surf Air is developing fully-electric and hybrid-electric SAM powertrain for Cessna Caravan, projecting first STC in early 2027.",
+      "severity": "RED_FLAG_NEGATIVE",
+      "supports": ["The development pathway (STC under FAA) is regulated and verifiable as a process; the partnership with TAI provides licensing scaffolding"],
+      "M_check": "uspto_odp.query_assignee ('Surf Air' and 'Surf Air Mobility')",
+      "M_value": "0 patent applications and 0 granted patents under either name, in any technology bucket (electric_powertrain, aircraft, other)",
+      "interpretation": "ZERO patent footprint as of cutoff for a company claiming to be developing a novel hybrid-electric powertrain product targeting FAA STC certification in early 2027. By comparison, even early-stage eVTOL/electric-aviation peers typically have 5-50+ patent applications by the time they have publicly announced a 3-year-out cert milestone. The IP is presumably owned by partners (TAI license is non-exclusive into existing TAI IP) — meaning the SAM System's underlying IP belongs to others, not SRFM. This contradicts the framing of SRFM as the technology developer. RED_FLAG_NEGATIVE per Nikola pattern: zero granted patents in claimed core technology areas."
+    },
+    {
+      "claim_id": "C-006",
+      "claim_text": "Surf Air has strategic partnership with AeroTEC for electric/hybrid powertrain development.",
+      "severity": "PASS",
+      "supports": ["AeroTEC has 29 SEC filing mentions"],
+      "M_check": "edgar_fts.query_fulltext ('AeroTEC')",
+      "M_value": "29 hits — top hits from Tuscan SPAC predecessor filings; AeroTEC is referenced as engineering services partner",
+      "interpretation": "AeroTEC is a real, externally-verifiable engineering firm; its name appears repeatedly in the SPAC merger materials describing the partnership. As a private engineering services firm, lack of independent disclosure is normal. PASS."
+    },
+    {
+      "claim_id": "C-007",
+      "claim_text": "Surf Air operated 176,131 passengers / 41 cities / 31,476 departures in 2023; Southern is largest US Cessna Caravan EX scheduled-service operator.",
+      "severity": "PASS",
+      "supports": ["Southern Airways Express has 12 SEC mentions and an EPA FRS facility (Honolulu)", "Revenue figures ($60.5M for 2023) are auditor-confirmed by PwC", "Operations are funded by US DOT EAS contracts"],
+      "M_check": "edgar_fts.query_fulltext ('Southern Airways Express') + EPA FRS hit",
+      "M_value": "12 hits + confirmed Honolulu HI facility",
+      "interpretation": "Real, verifiable operating airline. The volume claim is consistent with actual revenue ($60.5M), receivables, and physical airport-level disclosure. PASS."
+    },
+    {
+      "claim_id": "C-008",
+      "claim_text": "Surf Air operates physical aviation facilities including in California (LA County tax lien on 4 aircraft) and elsewhere.",
+      "severity": "PASS",
+      "supports": ["EPA FRS hit for Southern Airways Express/Mokulele Airlines in Honolulu", "LA County imposing a $1.2M tax lien is a registry-recordable event consistent with real owned-aircraft assets", "Material weakness in internal controls and unpaid IRS excise tax of $7.6M from 2016-17 are concrete distress signals consistent with a real, operating but cash-strapped business"],
+      "M_check": "epa_frs.query_facilities ('Surf Air' CA; 'Southern Airways' HI)",
+      "M_value": "0 in CA for Surf Air (expected per heuristic 1 — aviation operators lease airport space); 1 in HI for Southern Airways Express (Mokulele)",
+      "interpretation": "PASS. Aviation operators typically lease airport space and don't appear in EPA FRS — the heuristic warns this is normal absence. The single Honolulu hit confirms the operating footprint. The tax-lien disclosures themselves are fraud-friendly: management discloses the IRS lien, property tax defaults, and FAA civil penalty rather than concealing them. These are flags about FINANCIAL DISTRESS not about fabricated operations."
+    }
+  ]
+}

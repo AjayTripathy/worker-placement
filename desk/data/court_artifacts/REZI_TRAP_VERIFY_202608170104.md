@@ -1,0 +1,22 @@
+SEC direct fetches 403 and the IBKR snapshot permission wasn't granted — noted in the output where it limits a claim.
+
+### REZI (Resideo — post-spin Products & Solutions: thermostats/water & air controls, First Alert, ADI now separate) — screen "broken print −20.4%, $3.1B mcap, ND $3.1B = 3.59x EBITDA, moderate leverage" — **SCREEN-MISCLASSIFIED**
+
+**KILL FACTS (screen defects — all one root cause: the screen measured a company that stopped existing 9 days before the print)**
+- **ADI Global Distribution was spun off 2026-08-03** (REZI PR 8/12; 8-K 8/3). ADI is consolidated in Q2 and becomes **discontinued ops in Q3**. Every trailing metric in the row (TTM EBITDA, revenue, ADV) is the wrong perimeter. **New defect family: post-separation stale-perimeter join** — file it alongside family (1).
+- Screen's "ND $3.1B = 3.59x" = $3,620M debt − $549M cash at 7/4 (pre-spin BS) ÷ an implied **$855M** consolidated EBITDA. Corrected: $900M repaid 8/3 from ADI's dividend (term loans now $1,422M: $206M/2031 + $1,216M/2032), ~$200M more guided by end-Q3 → **PF debt ≈ $2,520M**. RemainCo cash **NOT DISCLOSED** (8-K silent; $549M + $400M restricted is pre-spin and includes ADI's). PF leverage **≈3.4–4.1x** vs FY26 standalone guide $605–625M — *not* "moderate," and right only by coincidence.
+- **Cap structure omitted:** 348,950 CD&R Series A cumulative **convertible participating** preferred, 7% (PIK-able), conversion price equitably adjusted to **$18.844** — **in the money at $20.50**. ~18.5–21.3M as-converted shares = **12–14% dilution** the $3.11B common-only mcap ignores. Corrected EV ≈ **$5.6–6.0B → 9.1–9.7x FY26E EBITDA**. Not a deep-value hit.
+- Tape artifact: pack's −35% 52w drawdown is **not spin-adjusted** (the 8/3 distribution is inside it). The 8/12 single-session move is clean; the drawdown is not.
+- Coverage: Oppenheimer PT $48→$27, Outperform. **Not an orphan** → the FAIR-CARRY carve-out does not apply.
+
+**LIVE FACTS**
+- **The perpetual trap is gone:** the Honeywell Indemnification & Reimbursement Agreement (90% of environmental claims, $140M/yr to 2043) was **terminated for a one-time $1,590M cash payment in August 2025** (REZI IR, 7/30/25 & completion PR). Today's debt *is* that buyout. Structurally clean FCF for the first time since the 2018 spin.
+- Q2 was a real beat: rev $1,981M, **record 30.0% GM**, adj EBITDA $249M (+19%), adj EPS $0.83 (+26%). Of the $27M tariff refunds, **~$20M went to ADI** — only ~$7M flattered RemainCo, so family-(4) contamination is small.
+- The −20.4% is the **guide**, not the quarter: FY26 standalone $2.90–2.95B / $605–625M EBITDA (Q3 $705–730M / $145–155M ⇒ FY is full-year recast P&S, derived not stated). Implies H2 EBITDA below H1.
+- **UNVERIFIED:** the "major OEM security customer" cited by secondary press appears **nowhere in the company PR** — do not carry it as fact. Also unverified: purpose of the 8/7 S-3ASR (possible CD&R resale shelf = overhang) — sec.gov returned 403 to every direct fetch this session; live IBKR quote not polled (permission denied), tape is the pack's $20.50.
+
+**RESOLVES ON:** 10-Q/8-K pro forma Item 9.01(b) (due filed 2026-08-07) → RemainCo cash and true PF net debt; **Q3 print ~2026-11-05** (unconfirmed) → first clean discontinued-ops P&S quarter, tests whether $145–155M is trough or first step down; S-3ASR resale registration → CD&R overhang; input-cost/price-action commentary on the Q3 call.
+
+**Disposition:** WATCH + tripwire — re-court on (a) PF net debt disclosed at ≤$2.2B, or (b) price ≤**$15** (≈8x EV/EBITDA, ~12% FCF yield to as-converted equity). Not advanced: at 9.1–9.7x with 3.4–4.1x leverage and in-the-money participating preferred, the risk is not yet fairly paid.
+
+Sources: [Q2 PR](https://www.prnewswire.com/news-releases/resideo-announces-record-second-quarter-2026-financial-results-initiates-standalone-2026-outlook-302850103.html) · [spin/debt 8-K](https://www.stocktitan.net/sec-filings/REZI/8-k-resideo-technologies-inc-reports-material-event-00430b72c6d6.html) · [Honeywell termination](https://investor.resideo.com/news/news-details/2025/Resideo-Announces-Completion-of-Transaction-with-Honeywell-To-Accelerate-Payment-of-All-Potential-Monetary-Obligations-Under-Indemnification-and-Reimbursement-Agreement/default.aspx) · [8/12 move](https://markets.financialcontent.com/stocks/article/stockstory-2026-8-13-why-resideo-rezi-stock-is-trading-lower-today)

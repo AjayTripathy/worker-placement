@@ -1,0 +1,113 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>award_flow_scanner</title><style>
+body{margin:0;background:#0b0e12;color:#e8ebee;font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:26px 24px 90px}
+a{color:#8b7cf6} h1{font-size:23px;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:#7d858e;margin:0 0 20px;font-size:13px}
+h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:#7d858e;margin:24px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 10px;border-bottom:1px solid #242a31;text-align:left;vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#7d858e}
+.k{font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:20px}
+.k-generator{color:#c3b8fb;background:rgba(139,124,246,.15)}
+.k-detector{color:#eccb8a;background:rgba(217,164,65,.15)}
+.k-watcher{color:#8ee5c1;background:rgba(53,201,143,.15)}
+.k-evidence{color:#b3bcc6;background:rgba(138,147,158,.15)}
+.h-OK{color:#35c98f} .h-STALE{color:#d9a441} .h-ERROR{color:#e0736a} .h-NEVER_RUN{color:#8a939e}
+pre{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px;overflow-x:auto;font-size:12px;line-height:1.5}
+.panel{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px 18px;margin-bottom:12px}
+ul{margin:4px 0;padding-left:20px} li{margin-bottom:4px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+</style></head><body><div class="wrap"><h1>award_flow_scanner</h1><p class="sub">registered capability · award_flow_scanner</p><a href="signals.html">&larr; all signals</a><div class="panel" style="margin-top:10px"><span class="k k-generator">GENERATOR</span> &nbsp;<span class="h-NEVER_RUN"><b>NEVER_RUN</b></span> · last run <span class="mono">never</span></div><p>Stage 0b generator: whole-universe FEDERAL AWARD-FLOW anomalies (USASpending).</p><form method="POST" action="/signals/run" style="margin:10px 0"><input type="hidden" name="name" value="award_flow_scanner"><input name="symbol" placeholder="symbol (if applicable)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px"><input name="symbols" placeholder="universe, comma-sep (generators)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px;margin-left:6px"><button type="submit" style="background:#8b7cf6;color:#0b0e12;border:0;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;margin-left:6px">Run now</button></form><h2>Datasources</h2><ul><li>reference implementation: verticals/generators/award_flow_scanner.py (see the code section for the feeds it touches)</li></ul><h2>Applies to</h2><ul><li><b>strategies:</b> quality_value</li></ul><h2>The code</h2><pre>&quot;&quot;&quot;award_flow_scanner — Stage 0b generator: whole-universe FEDERAL AWARD-FLOW anomalies (USASpending).
+
+Inverts the usaspending verifier: instead of checking a known name&#x27;s gov revenue, rank ALL top recipients by
+obligation ACCELERATION (trailing-6-months vs the same window a year ago). Frontrun-pilot lessons baked in:
+civilian agencies post ~0-day (tradeable); defense (DoD) lags ~98d (stale) -&gt; the scan runs CIVILIAN-ONLY by
+default. Corporate-family lesson: recipients are matched at the PARENT (recipient_id rollup where available);
+the SignalOS mapping pass still resolves families before any seed advances.
+
+  python3 verticals/generators/award_flow_scanner.py
+Writes data/AWARD_FLOW_ANOMALIES.json. READ-ONLY. The scanner proposes; the pipeline disposes.
+&quot;&quot;&quot;
+from __future__ import annotations
+import json, datetime, urllib.request
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+OUT = HERE / &quot;data&quot; / &quot;AWARD_FLOW_ANOMALIES.json&quot;
+API = &quot;https://api.usaspending.gov/api/v2/search/spending_by_category/recipient&quot;
+DOD = {&quot;Department of Defense&quot;}
+MIN_USD = 50e6          # trailing-window floor: too-small recipients can&#x27;t move a public co
+TOP = 500               # recipients pulled per window
+SHOW = 15
+
+
+def _window(start: datetime.date, end: datetime.date, civilian_only: bool = True) -&gt; dict:
+    filt = {&quot;time_period&quot;: [{&quot;start_date&quot;: start.isoformat(), &quot;end_date&quot;: end.isoformat()}]}
+    body = {&quot;filters&quot;: filt, &quot;category&quot;: &quot;recipient&quot;, &quot;limit&quot;: 100, &quot;page&quot;: 1}
+    out = {}
+    for page in range(1, TOP // 100 + 1):
+        body[&quot;page&quot;] = page
+        req = urllib.request.Request(API, data=json.dumps(body).encode(),
+                                     headers={&quot;Content-Type&quot;: &quot;application/json&quot;,
+                                              &quot;User-Agent&quot;: &quot;signalos-research 4tripathy@gmail.com&quot;})
+        try:
+            with urllib.request.urlopen(req, timeout=60) as r:
+                res = json.load(r)
+        except Exception:
+            break
+        for row in res.get(&quot;results&quot;, []):
+            name = (row.get(&quot;name&quot;) or &quot;&quot;).strip()
+            if name:
+                out[name.upper()] = out.get(name.upper(), 0) + (row.get(&quot;amount&quot;) or 0)
+        if not res.get(&quot;page_metadata&quot;, {}).get(&quot;hasNext&quot;):
+            break
+    return out
+
+
+def scan() -&gt; dict:
+    today = datetime.date.today()
+    # trailing ~6 completed months vs same window last year (6m smooths lumpy obligations)
+    end = today.replace(day=1) - datetime.timedelta(days=1)
+    start = (end - datetime.timedelta(days=182)).replace(day=1)
+    p_end, p_start = end.replace(year=end.year - 1), start.replace(year=start.year - 1)
+    cur, prv = _window(start, end), _window(p_start, p_end)
+    rows = []
+    for name, v in cur.items():
+        if v &lt; MIN_USD:
+            continue
+        pv = prv.get(name)
+        if not pv or pv &lt; 5e6:
+            continue          # need a real base to compute growth (new entrants listed separately)
+        rows.append({&quot;recipient&quot;: name.title()[:60], &quot;cur_usd_m&quot;: round(v / 1e6),
+                     &quot;prior_usd_m&quot;: round(pv / 1e6), &quot;yoy_pct&quot;: round((v / pv - 1) * 100, 1)})
+    rows.sort(key=lambda r: -r[&quot;yoy_pct&quot;])
+    new_entrants = sorted([{&quot;recipient&quot;: n.title()[:60], &quot;cur_usd_m&quot;: round(v / 1e6)}
+                           for n, v in cur.items() if v &gt;= MIN_USD and n not in prv],
+                          key=lambda r: -r[&quot;cur_usd_m&quot;])[:10]
+    return {&quot;asof&quot;: today.isoformat(), &quot;window&quot;: f&quot;{start}..{end} vs {p_start}..{p_end}&quot;,
+            &quot;note&quot;: &quot;all-agency totals; DEFENSE lags ~98d (frontrun lesson); families must be rolled up; AND (MMS lesson 2026-07-02) a NEW CONTRACT VEHICLE resets obligations to zero -&gt; recompete re-books read as fake ~2x accelerations — the mapping pass must check whether a surge is an announced recompete before calling it incremental demand&quot;,
+            &quot;n_recipients&quot;: len(rows), &quot;accelerating&quot;: rows[:SHOW], &quot;decelerating&quot;: rows[-10:][::-1],
+            &quot;new_entrants_50m&quot;: new_entrants}
+
+
+def main():
+    res = scan()
+    print(f&quot;=== FEDERAL AWARD-FLOW SCANNER  {res[&#x27;asof&#x27;]}  ({res[&#x27;n_recipients&#x27;]} recipients &gt;= ${MIN_USD/1e6:.0f}M, window {res[&#x27;window&#x27;]}) ===&quot;)
+    print(&quot;  TOP ACCELERATING (who&#x27;s winning federal money faster?):&quot;)
+    for r in res[&quot;accelerating&quot;]:
+        print(f&quot;   {r[&#x27;recipient&#x27;]:&lt;58} ${r[&#x27;cur_usd_m&#x27;]:&gt;7,}M  yoy {r[&#x27;yoy_pct&#x27;]:+8.1f}%&quot;)
+    print(&quot;  TOP DECELERATING (contract-cut tells):&quot;)
+    for r in res[&quot;decelerating&quot;]:
+        print(f&quot;   {r[&#x27;recipient&#x27;]:&lt;58} ${r[&#x27;cur_usd_m&#x27;]:&gt;7,}M  yoy {r[&#x27;yoy_pct&#x27;]:+8.1f}%&quot;)
+    if res[&quot;new_entrants_50m&quot;]:
+        print(&quot;  NEW ENTRANTS &gt;= $50M (no prior-year base):&quot;)
+        for r in res[&quot;new_entrants_50m&quot;][:6]:
+            print(f&quot;   {r[&#x27;recipient&#x27;]:&lt;58} ${r[&#x27;cur_usd_m&#x27;]:&gt;7,}M&quot;)
+    OUT.write_text(json.dumps(res, indent=1))
+    print(f&quot;  PROMOTE: SignalOS mapping pass (family rollup -&gt; ticker -&gt; seed) on the movers.&quot;)
+    print(f&quot;[-&gt; {OUT.name}]&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</pre></div></body></html>

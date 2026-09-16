@@ -1,0 +1,2674 @@
+{
+ "_meta": {
+  "name": "Signal OS \u2014 Cross-Vertical Signal-Channel Catalog",
+  "version": "0.1.0",
+  "compiled_on": "2026-05-28",
+  "purpose": "Structured catalog of public/near-public data feeds that carry credit/risk/operating signals across muni, buyside-DD, and equity verticals. Used to (1) reason about signal-to-price latency, (2) discover redundancy clusters, (3) drive the masking-mechanism + microstructure-knowledge layer.",
+  "cadence_categories": [
+   "real_time",
+   "monthly",
+   "quarterly",
+   "semi_annual",
+   "annual_mandatory",
+   "annual_voluntary",
+   "event_driven",
+   "irregular",
+   "on_request",
+   "UNVERIFIABLE"
+  ],
+  "market_watching_depth_categories": [
+   "WATCHED_BROADLY",
+   "WATCHED_BY_SOPHISTICATED",
+   "WATCHED_BY_PASSIVE_INDEX",
+   "WATCHED_BY_FEW",
+   "NOT_WATCHED"
+  ],
+  "source_artifacts_root": "/Users/ajay/exalted/signalos/"
+ },
+ "channels": [
+  {
+   "name": "CDIAC Yearly Fiscal Status Report (YFSR)",
+   "short_name": "cdiac_yfsr",
+   "publisher": "California Debt and Investment Advisory Commission (state treasurer's office)",
+   "url_pattern": "https://www.treasurer.ca.gov/cdiac/reports/M-Roos/{report_year}.pdf  (aggregate)  + per-issue YFSR on CDIAC DebtWatch",
+   "asset_classes": [
+    "ca_cfd_muni",
+    "ca_mello_roos"
+   ],
+   "cadence": "annual_mandatory",
+   "lag_from_event_to_publication_days": 150,
+   "lag_explanation": "CA Mello-Roos fiscal year ends 6/30; YFSRs due to CDIAC by 10/30 (~120 days). Aggregate summary report (Figures 1-13) published in Jan of following calendar year (~6-7 mo after FY end).",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "Per-CFD: delinquency %, V/L ratio, principal outstanding, AV, reserve fund balance vs minimum, foreclosure parcels + commencement date, Teeter Plan participation flag, top-taxpayer fields (partial), late-filing count. Aggregate: 1,829 issues / 1,177 CFDs / $16.3B principal RY2023-24.",
+   "redundant_channels": [
+    "cdiac_default_and_draw_db",
+    "emma_continuing_disclosure_53359_5",
+    "govt_code_53356_1_court_foreclosure"
+   ],
+   "access_method": "PDF aggregate annual + per-issuer PDF on CDIAC DebtWatch portal",
+   "access_gating": "free, no paywall; some historical years 404 on direct URL",
+   "validated_for_alpha_lead": "FALSIFIED for timing alpha (CFD_TIMING_ALPHA_TEST.md): YFSR lags court-filings + Default & Draw filings by 1-13 months; market repriced Diablo Grande to 65c BEFORE first detector fire. Useful as classification/diligence signal, not timing.",
+   "detectors_that_read_this": [
+    "value_to_lien_collapse",
+    "delinquency_spike",
+    "reserve_fund_drawn",
+    "reserve_fund_burndown",
+    "foreclosure_active",
+    "issuer_administration_concern",
+    "coverage_ratio_thin"
+   ],
+   "source_artifacts": [
+    "verticals/muni_credit/outputs/LANDSECURED_SECTOR_SCOPING.md  (section 1.4 + section 2)",
+    "verticals/muni_credit/outputs/CFD_TIMING_ALPHA_TEST.md",
+    "verticals/muni_credit/detectors/value_to_lien_collapse.py",
+    "verticals/muni_credit/detectors/delinquency_spike.py",
+    "verticals/muni_credit/detectors/reserve_fund_drawn.py",
+    "verticals/muni_credit/detectors/foreclosure_active.py",
+    "verticals/muni_credit/detectors/issuer_administration_concern.py"
+   ],
+   "_notes": "Mandatory under SB 165. 98.1% compliance in RY2023-24. Teeter Plan masks delinquency in ~half of CA counties (Solano, San Joaquin, Santa Cruz, El Dorado are Teeter; Mello-Roos typically Teeter-EXCLUDED so this caveat is mild for CFDs but strong for ad valorem)."
+  },
+  {
+   "name": "CDIAC Default and Draw on Reserve Database",
+   "short_name": "cdiac_default_and_draw_db",
+   "publisher": "California Debt and Investment Advisory Commission",
+   "url_pattern": "https://www.treasurer.ca.gov/cdiac/default-draw/issuename1.asp?type=Mello-Roos&issuer={issuer_name}",
+   "asset_classes": [
+    "ca_cfd_muni",
+    "ca_mello_roos"
+   ],
+   "cadence": "event_driven",
+   "lag_from_event_to_publication_days": 10,
+   "lag_explanation": "CDIAC notification required within 10 days of reserve draw or principal/interest default per Cal Govt Code (mandatory). Often appears on EMMA as a Material Event filing contemporaneously.",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "Per-issue: reserve-fund draw amount + date, principal/interest payment default date + amount, fiscal-agent name. RY 2023-24 saw 8 draws (3 Calexico + 3 Northstar + 2 Diablo Grande) and 2 defaults (both Truckee Donner).",
+   "redundant_channels": [
+    "cdiac_yfsr",
+    "emma_material_events"
+   ],
+   "access_method": "Web search form (issuer-name query) + EMMA Material Events feed",
+   "access_gating": "free, no paywall; bulk extract not exposed (per LANDSECURED_VALIDATION_PASS open-gap list)",
+   "validated_for_alpha_lead": "FALSIFIED \u2014 Diablo Grande 1st reserve draw filed Sept 2018 contemporaneously with first plausible dealer-mark repricing. Co-incident with price moves, not leading.",
+   "detectors_that_read_this": [
+    "reserve_fund_drawn"
+   ],
+   "source_artifacts": [
+    "verticals/muni_credit/outputs/CFD_TIMING_ALPHA_TEST.md",
+    "verticals/muni_credit/outputs/CFD_UPSTREAM_DATA_TEST.md",
+    "verticals/muni_credit/detectors/reserve_fund_drawn.py"
+   ],
+   "_notes": "Most-immediate public confirmation of CFD distress. Sophisticated dealers reprice within days. CDIAC + EMMA both carry the event; first-to-publish unclear but both intra-week."
+  },
+  {
+   "name": "MSRB EMMA \u2014 Continuing Disclosure (Govt Code 53359.5)",
+   "short_name": "emma_continuing_disclosure_53359_5",
+   "publisher": "Municipal Securities Rulemaking Board (MSRB) on behalf of CFD issuers",
+   "url_pattern": "https://emma.msrb.org/Issuer/Continuing-Disclosure/{issuer_or_obligor}",
+   "asset_classes": [
+    "ca_cfd_muni",
+    "ca_mello_roos"
+   ],
+   "cadence": "semi_annual",
+   "lag_from_event_to_publication_days": 45,
+   "lag_explanation": "Per Govt Code 53359.5 + standard CFD continuing-disclosure agreements: issuers report total delinquency $, parcel count, and per-developed-parcel delinquencies \u2265 semi-annual installment, filed on the semi-annual special-tax billing cycle. Typical filing ~30-60 days post-billing.",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "Parcel-level delinquency, top-taxpayer concentration (in CDA section), build-out %, debt service coverage, foreclosure proceedings. Filed by CFD administrators (David Taussig, NBS, Webb Municipal) on behalf of issuer.",
+   "redundant_channels": [
+    "cdiac_yfsr",
+    "cdiac_default_and_draw_db",
+    "govt_code_53356_1_court_foreclosure"
+   ],
+   "access_method": "EMMA web search by obligor name or CUSIP; ToU restricts programmatic scraping",
+   "access_gating": "free, ToU boilerplate blocks naive scraping (per CFD_TIMING_ALPHA_TEST.md); manual lookup feasible",
+   "validated_for_alpha_lead": "Dominant leading public source (CFD_UPSTREAM_DATA_TEST.md): issuer continuing disclosure leads county tax-default-list publication and CDIAC YFSR. Co-incident with court foreclosure complaints. Not exploitable for timing alpha \u2014 fully dealer-visible.",
+   "detectors_that_read_this": [
+    "buildout_stalled",
+    "top_taxpayer_concentration",
+    "coverage_ratio_thin",
+    "late_filing"
+   ],
+   "source_artifacts": [
+    "verticals/muni_credit/outputs/CFD_UPSTREAM_DATA_TEST.md  (Govt Code 53359.5 discussion)",
+    "verticals/muni_credit/outputs/LANDSECURED_SECTOR_SCOPING.md",
+    "verticals/muni_credit/detectors/buildout_stalled.py",
+    "verticals/muni_credit/detectors/top_taxpayer_concentration.py",
+    "verticals/muni_credit/detectors/coverage_ratio_thin.py"
+   ],
+   "_notes": "The lead public source for CFD parcel-level delinquency. CFD administrators (David Taussig, NBS, Webb Municipal) publish CDA parcel detail \u2014 this is the source for build-out % + top-taxpayer detail not in YFSR."
+  },
+  {
+   "name": "MSRB EMMA \u2014 Material Events (SEC Rule 15c2-12)",
+   "short_name": "emma_material_events",
+   "publisher": "MSRB on behalf of muni issuers/obligors",
+   "url_pattern": "https://emma.msrb.org/  (filtered to material-event filings)",
+   "asset_classes": [
+    "muni_general",
+    "ca_cfd_muni",
+    "ca_nh_muni",
+    "ca_ccrc_muni",
+    "ca_hospital_muni",
+    "ca_charter_muni"
+   ],
+   "cadence": "event_driven",
+   "lag_from_event_to_publication_days": 10,
+   "lag_explanation": "Rule 15c2-12 requires material-event filing within 10 business days of: rating changes, defaults, draws on reserves, bondholder consents, modifications, redemptions, tender offers, unscheduled draws on credit/liquidity facilities, defeasances. Many obligors file faster.",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "All Rule 15c2-12 events. For our universe: covenant-amendment events (the M&A leverage detector \u2014 the ONLY signal that survived blind OOS), rating actions, reserve draws, defaults, fiscal-agent changes.",
+   "redundant_channels": [
+    "cdiac_default_and_draw_db",
+    "moody_s_p_fitch_rating_actions"
+   ],
+   "access_method": "EMMA web; commercial feeds via Bloomberg, ICE, DPC DATA",
+   "access_gating": "EMMA web free; programmatic blocked by ToU",
+   "validated_for_alpha_lead": "Mixed. M&A leverage covenant-event detector survived blind OOS (+6 pp lift, 100% precision, 6% fire rate \u2014 only detector that did). General material-event monitoring is co-incident with sophisticated-dealer repricing.",
+   "detectors_that_read_this": [
+    "late_filing",
+    "ma_leverage_events",
+    "covenant_tripwire"
+   ],
+   "source_artifacts": [
+    "verticals/muni_credit/data/emma_material_events.json",
+    "verticals/muni_credit/data/ma_leverage_events.json",
+    "verticals/muni_credit/outputs/COVENANT_TRIPWIRE.md",
+    "verticals/muni_credit/outputs/UNIFIED_FINDINGS.md",
+    "/Users/ajay/.claude/projects/-Users-ajay-exalted-signalos/memory/feedback_detector_composition.md"
+   ],
+   "_notes": "The single highest-value muni channel for the framework \u2014 M&A leverage event detector is the only signal that survived blind OOS testing per the detector-composition memory."
+  },
+  {
+   "name": "California Govt Code 53356.1 Court Foreclosure Filings",
+   "short_name": "govt_code_53356_1_court_foreclosure",
+   "publisher": "CFD-issuer-initiated; filed in CA Superior Court (county-level dockets)",
+   "url_pattern": "Per-county Superior Court docket portals (e.g., Placer Superior Court for Northstar; Trellis.law for some aggregation)",
+   "asset_classes": [
+    "ca_cfd_muni",
+    "ca_mello_roos"
+   ],
+   "cadence": "event_driven",
+   "lag_from_event_to_publication_days": 0,
+   "lag_explanation": "CFDs are required to commence judicial foreclosure on delinquent parcels no later than October 1 each year when delinquency thresholds are met (typically >5%). Court complaints are public from day-of-filing.",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "Per-CFD foreclosure complaint filings naming delinquent property owners + delinquent amount. ACM Northstar complaint 2018-04-04 ($310K); Mountainside Builders 2019-06-04 ($4.9M); World International (Diablo Grande) WHWD vs World Intl CV-24-003049.",
+   "redundant_channels": [
+    "emma_continuing_disclosure_53359_5",
+    "cdiac_yfsr",
+    "county_tax_default_list"
+   ],
+   "access_method": "Per-county Superior Court docket search; PACER for federal; Trellis.law surfaces some",
+   "access_gating": "Public docket \u2014 free with court portal navigation. Per-county fragmentation makes batch difficult.",
+   "validated_for_alpha_lead": "Predates county tax-default-list publication by ~5 months (CFD_UPSTREAM_DATA_TEST.md). Dealer desks tracking CFD names monitor court dockets. No exploitable timing alpha; structurally the earliest mandatory-public signal of CFD distress.",
+   "detectors_that_read_this": [
+    "foreclosure_active",
+    "developer_bankruptcy"
+   ],
+   "source_artifacts": [
+    "verticals/muni_credit/outputs/CFD_UPSTREAM_DATA_TEST.md",
+    "verticals/muni_credit/outputs/CFD_TIMING_ALPHA_TEST.md",
+    "verticals/muni_credit/detectors/foreclosure_active.py"
+   ],
+   "_notes": "Statutory mechanism mandates a public signal \u2014 this is what makes CFD distress un-arbitrageable on a developer-credit basis."
+  },
+  {
+   "name": "California County Tax-Default List (R&T Code \u00a73371-\u00a73372)",
+   "short_name": "county_tax_default_list",
+   "publisher": "Per-county Tax Collector (Stanislaus, Placer, Imperial, Riverside, San Bernardino, etc.)",
+   "url_pattern": "https://www.stancounty.com/tr-tax/pdf/property-tax-default-list.pdf  (per-county pattern varies)",
+   "asset_classes": [
+    "ca_cfd_muni",
+    "ca_mello_roos",
+    "ca_real_estate"
+   ],
+   "cadence": "annual_mandatory",
+   "lag_from_event_to_publication_days": 215,
+   "lag_explanation": "1st installment delinquent Dec 10; 2nd installment delinquent Apr 10; tax-default status crystallizes July 1 of following FY; default list published in newspapers ~Aug-Sept (e.g., Placer Sept 8) = 5-10 months lag from underlying delinquency event.",
+   "market_watching_depth": "WATCHED_BY_FEW",
+   "what_it_carries": "Per-parcel APN + owner + delinquent amount. Annual snapshot only; no mid-year query for current-year delinquency status from any of the 3 counties tested (Stanislaus, Placer, Imperial).",
+   "redundant_channels": [
+    "emma_continuing_disclosure_53359_5",
+    "govt_code_53356_1_court_foreclosure"
+   ],
+   "access_method": "Per-county PDF; newspaper publication; some county portal name-search",
+   "access_gating": "Free PDFs. No subscription-based current-year delinquency product offered by Stanislaus, Placer, or Imperial (assessor subscriptions $220-$15,500/yr cover assessment value + sales, NOT delinquency).",
+   "validated_for_alpha_lead": "FALSIFIED for upstream alpha rescue (CFD_UPSTREAM_DATA_TEST.md). Net lead vs CDIAC YFSR = 1-3 months only; not the 6-12 months the hypothesis required. Issuer continuing disclosure beats it on cadence.",
+   "detectors_that_read_this": [],
+   "source_artifacts": [
+    "verticals/muni_credit/outputs/CFD_UPSTREAM_DATA_TEST.md  (full inventory of Stanislaus, Placer, Imperial)"
+   ],
+   "_notes": "Investigated as potential upstream rescue for the falsified land-secured timing-alpha hypothesis. Concluded it doesn't lead public market sources enough to extract alpha."
+  },
+  {
+   "name": "California County Recorder Notices of Default (NoD) / Trustee Sales (CC \u00a72924)",
+   "short_name": "county_recorder_nod_cc2924",
+   "publisher": "Per-county Recorder (Stanislaus, Placer, Riverside, San Bernardino, Sacramento, San Joaquin, etc.)",
+   "url_pattern": "https://crweb.stancounty.com/RecorderWorksInternet/  (per-county portal varies)",
+   "asset_classes": [
+    "ca_cfd_muni",
+    "ca_real_estate",
+    "buyside_dd_real_estate"
+   ],
+   "cadence": "real_time",
+   "lag_from_event_to_publication_days": 1,
+   "lag_explanation": "Recorder records the document on the day filed (or next business day). NoD = first step in CC \u00a72924 non-judicial foreclosure; trustee sale (NoTS) follows ~90+ days later.",
+   "market_watching_depth": "WATCHED_BY_FEW",
+   "what_it_carries": "Lender Notices of Default + Trustee Sale recordings against developer LLCs (e.g., BofA $157M NoD on East West Partners 2010-03-31 in Placer Co; LandSource $1.1B Barclays default 2008-04-22).",
+   "redundant_channels": [
+    "emma_continuing_disclosure_53359_5",
+    "developer_corp_credit_ratings"
+   ],
+   "access_method": "Per-county recorder portal name-search (free grantor-name lookup). PropertyShark/PropertyRadar aggregate; borrower-name behind paywall on free tier.",
+   "access_gating": "Free per-county portals; commercial aggregators paywall the cross-county view (PropertyShark $99/mo, PropertyRadar 5-day CC trial).",
+   "validated_for_alpha_lead": "PARTIALLY-VALIDATED for diligence-replication, NOT alpha (CFD_RECORDER_DATA_BUILD.md). Detector built + unit-tested (nod_recorder_filing.py); expected fire rate ~3-6% on full CFD universe. Lender NoDs frequently precede CFD-level distress by 12-24 months \u2014 useful but already-public.",
+   "detectors_that_read_this": [
+    "nod_recorder_filing",
+    "developer_bankruptcy"
+   ],
+   "source_artifacts": [
+    "verticals/muni_credit/outputs/CFD_RECORDER_DATA_BUILD.md",
+    "verticals/muni_credit/data/cfd_developer_nods.json",
+    "verticals/muni_credit/detectors/nod_recorder_filing.py"
+   ],
+   "_notes": "Investigator-level public source \u2014 sophisticated dealer desks track but not algorithmically watched. Cross-state version is referenced in buyside_dd source_atlas under PARCEL.mortgage_records (WPRDC, ACRIS, Wayne Co)."
+  },
+  {
+   "name": "CMS Care Compare \u2014 Nursing Home Provider Info (Star Ratings)",
+   "short_name": "cms_nh_care_compare_stars",
+   "publisher": "Centers for Medicare and Medicaid Services (CMS)",
+   "url_pattern": "https://data.cms.gov/provider-data/dataset/4pq5-n9py  (downloadable CSV; per-facility detail at care-compare.medicare.gov)",
+   "asset_classes": [
+    "ca_nh_muni",
+    "us_nh_muni",
+    "ca_ccrc_muni"
+   ],
+   "cadence": "monthly",
+   "lag_from_event_to_publication_days": 30,
+   "lag_explanation": "CMS refreshes provider-info file monthly; star-rating components (health-inspection, staffing, QM) recalculate quarterly. ~1 month lag from underlying inspection/event to CMS file refresh.",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "Per-facility CCN: overall star (1-5), health-inspection star, staffing star, QM star, RN hours, weighted total-CMP cumulative-24mo, DPNA flag, Abuse Icon flag.",
+   "redundant_channels": [
+    "cms_nh_special_focus_facility",
+    "cms_nh_civil_monetary_penalty"
+   ],
+   "access_method": "CMS bulk CSV download; per-facility web lookup",
+   "access_gating": "free, no paywall, structured CSV",
+   "validated_for_alpha_lead": "VALIDATED. Lead time vs muni rating action ~12-18 months. Caught 2/2 deteriorating obligors in 2023-2025 NH backtest with 100% precision; caught the one CA NH default in COVID-stress window 2020-2022. Effective except where Cal-Mortgage masking decouples operator credit from bond pricing.",
+   "detectors_that_read_this": [
+    "nh_cms_star_rating"
+   ],
+   "source_artifacts": [
+    "verticals/muni_credit/data/cms_nh/NH_ProviderInfo_May2026.csv",
+    "verticals/muni_credit/detectors/nh_cms_star_rating.py",
+    "verticals/muni_credit/outputs/CA_NH_INVESTMENT_THESIS.md"
+   ],
+   "_notes": "Refresh quarterly minimum; Cal-Mortgage insurance wrap MASKS this signal for ~half of CA NH muni names (bondholders price insurer credit, not operator)."
+  },
+  {
+   "name": "CMS Special Focus Facility (SFF) List",
+   "short_name": "cms_nh_special_focus_facility",
+   "publisher": "CMS",
+   "url_pattern": "https://www.cms.gov/Medicare/Provider-Enrollment-and-Certification/CertificationandComplianc/Downloads/SFFList.pdf",
+   "asset_classes": [
+    "ca_nh_muni",
+    "us_nh_muni"
+   ],
+   "cadence": "monthly",
+   "lag_from_event_to_publication_days": 30,
+   "lag_explanation": "CMS publishes the SFF list (worst-performing ~5% of NH nationally) monthly. Designation event-driven; publication monthly.",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "SFF designation status + SFF Candidate (watchlist); facility name + CCN.",
+   "redundant_channels": [
+    "cms_nh_care_compare_stars",
+    "cms_nh_civil_monetary_penalty"
+   ],
+   "access_method": "CMS web PDF + structured data",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "VALIDATED for classification. Fires on ~5% of CA NH universe, high precision. Signal again masked by Cal-Mortgage where applicable.",
+   "detectors_that_read_this": [
+    "nh_special_focus_facility"
+   ],
+   "source_artifacts": [
+    "verticals/muni_credit/detectors/nh_special_focus_facility.py",
+    "verticals/muni_credit/outputs/CA_NH_INVESTMENT_THESIS.md"
+   ],
+   "_notes": "Designation triggers more-frequent surveys + potential termination from Medicare/Medicaid."
+  },
+  {
+   "name": "CMS Nursing Home Enforcement Actions / Civil Monetary Penalties (CMP)",
+   "short_name": "cms_nh_civil_monetary_penalty",
+   "publisher": "CMS",
+   "url_pattern": "https://data.cms.gov/provider-data/dataset/g6vv-u9sr  (penalties.csv)",
+   "asset_classes": [
+    "ca_nh_muni",
+    "us_nh_muni"
+   ],
+   "cadence": "monthly",
+   "lag_from_event_to_publication_days": 60,
+   "lag_explanation": "CMS publishes the enforcement-actions / CMP dataset monthly. Penalties accumulate over 24-month trailing window.",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "Per-facility CMP amount + date + DPNA (Denial of Payment for New Admissions) status.",
+   "redundant_channels": [
+    "cms_nh_care_compare_stars",
+    "cms_nh_special_focus_facility"
+   ],
+   "access_method": "CMS bulk CSV",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Used in 5-detector NH framework (Ararat: $460K CMP + DPNA \u2192 5 fires).",
+   "detectors_that_read_this": [
+    "nh_civil_monetary_penalty"
+   ],
+   "source_artifacts": [
+    "verticals/muni_credit/detectors/nh_civil_monetary_penalty.py",
+    "verticals/muni_credit/outputs/CA_NH_INVESTMENT_THESIS.md"
+   ],
+   "_notes": "Cumulative >$500K in trailing 24mo OR active DPNA fires."
+  },
+  {
+   "name": "CMS Hospital Readmissions Reduction Program (HRRP) Penalty File",
+   "short_name": "cms_hospital_hrrp",
+   "publisher": "CMS",
+   "url_pattern": "https://data.cms.gov/provider-data/dataset/9n3s-kdb3",
+   "asset_classes": [
+    "ca_hospital_muni",
+    "us_hospital_muni"
+   ],
+   "cadence": "annual_mandatory",
+   "lag_from_event_to_publication_days": 60,
+   "lag_explanation": "HRRP penalty announced August, effective October 1 each year (FY runs Oct 1 - Sept 30).",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "Per-hospital CMS_HRRP penalty % (0-3%); for systems: penalty share across constituent hospitals.",
+   "redundant_channels": [
+    "cms_cost_reports_hcris"
+   ],
+   "access_method": "CMS bulk CSV",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Lead time ~6-18 months vs muni rating action. Detector fires only at max (3.00%) \u2014 narrow high-precision per the detector-composition discipline.",
+   "detectors_that_read_this": [
+    "cms_readmissions"
+   ],
+   "source_artifacts": [
+    "verticals/muni_credit/detectors/cms_readmissions.py",
+    "verticals/muni_credit/data/cms_hrrp/"
+   ],
+   "_notes": "Penalty caps at 3.00%; Medicare ~30-50% of hospital revenue \u2192 ~1.2% of total revenue at max."
+  },
+  {
+   "name": "CMS HCRIS \u2014 Medicare Cost Reports (Form 2552 / 2540 / 1728)",
+   "short_name": "cms_cost_reports_hcris",
+   "publisher": "CMS",
+   "url_pattern": "https://data.cms.gov/provider-data/  + bulk SAS extracts",
+   "asset_classes": [
+    "us_hospital_muni",
+    "us_nh_muni",
+    "public_co_healthcare",
+    "healthcare_reit"
+   ],
+   "cadence": "annual_mandatory",
+   "lag_from_event_to_publication_days": 270,
+   "lag_explanation": "Hospitals/SNFs/HHA file cost reports annually within ~5 months of FY end; CMS HCRIS publishes the extract ~3-6 months after that. ~9 months total lag, sometimes longer for revisions.",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "Facility-level revenue mix, Medicare/Medicaid days, operating expenses, net income. Steward Health Care's Medicare-margin deterioration was visible 18 months before MPW disclosure.",
+   "redundant_channels": [
+    "cms_nh_care_compare_stars"
+   ],
+   "access_method": "CMS Open Data API + bulk SAS extracts; m_sources/cms_cost_reports.py connector",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Forward-looking for healthcare-REIT tenant distress (Steward \u2192 MPW pattern documented).",
+   "detectors_that_read_this": [
+    "cms_readmissions (cross-reference)",
+    "tenant_credit_watch"
+   ],
+   "source_artifacts": [
+    "verticals/public_co/m_sources/cms_cost_reports.py",
+    "verticals/public_co/m_sources/tenant_credit_watch.py",
+    "verticals/muni_credit/data/hcris_archive/"
+   ],
+   "_notes": "Form 2552 (hospital) UUID c40fae1f-99a7-4d7f-b94e-fa9989b3c486; Form 2540 (SNF) 56a8a4cb-2cc4-43b1-8eee-b2dfe2c92bda; Form 1728 (HHA) cea7ec1e-6c4c-4866-934d-7a5d8b3e6c4a."
+  },
+  {
+   "name": "HHS-OIG Corporate Integrity Agreements (CIA) List",
+   "short_name": "hhs_oig_cia_list",
+   "publisher": "HHS Office of Inspector General",
+   "url_pattern": "https://oig.hhs.gov/compliance/corporate-integrity-agreements/cia-list/",
+   "asset_classes": [
+    "us_hospital_muni",
+    "public_co_healthcare"
+   ],
+   "cadence": "event_driven",
+   "lag_from_event_to_publication_days": 14,
+   "lag_explanation": "OIG publishes new CIAs within ~2 weeks of imposition. List is the active-CIA roster (typically 5 years per CIA).",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "Active CIA party + start date + expiration; underlying allegations.",
+   "redundant_channels": [
+    "doj_fca_settlements"
+   ],
+   "access_method": "HHS-OIG web page (HTML list)",
+   "access_gating": "free, public",
+   "validated_for_alpha_lead": "Lead time ~6-18 months for operational changes affecting financials.",
+   "detectors_that_read_this": [
+    "hhs_oig_cia",
+    "doj_fca"
+   ],
+   "source_artifacts": [
+    "verticals/muni_credit/detectors/hhs_oig_cia.py",
+    "verticals/muni_credit/data/detector_data_cms_hrrp_cia.json"
+   ],
+   "_notes": "CIA = 5-year structural compliance overhead burden."
+  },
+  {
+   "name": "DOJ False Claims Act Press Releases / Settlements",
+   "short_name": "doj_fca_settlements",
+   "publisher": "US Department of Justice",
+   "url_pattern": "https://www.justice.gov/news  (filtered to civil division + healthcare fraud)",
+   "asset_classes": [
+    "us_hospital_muni",
+    "public_co_healthcare"
+   ],
+   "cadence": "event_driven",
+   "lag_from_event_to_publication_days": 1,
+   "lag_explanation": "DOJ press release issued day-of-settlement. Underlying investigation may have been multi-year.",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "Settlement amount, allegation, intervention status, parties.",
+   "redundant_channels": [
+    "hhs_oig_cia_list",
+    "pacer_class_action"
+   ],
+   "access_method": "DOJ website + Justice news RSS",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Detector fires on >$25M settlement OR DOJ-intervened pending complaint (Erlanger case).",
+   "detectors_that_read_this": [
+    "doj_fca"
+   ],
+   "source_artifacts": [
+    "verticals/muni_credit/detectors/doj_fca.py",
+    "verticals/muni_credit/data/detector_data_doj_fca.json"
+   ],
+   "_notes": "DOJ-intervened complaints fire HIGH even pre-settlement."
+  },
+  {
+   "name": "HCAI (formerly OSHPD) Seismic Safety List of Buildings (SB 1953 / SB 90)",
+   "short_name": "ca_hcai_seismic_list",
+   "publisher": "California Department of Health Care Access and Information (HCAI)",
+   "url_pattern": "https://hcai.ca.gov/construction-finance/seismic-compliance-and-safety/seismic-safety-list-of-buildings/",
+   "asset_classes": [
+    "ca_hospital_muni"
+   ],
+   "cadence": "quarterly",
+   "lag_from_event_to_publication_days": 60,
+   "lag_explanation": "HCAI updates the SPC (Standard Performance Category) list multiple times per year as buildings re-evaluate, achieve extensions, or fail re-certification.",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "Per-building SPC rating (SPC-1 through SPC-5), funded-extension status, deadline year (2030).",
+   "redundant_channels": [],
+   "access_method": "HCAI web list",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Lead time 3-7 years vs 2030 deadline. Detector tightened post-CA-test (\u22655 unfunded SPC-2 buildings OR any unfunded SPC-2 in stressed obligor).",
+   "detectors_that_read_this": [
+    "hcai_seismic"
+   ],
+   "source_artifacts": [
+    "verticals/muni_credit/detectors/hcai_seismic.py",
+    "verticals/muni_credit/data/detector_data_ca_hcai_seismic.json"
+   ],
+   "_notes": "Required retrofit ~$100M+ per hospital for SPC-2 \u2192 SPC-4 conversion."
+  },
+  {
+   "name": "HCAI Cal-Mortgage Loan Insurance Division \u2014 Monthly Activity Report",
+   "short_name": "ca_hcai_cal_mortgage_monthly",
+   "publisher": "California Department of Health Care Access and Information (HCAI) \u2014 Cal-Mortgage Loan Insurance Division",
+   "url_pattern": "https://hcai.ca.gov/wp-content/uploads/{year}/{mm}/Cal-Mortgage_Loan_Insurance_Division_Monthly_Activity_Report_{Month}_{year}.pdf",
+   "asset_classes": [
+    "ca_nh_muni",
+    "ca_ccrc_muni",
+    "ca_hospital_muni"
+   ],
+   "cadence": "monthly",
+   "lag_from_event_to_publication_days": 30,
+   "lag_explanation": "HCAI publishes monthly activity reports ~30 days after month-end with portfolio claim activity, new commitments, and payment events.",
+   "market_watching_depth": "WATCHED_BY_FEW",
+   "what_it_carries": "Per-Cal-Mortgage-insured obligor: claim activity (e.g., bondholder payment date 2022-10-31 for CalPFA O'Connor Woods), new commitments, payment events. Aggregate insurance pool exposure.",
+   "redundant_channels": [],
+   "access_method": "HCAI monthly PDF",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Best primary source for confirming Cal-Mortgage insurance status (per ca_nh_clean_basket_bonds.json). Hedge value rather than steady alpha \u2014 relevant for insurer-cascade tail risk. As of 2026-05-28: trailing 18mo shows 1 active cascade event \u2014 St. Rose Hospital (~$13.96M, May 2025 anticipated-recovery line first appearance). HFCLIF cash drew down ~$11M from Oct 2024 to Jun 2025. Wrap still intact (HFCLIF $127.8M > $75M statutory minimum) but cascade is real and ongoing.",
+   "detectors_that_read_this": [
+    "cal_mortgage_cascade_monitor"
+   ],
+   "source_artifacts": [
+    "verticals/muni_credit/data/ca_nh_clean_basket_bonds.json",
+    "verticals/muni_credit/data/ca_nh_exclude_basket_bonds.json",
+    "verticals/muni_credit/data/cal_mortgage_cascade_activity.json",
+    "verticals/muni_credit/data/chffa_insurance_status.json",
+    "verticals/muni_credit/detectors/cal_mortgage_cascade_monitor.py",
+    "verticals/muni_credit/outputs/CA_NH_INVESTMENT_THESIS.md"
+   ],
+   "_notes": "Detector built 2026-05-28 (cal_mortgage_cascade_monitor). Second-order detector \u2014 fires only on Cal-Mortgage-INSURED obligors when claim cascade is active; inert on NOT_INSURED names. Cal-Mortgage is the dominant CA NH/CCRC masking mechanism \u2014 when this insurer faces a claim cascade, ALL wrapped names widen simultaneously. The cascade monitor modulates the interpretation of operator-credit detectors on wrapped names rather than replacing them. Primary report URL pattern (post-2024): https://hcai.ca.gov/wp-content/uploads/{year}/{mm}/Monthly-Report-{Month}-{year}-Final-ADA-Compliant.pdf (note format change from 2022 pattern: Cal-Mortgage_Loan_Insurance_Division_Monthly_Activity_Report_{Month}_{year}.pdf)."
+  },
+  {
+   "name": "CDE Dataquest \u2014 Enrollment + Demographics",
+   "short_name": "ca_cde_dataquest",
+   "publisher": "California Department of Education",
+   "url_pattern": "https://dq.cde.ca.gov  (per-CDS-code CSV files)",
+   "asset_classes": [
+    "ca_charter_muni"
+   ],
+   "cadence": "annual_mandatory",
+   "lag_from_event_to_publication_days": 270,
+   "lag_explanation": "School-year ends June; enrollment data published October-December (~6-12 months from start of academic year, ~9-12 mo from school year end).",
+   "market_watching_depth": "WATCHED_BY_FEW",
+   "what_it_carries": "Per-CDS-code: enrollment by grade + year, demographic breakdown, A-G completion %.",
+   "redundant_channels": [
+    "ca_cde_lcff_funding_data"
+   ],
+   "access_method": "Per-CDS-code CSV download (free, structured)",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Lead time ~12-24 months vs muni rating action (proposed; charter vertical scoping). Fires on 3-yr YoY enrollment \u2264 -3% OR 5-yr cum \u2264 -12%.",
+   "detectors_that_read_this": [
+    "charter_enrollment_trajectory (proposed)"
+   ],
+   "source_artifacts": [
+    "verticals/muni_credit/outputs/CHARTER_SECTOR_SCOPING.md",
+    "verticals/muni_credit/data/charter_universe.json"
+   ],
+   "_notes": "Detector built status: PROPOSED in charter sector scoping; not yet implemented."
+  },
+  {
+   "name": "CAASPP \u2014 California Assessment of Student Performance",
+   "short_name": "ca_caaspp_results",
+   "publisher": "California Department of Education (CAASPP)",
+   "url_pattern": "https://caaspp-elpac.cde.ca.gov",
+   "asset_classes": [
+    "ca_charter_muni"
+   ],
+   "cadence": "annual_mandatory",
+   "lag_from_event_to_publication_days": 240,
+   "lag_explanation": "Spring testing; results published ~August-October following school year end.",
+   "market_watching_depth": "WATCHED_BY_FEW",
+   "what_it_carries": "Per-CDS-code ELA + Math % met/exceeded standard, by grade + subgroup.",
+   "redundant_channels": [],
+   "access_method": "Public web + CSV",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Detector PROPOSED: fires when ELA+Math both bottom-quintile AND 3-yr trend \u2264 -3pp.",
+   "detectors_that_read_this": [
+    "charter_caaspp_collapse (proposed)"
+   ],
+   "source_artifacts": [
+    "verticals/muni_credit/outputs/CHARTER_SECTOR_SCOPING.md"
+   ],
+   "_notes": "Charter renewal often turns on CAASPP performance \u2014 partial leading indicator."
+  },
+  {
+   "name": "CDE LCFF Per-Pupil Funding Data",
+   "short_name": "ca_cde_lcff_funding_data",
+   "publisher": "California Department of Education",
+   "url_pattern": "https://www.cde.ca.gov/fg/aa/pa/",
+   "asset_classes": [
+    "ca_charter_muni"
+   ],
+   "cadence": "annual_mandatory",
+   "lag_from_event_to_publication_days": 180,
+   "lag_explanation": "LCFF apportionment calculated post-budget enactment; final per-pupil amounts published mid-year.",
+   "market_watching_depth": "WATCHED_BY_FEW",
+   "what_it_carries": "Per-LEA per-pupil base + supplemental + concentration grant amounts.",
+   "redundant_channels": [
+    "ca_cde_dataquest"
+   ],
+   "access_method": "Public file download",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Detector PROPOSED: enrollment-driven LCFF revenue decline \u2265 -3%/yr sustained 2yr.",
+   "detectors_that_read_this": [
+    "charter_lcff_funding_cut (proposed)"
+   ],
+   "source_artifacts": [
+    "verticals/muni_credit/outputs/CHARTER_SECTOR_SCOPING.md"
+   ],
+   "_notes": "Per Govt Code, CSFA Charter School Facility Program (CSFP) intercept routes LCFF apportionments to bond trustee for CSFP-supported deals (partial credit enhancement \u2014 analog to Cal-Mortgage but weaker)."
+  },
+  {
+   "name": "CDE Charter Schools Division \u2014 Renewal/Revocation Status",
+   "short_name": "ca_cde_charter_schools_division",
+   "publisher": "California Department of Education, Charter Schools Division",
+   "url_pattern": "https://www.cde.ca.gov/sp/ch/  + per-authorizer board minutes (LAUSD CSD, LA COE, etc.)",
+   "asset_classes": [
+    "ca_charter_muni"
+   ],
+   "cadence": "event_driven",
+   "lag_from_event_to_publication_days": 30,
+   "lag_explanation": "Authorizer board action triggers public board-minute publication ~2-4 weeks; CDE roster reflects status changes irregularly.",
+   "market_watching_depth": "WATCHED_BY_FEW",
+   "what_it_carries": "Revocation, non-renewal, probation, or closure events.",
+   "redundant_channels": [
+    "edsource_la_times_charter_coverage"
+   ],
+   "access_method": "CDE web + LAUSD CSD board agenda + LA COE board agenda",
+   "access_gating": "free, no API",
+   "validated_for_alpha_lead": "Detector PROPOSED \u2014 manual event-log curation required (no API).",
+   "detectors_that_read_this": [
+    "charter_renewal_status (proposed)"
+   ],
+   "source_artifacts": [
+    "verticals/muni_credit/outputs/CHARTER_SECTOR_SCOPING.md"
+   ],
+   "_notes": "Today's Fresh Start, Aveson, ICEF distress all surfaced through this channel."
+  },
+  {
+   "name": "FCMAT (Fiscal Crisis & Management Assistance Team) Reports",
+   "short_name": "ca_fcmat_reports",
+   "publisher": "FCMAT (California state agency)",
+   "url_pattern": "https://www.fcmat.org",
+   "asset_classes": [
+    "ca_charter_muni",
+    "ca_school_district_muni"
+   ],
+   "cadence": "irregular",
+   "lag_from_event_to_publication_days": 90,
+   "lag_explanation": "Reviews initiated upon request or by state mandate; reports published ~3 months after fieldwork.",
+   "market_watching_depth": "WATCHED_BY_FEW",
+   "what_it_carries": "Fiscal-distress reviews of LEAs + charters, with findings and recommendations.",
+   "redundant_channels": [
+    "ca_state_controller_audits"
+   ],
+   "access_method": "Public PDFs on fcmat.org",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Detector PROPOSED.",
+   "detectors_that_read_this": [
+    "charter_financial_compliance (proposed)",
+    "coe_fiscal_certification"
+   ],
+   "source_artifacts": [
+    "verticals/muni_credit/outputs/CHARTER_SECTOR_SCOPING.md",
+    "verticals/muni_credit/detectors/coe_fiscal_certification.py"
+   ],
+   "_notes": "Targeted, irregular cadence \u2014 high-precision when fires. FCMAT engagement is one of the inputs to coe_fiscal_certification detector (HIGH-severity trigger when an active fiscal-distress engagement exists)."
+  },
+  {
+   "name": "CA County Office of Education (COE) Quarterly Fiscal Certification (AB 1200)",
+   "short_name": "ca_coe_ab1200_fiscal_certification",
+   "publisher": "California Department of Education (CDE) consolidates per-county-COE certifications; individual COEs (Los Angeles COE, Sacramento COE, Fresno COE, El Dorado COE, etc.) issue the per-district certifications.",
+   "url_pattern": "https://www.cde.ca.gov/fg/fi/ir/interimstatus.asp  (master index); https://www.cde.ca.gov/fg/fi/ir/first{YYYY}{YY}.asp  and  https://www.cde.ca.gov/fg/fi/ir/second{YYYY}{YY}.asp  (per-cycle consolidated Q/N list)",
+   "asset_classes": [
+    "ca_school_district_muni",
+    "ca_k12_go_muni"
+   ],
+   "cadence": "quarterly",
+   "lag_from_event_to_publication_days": 105,
+   "lag_explanation": "Per AB 1200 (Ed Code \u00a742127.6 / \u00a742131): First Interim covers period ending Oct 31, district board approves by Dec 15, COE reviews/certifies ~30-60 days later. Second Interim covers period ending Jan 31, district due Mar 17, COE certifies ~30-60 days later. CDE consolidates the statewide Q/N list ~60-90 days after COE certification. Total event-to-CDE-publication: ~3-4 months. (Empirical anchor: 2025-26 Second Interim covering period ended 2026-01-31 was published by CDE on 2026-05-26 = 115 days lag.)",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "Per-district certification status: Positive (will meet financial obligations), Qualified (may not meet obligations in current + 2 subsequent FY), Negative (will not meet obligations in current FY). Plus: district name, county, budget amount for the cycle. Each cycle's CDE list IS the authoritative public record.",
+   "redundant_channels": [
+    "ca_fcmat_reports",
+    "ca_state_controller_audits"
+   ],
+   "access_method": "CDE web (consolidated PDF/HTML per cycle); per-COE board agenda for individual district certification letters; FCMAT reports for deeper detail",
+   "access_gating": "free, public; no API but consolidated HTML lists are stable URL patterns by year and cycle",
+   "validated_for_alpha_lead": "Lead time vs muni rating action: 12-24 months. Load-bearing anchors: SCUSD progression (2024-25 Q1 Positive \u2192 2024-25 Q2 Qualified \u2192 2025-26 Q1 Negative \u2192 Fitch IDR cut from A+ to BB- on 2026-04-28 \u2014 ~18-month lead from first Q to BB-); Pleasanton USD (2024-25 Q1 Positive \u2192 2025-26 Q1 Negative \u2014 12 month skip-Q jump); Plumas USD (Q since 2023 \u2192 FCMAT engagement Dec 2024 \u2192 projected cash insolvency Aug 2025 \u2192 state receivership \u2014 ~24-month timeline). Detector calibrated on 6-name ETF basket: 1/6 = 16.7% fire rate (River Delta = back-to-back Q, HIGH severity); universe baseline ~3-6% per cycle.",
+   "detectors_that_read_this": [
+    "coe_fiscal_certification"
+   ],
+   "source_artifacts": [
+    "verticals/muni_credit/detectors/coe_fiscal_certification.py",
+    "verticals/muni_credit/data/etf_coe_fiscal_scoring.json",
+    "verticals/muni_credit/data/ca_k12_go_universe.json"
+   ],
+   "_notes": "INTERACTION WITH `ca_k12_dedicated_tax_special_revenue` MASKING MECHANISM: A Q/N certification fires at the DISTRICT (obligor) level. The 5-notch Fitch criteria caps the spread between IDR and dedicated-tax GO rating \u2014 so a Q/N fire predicts IDR deterioration but the dedicated-tax GO can hold IG even at extreme distress (SCUSD: BB- IDR, BBB+ dedicated-tax GO). This means the COE detector should EXCLUDE ULTGO older-series (no pledged-special-revenue OS language), COPs, LRBs from the basket on fire \u2014 but dedicated-tax GO bonds with proper OS language may remain in BUY-ZONE as descending-ladder plays. The bond-series filter is applied downstream of the obligor-level detector fire."
+  },
+  {
+   "name": "California State Controller Audits",
+   "short_name": "ca_state_controller_audits",
+   "publisher": "California State Controller's Office",
+   "url_pattern": "https://www.sco.ca.gov",
+   "asset_classes": [
+    "ca_charter_muni",
+    "ca_school_district_muni",
+    "ca_local_govt_muni"
+   ],
+   "cadence": "irregular",
+   "lag_from_event_to_publication_days": 180,
+   "lag_explanation": "Adverse-finding audits published ~6 months post-fieldwork.",
+   "market_watching_depth": "WATCHED_BY_FEW",
+   "what_it_carries": "Material audit findings against LEAs / muni borrowers.",
+   "redundant_channels": [
+    "ca_fcmat_reports"
+   ],
+   "access_method": "Public PDFs",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Detector PROPOSED.",
+   "detectors_that_read_this": [
+    "charter_financial_compliance (proposed)",
+    "state_controller_intercept"
+   ],
+   "source_artifacts": [
+    "verticals/muni_credit/outputs/CHARTER_SECTOR_SCOPING.md"
+   ],
+   "_notes": "Triggers Govt-Code-mandated CFD foreclosure for special-district borrowers under intercept. Read by state_controller_intercept detector as the SCO_AUDIT_FINDING event source."
+  },
+  {
+   "name": "CA State Controller Apportionment Payments (Monthly per-program payment lists)",
+   "short_name": "ca_sco_apportionment_payments",
+   "publisher": "California State Controller's Office (SCO), Local Government Apportionments division",
+   "url_pattern": "https://www.sco.ca.gov/ard_local_apportionments.html (master index); https://www.sco.ca.gov/ard_current_payments.html (current-year per-program schedule)",
+   "asset_classes": [
+    "ca_charter_muni",
+    "ca_school_district_muni",
+    "ca_local_govt_muni",
+    "ca_csfa_charter_intercept"
+   ],
+   "cadence": "monthly",
+   "lag_from_event_to_publication_days": 5,
+   "lag_explanation": "SCO posts per-program apportionment schedule + payment list within ~1-5 business days after each disbursement cycle. K-12 Schools cycle is monthly. Lottery Educational + Prop 30 EPA are quarterly. Annual Payment Schedule PDFs published Jul/Aug for upcoming FY.",
+   "market_watching_depth": "WATCHED_BY_FEW",
+   "what_it_carries": "Per-program (Schools K-12, Community Colleges, Prop 30 K-12, Prop 30 CC, Lottery Educational, plus 50+ realignment / trial-court / local-aid programs), per-recipient payment amount + date. CRITICAL: SCO publishes the PAYMENT schedule but the canonical per-pupil LCFF allocation is computed by CDE Principal Apportionment Section (PASE) at https://www.cde.ca.gov/fg/aa/pa/. For CSFA-issued charter conduit deals, SCO is the actor that diverts LCFF apportionment to bond trustee under Ed Code 17199.4 \u2014 so a withholding or modification at SCO is the canonical alarm signal for the csfa_lcff_intercept masking mechanism.",
+   "redundant_channels": [
+    "ca_cde_lcff_funding_data"
+   ],
+   "access_method": "SCO public web; per-program HTML payment lists; annual Payment Schedule PDF",
+   "access_gating": "free, public; no API but stable URL patterns",
+   "validated_for_alpha_lead": "Monthly cadence + 5-day publication lag makes this the highest-frequency state-mediated apportionment channel for CA muni. A skipped or partial payment to a CSFA-issued charter conduit obligor or to a district receiving emergency apportionment loan under Ed Code 41320 is direct evidence of intercept-modification. No empirical anchor pulled yet \u2014 charter LCFF intercept has not been observably triggered in recent history; channel is read for signal-when-it-fires rather than routine apportionment-pattern alpha.",
+   "detectors_that_read_this": [
+    "state_controller_intercept"
+   ],
+   "source_artifacts": [
+    "verticals/muni_credit/detectors/state_controller_intercept.py",
+    "verticals/muni_credit/data/etf_sco_intercept_scoring.json"
+   ],
+   "_notes": "Taxonomy clarification (load-bearing for state_controller_intercept detector): SCO does NOT pay debt service on K-12 USD GO bonds. Under SB 222 (Cal. Gov't Code 53515), the dedicated property tax flows from the COUNTY tax collector direct to the bond trustee \u2014 SCO has no role. SCO IS the actor for: (a) CSFA charter-conduit LCFF intercept (Ed Code 17199.4); (b) state emergency apportionment loans to insolvent districts under Ed Code 41320 (district operations only, NOT bondholder cash flow); (c) general per-program apportionments to CA local agencies. The state_controller_intercept detector treats SCO payment activity as canonical channel for category (a) only. ETF-basket calibration 2026-05-28: 0 of 6 K-12 USD holdings are CSFA charter conduits, so SCO LCFF intercept channel is structurally not applicable to the K-12 USDs in the ETF; CDE Interim (ca_coe_ab1200_fiscal_certification channel) is the operative upstream signal."
+  },
+  {
+   "name": "CA DOF ROPS Review Letters (Successor Agency RPTTF approval)",
+   "short_name": "ca_dof_rops_review_letters",
+   "publisher": "California Department of Finance (DOF), Office of State Audits and Evaluations",
+   "url_pattern": "https://dof.ca.gov/programs/redevelopment/rops/  (master index); https://dof.ca.gov/media/docs/programs/redevelopment/rops/rops-{YYYY-YY}-review-letters-issued-by-finance/{AgencyName}_ROPS_{YY-YY}.pdf  (per-SA per-cycle letter)",
+   "asset_classes": [
+    "ca_successor_rda_muni",
+    "ca_tax_allocation_bonds_post_dissolution"
+   ],
+   "cadence": "annual_mandatory",
+   "lag_from_event_to_publication_days": 60,
+   "lag_explanation": "Successor agencies submit annual ROPS to DOF by Feb 1 covering Jul 1 of that year through Jun 30 of next year. DOF must issue review letter within 60 days. Empirical anchors ROPS 25-26 cycle: Cloverdale 2025-02-28 (29 days after submission); San Jose 2025-03-21 (49 days); Fontana 2025-04-04 (67 days, at statutory cap).",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "Per-SA per-fiscal-year: total approved RPTTF distribution amount split into ROPS A (Jul-Dec) + ROPS B (Jan-Jun); per-line-item approval/denial decisions; administrative-cost notes (HSC 34171(b)(3) cap compliance); prior-period-adjustment (PPA) offsets; outstanding litigation flags. Bond debt service items typically Priority 2 in the 34183 waterfall (after pre-1994 pass-throughs); most refunding TABs use 34177.5(e) consent to subordinate pass-throughs to debt service, moving bond items to Priority 1.",
+   "redundant_channels": [],
+   "access_method": "DOF web \u2014 per-letter PDF download; some county auditor sites mirror approved ROPS",
+   "access_gating": "free, public; per-letter URLs stable by cycle + agency snake_case name",
+   "validated_for_alpha_lead": "VERIFIED \u2014 canonical claims-pay channel for rops_allocation_intercept masking mechanism. DOF denial of a bond-debt-service line is the highest-severity event possible (would trigger state_controller_intercept at HIGH; analog to SCO LCFF withholding). Empirical history: zero DOF denials of bond-debt items observed across verified universe (per masking_mechanisms.json rops_allocation_intercept \u2014 three host-BK positive controls SB/Stockton/Vallejo all showed uninterrupted TAB payment through host BK). ETF-basket calibration 2026-05-28: 3/3 SA holdings (San Jose $143M / Fontana $36.5M / Cloverdale $1.7M ROPS 25-26) approved-in-full; only ADMIN_NOTE events fired (filtered as non-binding).",
+   "detectors_that_read_this": [
+    "state_controller_intercept"
+   ],
+   "source_artifacts": [
+    "verticals/muni_credit/detectors/state_controller_intercept.py",
+    "verticals/muni_credit/data/etf_sco_intercept_scoring.json",
+    "verticals/muni_credit/data/ca_successor_rda_universe.json"
+   ],
+   "_notes": "Statutory basis: HSC 34177(o)(1) (annual ROPS submission); HSC 34177.5 (refunding-bond subordination); HSC 34183 (RPTTF waterfall). DOF review process: (1) sample line-item review; (2) apply law; (3) approve/deny per line; (4) note admin-cost cap compliance per HSC 34171(b)(3); (5) apply PPA offset from prior-cycle to current. Meet-and-Confer dispute path per HSC 34177(m) exists for SA-vs-DOF disagreements; bondholders structurally insulated because bond-debt items rarely disputed. This DOF letter is the upstream approval that gates the actual semi-annual county-auditor RPTTF distribution to the trustee \u2014 more authoritative for the rops_allocation_intercept signal than downstream EMMA continuing disclosure."
+  },
+  {
+   "name": "Audited Financial Statements \u2014 Bond Covenant Compliance Section",
+   "short_name": "obligor_audit_covenant_compliance_section",
+   "publisher": "Per-obligor (issuer website + EMMA continuing disclosure attachment + ProPublica 990 audit attachment for 501(c)(3))",
+   "url_pattern": "Per-obligor IR / finance page; EMMA /IssuerHomePage/; ProPublica /nonprofits/{ein}/",
+   "asset_classes": [
+    "us_hospital_muni",
+    "us_ccrc_muni",
+    "us_charter_muni",
+    "ca_water_district_revenue",
+    "ca_anaheim_revenue_authority",
+    "ca_chffa_hospital_conduit",
+    "ca_rda_successor_muni"
+   ],
+   "cadence": "annual_mandatory",
+   "lag_from_event_to_publication_days": 180,
+   "lag_explanation": "Audits typically completed 90-180 days post-FYE; posted to issuer website + EMMA within ~7 months per typical CDA. CHFFA / CSFA conduit borrowers post to EMMA via dissemination agent.",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "Per-obligor verbatim covenant-compliance language. Three states: (a) 'in compliance with all financial covenants' (positive disclosure), (b) silent on covenants (ambiguous \u2014 possibly cured intra-year or no MTI covenants), (c) explicit 'non-compliance with financial covenants' with optional 'waiver obtained' or 'accelerated maturity' modifier. Master Trust Indenture obligors (hospitals, CCRCs, charters) carry the richest covenant set: days cash on hand, DSCR, debt-to-capitalization, additional bonds test, rate covenant. K-12 GO bonds carry NO MTI covenants (SB 222 statutory lien only). State GO carries no MTI covenants (full faith and credit).",
+   "redundant_channels": [
+    "emma_continuing_disclosure_53359_5",
+    "irs_form_990_schedule_k",
+    "propublica_nonprofit_explorer"
+   ],
+   "access_method": "Free PDF download from issuer IR site, EMMA, or ProPublica. CONFIRMED in 2026-05-28 session: many issuer-site PDFs are binary-encoded and not text-extractable via WebFetch; require pdftotext or browser-fingerprint scrape.",
+   "access_gating": "Free but practically gated by PDF text-extraction toolchain; some sites (mwdh2o.com observed) 403 naive User-Agent",
+   "validated_for_alpha_lead": "Prototype catch validated 2026-05-28: Alliance College-Ready Public Schools FY25 audit disclosed 'non-compliance with financial covenants, waiver obtained' (per outputs/CA_CHARTER_INVESTMENT_THESIS_V2.md), moving Alliance from BUY list to EXCLUDE list. Detector regex correctly fires on prototype text. Lead time vs rating action: typically 3-12 months (auditors disclose covenant breach in same FY; agency review follows).",
+   "detectors_that_read_this": [
+    "covenant_breach",
+    "going_concern",
+    "auditor_change"
+   ],
+   "source_artifacts": [
+    "verticals/muni_credit/detectors/covenant_breach.py",
+    "verticals/muni_credit/detectors/going_concern.py",
+    "verticals/muni_credit/detectors/auditor_change.py",
+    "verticals/muni_credit/data/etf_covenant_scoring.json",
+    "verticals/muni_credit/outputs/CA_CHARTER_INVESTMENT_THESIS_V2.md"
+   ],
+   "_notes": "COMPLEMENTARY to covenant_tripwire.py: tripwire computes headroom from CURRENT metrics vs known covenant minimums (requires parameterized covenant_terms.json + cafr_overrides.json per obligor); this channel reads DISCLOSURE LANGUAGE for explicit breach text (higher precision, covers obligors without parameterized terms). HOSTILE-VALIDATOR RULE: silence is NOT 'no breach'; if audit can't be retrieved or text-extracted, detector returns UNVERIFIABLE. In 2026-05-28 ETF basket scan, 13/20 holdings returned UNVERIFIABLE for this reason \u2014 primary gap is PDF text-extraction toolchain, not absence of the underlying signal."
+  },
+  {
+   "name": "IRS Form 990 \u2014 Schedule K (Tax-Exempt Bond Inventory)",
+   "short_name": "irs_form_990_schedule_k",
+   "publisher": "IRS (via ProPublica Nonprofit Explorer surfacing)",
+   "url_pattern": "https://projects.propublica.org/nonprofits/  (EIN-keyed)",
+   "asset_classes": [
+    "us_nh_muni",
+    "us_ccrc_muni",
+    "us_hospital_muni",
+    "us_charter_muni"
+   ],
+   "cadence": "annual_mandatory",
+   "lag_from_event_to_publication_days": 540,
+   "lag_explanation": "990 filed ~11.5 months post-FY-end (filing extensions common); IRS releases data ~6-12 mo later; ProPublica surfaces ~weeks after IRS release. Total lag 18-24 months.",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "Tax-exempt bond series inventory (par, issuer, refunded vs new), use-of-proceeds, private-business-use disclosures, bondholder relations.",
+   "redundant_channels": [
+    "emma_continuing_disclosure_53359_5"
+   ],
+   "access_method": "ProPublica web + PDF download",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Used for obligor par + CUSIP confirmation in NH/CCRC backtests.",
+   "detectors_that_read_this": [],
+   "source_artifacts": [
+    "verticals/muni_credit/outputs/CA_NH_INVESTMENT_THESIS.md",
+    "verticals/muni_credit/outputs/CHARTER_SECTOR_SCOPING.md"
+   ],
+   "_notes": "Canonical bond-inventory source for tax-exempt nonprofit obligors. Heavy lag limits use to verification, not signal."
+  },
+  {
+   "name": "California Successor RDA Recognized Obligation Payment Schedule (ROPS)",
+   "short_name": "ca_successor_rda_rops",
+   "publisher": "California Department of Finance (DOF) + per-successor-agency",
+   "url_pattern": "DOF web; per-successor PDF",
+   "asset_classes": [
+    "ca_rda_successor_muni"
+   ],
+   "cadence": "semi_annual",
+   "lag_from_event_to_publication_days": 60,
+   "lag_explanation": "ROPS A (Jul-Dec) due Feb 1; ROPS B (Jan-Jun) due Aug 1. Approval-window 30-60 days.",
+   "market_watching_depth": "WATCHED_BY_FEW",
+   "what_it_carries": "Successor-agency enforceable obligations, pass-through, residual-distribution status.",
+   "redundant_channels": [],
+   "access_method": "DOF web + agency PDFs",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "UNVERIFIABLE \u2014 referenced in landsecured_universe for South Lake Tahoe RDA 2001-1 but no detector built.",
+   "detectors_that_read_this": [],
+   "source_artifacts": [
+    "verticals/muni_credit/outputs/LANDSECURED_SECTOR_SCOPING.md"
+   ],
+   "_notes": "RDA dissolution remains a long-tail special situation."
+  },
+  {
+   "name": "SEC EDGAR Submissions API + 10-K / 10-Q Filings",
+   "short_name": "sec_edgar_submissions",
+   "publisher": "SEC EDGAR",
+   "url_pattern": "https://data.sec.gov/submissions/CIK{10-digit}.json  + filing-text URLs",
+   "asset_classes": [
+    "public_co_equity",
+    "public_co_credit",
+    "muni_credit (obligor parent disclosures)"
+   ],
+   "cadence": "event_driven",
+   "lag_from_event_to_publication_days": 60,
+   "lag_explanation": "10-K within 60-90 days post-FYE (large accelerated 60d, accelerated 75d, non-accel 90d). 10-Q within 40-45d post-QE. 8-K within 4 business days of event.",
+   "market_watching_depth": "WATCHED_BROADLY",
+   "what_it_carries": "All public-co filings: 10-K, 10-Q, 8-K, 13F, Form 4 (insider transactions), DEF 14A, S-1, 20-F, Form D (private placement), ABS-15G.",
+   "redundant_channels": [
+    "sec_edgar_fulltext_search"
+   ],
+   "access_method": "SEC submissions API (free, no key; UA required); bulk EDGAR archives",
+   "access_gating": "free; 10 req/sec rate limit",
+   "validated_for_alpha_lead": "Universal foundation. Lead time varies by event class.",
+   "detectors_that_read_this": [
+    "filing_timeliness",
+    "going_concern_detector",
+    "mw_lifecycle",
+    "auditor_change_tracker",
+    "form4",
+    "share_count_drift",
+    "rpo_drift",
+    "working_capital_drift",
+    "runway_calculator",
+    "xbrl_panel"
+   ],
+   "source_artifacts": [
+    "verticals/public_co/edgar.py",
+    "verticals/public_co/m_sources/sec_filings.py",
+    "verticals/public_co/m_sources/xbrl_panel.py"
+   ],
+   "_notes": "Free authoritative ticker\u2192CIK map at https://www.sec.gov/files/company_tickers.json. The core durable backbone for the public_co vertical."
+  },
+  {
+   "name": "SEC EDGAR Full-Text Search",
+   "short_name": "sec_edgar_fulltext_search",
+   "publisher": "SEC EDGAR",
+   "url_pattern": "https://efts.sec.gov/LATEST/search-index",
+   "asset_classes": [
+    "public_co_equity",
+    "public_co_credit"
+   ],
+   "cadence": "event_driven",
+   "lag_from_event_to_publication_days": 1,
+   "lag_explanation": "Indexed within ~hours of filing.",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "Free-text search of all EDGAR filings; scoped to specific CIKs, form types, date ranges. Counterparty-disclosure verification \u2014 does Megacap X mention SmallCap Y in their filings.",
+   "redundant_channels": [
+    "sec_edgar_submissions"
+   ],
+   "access_method": "SEC efts.sec.gov REST",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Central to Mode B counterparty-reciprocity detection (megacap_namecheck).",
+   "detectors_that_read_this": [
+    "edgar_fts",
+    "megacap_namecheck",
+    "counterparty_reciprocity",
+    "tenant_credit_watch"
+   ],
+   "source_artifacts": [
+    "verticals/public_co/m_sources/edgar_fts.py",
+    "verticals/public_co/m_sources/megacap_namecheck.py",
+    "verticals/public_co/m_sources/counterparty_reciprocity.py",
+    "verticals/public_co/full_pipeline_subagent_prompt.py"
+   ],
+   "_notes": "Mode B (implied verification \u2014 see DD two-modes memory): counterparty's filings should mention the company if claim is real."
+  },
+  {
+   "name": "SEC EDGAR Form 4 (Insider Transactions)",
+   "short_name": "sec_form_4",
+   "publisher": "SEC EDGAR",
+   "url_pattern": "https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK={cik}&type=4",
+   "asset_classes": [
+    "public_co_equity"
+   ],
+   "cadence": "event_driven",
+   "lag_from_event_to_publication_days": 2,
+   "lag_explanation": "Form 4 due within 2 business days of insider transaction.",
+   "market_watching_depth": "WATCHED_BROADLY",
+   "what_it_carries": "Per-insider transaction code (P=purchase, S=sale, A=award, F=tax-withholding, M=option exercise), shares, price, 10b5-1 indicator.",
+   "redundant_channels": [],
+   "access_method": "EDGAR submissions API + ownership.xml parsing",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Lead time varies. Form 4 SEVEREs ELEVATED in forward-test agents 60% vs historical 7% \u2014 note risk of overuse per smallcap memory.",
+   "detectors_that_read_this": [
+    "form4",
+    "insider_buy_timing",
+    "insider_vs_calendar"
+   ],
+   "source_artifacts": [
+    "verticals/public_co/m_sources/form4.py",
+    "verticals/public_co/m_sources/insider_buy_timing.py",
+    "verticals/public_co/m_sources/insider_vs_calendar.py"
+   ],
+   "_notes": "Insider_vs_calendar overlay flags discretionary sales within \u00b1N days of federal budget actions (IONQ ex-CEO Chapman $37.5M sale 2025-03-11 = day House passed FY25 approps zeroing AFRL earmark)."
+  },
+  {
+   "name": "USAspending.gov \u2014 Federal Procurement (FPDS) + Financial Assistance (FAADS)",
+   "short_name": "usaspending_gov",
+   "publisher": "US Treasury via USAspending.gov",
+   "url_pattern": "https://api.usaspending.gov",
+   "asset_classes": [
+    "public_co_defense",
+    "public_co_govt_services",
+    "public_co_general"
+   ],
+   "cadence": "monthly",
+   "lag_from_event_to_publication_days": 30,
+   "lag_explanation": "Contract obligations reported into FPDS within ~30 days; aggregations refresh monthly.",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "Per-recipient (UEI-anchored) contract obligations, sub-agency awards. DoD program-specific obligations.",
+   "redundant_channels": [
+    "pentagon_jbook_program_funding"
+   ],
+   "access_method": "USAspending REST API (free, no key)",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Mode A counterparty verification per full_pipeline_subagent_prompt.py. Absence of any DoD contracts when company claims named DoD program = HARD CONTRADICTION (RED_FLAG_NEGATIVE).",
+   "detectors_that_read_this": [
+    "usaspending",
+    "ic_contracting_proxy",
+    "revenue_concentration"
+   ],
+   "source_artifacts": [
+    "verticals/public_co/m_sources/usaspending.py",
+    "verticals/public_co/m_sources/ic_contracting_proxy.py",
+    "verticals/public_co/m_sources/revenue_concentration.py",
+    "verticals/public_co/defense_cohort.py"
+   ],
+   "_notes": "Rear-view (obligations recorded after award). Pair with pentagon_jbook for forward view. UEI-anchored queries avoid name-pollution (Hudson Technologies matches 67k unrelated entities)."
+  },
+  {
+   "name": "Pentagon J-Book (Procurement / RDT&E / O&M Budget Justifications)",
+   "short_name": "pentagon_jbook_program_funding",
+   "publisher": "DoD service comptrollers (Army ASA-FM, Navy NAVCOMP, Air/Space Force SAF-FM, OSD)",
+   "url_pattern": "https://www.saffm.hq.af.mil/Budget/  ; https://www.asafm.army.mil/Budget-Materials/  ; https://www.secnav.navy.mil/fmc/fmb/  ; https://comptroller.defense.gov/Budget-Materials/",
+   "asset_classes": [
+    "public_co_defense"
+   ],
+   "cadence": "annual_mandatory",
+   "lag_from_event_to_publication_days": 60,
+   "lag_explanation": "President's Budget submitted ~Feb each year; J-Books published ~30-60 days later. Annual cycle.",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "Per-Program-Element funding tables with multi-year projections. Forward view of customer programs.",
+   "redundant_channels": [
+    "usaspending_gov",
+    "earmark_detector"
+   ],
+   "access_method": "DoD comptroller site PDFs (~hundreds of MB total per FY)",
+   "access_gating": "free; site requires Chrome fingerprint to defeat 403 (per scraping_browser_fingerprint memory)",
+   "validated_for_alpha_lead": "Months ahead of company earnings acknowledgment for program-zeroing events. Canonical YSS/IONQ short-thesis vector.",
+   "detectors_that_read_this": [
+    "pentagon_jbook",
+    "cybercom_budget",
+    "earmark_detector"
+   ],
+   "source_artifacts": [
+    "verticals/public_co/m_sources/pentagon_jbook.py",
+    "verticals/public_co/m_sources/cybercom_budget.py",
+    "verticals/public_co/m_sources/earmark_detector.py",
+    "verticals/public_co/data/_jbook_data/programs.json"
+   ],
+   "_notes": "Forward-looking; complement to USAspending rear-view. Earmark_detector distinguishes congressional add-ons (fragile) from DoD-requested PEs (durable)."
+  },
+  {
+   "name": "USPTO Open Data Portal \u2014 Patent Applications & Grants",
+   "short_name": "uspto_odp_patents",
+   "publisher": "USPTO",
+   "url_pattern": "https://api.uspto.gov/api/v1/patent/applications/search",
+   "asset_classes": [
+    "public_co_equity",
+    "buyside_dd_general"
+   ],
+   "cadence": "real_time",
+   "lag_from_event_to_publication_days": 540,
+   "lag_explanation": "Applications published ~18 months after filing (publication, not grant). Grants typically ~36 months from filing. The INDEX (ODP) refreshes near-real-time once filings publish.",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "Per-assignee application + grant counts, invention titles, CPC classifications.",
+   "redundant_channels": [
+    "google_patents"
+   ],
+   "access_method": "USPTO ODP API (X-API-KEY header, free)",
+   "access_gating": "free with API key",
+   "validated_for_alpha_lead": "Nikola pattern: \u226520 granted patents with 0 in claimed-category fires SEVERE. Founder-name queries beat company-name queries (entity-resolution memory).",
+   "detectors_that_read_this": [
+    "uspto_odp",
+    "google_patents"
+   ],
+   "source_artifacts": [
+    "verticals/public_co/m_sources/uspto_odp.py",
+    "verticals/public_co/m_sources/google_patents.py",
+    "/Users/ajay/.claude/projects/-Users-ajay-exalted-signalos/memory/feedback_dd_entity_resolution.md"
+   ],
+   "_notes": "Preferred over PatentsView (decommissioned) and Google Patents (rate-limited)."
+  },
+  {
+   "name": "ClinicalTrials.gov v2 REST API",
+   "short_name": "clinicaltrials_gov_v2",
+   "publisher": "NIH",
+   "url_pattern": "https://clinicaltrials.gov/api/v2/studies",
+   "asset_classes": [
+    "public_co_biotech",
+    "public_co_pharma"
+   ],
+   "cadence": "real_time",
+   "lag_from_event_to_publication_days": 21,
+   "lag_explanation": "Sponsors required to register trials within 21 days of first enrollment; results within 12 months of completion. Index updates daily.",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "Per-trial phase, status, sponsor, collaborators, enrollment, primary outcome.",
+   "redundant_channels": [
+    "openfda_drug_approvals",
+    "fda_orange_book"
+   ],
+   "access_method": "Free REST API",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Adjudicates phase-stage claims (preclinical vs IND-cleared vs Ph1/2/3 vs filed vs approved). Lead time ~3-6 months on real status changes.",
+   "detectors_that_read_this": [
+    "clinical_trial_referral_quality"
+   ],
+   "source_artifacts": [
+    "verticals/public_co/m_sources/clinical_trials.py",
+    "verticals/public_co/cellgene_cohort.py"
+   ],
+   "_notes": "Core m-source for biotech cohort. | 2026-05-28: clinical_trial_referral_quality detector built and live-tested on Valius DD. Detector classifies each claimed treatment-lead into 6 buckets (ENROLLING_MATCH / HISTOLOGY_MISMATCH / BIOMARKER_GAP / APPROVED_DRUG_OFF_LABEL / OFF_LABEL_ONLY / NO_TARGET_TRIAL) by querying the v2 API for enrolling trials matched against the patient's histology and biomarker stratification. Source files: verticals/buyside_dd/detectors/clinical_trial_referral_quality.py + clinicaltrials_lookup.py.",
+   "_last_updated_2026_05_28": true
+  },
+  {
+   "name": "openFDA \u2014 Drug Approvals, Recalls, Enforcement",
+   "short_name": "openfda",
+   "publisher": "FDA",
+   "url_pattern": "https://api.fda.gov/drug/{drugsfda,enforcement}.json  ; food/enforcement.json  ; device/enforcement.json",
+   "asset_classes": [
+    "public_co_pharma",
+    "public_co_biotech",
+    "public_co_devices",
+    "public_co_food"
+   ],
+   "cadence": "monthly",
+   "lag_from_event_to_publication_days": 30,
+   "lag_explanation": "Recall events posted ~1 week post-classification; aggregated to monthly indexes.",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "Drug approvals (Drugs@FDA), Class I/II/III recalls (enforcement endpoint). Warning Letters proxied via Class I recall correlation (no clean WL endpoint per openfda docstring).",
+   "redundant_channels": [
+    "clinicaltrials_gov_v2",
+    "fda_orange_book"
+   ],
+   "access_method": "Free REST API",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Class I recalls correlate with Warning Letters ~6-12 months later (catastrophe proxy).",
+   "detectors_that_read_this": [
+    "openfda"
+   ],
+   "source_artifacts": [
+    "verticals/public_co/m_sources/openfda.py",
+    "verticals/public_co/cellgene_cohort.py"
+   ],
+   "_notes": "Warning Letter direct endpoint not exposed; ICD requires HHS data.gov access."
+  },
+  {
+   "name": "FDA Orange Book \u2014 Patent + Exclusivity Ladder",
+   "short_name": "fda_orange_book",
+   "publisher": "FDA",
+   "url_pattern": "https://www.fda.gov/drugs/drug-approvals-and-databases/orange-book-data-files  (products.txt, patent.txt, exclusivity.txt)",
+   "asset_classes": [
+    "public_co_pharma"
+   ],
+   "cadence": "monthly",
+   "lag_from_event_to_publication_days": 14,
+   "lag_explanation": "Updated monthly; FDA releases bulk pipe-delimited text files.",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "Per-product applicant_name, patent expiration dates, exclusivity grants (NCE, GAIN, ODE).",
+   "redundant_channels": [
+    "uspto_odp_patents"
+   ],
+   "access_method": "Bulk download",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "LOE (loss-of-exclusivity) is the dominant catastrophe vector for small/mid-cap marketed Rx.",
+   "detectors_that_read_this": [
+    "orange_book"
+   ],
+   "source_artifacts": [
+    "verticals/public_co/m_sources/orange_book.py"
+   ],
+   "_notes": "IPR/PGR challenges and generic ANDAs accelerate the LOE cliff."
+  },
+  {
+   "name": "NHTSA vPIC \u2014 Vehicle Manufacturer Registry",
+   "short_name": "nhtsa_vpic",
+   "publisher": "NHTSA",
+   "url_pattern": "https://vpic.nhtsa.dot.gov/api/vehicles/getmanufacturerdetails/{name}?format=json",
+   "asset_classes": [
+    "public_co_ev",
+    "public_co_auto"
+   ],
+   "cadence": "real_time",
+   "lag_from_event_to_publication_days": 30,
+   "lag_explanation": "Real-time registry; manufacturer-detail records update as new VINs are assigned.",
+   "market_watching_depth": "WATCHED_BY_FEW",
+   "what_it_carries": "Manufacturer registration status, vehicle-type-categories.",
+   "redundant_channels": [],
+   "access_method": "Free REST API",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Adjudicates 'we are a complete-vehicle manufacturer' claims (Lordstown, Hyzon, Fisker, Arrival, Lion).",
+   "detectors_that_read_this": [
+    "nhtsa"
+   ],
+   "source_artifacts": [
+    "verticals/public_co/m_sources/nhtsa.py",
+    "verticals/public_co/_local_inputs.py"
+   ],
+   "_notes": "Don't use for drones / military vehicles."
+  },
+  {
+   "name": "EPA Facility Registry Service (FRS)",
+   "short_name": "epa_frs",
+   "publisher": "EPA",
+   "url_pattern": "https://frs-public.epa.gov/ords/frs_public2/frs_rest_services.get_facilities",
+   "asset_classes": [
+    "public_co_industrial",
+    "buyside_dd_general"
+   ],
+   "cadence": "monthly",
+   "lag_from_event_to_publication_days": 30,
+   "lag_explanation": "Facilities added to FRS upon permit issuance/discovery; aggregate refreshes monthly.",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "Per-facility EPA permits (Title V air, RCRA, NPDES, TRI, GHGRP, Superfund, Brownfield).",
+   "redundant_channels": [
+    "osha_establishments_form_300A"
+   ],
+   "access_method": "EPA REST API",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Stronger discriminator than NHTSA address for factory existence. Light electronics / drone assembly often NOT in FRS \u2014 don't red-flag absence in those cases.",
+   "detectors_that_read_this": [
+    "epa_frs",
+    "epa_emissions"
+   ],
+   "source_artifacts": [
+    "verticals/public_co/m_sources/epa_frs.py",
+    "verticals/public_co/m_sources/epa_emissions.py"
+   ],
+   "_notes": "Companion connectors TRI + GHGRP add chemistry/emissions filters."
+  },
+  {
+   "name": "OSHA Form 300A Establishment-Specific Summary",
+   "short_name": "osha_establishments_form_300A",
+   "publisher": "OSHA / DOL",
+   "url_pattern": "https://www.osha.gov/pls/imis/establishment.search  ; CSV extracts from DOL Enforcement Data",
+   "asset_classes": [
+    "public_co_industrial",
+    "buyside_dd_general"
+   ],
+   "cadence": "annual_mandatory",
+   "lag_from_event_to_publication_days": 60,
+   "lag_explanation": "Establishments with \u226520 employees in covered industries file 300A by Mar 2 for prior year; CSV extract published ~Apr-May.",
+   "market_watching_depth": "WATCHED_BY_FEW",
+   "what_it_carries": "Per-establishment annual avg employees, hours worked, NAICS, address.",
+   "redundant_channels": [
+    "epa_frs",
+    "dol_h1b_lca"
+   ],
+   "access_method": "OSHA HTML search + bulk DOL CSV",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Adjudicates 'we have a 500-person factory at X' claims independent of EPA chemistry thresholds.",
+   "detectors_that_read_this": [
+    "osha_establishments"
+   ],
+   "source_artifacts": [
+    "verticals/public_co/m_sources/osha_establishments.py",
+    "verticals/buyside_dd/connectors/osha_establishment.py"
+   ],
+   "_notes": "Coverage gap: sub-20-employee operations don't appear; H-1B LCA picks up these."
+  },
+  {
+   "name": "DOL OFLC H-1B Labor Condition Application (LCA) Disclosure Data",
+   "short_name": "dol_h1b_lca",
+   "publisher": "DOL Office of Foreign Labor Certification (OFLC)",
+   "url_pattern": "https://www.dol.gov/agencies/eta/foreign-labor/performance",
+   "asset_classes": [
+    "public_co_tech",
+    "public_co_biotech",
+    "public_co_general"
+   ],
+   "cadence": "quarterly",
+   "lag_from_event_to_publication_days": 45,
+   "lag_explanation": "OFLC publishes LCA decisions quarterly ~45 days post-quarter-end.",
+   "market_watching_depth": "WATCHED_BY_FEW",
+   "what_it_carries": "Per-LCA: employer name + FEIN + NAICS, worksite address, number of workers requested, job title + SOC, wage offer, decision date.",
+   "redundant_channels": [
+    "osha_establishments_form_300A"
+   ],
+   "access_method": "Bulk CSV/Excel download",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Highest-leverage gap-closer for tech/drone/biotech/semi/SaaS where OSHA 300A under-covers (sub-20-employee operations still file H-1B sponsorships).",
+   "detectors_that_read_this": [
+    "dol_h1b_lca"
+   ],
+   "source_artifacts": [
+    "verticals/public_co/m_sources/dol_h1b_lca.py"
+   ],
+   "_notes": "~2M LCAs/yr; per-worksite-address granularity."
+  },
+  {
+   "name": "BLS Quarterly Census of Employment and Wages (QCEW)",
+   "short_name": "bls_qcew",
+   "publisher": "Bureau of Labor Statistics",
+   "url_pattern": "https://data.bls.gov/cew/data/api/{year}/{qtr}/area/{fips5}.csv",
+   "asset_classes": [
+    "public_co_general",
+    "buyside_dd_market"
+   ],
+   "cadence": "quarterly",
+   "lag_from_event_to_publication_days": 180,
+   "lag_explanation": "2-quarter publication lag (Q2 of YYYY available ~Q4 of YYYY).",
+   "market_watching_depth": "WATCHED_BY_FEW",
+   "what_it_carries": "Per-(NAICS \u00d7 county \u00d7 ownership \u00d7 aggregation): establishments, employment, wages.",
+   "redundant_channels": [
+    "dol_h1b_lca"
+   ],
+   "access_method": "Free CSV API",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Plausibility denominator for facility-scope claims (e.g., 500-person aerospace facility in Maricopa AZ vs county-NAICS 6,500 total).",
+   "detectors_that_read_this": [
+    "bls_qcew"
+   ],
+   "source_artifacts": [
+    "verticals/public_co/m_sources/bls_qcew.py"
+   ],
+   "_notes": "Includes state + federal employees; private-sector ownership separable."
+  },
+  {
+   "name": "BTS \u2014 Airline T-100 + On-Time Performance",
+   "short_name": "bts_airline_metrics",
+   "publisher": "Bureau of Transportation Statistics (BTS) \u2014 DOT",
+   "url_pattern": "https://www.transtats.bts.gov/Data_Elements.aspx?Data=2",
+   "asset_classes": [
+    "public_co_airlines"
+   ],
+   "cadence": "monthly",
+   "lag_from_event_to_publication_days": 45,
+   "lag_explanation": "Monthly carrier operational data published ~45 days post-month-end.",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "Per-carrier monthly RPM, ASM, load factor, departures by segment; on-time performance, cancellations.",
+   "redundant_channels": [],
+   "access_method": "BTS web + CSV",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Airlines telegraph distress through operational metrics months before financial impact in 10-Q.",
+   "detectors_that_read_this": [
+    "bts_airline_metrics"
+   ],
+   "source_artifacts": [
+    "verticals/public_co/m_sources/bts_airline_metrics.py"
+   ],
+   "_notes": "Quarterly aggregations by IATA code."
+  },
+  {
+   "name": "FCC Form 477 / Broadband Data Collection (BDC)",
+   "short_name": "fcc_form_477",
+   "publisher": "FCC",
+   "url_pattern": "https://www.fcc.gov/general/broadband-deployment-data-fcc-form-477",
+   "asset_classes": [
+    "public_co_telecom"
+   ],
+   "cadence": "semi_annual",
+   "lag_from_event_to_publication_days": 180,
+   "lag_explanation": "June + December filings; published ~6 months later. Post-2022 migrated to BDC.",
+   "market_watching_depth": "WATCHED_BY_FEW",
+   "what_it_carries": "Per-provider, per-state fixed-broadband subscription counts.",
+   "redundant_channels": [],
+   "access_method": "Bulk ZIP/CSV",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Subscriber bleed signal for cable/satellite/fiber issuers (CABO, GOGO, TDS, SATS, CALX).",
+   "detectors_that_read_this": [
+    "fcc_form_477"
+   ],
+   "source_artifacts": [
+    "verticals/public_co/m_sources/fcc_form_477.py"
+   ],
+   "_notes": "Two-period lag may be limiting; quarterly BDC eventually."
+  },
+  {
+   "name": "FDIC Call Reports (FFIEC 031/041)",
+   "short_name": "fdic_call_reports",
+   "publisher": "FDIC",
+   "url_pattern": "https://api.fdic.gov/banks/{institutions,financials}",
+   "asset_classes": [
+    "public_co_fintech",
+    "public_co_banks"
+   ],
+   "cadence": "quarterly",
+   "lag_from_event_to_publication_days": 45,
+   "lag_explanation": "Banks file Call Reports within 30 days post-QE; FDIC publishes within ~15 days after.",
+   "market_watching_depth": "WATCHED_BROADLY",
+   "what_it_carries": "Quarterly bank-level: consumer-loan PD bucket (LNCONOTH 30/90/NA), net charge-offs, ROAQ/ROEQ, deposits.",
+   "redundant_channels": [],
+   "access_method": "FDIC REST API",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Fintech-vertical: non-bank lenders (UPST, AFRM) originate on bank-partner balance sheets \u2192 Call Report adjudicates cohort credit quality indirectly.",
+   "detectors_that_read_this": [
+    "fdic_call_reports"
+   ],
+   "source_artifacts": [
+    "verticals/public_co/m_sources/fdic_call_reports.py"
+   ],
+   "_notes": "Companion to fintech_cohort."
+  },
+  {
+   "name": "FINRA BrokerCheck",
+   "short_name": "finra_brokercheck",
+   "publisher": "FINRA",
+   "url_pattern": "https://api.brokercheck.finra.org/search/firm",
+   "asset_classes": [
+    "public_co_finserv",
+    "buyside_dd_sponsor"
+   ],
+   "cadence": "real_time",
+   "lag_from_event_to_publication_days": 14,
+   "lag_explanation": "Registration changes posted ~14 days; disciplinary actions same-day.",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "Firm CRD, SEC#, registration status (Approved/Withdrawn/Suspended), disciplinary history.",
+   "redundant_channels": [
+    "sec_iapd_form_adv"
+   ],
+   "access_method": "Free REST API",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Adjudicates claims of 'registered broker-dealer regulated by SEC and FINRA'.",
+   "detectors_that_read_this": [
+    "finra_brokercheck"
+   ],
+   "source_artifacts": [
+    "verticals/public_co/m_sources/finra_brokercheck.py"
+   ],
+   "_notes": "Companion: SEC IAPD (Form ADV) for RIAs."
+  },
+  {
+   "name": "FMCSA SAFER Motor Carrier Registry",
+   "short_name": "fmcsa_safer",
+   "publisher": "FMCSA / DOT",
+   "url_pattern": "https://safer.fmcsa.dot.gov/keywordx.asp",
+   "asset_classes": [
+    "public_co_logistics",
+    "public_co_trucking"
+   ],
+   "cadence": "real_time",
+   "lag_from_event_to_publication_days": 30,
+   "lag_explanation": "DOT-number lookups + carrier snapshots refresh near real-time; safety scores update on rolling 24-month basis.",
+   "market_watching_depth": "WATCHED_BY_FEW",
+   "what_it_carries": "DOT number, fleet size (Power Units), driver count, legal name, OOS rates.",
+   "redundant_channels": [],
+   "access_method": "HTML scrape",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Adjudicates fleet-size claims.",
+   "detectors_that_read_this": [
+    "fmcsa"
+   ],
+   "source_artifacts": [
+    "verticals/public_co/m_sources/fmcsa.py"
+   ],
+   "_notes": "Two-step: keyword search \u2192 carrier snapshot."
+  },
+  {
+   "name": "NASA Technical Reports Server (NTRS)",
+   "short_name": "nasa_ntrs",
+   "publisher": "NASA",
+   "url_pattern": "https://ntrs.nasa.gov/api/citations/search",
+   "asset_classes": [
+    "public_co_defense",
+    "public_co_space"
+   ],
+   "cadence": "real_time",
+   "lag_from_event_to_publication_days": 90,
+   "lag_explanation": "Reports posted as released; some 30-90 day review.",
+   "market_watching_depth": "WATCHED_BY_FEW",
+   "what_it_carries": "Per-author/center/funding-number technical reports.",
+   "redundant_channels": [
+    "nasa_techport"
+   ],
+   "access_method": "Free REST API",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Asymmetric corroboration: PRESENT confirms claimed NASA work; ABSENT moderate (ITAR/EAR may suppress posting).",
+   "detectors_that_read_this": [
+    "nasa_ntrs"
+   ],
+   "source_artifacts": [
+    "verticals/public_co/m_sources/nasa_ntrs.py"
+   ],
+   "_notes": "Complement to TechPort (active funded projects)."
+  },
+  {
+   "name": "DOE Office of Science Congressional Budget Justification",
+   "short_name": "doe_budget_cbj",
+   "publisher": "DOE Office of Science (and other DOE volumes)",
+   "url_pattern": "https://science.osti.gov/budget",
+   "asset_classes": [
+    "public_co_quantum",
+    "public_co_clean_energy",
+    "public_co_isotope"
+   ],
+   "cadence": "annual_mandatory",
+   "lag_from_event_to_publication_days": 30,
+   "lag_explanation": "DOE volumes released alongside President's Budget submission ~Feb.",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "Per-program funding tables: ASCR, BES, FES, HEP, NP, NQI Centers.",
+   "redundant_channels": [
+    "pentagon_jbook_program_funding"
+   ],
+   "access_method": "PDF download; ingest_doe_budget.py LLM-extracts to JSON",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Companion to pentagon_jbook for quantum / advanced-computing / fusion / isotope cos whose program funding lives in DOE not DoD.",
+   "detectors_that_read_this": [
+    "doe_budget"
+   ],
+   "source_artifacts": [
+    "verticals/public_co/m_sources/doe_budget.py",
+    "verticals/public_co/data/_doe_data/"
+   ],
+   "_notes": "Other volumes (NNSA, ARPA-E, EM, FE, NE, EERE) can be ingested same way."
+  },
+  {
+   "name": "SAM.gov Entity Management",
+   "short_name": "sam_entity",
+   "publisher": "GSA \u2014 SAM.gov",
+   "url_pattern": "https://api.sam.gov/  (v3 entity endpoint)",
+   "asset_classes": [
+    "public_co_govt_services",
+    "public_co_defense"
+   ],
+   "cadence": "real_time",
+   "lag_from_event_to_publication_days": 30,
+   "lag_explanation": "Entity registrations/renewals near real-time; some lag on status changes (Active \u2192 Inactive).",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "Per-UEI: legal name, CAGE, DODAAC, registration status, addresses, business types, exclusion-status flag.",
+   "redundant_channels": [
+    "usaspending_gov"
+   ],
+   "access_method": "Free REST API",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Mandatory registry for federal-award eligibility.",
+   "detectors_that_read_this": [
+    "sam_entity"
+   ],
+   "source_artifacts": [
+    "verticals/public_co/m_sources/sam_entity.py"
+   ],
+   "_notes": "Doesn't expose employee count or revenue (financialInformation booleans only)."
+  },
+  {
+   "name": "BIS Entity List / Treasury OFAC SDN (Consolidated Screening List)",
+   "short_name": "export_control_csl",
+   "publisher": "Bureau of Industry & Security (BIS); Treasury OFAC; State DDTC \u2014 aggregated by Trade.gov",
+   "url_pattern": "https://api.trade.gov/static/consolidated_screening_list/consolidated.csv",
+   "asset_classes": [
+    "public_co_semi",
+    "public_co_industrial",
+    "public_co_aerospace"
+   ],
+   "cadence": "event_driven",
+   "lag_from_event_to_publication_days": 1,
+   "lag_explanation": "Designations posted within ~1 day of Federal Register notice.",
+   "market_watching_depth": "WATCHED_BROADLY",
+   "what_it_carries": "Designated parties (BIS Entity List, OFAC SDN, State DDTC debarred).",
+   "redundant_channels": [],
+   "access_method": "Static CSV + search API",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Huawei (2019), SMIC (2020), YMTC (2022): US-supplier revenue cliff within weeks.",
+   "detectors_that_read_this": [
+    "export_control_check"
+   ],
+   "source_artifacts": [
+    "verticals/public_co/m_sources/export_control_check.py"
+   ],
+   "_notes": "Cliff event \u2014 once designated, supplier revenue evaporates."
+  },
+  {
+   "name": "FCC Form 477 Sister: NRC + State Industrial Permits",
+   "short_name": "nrc_state_industrial_permits",
+   "publisher": "Nuclear Regulatory Commission + state DEQ/DEP",
+   "url_pattern": "Per-state DEQ portals",
+   "asset_classes": [
+    "public_co_industrial"
+   ],
+   "cadence": "UNVERIFIABLE",
+   "lag_from_event_to_publication_days": null,
+   "lag_explanation": "UNVERIFIABLE \u2014 not directly catalogued in our m_sources library",
+   "market_watching_depth": "WATCHED_BY_FEW",
+   "what_it_carries": "State-level industrial / nuclear permits not in EPA FRS",
+   "redundant_channels": [
+    "epa_frs"
+   ],
+   "access_method": "Per-state",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Not built; placeholder.",
+   "detectors_that_read_this": [],
+   "source_artifacts": [],
+   "_notes": "Placeholder; not actively used."
+  },
+  {
+   "name": "DOE/NREL Alternative Fueling Stations Locator",
+   "short_name": "nrel_alt_fuel_stations",
+   "publisher": "DOE/NREL",
+   "url_pattern": "https://developer.nrel.gov/api/alt-fuel-stations/v1.json",
+   "asset_classes": [
+    "public_co_hydrogen",
+    "public_co_ev_charging"
+   ],
+   "cadence": "monthly",
+   "lag_from_event_to_publication_days": 30,
+   "lag_explanation": "NREL refreshes the station locator monthly.",
+   "market_watching_depth": "WATCHED_BY_FEW",
+   "what_it_carries": "Per-station fuel-type, status, open-date, owner.",
+   "redundant_channels": [],
+   "access_method": "Free REST API",
+   "access_gating": "free with DEMO_KEY",
+   "validated_for_alpha_lead": "Adjudicates hydrogen/EV-charging infrastructure claims.",
+   "detectors_that_read_this": [
+    "nrel_fuel"
+   ],
+   "source_artifacts": [
+    "verticals/public_co/m_sources/nrel_fuel.py"
+   ],
+   "_notes": "Used in hydrogen + EV charging cohorts."
+  },
+  {
+   "name": "CourtListener / PACER \u2014 Federal Class Actions + Dockets",
+   "short_name": "courtlistener_pacer",
+   "publisher": "Free Law Project (CourtListener); US Federal Courts (PACER)",
+   "url_pattern": "https://www.courtlistener.com/api/rest/v3/dockets/  ; https://pacer.uscourts.gov/",
+   "asset_classes": [
+    "public_co_general",
+    "buyside_dd_entity",
+    "muni_credit (issuer parents)"
+   ],
+   "cadence": "real_time",
+   "lag_from_event_to_publication_days": 1,
+   "lag_explanation": "Federal dockets posted within ~24h of filing; CourtListener mirror near-real-time.",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "Party-name docket entries: securities class actions (10b-5), wage-hour, product-liability, ADA, bankruptcy.",
+   "redundant_channels": [
+    "doj_fca_settlements"
+   ],
+   "access_method": "CourtListener REST (free w/ rate limit; API key for throughput)",
+   "access_gating": "CourtListener free; PACER $0.10/page",
+   "validated_for_alpha_lead": "Wage-hour for staffing/retail; 10b-5 telegraphs accounting issues; product liability mass torts; ADA for retail/restaurants.",
+   "detectors_that_read_this": [
+    "pacer_class_action"
+   ],
+   "source_artifacts": [
+    "verticals/public_co/m_sources/pacer_class_action.py",
+    "verticals/buyside_dd/source_atlas.py  (PACER/CourtListener under ENTITY.federal_litigation)"
+   ],
+   "_notes": "Companion to bankruptcy_history under ENTITY in buyside_dd."
+  },
+  {
+   "name": "iborrowdesk \u2014 Interactive Brokers Daily Securities Lending",
+   "short_name": "iborrowdesk_ibkr",
+   "publisher": "iborrowdesk.com (public scrape of IBKR)",
+   "url_pattern": "https://iborrowdesk.com/api/ticker/{TICKER}",
+   "asset_classes": [
+    "public_co_equity"
+   ],
+   "cadence": "real_time",
+   "lag_from_event_to_publication_days": 1,
+   "lag_explanation": "Daily snapshot.",
+   "market_watching_depth": "WATCHED_BROADLY",
+   "what_it_carries": "Annualized borrow fee %, shares-available inventory at IBKR.",
+   "redundant_channels": [],
+   "access_method": "Free REST",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Indicative for short-side feasibility (used in distress_shortability).",
+   "detectors_that_read_this": [
+    "iborrow"
+   ],
+   "source_artifacts": [
+    "verticals/public_co/m_sources/iborrow.py",
+    "verticals/public_co/distress_shortability.py"
+   ],
+   "_notes": "IBKR-specific; other brokers diverge."
+  },
+  {
+   "name": "SEC EDGAR \u2014 Form D (Reg D Private Placements)",
+   "short_name": "sec_form_d",
+   "publisher": "SEC EDGAR",
+   "url_pattern": "https://efts.sec.gov/LATEST/search-index?forms=D",
+   "asset_classes": [
+    "buyside_dd_sponsor",
+    "public_co_pre_ipo"
+   ],
+   "cadence": "event_driven",
+   "lag_from_event_to_publication_days": 15,
+   "lag_explanation": "Form D required within 15 days of first sale.",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "Total offering amount, amount sold, amount remaining, # investors, date of first sale, federal exemption used (Reg D 506(b) vs 506(c)), issuer entities, related persons.",
+   "redundant_channels": [],
+   "access_method": "EDGAR + connector",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "AHC: Mode A revealed deck-claimed $2M round vs Form D $485K. Strong DD-side adjudicator. Per entity-resolution memory: must resolve to SPV/Series LLC, not deck-level company name.",
+   "detectors_that_read_this": [
+    "sec_edgar (DD-side)"
+   ],
+   "source_artifacts": [
+    "verticals/buyside_dd/connectors/sec_edgar.py",
+    "/Users/ajay/.claude/projects/-Users-ajay-exalted-signalos/memory/feedback_dd_two_modes.md",
+    "/Users/ajay/.claude/projects/-Users-ajay-exalted-signalos/memory/feedback_dd_entity_resolution.md"
+   ],
+   "_notes": "Strongest Mode A + Mode B adjudicator for DD."
+  },
+  {
+   "name": "City of Austin Issued Construction Permits (Socrata)",
+   "short_name": "austin_permits",
+   "publisher": "City of Austin",
+   "url_pattern": "https://data.austintexas.gov/resource/3syk-w9eu.json",
+   "asset_classes": [
+    "buyside_dd_real_estate"
+   ],
+   "cadence": "real_time",
+   "lag_from_event_to_publication_days": 1,
+   "lag_explanation": "Permits posted within ~1 day of issuance.",
+   "market_watching_depth": "WATCHED_BY_FEW",
+   "what_it_carries": "Per-permit: applieddate, status_current, project_name, original_address, GC, applicant, sqft, project_class.",
+   "redundant_channels": [],
+   "access_method": "Free Socrata JSON",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Adjudicates 'AHC factory in Austin' = 12 permits at 4422 Supply Ct under GC CM Constructors + landlord IGX Burleson Park LLC (entity-resolution memory).",
+   "detectors_that_read_this": [
+    "austin_permits"
+   ],
+   "source_artifacts": [
+    "verticals/buyside_dd/connectors/austin_permits.py",
+    "/Users/ajay/.claude/projects/-Users-ajay-exalted-signalos/memory/feedback_dd_entity_resolution.md"
+   ],
+   "_notes": "Critical lesson: tenants don't file permits; query by GC + landlord + address, NOT by sponsor/tenant name."
+  },
+  {
+   "name": "City of Albuquerque Building Permits (Posse/Tyler EnerGov)",
+   "short_name": "abq_permits",
+   "publisher": "City of Albuquerque",
+   "url_pattern": "https://posse.cabq.gov/cit/css/  ; https://opendata.cabq.gov/",
+   "asset_classes": [
+    "buyside_dd_real_estate"
+   ],
+   "cadence": "real_time",
+   "lag_from_event_to_publication_days": 7,
+   "lag_explanation": "No clean API; permit data lags ~1 week in citizen portal indexing.",
+   "market_watching_depth": "WATCHED_BY_FEW",
+   "what_it_carries": "Building permits per address.",
+   "redundant_channels": [],
+   "access_method": "Citizen portal + ArcGIS Hub (no stable API)",
+   "access_gating": "free, manual",
+   "validated_for_alpha_lead": "Limited; falls back to manual lookup URL.",
+   "detectors_that_read_this": [
+    "albuquerque_permits"
+   ],
+   "source_artifacts": [
+    "verticals/buyside_dd/connectors/albuquerque_permits.py"
+   ],
+   "_notes": "Connector returns UNSUPPORTED with manual URL when programmatic fails."
+  },
+  {
+   "name": "Bozeman MT Building Permits (OpenGov)",
+   "short_name": "bozeman_permits",
+   "publisher": "City of Bozeman MT",
+   "url_pattern": "https://bozeman.opengov.com/PORTAL/PROJECT/permitting",
+   "asset_classes": [
+    "buyside_dd_real_estate"
+   ],
+   "cadence": "real_time",
+   "lag_from_event_to_publication_days": 7,
+   "lag_explanation": "OpenGov SPA; no documented public REST API.",
+   "market_watching_depth": "WATCHED_BY_FEW",
+   "what_it_carries": "Building permits per project.",
+   "redundant_channels": [],
+   "access_method": "JS-rendered web; needs browser automation",
+   "access_gating": "free + manual",
+   "validated_for_alpha_lead": "Falls back to manual lookup.",
+   "detectors_that_read_this": [
+    "bozeman_permits"
+   ],
+   "source_artifacts": [
+    "verticals/buyside_dd/connectors/bozeman_permits.py"
+   ],
+   "_notes": "Workflow scraping deferred."
+  },
+  {
+   "name": "Allegheny County / WPRDC \u2014 Real Estate Sales, Mortgages, Assessments",
+   "short_name": "wprdc_allegheny",
+   "publisher": "Western PA Regional Data Center (WPRDC) \u2014 Allegheny County",
+   "url_pattern": "https://data.wprdc.org/api/3/action/datastore_search",
+   "asset_classes": [
+    "buyside_dd_real_estate"
+   ],
+   "cadence": "real_time",
+   "lag_from_event_to_publication_days": 14,
+   "lag_explanation": "CKAN datastore refreshes weekly-fortnightly.",
+   "market_watching_depth": "WATCHED_BY_FEW",
+   "what_it_carries": "Real Estate Sales (resource_id 5bbe6c55-bce6-4edb-9d04-68edeb6bf7b1), Mortgages, Property Assessments (resource_id 518b583f-7cc8-4f60-94d0-174cc98310dc), PLI Permits/Violations.",
+   "redundant_channels": [
+    "county_recorder_nod_cc2924"
+   ],
+   "access_method": "Free CKAN API",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Validated against FCRE2.",
+   "detectors_that_read_this": [
+    "wprdc_allegheny"
+   ],
+   "source_artifacts": [
+    "verticals/buyside_dd/connectors/wprdc_allegheny.py",
+    "verticals/buyside_dd/source_atlas.py"
+   ],
+   "_notes": "Covers Pittsburgh + ~130 municipalities."
+  },
+  {
+   "name": "NYC ACRIS Real Property Records",
+   "short_name": "acris_nyc",
+   "publisher": "NYC Department of Finance",
+   "url_pattern": "https://data.cityofnewyork.us/resource/8h5j-fqxa.json",
+   "asset_classes": [
+    "buyside_dd_real_estate"
+   ],
+   "cadence": "real_time",
+   "lag_from_event_to_publication_days": 5,
+   "lag_explanation": "Recorder data published ~5 days post-recording.",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "Deed records per instrument.",
+   "redundant_channels": [
+    "county_recorder_nod_cc2924"
+   ],
+   "access_method": "Socrata JSON",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Canonical NYC parcel-deeds source.",
+   "detectors_that_read_this": [
+    "acris_nyc"
+   ],
+   "source_artifacts": [
+    "verticals/buyside_dd/source_atlas.py"
+   ],
+   "_notes": "Companion: NYC PLUTO for building characteristics."
+  },
+  {
+   "name": "Texas Comptroller Franchise Tax Entity Search",
+   "short_name": "tx_comptroller_corp",
+   "publisher": "Texas Comptroller of Public Accounts",
+   "url_pattern": "https://comptroller.texas.gov/data-search/franchise-tax?name={name}",
+   "asset_classes": [
+    "buyside_dd_entity"
+   ],
+   "cadence": "real_time",
+   "lag_from_event_to_publication_days": 30,
+   "lag_explanation": "Franchise tax filings annual; entity status real-time.",
+   "market_watching_depth": "WATCHED_BY_FEW",
+   "what_it_carries": "Legal name, taxpayer ID (Comptroller# or FEIN), mailing-address ZIP.",
+   "redundant_channels": [],
+   "access_method": "Free JSON API",
+   "access_gating": "free, no documented rate limit (be polite)",
+   "validated_for_alpha_lead": "Mailing ZIP often the highest-value corroboration of claimed HQ city.",
+   "detectors_that_read_this": [
+    "tx_comptroller_corp"
+   ],
+   "source_artifacts": [
+    "verticals/buyside_dd/connectors/tx_comptroller_corp.py"
+   ],
+   "_notes": "Companion to Pennsylvania state_corp (currently 403 behind Cloudflare)."
+  },
+  {
+   "name": "Census ACS B25031 \u2014 Median Gross Rent",
+   "short_name": "census_acs_b25031",
+   "publisher": "US Census Bureau",
+   "url_pattern": "https://api.census.gov/data/{year}/acs/acs5",
+   "asset_classes": [
+    "buyside_dd_real_estate",
+    "buyside_dd_market"
+   ],
+   "cadence": "annual_mandatory",
+   "lag_from_event_to_publication_days": 730,
+   "lag_explanation": "ACS 5-year estimates lag ~2 years.",
+   "market_watching_depth": "WATCHED_BROADLY",
+   "what_it_carries": "Median gross rent by bedroom count, geography (tract/county/MSA).",
+   "redundant_channels": [
+    "hud_fmr"
+   ],
+   "access_method": "Free API (free key)",
+   "access_gating": "free with CENSUS_API_KEY",
+   "validated_for_alpha_lead": "Floor on claimed rents.",
+   "detectors_that_read_this": [
+    "census_acs"
+   ],
+   "source_artifacts": [
+    "verticals/buyside_dd/connectors/census_acs.py"
+   ],
+   "_notes": "5y estimates only; treat as floor."
+  },
+  {
+   "name": "HUD Fair Market Rent (FMR)",
+   "short_name": "hud_fmr",
+   "publisher": "HUD",
+   "url_pattern": "https://www.huduser.gov/hudapi/public/fmr",
+   "asset_classes": [
+    "buyside_dd_real_estate"
+   ],
+   "cadence": "annual_mandatory",
+   "lag_from_event_to_publication_days": 90,
+   "lag_explanation": "FMR for FY published ~Q4 of prior calendar year.",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "Section 8 voucher rent ceilings by metro + small-area (zip).",
+   "redundant_channels": [
+    "census_acs_b25031"
+   ],
+   "access_method": "Free REST (HUD_API_TOKEN required)",
+   "access_gating": "free with token",
+   "validated_for_alpha_lead": "Flags 'Section 8 viability' claims where proposed rent > FMR.",
+   "detectors_that_read_this": [
+    "hud_fmr"
+   ],
+   "source_artifacts": [
+    "verticals/buyside_dd/connectors/hud_fmr.py"
+   ],
+   "_notes": "Companion: HUD Income Limits."
+  },
+  {
+   "name": "Brave / DuckDuckGo Search (Tier-1 Open Web Discovery)",
+   "short_name": "web_discovery_search",
+   "publisher": "Brave (primary) + DuckDuckGo (fallback)",
+   "url_pattern": "https://search.brave.com  ; https://html.duckduckgo.com",
+   "asset_classes": [
+    "buyside_dd_general",
+    "public_co_general"
+   ],
+   "cadence": "real_time",
+   "lag_from_event_to_publication_days": 7,
+   "lag_explanation": "Web crawl latency varies; ~hours-to-days for surfaced news/LinkedIn/LoopNet.",
+   "market_watching_depth": "WATCHED_BROADLY",
+   "what_it_carries": "Open-web facts about entities: addresses, partners, customers, prior names, real-estate listings.",
+   "redundant_channels": [
+    "company_signal_ddg"
+   ],
+   "access_method": "HTML scrape with backoff; Brave API ($5/1k) for production",
+   "access_gating": "free with rate-limit risk; paid for stable",
+   "validated_for_alpha_lead": "AHC lesson: 'AHC factory Austin' \u2192 LoopNet 4422 Supply Ct listing \u2192 enables Tier 2/3 productive queries.",
+   "detectors_that_read_this": [
+    "web_discovery"
+   ],
+   "source_artifacts": [
+    "verticals/buyside_dd/connectors/web_discovery.py",
+    "/Users/ajay/.claude/projects/-Users-ajay-exalted-signalos/memory/feedback_dd_entity_resolution.md"
+   ],
+   "_notes": "Tier 1 discovery before Tier 2/3 verification."
+  },
+  {
+   "name": "IRS Form 5500 / DOL EFAST \u2014 Defined-Benefit Pension Funded Status",
+   "short_name": "form_5500_pension",
+   "publisher": "IRS / DOL EFAST",
+   "url_pattern": "https://efast.dol.gov/portal/app/disseminatePublic",
+   "asset_classes": [
+    "us_hospital_muni",
+    "us_pension_credit",
+    "public_co_industrial"
+   ],
+   "cadence": "annual_mandatory",
+   "lag_from_event_to_publication_days": 365,
+   "lag_explanation": "Form 5500 filed ~7-9.5 mo post plan-year-end (with extensions); EFAST disseminates ~30 days later. Detector typically uses obligor audited FS pension note (same data, faster).",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "Plan assets / PBO / underfunding / service-cost ratio.",
+   "redundant_channels": [
+    "sec_edgar_submissions"
+   ],
+   "access_method": "EFAST portal + bulk CSV",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Lead time 12-36 months on rating-agency model updates.",
+   "detectors_that_read_this": [
+    "pension_funded_ratio"
+   ],
+   "source_artifacts": [
+    "verticals/muni_credit/detectors/pension_funded_ratio.py"
+   ],
+   "_notes": "Detector data typically pulled from 10-K/audited FS pension note, not Form 5500 directly (faster). For CA public-sector obligors use calpers_employer_valuation / calstrs_db_valuation channels instead \u2014 they publish per-employer + systemwide much earlier."
+  },
+  {
+   "name": "CalPERS Public Agency Actuarial Valuation Reports (Per-Employer)",
+   "short_name": "calpers_employer_valuation",
+   "publisher": "California Public Employees' Retirement System (CalPERS)",
+   "url_pattern": "https://www.calpers.ca.gov/page/employers/actuarial-services/employer-contributions  (per-employer PDF; one per plan: Misc, Safety, PEPRA tiers)",
+   "asset_classes": [
+    "ca_local_govt_muni",
+    "ca_water_rev_muni",
+    "ca_rda_successor_muni",
+    "ca_state_go_muni",
+    "ca_pob_muni"
+   ],
+   "cadence": "annual_mandatory",
+   "lag_from_event_to_publication_days": 365,
+   "lag_explanation": "CalPERS measurement date = June 30 of FY end; per-employer reports published ~12 months later (June FY+1) for use in contribution-rate setting effective FY+2. Earliest preview comes via CalPERS preliminary investment-return press release in July (e.g., 11.6% return announce for FY2024-25 in July 2025).",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "Per-employer-plan: Market Value of Assets, Actuarial Liability, funded ratio (MVA / AL), Net Pension Liability (NPL), required contribution rates (employer normal cost % of payroll + UAL payment $), amortization schedule. Both Misc and Safety plans where applicable.",
+   "redundant_channels": [
+    "form_5500_pension",
+    "gasb_68_employer_acfr_pension_note"
+   ],
+   "access_method": "Per-employer PDF download from CalPERS portal; aggregate funded-ratio figures in CalPERS ACFR",
+   "access_gating": "free, no paywall; per-employer search by employer name",
+   "validated_for_alpha_lead": "Trajectory (5-year slope) is the leading indicator: Stockton CalPERS Misc declined ~26pp over 5y (FY08 89% -> FY12 63%) before June 2012 Ch 9. Vallejo similar 4y decline before May 2008 Ch 9. Sacramento USD's CalSTRS exposure 5y decline preceded April 2026 Fitch BB- cut. Snapshot lags; trajectory leads by 12-36 months.",
+   "detectors_that_read_this": [
+    "pension_funded_ratio",
+    "pension_funded_ratio_trajectory"
+   ],
+   "source_artifacts": [
+    "verticals/muni_credit/detectors/pension_funded_ratio.py",
+    "verticals/muni_credit/detectors/pension_funded_ratio_trajectory.py",
+    "verticals/muni_credit/data/etf_pension_trajectory.json",
+    "verticals/muni_credit/data/ca_pob_universe.json"
+   ],
+   "_notes": "Stockton/San Bernardino Ch 9 rulings established CalPERS contributions are SENIOR to POB bondholders (CalPERS = special-status creditor under CA Govt Code; POB = unsecured general obligation). Funded-ratio decline = future cash-flow pressure on general fund that competes with all GO debt service. Per-employer reports cover Misc (general employees), Safety (police/fire/lifeguards), and PEPRA tiers separately."
+  },
+  {
+   "name": "CalSTRS Defined Benefit Program Actuarial Valuation Reports",
+   "short_name": "calstrs_db_valuation",
+   "publisher": "California State Teachers' Retirement System (CalSTRS)",
+   "url_pattern": "https://www.calstrs.com/general-information/actuarial-valuations-and-reports  (systemwide PDF; one report per year)",
+   "asset_classes": [
+    "ca_k12_muni",
+    "ca_community_college_muni",
+    "ca_charter_muni"
+   ],
+   "cadence": "annual_mandatory",
+   "lag_from_event_to_publication_days": 365,
+   "lag_explanation": "Measurement date June 30; report published ~12 months later. Funding-plan reports published quarterly; full actuarial valuation annual.",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "Systemwide DB funded ratio (76.7% as of June 30 2024 per CalSTRS 2024 valuation; $88.7B unfunded liability), historical funded-ratio series, employer/state/member contribution-rate path, AB 1469 funding-plan progress.",
+   "redundant_channels": [
+    "gasb_68_employer_acfr_pension_note"
+   ],
+   "access_method": "PDF download",
+   "access_gating": "free, no paywall",
+   "validated_for_alpha_lead": "Trajectory at SYSTEMWIDE level is the public signal \u2014 per-district disaggregation is NOT available because CalSTRS DB Program is a cost-sharing multiple-employer plan (each K-12 district participates pro-rata via uniform contribution rate). Per-district variation surfaces only via GASB 68 net-pension-liability / governmental-fund-revenue multiples in each district's ACFR. Systemwide funded ratio improved FY20 67.1% -> FY24 76.7% during the window covered, anti-correlated with the Stockton-era pattern, so this signal does NOT currently flag distress for K-12 holdings.",
+   "detectors_that_read_this": [
+    "pension_funded_ratio_trajectory"
+   ],
+   "source_artifacts": [
+    "verticals/muni_credit/detectors/pension_funded_ratio_trajectory.py",
+    "verticals/muni_credit/data/etf_pension_trajectory.json"
+   ],
+   "_notes": "K-12 districts cannot escape CalSTRS systemwide trajectory but can experience disproportionate stress when contribution rates rise faster than LCFF revenue (which is the Sacramento USD pattern). The CalSTRS systemwide trajectory is a NECESSARY-NOT-SUFFICIENT signal for K-12 distress; pair with enrollment / LCFF / ESSER-cliff detectors. Open gap: per-district GASB 68 NPL ratios for the ETF K-12 holdings list."
+  },
+  {
+   "name": "GASB 68 Employer Pension Footnote (ACFR / CAFR Note)",
+   "short_name": "gasb_68_employer_acfr_pension_note",
+   "publisher": "Per-employer (cities, counties, special districts, K-12, community colleges) in audited ACFR",
+   "url_pattern": "Per-employer ACFR \u2014 typically Note 11 or Note H 'Pension Plan'",
+   "asset_classes": [
+    "ca_local_govt_muni",
+    "ca_water_rev_muni",
+    "ca_k12_muni",
+    "ca_community_college_muni",
+    "ca_rda_successor_muni",
+    "us_local_govt_muni"
+   ],
+   "cadence": "annual_mandatory",
+   "lag_from_event_to_publication_days": 365,
+   "lag_explanation": "ACFR issuance is FY-end + 6 months for most CA local govts (per state law; later for distressed/late filers \u2014 see late_filing detector). Pension note carries the measurement-date snapshot (typically 1-year lagged from ACFR issuance date).",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "Per-employer Net Pension Liability, plan-fiduciary-net-position-to-total-pension-liability ratio (the GASB version of funded ratio), service cost, sensitivity analysis (discount rate +1% / -1% NPL bands), schedule of contributions vs. actuarially determined contribution, deferred outflows/inflows from changes in assumptions.",
+   "redundant_channels": [
+    "calpers_employer_valuation",
+    "calstrs_db_valuation",
+    "form_5500_pension"
+   ],
+   "access_method": "EMMA financial disclosure (PDF) + per-employer website Finance / Treasurer page",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Provides per-employer trajectory where CalSTRS systemwide proxy is too coarse. For K-12 ETF holdings, this is the primary path to district-specific pension stress (e.g., Sacramento USD NPL / governmental-fund-revenue multiple).",
+   "detectors_that_read_this": [
+    "pension_funded_ratio",
+    "pension_funded_ratio_trajectory"
+   ],
+   "source_artifacts": [
+    "verticals/muni_credit/detectors/pension_funded_ratio_trajectory.py",
+    "verticals/muni_credit/data/etf_pension_trajectory.json"
+   ],
+   "_notes": "GASB 68 NPL is computed using BLENDED discount rate (long-term assumed return for funded portion, muni bond yield for unfunded portion). Discount-rate volatility creates apparent funded-ratio swings that are not real economic deterioration \u2014 interpret 5y trajectory net of discount-rate assumption changes. CalPERS reduced discount rate from 7.50% to 7.00% in 2021, causing one-time funded-ratio drop across all CalPERS employers."
+  },
+  {
+   "name": "Moody's / S&P / Fitch \u2014 Issue & Issuer Ratings + Rating Actions",
+   "short_name": "moody_s_p_fitch_rating_actions",
+   "publisher": "Moody's, Standard & Poor's, Fitch (agencies)",
+   "url_pattern": "Agency websites (gated) + EMMA Material Events feed",
+   "asset_classes": [
+    "muni_credit",
+    "public_co_credit"
+   ],
+   "cadence": "event_driven",
+   "lag_from_event_to_publication_days": 1,
+   "lag_explanation": "Rating actions published same-day on Material Events feed (EMMA Rule 15c2-12 #1).",
+   "market_watching_depth": "WATCHED_BROADLY",
+   "what_it_carries": "Issue/issuer rating, outlook, watch status.",
+   "redundant_channels": [
+    "emma_material_events"
+   ],
+   "access_method": "Agency sites (mostly gated) + EMMA + Bloomberg/ICE",
+   "access_gating": "agency websites paywalled; EMMA Material Events feed free",
+   "validated_for_alpha_lead": "Co-incident with broad market move; lagging vs operating-signal detectors per framework's lead-time analyses (CMS Star Ratings ~12-18 mo ahead of muni rating action, etc.).",
+   "detectors_that_read_this": [
+    "developer_corp_credit"
+   ],
+   "source_artifacts": [
+    "verticals/muni_credit/detectors/developer_corp_credit.py",
+    "verticals/muni_credit/outputs/CA_NH_INVESTMENT_THESIS.md"
+   ],
+   "_notes": "87.6% of CA CFDs unrated \u2014 so for CFD universe this channel covers <13% of issues."
+  },
+  {
+   "name": "MunicipalBonds.com / EMMA RTRS \u2014 Trade Prints",
+   "short_name": "emma_rtrs_trades",
+   "publisher": "MSRB Real-Time Transaction Reporting System (RTRS)",
+   "url_pattern": "https://emma.msrb.org/MarketActivity/  ; https://www.municipalbonds.com/  (consumer surface)",
+   "asset_classes": [
+    "muni_credit"
+   ],
+   "cadence": "real_time",
+   "lag_from_event_to_publication_days": 1,
+   "lag_explanation": "15-min RTRS for institutional trades; daily aggregation; quarterly archive.",
+   "market_watching_depth": "WATCHED_BROADLY",
+   "what_it_carries": "Per-CUSIP per-trade price, yield, par, side.",
+   "redundant_channels": [],
+   "access_method": "EMMA web (free, view-only); RTRS subscription paid; MunicipalBonds.com 5-trade free limit",
+   "access_gating": "EMMA free view-only; programmatic blocked by ToU; Wayback Machine snapshots only useful auxiliary",
+   "validated_for_alpha_lead": "Used to test signal-to-price lag (CFD_TIMING_ALPHA_TEST.md) \u2014 Diablo Grande 65.75c 2019-11-14 vs first detector fire 2018-09. Price LED signal by ~12 months.",
+   "detectors_that_read_this": [],
+   "source_artifacts": [
+    "verticals/muni_credit/data/landsecured_bond_trades.json",
+    "verticals/muni_credit/outputs/CFD_TIMING_ALPHA_TEST.md"
+   ],
+   "_notes": "The ground-truth price feed against which all signal-channel leads are measured."
+  },
+  {
+   "name": "ProPublica Nonprofit Explorer \u2014 990 + Schedule K + Schedule O",
+   "short_name": "propublica_nonprofit_explorer",
+   "publisher": "ProPublica (surfacing IRS data)",
+   "url_pattern": "https://projects.propublica.org/nonprofits/",
+   "asset_classes": [
+    "us_nh_muni",
+    "us_ccrc_muni",
+    "us_hospital_muni",
+    "us_charter_muni"
+   ],
+   "cadence": "annual_mandatory",
+   "lag_from_event_to_publication_days": 540,
+   "lag_explanation": "Same as Form 990 + ~30 days ProPublica indexing.",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "Form 990 full text + Schedule K (tax-exempt bond detail) + Schedule O (narrative).",
+   "redundant_channels": [
+    "irs_form_990_schedule_k"
+   ],
+   "access_method": "Free web + PDF download",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Validated for obligor par + EIN cross-check.",
+   "detectors_that_read_this": [],
+   "source_artifacts": [
+    "verticals/muni_credit/outputs/CA_NH_INVESTMENT_THESIS.md",
+    "verticals/muni_credit/outputs/CHARTER_SECTOR_SCOPING.md"
+   ],
+   "_notes": "Free surfacing of the same data as IRS Form 990 channel; functionally redundant."
+  },
+  {
+   "name": "PACER Bankruptcy Court Filings",
+   "short_name": "pacer_bankruptcy",
+   "publisher": "US Federal Courts (PACER)",
+   "url_pattern": "https://pacer.uscourts.gov/",
+   "asset_classes": [
+    "ca_cfd_muni",
+    "buyside_dd_entity",
+    "public_co_general"
+   ],
+   "cadence": "real_time",
+   "lag_from_event_to_publication_days": 1,
+   "lag_explanation": "Ch 9 / Ch 11 / Ch 7 filings docketed within 1 day.",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "Bankruptcy petition, schedules, claims register.",
+   "redundant_channels": [
+    "courtlistener_pacer"
+   ],
+   "access_method": "PACER paid ($0.10/page) + CourtListener mirror",
+   "access_gating": "PACER metered; CourtListener free rate-limited",
+   "validated_for_alpha_lead": "Diablo Grande WHWD Ch 9 EDCA 25-26635 filed 2025-11-25.",
+   "detectors_that_read_this": [
+    "developer_bankruptcy"
+   ],
+   "source_artifacts": [
+    "verticals/muni_credit/outputs/LANDSECURED_VALIDATION_PASS.md",
+    "verticals/muni_credit/detectors/developer_bankruptcy.py"
+   ],
+   "_notes": "Cited as gold-standard primary source not yet exercised due to time-box."
+  },
+  {
+   "name": "OpenCorporates / 50-State Secretary of State Entity Registries",
+   "short_name": "state_corp_registries",
+   "publisher": "Per-state Secretary of State",
+   "url_pattern": "Per-state SoS portals (varies)",
+   "asset_classes": [
+    "buyside_dd_entity",
+    "muni_credit (developer LLCs)"
+   ],
+   "cadence": "real_time",
+   "lag_from_event_to_publication_days": 7,
+   "lag_explanation": "Filings posted within ~1 week.",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "Entity formation, status, registered agent, officers/members.",
+   "redundant_channels": [
+    "tx_comptroller_corp",
+    "az_corp"
+   ],
+   "access_method": "Per-state scrape; OpenCorporates paid API",
+   "access_gating": "free per-state (varies); Cloudflare on PA, CA UCC, etc.",
+   "validated_for_alpha_lead": "Used for entity-resolution: developer LLC \u2194 parent corp credit; SPV/Series LLC for Form D.",
+   "detectors_that_read_this": [
+    "state_corp_pa",
+    "az_corp"
+   ],
+   "source_artifacts": [
+    "verticals/buyside_dd/connectors/state_corp_pa.py",
+    "verticals/public_co/m_sources/az_corp.py",
+    "verticals/buyside_dd/source_atlas.py"
+   ],
+   "_notes": "Per-state fragmentation = batch DD work-in-progress."
+  },
+  {
+   "name": "FEMA National Flood Hazard Layer (NFHL)",
+   "short_name": "fema_nfhl",
+   "publisher": "FEMA",
+   "url_pattern": "https://msc.fema.gov/portal/",
+   "asset_classes": [
+    "buyside_dd_real_estate"
+   ],
+   "cadence": "irregular",
+   "lag_from_event_to_publication_days": 90,
+   "lag_explanation": "Flood maps re-issued irregularly (~years); accessible real-time.",
+   "market_watching_depth": "WATCHED_BROADLY",
+   "what_it_carries": "Per-parcel flood zone, BFE.",
+   "redundant_channels": [
+    "first_street_foundation"
+   ],
+   "access_method": "Free portal + ArcGIS feature server",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Standard input.",
+   "detectors_that_read_this": [],
+   "source_artifacts": [
+    "verticals/buyside_dd/source_atlas.py  (PARCEL.flood_zone)"
+   ],
+   "_notes": "Standard underwriting layer."
+  },
+  {
+   "name": "EPA Envirofacts / State DEQ",
+   "short_name": "epa_envirofacts_state_deq",
+   "publisher": "EPA + state DEQ/DEP",
+   "url_pattern": "https://enviro.epa.gov/  ; per-state DEQ portals",
+   "asset_classes": [
+    "buyside_dd_real_estate"
+   ],
+   "cadence": "monthly",
+   "lag_from_event_to_publication_days": 60,
+   "lag_explanation": "EPA refreshes ~monthly; state DEQ varies.",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "Per-parcel environmental status: contaminated sites, RCRA, CERCLIS.",
+   "redundant_channels": [
+    "epa_frs"
+   ],
+   "access_method": "Free portal",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Standard real-estate diligence.",
+   "detectors_that_read_this": [],
+   "source_artifacts": [
+    "verticals/buyside_dd/source_atlas.py  (PARCEL.environmental_status)"
+   ],
+   "_notes": "Standard underwriting layer."
+  },
+  {
+   "name": "USCYBERCOM / Service Cyber SAG Budget Aggregation",
+   "short_name": "cybercom_budget",
+   "publisher": "DoD service comptrollers (Army, Navy, USMC, SOCOM, AF/SF)",
+   "url_pattern": "Per-service OP-5 SAG budget documents",
+   "asset_classes": [
+    "public_co_cyber"
+   ],
+   "cadence": "annual_mandatory",
+   "lag_from_event_to_publication_days": 60,
+   "lag_explanation": "Aligned to J-Book cycle.",
+   "market_watching_depth": "WATCHED_BY_FEW",
+   "what_it_carries": "Per-SAG cyber spending; CMF construct distributed.",
+   "redundant_channels": [
+    "pentagon_jbook_program_funding"
+   ],
+   "access_method": "OP-5 documents (PDF)",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Cyber funding not in single PE; aggregator surfaces.",
+   "detectors_that_read_this": [
+    "cybercom_budget"
+   ],
+   "source_artifacts": [
+    "verticals/public_co/m_sources/cybercom_budget.py"
+   ],
+   "_notes": "Cross-service aggregation for cyber subcontractors."
+  },
+  {
+   "name": "IC Contracting Proxy (BAH / SAIC / CACI / LDOS-style)",
+   "short_name": "ic_contracting_proxy",
+   "publisher": "Aggregated derivation from usaspending + 10-K disclosure + cleared-FTE benchmarks",
+   "url_pattern": "Derived",
+   "asset_classes": [
+    "public_co_govt_services"
+   ],
+   "cadence": "irregular",
+   "lag_from_event_to_publication_days": null,
+   "lag_explanation": "UNVERIFIABLE \u2014 derivation cadence not fixed; depends on 10-K disclosure cadence (annual) + cleared-FTE benchmark refresh.",
+   "market_watching_depth": "WATCHED_BY_FEW",
+   "what_it_carries": "Plausibility envelope on IC revenue claims (cleared_FTE \u00d7 utilization \u00d7 rev_per_cleared_FTE).",
+   "redundant_channels": [],
+   "access_method": "Derived inside the framework",
+   "access_gating": "free",
+   "validated_for_alpha_lead": "Captures classified-revenue-share claims that USAspending shows only at agency-aggregate.",
+   "detectors_that_read_this": [
+    "ic_contracting_proxy"
+   ],
+   "source_artifacts": [
+    "verticals/public_co/m_sources/ic_contracting_proxy.py"
+   ],
+   "_notes": "Three-signal triangulation."
+  },
+  {
+   "name": "Roseville / CSCDA / CMFA / CalPFA / CSFA \u2014 TEFRA Notices + OS Publication",
+   "short_name": "ca_muni_conduit_tefra_os",
+   "publisher": "Per-conduit (CMFA, CSCDA, CalPFA, CSFA, CMFA-Redlands; primary city/county)",
+   "url_pattern": "Per-conduit website (e.g., https://www.cmfa-ca.com  TEFRA notices)",
+   "asset_classes": [
+    "ca_nh_muni",
+    "ca_ccrc_muni",
+    "ca_hospital_muni",
+    "ca_charter_muni",
+    "ca_cfd_muni"
+   ],
+   "cadence": "event_driven",
+   "lag_from_event_to_publication_days": 30,
+   "lag_explanation": "TEFRA notices published ~30 days pre-issuance public hearing; OS published at/near pricing.",
+   "market_watching_depth": "WATCHED_BY_SOPHISTICATED",
+   "what_it_carries": "Per-issue: TEFRA authorization, par, use of proceeds, OS w/ covenants, security details, insurance status.",
+   "redundant_channels": [
+    "emma_material_events",
+    "msrb_emma_official_statements"
+   ],
+   "access_method": "Per-conduit web",
+   "access_gating": "free, no API",
+   "validated_for_alpha_lead": "Used to surface HumanGood Plymouth Village $205M TEFRA pre-issuance signal.",
+   "detectors_that_read_this": [],
+   "source_artifacts": [
+    "verticals/muni_credit/outputs/CA_NH_INVESTMENT_THESIS.md",
+    "verticals/muni_credit/outputs/CHARTER_SECTOR_SCOPING.md"
+   ],
+   "_notes": "Forward-looking primary-market signal."
+  },
+  {
+   "name": "EdSource / LA Times Education / Local News",
+   "short_name": "edsource_la_times_charter_coverage",
+   "publisher": "EdSource, LA Times, local outlets",
+   "url_pattern": "https://edsource.org  ; https://www.latimes.com/california/education",
+   "asset_classes": [
+    "ca_charter_muni"
+   ],
+   "cadence": "real_time",
+   "lag_from_event_to_publication_days": 1,
+   "lag_explanation": "News cycle.",
+   "market_watching_depth": "WATCHED_BY_FEW",
+   "what_it_carries": "Authorizer-conflict events, scandals, founder departures.",
+   "redundant_channels": [
+    "ca_cde_charter_schools_division"
+   ],
+   "access_method": "RSS + search",
+   "access_gating": "free / metered paywall",
+   "validated_for_alpha_lead": "Used to populate authorizer-conflict event log.",
+   "detectors_that_read_this": [
+    "charter_authorizer_conflict (proposed)"
+   ],
+   "source_artifacts": [
+    "verticals/muni_credit/outputs/CHARTER_SECTOR_SCOPING.md"
+   ],
+   "_notes": "Manual event-log curation required."
+  },
+  {
+   "name": "Google News + Local CA News + Bond Buyer \u2014 Negative-News Velocity",
+   "short_name": "google_news_local_ca",
+   "publisher": "Google News (aggregator), local CA outlets (LA Times, SF Chronicle, Sac Bee, OC Register, San Diego Union Tribune, Fresno Bee, KQED, EdSource, CalMatters, Mountain View Voice, Fresnoland, KVPR, Monterey County NOW), Bond Buyer (sector specialist), CA AG press release feed, DOJ press release feed",
+   "url_pattern": "https://news.google.com/search?q={obligor_name}+{topic}+site:{local_outlet}  + oag.ca.gov/news/press-releases  + justice.gov/news",
+   "asset_classes": [
+    "muni_general",
+    "ca_k12_go_muni",
+    "ca_hospital_muni",
+    "ca_charter_muni",
+    "ca_nh_muni",
+    "ca_water_muni",
+    "ca_rda_successor_muni",
+    "ca_housing_muni"
+   ],
+   "cadence": "real_time",
+   "lag_from_event_to_publication_days": 1,
+   "lag_explanation": "Wire / local-paper coverage typically hits the index within 24 hours of a public event (AG press release, strike authorization, layoff WARN filing, civil grand jury report, lawsuit filing). Google News indexes within hours; outlet RSS may be faster.",
+   "market_watching_depth": "WATCHED_BROADLY",
+   "what_it_carries": "Per-obligor sentiment-tagged article stream over rolling windows. Carries: (a) labor-action cycles (strike authorization, nurse contract expiry, mass layoff WARN); (b) AG / DOJ / HHS-OIG enforcement actions; (c) civil grand jury / FCMAT / state controller adverse findings; (d) Title IX / sexual-abuse litigation clusters; (e) active-fire / disaster investigation language; (f) hospital closure announcements; (g) school-district receivership chatter.",
+   "redundant_channels": [
+    "emma_material_events",
+    "doj_fca_settlements",
+    "hhs_oig_cia_list",
+    "ca_fcmat_reports",
+    "ca_state_controller_audits"
+   ],
+   "access_method": "Free web search + outlet RSS; LLM sentiment classification (gpt-4o-mini or similar) for tagging at scale",
+   "access_gating": "free; outlet paywalls vary (LA Times / SF Chronicle have metered access); Bond Buyer is subscription. Google News query rate limits apply at scale.",
+   "validated_for_alpha_lead": "FASTEST signal in the framework \u2014 news typically precedes formal rating actions by months and EMMA material-event filings by weeks. INITIAL CALIBRATION (2026-05-28, CA muni ETF 19-name basket): 4/19 = 21% fire rate. Sector skew: 3/4 CHFFA hospitals fire (Stanford open-ended nurses strike + $10M wage settlement + Lucile Packard layoffs; Providence Eureka CA AG Emergency Services enforcement; Adventist HHS-OIG CMP + CA AG patient-disclosure settlement + Roseville WARN); 1/6 K-12 fires (Clovis USD two Title IX lawsuit clusters trailing 12mo). Per honesty-alpha framework: news of HONESTLY DISCLOSED bad events is already in dealer-market price, so detector value is exclusion-screen + microstructure-confirmation rather than timing alpha.",
+   "detectors_that_read_this": [
+    "news_sentiment_monitor"
+   ],
+   "source_artifacts": [
+    "verticals/muni_credit/detectors/news_sentiment_monitor.py",
+    "verticals/muni_credit/data/etf_news_sentiment.json",
+    "/Users/ajay/.claude/projects/-Users-ajay-exalted-signalos/memory/feedback_signalos_true_goal_microstructure_knowledge.md",
+    "/Users/ajay/.claude/projects/-Users-ajay-exalted-signalos/memory/feedback_honesty_alpha_framework.md"
+   ],
+   "_notes": "Hostile-validator discipline required: 'controversial budget discussion' is NEUTRAL, not negative; sector-wide narratives (CA-school-enrollment-cliff, State structural deficit) should not fire per-obligor unless the specific obligor has its own surfaced event. Active-investigation language tags (DOJ_AG_ENFORCEMENT, NURSES_STRIKE_OPEN_ENDED, FCMAT_FISCAL_DISTRESS_REVIEW, STATE_RECEIVERSHIP, TITLE_IX_LITIGATION_CLUSTER, ACTIVE_FIRE_INVESTIGATION, SEC/FBI investigation, CRIMINAL_INDICTMENT_PUBLIC_OFFICIAL) bump severity. Cal-Mortgage / CSFA-intercept / GO-wrap masking may DECOUPLE detector fire from bond-price response on wrapped obligor names \u2014 cross-check with masking_mechanisms.json."
+  },
+  {
+   "name": "FEMA National Risk Index tract-level hazard designations",
+   "short_name": "fema_nri_hazard",
+   "publisher": "FEMA (National Risk Index; official ArcGIS feature service)",
+   "url_pattern": "https://services.arcgis.com/XG15cJAlne2vxtgt/arcgis/rest/services/National_Risk_Index_Census_Tracts/FeatureServer/0/query?where=TRACTFIPS='{tract}'",
+   "asset_classes": [
+    "ca_school_go_muni",
+    "ca_cfd_muni",
+    "ca_mello_roos",
+    "private_re_credit",
+    "public_co_insurers",
+    "public_co_homebuilders",
+    "public_co_utilities",
+    "ccrc_muni"
+   ],
+   "cadence": "annual_voluntary",
+   "lag_from_event_to_publication_days": 365,
+   "lag_explanation": "NRI model updates roughly annually (v1.20 Dec-2025). The SIGNAL latency that matters is downstream: hazard designation -> insurer non-renewals/FAIR-plan growth -> property marketability/AV drag plays out over YEARS, and muni assessed-value rolls lag a further 1-2 years. Slowest channel in the catalog; nobody trades it.",
+   "market_watching_depth": "UNWATCHED_BY_MUNI_MARKET",
+   "what_it_carries": "Per-census-tract risk score/rating + building-value exposure for 18 natural hazards. Predicts insurance withdrawal geography -> uninsurable property -> assessed-value/collateral-value drag (the levy base for school GO; the collateral for RE credit; the book for P&C insurers). Key discipline: hazards must be checked JOINTLY -- optimizing exposure away from one peril silently concentrates another (CA sleeve: seismic diversification concentrated wildfire; Mendocino USD 91% of building value in high-fire tracts, 2026-06-10).",
+   "redundant_channels": [
+    "cal_fire_fhsz (CA-only, regulatory zones; captcha-walled)",
+    "ca_fair_plan_zip_growth (sharper insurer-stress signal; not yet programmatic)"
+   ],
+   "access_method": "api",
+   "access_gating": "none (free, no auth; OpenFEMA does NOT carry NRI; old static download path dead)",
+   "validated_for_alpha_lead": "NO -- structural/credit overlay, not a trading signal; encodes WHERE the slow insurance-withdrawal channel will bite first",
+   "detectors_that_read_this": [
+    "wildfire_overlay (muni_credit sleeve constraint FIRE_CAP)",
+    "buyside_dd dispatcher via natural_hazard_exposure attribute + recall floor"
+   ],
+   "source_artifacts": [
+    "verticals/buyside_dd/connectors/fema_nri_hazard.py",
+    "verticals/muni_credit/wildfire_overlay.py",
+    "verticals/muni_credit/data/issuer_credit/nri_ca_tracts_wildfire.json"
+   ],
+   "_notes": "District-level aggregation for school GOs via NCES EDGE GRF25 lea_tract join (no GIS). Paradise validation: wildfire score 95.2 but rating only 'Relatively Moderate' because the exposed building stock already burned in 2018 -- NRI ratings are exposure-conditioned, read score AND rating."
+  },
+  {
+   "name": "EMMA continuing-disclosure event notices (SEC Rule 15c2-12)",
+   "short_name": "emma_continuing_disclosure",
+   "publisher": "MSRB EMMA (issuer/obligated-person filings)",
+   "url_pattern": "POST emma.msrb.org/Security/ContinuingDisclosurePartialView {SecurityId:<CUSIP>, SelectedPredefinedDateRange:'All'} (Disclaimer6 cookie)",
+   "asset_classes": [
+    "all_muni"
+   ],
+   "cadence": "event_driven",
+   "lag_from_event_to_publication_days": 10,
+   "lag_explanation": "15c2-12 requires event notices within 10 business days of occurrence \u2014 the FASTEST channel in munis, against an annual default cadence for everything else. Failure-to-file notices are themselves a meta-signal about the issuer's disclosure hygiene.",
+   "market_watching_depth": "WATCHED_BY_INSTITUTIONS_ONLY (no consolidated alerting for retail; nothing prices small-issuer notices quickly)",
+   "what_it_carries": "Rating changes, reserve draws, payment delinquencies, defeasance/redemption notices (kills a pending buy), failure-to-provide-annual-information, insurer events. Triage rules: (1) ATWATER PATTERN \u2014 on-time operating-data filings can mask chronically late audits, check audit currency separately; (2) WRAP NOISE \u2014 insurer notices (AGM merger 2024 fired on every wrapped CUSIP) are insurer-channel, not issuer credit.",
+   "redundant_channels": [
+    "rating agency feeds (paid)",
+    "cdiac_yfsr (CA, slower)"
+   ],
+   "access_method": "api_scrape",
+   "access_gating": "disclaimer cookie only; free",
+   "validated_for_alpha_lead": "NOT TESTED for alpha; validated for DD/monitoring on 25-name live basket 2026-06-11 (0 redemption risks, 1 chronic-late-filer caught pre-purchase)",
+   "detectors_that_read_this": [
+    "cd_monitor.py (holdings delta watch)",
+    "late_filing (muni detector \u2014 refinement candidate: audit-vs-operating currency split)"
+   ],
+   "source_artifacts": [
+    "verticals/muni_credit/emma_continuing_disclosure.py",
+    "verticals/muni_credit/cd_monitor.py",
+    "verticals/muni_credit/outputs/buylist_dd/cd_scan_p1.json"
+   ],
+   "_notes": "Promotion to a buyside_dd connector (disclosure_history attribute) is a TODO; muni-only for now."
+  },
+  {
+   "name": "EMMA annual filings as levy-base/AV underwriting source",
+   "short_name": "emma_annual_filings_av",
+   "publisher": "MSRB EMMA (district/obligor annual reports)",
+   "url_pattern": "Security/Details/<cusip> -> ContinuingDisclosurePartialView -> Annual Financial Information doc IDs -> emma.msrb.org/<DOCID>.pdf",
+   "asset_classes": [
+    "ca_school_go_muni",
+    "all_muni"
+   ],
+   "cadence": "annual_mandatory",
+   "lag_from_event_to_publication_days": 270,
+   "lag_explanation": "FYE 6/30 + CDA due dates ~next March; AV tables lag the assessment roll ~1yr.",
+   "market_watching_depth": "UNWATCHED for small issuers (no agency coverage = nobody reads these)",
+   "what_it_carries": "Assessed-value totals + history, GO debt schedules, Teeter confirmation, (sometimes) top-taxpayer tables. The land-use mix lives only in the issuance OS (vintage caveat). THE per-issuer credit method for unrated school GOs: metric that matters = GO debt as % of AV (Emery: office-CRE AV concern real but debt=1.0% of AV/96x coverage + Teeter -> intact; Turlock SFID: 0.44%/230x).",
+   "redundant_channels": [
+    "county assessor rolls (primary but per-county formats)",
+    "CDIAC DebtWatch (debt only)"
+   ],
+   "access_method": "api_scrape + pdf_read",
+   "access_gating": "disclaimer cookie only; free",
+   "validated_for_alpha_lead": "NO \u2014 credit-underwrite channel, not a trading signal",
+   "detectors_that_read_this": [
+    "school_go_issuer_credit.py (v2 roadmap: AV/debt coverage metric)"
+   ],
+   "source_artifacts": [
+    "verticals/muni_credit/outputs/buylist_dd/av_underwrite.json",
+    "verticals/muni_credit/data/os_cache/"
+   ],
+   "_notes": "Identity discipline applies: resolve issuer from EMMA title BEFORE matching filings (5 misbindings caught 2026-06-10/11)."
+  },
+  {
+   "name": "Scheduler exhaust \u2014 booking-slot scarcity nowcast",
+   "short_name": "scheduler_exhaust",
+   "publisher": "self-hosted appointment/reservation schedulers (booking widgets, wait-time postings)",
+   "url_pattern": "per-instance PanelSpec.scheduler_url (e.g. appointment.questdiagnostics.com; labcorp.com/labs-and-appointments); framework = desk/scheduler_exhaust.py",
+   "mechanism": "public booking-slot scarcity leaks utilization: days-to-next-available, %-same-day, and booking-horizon depth over a FIXED location panel move with operational load AHEAD of the reported volume print. Operational physical quantity, hard to fake, free to observe, too niche for alt-data vendors to productize.",
+   "asset_classes": [
+    "public_co_healthcare_services",
+    "public_co_consumer_services",
+    "public_co_general"
+   ],
+   "cadence": "weekly (spot sample at a fixed weekday/hour per instance)",
+   "lag_from_event_to_publication_days": 0,
+   "lag_explanation": "the slot state IS the event (zero observation lag); the corresponding reported volume prints 30-60d after quarter end, so the channel LEADS reported volume by 0-1 quarter.",
+   "latency": "leads reported volume 0-1 quarter",
+   "market_watching_depth": "NOT_WATCHED",
+   "what_it_carries": "per-location status (ok / no_slots / blocked=MISSING-never-zero), days-to-next-available-slot, %-same-day, %-within-48h, %-booked-out (right-censored at the visible booking horizon), panel coverage + sample quality. Aggregated per instance into desk/data/scheduler_exhaust/<ticker>_history.jsonl.",
+   "applies_to": "appointment/reservation-based service businesses with PUBLIC online booking (draw sites/labs, urgent-care & ER queue postings, salon online check-in, restaurant order-ahead/reservations, med-spa injectable providers, service bays). Book-wide applicability census: desk/data/scheduler_exhaust/candidates.json (2026-07-23: 7 yes / 18 indirect / 390 no over 415 ledger names) \u2014 UNSCREENED != CLEAR; coverage validator = `python3 -m desk.scheduler_exhaust --census-gaps`.",
+   "confounders": [
+    "capacity-vs-demand: slot scarcity conflates demand with CAPACITY \u2014 staffing up shortens waits while volume rises; designated cross-check = hiring_velocity (same-site posting waves = capacity change)",
+    "spot-vs-average sampling: a weekly spot sample is not the average booking experience \u2014 fix the sampling weekday/hour per instance and read trends across snapshots, never one pull"
+   ],
+   "validation_status": "PAPER \u2014 calibration seed = DGX/LH Q2-2026 frozen calls; the channel graduates only if it beats consensus through the Q3-2026 prints (October). No basket/sizing use before graduation.",
+   "redundant_channels": [
+    "hiring_velocity (capacity side \u2014 the designated cross-check, not a substitute)",
+    "direct volume releases where they exist (state gaming monthlies, airport traffic) strictly dominate the proxy \u2014 see candidates.json notes on FLL/ASR/PAC"
+   ],
+   "access_method": "browser_scrape (Playwright real-Chrome fingerprint, land-first-for-cookies, in-page fetch) + per-instance --manual CSV fallback",
+   "access_gating": "free; anti-bot WAFs on some targets \u2014 blocked locations are recorded as MISSING, never zero; >40% blocked marks the snapshot DEGRADED",
+   "validated_for_alpha_lead": "NOT YET \u2014 PAPER. Seed instance #1 = Quest/Labcorp lab-appointment panel (desk/lab_scheduler_panel.py). Frozen Q2-2026 calls grade at the Q3 prints; graduation requires beating consensus, not merely correlating.",
+   "detectors_that_read_this": [
+    "scheduler_exhaust (framework: desk/scheduler_exhaust.py; connector shim: verticals/buyside_dd/connectors/scheduler_exhaust.py)",
+    "lab_scheduler_panel (instance #1: desk/lab_scheduler_panel.py \u2014 DGX/LH)"
+   ],
+   "source_artifacts": [
+    "desk/scheduler_exhaust.py",
+    "desk/data/scheduler_exhaust/candidates.json",
+    "desk/data/scheduler_exhaust/REGISTRY_PATCH.md"
+   ],
+   "_notes": "The desk's preferred signal shape. Instance adapters register via desk.scheduler_exhaust.INSTANCE_MODULES (get_panel_specs() -> [PanelSpec])."
+  },
+  {
+   "name": "Regulator handle cohorted by tax-regime change",
+   "short_name": "regulator_handle_tax_cohort",
+   "asset_classes": [
+    "us_osb_equity",
+    "gambling"
+   ],
+   "mechanism": "State regulator monthly handle files, cohorted into tax-changed (PA/NJ/IL) vs tax-unchanged (MI/TN/IN/NY/OH) states, separate a LEGISLATIVE shock from a TECHNOLOGICAL one; cross-check against venue-level exchange volume to solve gross diversion vs net drag -> recover INCREMENTALITY.",
+   "latency": "NEGATIVE at every step (free public file led price; price led company disclosure)",
+   "transferable_rule": "An issuer's volume metric is evidence about the ISSUER, never about its market (FanDuel +2.2% while the market ran -3.9%); cohort the regulator file, then solve gross-vs-net to recover incrementality.",
+   "precedent": "FLUT court 2026-08-07 (red REJECT 8/10); next decisive read = Sept-Nov 2026 NFL-clean regulator files, published BEFORE the Q3 print.",
+   "added": "2026-08-07"
+  }
+ ],
+ "redundancy_clusters": [
+  {
+   "cluster_id": "cluster_ca_cfd_distress",
+   "name": "CA CFD distress signaling \u2014 5+ public channels carry the same information",
+   "description": "The microstructure finding from CFD_TIMING_ALPHA_TEST + CFD_UPSTREAM_DATA_TEST: the same special-tax delinquency event is carried by 5+ overlapping public channels at varying lags. Per honesty-alpha framework, this makes the signal UN-ARBITRAGEABLE \u2014 once any one channel publishes, the dealer market re-prices before slower channels catch up.",
+   "channels": [
+    "cdiac_yfsr  (annual, ~5mo lag)",
+    "cdiac_default_and_draw_db  (event-driven, ~10d)",
+    "emma_continuing_disclosure_53359_5  (semi-annual, ~30-60d)",
+    "emma_material_events  (event-driven, ~10d)",
+    "govt_code_53356_1_court_foreclosure  (event-driven, 0d)",
+    "county_tax_default_list  (annual, ~215d lag)"
+   ],
+   "implication": "Land-secured timing-alpha hypothesis FALSIFIED across 3 priority CFDs (Diablo Grande, Northstar, Palmdale). Framework's value here is classification/diligence-replication, not entry-timing alpha."
+  },
+  {
+   "cluster_id": "cluster_ca_nh_quality",
+   "name": "CA NH operator quality \u2014 CMS triangulation",
+   "description": "3 CMS channels triangulate NH operator quality; signals are highly correlated, but composite use is forbidden by detector-composition discipline (use as union of narrow filters).",
+   "channels": [
+    "cms_nh_care_compare_stars  (monthly, ~30d)",
+    "cms_nh_special_focus_facility  (monthly)",
+    "cms_nh_civil_monetary_penalty  (monthly, ~60d)"
+   ],
+   "implication": "All 3 effective for operator-credit classification (100% precision in 2023-2025 NH backtest). All 3 MASKED by Cal-Mortgage insurance wrap (bondholders price insurer credit, not operator) \u2192 framework hedges insurer-cascade tail risk rather than steady alpha."
+  },
+  {
+   "cluster_id": "cluster_healthcare_fraud_enforcement",
+   "name": "Healthcare fraud + enforcement",
+   "description": "DOJ + HHS-OIG + CMS readmissions overlap on enforcement-driven catastrophes.",
+   "channels": [
+    "doj_fca_settlements  (event-driven, ~1d)",
+    "hhs_oig_cia_list  (event-driven, ~14d)",
+    "cms_hospital_hrrp  (annual)"
+   ],
+   "implication": "CIA imposition is a 5-year structural compliance overhead; HRRP max penalty fires only at max (3.00%) for narrow high-precision."
+  },
+  {
+   "cluster_id": "cluster_dod_revenue_disclosure",
+   "name": "DoD revenue forward + rear-view triangulation",
+   "description": "USAspending (rear) + Pentagon J-Book (forward) + earmark detector (political-fragility) + insider_vs_calendar (temporal proximity) carry overlapping but distinct slices of DoD-revenue exposure.",
+   "channels": [
+    "usaspending_gov  (monthly, ~30d)",
+    "pentagon_jbook_program_funding  (annual, ~60d)",
+    "earmark_detector  (annual, via J-Book)",
+    "sec_form_4  (event-driven, ~2d)",
+    "ic_contracting_proxy  (derived)"
+   ],
+   "implication": "Forward-funding view (J-Book) + insider-sale temporal overlay = canonical YSS/IONQ short-thesis vector. Each channel alone is insufficient; composition produces the catastrophe signal."
+  },
+  {
+   "cluster_id": "cluster_dd_developer_credit_chain",
+   "name": "Developer credit chain (DD + muni)",
+   "description": "Real-estate developer distress is carried via SEC (public-co developers), state SoS (entity status), county recorder (NoD/trustee sales), agency ratings (Moody's/S&P/Fitch), and CFD continuing disclosure.",
+   "channels": [
+    "sec_edgar_submissions  (event-driven)",
+    "state_corp_registries  (real-time)",
+    "county_recorder_nod_cc2924  (real-time)",
+    "moody_s_p_fitch_rating_actions  (event-driven)",
+    "emma_continuing_disclosure_53359_5  (semi-annual)",
+    "pacer_bankruptcy  (real-time)"
+   ],
+   "implication": "Detectors developer_bankruptcy + developer_corp_credit + nod_recorder_filing compose this cluster into a chain-of-distress signal for CFD master developers."
+  },
+  {
+   "cluster_id": "cluster_public_co_workplace_facility_scope",
+   "name": "Workplace / facility scope plausibility",
+   "description": "Adjudicate 'we have N-person factory at X' claims via multiple federal employment/permit registries.",
+   "channels": [
+    "osha_establishments_form_300A  (annual)",
+    "dol_h1b_lca  (quarterly)",
+    "bls_qcew  (quarterly, ~180d lag)",
+    "epa_frs  (monthly)",
+    "epa_envirofacts_state_deq",
+    "fmcsa_safer"
+   ],
+   "implication": "OSHA Form 300A is primary >=20-employee establishment; H-1B LCA catches sub-20 (tech/drone/biotech/semi); BLS QCEW gives county-NAICS denominator; EPA FRS = permitted facilities."
+  },
+  {
+   "cluster_id": "cluster_pharma_loe_clinical",
+   "name": "Pharma / biotech regulatory + clinical",
+   "description": "FDA + ClinicalTrials.gov + Orange Book + USPTO together carry the LOE + pipeline picture for marketed Rx + dev-stage biotech.",
+   "channels": [
+    "clinicaltrials_gov_v2  (real-time)",
+    "openfda  (monthly)",
+    "fda_orange_book  (monthly)",
+    "uspto_odp_patents"
+   ],
+   "implication": "Cellgene cohort relies on clinicaltrials + openFDA; marketed-Rx LOE pattern uses Orange Book + USPTO."
+  }
+ ],
+ "under_documented_channels": [
+  {
+   "channel": "ca_hcai_cal_mortgage_monthly",
+   "why_under_documented": "The single most important MASKING mechanism for CA NH/CCRC muni (per honesty-alpha framework) \u2014 Cal-Mortgage insurance wrap decouples operator credit from bond pricing for ~half of CA NH/CCRC universe. The Monthly Activity Report is the only primary source for confirming insurance status + portfolio claim activity. NO detector currently reads this channel; it is cited only in obligor-bond JSON notes.",
+   "recommended_action": "Build a dedicated detector that reads Cal-Mortgage monthly activity (claim events, portfolio reserve burn, new commitments) and treats it as an insurer-cascade tail-risk early warning. This is the cross-vertical analog of the framework's macro-hedge thesis."
+  }
+ ],
+ "channels_count": 84
+}

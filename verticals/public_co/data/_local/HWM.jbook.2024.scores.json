@@ -1,0 +1,156 @@
+{
+  "ticker": "HWM",
+  "cik": "0000004281",
+  "cutoff": "2024-09-01",
+  "filing": "0000004281-24-000007_10-K.txt",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "F-35 program volumes were a named driver of Engineered Structures segment year-over-year volume changes (lower F-35 volumes cited in 2023-vs-2022 and 2022-vs-2021 commentary).",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook.query_program_funding(program_name='F-35 Squadrons', cutoff=2024-09-01) -> FUNDED_STEADY; PE 0207142F; FY2024 RDT&E $88.991M",
+        "pentagon_jbook.query_program_funding(program_name='F-35 C2D2', cutoff=2024-09-01) -> FUNDED_STEADY; PE 0604840F; FY2024 RDT&E $1,236.71M",
+        "pentagon_jbook.query_program_funding(pe_number='0207142F') -> FUNDED_STEADY"
+      ],
+      "M_check": "pentagon_jbook",
+      "M_value": "FUNDED_STEADY (F-35 Squadrons + F-35 C2D2)",
+      "interpretation": "F-35 is the single most-named DoD program in the 10-K. The corpus shows F-35 Squadrons (PE 0207142F) and F-35 C2D2 (PE 0604840F) both FUNDED_STEADY at cutoff (FY2024 J-Book). The corpus only includes RDT&E lines for F-35, not the F-35 procurement line items (P-40 / multi-year buy), but the RDT&E lines map directly to ongoing program-of-record funding. There is no J-Book divergence here: Howmet's reliance on F-35 volumes is consistent with forward Pentagon funding. NB: HWM's actual F-35 exposure is to the production / spare-parts side (titanium mill products via RTI MPO; airframe forgings via Engineered Structures), and JSF procurement quantities have actually been modestly trimmed in FY24-26 budget cycles. With only RDT&E PEs in corpus, treat this as PASS but flag that the procurement-quantity sub-signal is outside corpus scope."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Howmet subsidiary RTI Advanced Forming supplies titanium mill products into the F-35 production program via a Master Purchase Order with Lockheed Martin (litigation pending Nov 2023 - 2024).",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook.query_program_funding(program_name='F-35') -> 2 FUNDED_STEADY matches (F-35 C2D2 + F-35 Squadrons)",
+        "pentagon_jbook.query_program_funding(contractor_name='Howmet Aerospace') -> NOT_FOUND (Howmet is not a J-Book primary contractor — they're sub-tier, expected)",
+        "edgar_fts.query_fulltext('Howmet', cik=LMT) -> 9 hits in LMT filings (counterparty cross-confirmation that LMT discloses Howmet relationship)"
+      ],
+      "M_check": "pentagon_jbook + edgar_fts",
+      "M_value": "F-35 program FUNDED_STEADY; Lockheed Martin counterparty discloses Howmet relationship",
+      "interpretation": "The F-35 program forward funding is intact, so the titanium MPO with Lockheed Martin is grounded in a real, funded program of record. The litigation is a pricing/contractual dispute, NOT a program-cancellation risk — i.e., it does not pattern-match the J-Book divergence thesis. (Materiality note: the MPO covers titanium mill products supplied through Lockheed's Qualified Suppliers under separate agreements; quantum of revenue not disclosed in the 10-K but is sub-segment within Engineered Structures.) No divergence signal."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "GE 12% + RTX 9% of FY2023 third-party sales — top-2 customers ~21% of revenue, with implied F119 (F-22 engine), F135 (F-35 engine), and commercial-aero pull-through.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook.query_program_funding(contractor_name='RTX') -> NOT_FOUND in primary_contractor index",
+        "pentagon_jbook.query_program_funding(contractor_name='GE Aviation') -> NOT_FOUND in primary_contractor index",
+        "Corpus by_entity index covers 58 entities; large prime contractors (RTX, GE Aerospace) are not primary_contractors on the seeded PE set — this is a coverage gap, not a flag"
+      ],
+      "M_check": "pentagon_jbook (contractor_name)",
+      "M_value": "NOT_FOUND — coverage gap",
+      "interpretation": "The aggregate customer-concentration claim (GE 12%, RTX 9%) cannot be decomposed to specific Pentagon PEs from filing language alone. The corpus' contractor index doesn't link RTX or GE Aviation to specific PEs in a way that lets us verify program-level concentration. UNVERIFIABLE per heuristic (7) — NOT_FOUND in J-Book contractor index is not a red flag. No divergence claim is made by Howmet at PE granularity, so no claim to falsify here."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Howmet expects defense aerospace growth in 2024 alongside commercial; forward exposure described only at the aggregate 'defense aerospace' market level with no PE-level disclosure.",
+      "severity": "PASS",
+      "supports": [
+        "B-21 Raider (P-40 B02100): FUNDED_STEADY at cutoff",
+        "KC-46A Tanker Squadrons (PE 0401221F): FUNDED_STEADY at cutoff",
+        "F-15EX (PE 0207146F): FUNDED_STEADY ($101.996M FY24 RDT&E)",
+        "CV-22 (PE 0401318F): FUNDED_STEADY at cutoff",
+        "F-35 Squadrons + F-35 C2D2: FUNDED_STEADY"
+      ],
+      "M_check": "pentagon_jbook (5 PE checks against the most likely Howmet-exposed airframe programs)",
+      "M_value": "5 of 5 most-likely-exposed airframe programs FUNDED_STEADY",
+      "interpretation": "Howmet's forward defense-aerospace narrative is consistent with the J-Book. Every airframe/engine program likely to drive Howmet's defense Engineered Structures + Engine Products book (F-35, B-21, KC-46, F-15EX, CV-22) is FUNDED_STEADY in the FY2026 J-Book at the 2024-09-01 cutoff. No PE-level divergence signal; the framework's primary divergence pattern does not catch on this filing. Materiality of the test is mid (heuristic 2c): Howmet's defense narrative is broad and aggregate, not load-bearing on any single PE."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Engineered Structures serves commercial aerospace, defense aerospace, and land/sea defense; titanium-heavy airframe exposure inferred to multiple military fighters.",
+      "severity": "PASS",
+      "supports": [
+        "F-22 Raptor: NOT_FOUND in corpus (F-22 production ended in 2012; current funding is sustainment, not in seeded PE set)",
+        "F-15EX (PE 0207146F): FUNDED_STEADY ($101.996M FY24)",
+        "F-15 EPAWSS (PE 0207171F): FUNDED_STEADY ($12.975M FY24)",
+        "F-15E Squadrons (PE 0207134F): FUNDED_STEADY ($40.348M FY24)",
+        "Initial loose matches for 'F-15EX' and 'F-15 EPAWSS' picked up the legacy F-15 procurement P-40 line item F01500 ($0 since FY2008) and returned UNFUNDED_TWO_PLUS_YEARS; this is corpus name-fuzzy-match noise (heuristic 4 — PE name ambiguity). The correct disambiguation is the FUNDED_STEADY RDT&E PEs above."
+      ],
+      "M_check": "pentagon_jbook (PE-disambiguated)",
+      "M_value": "F-15 family RDT&E PEs all FUNDED_STEADY; legacy F-15 procurement P-40 (F01500) is UNFUNDED but does NOT represent current production",
+      "interpretation": "Important calibration note: the corpus' fuzzy-match returned UNFUNDED_TWO_PLUS_YEARS for 'F-15EX', 'F-15 EPAWSS', and 'F-15E Squadrons' because it bound to the legacy F-15 procurement line F01500 (which has been zero since 2008). By heuristic 4, picking the most-likely-matched PE — the RDT&E PEs 0207146F, 0207171F, 0207134F — all are FUNDED_STEADY. The F-15EX has a multi-year procurement buy outside the seeded P-40 corpus subset. Net: no real J-Book divergence on Howmet's F-15-family exposure. Score PASS but explicitly flag the fuzzy-match noise so downstream consumers do not over-weight the UNFUNDED P-40 hit."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Engine Products serves next-generation engine programs and depends on commercial + defense engine OEMs (GE Aerospace, Pratt & Whitney, CFM, Rolls-Royce); no specific defense-engine PE disclosed.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook.query_program_funding(contractor_name='Pratt & Whitney') -> NOT_FOUND in primary_contractor index",
+        "pentagon_jbook.query_program_funding(contractor_name='GE Aviation') -> NOT_FOUND",
+        "Corpus does not seed PE-to-engine-OEM mappings for F135, F119, F110, F100 production engines"
+      ],
+      "M_check": "pentagon_jbook (contractor_name)",
+      "M_value": "NOT_FOUND in contractor index",
+      "interpretation": "Howmet's Engine Products narrative is engine-OEM-mediated and the company doesn't name a defense engine PE. Per heuristic 7, NOT_FOUND in the corpus is not a red flag. The forward Engine Products defense book is most likely driven by F135 (F-35 engine) spares and growing engine spares; since F-35 Squadrons is FUNDED_STEADY, the engine-program pull-through is likely intact. UNVERIFIABLE on corpus coverage."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Defense aerospace mix is shrinking as % of total revenue (FY2021 19% -> FY2022 16% -> FY2023 15%); company caveats defense spending dependence.",
+      "severity": "PASS",
+      "supports": [
+        "F-35 Squadrons (PE 0207142F): FUNDED_STEADY",
+        "B-21 Raider (P-40 B02100): FUNDED_STEADY"
+      ],
+      "M_check": "pentagon_jbook + filing arithmetic",
+      "M_value": "Forward DoD programs supporting Howmet's defense book are FUNDED_STEADY; the mix-shrink is structural (commercial recovery growing faster), NOT a defense-funding story",
+      "interpretation": "The 19% -> 15% trajectory is not a J-Book divergence signal; it is a denominator effect — commercial aerospace is recovering off pandemic lows so the defense share is declining as the total grows. Defense aerospace absolute revenue is actually growing (per 10-Q: 'higher volumes in the ... defense aerospace ... markets'). No divergence claim caught."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Worldwide patent portfolio ~940 granted + 215 pending as of YE 2023; business not materially dependent on any single patent.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "uspto_odp query not run — claim is aggregate and self-caveated ('not materially dependent on any single patent')",
+        "Patent count is not a J-Book-grounded claim (control claim per extract rubric)"
+      ],
+      "M_check": "uspto_odp.query_assignee (not executed — claim is aggregate, not single-patent-specific)",
+      "M_value": "n/a — claim explicitly aggregate",
+      "interpretation": "Control claim per extract rubric — non-J-Book, aggregate, self-caveated, no falsifiable forward dependency on any specific patent. UNVERIFIABLE without a single-patent-dependent narrative to test."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "Howmet operates ~50 principal facilities in 20 countries with ~23,200 employees as of YE 2023; named U.S. plants are large, mature, unionized.",
+      "severity": "PASS",
+      "supports": [
+        "Filing internal consistency: explicit plant list cross-references to UAW collective-bargaining disclosures (Whitehall MI ~1,400 employees expires 2028-04-01; Cleveland OH ~750 employees expires 2024-04-28)"
+      ],
+      "M_check": "epa_frs.query_facilities (not executed at depth — facility list is well-disclosed and internally consistent in 10-K)",
+      "M_value": "n/a (filing-internal verification sufficient)",
+      "interpretation": "Control claim, non-J-Book. Footprint disclosure is detailed (city/state/segment/product mapping) and internally consistent with workforce + union disclosures. No divergence to test."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "Counterparty (Lockheed Martin) should mirror the F-35 titanium MPO litigation in its own SEC filings (CIK 0000936468).",
+      "severity": "PASS",
+      "supports": [
+        "edgar_fts('Howmet', cik=0000936468, cutoff=2024-09-01) -> 9 hits across LMT filings in scope range (counterparty does disclose the relationship)",
+        "edgar_fts('RTI Advanced Forming', cik=0000936468) -> 0 hits (LMT does not name the specific Howmet subsidiary in its own disclosures)",
+        "edgar_fts('titanium mill products', cik=0000936468) -> 0 hits",
+        "USAspending.query_dod_contracts(recipient='Howmet') -> 1,425 awards totaling $26.97M direct DoD (mostly DLA fasteners + M119 howitzer firing platforms — confirms HWM does receive direct DoD revenue but primary defense flow is via prime contractors)"
+      ],
+      "M_check": "edgar_fts + usaspending (orthogonal verification)",
+      "M_value": "LMT counterparty disclosure: 9 'Howmet' hits in scope; 0 hits for specific subsidiary or contract terms",
+      "interpretation": "LMT's 10-K mentions Howmet 9 times across its filing history (counterparty relationship confirmed) but does NOT separately name the RTI Advanced Forming litigation or the titanium-mill-products dispute — i.e., LMT considers the dispute below its own materiality threshold while Howmet treats it as a Legal Proceedings disclosure. This is consistent with a sub-tier supplier dispute, not a program-cancellation risk. No J-Book divergence."
+    }
+  ],
+  "summary": {
+    "n_claims": 10,
+    "n_queries": 17,
+    "severity_counts": {
+      "PASS": 7,
+      "MODERATE_UNDERDELIVERY": 0,
+      "SEVERE_UNDERDELIVERY": 0,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 3
+    },
+    "jbook_grounded_claims": 6,
+    "jbook_grounded_claim_ids": ["C1","C2","C4","C5","C6","C7"],
+    "pentagon_jbook_fired_on": 5,
+    "pentagon_jbook_fired_claim_ids": ["C1","C2","C4","C5","C7"],
+    "framework_signal": "NO_DIVERGENCE — Howmet's defense aerospace narrative is consistent with the FY2026 J-Book at the 2024-09-01 cutoff. The only specific Pentagon program named in the 10-K (F-35) is FUNDED_STEADY in the corpus, and all five most-likely-exposed defense airframes/engines (F-35, B-21, KC-46, F-15EX, CV-22) are FUNDED_STEADY. HWM is a Tier-1 prime-contractor supplier — its disclosures don't expose specific PE numbers, so the J-Book divergence test has limited surface area to land. No SEVERE or RED_FLAG triggers.",
+    "calibration_note": "Heuristic 4 (PE name ambiguity) fired on the F-15 family: corpus fuzzy-match initially bound 'F-15EX'/'F-15 EPAWSS'/'F-15E Squadrons' to the legacy F-15 procurement P-40 line item F01500 (UNFUNDED since 2008), but disambiguation to the correct RDT&E PEs (0207146F / 0207171F / 0207134F) returns FUNDED_STEADY. Without applying heuristic 4, the framework would mis-fire SEVERE on legitimately funded F-15EX exposure. Logged here so this calibration is auditable."
+  }
+}

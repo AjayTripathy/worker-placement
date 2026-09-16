@@ -1,0 +1,22 @@
+### APO (Apollo Global Management — alt-asset manager + Athene annuities) — screen "$143.58, −6% off 52w high, +44% off low, private-credit fear overdone" — **SCREEN-MISCLASSIFIED**
+
+**KILL FACTS (the row's own metrics fail first)**
+- **Tape defect, class (1) field-join:** $143.58 is the **26-week high**, not the close. Corrected: px **$140.76**, 52w hi **$153.29** → **−8.2%** off high; 52w lo **$99.56** → **+41.4%** off low (evidence pack, yahoo). Frame survives, arithmetic doesn't. IBKR was permission-denied this session, so the "IV 2–5th pctile" claim is **UNVERIFIED**.
+- **"Fear is priced in APO" is falsified by the operating line, not by fear resolving:** FRE $728M (+30%) Q1, **$785M (+25%)** Q2; SRE **$877M (+11%)**; AUM $1.05T ([Q2 release](https://www.apollo.com/insights-news/pressreleases/2026/08/apollo-reports-second-quarter-2026-results-3338111)). The rally bought FRE compounding. The June AVOID's credit pillar was never tested by it.
+- **Not an orphan → no FAIR-CARRY exemption.** 11+ covering analysts, consensus PT $146–149, BofA $165 (cut from $190), 2026E ANI/sh cut to **$9.40** ([tipranks](https://www.tipranks.com/news/the-fly/apollo-global-price-target-lowered-to-165-from-190-at-bofa)). At $140.76 = **15.0x forward ANI**.
+- **GAAP is unusable here, class (4):** H1-26 net loss to common **$594M** on a **$2,090M** tax provision (vs $246M), from Q1's **$1.7B** valuation allowance after ACRA revoked its Bermuda CIT election ([Q1 8-K](https://www.stocktitan.net/sec-filings/APO/8-k-apollo-global-management-inc-reports-material-event-fc39515f51fa.html), [10-Q](https://www.stocktitan.net/sec-filings/APO/10-q-apollo-global-management-inc-quarterly-earnings-report-c2a2d97d8c02.html)). Any GAAP-P/E screen row on APO is garbage this year. Forward Athene tax rate: **UNVERIFIED** (EDGAR 403'd; needs the 10-Q tax footnote).
+
+**LIVE FACTS**
+- **The June pillar hardened, it didn't resolve:** ADS Q2-26 withdrawal requests **16.8% of shares (~$2.4B), largest since 2022 launch**, gated at 5% → **~45% prorated fill** ([AltsWire](https://altswire.com/apollo-debt-solutions-bdc-caps-q2-redemptions-at-5-as-withdrawal-requests-hit-16-8/)). Next tender opened **8/14, closes 9/14/26**. "MidCap defaults doubling" — **UNVERIFIED**, dropped from the thesis until sourced.
+- **First crack:** ANI $2.11 missed $2.16–2.18, ending four beats — and the miss is in SRE (+11%) where the credit sits, not FRE (+25%).
+- **Cap structure (pulled first):** 6.75% Series A MCPS mandatorily converted 7/31/26 at 0.5074; Form 25 effective 8/11, 15-12G 8/11. Shares out **590,543,159 (8/5/26)** vs 580,422,573 (11/5/25) = **+1.7%** — basic/diluted convergence, *not* new dilution (pack's 590.4M diluted already if-converted). **APOS** = 7.625% 2053 junior notes; never join to APO equity.
+- **Related party:** LDB 2025 LLC (Black family trusts) took 3.0M shares 7/29, joined the stockholders agreement 8/13, 13D 8/14, plus 144s 8/7 and 8/14; a share-forward settleable in **cash** is reported **SECONDARY-ONLY** ([TradingView](https://www.tradingview.com/news/tradingview:8800022a39d9e:0-ldb-2025-llc-joins-stockholders-agreement-at-apollo-global-management-with-0-51-stake/)) — needs 13D Item 6 primary before it counts.
+
+**MISSED-ENTRY GRADE:** the gate was right and it **filled** — 26w low $99.56 vs alert_below 100, +41% forgone. Failure was in the action layer (no resting order / no alert→action SLA), not the analysis. File as process defect: an AVOID carrying a price gate must stage the gate or the gate is decorative.
+
+**RESOLVES ON:**
+- **9/14/26** — ADS August tender close: request % ≥ Q2's 16.8% = run intact; < 8% = pillar decaying.
+- **11/3/26** (yfinance-derived, unconfirmed) — Q3 print: second consecutive SRE deceleration <10% or ANI miss = thesis inverts to short-court referral.
+- **Price gate re-derived: $112.80** (12x × $9.40 2026E ANI) — the June gate moves **up** from $99–100 because the E moved, not because the risk fell.
+
+**Disposition:** AVOID/DECLINE on APO equity + reopen at ≤$113 or on a verified ACRA forward-tax-rate disclosure. Route the principal's fear-overdone thesis to the **vehicle layer** — the discount that persists is in listed BDC NAVs (TCPC, queued), not in a covered 15x forward compounder 8% off its high.

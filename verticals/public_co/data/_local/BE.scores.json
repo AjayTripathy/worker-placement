@@ -1,0 +1,77 @@
+{
+  "ticker": "BE",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Bloom Energy and AEP entered a strategic partnership announced November 2024 for AEP to procure up to 1 GW of solid oxide fuel cells, with an initial 100 MW order; in 2025 began deploying projects across AEP service territory.",
+      "severity": "PASS",
+      "supports": ["AEP 10-K filing 2025-02-13 (FY2024) and 2026-02-12 (FY2025) both mention 'Bloom Energy'; two AEP 8-K press releases (4Q2024 ex 99.1 and 4Q2025 ex 99.1) also reference Bloom Energy."],
+      "M_check": "edgar_fts.query_fulltext(cik=0000004904 (AEP), term='Bloom Energy')",
+      "M_value": "total_hits=4 (2x 10-K, 2x 8-K) in AEP filings through cutoff",
+      "interpretation": "Counterparty-disclosure threshold (Layer 3 Rule 7) is met. AEP independently discloses Bloom Energy across multiple 10-Ks and press-release 8-Ks, consistent with a material supply arrangement. The BE 10-K cleanly disaggregates the 1 GW announced procurement from the 100 MW actual initial order (Heuristic 3 satisfied — no announced-vs-operating conflation). PASS."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Bloom Energy entered a $5.0 billion financing framework with Brookfield Asset Management in August 2025 over five years for future Bloom Energy fuel cell projects focused on AI infrastructure.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["Brookfield Corporation (CIK 0001001085) full-text search: 0 hits for 'Bloom Energy'", "Brookfield Asset Management Ltd (CIK 0001925236) full-text search: 0 hits for 'Bloom Energy'", "0 hits across all SEC filings for the phrase 'Brookfield Bloom'"],
+      "M_check": "edgar_fts.query_fulltext at multiple Brookfield parent CIKs",
+      "M_value": "0 hits at any tested Brookfield parent filer",
+      "interpretation": "Brookfield deploys via private infrastructure funds (Brookfield Short-Term AI Fund and Long-Term AI Fund referenced in BE 10-K XBRL), which would not necessarily trigger parent-10-K disclosure; parent-level absence is therefore not a hard contradiction (Heuristic 7 doesn't fire cleanly). However, Heuristic 3 (announced vs operating) and Heuristic 4 (investment vs operating): the $5B headline is a 'prospective financing framework' over 5 years, while BE's 2025 cash flow shows only $36.5M of actual JV investment deployed — a >100x gap. The framework is real but the headline is announced-not-funded. MODERATE."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Bloom Energy entered an October 2025 partnership with Oracle to provide on-site solid state power for AI data centers, agreeing to issue a warrant for 3,531,073 shares at $113.28; $15.9 million of share-based consideration was recognized as a reduction to product revenue based on milestones with the key hyperscaler.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["Oracle (CIK 0001341439) full-text search restricted to 10-K/10-Q/8-K: 0 hits for 'Bloom Energy' or 'Bloom'", "6 hits in Oracle DEF 14A proxy statements (2020-2025) — these are board-director cross-references (BE CEO KR Sridhar served on Oracle's board), NOT customer disclosures"],
+      "M_check": "edgar_fts.query_fulltext(cik=0001341439, forms='10-K,10-Q,8-K', term='Bloom')",
+      "M_value": "0 periodic/current-report hits in Oracle filings; 6 proxy hits unrelated to the supply arrangement",
+      "interpretation": "Heuristic 7 (counterparty-disclosure threshold): The Oracle partnership is from Oracle's perspective a vendor relationship for on-site power, not customer revenue — so Oracle 10-K disclosure is NOT strictly required and absence is not a hard contradiction. However, Heuristic 11 (revenue-recognition pattern): BE has already recognized a $15.9M REDUCTION to product revenue tied to share-based consideration payable to a 'key hyperscaler customer' (likely Oracle) before the warrant is even formally issued — revenue is being recognized via a complex warrant-share-issuance structure that obscures cash conversion. The DEF 14A hits suggest the CEO-director cross-link enabled this arrangement, which is itself a related-party-flavored signal (note Oracle is not formally a related party but the CEO-board overlap is material context). Also note: Oracle warrant expiration is only 6 months — extremely short, suggesting the arrangement is conditional on near-term milestone completion. MODERATE."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Bloom has deployed Energy Server systems across approximately 1,100 sites in 9 countries with manufacturing in the U.S., and plans to expand its Fremont, California production capacity to approximately 2 GW by end of 2026.",
+      "severity": "PASS",
+      "supports": ["EPA FRS California: 11 Bloom Energy facilities registered (including Fremont 44370 Christy St, multiple Sunnyvale sites, NASA Research Park Plant 3, Madera Biogas)", "EPA FRS Delaware: 7 Bloom Energy facilities registered (Newark manufacturing center 200 Christina Pkwy, Brookside, Red Lion power generation incl. Diamond State Generation Partners JV, SEvone, Plant #7)"],
+      "M_check": "epa_frs.query_facilities(name='Bloom Energy', state in ['CA','DE'])",
+      "M_value": "CA: 11 facilities; DE: 7 facilities (incl. named manufacturing centers)",
+      "interpretation": "Physical-facility claim is verified by EPA registry (Heuristic 1 — EPA FRS is the authoritative manufacturing-existence test for H2/fuel-cell). Both the Fremont CA manufacturing facility and Newark DE manufacturing facility are registered with EPA. The 2 GW Fremont expansion is forward-looking and cannot be verified at cutoff, but the production-footprint base is confirmed. PASS."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Bloom received IRS notification on March 29, 2024 of acceptance of its application for a Qualifying Advanced Energy Project Credit (Section 48C(e)) of up to $75.3 million for its Fremont, California facility, with DOE recommendation to the IRS.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["USAspending recipient_contracts(Bloom Energy): n_awards=0", "USAspending recipient_grants(Bloom Energy): n_awards=0"],
+      "M_check": "usaspending.query_recipient_contracts and query_recipient_grants",
+      "M_value": "0 USAspending awards under 'Bloom Energy'",
+      "interpretation": "Heuristic 5 (source-jurisdiction mismatch): Section 48C(e) is an IRS tax-credit allocation, NOT a direct federal contract or grant transfer — it is redeemed against tax liability and does NOT appear in USAspending. So zero USAspending hits is EXPECTED and does not contradict the claim. The 10-K itself explicitly acknowledges the credit is contingent: 'subject to satisfaction of the underlying certification requirements... and potential clearance by the Office of Management and Budget due to President Trump's executive order halting the disbursement of funds under the IRA.' Stage-ladder (Heuristic 3): allocation-letter received, but two-year certification window and OMB-clearance risk mean cash realization is uncertain. UNVERIFIABLE via available M-sources; the in-filing disclosure of OMB risk is itself a soft underdelivery signal."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Bloom's proprietary solid oxide platform powers the Bloom Electrolyzer; in 2023 demonstrated the world's largest solid oxide electrolyzer at NASA Ames Research Center producing over 2.4 metric tonnes of hydrogen per day with industry-leading efficiency.",
+      "severity": "PASS",
+      "supports": ["USPTO ODP: 641 total patent applications, 283 granted patents pre-cutoff under 'Bloom Energy'", "Categorization: 283 fuel-cell-tagged, 43 electrolyzer/electrolysis/hydrogen-tagged"],
+      "M_check": "uspto_odp.query_assignee(Bloom Energy)",
+      "M_value": "n_granted=283; fuel_cell=283; electrolyzer/H2 bucket=43",
+      "interpretation": "Heuristic 8: PASS threshold is n_granted>=10 with claimed-technology hits. Bloom has 283 granted patents (28x threshold) and 43 specifically in the electrolyzer/hydrogen subdomain. The IP base is deeply consistent with the claimed SOFC + solid-oxide electrolyzer technology stack. The 2.4 tonnes/day NASA Ames demonstration is consistent with the claimed technology. PASS."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Customer concentration: in 2025, three customers (the first of which is the related-party SK ecoplant) represented approximately 12% of total revenue; in 2024 three customers (the first being the related party) represented approximately 14%.",
+      "severity": "PASS",
+      "supports": ["BE 10-K explicit ASC 280 / concentration-of-risk disclosure: 12% (2025), 14% (2024), [implied lower] (2023). Top customer is the SK ecoplant related party.", "Cross-corpus: 933 total filings across SEC mentioning 'Bloom Energy' — broad public-record corroboration"],
+      "M_check": "edgar_fts.query_fulltext(term='Bloom Energy', no CIK)",
+      "M_value": "total_hits=933 across all filers; concentration figures disclosed in BE 10-K Concentration of Risk note",
+      "interpretation": "Customer concentration improved year-over-year (14%->12% for top 3). The continued centrality of the SK ecoplant related-party as the largest customer is a structural feature (Heuristic 4 — strategic-investor cross-equity relationship), but it is properly disclosed as a related-party. Concentration is moderate and falling, which is positive. The claim is self-disclosed and consistent. PASS."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Capital structure transformed in 2025: $2.5 billion 0% Convertible Senior Notes due 2030 issued November 4, 2025 (net proceeds $2.44B), with concurrent exchange transactions retiring $975.9M of existing 3.0% Green Notes; new $600M senior secured revolving credit facility entered December 19, 2025. Cash and equivalents grew to $2,454.1M (from $802.9M) and total recourse debt to $2,613.7M (from $1,124.7M).",
+      "severity": "PASS",
+      "supports": ["BE 10-K MD&A and Note 8 (Outstanding Loans) provide complete disaggregation of the $2.5B 0% Notes issuance, $975.9M Existing Notes repayment via cash + ~42.4M-share stock exchange, $32.3M loss on debt extinguishment, and $600M revolver entered 12/19/2025 with no draws and no springing-maturity triggers as of filing date", "Auditor: Deloitte & Touche LLP — issued effectiveness opinion on ICFR for FY2025; no going-concern qualifier; ICFR was deemed effective by management"],
+      "M_check": "In-filing financial-statement-note verification; no external M-source applies",
+      "M_value": "Reconciled in 10-K MD&A and Liquidity note; covenant compliance affirmed (Secured Leverage Ratio <= 3.25, Interest Coverage >= 3.00)",
+      "interpretation": "Heuristic 10 (delisting/going-concern fingerprints): NEGATIVE — no going-concern qualifier, no Form 15-12G/25-NSE, no reverse split, ATM still capped, no auditor change. Heuristic 11 (revenue-recognition): the Oracle warrant share-based offset is the one yellow flag (handled under C3); otherwise revenue is reported cleanly. The recapitalization is dilutive (~42.4M new shares + 24% of the 0% Notes principal will convert at ~$155/share parity if held) but supportive of business growth. Cash position of $2.45B is 24+ months at current ~$93M annual investing burn. PASS — capital structure is now stronger than 1Y prior, with $600M undrawn revolver covenant-compliant."
+    }
+  ]
+}

@@ -1,0 +1,416 @@
+<title>MBGL — Catalyst-Carry Court Deck</title>
+<style>
+  :root {
+    --paper: #F7F8F6; --card: #FFFFFF; --ink: #1A2530; --ink-2: #4C5A66; --ink-3: #7C8893;
+    --rail: #23425F; --rail-ink: #E9EEF3; --hair: #DDE3E0;
+    --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a;
+    --warn-bg: #FBF3E4; --warn-bd: #D9A54A; --ok-bg: #E8F5EF; --bad-bg: #FBEAE7;
+    --pill-v: #0E6E45; --pill-c: #23425F; --pill-r: #A93226; --pill-u: #8A6D1D;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      --paper: #10161C; --card: #171F27; --ink: #E7ECF0; --ink-2: #A9B4BD; --ink-3: #77828C;
+      --rail: #1B2F44; --rail-ink: #D7E1EA; --hair: #2A353F;
+      --s1: #3987e5; --s2: #d95926; --s3: #199e70;
+      --warn-bg: #2A2415; --warn-bd: #C98500; --ok-bg: #14261E; --bad-bg: #2C1B18;
+      --pill-v: #2FA97A; --pill-c: #7FA6CC; --pill-r: #E66767; --pill-u: #C9A94E;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #10161C; --card: #171F27; --ink: #E7ECF0; --ink-2: #A9B4BD; --ink-3: #77828C;
+    --rail: #1B2F44; --rail-ink: #D7E1EA; --hair: #2A353F;
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70;
+    --warn-bg: #2A2415; --warn-bd: #C98500; --ok-bg: #14261E; --bad-bg: #2C1B18;
+    --pill-v: #2FA97A; --pill-c: #7FA6CC; --pill-r: #E66767; --pill-u: #C9A94E;
+  }
+  :root[data-theme="light"] {
+    --paper: #F7F8F6; --card: #FFFFFF; --ink: #1A2530; --ink-2: #4C5A66; --ink-3: #7C8893;
+    --rail: #23425F; --rail-ink: #E9EEF3; --hair: #DDE3E0;
+    --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a;
+    --warn-bg: #FBF3E4; --warn-bd: #D9A54A; --ok-bg: #E8F5EF; --bad-bg: #FBEAE7;
+    --pill-v: #0E6E45; --pill-c: #23425F; --pill-r: #A93226; --pill-u: #8A6D1D;
+  }
+  body { background: var(--paper); color: var(--ink); margin: 0;
+         font-family: Charter, Georgia, 'Times New Roman', serif; line-height: 1.55; }
+  .deck { max-width: 960px; margin: 0 auto; padding: 0 20px 80px; }
+  .slide { background: var(--card); border: 1px solid var(--hair); border-radius: 6px;
+           margin: 28px 0; overflow: hidden; }
+  .rail { background: var(--rail); color: var(--rail-ink); display: flex; align-items: baseline;
+          gap: 14px; padding: 8px 18px; font-family: 'Avenir Next Condensed','Arial Narrow','Helvetica Neue',sans-serif; }
+  .rail .no { font-size: 13px; letter-spacing: .18em; opacity: .75; font-variant-numeric: tabular-nums; }
+  .rail .lab { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; }
+  .body { padding: 22px 26px 26px; }
+  h1 { font-family: 'Avenir Next Condensed','Arial Narrow','Helvetica Neue',sans-serif;
+       font-weight: 700; font-size: 40px; line-height: 1.08; margin: 6px 0 10px; text-wrap: balance; }
+  h2 { font-family: 'Avenir Next Condensed','Arial Narrow','Helvetica Neue',sans-serif;
+       font-weight: 600; font-size: 25px; margin: 0 0 12px; text-wrap: balance; }
+  h3 { font-size: 17px; margin: 18px 0 6px; }
+  p, li { font-size: 15.5px; color: var(--ink); max-width: 70ch; }
+  .sub { color: var(--ink-2); }
+  .small { font-size: 13px; color: var(--ink-2); }
+  .mono, td.num, .num { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+        font-variant-numeric: tabular-nums; }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; margin: 10px 0; }
+  .tw { overflow-x: auto; }
+  th { text-align: left; font-family: 'Avenir Next Condensed','Arial Narrow',sans-serif;
+       font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2);
+       border-bottom: 2px solid var(--rail); padding: 6px 10px 4px; white-space: nowrap; }
+  td { border-bottom: 1px solid var(--hair); padding: 7px 10px; vertical-align: top; }
+  td.num { text-align: right; white-space: nowrap; }
+  .pill { display: inline-block; border-radius: 3px; padding: 1px 7px; font-size: 11px;
+          font-family: 'Avenir Next Condensed','Arial Narrow',sans-serif; letter-spacing: .08em;
+          text-transform: uppercase; color: #fff; }
+  .pv { background: var(--pill-v); } .pc { background: var(--pill-c); }
+  .pr { background: var(--pill-r); } .pu { background: var(--pill-u); }
+  .verdict { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0; }
+  .vcard { flex: 1 1 150px; border: 1px solid var(--hair); border-radius: 5px; padding: 10px 14px; }
+  .vcard .k { font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3);
+              font-family: 'Avenir Next Condensed','Arial Narrow',sans-serif; }
+  .vcard .v { font-size: 21px; font-weight: 700; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .callout { border-left: 3px solid var(--warn-bd); background: var(--warn-bg);
+             padding: 10px 16px; margin: 14px 0; border-radius: 0 4px 4px 0; }
+  .callout p { margin: 4px 0; }
+  .carry { border: 2px solid var(--warn-bd); background: var(--warn-bg); border-radius: 5px;
+           padding: 12px 16px; margin: 14px 0; }
+  .carry p { margin: 4px 0; }
+  figure { margin: 18px 0; }
+  figcaption { font-size: 12.5px; color: var(--ink-2); margin-top: 6px; max-width: 78ch; }
+  svg text { font-family: ui-monospace,'SF Mono',Menlo,monospace; fill: var(--ink-2); }
+  svg .axl { font-size: 10.5px; }
+  svg .dl  { font-size: 11px; fill: var(--ink); }
+  svg .grid { stroke: var(--hair); stroke-width: 1; }
+  .legend { display: flex; gap: 18px; font-size: 12.5px; color: var(--ink-2); margin: 4px 0 0; }
+  .sw { display:inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+  .fine { font-size: 12.5px; color: var(--ink-3); }
+  #tip { position: fixed; pointer-events: none; background: var(--ink); color: var(--paper);
+         font: 12px ui-monospace, Menlo, monospace; padding: 4px 8px; border-radius: 3px;
+         opacity: 0; transition: opacity .12s; z-index: 10; max-width: 260px; }
+  @media (prefers-reduced-motion: reduce) { #tip { transition: none; } }
+</style>
+
+<div id="tip" role="status"></div>
+<div class="deck">
+
+<!-- ══════════ SLIDE 1 — COVER ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">01 / 10</span><span class="lab">Cover · Verdict · Catalyst-carry</span></div>
+  <div class="body">
+    <p class="small mono">DESK RESEARCH · SPINOFF-ORPHAN COHORT · 2026-08-03 · MBGL (NYSE)</p>
+    <h1>Mobility Global: CARFAX is worth more than the whole company — if Thursday says so</h1>
+    <p class="sub">The S&amp;P Global spinoff whose forced-sell is done, whose drift edge is spent, and whose one
+    standing pillar — CARFAX alone exceeding the entire enterprise value — faces its first standalone print in
+    four days. This deck exists so that nothing is researched inside the reaction window.</p>
+    <div class="carry">
+      <p class="mono"><b>v1.4.1 CATALYST-CARRY DOCUMENT.</b></p>
+      <p>The gate resolves <b>Thursday 2026-08-07, 8:00 AM ET</b> (first standalone Q2 print). This thesis rides
+      attached to resolution pack <span class="mono">MBGL|2026-08-07</span>: the pre-committed branches below are
+      graded against the release, the envelope stages (or the PASS hardens) mechanically, and <b>zero fresh
+      research happens inside the reaction window</b>. Sequence rule: read the CARG and CARS prints
+      <b>Wednesday 2026-08-06 first</b> — they are the free external reads on both gate inputs.</p>
+    </div>
+    <div class="verdict">
+      <div class="vcard"><div class="k">Court verdict</div><div class="v">4 / 10</div>
+        <div class="small">WATCH — gated, not a buy today</div></div>
+      <div class="vcard"><div class="k">Class</div><div class="v" style="font-size:16px">FLOW edge spent<br>conditional RP post-gate</div></div>
+      <div class="vcard"><div class="k">Live (2026-08-03)</div><div class="v">$20.38</div>
+        <div class="small">distribution 07-01 · trough $19.26</div></div>
+      <div class="vcard"><div class="k">Prob-weighted FV</div><div class="v">$22.82</div>
+        <div class="small">+12% — <b>below</b> the Street's $24.50</div></div>
+      <div class="vcard"><div class="k">Size on gate-clear</div><div class="v">0.5–0.75%</div>
+        <div class="small">CARS datum sets which</div></div>
+    </div>
+    <p class="fine"><b>Position disclosure (at publication):</b> no MBGL position is held as of 2026-08-03
+    (positions polled same-session). Entry occurs only if the Thursday gate clears, per the pre-committed
+    structure on slide 7; the author may trade at any time without notice.</p>
+  </div>
+</section>
+
+<!-- ══════════ SLIDE 2 — THE SETUP ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">02 / 10</span><span class="lab">The setup — a real forced-sell, already finished</span></div>
+  <div class="body">
+    <h2>SP500 parent, SP600 child: every S&amp;P 500 fund had to sell a line it can never hold</h2>
+    <p>S&amp;P Global distributed Mobility Global — CARFAX, automotiveMastermind, and the B2B automotive-data
+    franchise — on <span class="mono">2026-07-01</span>. S&amp;P DJI placed the spinco <i>down</i> into the S&amp;P 600
+    (it replaced Core Laboratories, effective 07-02, primary-confirmed), which makes MBGL a member of the genuine
+    net forced-<b>sell</b> sub-cohort: SP500 index funds must liquidate, and SP600 buying only partially offsets.</p>
+    <div class="tw"><table>
+      <tr><th>Tape fact</th><th class="num">Value</th><th>Read</th></tr>
+      <tr><td>First when-issued bars</td><td class="num mono">2026-06-26</td><td>window dated off the FILED 07-01 distribution</td></tr>
+      <tr><td>Post-distribution trough</td><td class="num">$19.26 · 07-06</td><td>the mechanical flush; intraday low $18.15</td></tr>
+      <tr><td>Last close</td><td class="num">$20.38</td><td>+5.8% off trough, −3.8% since distribution — DUMP_THEN_BASE</td></tr>
+      <tr><td>Days since distribution</td><td class="num">32 — LATE_WINDOW</td><td>the orphan-drift window is ~45 days and mostly burned</td></tr>
+    </table></div>
+    <p><b>The honest ruling on the flow leg: the edge is spent.</b> The forced-sell completed in the first two
+    weeks, the price is +12% off the low, and our own generator doctrine says the drift after the mechanical
+    print is commonly front-run. What remains is not a flow trade — it is a conditional valuation case that
+    must earn its way through Thursday's print.</p>
+  </div>
+</section>
+
+<!-- ══════════ SLIDE 3 — WHAT THE COURT CORRECTED ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">03 / 10</span><span class="lab">Corrections kept — what we got wrong first</span></div>
+  <div class="body">
+    <h2>Three of our own premises broke on inspection. We publish the breakage.</h2>
+    <ul>
+      <li><b>The "initiation wave" catalyst was fabricated.</b> The playbook assumed sell-side coverage arrives
+      25–40 days post-spin, lifting the orphan. Wrong mechanism: <b>spin-offs carry no underwriter quiet
+      period</b> — coverage began day 1 of regular-way trading. RBC $23 Sector Perform, Baird $23 Neutral, and
+      UBS $23 on 07-02; Wells Fargo $27 Overweight on 07-08; Wolfe $25 Outperform on 07-20. Mean target
+      <b>$24.50</b>, and nothing new since 07-20. There is no coverage vacuum left to close. This correction is
+      now encoded cohort-wide as a generator defect (spinoff_orphans, P1).</li>
+      <li><b>The $37 price target from our prior art is discarded.</b> No firm, no analyst, no date — it exists
+      only as an unnamed aggregator "high estimate," contradicted by all five sourced initiations.</li>
+      <li><b>The Form 10 was not the highest-information document — the 12-May Investor Day deck was, and the
+      first pass missed it.</b> It carries management's actual guidance: <b>+$20–25M incremental run-rate</b>
+      standalone costs (≈$44–47M total), <b>$75–100M one-time</b> stand-up costs over 12–18 months, and a
+      <b>~$1B deferred tax liability from the IHS merger amortizing over 12 years ≈ $83M/yr of cash-tax
+      drag</b>. Leverage at spin is <b>2.8× gross vs management's own &lt;2.5× target</b>. Process rule banked:
+      for any spin, pull the pre-spin Investor Day deck alongside the Form 10.</li>
+    </ul>
+    <div class="callout"><p>After doing the work, our probability-weighted fair value ($22.82) sits
+    <b>below</b> the Street mean ($24.50). We are on the Hold side of a 2-Buy / 3-Hold tape — which is why
+    this name is a gate, not a conviction long.</p></div>
+  </div>
+</section>
+
+<!-- ══════════ SLIDE 4 — THE STANDING PILLAR ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">04 / 10</span><span class="lab">The pillar — CARFAX &gt; the whole company</span></div>
+  <div class="body">
+    <h2>At 15–16× its own segment EBITDA, CARFAX exceeds the entire enterprise value</h2>
+    <figure>
+      <svg viewBox="0 0 880 210" width="100%" role="img" aria-label="Sum-of-parts: CARFAX segment value versus total enterprise value">
+        <line class="grid" x1="150" y1="30" x2="150" y2="180"/>
+        <g>
+          <rect x="150" y="45" width="560" height="34" rx="4" fill="var(--s1)"><title>Enterprise value ≈ $7.86B (cap + net debt $1.85B, normalized FY26E)</title></rect>
+          <rect x="150" y="100" width="573" height="34" rx="4" fill="var(--s3)"><title>CARFAX at 15x segment EBITDA ($536M × 15) = $8.04B</title></rect>
+          <rect x="723" y="100" width="39" height="34" rx="4" fill="var(--s3)" opacity="0.45"><title>…to 16x = $8.58B top of range</title></rect>
+          <rect x="150" y="155" width="140" height="20" rx="4" fill="var(--s2)"><title>B2B segment: $197M EBITDA at 32% margin — implicitly FREE at the current EV</title></rect>
+        </g>
+        <text class="dl" x="156" y="40">Enterprise value — $7.86B</text>
+        <text class="dl" x="156" y="95">CARFAX alone at 15–16× — $8.04–8.58B</text>
+        <text class="dl" x="300" y="170">B2B ($197M EBITDA) — free</text>
+      </svg>
+      <figcaption>Form-10 primary segment data, source-independent: CARFAX $536M EBITDA at 47% margin; B2B
+      $197M at 32%. Normalized FY26E adj EBITDA $740M, net debt $1.85B, EV $7.86B (10.6×). The pillar holds
+      across every comp source the court tested — it is why this is WATCH and not PASS.</figcaption>
+    </figure>
+    <p>The counterweight is real: the DTL cash-tax drag (~$83M/yr), the stand-up costs, and leverage above
+    management's own target all subtract from the equity's share of that value. The pillar says the downside
+    is cushioned by a hard asset; it does not say the stock is cheap at any price on any print.</p>
+  </div>
+</section>
+
+<!-- ══════════ SLIDE 5 — THE GATE INPUTS ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">05 / 10</span><span class="lab">Demand tape — why the gate exists</span></div>
+  <div class="body">
+    <h2>Every external read on auto-advertising demand deteriorated into this print</h2>
+    <div class="tw"><table>
+      <tr><th>Datum</th><th class="num">Reading</th><th>Bearing on MBGL</th></tr>
+      <tr><td>OEM national linear TV ad spend</td><td class="num">−18% y/y <span class="small">(April 2026, actual)</span></td>
+          <td>auto falls below 10% of measured ad spend for the first time on record — the B2B segment's demand pool</td></tr>
+      <tr><td>Cars.com OEM &amp; National revenue</td><td class="num">−12% y/y Q1</td>
+          <td>the cleanest public proxy for MBGL's B2B segment (35% of revenue); guided to stay under pressure</td></tr>
+      <tr><td>Cox dealer sentiment</td><td class="num">56 → 47</td><td>below the expansion line; independents at 40 vs franchised 53</td></tr>
+      <tr><td>CARFAX's own July release</td><td class="num">used-price growth +$50 <span class="small">vs +$900 in May</span></td>
+          <td>the listings/valuation engine cooling from the company's own data</td></tr>
+      <tr><td>BEV sales H1-2026</td><td class="num">−25.1% y/y</td><td>removes the largest OEM launch-marketing category of the last five years</td></tr>
+    </table></div>
+    <p>This is why the ungated reward/risk is ~0.9:1 and the court refused an unconditional entry: the bear
+    scenario (guide cut on B2B softness) is live, dated, and arrives <b>Thursday</b>. The gate converts an
+    unknowable into a read.</p>
+  </div>
+</section>
+
+<!-- ══════════ SLIDE 6 — VALUATION ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">06 / 10</span><span class="lab">Valuation — honestly below the Street</span></div>
+  <div class="body">
+    <h2>PWFV $22.82 against $20.38 — +12%, and reward/risk ~0.9:1 without the gate</h2>
+    <figure>
+      <svg viewBox="0 0 880 190" width="100%" role="img" aria-label="Fair-value scenarios versus live price">
+        <line class="grid" x1="60" y1="95" x2="860" y2="95"/>
+        <g>
+          <circle cx="200" cy="95" r="8" fill="var(--s2)"><title>BEAR $15.05 · 35% — OEM ad softness persists, B2B re-rolls, guide cut on 08-07; 8.5x</title></circle>
+          <circle cx="480" cy="95" r="8" fill="var(--s1)"><title>BASE $25.08 · 45% — guide reaffirmed, CARFAX ~7-8%, trades to the Street's $24.50; 12.5x</title></circle>
+          <circle cx="660" cy="95" r="8" fill="var(--s3)"><title>BULL $31.35 · 20% — SOTP recognized, dividend declared, margin expansion begins; 15x</title></circle>
+          <line x1="350" y1="45" x2="350" y2="145" stroke="var(--ink)" stroke-width="2" stroke-dasharray="5 4"><title>Live $20.38</title></line>
+          <line x1="418" y1="60" x2="418" y2="130" stroke="var(--ink-3)" stroke-width="2"><title>Probability-weighted fair value $22.82</title></line>
+        </g>
+        <text class="dl" x="178" y="140">$15.05</text><text class="dl" x="458" y="140">$25.08</text>
+        <text class="dl" x="638" y="140">$31.35</text>
+        <text class="dl" x="290" y="36">live $20.38</text><text class="dl" x="396" y="56">PWFV $22.82</text>
+        <text class="axl" x="172" y="162">BEAR · 35%</text><text class="axl" x="450" y="162">BASE · 45%</text><text class="axl" x="632" y="162">BULL · 20%</text>
+      </svg>
+      <figcaption>Struck on normalized FY26E adj EBITDA $740M and EV $7.86B. Bear: −26% on a Thursday guide
+      cut. Base: +23% trading to the Street mean on a reaffirm. Bull: +54% on SOTP recognition. A 35% weight
+      on a −26% outcome is why no dollar moves before the print.</figcaption>
+    </figure>
+    <p class="fine">Discipline note: our base case assumes the stock merely reaches the Street's own $24.50 —
+    no multiple heroics — and our weighted number still sits below that mean. The conservative-FV guard cuts
+    the other way here: we checked we were not <i>talking ourselves out</i> of a fair case, and the answer is
+    the gate, not a bigger number.</p>
+  </div>
+</section>
+
+<!-- ══════════ SLIDE 7 — THE ADJUDICATED GATE ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">07 / 10</span><span class="lab">The gate — blue-team modified, pre-committed</span></div>
+  <div class="body">
+    <h2>Two conditions are the thesis. The third is only a size dial.</h2>
+    <p>The finding court demanded all three clear conjunctively. The blue team overturned that structure —
+    condition 3 gates the <i>free</i> segment (slide 4), and a CARS-driven sympathy gap-down is a better
+    entry on the thesis that survives, not a reason to refuse one. The principal accepted. The
+    pre-committed structure:</p>
+    <div class="tw"><table>
+      <tr><th>Step</th><th>Condition</th><th>Role</th></tr>
+      <tr><td class="mono">Wed 08-06</td><td>Read CARG + CARS prints (dealer counts; OEM &amp; National revenue trajectory)</td>
+          <td>free external reads on both gate inputs — <b>before anything</b></td></tr>
+      <tr><td class="mono" rowspan="2">Thu 08-07 8:00 ET</td>
+          <td><b>1.</b> FY26 organic cc revenue guide <b>7.5–9% REAFFIRMED</b> (from 12-May, never reaffirmed post-spin)<br>
+              <b>2.</b> CARFAX revenue growth <b>≥ 6.5% y/y</b> (Q1 was +7.6%; FY25 +10.1%)</td>
+          <td><b>CONJUNCTIVE — the thesis.</b> Either fails → no entry</td></tr>
+      <tr><td><b>3.</b> CARS OEM &amp; National not worse than −12% y/y</td>
+          <td><b>SIZING MODIFIER ONLY:</b> clean → <b>0.75%</b> · ugly → <b>0.5% into the sympathy weakness</b></td></tr>
+    </table></div>
+    <h3>Execution on gate-clear</h3>
+    <p><b>Half at limit $20.45 GTC + half marketable with chase-cap $21.75.</b> A limit-only structure would
+    fill mainly when the market <i>rejects</i> a clean print — the wrong-side-gate lesson from this cohort's
+    blue-team rulings. Paying up to +6.7% for the removal of the decisive uncertainty still leaves +15% to the
+    base fair value.</p>
+    <h3>PASS hardens (no entry, remove the gate) if any:</h3>
+    <ul>
+      <li>the guide is cut or withdrawn;</li>
+      <li>CARFAX prints &lt; 6.0%;</li>
+      <li>stand-up costs are quantified above the $100M top end.</li>
+    </ul>
+    <h3>Kill triggers post-entry (pre-committed)</h3>
+    <ul>
+      <li>CARFAX segment adj-EBITDA margin &lt; 44% in any quarter through FY26 → fair value ~$18, thesis wrong, exit;</li>
+      <li>CARFAX revenue growth &lt; 5% in any quarter → exit.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ══════════ SLIDE 8 — FOUR-IDEA FRAME ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">08 / 10</span><span class="lab">The four-idea frame (v1.6)</span></div>
+  <div class="body">
+    <h2>Market belief · our belief · the edge claim · the priced-in risk</h2>
+    <div class="tw"><table>
+      <tr><th style="width:20%">Leg</th><th>Statement</th></tr>
+      <tr><td><b>Market believes</b></td><td>A decent data asset in a deteriorating auto-ad tape, fairly held at
+        ~$20–21 until the first standalone print proves the guide; mild constructive lean (mean PT $24.50,
+        2-Buy/3-Hold).</td></tr>
+      <tr><td><b>We believe</b></td><td>Roughly the same — our PWFV sits below the Street mean. The distinct claim
+        is narrower: CARFAX alone covers the EV, so a reaffirmed guide makes the B2B optionality free and the
+        base case (+23%) cheap to hold; a cut makes the whole question moot.</td></tr>
+      <tr><td><b>Why we might have edge</b></td><td>Honestly: not much. The flow edge is spent and coverage arrived
+        day 1. What remains is process edge — the pre-committed gate lets us act inside the reaction window at
+        full speed while the tape digests three prints in two days.</td></tr>
+      <tr><td><b>Why it may be priced in</b></td><td>Five initiations already frame the value; the SOTP is visible
+        to anyone with the Form 10; and the demand deterioration (slide 5) is public. If Thursday reaffirms, the
+        move to $24–25 may be fast precisely because nothing here is secret.</td></tr>
+      <tr><td><b>Mechanism falsifier</b></td><td>Guide cut/withdrawn, or CARFAX &lt;6.0% growth, or segment margin
+        &lt;44% — any one converts the "temporary de-rate" read into a derailment and the case dies as stated.</td></tr>
+      <tr><td><b>Edge label</b></td><td><b>FLOW (spent) → conditional RISK_PREMIUM post-gate.</b> No honesty
+        finding either direction; the carry is labeled carry.</td></tr>
+    </table></div>
+    <p class="fine">Open item, carried: MBGL's Russell 1000-vs-2000 constituent status is unverified. If it was
+    auto-added to the Russell 1000 at the spin while sitting in the S&amp;P 600, the June-2027 reconstitution
+    could demote it — a <b>second, later forced-sell</b>. Rule-derived only; needs a constituent file before it
+    enters any thesis.</p>
+  </div>
+</section>
+
+<!-- ══════════ SLIDE 9 — VERIFICATION TABLE ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">09 / 10</span><span class="lab">SignalOS validation — claims graded</span></div>
+  <div class="body">
+    <h2>Verification table (v1.6): courts generate facts, this pass audits them</h2>
+    <div class="tw"><table>
+      <tr><th>Claim</th><th>Authority</th><th>Grade</th></tr>
+      <tr><td>SP500 parent → SP600 placement (replaced Core Laboratories, eff. 07-02)</td>
+          <td>S&amp;P DJI 06-26 release</td><td><span class="pill pv">Verified</span></td></tr>
+      <tr><td>CARFAX $536M EBITDA @ 47% / B2B $197M @ 32%; spin leverage 2.46–2.8×</td>
+          <td>Form 10 / information statement (EDGAR)</td><td><span class="pill pv">Verified</span></td></tr>
+      <tr><td>First standalone print Thu 2026-08-07 8:00 ET</td>
+          <td>company IR announcement 07-08</td><td><span class="pill pv">Verified</span></td></tr>
+      <tr><td>Day-1 coverage: five initiations, mean $24.50; no quiet period exists for spins</td>
+          <td>initiation records 07-02 → 07-20</td><td><span class="pill pv">Verified</span> <span class="small">(kills the initiation-wave catalyst)</span></td></tr>
+      <tr><td>Standalone costs +$20–25M run-rate, $75–100M one-time; ~$1B IHS DTL ≈ $83M/yr cash tax</td>
+          <td>12-May-2026 Investor Day deck (management guidance)</td><td><span class="pill pc">Corroborated</span></td></tr>
+      <tr><td>OEM TV ad −18%; CARS OEM −12%; Cox sentiment 56→47; BEV −25.1%</td>
+          <td>Guideline / CARS Q1 / Cox / registration data</td><td><span class="pill pc">Corroborated</span></td></tr>
+      <tr><td>Prior-art $37 price target</td><td>no firm, analyst, or date locatable; contradicted by all five initiations</td>
+          <td><span class="pill pr">Refuted — discarded</span></td></tr>
+      <tr><td>"Initiation wave lifts the orphan at day 25–40"</td><td>coverage began day 1</td>
+          <td><span class="pill pr">Refuted — fabricated catalyst</span></td></tr>
+      <tr><td>Russell 1000-vs-2000 constituent status (second forced-sell, Jun-2027)</td>
+          <td>rule-derived; no constituent file</td><td><span class="pill pu">Unverifiable</span></td></tr>
+      <tr><td>Generator field note: <span class="mono">recovery_off_trough_pct</span> computed from closes only</td>
+          <td>hides the +26% intraday bounce-and-fade; defect filed (P2)</td><td><span class="pill pu">Flagged</span></td></tr>
+    </table></div>
+  </div>
+</section>
+
+<!-- ══════════ SLIDE 10 — FROZEN CALL · EPILOGUE ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">10 / 10</span><span class="lab">The graded call · epilogue</span></div>
+  <div class="body">
+    <h2>This thesis grades Thursday morning, against its own bar</h2>
+    <div class="callout">
+      <p class="mono"><b>FROZEN CALL · MBGL | 2026-08-07</b> (calibration ledger, frozen 2026-08-03 at $20.38)</p>
+      <p>The 7.5–9% FY26 organic cc revenue guide (12-May Investor Day, never reaffirmed post-spin) is
+      <b>REAFFIRMED</b> at the first standalone print. <b>our_p = 0.55.</b> Resolution pack
+      <span class="mono">MBGL|2026-08-07</span> is armed with the full branch structure of slide 7; the frozen
+      number never revises — later evidence adjusts sizing only.</p>
+    </div>
+    <div class="tw"><table>
+      <tr><th>Catalyst</th><th>Date</th><th>Read</th></tr>
+      <tr><td>CARG + CARS Q2 prints</td><td class="mono">Wed 2026-08-06</td><td>gate inputs — dealer counts, OEM ad trajectory</td></tr>
+      <tr><td><b>MBGL first standalone Q2 print</b></td><td class="mono">Thu 2026-08-07 8:00 ET</td><td>the resolver — conditions 1+2, sizing dial 3</td></tr>
+      <tr><td>First TRUE standalone quarter (Q3)</td><td class="mono">Oct/Nov 2026</td><td>carve-out basis ends; standalone costs land in the numbers</td></tr>
+      <tr><td>Possible dividend declaration</td><td class="mono">by 2026-12-31</td><td>capital-return policy from the Investor Day framework</td></tr>
+    </table></div>
+    <h3>Epilogue — what the adversarial process changed (kept, per house practice)</h3>
+    <p class="sub">The finding court corrected itself twice mid-run (earnings date, quiet-period mechanism) and
+    conceded its standalone-cost estimate was built on the wrong document. The blue team then overturned the
+    court's conjunctive gate — the CARS condition gated a segment the price isn't paying for — and replaced the
+    limit-only execution that would have filled mainly on a rejected print. Our fair value ends up below the
+    Street's. We publish all of it because the corrections are the credibility.</p>
+    <hr style="border:none;border-top:1px solid var(--hair);margin:18px 0">
+    <p class="fine"><b>Disclaimer.</b> This document is personal research, published for informational and
+    educational purposes only. It is not financial, investment, tax, or legal advice, and it is not an offer
+    or a solicitation to buy or sell any security. The author is not a financial advisor, registered
+    investment adviser, or broker-dealer. <b>Position disclosure:</b> at the time of writing the author holds
+    no position in MBGL; conditional orders consistent with this document may be placed only if the
+    2026-08-07 gate clears, and the author may buy or sell at any time without notice. Every figure reflects
+    a good-faith effort at verification against primary sources (Form 10, S&amp;P DJI releases, company IR,
+    third-party ad/dealer data as labeled), but errors are possible and numbers go stale; nothing here is a
+    guarantee of accuracy or of future results. Do your own research and consult a licensed professional
+    before making any investment decision.</p>
+  </div>
+</section>
+
+</div>
+<script>
+  (function () {
+    var tip = document.getElementById('tip');
+    var marks = document.querySelectorAll('svg circle, svg rect[fill^="var(--s"], svg line[stroke-dasharray]');
+    marks.forEach(function (m) {
+      var t = m.querySelector('title');
+      if (!t) return;
+      m.addEventListener('mousemove', function (e) {
+        tip.textContent = t.textContent;
+        tip.style.left = Math.min(e.clientX + 14, window.innerWidth - 270) + 'px';
+        tip.style.top = (e.clientY + 14) + 'px';
+        tip.style.opacity = 1;
+      });
+      m.addEventListener('mouseleave', function () { tip.style.opacity = 0; });
+    });
+  })();
+</script>

@@ -1,0 +1,84 @@
+{
+  "ticker": "GTM",
+  "company": "ZoomInfo Technologies Inc.",
+  "cutoff": "2026-05-20",
+  "filing": "0001794515-26-000012_10-K.txt",
+  "filing_date": "2026-02-12",
+  "rfm_tuples": [
+    {
+      "claim_id": "C1",
+      "R": "As of December 31, 2025, we had $175.9 million of cash and cash equivalents, $4.0 million of short-term investments, and $150.0 million available under our first lien revolving credit facility... We believe that our cash flows from operations and existing available cash and cash equivalents... will be adequate to fund our operating and capital needs for at least the next 12 months and for the foreseeable future.",
+      "f": "If management is solvent and not facing going-concern doubt, the 10-K should pass the ASC 205-40 going-concern test cleanly; any auditor-raised substantial-doubt language would refute this.",
+      "M_source": "going_concern_detector.query_going_concern",
+      "M_value": "signal=NO_GOING_CONCERN, n_matches=0 (10-K filed 2026-02-12, report_date 2025-12-31)",
+      "severity": "PASS",
+      "interpretation": "Going-concern detector confirms zero canonical phrases in the 10-K. With $176M cash, $150M revolver capacity, $465M operating cash flow in 2025, and net income of $124M, the liquidity claim is consistent with the filing record. No obscuring detected."
+    },
+    {
+      "claim_id": "C2",
+      "R": "ITEM 9. CHANGES IN AND DISAGREEMENTS WITH ACCOUNTANTS ON ACCOUNTING AND FINANCIAL DISCLOSURE. None.",
+      "f": "If there have been no auditor disputes or changes, EDGAR 8-K Item 4.01 history should show clean auditor tenure for the 5-year lookback.",
+      "M_source": "auditor_change_tracker.query_auditor_changes",
+      "M_value": "signal=CLEAN_AUDITOR_TENURE, n_8k_item_401=0, n_big4_resignations=0, n_disagreements=0 (lookback 2021-05-21 to 2026-05-20)",
+      "severity": "PASS",
+      "interpretation": "Item 9 disclosure of no disagreements is corroborated by zero 8-K Item 4.01 filings over the 5-year lookback. No auditor-change red flag."
+    },
+    {
+      "claim_id": "C3",
+      "R": "On September 4, 2024, a putative class action lawsuit was filed against ZoomInfo Technologies Inc. ... alleges that the defendants made false and/or misleading statements related to the Company's business, operations, and prospects, including in respect of the effects of the COVID-19 pandemic... The Company intends to vigorously defend against this lawsuit.",
+      "f": "If the case is genuinely active (not quietly settled and unmentioned), subsequent Q1 2026 10-Q should reaffirm the disclosure in legal-matters footnote.",
+      "M_source": "claim_evolution.query_claim_evolution",
+      "M_value": "evolution_status=REAFFIRMED_IN_STRUCTURED_DISCLOSURE, 10-Q filed 2026-05-11 classification=AFFIRMED, vigorous-defense language re-stated",
+      "severity": "PASS",
+      "interpretation": "Material securities-fraud class action (covering Nov-2020 through Aug-2024) is being continuously re-disclosed in legal-matters notes in subsequent filings. Honest disclosure cadence; this is a real overhang but no obscuring."
+    },
+    {
+      "claim_id": "C4",
+      "R": "As of December 31, 2025, we had 3,180 employees, consisting of 662 in cost of service, 1,370 in sales and marketing, 763 in research and development, and 385 in general and administrative. Of these, 72% of our employees were located in North America... We maintain additional offices in Waltham, Massachusetts; Bethesda, Maryland; Austin, Texas; Ra'anana, Israel; Toronto, Canada; Chennai, India; Bangalore, India; Dublin, Ireland and London, England.",
+      "f": "If ZoomInfo really operates a 763-person R&D org and named US offices, DOL OFLC H-1B LCA filings should show worksite presence at the named US addresses (Waltham, Bethesda, Austin).",
+      "M_source": "dol_h1b_lca.query_lca_filings",
+      "M_value": "n_filings=11, worksites include Waltham MA (275 Wyman St, 5 LCAs), Bethesda MD (7700 Old Georgetown Rd, 1), Bellevue WA (1), Chandler AZ (1), all Software Developers SOC, NAICS 5182, signal=REGISTERED_H1B_SPONSOR",
+      "severity": "PASS",
+      "interpretation": "H-1B LCAs corroborate ZoomInfo as a registered H-1B sponsor with worksites at two of the three named US R&D offices (Waltham MA and Bethesda MD addresses match the 10-K). Vancouver HQ absence is uninformative because LCAs reflect H-1B-eligible roles only and US-citizen HQs often skip H-1B. Headcount and offices are plausibly real."
+    },
+    {
+      "claim_id": "C5",
+      "R": "Other technology companies... Technology companies, including those that operate in related industries, such as CRM, business software, or advertising, including Salesforce, Oracle, Google, or Microsoft/LinkedIn, may choose to compete with us in the B2B sales and marketing intelligence space... Our infrastructure operates out of third-party data centers hosted by Google and Amazon Web Services.",
+      "f": "These megacap mentions are framed as competitors (LinkedIn, Salesforce, Microsoft) and infrastructure vendors (AWS, Google), not as customer/partnership claims. Megacap-side mentions of ZoomInfo would be unusual since the relationship is the small-cap as customer of AWS/Google, not the reverse. INFLATION_SUSPECT from megacap_namecheck is therefore NOT informative for an obscuring signal here.",
+      "M_source": "megacap_namecheck.query_megacap_mentions",
+      "M_value": "signal=INFLATION_SUSPECT, 0 megacap hits across 19 megacaps over 10-year window",
+      "severity": "UNVERIFIABLE",
+      "interpretation": "Megacap silence on ZoomInfo is expected: ZoomInfo is a B2B SaaS vendor whose relationship with AWS/Google is as a customer (would not appear in AWS's 10-K), and with Salesforce/Microsoft is as a competitor (would not be cited). The 10-K does not actually claim a megacap partnership \u2014 only infrastructure use and competitive context. INFLATION_SUSPECT signal is a methodology false positive here."
+    },
+    {
+      "claim_id": "C6",
+      "R": "Revenue $1,249.5M (2025) ... an increase of $35.2M over 2024 ($1,214.3M)... Adjusted EBITDA $475.7M, an increase of $23.3M, or 5%... Net income $124.2M... Equity-based compensation expense $116.2M (2025), $138.0M (2024), $167.6M (2023). Restructuring and transaction-related expenses $40.3M (2025), $101.6M (2024), $10.3M (2023).",
+      "f": "If the EBITDA growth is real and not driven by aggressive add-backs hiding deteriorating credit quality, secured-debt activity and lender pressure indicators should not be clustering.",
+      "M_source": "ucc_proxy.query_ucc_exposure",
+      "M_value": "signal=ELEVATED_LIEN_EXPOSURE, 39 total term hits in 8-K/10-K/10-Q over 36mo, 19 'lien' mentions, 0 Item 2.03 (no new direct-financial-obligation 8-Ks), cluster_in_6mo=False",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "ELEVATED lien language reflects the existing 2022 first-lien credit facility (standard for an LBO-legacy capital structure), not new distress filings \u2014 zero Item 2.03 8-Ks. However, the combination of (a) 1% revenue growth, (b) $23M bad-debt provision (down from $42.8M in 2024 but still 1.8% of revenue), (c) $40M restructuring charges, and (d) flat $1.25B revenue against $1.6B + $1B newly authorized buyback all paint a credit picture more strained than the 5% adj-EBITDA growth headline suggests. Not deceptive (all disclosed), but the lien-language elevation reinforces that the capital structure is leveraged enough to matter."
+    },
+    {
+      "claim_id": "C7",
+      "R": "Insiders' Form 4 activity: Through 2025 and into 2026, named executives (Schuck Henry [CEO], O'Brien Michael Graham, Roth James M, McGrane Ashley) recorded routine vesting/withholding transactions. Per 10-K disclosure on stock repurchases: 'During the year ended December 31, 2025, the Company repurchased and subsequently retired 40,462,670 shares of common stock at an average price of $10.06.' Subsequent to year-end through Feb 6, 2026 repurchased 2,713,866 shares at $9.45 avg.",
+      "f": "If management's belief that the stock is undervalued is genuine (justifying $1B+ buyback authorization at low prices), insider-sale activity should be calibrated: no discretionary clustering against undisclosed-risk events.",
+      "M_source": "insider_vs_calendar.query_insider_sales_near_budget_events (contractor_name='ZoomInfo')",
+      "M_value": "n_form4_filings=66, n_proximate_sales=14, n_discretionary_proximate=0 (all 14 proximate sales are 10b5-1 or F-code tax-withholding), total proximate value $756k across 4 unique owners",
+      "severity": "PASS",
+      "interpretation": "Zero discretionary insider sales proximate to budget/fiscal-event windows. All proximate transactions are routine RSU vesting tax withholding (F-code) or pre-planned 10b5-1. Pattern is consistent with management's stated thesis of the buyback as an undervalued repurchase, not an exit signal. Note: ZoomInfo has no federal-budget exposure, so the IONQ-template signal is largely structurally inapplicable, but the absence of any discretionary clustering still adjudicates as PASS."
+    }
+  ],
+  "composite": 0.1429,
+  "summary": "GTM (ZoomInfo) presents as honestly-disclosed SaaS in a credit-cyclical downcycle \u2014 clean going-concern, clean auditor tenure, real H-1B-backed headcount, continuously re-disclosed securities litigation, and routine 10b5-1 insider sales. The only mild flag is ELEVATED_LIEN_EXPOSURE from legacy LBO-era secured debt against a 1% revenue-growth backdrop; everything is disclosed, no obscuring. Honesty-alpha framework finds no LYING signal \u2014 the -70% drawdown reflects multiple-compression and securities-litigation overhang on honestly-reported deteriorating growth, not management deception.",
+  "scoring": {
+    "PASS": 5,
+    "UNVERIFIABLE": 1,
+    "MODERATE_UNDERDELIVERY": 1,
+    "SEVERE_UNDERDELIVERY": 0,
+    "RED_FLAG_NEGATIVE": 0,
+    "verifiable_claims": 7,
+    "weighted_sum": "(0*5 + 1*1 + 2*0 + 3*0) / 7 = 1 / 7",
+    "composite": 0.1429
+  }
+}

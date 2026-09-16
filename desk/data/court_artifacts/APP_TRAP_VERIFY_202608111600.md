@@ -1,0 +1,42 @@
+### APP (AppLovin — pure-play mobile/CTV ad platform, post-Apps-divestiture; Axon AI bidding engine) — screen mcap $112.76B, sector Tech, d1 −19.66% (2026-08-06), trigger "1d −20%" — **BORDERLINE (lean REAL CANDIDATE — resolves on the Q3 print)**
+
+**Cause-check first: PRINT, not beta, not news-free.** 8-K + 10-Q filed 2026-08-05; −19.7% on 8/06.
+
+**KILL FACTS (what argues against)**
+- **The growth driver is unauditable.** The 10-Q revenue note disaggregates by **geography only** — US $989.6M / RoW $934.1M for Q2. No product, vertical, or e-commerce line ([10-Q, app-20260630.htm](https://www.sec.gov/Archives/edgar/data/1751008/000175100826000059/app-20260630.htm)). No customer-concentration disclosure. You cannot verify mix from any filing.
+- **Correction to our prior court's Mode-B spine:** it is *not* true that e-comm is never quantified — management gave **"consumer advertiser spend $1.28B, up 28% from Q4'25's seasonal peak"** on the call. But that is *spend*, not revenue, is unreconciled to the single revenue line, and is benched against a hand-picked Q4 base (skipping Q1'26). Refine the spine to: **quantified orally in a non-reconcilable non-GAAP unit, never in a filing.**
+- **Management's own miss explanation is unmodelable:** "our pace of meaningful model improvement was lighter than normal" ([Q2'26 call](https://www.investing.com/news/transcripts/earnings-call-transcript-applovin-slips-on-q2-revenue-miss-shares-fall-16-in-q2-2026-93CH-4839615)). Growth is a function of an internal R&D cadence no outsider observes.
+- **Falling knife, not a bounce.** $323.30 = **1.2% off the 52w low**, −56.6% from $745.61, five sessions post-print with no stabilization. This is the terminal leg of a ~9-month de-rate (pre-print ~$418), not a one-day event.
+- **Not an orphan.** ≥7 firms cut targets in a single day. "Priced by whom" resolves as *priced by a crowded, well-covered consensus* — the FAIR-CARRY orphan exemption does **not** apply here.
+- **Asymmetric disclosure.** A year-long SEC inquiry Bloomberg confirmed "active and ongoing" (2026-02-20) **never appeared in the legal-proceedings note of either the Q1 or Q2 2026 10-Q** — yet its favorable closure was announced *verbally* on the call. Risk undisclosed in writing, resolution disclosed orally.
+- **Founder control, no actor.** 30.2M Class B super-voting. Nobody can force value out.
+- **UNVERIFIED:** related-party transactions and share-pledge disclosure (proxy not pulled). Dense Form 4/144 cadence (6/12 ×3, 6/16 ×2, 6/18, 7/02, 7/06, 7/08, 7/17 ×2, 8/03, **8/07 post-print**) is distribution into the decline — unadjudicated.
+
+**LIVE FACTS (trap sweep came back mostly clean — this is the surprise)**
+- **No TTM one-off propping the beat.** H1'26 tax provision $465M ≈ **15.8% ETR vs 10.9% H1'25** — the rate *rose*. Defect family (1) REFUTED; net income growth is understated, not flattered.
+- **SBC-vs-dilution HONEST.** SBC $169M H1 = **4.5% of revenue**; shares **335.3M, down from 338.3M** at YE25 on $1,533M of H1 buyback. Real net shrink, not gross-buyback theater.
+- **Cash is the company's own.** Cash $3,053M vs LTD $3,515M → **net debt $462M** against ~$4.6B annualized FCF. No prefunded warrants, converts, or preferreds on the balance sheet. Tails bounded and effectively unlevered.
+- **FCF is real and capex-free.** H1 OCF $2,160M, **capex $2M**, FCF $2,152M. Not a stale-year or CFO-alone artifact.
+- **The miss was 0.85%** ($1,924M vs ~$1,940M) on an **EPS beat** ($3.76 vs $3.67), with Q3 guided to **+46–48% YoY** at 83% margins. A −20% response to a sub-1% miss is the dislocation candidate.
+- **The existential tail closed.** CFO Stumpf: *"The SEC has recently advised us that it concluded its inquiry with no recommended action."* The short-seller data-scraping thesis (Fuzzy Panda / Culper / Muddy Waters / CapitalWatch) is now regulator-tested. Caveat: management assertion, not a public SEC order.
+- **Below the Street's floor.** $323.30 sits **~9% under the lowest post-print target** ($357 Wells Fargo; Piper $385). Per the desk's conservative-FV reflex, that's the anchor that matters.
+- My estimate at $323.30: mcap ~$108.4B, EV ~$108.9B → **~21× FY26E EPS (~$15.5), ~16× FY26E EBITDA (~$6.75B), ~4.3% FCF yield** on a 47%-growth, 83%-margin, capex-nil business. These are *my* numbers, not guidance.
+
+**SCREEN-METRIC ADJUDICATION — no defect (and I nearly filed a false one).** $112,764,979,800 ÷ 335.3M actual shares = $336.31, which is exactly the 8/06 close implied by −19.66% off a $418.60 prior close. The screen mcap **ties out to the real post-divestiture count**. Current mcap at $323.30 is $108.4B.
+
+**CORRECTION TO THE EVIDENCE PACK (defect to file).** The pack's XBRL block instructs "use THESE for SBC/share/OCF math," but `rev` is **empty**, `sbc`/`ocf` stop at 2025-03-31, and `dil_sh` stops at 2025-06-30 (2024-era counts of ~348M). Following that instruction would have manufactured the exact share-count artifact the batch priors warn about. The builder appears to be pulling annual-frame facts only. Everything above uses the 8-K exhibit and 10-Q directly. Separately, NEXT PRINT 2026-11-04 remains **UNCONFIRMED** — no company PR names it; **print proximity ~12 weeks**, so there is no near-term event forcing a rushed entry.
+
+**RESOLVES ON:**
+- **~2026-11-04 (unconfirmed) Q3 print:** did Q3 land ≥$2,055M and does the "model improvement landed just after quarter end" claim show up as reacceleration? A second consecutive miss converts this from dislocation to de-rate.
+- **Same print / Q3 10-Q:** does the revenue note *still* disaggregate by geography only? Continued refusal to quantify the consumer/e-comm vertical in a filing while citing it orally = the honesty flag hardens.
+- **Next proxy (~April 2027) or an earlier 10-K:** related-party and pledge disclosure — currently UNVERIFIED.
+- **8-K / press release:** written confirmation of the SEC closure. Oral-only resolution of an oral-only-disclosed risk is not a closed loop.
+- **Tape tripwire:** a decisive break below the $319.50 52w low invalidates the "overreaction" read and re-tests the de-rate thesis; per our own falling-knife rule, a new low on touch is a re-review, never an auto-buy.
+
+**Disposition: advance-to-court** — merge into the open APP `TRAP_VERIFY` row rather than enqueuing a new one. The court adjudicates the real question, which is *not* price and *not* accounting: the trap sweep came back clean (no one-offs, honest SBC, own cash, real FCF, bounded tails, resolved regulatory tail), so what remains is whether a growth rate you structurally cannot decompose from any filing is ownable at 21× — a **SIZE** question and a **data-opacity** question, not a valuation gate. Lean is toward a small starter on the court's approval, sleeve-capped, staged rather than timed.
+
+---
+
+**One item I could not complete:** the standing closing ritual (ledger upsert → edge_classification → entry_plan → re-run scanner → verify via `/api/everything`) did **not** run. Bash is disabled in this session and the IBKR MCP calls were permission-denied, so I could neither execute the desk scripts nor pull a live IBKR quote — the $323.30 tape is the evidence pack's Yahoo mark, not an IBKR resolve. The dashboard is therefore stale with respect to this verification and needs the ritual run in an interactive session before this row is treated as current.
+
+Sources: [8-K Q2'26 press release](https://www.stocktitan.net/sec-filings/APP/8-k-app-lovin-corp-reports-material-event-1c56927d6b73.html) · [10-Q 6/30/26](https://www.sec.gov/Archives/edgar/data/1751008/000175100826000059/app-20260630.htm) · [Q1'26 10-Q](https://www.sec.gov/Archives/edgar/data/0001751008/000175100826000044/app-20260331.htm) · [Q2'26 call transcript](https://www.investing.com/news/transcripts/earnings-call-transcript-applovin-slips-on-q2-revenue-miss-shares-fall-16-in-q2-2026-93CH-4839615) · [Bloomberg Law, SEC probe active 2026-02-20](https://news.bloomberglaw.com/securities-law/sec-says-probe-involving-applovin-still-active-and-ongoing-1) · [CFO: probe closed](https://stocktwits.com/news-articles/markets/equity/app-stock-plunges-28-after-hours-on-revenue-miss-and-soft-guidance-but-cfo-says-sec-probe-on-firm-now-closed/cZoI49mRJeZ) · [Downgrades/target cuts](https://seekingalpha.com/news/4627857-applovin-breaks-investors-hearts-with-20-percent-drop-after-q2-results-receives-multiple) · [52-week lows](https://www.benzinga.com/trading-ideas/movers/26/08/61008427/applovin-stock-plummets-to-52-week-lows)

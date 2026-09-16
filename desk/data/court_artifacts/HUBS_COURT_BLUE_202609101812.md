@@ -1,0 +1,54 @@
+## BLUE BENCH — HUBS — RED CASE: PARTIALLY OVERTURNED
+
+**PACK: acknowledged** (px 225.01, dd52 −0.571, pct_off_low 0.326, BOOK qty 42.0 @ 186.7875, orders NONE). Superseded: (a) **red's own tape (228.025 / −0.565 / +0.344) is not in this pack** and is internally inconsistent with pct_off_low 0.326 (169.65×1.326 = 224.9) — every red multiple is ~1.3% hot on top of the error it charges the thesis with; (b) pack XBRL block frame-broken (rev ends 2018-03-31; sbc/dil_sh/ocf Q1-only) — used only for the SBC *trend*; (c) thesis "live 233.59" rejected.
+
+**PRINT PROXIMITY: 2026-11-04 — yfinance-derived, NOT company-confirmed.** No HubSpot PR names a Q3 date; ~38 TD out. No pre-print gate triggers. **PRIZE-TABLE MANDATE: N/A** — HubSpot is a $3.7B-revenue, GAAP-profitable operator, not a pre-revenue project developer; no magic-funding counterfactual applies.
+
+**PER-FINDING RULINGS**
+
+1. **Book state** | red: 83→42, "verdict axis doesn't exist" | check: pack BOOK = 42.0; 42×225.01 = **$9,450** | **SUSTAINED–REDUCED.** 42 ≈ half of 83 — the trim-50 *was already executed*; the live axis is hold-42 vs. go-flat, which is a real question, not a void one. Immateriality is a sizing note, not a kill.
+2. **IV 63.6 vs RV 105.8** | check: a single −20.2% day inside a 21-day window alone annualizes to **~70% vol**; RV is one-print arithmetic, IV<RV post-event is mechanical | **SUSTAINED — thesis leg dead.** But red tagged it **NOVEL** while calling it "textbook" in the same sentence. **Tag contested → CONSENSUS.**
+3. **Prize table** | check: EV = $265.00 exactly; on pack px that is **+17.8%**, not +16.2%. Bear −24.4% / bull +60.0%; bull = **4.51x EV/S**, bear 170 ≈ **2.0x EV/S** | **REDUCED.** The re-rate requirement is real; but a +17.8% EV with a −24% bear on an unlevered, GAAP-profitable name is an ownable carry, and comparing a point EV to an *annualized* implied vol is a category error.
+4. **Net-cash / buyback double count** | check: red charges the **$531.9M buyback as cash burn (F4)** *and* **~$560M SBC as an expense (F5)** — those are the same economic cost. The buyback is the settlement of SBC; charging both is the mirror image of the sin red prosecutes. Pace: cash+inv fell **$1.8B→$1.4B = $200M/qtr over two quarters → ~7 quarters**, not "<4"; and diluted shares **52.7M→49.3M** means the buyback *over*-covered dilution — capital return, not burn | **PARTIALLY OVERTURNED.** The no-double-credit rule (cash *or* buyback support) is SUSTAINED; "balance sheet is a burn source, exhausted <4 quarters" is OVERTURNED.
+5. **SBC ≈ FCF** | check: pack SBC series grows ~5%/yr (Q1-25 116.7 vs Q1-24 111.1) → FY26 ≈ **$490M**, not $560M; SBC/revenue **13.3%**, *falling* from ~17%. Owner-FCF ≈ **$167M = 1.7% of EV** | **REDUCED** (direction sustained: 6.4% yield is refuted; the "≈breakeven/1.1%" magnitude is overstated by ~55%).
+6. **Basis mix (GAAP $43.3M welded to 14.1x forward non-GAAP)** | check: run-rate GAAP op ~$173M → ~57x EV/GAAP-EBIT; trailing 75.7x is secondary but directionally right | **SUSTAINED (DATA).**
+7. **"We agree with the street → no edge"** | check: red produced the street's *revenue* number ($941.2M vs guide $924–925M; 13% 3-yr) but **never produced the street's price target** — the load-bearing anchor for a prize-table thesis. A thesis can diverge on **multiple** without diverging on forecast; red never tested that | **REDUCED — "FATAL to edge" OVERTURNED.** Under divergence-not-coverage, counting the street's growth model is not the work; the mechanism-vs-anchor comparison was never run. CONSENSUS tag on the forecast leg stands.
+8. **Market cap provenance** | check: 49.87M × 225.01 = **$11.22B**, EV **$9.88B**, **2.68x EV/S** — red's $11.37B/$10.03B is itself stale-tape | **SUSTAINED and STRENGTHENED against red.**
+9. **10% short interest** | check: fact accepted (secondary). Red graded TIMING and then let it feed "no edge" | **SUSTAINED, SIGN FLIPPED** — 10% short + $1.0B authorization + mid-teens cc growth is squeeze asymmetry *into* a print; per doctrine CROWDED sizes, never rejects.
+10. **MNDY correlation** | **SUSTAINED (SIZING).**
+11. **Insider read** | **SUSTAINED as PLAUSIBLE**; no verdict rests there. Form 3 on 8/6 is an initial statement (new officer/director), benign; 10b5-1 dates unread.
+
+**NEW FINDINGS RED MISSED**
+- **N1 (fatal to red's header):** red's ruling enum says **REJECT** while its own position line says **HOLD-NO-ADD the 42 shares**. A reject that recommends holding is not a kill; it is a no-add. | internal audit | **CONFIRMED.**
+- **N2 (red's "binding gap" is not a gap):** HubSpot's 10-Q deferred-revenue note discloses quarterly **invoicing** — "Deferred revenue during the three months ended March 31, 2025 increased by $52.7 million resulting from $766.8 million of additional invoicing and was offset by revenue recognized of $714.1 million" — i.e. a **billings series is derivable from primary filings** without cRPO. Red declared `rpo_drift` UNCHECKABLE and never applied the SEC-403/jina fallback to the pack's own Q2-26 10-Q (0001193125-26-335232). | primary 10-Q | **REFUTED (red's UNCHECKABLE).**
+- **N3 (strengthens red, bounded):** ~$767M/qtr invoicing implies a large deferred-revenue balance, so part of "net cash" is customer prepayment. Correct treatment is a **cost-to-fulfill haircut (~15% of deferred), not full deduction** — a ~$150M EV haircut, not $1B. Magnitude **UNVERIFIED** (6/30/26 balance unread).
+- **N4 (missed kill lever):** the prior court's "6 of 9pp deceleration is FX" and implied Q4 +15.8% **require the FX tailwind to persist** (rep 20% > cc 17%). If USD firms, reported converges *down* to cc — the same outcome red needed and never argued. **PLAUSIBLE** (no FX series pulled; `desk/seasonality.py` unavailable this session — coverage gap, reported).
+- **N5 (detector hygiene):** red graded `austin_permits`, `beauty_velocity_poll`, `beauty_virality` — **not in this pack's dispatch** — and skipped all three clinical entries that are. Copy-forward from another case.
+
+**DETECTORS CONSULTED**
+- app_review_velocity — NOT-FIRED (checked, clean): companion console, not purchase surface; low-hundreds review counts cannot discriminate 5k vs 6k adds on 306,446 customers. Planner upheld.
+- cybercom_budget — UNCHECKABLE: no federal cyber program line exists to check; SIC-only match.
+- doe_budget — UNCHECKABLE: no quantum/fusion/HPC program; missing evidence = any DOE award.
+- ic_contracting_proxy — UNCHECKABLE: no classified/IC revenue claim in PR or 10-Q excerpt.
+- pentagon_jbook — UNCHECKABLE: no DoD program element; R/M-gap inapplicable to SMB SaaS.
+- revenue_concentration — NOT-FIRED: 10-Q tags show *geographic* concentration (country:IE, RestOfTheWorld), not customer/prime; 306k-customer base is the inverse pattern.
+- rpo_drift — **CHECKABLE, PARTIALLY FIRED**: no RPO/cRPO tag, but the deferred-revenue note's **invoicing** line (Q1-25: $766.8M invoiced vs $714.1M recognized) is a billings series; Q2/Q3-26 values unread in this session → the pre-11/04 read red called impossible is available. Missing evidence: the 2026 invoicing figures.
+- runway_calculator — NOT-FIRED: $1.4B cash/inv, zero LT debt, GAAP-profitable; re-run on buyback funding gives ~7 quarters at H1 pace, not <4.
+- clinical_trial_referral_quality — UNCHECKABLE/N-A: no diagnostics or referral business; dispatch false positive.
+- clinicaltrials_lookup — UNCHECKABLE/N-A: no clinical program; helper detector, nothing to look up.
+- competitor_trial_omission — UNCHECKABLE/N-A: no S-1, no trial program.
+- lockup_expiration_calendar — NOT-FIRED: no follow-on; 2014-listed issuer, no lockup overhang.
+- upc_tra_value_extraction — NOT-FIRED: single-class C-corp, no Up-C/TRA in the 10-Q excerpt (excluded before any share-count finding).
+- albuquerque_permits — UNCHECKABLE/N-A: only resolved facility is Cambridge MA (2 Canal Park).
+
+**COVERAGE GAPS:** Q2-26 10-Q not read as primary this session (search-only tool; jina fallback untested) — invoicing/deferred-revenue at 6/30/26 **UNVERIFIED**; FX series and seasonality tool unavailable; Q3 buyback pace unfiled; 10b5-1 adoption dates unread.
+
+```kg_candidate
+{"name": "sbc_and_antidilution_buyback_double_charge", "kind": "mechanism", "one_line": "A bear case charges full SBC against FCF AND charges the anti-dilution repurchase as separate cash burn, double-counting one compensation cost.", "fires_on": "Bear math subtracts SBC from FCF to get owner-FCF while separately treating repurchase spend > FCF as balance-sheet depletion, in a name where diluted share count is flat-to-down.", "evidence_here": "HUBS: red charged $560M SBC (F5) and the $531.9M Q2 buyback (F4) as independent drains while diluted shares fell 52.7M->49.3M; corrected SBC ~$490M, cash draw $200M/qtr (~7 qtrs), owner-FCF 1.7% not 1.1%.", "applies_to_guess": {"issuer_features": ["sbc_heavy", "active_repurchase_authorization", "flat_or_declining_diluted_shares"], "sic_prefixes": ["7372", "737"]}}
+```
+
+**NET POSITION AFTER BOTH BENCHES:** What survives is a **de-rated leg count, not a kill**. Dead: the IV/RV "flow" leg (F2, sustained), the 6.4% FCF yield (F5, reduced to ~1.7% owner-FCF), the "cheap-and-GAAP-profitable" basis weld (F6), and the double-*credit* of net cash plus buyback (F4, half of it). Alive: unlevered balance sheet with ~7 quarters of buyback capacity at H1 pace, falling SBC intensity, shrinking share count, mid-teens cc growth, EV **$9.88B = 2.68x EV/S**, prize EV **+17.8%** with a −24% bear that is itself a 2.0x-sales trough — and 10% short interest as squeeze asymmetry into the print. Red's REJECT header is unsupported by its own HOLD-NO-ADD line and by the corrected arithmetic. **Position: HOLD the 42 shares (~$9.45k), NO ADD, NO TRIM.** Gates: (i) Q3 10-Q invoicing/deferred-revenue line vs revenue — billings growth <12% ⇒ trim to zero; (ii) net adds ≤5,000 **with** NRR <102% ⇒ trim to zero; (iii) Q3 repurchase >$300M with cash+inv <$1.2B ⇒ trim-50; (iv) a company PR confirming the print date before sizing anything. Post-audit kill distribution — **kills: 1 novel (net-cash/buyback no-double-credit, reduced) / 5 consensus (IV-crush re-tagged, SBC, street-agreement, basis mix, correlation) / 4 data-hygiene (book state, tape provenance, short interest, insider)**.
+
+**Conviction that HOLD-42/no-add is the right net position: 7/10.**
+
+Primary citations: HubSpot Q2-2025 10-Q — https://www.sec.gov/Archives/edgar/data/1404655/000095017025104104/hubs-20250630.htm ; Q1-2025 10-Q (invoicing/deferred-revenue mechanics quoted) — https://www.sec.gov/Archives/edgar/data/1404655/000095017025067055/hubs-20250331.htm ; Q2-26 8-K ex-99.1 as cited by red — https://www.sec.gov/Archives/edgar/data/0001404655/000119312526335148/hubs-ex99_1.htm (not independently re-fetched this session; flagged).

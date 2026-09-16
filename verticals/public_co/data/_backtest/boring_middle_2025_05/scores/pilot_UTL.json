@@ -1,0 +1,125 @@
+{
+  "ticker": "UTL",
+  "company": "UNITIL CORP",
+  "cutoff": "2025-05-15",
+  "filing": "0000950170-25-017154_10K.txt",
+  "filing_date": "2025-02-10",
+  "cik": "0000755001",
+  "sector": "Utilities",
+  "industry": "Utilities - Diversified",
+  "group": "boring_middle",
+  "rfm_tuples": [
+    {
+      "claim_id": "C1",
+      "R": "Unitil is a public utility holding company headquartered in Hampton, New Hampshire... Unitil's principal business is the local distribution of electricity and natural gas to approximately 198,500 customers throughout its service territories in the states of New Hampshire, Massachusetts and Maine. (10-K, Item 1)",
+      "f": "Mode A existence check: verify the four named regulated subsidiaries (Unitil Energy NH, Fitchburg MA, Northern Utilities NH/ME, Granite State pipeline FERC) and a single CIK 0000755001 filing structure. Cross-checked against EDGAR submissions API and recent 10-Q/10-K cover pages.",
+      "M_source": "edgar_fts",
+      "M_value": "Confirmed. Holding-co structure stable across multiple 10-K vintages; rate-base subsidiaries match state PUC dockets cited within the filing (NHPUC, MDPU, MPUC, FERC). No undisclosed material affiliates.",
+      "severity": "PASS",
+      "interpretation": "Vanilla regulated utility holdco disclosure. Nothing aspirational; everything tied to recoverable rate base and decoupled distribution revenue."
+    },
+    {
+      "claim_id": "C2",
+      "R": "On January 31, 2025, Unitil Corporation acquired Bangor Natural Gas Company, a natural gas distribution utility... for $70.9 million in cash... The acquisition closed on January 31, 2025. (10-K subsequent events)",
+      "f": "Mode A: verify announce/close dates and price. Mode B (the punchline): given the deal closed January 31 — was it the END of the M&A program, or only the FIRST of a stacked series the 10-K didn't disclose? Use edgar_fts + claim_evolution to see all post-base-filing deals.",
+      "M_source": "claim_evolution + edgar_fts",
+      "M_value": "Bangor close confirmed at $71.2M (with WC adjustment) per Q1 10-Q (filed 2025-05-06). BUT: 10-K disclosure of Bangor is silent on TWO further announced acquisitions that surface PRE-CUTOFF. (a) Maine Natural Gas Co. announced 2025-04-01 (8-K 2025-04-04), $86.0M debt-free, MPUC approval pending. (b) Aquarion Water Companies (3 water utilities, MA/NH/CT-parent) announced 2025-05-06 (8-K 2025-05-12), $100.0M enterprise value incl. $30.0M assumed debt. Cumulative announced M&A in <4 months from 10-K filing: ~$257M EV vs. Unitil's $534M Q1 common equity.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Not a 'lie' — each subsequent deal got its own 8-K — but the 10-K Item 1A and MD&A framed Bangor as a one-off bolt-on, with no language signaling that a multi-deal M&A program was queued. Investors reading the 10-K alone in Feb 2025 would materially under-estimate the financing and integration burden ahead. This is a Mode B finding the framework caught only because edgar_fts surfaced the 2025-04/05 8-Ks."
+    },
+    {
+      "claim_id": "C3",
+      "R": "On January 29, 2025, the Company entered into an amendment to the Credit Facility, which (among other things) increased the borrowing limit under the Credit Facility from $200 million to $275 million and extended the term... At December 31, 2024 and December 31, 2023, the Company was in compliance with the covenants. The only financial covenant... provides that Unitil's Funded Debt to Capitalization... cannot exceed 65%, tested on a quarterly basis. (10-K MD&A + Note 4)",
+      "f": "Mode B: compute Funded Debt / (Funded Debt + Equity) for the LATEST pre-cutoff data point (Q1 10-Q, 2025-03-31) and project pro-forma for the two announced-but-unclosed deals (Maine Natural $86M term loan + Aquarion $100M term loan, of which ~$70M new debt). Compare against 65% covenant.",
+      "M_source": "sec_filings (Q1 10-Q balance sheet) + 8-K commitment letters",
+      "M_value": "Mar 31 2025 (Q1 10-Q): Total Long-Term Debt $646.0M + Short-Term Borrowings $172.9M = Funded Debt ~$818.9M. Total Common Equity $534.1M. Funded Debt / (Funded Debt + Equity) = ~60.5%. Pro-forma adding Maine Natural $86M + Aquarion ~$70M (new) = ~$975M / $1,509M = ~64.6%. The May 12 8-K explicitly states the Aquarion Bank-of-Nova-Scotia term loan covenant requires 'maintaining a 65% debt to capitalization ratio (tested quarterly on a consolidated basis)'.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Headline 'in compliance' is true, but the pre-cutoff pro-forma puts the issuer within ~40 bps of its only material financial covenant once both pending deals close. Either an equity raise or an acquisition delay is required; neither is yet disclosed. The 10-K does not surface this in its Liquidity section — investors must rebuild the math from the Q1 10-Q and post-Feb 8-Ks."
+    },
+    {
+      "claim_id": "C4",
+      "R": "As of December 31, 2024, the Company had approximately $105.8 million in short-term debt outstanding under its revolving credit facility. (10-K Risk Factors / MD&A)",
+      "f": "Mode B claim drift: did this short-term reliance INCREASE between 10-K cutoff (Dec 31 2024) and the Q1 10-Q (Mar 31 2025) — and is the trend consistent with the implied Bangor close + integration drag?",
+      "M_source": "claim_evolution + sec_filings",
+      "M_value": "Q1 10-Q reports Short-Term Borrowings Outstanding of $172.9M at Mar 31 2025 — up $67.1M (+63%) from year-end despite the Jan 29 2025 credit facility upsize to $275M. Available declined to $102.1M. Cash provided by operating activities in Q1 was unremarkable for the seasonally strong winter quarter; the increase reflects the Bangor $71.2M cash close + working capital.",
+      "severity": "PASS",
+      "interpretation": "Disclosure is consistent and the cash use is identifiable (Bangor close). Not a lie. Listed as a marker for the C3 leverage trajectory, not as an underdelivery."
+    },
+    {
+      "claim_id": "C5",
+      "R": "Unitil Corporation and its utility subsidiaries... are currently rated 'BBB+' by Standard & Poor's Ratings Services. Unitil Corporation and Granite State are currently rated 'Baa2', and Fitchburg, Unitil Energy and Northern Utilities are currently rated 'Baa1' by Moody's Investors Services. (10-K MD&A)",
+      "f": "Mode A: rating affirmed as of filing date. Mode B: any pre-cutoff downgrade, watch-negative, or outlook change post 10-K filing? Search EDGAR FTS for 'downgrade', 'rating action', '8-K Item 7.01 Reg FD' notices.",
+      "M_source": "edgar_fts",
+      "M_value": "No 8-K rating-action filing in the window 2025-02-11 to 2025-05-15. One 'downgrade' FTS hit (the 10-K itself, generic risk language). Q1 10-Q reiterates the same ratings. No insider-source confirmation of S&P / Moody's review activity is possible under blinding rules.",
+      "severity": "PASS",
+      "interpretation": "Rating claim still verifiable as of cutoff. Note: post-cutoff rating action is OUT OF SCOPE for blinding — flagged only that the rapidly rising debt load against unchanged ratings is a forward risk a rating agency would price."
+    },
+    {
+      "claim_id": "C6",
+      "R": "Unitil Energy, Fitchburg and Northern Utilities have a well-diversified customer mix and are not dependent on a single customer, or a few customers, for their electric and natural gas sales. (10-K Item 1 + Note 2)",
+      "f": "Mode A: residential vs C&I revenue mix is in MD&A. Verify there is no hidden top-customer or top-contract concentration in the regulated rev base or the Granite State pipeline (which serves Northern Utilities as primary shipper, an affiliate).",
+      "M_source": "revenue_concentration (manual cross-read MD&A)",
+      "M_value": "Total customers ~198,500 across two states + Maine; largest sub-segment Northern Utilities C&I gas ($117M) is ~24% of consolidated rev. Granite State pipeline ($9.8M rev, ~2%) derives revenue 'principally from the transportation services provided to Northern Utilities' — affiliate dependence, but consolidated away. No external single-customer concentration disclosed.",
+      "severity": "PASS",
+      "interpretation": "Diversified-customer claim is true for the regulated distribution stack. Affiliate concentration at Granite State is consolidated and disclosed in segment notes."
+    },
+    {
+      "claim_id": "C7",
+      "R": "We have served as the Company's auditor since 2014. /s/ Deloitte & Touche LLP, Boston, MA, February 10, 2025. Critical Audit Matter: Impact of Rate-Regulation on Various Account Balances and Disclosures. (10-K Item 8)",
+      "f": "Mode A: auditor identity + tenure. Mode B: any 8-K Item 4.01 auditor change or 8-K with disagreement reference in the cutoff window? Did the CAM language change vs. prior year (signal of new contentious area)?",
+      "M_source": "auditor_change_tracker",
+      "M_value": "auditor_change_tracker: CLEAN_AUDITOR_TENURE, n_8k_item_401=0, n_big4_resignations=0, n_disagreements=0 over the lookback. Deloitte tenure of 11 years; single CAM is the standard regulated-utility 'rate regulation accounting' matter (Topic 980).",
+      "severity": "PASS",
+      "interpretation": "Auditor signal is clean. CAM is the standard regulated-utility template; no new contentious area appeared this year."
+    },
+    {
+      "claim_id": "C8",
+      "R": "Insider Form 4 activity: 9 insiders filed Form 4s on 2025-01-29 (post-board-meeting performance-share / restricted-stock grants); additional Form 4 grant cluster 2024-10-03. (Implicit from EDGAR Form 4 indices, not from the 10-K itself.)",
+      "f": "Mode B: insider behavior vs federal-budget calendar (the canonical IONQ tell). Sweep Form 4 transactions over a 540-day lookback and overlay against the budget calendar. For a regulated utility with negligible federal-customer exposure, the relevant calendar event is much weaker, but cluster behavior near acquisition announcements is still observable.",
+      "M_source": "insider_vs_calendar + form4",
+      "M_value": "insider_vs_calendar: 24 Form 4 filings in lookback, 0 OPEN-MARKET sales, 0 discretionary sales, n_proximate_sales=0. Form 4s in the window are grants (A code) and tax-withholding share withholdings (F code) tied to the January board comp cycle — not discretionary dispositions. No 10b5-1 plan currently in place (the 2023 plan terminated 2024-05-31 and was not renewed per 10-K).",
+      "severity": "PASS",
+      "interpretation": "Insider behavior is conservative and explicable from the comp calendar. No insider was reducing exposure ahead of the M&A leverage build-up — supports the read that management believes the acquisitions are accretive."
+    },
+    {
+      "claim_id": "C9",
+      "R": "The Company's past and present operations include activities that are generally subject to extensive federal and state environmental laws and regulations. The Company has recovered or will recover substantially all of the costs of the environmental remediation work performed to date from customers or from its insurance carriers... The Environmental Obligations balance grew from $4.6M to $7.8M in 2024 (Additions $3.6M), driven by a $5.6M accrual at the Northern Utilities Rochester NH MGP site. (10-K Note 7)",
+      "f": "Mode A: existence of MGP cleanup obligations. Mode B: severity of the new accrual — is the +$3.2M YoY (78%) increase commensurate with disclosure, or is it being soft-pedaled relative to its impact?",
+      "M_source": "self_text (Note 7) + edgar_fts (Rochester NH MGP)",
+      "M_value": "Environmental Obligations rose from $4.6M to $7.8M YoY. The new Rochester NH RAP accrual of $5.6M dominates additions. Disclosure is explicit and amortization mechanism for NH MGP costs over seven-year periods exists. Fitchburg Sawyer Passway range disclosed as $40k accrued vs. up-to-$3.5M reasonably possible high-end.",
+      "severity": "PASS",
+      "interpretation": "Environmental remediation is disclosed with appropriate sensitivity ranges and the cost-recovery mechanism is regulator-approved. No going-concern implication; the obligations are well within recoverable-via-rates territory. Notable mainly as a quiet trend, not a flag."
+    },
+    {
+      "claim_id": "C10",
+      "R": "No substantial-doubt / going-concern language. Pension Funded Status: Pension Plan PBO $148.6M vs Plan Assets $149.0M = effectively fully funded ($+0.4M); SERP underfunded by $13.8M; PBOP underfunded by $12.7M. The Company has committed to reduce greenhouse gas emissions from 2019 levels by at least 50% by 2030 and to achieve net-zero greenhouse gas emissions by 2050. (10-K + Note 9)",
+      "f": "Mode A: going-concern detector. Mode B: claim drift in the climate commitment — is the 50%-by-2030 / net-zero-by-2050 pledge still affirmed in the Q1 10-Q, or has it been quietly softened, given a pivot toward acquiring a WATER utility (Aquarion) that has no fossil-emissions profile but also no decarbonization synergy with the existing gas LDC investments?",
+      "M_source": "going_concern_detector + claim_evolution",
+      "M_value": "going_concern_detector: NO_GOING_CONCERN, n_matches=0 in the cutoff-aware filing. Pension fully funded — a rare positive in the boring-middle cohort. Climate commitments still appear in the 10-K verbatim; the Q1 10-Q does not repeat them but does not retract them either. Mass DPU's 2050 Decarbonization Roadmap continues to apply Climate Compliance Plan (CCP) obligations to Fitchburg with the first CCP due April 1, 2025.",
+      "severity": "PASS",
+      "interpretation": "Clean on the highest-priority distress detector. Pension overfunded — supports the read that this is a healthy regulated utility being honest about its rate-recovery and obligations. The Aquarion water-utility pivot is strategically curious in a CCP-mandated decarbonization context, but the 10-K is honest about the Massachusetts climate-compliance burden."
+    }
+  ],
+  "supplemental_signals": {
+    "going_concern_signal": "NO_GOING_CONCERN",
+    "auditor_signal": "CLEAN_AUDITOR_TENURE",
+    "insider_signal": "NO_PROXIMATE_SALES",
+    "claim_evolution_bangor": "REAFFIRMED_IN_STRUCTURED_DISCLOSURE",
+    "edgar_fts_aquarion_hits": 4,
+    "edgar_fts_scotiabank_hits": 6,
+    "ma_pipeline_announced_post_10k_pre_cutoff": [
+      {"date": "2025-04-01", "target": "Maine Natural Gas Company", "consideration_usd_mm": 86.0, "financing": "Scotiabank delayed-draw term loan $86M"},
+      {"date": "2025-05-06", "target": "Aquarion Water Companies (MA + NH + Abenaki)", "consideration_usd_mm": 100.0, "debt_assumed_usd_mm": 30.0, "financing": "Scotiabank delayed-draw term loan $100M with 65% debt/cap covenant"}
+    ],
+    "pro_forma_funded_debt_to_cap_at_close_estimate_pct": 64.6,
+    "covenant_threshold_pct": 65.0,
+    "short_term_borrowings_q1_2025_mm": 172.9,
+    "short_term_borrowings_yr_end_2024_mm": 105.8,
+    "pension_funded_status_pbo_minus_assets_thousand": 418,
+    "environmental_obligations_yoy_change_mm": 3.2,
+    "deterministic_supplemental_notes": "Utility holdco with stable fundamentals; the only material framework signal is the post-10K M&A pipeline that pushes pro-forma leverage to within ~40 bps of the credit-facility covenant ceiling. No insider warnings, clean auditor, no going-concern."
+  },
+  "summary": "Utility holdco with vanilla regulated distribution operations (electric + gas across NH/MA/ME). 10-K reads as honest and complete on Mode A: customer counts, rate cases, MGP remediation, pension overfunded, auditor tenure 11 yrs Deloitte, no going-concern, no insider selling. The framework's value-add is Mode B claim drift between the 10-K (filed 2025-02-10) and cutoff (2025-05-15): the 10-K discloses Bangor ($71M) as a one-off subsequent event, but pre-cutoff 8-Ks reveal a stacked M&A program (Maine Natural $86M April; Aquarion Water $100M May) financed entirely with Scotiabank delayed-draw term loans. Pro-forma Funded Debt / Capitalization rises from ~60.5% (Q1) to ~64.6% at close — within 40 bps of the 65% covenant ceiling that all three term-loan facilities share. Either an equity raise or deal-timing slippage is implied but not yet disclosed. Net: mostly-honest disclosure with one MODERATE underdelivery (M&A program scope) and one MODERATE leverage-trajectory concern. NEUTRAL tier — the framework finds no liar, but flags a leverage cliff that the 10-K alone would not surface.",
+  "verdict": "NEUTRAL",
+  "composite": 0.62
+}

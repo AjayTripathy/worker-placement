@@ -1,0 +1,1796 @@
+{
+ "_schema_version": "1.0",
+ "_built": "2026-05-29",
+ "_purpose": "Cross-asset masking-mechanism catalog. Each entry documents a structural feature that decouples a public signal from market price reflection. The framework's contribution = identifying which signals matter despite (or because of) masking.",
+ "_documentation_depth_levels": {
+  "VERIFIED": "Mechanism observed in primary-source data with measured spread/price impact",
+  "DOCUMENTED": "Mechanism described in scoping/validation docs with structural detail; price impact inferred",
+  "MENTIONED_NOT_VALIDATED": "Mechanism named but structural details / asset-class impact not yet tested",
+  "STRUCTURALLY_NEGATIVE": "Expected masking mechanism CONFIRMED ABSENT \u2014 itself a finding"
+ },
+ "_severity_levels": {
+  "HIGH": "Decouples signal from price almost entirely (e.g., state insurance wrap to AA-)",
+  "MEDIUM": "Partial decoupling \u2014 material spread effect (e.g., 2-3 notch enhancement)",
+  "LOW": "Mild masking \u2014 delays signal-to-price reflection by weeks to months",
+  "NONE": "No masking after primary-source review (structurally-negative finding)"
+ },
+ "mechanisms": [
+  {
+   "name": "Cal-Mortgage Loan Insurance Program",
+   "short_name": "cal_mortgage",
+   "category": "insurance_wrap",
+   "asset_classes": [
+    "ca_nh_muni",
+    "ca_ccrc_muni",
+    "ca_hospital_muni_minor"
+   ],
+   "issuer": "California Health Facilities Financing Authority / Department of Health Care Access and Information (HCAI)",
+   "structural_property": "State of California acts as insurer of last resort on participating health-facility bonds. Insured bonds carry State of CA AA- credit (was AA before 2017). HCAI underwrites the deal at issuance; issuer pays insurance premium; in default, bondholders are paid by Cal-Mortgage (drawing on state appropriation if reserves are insufficient).",
+   "what_it_masks": "Underlying operator credit \u2014 CMS Star Ratings (1-star vs 5-star), Special Focus Facility designation, Civil Monetary Penalties, Denial-of-Payment-for-New-Admissions actions, going-concern audit qualifications, occupancy decline, debt-service coverage deterioration.",
+   "what_it_does_NOT_mask": "Cal-Mortgage's own portfolio claim cascade \u2014 if multiple insured operators distress simultaneously (e.g., COVID-scale event), insurer credit itself resets and ALL wrapped names widen. Also does not mask bondholder loss on uninsured subordinate tranches of the same obligor.",
+   "claims_pay_trigger": "Insured payment default \u2192 Cal-Mortgage pays bondholders \u2192 state-program reserves drawn down \u2192 if reserves insufficient, state general fund per CA Health & Safety Code \u00a7129050 et seq.",
+   "signal_to_price_impact": "STRONG MASKING. CA NH backtest: framework identified 100% of deteriorating obligors in-sample window. Cal-Mortgage-insured names (Carmel Valley Manor, The Redwoods Mill Valley) traded IDENTICALLY to clean-basket names despite triggering 2-4 detector fires. Carmel Valley Manor traded at par (100.134, 3.00% YTM) despite SFF Candidate flag. Honest realizable alpha compressed from ~115 bps TEY (in-sample exclusion) to ~30-60 bps in current market.",
+   "alpha_implication": "Framework adds value because operator signal is hidden in plain sight. Primary alpha modes: (1) forward-looking insurer-cascade tail-risk avoidance; (2) uninsured/subordinate tranche exposure (e.g., LAJH Series 2019A at +230 bps wide); (3) long-term credit migration / loss of insurance access on refi.",
+   "severity": "HIGH",
+   "documentation_depth": "VERIFIED",
+   "verified_via": "ca_nh_exclude_basket_bonds.json \u2014 Cal-Mortgage names trading to AA- insured curve regardless of operator distress; HCAI Cal-Mortgage Monthly Activity Reports show claim history.",
+   "source_artifacts": [
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/outputs/CA_NH_INVESTMENT_THESIS.md",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/data/ca_nh_clean_basket_bonds.json",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/data/ca_nh_exclude_basket_bonds.json",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/data/ca_nh_universe.json",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/data/ca_ccrc_universe.json",
+    "/Users/ajay/.claude/projects/-Users-ajay-exalted-signalos/memory/feedback_signalos_true_goal_microstructure_knowledge.md"
+   ],
+   "cross_references": [
+    "agm_bond_insurance",
+    "bam_bond_insurance",
+    "fha_section_242"
+   ],
+   "first_observed_session": "2026-05-27",
+   "_notes": "Cal-Mortgage Monthly Activity Reports on HCAI website (calmortgage.hcai.ca.gov) are the primary source for claim history. The masking is so strong that even the framework-correct OPERATOR signal does not translate to bond spreads unless and until the insurer itself is stressed."
+  },
+  {
+   "name": "Teeter Plan (Mello-Roos statutory carve-out)",
+   "short_name": "teeter_carveout_mello_roos",
+   "category": "statutory_carveout",
+   "asset_classes": [
+    "ca_mello_roos_cfd",
+    "ca_1915_act_assessment_bonds"
+   ],
+   "issuer": "California Revenue & Taxation Code \u00a74701-4717 (Teeter Plan), with standard county-level implementation excluding Mello-Roos and 1915 Act charges from Teeter participation",
+   "structural_property": "Counties opting into Teeter advance 100% of levied ad valorem property taxes to local agencies regardless of underlying parcel collection. STANDARD IMPLEMENTATION EXCLUDES Mello-Roos special taxes and 1915 Act assessments \u2014 confirmed for Placer County explicitly ('exception of 1915 Act Bond and Mello Roos charges') and inferred for LA County from per-CFD CDIAC YFSR teeter_plan: false on Palmdale 93-1, and empirically for Stanislaus where Diablo Grande defaults are reaching bondholders.",
+   "what_it_masks": "For Teetered tax classes: county absorbs delinquency, bondholders see 0% reported. For Mello-Roos and 1915 Act: NOTHING IS MASKED \u2014 special-tax delinquency flows through to bondholders unmasked.",
+   "what_it_does_NOT_mask": "CFD special-tax delinquency in 0 of 3 validation-pass CFDs (Diablo Grande, Palmdale 93-1, Northstar CSD CFD 1) \u2014 explicit statutory exclusion. Of 117-CFD universe, only ~2 (San Joaquin 2009-2, Fairfield 2007-1) showed Teeter-masking even partially.",
+   "claims_pay_trigger": "N/A (this is an absence-of-masking finding for Mello-Roos)",
+   "signal_to_price_impact": "STRUCTURALLY-NEGATIVE for Mello-Roos: signal propagates fast (CFD distress reaches bondholders in real time). Originally hypothesized as significant masking layer; validation pass found explicit statutory exclusion in every county checked. The framework's `delinquency_spike` detector flags `teeter_excluded: false` cases for audit \u2014 only ~2/30 CFDs in universe sample show measurable Teeter masking.",
+   "alpha_implication": "DOES NOT REDUCE framework alpha for Mello-Roos CFDs (special-tax signal flows through). DOES REDUCE alpha for ad-valorem-backed land-secured GO bonds in Teetered counties (Teeter cushion delays/absorbs delinquency signal).",
+   "severity": "NONE (for Mello-Roos); MEDIUM (for ad-valorem GO in Teetered counties)",
+   "documentation_depth": "VERIFIED",
+   "verified_via": "Placer County FAQ ID 665 explicit text; CDIAC YFSR per-CFD teeter_plan boolean field shows false for Palmdale 93-1 (LA Co) and Diablo Grande 1 (Stanislaus Co); empirical evidence that defaults reach Diablo Grande bondholders.",
+   "source_artifacts": [
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/outputs/LANDSECURED_SECTOR_SCOPING.md",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/outputs/LANDSECURED_VALIDATION_PASS.md",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/outputs/LANDSECURED_UNIVERSE_EXPANSION.md",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/detectors/delinquency_spike.py",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/data/landsecured_universe.json"
+   ],
+   "cross_references": [
+    "csfa_lcff_intercept",
+    "rating_agency_lag_muni"
+   ],
+   "first_observed_session": "2026-05-28",
+   "_notes": "CRITICAL NEGATIVE FINDING. Originally hypothesized as Cal-Mortgage-equivalent masking for CFD vertical; turned out to be a structural carve-out that LEAVES Mello-Roos signals UNMASKED. This is itself a framework-relevant finding: 'where you'd expect masking, there isn't any.' Counties confirmed Teeter-excluded for Mello-Roos: Placer (explicit), LA (empirical via per-CFD field), Stanislaus (empirical), Imperial (empirical). Likely industry standard."
+  },
+  {
+   "name": "CSFA Charter School LCFF Intercept (Ed Code \u00a717199.4)",
+   "short_name": "csfa_lcff_intercept",
+   "category": "intercept_structure",
+   "asset_classes": [
+    "ca_charter_muni_csfa_issued"
+   ],
+   "issuer": "California School Finance Authority (CSFA) conduit + State Controller payment-diversion mechanism under California Education Code \u00a717199.4",
+   "structural_property": "Participating charter pledges intercept of state per-pupil LCFF (Local Control Funding Formula) apportionment. State Controller diverts apportionment to bond trustee on deficiency \u2014 operator never receives the funds before debt service. Real credit enhancement at the State Controller payment-mechanism level, but NOT a state guarantee (LISC confirms CA is NOT in state-debt-service-guarantee tier \u2014 only CO/UT/TX/AZ/ID).",
+   "what_it_masks": "Voluntary-default risk on debt service for going-concern charters. Operator-level enrollment soft signals, school-level closures within a multi-school operator, financial-compliance findings \u2014 all partially absorbed because LCFF apportionment continues flowing.",
+   "what_it_does_NOT_mask": "Charter closure / revocation events (no apportionment to intercept \u2192 bondholder loss). Material operator-credit deterioration that leads to authorizer non-renewal. Private placement / non-CSFA-issued charter debt (CSCDA, CMFA, CalPFA charter conduits don't carry the same intercept structure).",
+   "claims_pay_trigger": "Deficiency in scheduled debt service \u2192 State Controller diverts next LCFF apportionment to bond trustee before reaching the charter operator.",
+   "signal_to_price_impact": "PARTIAL MASKING \u2014 2-3 notch credit uplift. Empirical CSFA 2024 conduit spread book: BBB CSFA charter (Alliance, Granada Hills) 91-110 bps over MMD; BB+ CSFA (New Designs, ICEF) 143 bps; BB+ CSFA (Pacific Springs) 245 bps; unrated CSFA 230-260 bps. Compares against pre-intercept charter muni paper at 275-450 bps. ~150-300 bps spread compression attributable to intercept. Spread STILL correlates with operator metrics \u2014 masking is partial, not Cal-Mortgage-strength.",
+   "alpha_implication": "Framework should fire effectively on operator credit signals (no Cal-Mortgage-style full decoupling). EXCEPT for charter-closure-risk cases, where operator distress maps to bondholder loss only after authorizer action \u2014 and authorizer board minutes are themselves the public record, so honesty-alpha is hard.",
+   "severity": "MEDIUM",
+   "documentation_depth": "VERIFIED (v3: 56-anchor distribution + within-band correlation test)",
+   "verified_via": "CSFA 2024 Conduit Financing Program Report pricing book; California Education Code \u00a717199.4 codified at Justia; LISC Charter School Bond Study excluding CA from state-guarantee tier.",
+   "verified_universe_size": 17,
+   "verified_universe_size_non_intercept": 3,
+   "verified_universe_size_pcsd_lease": 2,
+   "verified_universe_size_pool_or_pp_excluded": 2,
+   "verified_universe_size_unknown_or_no_bonds": 5,
+   "_universe_size_audit_pass": "v2_audit_2026_05_28 (CHARTER_UNIVERSE_AUDIT.md). 17 obligors confirmed CSFA-intercept with direct conduit issuance: Aspire, Alliance, KIPP SoCal, KIPP NorCal (recent), Bright Star, Camino Nuevo, Da Vinci, Magnolia, Granada Hills, El Camino Real, Vaughn, ICEF, Equitas, Ednovate, Green Dot, New Designs, Rocketship, Larchmont, Stockton Collegiate, Capitol Collegiate, plus historical Celerity. 3 control-group cscda_no_intercept (Lighthouse, High Tech High, Gateway). Spread test target N=17 intercept vs N=3 non-intercept (small control sample; supplement with national non-CA CSCDA charter sample for power).",
+   "source_artifacts": [
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/outputs/CHARTER_SECTOR_SCOPING.md",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/outputs/CHARTER_VALIDATION_PASS.md",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/outputs/CHARTER_UNIVERSE_AUDIT.md",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/data/charter_universe.json",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/data/charter_universe_v2.json"
+   ],
+   "cross_references": [
+    "cal_mortgage",
+    "state_pension_intercept",
+    "pcsd_facility_credit_pool"
+   ],
+   "first_observed_session": "2026-05-28",
+   "_notes": "Charter analog to Cal-Mortgage but materially weaker. The strongest spread compression evidence in 2024 was for the most 'honest' CSFA-issued, intercept-protected, multi-school operators \u2014 suggesting market discriminates within the intercept-protected pool on operator quality. v2 audit (2026-05-28) confirmed universe size: 17 csfa_intercept obligors with direct issuance verified, 3 cscda_no_intercept controls. v1 universe had 86% EIN error rate plus 3 fabricated school-closure claims (View Park Prep Middle, Aveson School of Leaders, Aveson Global Leadership Academy \u2014 all VERIFIED ACTIVE per CDE 2026-Jan/Feb updates); v2 corrects these and adds structure_class field per obligor for clean spread-test partitioning. Critical structural correction: Rocketship 2017 OG was CSFA-issued not CSCDA as v1 claimed \u2014 moves Rocketship into intercept group.",
+   "measured_test_2026_05_28": {
+    "test_name": "Operator-signal-strength vs bond-spread, within structure class",
+    "test_method": "Pulled operator_signal_strength_score (0-100, 6-subscore rubric) for 21 CSFA-intercept obligors and 3 CSCDA-no-intercept controls. Paired with primary-market spread anchors (CSFA 2024 Conduit Financing Program Report, N=4 empirical) + modeled spreads for the remaining names.",
+    "headline_finding": "CSFA LCFF intercept MASKS operator credit via rating compression. Within the same rating band, operator-strength variance produces near-zero spread differential.",
+    "evidence": {
+     "empirical_anchor_pairs_at_same_rating": [
+      {
+       "rating_band": "BB+",
+       "obligor_weak": "ICEF Public Schools",
+       "weak_op_score": 54,
+       "weak_spread_bps": 143,
+       "obligor_strong": "New Designs Charter School",
+       "strong_op_score": 87,
+       "strong_spread_bps": 143,
+       "op_score_delta": 33,
+       "spread_delta_bps": 0,
+       "interpretation": "33-point operator-strength gap produces 0 bps spread differential within the BB+ rating band \u2014 clean masking signal"
+      }
+     ],
+     "full_universe_correlation_csfa_intercept_N20": {
+      "pearson_r_spread_vs_operator_score": -0.298,
+      "bottom_3_op_mean_spread_bps": 145,
+      "top_3_op_mean_spread_bps": 117,
+      "delta_bps": 28,
+      "op_score_range_tested": "54 to 94"
+     }
+    },
+    "verdict": "VERIFIED \u2014 STRONG MASKING via rating-compression channel. Structural parallel to Cal-Mortgage but mediated through ratings instead of direct insurance wrap.",
+    "framework_implication": "For CSFA-intercept charter muni, operator-signal-vs-spread alpha is structurally minimal. Diligence-replication value remains: framework correctly flags operator distress (ICEF op 54) that the bond price ignores \u2014 useful for self-managed SMA exclusion at zero institutional management fee.",
+    "data_quality_caveats": [
+     "N=4 empirical anchors (CSFA 2024 Conduit Report) \u2014 small sample, but the within-rating-band finding is mathematically clean",
+     "Full-universe N=20 includes 16 modeled spreads (rating-band-derived) \u2014 the modeled spreads encode the assumed masking, so the full-universe correlation is partially tautological",
+     "The within-rating-band differential test (ICEF=143 vs New Designs=143, both BB+) is the load-bearing empirical finding"
+    ],
+    "source_files": [
+     "verticals/muni_credit/data/charter_bond_spreads.json",
+     "verticals/muni_credit/data/charter_operator_signals.json",
+     "verticals/muni_credit/data/charter_universe_v2.json"
+    ],
+    "_superseded_by": "measured_test_v3_2026_05_28 \u2014 earlier N=4 anchor test produced overstated 'strong masking' verdict, corrected to partial masking with 56-anchor sample"
+   },
+   "measured_test_v3_2026_05_28": {
+    "test_name": "v3 spread test with 56 empirical anchors from CSFA 2010-2024 reports",
+    "n_anchors": 56,
+    "rating_band_distribution": {
+     "BBB (N=7)": "median 91 bps, range 61-144, stdev 27",
+     "BBB- (N=9)": "median 106 bps, range 70-224, stdev 63",
+     "BB+ (N=11)": "median 145 bps, range 96-245, stdev 46",
+     "BB / B": "wider but very small N"
+    },
+    "within_band_operator_signal_correlation": {
+     "BBB N=4": "r=+0.82 (wrong direction, small N; Aspire same op_score 81 had 94 vs 72 bps swings on different issuances)",
+     "BBB- N=5": "r=-0.38 (correct direction, weak; Granada Hills posted 224\u219271\u219270 bps from 2017\u21922019\u21922021 with NO operator change)"
+    },
+    "across_rating_correlation": "rank correlation rating\u2192spread = +0.43; R\u00b2~19%",
+    "revised_verdict": "PARTIAL MASKING. Rating uplift via intercept is the structural mechanism (R\u00b2~19%). Within-rating variance dominated by market-conditions and timing, not operator signal. Operator signal is a small secondary factor (BBB- r=-0.38) but noisy.",
+    "earlier_v2_finding_corrected": "Earlier 'ICEF=143 / New Designs=143 at BB+' finding was a coincidence \u2014 both at the BB+ rating-band median (~145 bps), not a clean within-band masking test. At N=56 the true finding is partial masking, not strong masking.",
+    "load_bearing_evidence": "Granada Hills Charter time-series: same obligor, same BBB- rating, same operator score 89 \u2014 spread compressed 224\u219271\u219270 bps from 2017\u21922019\u21922021. Operator signal cannot explain a 153 bps swing on the same operator in 38 months. Market-conditions and issuance-timing dominate within-rating variance.",
+    "framework_implication": "CSFA LCFF intercept is a structural mechanism that produces rating uplift (~2-3 notches per scoping), and that rating uplift is the bulk of the masking. Within-rating spread variance is dominated by market timing rather than operator signal. The exclusion-value of the framework on charter muni operates by avoiding sub-IG names (BB+ and below at median 145 bps), not by spread arbitrage within a rating band.",
+    "data_quality": "HIGH \u2014 56 primary-market anchors from CSFA 2010-2024 Conduit Financing Program Reports, parsed via pdftotext from Wayback Machine archives. Annual transaction totals match CSFA's own published totals exactly."
+   }
+  },
+  {
+   "name": "PCSD Facility-Credit Pool (charter facility lease structure)",
+   "short_name": "pcsd_facility_credit",
+   "category": "intercept_structure",
+   "asset_classes": [
+    "ca_charter_facility_bonds_pcsd"
+   ],
+   "issuer": "Pacific Charter School Development (PCSD) \u2014 multi-asset facility lessor that issues bonds backed by a portfolio of lease payments from charter operators",
+   "structural_property": "PCSD owns facilities, leases them to charter operators, and issues bonds secured by the multi-charter lease cash flows. Investor credit exposure is to the multi-asset PCSD portfolio, not to any single underlying operator (e.g., Aveson).",
+   "what_it_masks": "Single-charter operator distress at the bond-CUSIP level. A single operator's enrollment collapse, financial deterioration, or renewal denial does not translate 1:1 to bond price action because PCSD has diversified lease payers.",
+   "what_it_does_NOT_mask": "Multi-operator distress events or PCSD-level governance issues. Pool-level rather than single-name signal.",
+   "claims_pay_trigger": "Bond covenant tied to aggregate lease coverage of PCSD pool; single-operator default does not breach unless pool-level coverage compromised.",
+   "signal_to_price_impact": "MASKS single-obligor charter signals. Aveson FY24 net-assets decline (-45%) is real distress but invisible at the PCSD bond level.",
+   "alpha_implication": "Framework cannot extract investable signal at the single-charter level for PCSD-leased operators. Single-obligor detectors should filter to direct-conduit-issuer (CSFA, CSCDA) cases only \u2014 NOT PCSD facility-credit names.",
+   "severity": "HIGH (within scope of single-operator alpha)",
+   "documentation_depth": "DOCUMENTED",
+   "verified_via": "Charter validation pass \u2014 Aveson distress invisible because debt held at PCSD facility-pool level, not Aveson direct-issued.",
+   "source_artifacts": [
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/outputs/CHARTER_VALIDATION_PASS.md",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/data/charter_initial_detector_data/aveson_charter_schools.json"
+   ],
+   "cross_references": [
+    "csfa_lcff_intercept",
+    "ccsa_jpa_pool"
+   ],
+   "first_observed_session": "2026-05-28",
+   "_notes": "Universe.json tagging required to separate `direct_conduit_issuer` vs `pcsd_lease_pool` vs `pooled_jpa` so screening can filter to direct-obligor exposure only."
+  },
+  {
+   "name": "CCSA-JPA Pooled Financing (charter)",
+   "short_name": "ccsa_jpa_pool",
+   "category": "intercept_structure",
+   "asset_classes": [
+    "ca_charter_pooled_jpa"
+   ],
+   "issuer": "California Charter Schools Association Joint Powers Authority pooled-financing program",
+   "structural_property": "Pool of multiple charter operators jointly issuing through CCSA-JPA. Investor exposure is to the pool, not single-charter.",
+   "what_it_masks": "Single-charter distress within the pool.",
+   "what_it_does_NOT_mask": "Pool-wide distress; signals from non-pool participants.",
+   "claims_pay_trigger": "Pool-level coverage covenant.",
+   "signal_to_price_impact": "Single-charter signal masked at CUSIP level; framework needs pool-decomposition data to test.",
+   "alpha_implication": "Single-charter detectors don't fire cleanly on pool CUSIPs.",
+   "severity": "MEDIUM",
+   "documentation_depth": "MENTIONED_NOT_VALIDATED",
+   "verified_via": "Listed in charter universe.json as a separate sector_specific detector class to be built.",
+   "source_artifacts": [
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/outputs/CHARTER_SECTOR_SCOPING.md",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/data/charter_universe.json"
+   ],
+   "cross_references": [
+    "pcsd_facility_credit",
+    "csfa_lcff_intercept"
+   ],
+   "first_observed_session": "2026-05-28",
+   "_notes": "Pool composition data not pulled; awaiting CCSA-JPA disclosure. Was proposed as a sector-specific detector in scoping \u2014 not yet validated."
+  },
+  {
+   "name": "Bond insurance \u2014 AGM (Assured Guaranty Municipal)",
+   "short_name": "agm_bond_insurance",
+   "category": "insurance_wrap",
+   "asset_classes": [
+    "muni_general_cross_sector",
+    "us_hospital_muni",
+    "us_transportation_muni",
+    "ca_lease_revenue_muni"
+   ],
+   "issuer": "Assured Guaranty Municipal Corp \u2014 investment-grade-rated private muni bond insurer. Merged into Assured Guaranty Inc. (AG) effective 2024-08-01 with AG as surviving company.",
+   "structural_property": "Bond insurance wrap; bondholder receives insurer credit (AGM rated A1 Moody's / AA S&P) regardless of underlying obligor.",
+   "what_it_masks": "Underlying obligor distress for any insured CUSIP \u2014 measured in WCHCC BBB- hospital (140 bps), Brightline Florida CCC- transportation (300-420 bps). Wrap also referenced in Palomar Health forbearance Jan 2025 (mechanism citation).",
+   "what_it_does_NOT_mask": "Insurer claim cascade across portfolio; uninsured subordinate tranches (cleanly visible in WCHCC Series 2023 where 2052 non-insured tranche trades 140 bps wider than AGM-insured 2051/2053 on same deal); covenant events that trigger insurer remediation (forbearance, restructuring).",
+   "claims_pay_trigger": "Insured payment default \u2192 AGM pays bondholders \u2192 indemnity claim against obligor.",
+   "signal_to_price_impact": "STRONG MASKING but HIGHLY CONDITIONAL on underlying credit. Measured 2026-05-28: ~0 bps compression at AA- underlying (Moreno Valley), 140 bps at BBB- (WCHCC), 300-420 bps at CCC- (Brightline Florida). Investment-grade insured paper retains operator-quality signal in price (NOT masked); sub-IG insured paper is fully masked (bondholder underwrites AGM not obligor).",
+   "alpha_implication": "Same as Cal-Mortgage thesis but with private-sector insurer credit. Diligence-replication value concentrated in sub-IG insured wrap segment: framework signal fires on operator quality but spread compression to insurer curve mutes price reflection. Top trade examples: Brightline AGM 2047 (340618DW4) at ~30-40 bps tail-pickup vs comparable AGM paper; WCHCC AGM 2051 (95737TFP6) fair-value at AA-equivalent ~25-37 bps over MMD AAA.",
+   "severity": "HIGH (for sub-IG underlyings); NONE (for AA- and better underlyings)",
+   "documentation_depth": "VERIFIED",
+   "verified_via": "Multi-pair primary-source matched-pair test 2026-05-28. WCHCC OS PDF + MunicipalBonds.com CUSIP-level trade tape. Brightline AGM press release + same-CUSIP-maturity insured-vs-uninsured trade comparison. Moreno Valley OS PDF + primary pricing.",
+   "verified_pair_count": 4,
+   "source_artifacts": [
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/data/agm_bam_wrap_measurements.json",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/outputs/AGM_BAM_INSURANCE_WRAP_MEASUREMENT.md",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/data/ca_per_obligor/palomar_health.json",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/data/ca_nh_exclude_basket_bonds.json"
+   ],
+   "cross_references": [
+    "cal_mortgage",
+    "bam_bond_insurance",
+    "fha_section_242"
+   ],
+   "first_observed_session": "2026-05-27",
+   "first_measured_session": "2026-05-28",
+   "_notes": "Same wrap-masking pattern as Cal-Mortgage but private-sector insurer. The 2026-05-28 measurement showed Cal-Mortgage was a higher-average-compression mechanism only because it's used predominantly on stressed CA NH/CCRC operators \u2014 AGM applied across the credit spectrum yields tiny average but Brightline-class extreme compression on distressed names.",
+   "measured_test_2026_05_28": {
+    "test_name": "Cross-sector AGM wrap spread-compression measurement via within-deal insured-vs-uninsured pairs",
+    "n_clean_pairs": 4,
+    "sector_breakdown": {
+     "us_hospital_muni": {
+      "n": 1,
+      "median_compression_bps": 140,
+      "obligor": "WCHCC BBB-"
+     },
+     "us_transportation_muni": {
+      "n": 2,
+      "median_compression_bps": 361,
+      "range_bps": [
+       300,
+       422
+      ],
+      "obligor": "Brightline Florida CCC-"
+     },
+     "ca_lease_revenue_muni": {
+      "n": 1,
+      "median_compression_bps": 5,
+      "obligor": "Moreno Valley AA-"
+     }
+    },
+    "headline_finding": "AGM compression is highly conditional on underlying credit: ~0 bps at AA-, 140 bps at BBB-, 300-420 bps at CCC-. Cornaggia/Hund/Nguyen 2024 academic average (post-2008 statistically insignificant) is correct AT AVERAGE but masks a strong conditional effect at the sub-IG tail.",
+    "comparison_to_cal_mortgage": "AGM at distressed underlying (Brightline 300-420 bps) is LARGER compression than Cal-Mortgage at stressed CA NH/CCRC (~100 bps). Same structural mechanism, different sample compositions.",
+    "primary_source_pairs": [
+     {
+      "pair": "WCHCC 95737TFP6 (insured) vs 95737TFQ4 (uninsured)",
+      "compression_bps": 140,
+      "dates": "2026-05-12/13"
+     },
+     {
+      "pair": "Brightline 340618DV6 (AGM 2053) vs 340618DT1 (uninsured 2053)",
+      "compression_bps": 422,
+      "dates": "2026-05-08/14"
+     },
+     {
+      "pair": "Brightline 340618DW4 (AGM 2047) vs 340618DU8 (uninsured 2047)",
+      "compression_bps": 300,
+      "dates": "2026-04-29/2026-05-12"
+     },
+     {
+      "pair": "Moreno Valley 61685PFH6 (insured 2035) vs 61685PEZ7 (uninsured 2027)",
+      "compression_bps": 5,
+      "dates": "2024-07-16 primary pricing"
+     }
+    ],
+    "academic_anchor": "Cornaggia Hund Nguyen 2024 Management Science 70(4):2330-2354 \u2014 pre-2008 4-14 bps, post-2008 statistically insignificant on average."
+   }
+  },
+  {
+   "name": "Bond insurance \u2014 BAM (Build America Mutual)",
+   "short_name": "bam_bond_insurance",
+   "category": "insurance_wrap",
+   "asset_classes": [
+    "muni_general_cross_sector",
+    "us_school_district_go_muni",
+    "tx_water_sewer_muni",
+    "us_hospital_muni",
+    "ca_charter_muni_minor"
+   ],
+   "issuer": "Build America Mutual Assurance Company \u2014 mutual muni bond insurer (member-owned). Rated AA Stable by S&P. 2024 1H insured 762 deals / $18.6B par (45.9% market share, up from 37.2% YoY).",
+   "structural_property": "Bond insurance wrap; bondholder receives insurer credit (BAM rated AA at S&P) regardless of underlying obligor.",
+   "what_it_masks": "Same structural identity as AGM \u2014 underlying obligor credit on insured CUSIPs. By assumption (per cross-AGM structural test), magnitude scales with underlying-credit distress: ~0 bps at AA-/AA, ~40-50 bps at A1, ~140 bps at BBB-, ~300+ at distressed.",
+   "what_it_does_NOT_mask": "Same as AGM \u2014 insurer cascade, subordinate tranches, covenant remediation events.",
+   "claims_pay_trigger": "Same as AGM.",
+   "signal_to_price_impact": "DOCUMENTED (single-anchor only) \u2014 STRUCTURAL EQUIVALENCE to AGM. Travis County WCID 20 (BAM, A1 underlying TX water 2024): primary pricing ~30-90 bps over MMD AAA across the curve = consistent with AA insured curve compressing A1 underlying ~40 bps. Bridgewater-Raynham (BAM, A1 underlying MA school 2021): 20Y at 1.90% vs MMD 20Y ~1.40% = ~50 bps wrapped spread. West Contra Costa USD 2024 ($286M BAM wrap on A+ underlying lifted to AA insured) cited in Bond Buyer but pricing scale not extracted this session.",
+   "alpha_implication": "Same as AGM/Cal-Mortgage. BAM is less sector-concentrated than Cal-Mortgage but provides equivalent masking on any wrapped CUSIP. Negative finding from this session: Marshfield Clinic (stressed BBB hospital) chose to issue UNINSURED at BBB in June 2024 rather than pay BAM premium \u2014 suggesting BAM premium for BBB hospital may exceed compression value at that credit tier.",
+   "severity": "HIGH (for sub-IG underlyings, by structural analogy); NONE (for AA- and better underlyings)",
+   "documentation_depth": "DOCUMENTED",
+   "verified_via": "Two primary-source single-anchor measurements 2026-05-28: Travis County WCID 20 OS PDF (BAM TX water A1, 2024) and Bridgewater-Raynham OS PDF (BAM MA school A1, 2021). Structural identity to AGM (which has 4-pair VERIFIED status) supports parallel conclusion absent direct matched-pair data. CA NH LAJH Series 2020 alternate-insurer hypothesis previously cited.",
+   "single_anchor_count": 2,
+   "matched_pair_count": 0,
+   "source_artifacts": [
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/data/agm_bam_wrap_measurements.json",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/outputs/AGM_BAM_INSURANCE_WRAP_MEASUREMENT.md",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/data/ca_nh_exclude_basket_bonds.json",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/outputs/CHARTER_SECTOR_SCOPING.md"
+   ],
+   "cross_references": [
+    "cal_mortgage",
+    "agm_bond_insurance"
+   ],
+   "first_observed_session": "2026-05-28",
+   "first_measured_session": "2026-05-28",
+   "_notes": "Upgraded from MENTIONED_NOT_VALIDATED to DOCUMENTED with measurement caveat. Full VERIFIED status requires direct same-deal insured-vs-uninsured BAM pair \u2014 typical BAM deal is fully wrapped which makes pair-design scarce. Best targets for next session: Detroit GO 2018A (BAM 2043) vs uninsured Detroit short tenor; West Contra Costa USD 2024 Series B short maturities (uninsured) vs Series A long (BAM-insured).",
+   "measured_test_2026_05_28": {
+    "test_name": "BAM cross-sector single-anchor primary-pricing observations",
+    "n_anchors": 2,
+    "anchors": [
+     {
+      "deal": "Travis County WCID 20 Series 2024 (TX water)",
+      "underlying_moodys": "A1",
+      "insured_sp": "AA",
+      "spread_to_mmd_aaa_bps_range": [
+       30,
+       90
+      ],
+      "implied_compression_vs_a1_curve_bps": 40,
+      "primary_source": "https://storage2.snappages.site/6kzhzugcmy/assets/files/Travis-Co.-WCID-No.-20-Final-OS-Series-2-25.pdf"
+     },
+     {
+      "deal": "Bridgewater-Raynham Regional School District MA Series 2021 (MA school GO)",
+      "underlying_moodys": "A1",
+      "insured_sp": "AA",
+      "spread_to_mmd_aaa_bps_at_20y": 50,
+      "primary_source": "https://www.ufasi.com/assets/files/DjIc9GYX"
+     }
+    ],
+    "structural_inference_from_agm_test": "AGM 4-pair test established conditional compression curve: ~0 bps at AA-, ~140 at BBB-, ~360 at CCC-. BAM single-anchor data is consistent with A1 ~40-50 bps point on that curve. Parallel structure validates extrapolation absent direct BAM matched-pair test.",
+    "honest_limitation": "BAM measurement is structurally inferred, not directly pair-measured. PARTIAL-VERIFIED at best. Full VERIFIED requires either Detroit 2018A BAM pair or WCCUSD 2024 Series A/B pair, both flagged for next-session pull."
+   }
+  },
+  {
+   "name": "FHA Section 242 Hospital Mortgage Insurance",
+   "short_name": "fha_section_242",
+   "category": "sovereign_guarantee",
+   "asset_classes": [
+    "us_hospital_muni"
+   ],
+   "issuer": "U.S. Department of Housing and Urban Development (HUD) \u2014 Federal Housing Administration / Office of Hospital Facilities",
+   "structural_property": "Federal mortgage insurance under Section 242 of the National Housing Act. HUD insures the hospital mortgage; lender is paid in default. For TAX-EXEMPT bonds: state conduit (DASNY, NJHCFFA, CSCDA, NMHELC, etc.) issues FHA-Insured Mortgage Hospital Revenue Bonds; bondholders' security is the insured mortgage note + Mortgage Insurance Benefits. For TAXABLE bonds: lender issues GNMA pass-through securities backed by the insured mortgage which collateralize the bonds (e.g. Maimonides Series 2013, Capital Health $755M). HUD marketing claims 'AAA-equivalent rating'; in practice rating agencies assign Aa1/AA+ (not full Aaa).",
+   "what_it_masks": "Hospital operator credit deterioration \u2014 operating margins (Maimonides $375M cum loss 2021-2024), payor mix (St. Barnabas Bronx Medicaid concentration), going-concern audits (Brooklyn Hospital Center 2023 AND 2024), labor disruption (Kaleida Health), state-funding sensitivity (Sinai Chicago OBBBA exposure).",
+   "what_it_does_NOT_mask": "Two historical claim events demonstrate the program has been stress-tested: (1) Lakeway Regional Medical Center TX defaulted 2013 with $172M HUD claim + FCA fraud settlement; (2) LRGHealthcare NH filed Ch.11 in 2020 with $111M HUD claim. Bondholders/GNMA holders paid in both. Bond market remembers \u2014 sector premium persists.",
+   "claims_pay_trigger": "Insured payment default \u2192 HUD pays mortgage lender / GNMA \u2192 bondholders made whole \u2192 HUD recovery action against hospital owner.",
+   "signal_to_price_impact": "PARTIAL MASKING (NOT full Cal-Mortgage analog). Bonds rated Aa1/AA+ via wrap, but secondary market trades them ~50-75 bps wider than MMD AAA. Maimonides Series 2020 (DASNY, CUSIP 64990G3B6, 3% due 2050, Aa1/AA+) traded 4.99% YTM May 2026 vs 24y MMD AAA interp ~4.24% = +75 bps; on the 2043 maturity (CUSIP 64990G3A8) traded 4.44% YTM vs 17y MMD AAA interp ~3.74% = +70 bps, ~at the A-rated muni curve. Wrap compresses but does NOT decouple; operator distress at Maimonides (going-concern 2024 audit) leaks into spread.",
+   "alpha_implication": "Three modes the framework can extract: (1) EXCLUSION VALUE \u2014 avoid weak-operator + wrapped names (Brooklyn Hospital Center going-concern 2023+2024, Maimonides going-concern 2024, Kaleida $200M cum loss, St. Barnabas CMS 1-star) when offered at 'AAA-equivalent' yields; (2) SELECTION VALUE \u2014 prefer clean-operator + wrap combos (NYP, MUSC, UNM Hospital, Englewood Health) which deserve the AAA-equivalent treatment; (3) FAIR-VALUE PLAY \u2014 75-bps-over-AAA paper on Maimonides-type names is realistic compensation but only if framework correctly identifies the operator distress NOT yet priced in. Realizable alpha: ~50-120 bps depending on operator quality bucket. Wider than Cal-Mortgage's 30-60 bps because wrap masks less.",
+   "severity": "MEDIUM",
+   "documentation_depth": "DOCUMENTED",
+   "verified_via": "Universe pulled from HUD 242_All_Historical_Deals.xlsx via Wayback 2025-04-22 (94 active loans, 69 unique obligors, $8.66B). Bond-spread anchor from Maimonides DASNY Series 2020 (1 obligor, 3 traded CUSIPs verified via municipalbonds.com). Operator distress validated via Crain's NY, Brooklyn Paper, Buffalo News, S&P Global, news reports. N=1 deep spread anchor \u2014 should expand to N\u22655 across rating bands before promoting to VERIFIED.",
+   "verified_universe_size": 69,
+   "verified_total_mortgage_usd": 8660000000,
+   "source_artifacts": [
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/data/us_fha242_hospital_universe.json",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/data/fha242/242_all_deals_raw.json",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/data/fha242/242_active_aggregated.json",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/data/fha242/ohf_commitments.json",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/data/fha242/maimonides_2020_OS.pdf",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/outputs/US_FHA242_HOSPITAL_SECTOR_SCOPING.md"
+   ],
+   "cross_references": [
+    "cal_mortgage",
+    "agm_bond_insurance",
+    "gnma_passthrough_insurance",
+    "usda_rural_development",
+    "rating_agency_lag_muni",
+    "obligated_group_consolidation"
+   ],
+   "first_observed_session": "2026-05-28",
+   "_notes": "FALSIFIES the original 'Cal-Mortgage analog at federal level' prediction. Federal wrap masks LESS effectively than state Cal-Mortgage. Three structural reasons: (a) program has had real defaults (Lakeway $172M 2013, LRGHealthcare $111M 2020), (b) hospital revenue bond technicals add sector premium that AGM/Cal-Mortgage paper doesn't bear, (c) GAO-flagged program reauthorization / political risk priced in. Reframes the alpha mode from 'decoupled wrap arbitrage' to 'exclusion + selection + fair-value-of-wrap' play. Top-5 buys: NYP, MUSC, UNM Hospital, Englewood, Union Hospital Terre Haute. Top-5 excludes: Brooklyn Hospital Center, Maimonides, Kaleida Health, St. Barnabas Bronx, Sinai Chicago.",
+   "measured_test_2026_05_28": {
+    "test_name": "FHA 242 wrap masking vs operator distress, N=1 deep anchor + universe-distress mapping",
+    "load_bearing_pair": {
+     "obligor": "Maimonides Medical Center",
+     "wrap_status": "FHA Section 242, Aa1/AA+ at issuance July 2020",
+     "operator_state_2024_2025": "going-concern 'substantial doubt' 2024 audit; $375M cumulative loss 2021-2024; $85M Q1 2025 loss (+39% YoY); NYC H+H merger pending",
+     "bond_spread_observation": {
+      "cusip_2050_term": "64990G3B6",
+      "issue_yield_2020": 2.57,
+      "current_yield_2026_05": 4.99,
+      "current_price": 72.49,
+      "mmd_aaa_24y_interp": 4.24,
+      "spread_to_mmd_aaa_bps": 75,
+      "cusip_2043_term": "64990G3A8",
+      "current_yield_2043": 4.44,
+      "spread_to_mmd_aaa_17y_bps": 70,
+      "interpretation": "Aa1/AA+ wrap fails to compress spread to AAA curve; bond trades ~at A-rated muni curve despite federal-insurance wrap. PARTIAL masking, NOT Cal-Mortgage-strength full masking."
+     }
+    },
+    "verdict": "PARTIAL MASKING. Wrap rating != market price. Original 'Cal-Mortgage analog' prediction is PARTIALLY FALSIFIED \u2014 federal wrap masks less than state wrap.",
+    "data_quality_caveats": [
+     "N=1 deep spread anchor (Maimonides) \u2014 should expand to Kaleida, Albany Med, Hollywood Pres, MUSC for N=5 within-rating test",
+     "MMD AAA interpolation between 20y (4.10%) and 30y (4.45%) \u2014 publishers like Bond Buyer give full curve daily, this is the rough cut",
+     "Operator distress signals (going-concern, CMS Star, losses) sourced from news + Crain's; should pull HCRIS direct for structured scoring"
+    ]
+   }
+  },
+  {
+   "name": "Hospital muni rating-agency response lag",
+   "short_name": "rating_agency_lag_muni",
+   "category": "rating_agency_lag",
+   "asset_classes": [
+    "us_hospital_muni",
+    "us_ccrc_muni",
+    "us_nh_muni_minor"
+   ],
+   "issuer": "S&P Global Ratings, Moody's Investors Service, Fitch Ratings \u2014 sector teams",
+   "structural_property": "Rating agencies typically update sector outlooks and individual obligor ratings on a multi-quarter to multi-year cycle. CMS Star Rating changes (monthly), CMP filings (quarterly), and continuing-disclosure updates often appear in primary-source data 12-36 months before rating action.",
+   "what_it_masks": "Fundamental deterioration in the window between primary-source event and rating downgrade.",
+   "what_it_does_NOT_mask": "Sophisticated dealer markup repricing (which often occurs faster than rating action). The masking is against retail / index-tracking flow, not against sophisticated price discovery.",
+   "claims_pay_trigger": "N/A (this is a temporal masking, not a payment-enhancement structure).",
+   "signal_to_price_impact": "MEDIUM \u2014 creates 12-36 month windows in which framework signals (CMS Star, SFF, CMP, HCAI seismic non-compliance) can lead rating action. HCAI seismic detector docstring specifies 'typically 12-36 months' lead time vs rating action.",
+   "alpha_implication": "Framework adds value by leading rating agencies on operator-credit deterioration in healthcare muni. Index-tracking flow that rebalances on rating change is the slow-mover; sophisticated dealer flow may be faster.",
+   "severity": "MEDIUM",
+   "documentation_depth": "DOCUMENTED",
+   "verified_via": "HCAI seismic detector docstring; signalos-true-goal-microstructure memory explicitly lists 'implicit rating-agency lag (hospital muni)' as a mechanism.",
+   "source_artifacts": [
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/detectors/hcai_seismic.py",
+    "/Users/ajay/.claude/projects/-Users-ajay-exalted-signalos/memory/feedback_signalos_true_goal_microstructure_knowledge.md"
+   ],
+   "cross_references": [
+    "cal_mortgage",
+    "obligated_group_consolidation"
+   ],
+   "first_observed_session": "2026-05-27",
+   "_notes": "Modest masking. The HCAI seismic detector explicitly leverages this \u2014 fires 3-7 years before 2030 compliance deadline, agencies cite the issue in CA hospital rationales but only post-event."
+  },
+  {
+   "name": "Cal-Mortgage insurer-cascade tail risk (insurance-of-insurance dynamic)",
+   "short_name": "cal_mortgage_cascade_tail",
+   "category": "insurance_wrap",
+   "asset_classes": [
+    "ca_nh_muni",
+    "ca_ccrc_muni"
+   ],
+   "issuer": "California HCAI / State General Fund (residual claim path)",
+   "structural_property": "When multiple Cal-Mortgage-insured operators distress simultaneously (e.g., COVID-scale event), insurer claim reserves are drawn down. Eventually insurer credit itself resets if claim cascade exceeds reserves + state appropriation capacity.",
+   "what_it_masks": "Individual operator distress signal, until cascade threshold reached.",
+   "what_it_does_NOT_mask": "Portfolio-level distress visible in HCAI Cal-Mortgage Monthly Activity Reports.",
+   "claims_pay_trigger": "Multiple simultaneous insured defaults \u2192 reserves drawn \u2192 state general fund pressured \u2192 potential insurer rating action \u2192 all wrapped names widen.",
+   "signal_to_price_impact": "Currently latent (no cascade event in dataset). The COVID-stress 2020-2022 backtest window saw +5.4 pp exclusion alpha vs in-sample +14.3 pp \u2014 partial cascade reduced wrap masking marginally.",
+   "alpha_implication": "Forward-looking tail-risk hedge value; not steady alpha. Framework should monitor HCAI activity reports for early claim-cascade signal.",
+   "severity": "MEDIUM (latent, becomes HIGH if cascade triggered)",
+   "documentation_depth": "DOCUMENTED",
+   "verified_via": "CA NH investment thesis revised framework value-proposition section; COVID-window backtest empirical results.",
+   "source_artifacts": [
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/outputs/CA_NH_INVESTMENT_THESIS.md",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/data/ca_nh_exclude_basket_bonds.json"
+   ],
+   "cross_references": [
+    "cal_mortgage"
+   ],
+   "first_observed_session": "2026-05-27",
+   "_notes": "This is the tail-risk decomposition of the Cal-Mortgage wrap \u2014 the wrap masks individual signals, but the AGGREGATE signal eventually flows through to state credit if multiple operators distress simultaneously."
+  },
+  {
+   "name": "Obligated-group consolidation (CCRC / hospital)",
+   "short_name": "obligated_group_consolidation",
+   "category": "implicit_guarantee",
+   "asset_classes": [
+    "ca_ccrc_muni",
+    "us_hospital_muni"
+   ],
+   "issuer": "Multi-LPC obligated-group structures (HumanGood CA, Front Porch, Sequoia Living, Eskaton/ECS, Ascension, Providence, etc.)",
+   "structural_property": "Multiple individual life-plan communities or hospital facilities consolidated into a single obligated group; debt is cross-guaranteed jointly and severally across all member entities. Standalone single-site credit is subsumed into the aggregate group credit.",
+   "what_it_masks": "Single-site distress (occupancy decline, single-facility seismic non-compliance, single-site CMS Star drop) \u2014 masked at bond level when group credit remains stable.",
+   "what_it_does_NOT_mask": "Aggregate group deterioration. M&A leverage events at the group level. Cross-default on senior leverage.",
+   "claims_pay_trigger": "Group-level coverage covenant; single-site default doesn't trigger unless group coverage breached.",
+   "signal_to_price_impact": "STRONG MASKING for single-site signals on multi-site obligors. CA CCRC scoping notes 'Most CA CCRC muni debt is concentrated in 4 obligated groups which collectively control 25+ communities' \u2014 single-LPC distress essentially invisible to bondholders in these names.",
+   "alpha_implication": "Framework's single-site CMS / occupancy / seismic detectors do NOT translate to bond-level signal for obligated-group names. The Mt SA Gardens unrated single-site has higher YTM (~7%) than obligated-group HumanGood CalOG names (~5%) \u2014 single-site = higher idiosyncratic credit risk priced into spread; obligated-group = diversified credit, less individual signal.",
+   "severity": "HIGH (for multi-site obligated groups)",
+   "documentation_depth": "VERIFIED",
+   "verified_via": "ca_ccrc_universe.json explicit obligated-group structural observations; comparison of Mt SA Gardens (unrated single-site, 7% YTM) vs HumanGood CalOG (Fitch A, 5% YTM).",
+   "source_artifacts": [
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/data/ca_ccrc_universe.json",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/outputs/CA_NH_INVESTMENT_THESIS.md"
+   ],
+   "cross_references": [
+    "cal_mortgage",
+    "pcsd_facility_credit"
+   ],
+   "first_observed_session": "2026-05-27",
+   "_notes": "Cross-asset pattern with PCSD pool. Both decouple single-name signal from CUSIP price via portfolio-level credit. Framework must filter to single-site direct-issued exposure when possible to extract single-name alpha."
+  },
+  {
+   "name": "Reserve fund cushion (CFD bondholder protection)",
+   "short_name": "reserve_fund_cushion",
+   "category": "statutory_carveout",
+   "asset_classes": [
+    "ca_mello_roos_cfd",
+    "ca_1915_act_assessment"
+   ],
+   "issuer": "Bond indenture structure; reserve funds typically 10% of par or maximum annual debt service",
+   "structural_property": "CFD bonds carry a cash-funded (or surety-bonded) reserve fund that absorbs special-tax delinquency before bondholders see missed debt service. Reserve must be replenished from cured taxes / foreclosure proceeds.",
+   "what_it_masks": "Special-tax delinquency in years 1-N where N depends on reserve size and burn rate. Northstar CSD CFD 1 had 65-75% delinquency from FY 2019-20 onward but no bondholder default through 2026 because reserve absorbed three reserve draws ($3.68M Sep 2020, $965K Mar 2021, etc.).",
+   "what_it_does_NOT_mask": "Reserve depletion event itself (CDIAC Default & Draw on Reserve filings are EMMA-distributed within days). Continued delinquency past reserve depletion.",
+   "claims_pay_trigger": "Special-tax shortfall \u2192 draw on reserve fund \u2192 CDIAC filing within 10 days.",
+   "signal_to_price_impact": "MEDIUM \u2014 delays bondholder default by typically 1-3 years from first material delinquency. The framework's `reserve_fund_burndown` detector (proposed but not yet populated due to t-1 reserve data gaps) is the intended LEADING indicator for this masking pattern. Northstar exemplifies: distress hasn't reached bondholder default (reserve absorbing), so spreads tighter than Diablo Grande (Ch 9 filed).",
+   "alpha_implication": "Reserve cushion creates a window where framework signals (delinquency, foreclosure, developer distress) precede observable bond impairment. This is the strongest residual alpha mechanism for CFDs after CDIAC-timing test falsified the broader thesis.",
+   "severity": "MEDIUM",
+   "documentation_depth": "VERIFIED",
+   "verified_via": "Northstar CSD reserve-draw history (FY 2019-20 $3.68M, FY 2020-21 $965K); CFD timing test concluded Northstar is the only case where signal-to-price gap may still exist via reserve-cushion mechanism.",
+   "source_artifacts": [
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/outputs/CFD_TIMING_ALPHA_TEST.md",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/outputs/LANDSECURED_VALIDATION_PASS.md",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/detectors/reserve_fund_burndown.py",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/detectors/reserve_fund_drawn.py"
+   ],
+   "cross_references": [
+    "teeter_carveout_mello_roos",
+    "csfa_lcff_intercept"
+   ],
+   "first_observed_session": "2026-05-28",
+   "_notes": "Reserve fund is a self-funded cushion, not a third-party guarantee \u2014 but functionally serves as masking layer. The validation pass identified reserve-fund-cushion as 'the most important' masking analog to investigate further. Currently 0% detector fire rate on `reserve_fund_burndown` due to t-1 reserve balance data gaps for most CFDs."
+  },
+  {
+   "name": "Faith-based / donor-base operator support",
+   "short_name": "donor_base_support",
+   "category": "donor_base_support",
+   "asset_classes": [
+    "us_ccrc_muni",
+    "us_hospital_muni_catholic",
+    "us_nh_muni_faith_based"
+   ],
+   "issuer": "Religious or community-affiliated nonprofit operators (Catholic Health Services, Bethany Home Society, Pilgrim Place, faith-based CCRCs, etc.)",
+   "structural_property": "Faith-based or community-affiliated operators have implicit donor / community / diocese support that does not appear on the balance sheet but historically materializes in distress events (fundraising surges, sponsor loans, parent-religious-order capital infusions).",
+   "what_it_masks": "Going-concern signals on faith-based operators \u2014 donor-base support is rarely contractually committed but empirically rescues such operators at higher rates than secular peers.",
+   "what_it_does_NOT_mask": "Catastrophic operational failure where donor base itself is insufficient. Diocese-level financial distress (CHS Buffalo, Long Island, NJ Catholic systems flagged for high Medicaid concentration without diocesan backstop).",
+   "claims_pay_trigger": "N/A (informal support pattern; not a contractual trigger).",
+   "signal_to_price_impact": "WEAK MASKING. Bethany Home Society (4-star CMS, faith-based) trades to Cal-Mortgage AA- curve regardless of donor support. Carmel Valley Manor (Catholic) Cal-Mortgage wrap dominates donor signal. In NH/CCRC scoping notes: 'CMS 4-star rating + faith-based donor base provide additional credit support outside the insurance wrap.'",
+   "alpha_implication": "Framework should not over-penalize faith-based operators on going-concern signals when donor-base support is historically demonstrated. But the masking effect is dominated by other layers (insurance wraps, obligated-group structures) for the largest faith-based CCRCs.",
+   "severity": "LOW",
+   "documentation_depth": "MENTIONED_NOT_VALIDATED",
+   "verified_via": "CA NH/CCRC clean-basket notes; cited in microstructure-catalog as a residual category to test.",
+   "source_artifacts": [
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/data/ca_nh_clean_basket_bonds.json",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/data/detector_data_filing_payor.json"
+   ],
+   "cross_references": [
+    "cal_mortgage",
+    "obligated_group_consolidation"
+   ],
+   "first_observed_session": "2026-05-27",
+   "_notes": "Mentioned but not quantitatively isolated. Likely a small residual effect after stripping out other masking layers. Catholic health system distress events (Buffalo CHS, NJ safety-net) suggest donor base is insufficient in regions with high Medicaid concentration."
+  },
+  {
+   "name": "Charter private-placement opacity",
+   "short_name": "charter_private_placement_opacity",
+   "category": "statutory_carveout",
+   "asset_classes": [
+    "ca_charter_muni_private_placement"
+   ],
+   "issuer": "Private-placement charter debt (e.g., Today's Fresh Start CSCDA / private placement)",
+   "structural_property": "Private-placement debt has no SEC continuing-disclosure obligations, no EMMA material event filings, no observable trade data. Even when operator distress is real (Today's Fresh Start = multi-revocation), the debt is analytically unreachable.",
+   "what_it_masks": "EVERYTHING \u2014 no public market signal exists. Distress is invisible from the bond-price side.",
+   "what_it_does_NOT_mask": "Operator-level public-record distress (charter revocations, CDE closure, FCMAT review) \u2014 these are public via authorizer channels, just not via the bond market.",
+   "claims_pay_trigger": "Privately negotiated default workout; no public trigger.",
+   "signal_to_price_impact": "TOTAL MASKING at bond level. Today's Fresh Start framework hit was real, but no analyzable bond CUSIPs.",
+   "alpha_implication": "Framework cannot extract investable signal on private-placement charter names regardless of operator-quality detection accuracy. Useful only as positive-control / training-set anchor.",
+   "severity": "HIGH (within scope of bond-price alpha)",
+   "documentation_depth": "VERIFIED",
+   "verified_via": "Today's Fresh Start charter validation pass \u2014 operator distress confirmed but no EMMA trade data, likely private placement.",
+   "source_artifacts": [
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/outputs/CHARTER_VALIDATION_PASS.md",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/data/charter_initial_detector_data/todays_fresh_start.json"
+   ],
+   "cross_references": [
+    "pcsd_facility_credit",
+    "csfa_lcff_intercept"
+   ],
+   "first_observed_session": "2026-05-28",
+   "_notes": "This is a 'masking by opacity' rather than by structural enhancement \u2014 debt simply doesn't trade publicly. Framework needs to flag `direct_conduit_issuer_public` vs `private_placement` so private-placement names are excluded from alpha-test universe."
+  },
+  {
+   "name": "CFD redundant public-channel topology",
+   "short_name": "cfd_redundant_signal_channels",
+   "category": "statutory_carveout",
+   "asset_classes": [
+    "ca_mello_roos_cfd"
+   ],
+   "issuer": "CDIAC YFSR (annual) + CDIAC Default & Draw on Reserve (event-driven) + Govt Code 53356.1 court foreclosures (event-driven) + Govt Code 53359.5 continuing disclosure (semi-annual)",
+   "structural_property": "CFD distress signals are carried by 3-4 REDUNDANT public channels with overlapping cadence. Even if a sophisticated investor monitored only the slowest channel (annual CDIAC YFSR), they would still see distress within 6-12 months. Faster channels (Default & Draw filings, court complaints) carry the same signal within days of crystallization.",
+   "what_it_masks": "NOTHING \u2014 this is anti-masking. The redundancy ensures signals reach market in real time.",
+   "what_it_does_NOT_mask": "Anything \u2014 this is the structural REASON CFD timing alpha was falsified.",
+   "claims_pay_trigger": "N/A (this is a signal-channel observation).",
+   "signal_to_price_impact": "STRUCTURALLY-NEGATIVE for timing alpha. CFD timing test concluded: 'The framework's CFD signal channel is market-efficient \u2014 public-channel topology is too redundant to extract timing alpha from CDIAC alone.' Diablo Grande price led signal by 6-12 months because dealer markups absorbed the multi-channel public information faster than annual CDIAC filings.",
+   "alpha_implication": "Framework adds NO TIMING ALPHA on CFDs. Diligence-replication value remains (correctly classifying distress is useful as a forward-flag for portfolio decisions even when bondholders are insulated by structural redundancy of signals reaching market).",
+   "severity": "NONE (anti-masking finding)",
+   "documentation_depth": "VERIFIED",
+   "verified_via": "CFD timing test: ~0-12 month lead/lag, with price leading signal in Diablo Grande case; upstream-data test confirmed county assessor data adds only 1-3 month lead vs CDIAC.",
+   "source_artifacts": [
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/outputs/CFD_TIMING_ALPHA_TEST.md",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/outputs/CFD_UPSTREAM_DATA_TEST.md"
+   ],
+   "cross_references": [
+    "teeter_carveout_mello_roos",
+    "reserve_fund_cushion"
+   ],
+   "first_observed_session": "2026-05-28",
+   "_notes": "Cataloged as a NEGATIVE / anti-masking finding. The cross-asset principle: where multiple public channels carry the same signal at different cadences, market-efficiency arbitrage forces synchrony. This is the CFD-vertical reason the framework needs UPSTREAM data (developer corp credit, county recorder NoDs) rather than CDIAC alone."
+  },
+  {
+   "name": "Stale-distress on long-defaulted bonds",
+   "short_name": "stale_distress_pricing",
+   "category": "rating_agency_lag",
+   "asset_classes": [
+    "ca_mello_roos_cfd",
+    "us_muni_general"
+   ],
+   "issuer": "Continuing CDIAC YFSR reporting on already-defaulted CFDs (Palmdale 93-1 reports 100% delinquency continuously since 1996/97)",
+   "structural_property": "When a CFD or bond has been in default for 5+ years, CDIAC continues to report it in current-year distress figures, but the market has fully priced the distress decades earlier. Detector fires on `current_delinquency_pct: 100%` for Palmdale 93-1 are STALE re-detection.",
+   "what_it_masks": "Distinction between fresh distress (tradable signal) and stale distress (already-priced). Framework would falsely classify these as current-window exclusion candidates.",
+   "what_it_does_NOT_mask": "Underlying default status \u2014 bond has been in default 27+ years for Palmdale; everyone knows.",
+   "claims_pay_trigger": "N/A (this is a temporal / signal-classification finding).",
+   "signal_to_price_impact": "FALSE POSITIVE \u2014 framework would re-detect Palmdale 93-1 as 'EXCLUDE' on 100% delinquency, but bonds traded at deep distress / workout values for 25+ years. Honesty-alpha violation.",
+   "alpha_implication": "Framework needs `years_since_first_default` field and STALE_DISTRESS_YEARS = 5 cutoff (now implemented in `run_landsecured_union_screen.py`) to filter stale distress from fresh distress.",
+   "severity": "LOW (mitigation implemented)",
+   "documentation_depth": "VERIFIED",
+   "verified_via": "Landsecured validation pass identified Palmdale 93-1 as stale-distress false positive; universe.json now carries `_distress_origination_date` field; framework has `STALE_DISTRESS_YEARS = 5` cutoff.",
+   "source_artifacts": [
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/outputs/LANDSECURED_VALIDATION_PASS.md",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/outputs/LANDSECURED_UNIVERSE_EXPANSION.md",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/outputs/CFD_TIMING_ALPHA_TEST.md"
+   ],
+   "cross_references": [
+    "cfd_redundant_signal_channels"
+   ],
+   "first_observed_session": "2026-05-28",
+   "_notes": "Not strictly a 'masking mechanism' in the sense of decoupling signal from price \u2014 closer to a signal-classification failure mode. Included for completeness because it shapes which framework fires translate to tradable alpha."
+  },
+  {
+   "name": "City/County pension obligation bond general-fund intercept (CA POBs)",
+   "short_name": "state_pension_intercept",
+   "category": "intercept_structure",
+   "asset_classes": [
+    "ca_pob_city_muni",
+    "ca_pob_county_muni",
+    "ca_pob_lease_revenue_pension_variant"
+   ],
+   "issuer": "California city/county POB issuers (Orange, LA, San Diego counties; Pasadena, Riverside, Stockton, San Bernardino, Oakland, San Jose cities). NOTE: State of California has ZERO outstanding POBs \u2014 the 2007 Court of Appeal State Pension Obligation Bond Committee v. All Persons ruling rejected state POBs as violating the constitutional debt limit.",
+   "structural_property": "POBs are TAXABLE unconditional obligations of the issuer's general fund, NOT secured by ad-valorem taxing authority. Per Pasadena 2015 Fitch rationale: 'POBs are unconditional obligations of the city and are not secured by the city's taxing authority.' Bondholders rely on the obligor's general-fund credit, NOT on the pension system's funded ratio. The Dec 18, 2025 CA Supreme Court City of San Jose v. Howard Jarvis ruling explicitly upheld city/county POBs as 'obligations imposed by law' exempt from voter approval \u2014 cementing the structural class.",
+   "what_it_masks": "Pension funded-ratio deterioration. The framework's `pension_funded_ratio.py` detector fires when funded ratio < 60%; many CalPERS-pool members and city-administered plans (San Jose Federated, Police & Fire; Fresno; Oakland legacy) trip this threshold yet POB spreads track GO credit not pension health. CalPERS at 75% / CalSTRS at 76.7% / county systems at 70-79% \u2014 framework signal fires, market ignores.",
+   "what_it_does_NOT_mask": "(1) Catastrophic obligor credit deterioration leading to Ch 9 \u2014 at the BK tail, POBs are SUBORDINATE to pension contributions. Stockton (Klein 2014) and San Bernardino (Jury 2017) federal-court rulings explicitly held POBs do NOT rank pari passu with CalPERS. POB recovery: Stockton 51% direct, San Bernardino 40% PV; pensions paid 100% both cases. (2) Obligor general-fund credit weakness (Oakland Dec 2024 Moody's downgrade reflects city operating deficit \u2014 propagates to POB spread normally).",
+   "claims_pay_trigger": "Annual general-fund appropriation; documented as non-contingent unconditional obligation but in practice subordinate to senior operating expenses and pension contributions if Ch 9 invoked.",
+   "signal_to_price_impact": "PARTIAL/CONDITIONAL MASKING. For performing credits: STRONG masking \u2014 POBs trade to obligor GO credit curve (typically 0-1 notch below GO). Fitch upgraded San Diego County POB to AAA in 2024 criteria review explicitly recognizing this; Sonoma County POBs upgraded to AA+ on GO trajectory. Pension-funded-ratio signal does NOT translate. For Ch 9-tail credits: ANTI-masking \u2014 POBs subordinated to pensions, recovery 40-51%. Bond insurance (Assured on Stockton, Ambac on San Bernardino) compensates at tail via wrap.",
+   "alpha_implication": "Same structural pattern as csfa_lcff_intercept: rating-compression channel (POB rating clusters near obligor GO regardless of pension health). Framework value is exclusion at the rating-band tail (sub-IG names like Stockton, San Bernardino, Oakland post-2024) rather than within-rating arbitrage. Descending-ladder play: strong-issuer-rated-low POBs where rating is constrained by taxable/GF-only structural factors offer 50-75 bps yield pickup over GO. NOTE: POBs are TAXABLE \u2014 TEY math vs CA AAA muni does NOT apply; benchmark is UST + corporate-AA spread.",
+   "severity": "HIGH (for performing credits) / NONE-to-NEGATIVE (at Ch 9 tail without wrap)",
+   "documentation_depth": "DOCUMENTED",
+   "verified_via": "CA POB sector scoping 2026-05-28: 27-obligor universe, primary-source ratings confirmed for 12 obligors. Empirical evidence: (1) Fitch San Diego County 2008A POB upgraded to AAA in 2024 criteria review explicitly recognizing POB-GO convergence; (2) Pasadena 2015 Fitch AA rating rationale explicitly stating POBs unsecured by taxing authority; (3) Sonoma County POB upgraded to AA+ on GO/pension trajectory; (4) Stockton Klein ruling + San Bernardino Jury ruling establishing POB Ch 9 subordination; (5) State of CA 2007 Court of Appeal ruling rejecting state-level POBs.",
+   "verified_universe_size": 27,
+   "_universe_breakdown": {
+    "county_pob_issuers": 8,
+    "city_pob_issuers": 17,
+    "lease_revenue_pension_variant": 2,
+    "state_pobs": 0,
+    "historical_defaulters_with_wrap": 2
+   },
+   "source_artifacts": [
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/data/ca_pob_universe.json",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/outputs/CA_POB_SECTOR_SCOPING.md",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/detectors/pension_funded_ratio.py",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/data/ca_per_obligor/uc_medical_centers.json",
+    "/Users/ajay/.claude/projects/-Users-ajay-exalted-signalos/memory/feedback_signalos_true_goal_microstructure_knowledge.md"
+   ],
+   "cross_references": [
+    "csfa_lcff_intercept",
+    "agm_bond_insurance",
+    "bam_bond_insurance",
+    "obligated_group_consolidation",
+    "go_bond_taxing_authority"
+   ],
+   "first_observed_session": "2026-05-28",
+   "_notes": "Task-spec correction noted: State of California has ZERO outstanding POBs (constitutional bar per 2007 ruling). Vallejo did NOT have POBs in 2008 Ch 9 (task-spec premise FALSIFIED; Vallejo bondholder recoveries ~60% were on COPs / lease revenue, not POBs). Structural parallel to csfa_lcff_intercept: both produce rating-compression / GO-convergence; both have within-rating spread variance dominated by market-conditions noise not operator/pension-fund signal. Per-CUSIP spread test pending \u2014 next session pull EMMA bid-side spreads on universe for empirical anchor test (analog to charter v3 56-anchor distribution).",
+   "measured_evidence_2026_05_28": {
+    "test_name": "CA POB sector scoping + 2-positive-control bankruptcy outcome analysis",
+    "empirical_anchors": [
+     {
+      "obligor": "San Diego County 2008A POB",
+      "rating_change": "AA initial 2008 -> AAA Fitch 2024",
+      "evidence_strength": "STRONG",
+      "interpretation": "POB rating moves with GO credit; pension funded ratio ~79% irrelevant to rating action. Fitch criteria-review 2024 explicitly recognized POBs trade to GO."
+     },
+     {
+      "obligor": "Pasadena 2015 POB Refunding",
+      "rating": "AA Fitch with explicit rationale 'unconditional obligation of the city and not secured by taxing authority'",
+      "evidence_strength": "PRIMARY-SOURCE",
+      "interpretation": "Direct documentation of the structural property of state_pension_intercept"
+     },
+     {
+      "obligor": "Stockton 2007 POB",
+      "outcome": "Ch 9 51% direct recovery; Assured Guaranty wrap paid bondholders 100%",
+      "evidence_strength": "PRIMARY-SOURCE BK RECORD",
+      "interpretation": "POBs subordinate to CalPERS in Ch 9 (Klein ruling); bond-insurance wrap compensates at tail"
+     },
+     {
+      "obligor": "San Bernardino 2005 POB",
+      "outcome": "Ch 9 initial 1% proposed -> 40% PV settled over 30 years; Ambac wrap",
+      "evidence_strength": "PRIMARY-SOURCE BK RECORD",
+      "interpretation": "Even cleaner subordination ruling (Jury); POBs are 'unsecured' GF obligations"
+     },
+     {
+      "obligor": "State of California (attempted POB 2004-2007)",
+      "outcome": "$929M proposed POB INVALIDATED by Cal. Ct. App. 2007",
+      "evidence_strength": "PRIMARY-SOURCE COURT RULING",
+      "interpretation": "State-level POBs constitutionally barred without voter approval; task-spec premise that state has POBs is FALSIFIED."
+     },
+     {
+      "obligor": "City of San Jose (Dec 18, 2025 CA Supreme Court ruling)",
+      "outcome": "$3.48B POB authorization upheld; validation actions no longer required",
+      "evidence_strength": "PRIMARY-SOURCE COURT RULING",
+      "interpretation": "Local-agency POBs explicitly affirmed. Forward test: San Jose POB pricing at issuance vs San Jose GO curve."
+     }
+    ],
+    "verdict": "PARTIAL/CONDITIONAL VERIFIED for performing credits; FALSIFIED at Ch 9 tail (where bond-insurance wrap re-masks instead). Structurally analogous to csfa_lcff_intercept rating-compression channel.",
+    "next_session_test": "Pull per-CUSIP EMMA secondary spreads on 27-obligor universe; compute POB-spread-vs-pension-funded-ratio correlation. Expected: weak/zero correlation (intercept masks the signal). Forward test: San Jose POB at-issuance pricing vs San Jose GO curve."
+   }
+  },
+  {
+   "name": "GO bond taxing-authority masking",
+   "short_name": "go_bond_taxing_authority",
+   "category": "implicit_guarantee",
+   "asset_classes": [
+    "us_municipal_go_bonds",
+    "us_school_district_go_bonds"
+   ],
+   "issuer": "City / County / School District general-obligation bonds backed by full-faith-and-credit + taxing authority",
+   "structural_property": "GO bonds are backed by the issuer's unlimited (or limited) taxing power. Even when operating cash flows deteriorate, taxing authority provides residual debt-service support.",
+   "what_it_masks": "Operating-budget distress, individual department-level credit issues, single-line-item budget pressure.",
+   "what_it_does_NOT_mask": "Catastrophic erosion of tax base (e.g., Detroit pre-bankruptcy). Politically untenable tax-rate increases.",
+   "claims_pay_trigger": "Bondholder claim has priority over most operating expenses; default requires affirmative non-appropriation action.",
+   "signal_to_price_impact": "STRONG MASKING for normal operating-budget signals. School-district GO bonds (Elk Grove USD CFD 1 = V/L 463x because backed by entire district AV) are a CFD-adjacent example.",
+   "alpha_implication": "Framework signals on operating performance don't translate to GO spreads except in catastrophic-tax-base-erosion cases. Diligence value remains; alpha is sector-limited.",
+   "severity": "HIGH (for healthy taxing authorities); LOW (in tax-base-erosion cases)",
+   "documentation_depth": "MENTIONED_NOT_VALIDATED",
+   "verified_via": "Mentioned in microstructure-knowledge memory; school-district CFD case (Elk Grove USD V/L 463x) is an implicit example.",
+   "source_artifacts": [
+    "/Users/ajay/.claude/projects/-Users-ajay-exalted-signalos/memory/feedback_signalos_true_goal_microstructure_knowledge.md",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/outputs/LANDSECURED_SECTOR_SCOPING.md"
+   ],
+   "cross_references": [
+    "csfa_lcff_intercept",
+    "state_pension_intercept",
+    "ca_k12_dedicated_tax_special_revenue"
+   ],
+   "first_observed_session": "2026-05-28",
+   "_notes": "Generic placeholder. The CA K-12 specific sub-mechanism `ca_k12_dedicated_tax_special_revenue` (added 2026-05-28) supersedes for CA school district GO. This entry retained for non-CA / non-K-12 GO (city GO, county GO, US school district GO outside CA)."
+  },
+  {
+   "name": "CA K-12 School District Dedicated-Tax Special-Revenue Statutory Lien (SB 222 + Bankruptcy Code \u00a7902(2))",
+   "short_name": "ca_k12_dedicated_tax_special_revenue",
+   "category": "intercept_structure",
+   "asset_classes": [
+    "ca_k12_school_district_go",
+    "ca_community_college_district_go"
+   ],
+   "issuer": "California K-12 school district issuers (LAUSD, SDUSD, Long Beach USD, SFUSD, OUSD, SCUSD, Fresno USD, ~900 districts statewide) + community college district issuers (CCSF, LACCD, etc.). Bonds secured by ad valorem property tax levied by COUNTY on district tax roll under Prop 13 / Prop 39.",
+   "structural_property": "Dedicated property-tax-pledged-special-revenue masking via FOUR-LAYER structural protection: (1) Cal Ed Code \u00a715250 et seq. + Gov't Code \u00a753550 statutory prohibition on use of bond-debt-service property tax for any operating purpose; (2) SB 222 (Cal. Gov't Code \u00a753515, eff Jan 2016) automatic statutory lien on the levy-and-collection moment, binding on district successors and creditors irrespective of recordation or notice; (3) Bankruptcy Code \u00a7902(2) 'pledged special revenues' treatment per legal opinion, exempting bond payments from automatic stay; (4) Fitch criteria allowing up to 5 notches between district IDR and dedicated-tax GO rating. NOT a state-apportionment intercept (unlike CSFA LCFF) \u2014 state LCFF money never touches the bond trustee. Bondholders are paid from county-administered property tax pre-distribution to district treasury.",
+   "what_it_masks": "District operational distress (deficit spending, ESSER cliff stress); ADA / enrollment decline (LAUSD 48% peak-to-trough); state-receiver status (Vallejo, Inglewood, Compton, Oakland historical); chronic-absenteeism; qualified audit opinions; FCMAT engagement; emergency-apportionment loans. Empirically: ZERO CA K-12 GO bond defaults in modern era despite multiple state-receivership episodes.",
+   "what_it_does_NOT_mask": "(1) Older ULTGO series WITHOUT explicit dedicated-tax-pledged-special-revenue OS language \u2014 these track IDR not dedicated-tax-AAA (Sacramento USD 2007/2011/2012 GOs cut to BB- alongside IDR while 2017E/2017C dedicated-tax series held at higher rating); (2) Lease revenue bonds (LRBs) and certificates of participation (COPs) issued by the district \u2014 no statutory lien, no dedicated tax (Sacramento USD LRB cut to B+; LAUSD COP A+ negative); (3) Catastrophic tax-base erosion (theoretical \u2014 not observed in CA modern era); (4) Bond-insurance-dependent deals (West Contra Costa USD 2024 wrap-dependent issuance is re-masked by agm_bond_insurance / bam_bond_insurance, not pure dedicated-tax mechanism); (5) Micro-districts with tax base too thin to support 5-notch uplift effectively (Modoc, Imperial).",
+   "claims_pay_trigger": "County levies ad valorem property tax on district tax roll under SB 222 statutory lien at moment of levy; tax revenues flow to county-administered debt service fund per Ed Code \u00a715250 et seq. without entering district treasury. In district insolvency / state receivership: payment continues uninterrupted because tax never enters distressed cash-flow cycle.",
+   "signal_to_price_impact": "VERIFIED PARTIAL MASKING via rating-compression channel. Sacramento USD 2026-04-28 anchor: IDR cut BB- from A+ (6 notches), ULTGO older series BB- from A+ (6 notches), dedicated-tax GO BBB+ from AAA (4 notches), LRB B+ from A (5 notches). Dedicated-tax GO retained EXACTLY 5 notches above IDR \u2014 Fitch criteria max. LAUSD 2026-04-20 anchor: IDR AA- NEGATIVE outlook, dedicated-tax GO AAA STABLE \u2014 4-notch gap unchanged despite 48% ADA decline. Series-level bifurcation is the cleanest framework-value-add (BUY dedicated-tax series, AVOID older ULTGO / LRB / COP at distressed districts). Per-CUSIP secondary spread compression not yet measured; estimated 50-200 bps at distressed-IDR districts based on rating-band-implied spread gap.",
+   "alpha_implication": "Largest masking ceiling (5 notches) of any CA intercept-class mechanism, operating on largest universe ($150-200B+, 40-60x CSFA charter universe). Framework value is bifurcation: at fiscal-distressed districts (Sacramento, Oakland, Inglewood, SFUSD), BUY newer dedicated-tax-pledged-special-revenue GO series (rating-compression holds them at floor); AVOID older ULTGO series and ALL appropriation paper (COPs, LRBs) at the same districts. Mechanism is closer in structure to rops_allocation_intercept (property-tax waterfall carveout) than to csfa_lcff_intercept (state-money intercept), despite functional similarity.",
+   "severity": "HIGH (5-notch rating uplift)",
+   "documentation_depth": "VERIFIED",
+   "verified_via": "Multi-anchor 2026-05-28 scoping pass. PRIMARY-SOURCE rating actions: (1) Bond Buyer 'Sacramento school bonds downgraded to junk on fiscal woes' (2026-04-28) \u2014 Fitch action showing exact 5-notch gap; (2) Bond Buyer 'Los Angeles school bond outlook dropped to negative by Fitch, Moody's' (2026-04-20) \u2014 LAUSD AAA dedicated-tax stable while IDR negative; (3) Bond Buyer 'Fitch downgrades Sacramento schools, sparing some GO bonds' \u2014 earlier Sacramento series-level bifurcation; (4) Bond Buyer 'California School GO Structure Seen as Special Revenues' (2016) \u2014 Fitch criteria origination; (5) Orrick 2015-03 'California's SB 222' client alert \u2014 legal mechanism documentation. PRIMARY LEGAL AUTHORITY: SB 222 / Cal. Gov't Code \u00a753515; Ed Code \u00a715250 et seq.; Bankruptcy Code \u00a7902(2). FALSIFICATION CONTROLS: TX PSF analog confirmed absent in CA (no California Permanent School Fund bond guarantee exists); CA Ed Code \u00a741320.1 state-emergency-loan mechanism confirmed to flow to DISTRICT operations not bondholders (Vallejo $60M repaid 2024, Inglewood $29M outstanding) \u2014 the state intervention is operationally orthogonal to bondholder cash flow.",
+   "verified_universe_size": 32,
+   "_universe_breakdown": {
+    "largest_districts_by_par_or_ada": 6,
+    "mid_size_urban_districts": 8,
+    "wealthy_suburban_districts": 6,
+    "rural_or_central_valley": 4,
+    "fiscal_distress_or_state_receiver_history": 8
+   },
+   "source_artifacts": [
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/data/ca_k12_go_universe.json",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/outputs/CA_K12_GO_SECTOR_SCOPING.md"
+   ],
+   "cross_references": [
+    "csfa_lcff_intercept",
+    "state_pension_intercept",
+    "rops_allocation_intercept",
+    "go_bond_taxing_authority",
+    "agm_bond_insurance",
+    "bam_bond_insurance"
+   ],
+   "first_observed_session": "2026-05-28",
+   "_notes": "Task-spec hypothesis CORRECTED: K-12 GO has NO state-apportionment intercept analogous to CSFA LCFF (which was the brief's hypothesized mechanism). State LCFF money never flows to bond trustees. The ACTUAL masking mechanism is the SB 222 statutory lien on dedicated property tax \u2014 structurally a PROPERTY-TAX-PLEDGE carveout (closer to rops_allocation_intercept) but functionally similar to CSFA LCFF in producing rating-band compression. Largest masking ceiling (5 notches) of any CA intercept-class mechanism, operating on 40-60x larger universe than CSFA charter. Also CONFIRMED FALSIFIED: no California analog to Texas Permanent School Fund (no state-backed bond guarantee for K-12 GO). Series-level bifurcation (Sacramento USD 2026-04-28 action) is the cleanest framework-value-add \u2014 BUY newer dedicated-tax series, AVOID older ULTGO / LRB / COP at distressed districts. Per-CUSIP EMMA secondary spread test queued for next session as analog to charter v3 56-anchor distribution.",
+   "measured_evidence_2026_05_28": {
+    "test_name": "CA K-12 GO sector scoping + Sacramento USD / LAUSD rating-action anchor analysis",
+    "empirical_anchors": [
+     {
+      "obligor": "Sacramento City USD (2026-04-28 Fitch action)",
+      "rating_change": "IDR A+ \u2192 BB- (6 notches); ULTGO older series A+ \u2192 BB-; dedicated-tax GO AAA \u2192 BBB+; LRB A \u2192 B+",
+      "evidence_strength": "STRONG / LOAD-BEARING",
+      "interpretation": "Dedicated-tax GO retained EXACTLY 5 notches above IDR (BBB+ vs BB-) \u2014 Fitch criteria max. Series-level bifurcation: older ULTGO without explicit pledged-special-revenue OS language tracks IDR (cut to BB-); newer dedicated-tax series retains rating-compression uplift. Fitch quote: 'constitutional and statutory protections afforded to property tax revenues levied for bond repayment.'",
+      "source": "https://www.bondbuyer.com/news/sacramento-school-bonds-downgraded-to-junk-on-fiscal-woes"
+     },
+     {
+      "obligor": "Los Angeles Unified SD (2026-04-20 Fitch action)",
+      "rating_change": "IDR AA- stable \u2192 negative outlook; ULTGO AA- stable \u2192 negative; COP A+ stable \u2192 negative; dedicated-tax GO AAA STABLE (unchanged)",
+      "evidence_strength": "STRONG",
+      "interpretation": "Despite 48% peak-to-trough ADA decline (746K \u2192 389K), dedicated-tax GO outlook is uninfluenced by operator deterioration. 4-notch gap between dedicated-tax GO (AAA) and IDR (AA-) reinforces the structural-floor masking.",
+      "source": "https://www.bondbuyer.com/news/los-angeles-school-bonds-cut-to-negative-by-two-raters"
+     },
+     {
+      "obligor": "Inglewood USD (state-receiver 2012-ongoing)",
+      "outcome": "S&P BBB- retained throughout 13-year state receivership; $29M state emergency loan repaying through 2034-35; no GO default",
+      "evidence_strength": "PRIMARY-SOURCE STATE-RECEIVER RECORD",
+      "interpretation": "State emergency loans flow to district operations, NOT bondholders. Dedicated-tax GO masking holds the bond at IG (BBB-) despite extreme operator distress. Receivership exit potential 2027.",
+      "source": "https://www.fcmat.org/PublicationsReports/InglewoodUSD-full-report2024.pdf"
+     },
+     {
+      "obligor": "Vallejo City USD (2004-2025 state-receiver, exited 2025-06-30)",
+      "outcome": "$60M emergency loan ($68.5M with interest) repaid Aug 2024; 20-year receivership exited June 2025; no GO default",
+      "evidence_strength": "PRIMARY-SOURCE RECEIVERSHIP RECORD",
+      "interpretation": "Longest CA state-receivership episode in K-12 history (20 years); GO bondholders paid throughout via dedicated-tax structure. Masking VERIFIED at maximum-duration stress scenario.",
+      "source": "https://localnewsmatters.org/2025/06/25/vallejo-city-unified-school-district-emerges-from-state-receivership-after-two-decades/"
+     },
+     {
+      "obligor": "Fitch criteria origination 2016",
+      "outcome": "Fitch began bifurcating IDR from ULTGO dedicated-tax GO for CA school districts in 2016; up to 5-notch differential permitted",
+      "evidence_strength": "PRIMARY-SOURCE FITCH CRITERIA",
+      "interpretation": "Criteria-level codification of the masking mechanism. S&P, Moody's adopted analogous approaches.",
+      "source": "https://www.bondbuyer.com/news/california-school-go-structure-seen-as-special-revenues"
+     },
+     {
+      "obligor": "Texas Permanent School Fund (cross-reference / falsification control)",
+      "outcome": "TX PSF wraps ~$100B+ TX school bonds with AAA from $60B+ fund corpus; CA has NO analog",
+      "evidence_strength": "PRIMARY-SOURCE COMPARATIVE CONTROL",
+      "interpretation": "Confirms California's masking mechanism is structurally DIFFERENT from Texas PSF. CA relies on statutory-lien + dedicated-tax mechanism, not state-fund guarantee.",
+      "source": "https://tea.texas.gov/finance-and-grants/state-funding/facilities-funding-and-standards/bond-guarantee-program"
+     }
+    ],
+    "verdict": "VERIFIED \u2014 PARTIAL MASKING via rating-compression channel (5-notch ceiling). The task-spec hypothesis (state-apportionment intercept) is FALSIFIED at the structural level but the functional masking outcome is CONFIRMED via a different legal pathway (SB 222 statutory lien + Bankruptcy Code \u00a7902(2) pledged-special-revenue).",
+    "next_session_test": "Pull per-CUSIP EMMA secondary spreads on 30-CUSIP sample (10 dedicated-tax-AAA pattern, 10 BBB-A under stress, 10 older-ULTGO-no-pledge at fiscal-distressed). Compute spread-to-MMD-AAA at matched maturity. Test whether spread bifurcates cleanly at series-level on Sacramento/Oakland/LAUSD. Analog to charter v3 56-anchor distribution test."
+   }
+  },
+  {
+   "name": "Top-taxpayer concentration with solvent master developer",
+   "short_name": "solvent_master_developer_implicit_support",
+   "category": "sponsor_support",
+   "asset_classes": [
+    "ca_mello_roos_cfd"
+   ],
+   "issuer": "Pre-buildout housing CFDs where master developer is solvent IG/sub-IG public homebuilder (FivePoint, Lennar, Pulte, KB Home, etc.)",
+   "structural_property": "When pre-buildout CFD has >50% taxpayer concentration with solvent master developer, developer pays special tax across undeveloped parcels and effectively backstops the bondholder cash flow until buildout completes.",
+   "what_it_masks": "Pre-buildout parcel-level fragility \u2014 concentration risk is real but mitigated when concentrated party is creditworthy.",
+   "what_it_does_NOT_mask": "Developer-credit deterioration (this is where `developer_corp_credit.py` fires).",
+   "claims_pay_trigger": "Sustained developer special-tax payment.",
+   "signal_to_price_impact": "MEDIUM \u2014 Irvine 2013-3 (FivePoint master developer, B2/B+/BB- sub-IG but solvent) has 0.1% delinquency on $904M par. Solvent developer = clean signal. Beazer / Tri Pointe (sub-IG with recent downgrade actions) = potential concentration risk.",
+   "alpha_implication": "Framework's `top_taxpayer_concentration` detector should fire ONLY when concentration AND (delinquency >2% OR build-out stalled OR developer in distress). Developer-credit layer is the leading indicator that converts concentration from latent to active risk.",
+   "severity": "MEDIUM",
+   "documentation_depth": "VERIFIED",
+   "verified_via": "CFD developer credit build identified Beazer Nov 2025 S&P downgrade B+\u2192B and Tri Pointe Feb 2026 CreditWatch Developing as the strongest current signals. FivePoint clean despite sub-IG.",
+   "source_artifacts": [
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/outputs/CFD_DEVELOPER_CREDIT_BUILD.md",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/data/cfd_developer_credit.json",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/detectors/developer_corp_credit.py",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/detectors/top_taxpayer_concentration.py"
+   ],
+   "cross_references": [
+    "solvent_master_developer_implicit_support",
+    "cfd_redundant_signal_channels"
+   ],
+   "first_observed_session": "2026-05-28",
+   "_notes": "This is a sponsor-support mechanism \u2014 the developer is not contractually guaranteeing the CFD but their continuing solvency functionally backstops cash flow. The 17 mature/built-out CFDs in the universe have fragmented homeowner taxpayer base so this mechanism doesn't apply post-buildout."
+  },
+  {
+   "name": "Charter authorizer relationship (LAUSD CSD / county BOE)",
+   "short_name": "charter_authorizer_relationship",
+   "category": "implicit_guarantee",
+   "asset_classes": [
+    "ca_charter_muni"
+   ],
+   "issuer": "LAUSD Charter Schools Division, LA County Office of Education, county boards of education statewide",
+   "structural_property": "Charter authorizer's renewal/revocation discretion determines whether operator continues. Strong authorizer relationships (Da Vinci-Wiseburn USD, Granada Hills-LAUSD long-running renewal) are an implicit support layer.",
+   "what_it_masks": "Standalone operator credit when authorizer relationship is strong \u2014 distressed operators with patient authorizers can survive multi-year cure periods.",
+   "what_it_does_NOT_mask": "Authorizer relationship deterioration (Today's Fresh Start = multiple revocation actions across LAUSD and LACOE; Aveson = Pasadena USD non-renewal).",
+   "claims_pay_trigger": "N/A (informal political-fiscal support pattern).",
+   "signal_to_price_impact": "WEAK MASKING relative to CSFA LCFF intercept. The authorizer-relationship detector (`charter_authorizer_conflict`) fires only on active conflicts \u2014 clean authorizer relationships are an absence-of-signal observation.",
+   "alpha_implication": "Framework's authorizer-relationship detector is the right shape (fire only on active conflict, not absence). For framework-flagged operators with stronger authorizer relationships, the masking is partial \u2014 bondholders still face material risk from any future authorizer action.",
+   "severity": "LOW",
+   "documentation_depth": "DOCUMENTED",
+   "verified_via": "Charter validation pass \u2014 clean basket Granada Hills + Da Vinci + Green Dot CA cited authorizer relationships as a structural strength.",
+   "source_artifacts": [
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/outputs/CHARTER_SECTOR_SCOPING.md",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/outputs/CHARTER_VALIDATION_PASS.md"
+   ],
+   "cross_references": [
+    "csfa_lcff_intercept",
+    "donor_base_support"
+   ],
+   "first_observed_session": "2026-05-28",
+   "_notes": "Cited as a partial credit-support layer in charter scoping. Functionally less material than LCFF intercept; included for completeness."
+  },
+  {
+   "name": "ROPS allocation intercept (CA Successor RDA tax-allocation framework)",
+   "short_name": "rops_allocation_intercept",
+   "category": "intercept_structure",
+   "asset_classes": [
+    "ca_successor_rda_muni",
+    "ca_tax_allocation_bonds_post_dissolution"
+   ],
+   "issuer": "California Department of Finance (DOF) + County Auditor-Controllers (RPTTF fiduciary). Statutory basis: Health & Safety Code Part 1.85 (Dissolution of Redevelopment Agencies), specifically \u00a734183 (RPTTF waterfall) and \u00a734177.5 (refunding-bond subordination of pass-throughs).",
+   "structural_property": "California dissolved redevelopment agencies (RDAs) on Feb 1, 2012 under ABx1 26. Existing RDA tax-allocation-bond debt preserved and serviced by Successor Agencies (typically the host city or county). Property-tax increment flows into county-administered Redevelopment Property Tax Trust Fund (RPTTF). Per HSC \u00a734183, county auditor distributes RPTTF semi-annually (Jan 2, Jun 1) in fixed waterfall: (1) statutory + pre-1994 pass-throughs to taxing entities, (2) TAB debt service per Recognized Obligation Payment Schedule (ROPS), (3) revenue bond debt service if pledged, (4) other ROPS obligations + admin allowance, (5) residual back to taxing entities. Per \u00a734177.5(e), refunding TABs can SUBORDINATE pass-throughs via 45-day deemed-approval consent \u2014 most post-dissolution refunding TABs have obtained this, moving them to Priority 1.",
+   "what_it_masks": "Host city/county general fund stress. RDA TABs paid from RPTTF held in county trust, structurally separated from host general fund. Per US Bankruptcy Code \u00a7902(2), RPTTF revenue is 'special revenue' \u2014 continues to flow through host Chapter 9. EMPIRICALLY VERIFIED: San Bernardino (BK 2012-2017), Stockton (BK 2012-2015), Vallejo (BK 2008-2011) \u2014 all three hosts' Successor Agency TABs received uninterrupted debt service throughout host BK.",
+   "what_it_does_NOT_mask": "(1) Project-area AV decline \u2014 directly drives DSCR and is the load-bearing rating factor in S&P methodology. (2) Top-taxpayer concentration risk (Anaheim Disney, Inglewood SoFi, Burbank Disney/Warner). (3) DOF rejection of obligations on ROPS (rare, but Oakland v. DOF 2022 documented Meet-and-Confer litigation; bondholders structurally insulated as TAB debt service is Priority 2 \u2014 non-disputed). (4) Pre-dissolution intra-agency fund-transfer abuse \u2014 Hercules Feb 1 2012 RDA TAB default occurred ON the dissolution date due to alleged diversion of tax-increment cash to city general fund, exactly the pattern the post-dissolution ROPS framework was designed to prevent.",
+   "claims_pay_trigger": "Semi-annual RPTTF distribution by county auditor-controller direct to bond trustee, before host city receives any pass-through revenue. DOF + Oversight Board approval required for ROPS submission and refunding issuance.",
+   "signal_to_price_impact": "PARTIAL MASKING \u2014 STRONG STRUCTURAL EVIDENCE. Three host-BK positive controls (SB, Stockton, Vallejo) showed uninterrupted TAB payment. S&P rates 70% of post-dissolution refunding TABs A-category, 15% AA- (Bond Buyer 2014 baseline). However, Moody's withdrew 31 of 94 rated credits and assigned Ba1 (junk) to most remaining; only 12 of 63 Moody's-rated names investment-grade (2012 baseline). Split-rating dispersion S&P vs Moody's is the widest in any sector scoped to date \u2014 direct structural-pricing-inefficiency signal. San Bernardino TABs cut S&P A- -> BBB on host BK (1-notch transmission of host stress) but Fitch later assigned A on same credit post-emergence (2016). Pattern: host stress transmits PARTIALLY through ratings but cushion >2 notches preserved.",
+   "alpha_implication": "Three alpha modes initially hypothesized; one FALSIFIED, two remaining: (1) Avoid host-BK-recovery cohort + insurer-wrapped legacy \u2014 ~10-25 bps net TEY by exclusion. (2) Split-rating-arbitrage [FALSIFIED 2026-05-28]: hypothesized S&P-A-category names that Moody's withdrew or junk-rated would trade at blended-rating spread levels with ~20-40 bps gross uplift. Tested via N=10 CUSIPs across 9 issuers with verified EMMA trade prints; ZERO names currently have an active Moody's Ba1-or-lower rating. The 2012-2014 split-rating baseline structurally resolved via Moody's rating withdrawals (31 of 94 in 2012; 22 more in 2014) + 2014-2017 new-methodology upgrade cycle (San Jose SARA Housing A1 + Non-Housing A2 May 2017; Santa Monica A2; others). Mean observed spread = +5.5 bps vs S&P-implied (within bid/ask noise) and -180 bps vs counterfactual Moody's Ba1 \u2014 but the counterfactual is irrelevant because Moody's isn't rating these credits at Ba1 anymore. SEE: data/ca_successor_rda_split_rating_test.json + outputs/CA_SUCCESSOR_RDA_SPLIT_RATING_TEST.md. (3) Quality-rated-low descend-the-ladder: identify issuers where project-area AV growth + DSCR + concentration justifies higher S&P rating than assigned (Riverside upgrade BBB->A- on AV growth is the canonical case) \u2014 remains untested but mechanically reasonable. NEW finding from split-rating test: a modest 30-50 bps illiquidity premium exists on small-issuer names (Brea, Buena Park, San Marcos), but this is small-deal liquidity discount NOT rating-disagreement arbitrage \u2014 different signal regime; should not be confused with the falsified hypothesis. Composite expected honest alpha revised: 10-20 bps net TEY (exclusion-only + small-issuer illiquidity selection); split-rating mode removed.",
+   "severity": "MEDIUM (PARTIAL masking; split-rating-dispersion alpha mode FALSIFIED in current market)",
+   "documentation_depth": "VERIFIED (intercept structure VERIFIED; split-rating-arbitrage alpha mode FALSIFIED via N=10 empirical test 2026-05-28)",
+   "verified_via": "(1) HSC \u00a734183 statutory waterfall codified at Justia. (2) HSC \u00a734177.5(e) refunding-bond subordination at FindLaw. (3) S&P Atascadero 2024A rating report (March 2024) \u2014 golden methodology data: 4.89x MADS / 58% AV cushion / 13.5% top-10 / 0.27 volatility ratio / 5.6% 5yr AV growth. (4) Bond Buyer 2014 commentary \u2014 70% A-category / 15% AA- S&P distribution. (5) Bond Buyer 2012 commentary \u2014 Moody's withdrew 31 of 94, Ba1 average. (6) San Bernardino BK case \u2014 TAB debt service uninterrupted through 2012-2017 BK; Fitch A 2016 post-emergence. (7) Stockton + Vallejo BK cases \u2014 same pattern. (8) Hercules 2012 default \u2014 pre-ROPS, on dissolution date, alleged pre-dissolution diversion (i.e., exactly what ROPS prevents). (9) Oakland v. DOF 2022 \u2014 ROPS litigation precedent on non-TAB items. (10) Split-rating-arbitrage falsification test 2026-05-28: N=10 CUSIPs (Anaheim 032564AH9, Riverside 76904RBR7+BP1, San Marcos 79876CAM0, Brea 106293BV4, Buena Park 119144AQ6, Novato 66989KAD3, LA Co/West Covina 54465AHJ4, Inglewood 457106MR0+MY5); EMMA trade prints pulled via MunicipalBonds.com; mean observed-vs-S&P-implied = +5.5 bps; ZERO names with current Moody's Ba1 rating; Moody's withdrawn on majority; Moody's 2017 upgrade cycle (SJ SARA PR_903967818, Santa Monica PR_332803) re-rated surviving credits to investment grade.",
+   "verified_universe_size": 30,
+   "empirical_test_n_cusips": 10,
+   "empirical_test_n_distinct_issuers": 9,
+   "source_artifacts": [
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/outputs/CA_SUCCESSOR_RDA_SECTOR_SCOPING.md",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/data/ca_successor_rda_universe.json",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/data/ca_successor_rda_split_rating_test.json",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/outputs/CA_SUCCESSOR_RDA_SPLIT_RATING_TEST.md"
+   ],
+   "cross_references": [
+    "csfa_lcff_intercept",
+    "go_bond_taxing_authority",
+    "agm_bond_insurance",
+    "cal_mortgage"
+   ],
+   "first_observed_session": "2026-05-28",
+   "_notes": "ROPS is the closest structural analog to CSFA LCFF: both are state-mandated payment diversions executed by a state or county officer (county auditor for ROPS; state controller for CSFA LCFF), before the operator/issuer touches the funds. Differences from CSFA: (a) ROPS is property-tax-based (driven by project-area AV) rather than per-pupil-apportionment-based; (b) ROPS waterfall puts pass-throughs FIRST by default (refunding subordination requires consent); (c) ROPS has no analog to 'authorizer revocation' \u2014 closed-lien constraint means no new debt can be added. UPDATE 2026-05-28: Split-rating dispersion S&P vs Moody's IS unique to this sector vs CSFA, but has STRUCTURALLY RESOLVED post-2014 via Moody's rating withdrawals + upgrade cycle. The 2012-2014 'wide split' baseline is no longer present in 2026 market; arbitrage hypothesis falsified. The MECHANISM (different methodologies producing different conclusions) remains real, but the EMPIRICAL OPPORTUNITY (active Ba1 ratings on credits that S&P rates A-cat) no longer exists at meaningful scale. New mechanism observation from this test: small-issuer ILLIQUIDITY PREMIUM (~30-50 bps on Brea/Buena Park/San Marcos) is a separate, real, and unrelated alpha mode \u2014 should be characterized as 'small-deal liquidity discount' not 'rating-disagreement arbitrage'. Microstructure-knowledge value of this test = high: we have NEGATIVE-FINDING evidence on a specific candidate mechanism, which is exactly what the knowledge graph needs to encode (alongside positive findings) per the framework's true-goal microstructure-knowledge mandate.",
+   "falsified_alpha_modes": [
+    {
+     "mode_name": "split_rating_arbitrage_sp_moodys",
+     "hypothesized_alpha_bps": "20-40 gross",
+     "tested_n_cusips": 10,
+     "tested_n_issuers": 9,
+     "test_date": "2026-05-28",
+     "verdict": "FALSIFIED for current market",
+     "reason": "Hypothesized cohort (S&P >= A- AND Moody's <= Ba1) does not exist at meaningful scale in 2026. Moody's withdrew most ratings on the sector 2012-2014; upgraded the survivors 2014-2017 under new methodology. Mean observed spread = +5.5 bps vs S&P-implied (within bid/ask noise). No 'mispricing relative to Moody's' to capture because Moody's isn't holding the sub-IG view it held in 2012.",
+     "structural_lesson": "Rating-agency-disagreement arbitrage hypotheses must check that the DISAGREEMENT IS CURRENT, not just that it existed at some prior baseline. Methodology divergence can resolve via one agency exiting the market (the empirical case here)."
+    }
+   ],
+   "key_data_points_for_detector_construction": {
+    "load_bearing_signals_for_underwriting": [
+     "project_area_av_growth_5yr",
+     "incremental_av_pct_of_total_av",
+     "top_10_taxpayer_concentration",
+     "mads_dscr_at_current_av",
+     "av_loss_to_1x_coverage_cushion",
+     "volatility_ratio",
+     "passthroughs_subordinated_yes_no",
+     "closed_lien_constraint_satisfied",
+     "structure_class"
+    ],
+    "load_bearing_signals_for_alpha": [
+     "split_rating_dispersion_sp_vs_moodys",
+     "host_city_go_rating_minus_sa_tab_rating",
+     "host_bk_history",
+     "insurer_wrap_presence",
+     "project_area_concentration_exposure"
+    ]
+   }
+  },
+  {
+   "name": "GSE / GNMA pass-through insurance (housing muni)",
+   "short_name": "gnma_passthrough_insurance",
+   "category": "sovereign_guarantee",
+   "asset_classes": [
+    "us_housing_muni_state_hfa",
+    "us_section_8_assisted_housing",
+    "ca_affordable_housing_muni"
+   ],
+   "issuer": "Government National Mortgage Association (Ginnie Mae) / Fannie Mae / Freddie Mac",
+   "structural_property": "State housing finance agency (HFA) bonds backed by GNMA MBS pass-throughs carry full federal credit. Section 8 HAP contracts provide federal payment for assisted housing.",
+   "what_it_masks": "Underlying mortgage credit / project credit on insured/wrapped bonds.",
+   "what_it_does_NOT_mask": "Loss of HUD approval / FHA insurance; HAP contract termination. Most importantly (per CA 2026-05-28 scoping): unwrapped workforce-housing JPA-acquisition bonds (CSCDA CIA / CalCHA / CMFA Special Finance Agency I) are STRUCTURALLY OUTSIDE the wrap-cluster despite using the same conduit issuers \u2014 7 of 14 CalCHA names defaulted/impaired by 2024-2025; spread variance +70 to +475+ bps over MMD AAA fully reflects operator distress.",
+   "claims_pay_trigger": "GNMA pass-through guarantee on scheduled P&I; HAP voucher payment by HUD.",
+   "signal_to_price_impact": "FULL MASKING for true GNMA-wrapped tranches (direct CA CUSIP anchor not pulled this session; CA 2023-2025 vintage is Freddie-TEL-dominated). Analogous Freddie Mac TEL wrap pattern is dominant in CA 4% LIHTC + PAB market. Section 8 HAP-backed conduit (CalHFA SF Supportive Housing 13034PC96 anchor): +20 to +50 bps over MMD AAA depending on HAP-contract news cycle.",
+   "alpha_implication": "Framework cannot extract operator-level alpha on GNMA-wrapped or Freddie-TEL-wrapped bonds. CRITICAL FINDING from CA affordable housing scoping (2026-05-28): the largest sectoral-scale anti-masking opportunity is identifying which apparent 'housing muni' deals do NOT carry GSE/federal wrap \u2014 unwrapped JPA workforce-housing deals trade as if they were GSE-wrapped but bondholders bear full project-level cash-flow risk.",
+   "severity": "HIGH (for true GSE wrap); NONE (for JPA-acquisition workforce housing that LACKS wrap)",
+   "documentation_depth": "DOCUMENTED",
+   "verified_via": "CA Affordable Housing Sector Scoping 2026-05-28: 9 CUSIPs across 8 obligors covering 4 distinct wrap classes. CalHFA program credit (Aa1/AA+) anchor 13032WCB8 + 13032WES9 trading 60-67 bps over MMD AAA. CalHFA conduit supportive housing 13034PC96 trading 20-50 bps. Unwrapped workforce housing 126292BG5/BT7/CA7 + 12574TAB3 + 13013HAA8 trading 70-475+ bps. Real Deal + Octus reporting on CalCHA defaults (Mira Vista Hills, Serenity at Larkspur, Annadel) + secondary-market pricing 63.5 cents.",
+   "source_artifacts": [
+    "/Users/ajay/.claude/projects/-Users-ajay-exalted-signalos/memory/feedback_signalos_true_goal_microstructure_knowledge.md",
+    "/Users/ajay/exalted/signalos/verticals/buyside_dd/outputs/20260512_212228/DIVERGENCE_REPORT.md",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/data/ca_affordable_housing_universe.json",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/outputs/CA_AFFORDABLE_HOUSING_SECTOR_SCOPING.md"
+   ],
+   "cross_references": [
+    "fha_section_242",
+    "cal_mortgage",
+    "calhfa_program_credit_overcollateralization",
+    "freddie_mac_tel_passthrough",
+    "essential_workforce_housing_unwrapped_jpa",
+    "section_8_hap_revenue_floor",
+    "fha_542c_risk_share",
+    "agm_bond_insurance"
+   ],
+   "first_observed_session": "2026-05-28",
+   "_notes": "Cross-asset: housing muni + DD case. Federal guarantee creates both a credit floor AND a revenue ceiling (HAP caps at FMR). Mechanism applies similarly to LIHTC, USDA Rural Development housing, and other federally-supported housing programs. UPGRADED from MENTIONED_NOT_VALIDATED to DOCUMENTED via CA Affordable Housing scoping pass 2026-05-28 which captured spread anchors for wrap-class taxonomy across 4 sub-mechanisms (CalHFA program credit, Section 8 HAP, Freddie TEL, unwrapped workforce). Full VERIFIED status pending direct GNMA-California CUSIP matched-pair test \u2014 GNMA-collateralized housing muni is rare in 2023-2025 CA vintage (Freddie TEL displaced GNMA path), need to pull older vintage anchors next session.",
+   "measured_test_2026_05_28": {
+    "test_name": "CA Affordable Housing wrap-class spread anchors via MunicipalBonds.com EMMA trade tape",
+    "n_cusips": 9,
+    "n_obligors": 8,
+    "wrap_class_breakdown": {
+     "calhfa_program_credit": {
+      "n": 2,
+      "median_spread_bps": 64,
+      "wrap_rating": "Aa1/AA+",
+      "anchors": [
+       "13032WCB8 (67 bps, 14y)",
+       "13032WES9 (61 bps, 17y)"
+      ]
+     },
+     "calhfa_conduit_supportive_housing_section_8": {
+      "n": 1,
+      "median_spread_bps": 35,
+      "anchors": [
+       "13034PC96 (20-50 bps range)"
+      ]
+     },
+     "freddie_mac_tel_inferred": {
+      "n": 1,
+      "median_spread_bps_estimated": 40,
+      "anchors": [
+       "130483GH7 CMFA Terracina (yield field corrupted; structural inference)"
+      ]
+     },
+     "essential_workforce_housing_unwrapped_performing": {
+      "n": 3,
+      "median_spread_bps": 102,
+      "range_bps": [
+       70,
+       172
+      ],
+      "anchors": [
+       "126292BG5 (70)",
+       "126292BT7 (102)",
+       "126292CA7 (172, CRF draw)"
+      ]
+     },
+     "essential_workforce_housing_unwrapped_distressed": {
+      "n": 2,
+      "median_spread_bps": 190,
+      "range_bps": [
+       155,
+       475
+      ],
+      "anchors": [
+       "12574TAB3 (155)",
+       "13013HAA8 (190 Annadel defaulted)",
+       "Mira Vista Hills 63.5 cents = ~375-475"
+      ]
+     }
+    },
+    "headline_finding": "Wrap-class spread variance from +20 bps (Section 8 HAP wrap) to +475+ bps (unwrapped distressed workforce housing) \u2014 ~450 bps gap traverses the entire muni credit spectrum within the same nominal 'CA affordable housing muni' sector.",
+    "cross_vertical_pattern": "CalHFA wrap (60-67 bps) trades tighter than FHA Section 242 wrap on Maimonides (70-75 bps) despite both being federal/state insurance with similar rating. Reason: underlying loan portfolio quality \u2014 CalHFA backs current-pay mix of FHA Risk Share + GNMA; Maimonides is single going-concern hospital. Same lesson as AGM rating-conditional finding (0/140/360 bps at AA-/BBB-/CCC-): wrap effect = conditional on underlying credit, not just on wrap rating.",
+    "predictions_validated": [
+     "CalHFA state HFA wrap masks operator signal at program-credit level (STRONG): VERIFIED",
+     "Federal/state wraps mask less when underlying is sub-IG distressed (per AGM analog): VERIFIED via essential-workforce-housing-unwrapped anchor showing FULL signal flow-through"
+    ],
+    "predictions_falsified": [
+     "Predicted: 'CA affordable housing muni typically uses GNMA / FHA / Cal HFA wraps.' ACTUAL: a major subsector (~$8-10B of 2019-2022 vintage workforce housing) is UNWRAPPED \u2014 single-asset JPA acquisitions with no federal/state credit enhancement. The wrap-cluster prediction does NOT apply uniformly across the 'affordable housing' label."
+    ]
+   }
+  },
+  {
+   "name": "CalHFA Affordable Multifamily Housing Revenue Bond Indenture program-credit overcollateralization",
+   "short_name": "calhfa_program_credit_overcollateralization",
+   "category": "insurance_wrap",
+   "asset_classes": [
+    "ca_affordable_housing_muni",
+    "us_housing_muni_state_hfa"
+   ],
+   "issuer": "California Housing Finance Agency (CalHFA) \u2014 state HFA balance-sheet overcollateralization through indenture pledge of program assets vs program debt",
+   "structural_property": "CalHFA's Affordable Multifamily Housing Revenue Bond Indenture (post-2023 reentry) carries the program's balance-sheet credit rather than any specific loan or wrap. Moody's Aa2 originally (Aug 2023), upgraded to Aa1 Jan 2026; S&P AA originally, upgraded AA+ Aug 2025. Rating drivers: 1.31x PADR (program-asset-to-debt ratio), asset/debt ratio >7x, margins 63%, indenture flexibility to fund credit-enhanced loans (FHA Risk Share + GNMA) AND uninsured loans. The underlying loan portfolio is a MIX \u2014 wrap effect operates at the program-credit level, not at the individual-loan level.",
+   "what_it_masks": "Project-level operator distress (REAC inspection failures, LIHTC compliance violations, single-property occupancy decline) within the CalHFA program's loan portfolio. As long as program-aggregate PADR remains >1.0x, individual-property signal is absorbed by the program credit.",
+   "what_it_does_NOT_mask": "Program-aggregate stress (PADR <1.0x); broader CA state-credit deterioration; CalHFA balance-sheet event-of-default. Also does NOT mask the SEPARATE conduit-issued non-recourse bonds CalHFA issues (supportive housing series like 833 Bryant CUSIP 13034PC96) which rely on project-level cash flow not program credit.",
+   "claims_pay_trigger": "Indenture event of default \u2192 trustee enforces lien on program assets; ultimately CA state HFA balance sheet.",
+   "signal_to_price_impact": "STRONG MASKING. Anchor CUSIPs 13032WCB8 (3.85% / 2039) trading 3.871% yield May 13 2026 = +67 bps over MMD AAA 14y, and 13032WES9 (4.35% / 2043) trading 4.261% = +61 bps over MMD AAA 17y. Tighter than FHA Section 242 hospital wrap (Maimonides at +70-75 bps) because CalHFA's underlying loan portfolio is current-pay-quality, whereas FHA 242 wraps stressed standalone hospitals.",
+   "alpha_implication": "Same as Cal-Mortgage: framework operator-signal detectors are MUTED on CalHFA program credit. Alpha modes: (1) FORWARD-LOOKING program-credit migration / PADR trajectory monitoring; (2) WITHIN-WRAP rating-band selection (e.g., Aa1 CalHFA vs other state HFA peers); (3) EXCLUDE deals from sub-tiers within CalHFA's portfolio (uninsured loans) when known to be in distress \u2014 but loan-level disclosure is limited.",
+   "severity": "HIGH",
+   "documentation_depth": "DOCUMENTED",
+   "verified_via": "CA Affordable Housing Sector Scoping 2026-05-28: 2 anchor CUSIPs with primary-source EMMA trade prints; CalHFA rating-upgrade press releases (Moody's Aa1 Jan 2026, S&P AA+ Aug 2025); CalHFA $84.9M 2023 Series A pricing report (Bond Buyer); Moody's investor presentation citing 1.31x PADR.",
+   "source_artifacts": [
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/data/ca_affordable_housing_universe.json",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/outputs/CA_AFFORDABLE_HOUSING_SECTOR_SCOPING.md",
+    "https://www.calhfa.ca.gov/about/press/press-releases/2026/pr2026-01-12.htm",
+    "https://www.calhfa.ca.gov/about/press/press-releases/2025/pr2025-08-25.htm",
+    "https://www.bondbuyer.com/news/california-housing-agencys-new-multifamily-credit-well-received",
+    "https://www.municipalbonds.com/bonds/issue/13032WCB8/",
+    "https://www.municipalbonds.com/bonds/issue/13032WES9/"
+   ],
+   "cross_references": [
+    "cal_mortgage",
+    "fha_section_242",
+    "fha_542c_risk_share",
+    "freddie_mac_tel_passthrough",
+    "gnma_passthrough_insurance",
+    "agm_bond_insurance"
+   ],
+   "first_observed_session": "2026-05-28",
+   "first_measured_session": "2026-05-28",
+   "_notes": "Structurally analogous to Cal-Mortgage but for housing rather than nursing/CCRC. State HFA program credit absorbs project-level operator signal until program-aggregate PADR breached. Promote to VERIFIED with N\u22655 within-rating-band test once California HFA peer-comparison data pulled (NY HFA, MA Housing, FL HFA, etc.)."
+  },
+  {
+   "name": "Freddie Mac Tax-Exempt Loan (TEL) pass-through credit substitution",
+   "short_name": "freddie_mac_tel_passthrough",
+   "category": "insurance_wrap",
+   "asset_classes": [
+    "ca_affordable_housing_muni",
+    "us_lihtc_4pct_pab_muni"
+   ],
+   "issuer": "Freddie Mac Multifamily Targeted Affordable Housing (TAH) program",
+   "structural_property": "Freddie Mac unconditionally purchases the tax-exempt loan (TEL or Flex TEL) underlying a conduit-issued multifamily housing revenue bond. The conduit issuer (CSCDA, CMFA, CalPFA, SDHC, LAHCID, etc.) retains nominal title but credit risk transfers entirely to Freddie Mac. Bonds are typically priced to GSE muni credit (Aa2/AA effective via Freddie balance sheet). Used predominantly on 4% LIHTC + tax-exempt PAB acquisitions and substantial rehabilitations. Loan terms: 30y fixed, 35y amortization, 1.15x min DSCR, 90% LTV. Dominant credit-enhancement structure for California 4% LIHTC affordable housing 2023-2025.",
+   "what_it_masks": "Project-level operator credit (LIHTC compliance, REAC inspection, occupancy decline) on the wrapped portion of the capital stack. Freddie Mac will continue scheduled debt service regardless of operator distress.",
+   "what_it_does_NOT_mask": "Freddie Mac corporate credit / conservatorship risk; bonds priced below Aaa GNMA paper because no full federal faith & credit. Also does NOT mask SUBORDINATE tranches issued alongside Freddie TEL senior \u2014 sub debt remains project-level exposure.",
+   "claims_pay_trigger": "Freddie Mac timely-pay obligation on the purchased TEL; payment cascade flows from Freddie to trustee to bondholders.",
+   "signal_to_price_impact": "STRONG MASKING (structural inference; direct CA matched-pair anchor not pulled this session). Predicted +30-50 bps over MMD AAA based on Freddie Mac muni paper comparables. Single CMFA Terracina anchor (130483GH7) showed price near par at 99.713 May 2026 (yield field aggregator-corrupted at 0.000).",
+   "alpha_implication": "Framework cannot extract operator-level alpha on Freddie-TEL-wrapped tranches. Diligence-replication value: (1) confirm wrap status on each deal (some conduit issues are wrapped, some are not \u2014 mis-identification risk); (2) capture subordinate-tranche exposure separately.",
+   "severity": "HIGH",
+   "documentation_depth": "DOCUMENTED",
+   "verified_via": "Freddie Mac Multifamily TAH program docs; CSCDA 2024 deal pattern (Lexington Green $42.9M, Prospera $30.75M, Second St Andrews $12.9M \u2014 all Ready Capital-originated, the dominant CA Freddie TEL lender); CMFA Terracina anchor CUSIP 130483GH7 May 2026 trade. Direct OS-to-bond pair test pending next session.",
+   "source_artifacts": [
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/data/ca_affordable_housing_universe.json",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/outputs/CA_AFFORDABLE_HOUSING_SECTOR_SCOPING.md",
+    "https://mf.freddiemac.com/docs/tah_workshop_tax_exempt_loans_including_flex.pdf",
+    "https://www.municipalbonds.com/bonds/issue/130483GH7/"
+   ],
+   "cross_references": [
+    "gnma_passthrough_insurance",
+    "calhfa_program_credit_overcollateralization",
+    "fha_section_242",
+    "agm_bond_insurance"
+   ],
+   "first_observed_session": "2026-05-28",
+   "_notes": "Dominant 2023-2025 California 4% LIHTC + PAB credit-enhancement structure. Displaced older GNMA / FHA 221d4 securitization path. Promote to VERIFIED via direct OS+pricing pair test on Lexington Green / Prospera / Second St Andrews next session."
+  },
+  {
+   "name": "FHA Section 542(c) Risk-Sharing Insurance (state HFA participation)",
+   "short_name": "fha_542c_risk_share",
+   "category": "sovereign_guarantee",
+   "asset_classes": [
+    "ca_affordable_housing_muni",
+    "us_state_hfa_multifamily"
+   ],
+   "issuer": "U.S. Department of Housing and Urban Development (HUD) + participating state HFAs (CalHFA in California). HUD insures multifamily mortgages with state HFA bearing 50% (or 25%, depending on tier) of any claim loss \u2014 i.e. RISK-SHARED, not full FHA insurance.",
+   "structural_property": "HUD insures the mortgage; state HFA shares 50% of claim risk (Level I participation, which CalHFA holds). State HFA underwrites the loan to its standards; HUD does NOT re-underwrite. Insurance applies to the mortgage held in the state HFA's portfolio. Bond-level credit comes from the state HFA's overall program credit which is in turn credit-enhanced by the FHA-insured-portion of the loan portfolio.",
+   "what_it_masks": "Project-level operator credit at the mortgage-asset level. Combined with state HFA program-credit overcollateralization (CalHFA Aa1/AA+), creates strong but partial federal-credit floor.",
+   "what_it_does_NOT_mask": "State HFA insurance reserves drawn down by simultaneous claims; eventually flows through to program PADR if claims concentrate. Also: FHA 542(c) is a 50% risk-share, NOT full FHA insurance \u2014 wrap is meaningfully less strong than FHA 221(d)(4) or 242 full insurance.",
+   "claims_pay_trigger": "Mortgage default \u2192 state HFA pays 50% of claim from program reserves + HUD pays 50% from MMI fund. Bondholders are paid from state HFA program credit; insurance reserves replenish program assets indirectly.",
+   "signal_to_price_impact": "STRONG MASKING (embedded inside CalHFA Affordable Multifamily Indenture; anchor CUSIPs 13032WCB8 + 13032WES9 at +60-67 bps over MMD AAA). Cannot isolate standalone FHA 542c spread \u2014 always wrapped by state HFA program credit.",
+   "alpha_implication": "Same as CalHFA program-credit \u2014 framework operator-level signal muted. FHA 542c risk-share structure is the underlying loan-level insurance; the masking that bondholders observe is at the CalHFA program-credit overlay level.",
+   "severity": "HIGH",
+   "documentation_depth": "DOCUMENTED",
+   "verified_via": "CalHFA Affordable Multifamily Housing Revenue Bond Indenture documentation; HUD FHA Section 542(c) Risk-Sharing Program description; Moody's Aa2/Aa1 rating reports citing 'flexibility of indenture to fund credit-enhanced multifamily loans, largely expected to be FHA Risk Share loans'.",
+   "source_artifacts": [
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/data/ca_affordable_housing_universe.json",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/outputs/CA_AFFORDABLE_HOUSING_SECTOR_SCOPING.md",
+    "https://www.hud.gov/hud-partners/multifamily-programs"
+   ],
+   "cross_references": [
+    "calhfa_program_credit_overcollateralization",
+    "gnma_passthrough_insurance",
+    "fha_section_242"
+   ],
+   "first_observed_session": "2026-05-28",
+   "_notes": "Distinct from FHA 221(d)(4) (full FHA insurance, new construction) and FHA Section 242 (hospital, full FHA insurance). Risk-sharing is a weaker insurance structure but combined with state HFA balance sheet provides equivalent wrap-effect for bondholders. State HFA reserves the right to underwrite (no HUD re-underwriting) is operationally important but credit-effect-wise equivalent for bondholders to full federal wrap so long as state HFA reserves are intact."
+  },
+  {
+   "name": "Section 8 HAP (Housing Assistance Payment) revenue-floor pledge",
+   "short_name": "section_8_hap_revenue_floor",
+   "category": "sovereign_guarantee",
+   "asset_classes": [
+    "ca_affordable_housing_muni",
+    "us_section_8_assisted_housing"
+   ],
+   "issuer": "U.S. Department of Housing and Urban Development (HUD) Office of Multifamily Housing \u2014 project-based Section 8 HAP contracts assigned to bond trustee as security",
+   "structural_property": "Project-based Section 8 Housing Assistance Payment contract (typically 20-year term, renewable) pledged to bond trustee as primary security for project-level multifamily affordable housing revenue bonds. Federal voucher payment guaranteed by HUD subject to annual appropriation; revenue stream creates effective revenue-floor for debt service.",
+   "what_it_masks": "Tenant credit / rent-collection risk (HUD pays the voucher portion regardless of tenant). Project occupancy decline below 100% Section 8 (mixed-income projects retain residual exposure to non-Section-8 units).",
+   "what_it_does_NOT_mask": "HAP contract non-renewal at term end (renewal risk); annual HUD appropriation risk; FMR (Fair Market Rent) caps that limit rental upside; HUD enforcement actions on REAC failures that could withdraw HAP eligibility.",
+   "claims_pay_trigger": "HUD pays HAP voucher directly to project owner monthly; assignment to trustee creates structural intercept.",
+   "signal_to_price_impact": "MEDIUM-STRONG masking on rent-revenue side; not on principal-credit side. Anchor CUSIP 13034PC96 (CalHFA SF Supportive Housing / 833 Bryant) trading +20-50 bps over MMD AAA \u2014 tight when HAP renewal news quiet, widens on policy-cycle event.",
+   "alpha_implication": "Framework signals on tenant-rent collection are mostly muted by HAP. Signals on HAP renewal cycle, REAC inspection failures (which could trigger HAP withdrawal), and FMR-cap-vs-market-rent gap remain INFORMATIVE. Forward alpha: monitor HUD multifamily inspection failure reports + HAP renewal queue.",
+   "severity": "MEDIUM",
+   "documentation_depth": "DOCUMENTED",
+   "verified_via": "CalHFA 833 Bryant Supportive Housing trade tape CUSIP 13034PC96 with 5+ trade prints over 2026-03 to 2026-05 showing +20 to +50 bps range; HUD Multifamily Programs description of project-based Section 8.",
+   "source_artifacts": [
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/data/ca_affordable_housing_universe.json",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/outputs/CA_AFFORDABLE_HOUSING_SECTOR_SCOPING.md",
+    "https://www.municipalbonds.com/bonds/issue/13034PC96/"
+   ],
+   "cross_references": [
+    "gnma_passthrough_insurance",
+    "calhfa_program_credit_overcollateralization",
+    "fha_section_242"
+   ],
+   "first_observed_session": "2026-05-28",
+   "_notes": "Buyside DD Section 8 housing case study found HAP caps at FMR are the binding revenue-side constraint; this catalog entry extends that finding to the muni bond credit side. The revenue-floor pledge is structurally similar to lottery proceeds backing CSFA LCFF intercept \u2014 federal payment substitutes for tenant rent."
+  },
+  {
+   "name": "Essential / Workforce Housing JPA-acquisition (unwrapped) \u2014 STRUCTURAL ANTI-MASKING",
+   "short_name": "essential_workforce_housing_unwrapped_jpa",
+   "category": "statutory_carveout",
+   "asset_classes": [
+    "ca_workforce_housing_muni",
+    "ca_essential_housing_muni"
+   ],
+   "issuer": "California JPA single-purpose conduits: CSCDA Community Improvement Authority (CIA), California Community Housing Agency (CalCHA), CMFA Special Finance Agency I, CalPFA",
+   "structural_property": "Joint Powers Authority issues tax-exempt bonds on behalf of a single-asset apartment-acquisition LLC. JPA acquires market-rate apartment building and converts to 80-120% AMI rent-restricted housing ('missing middle'). Project NOT eligible for 4% LIHTC, NOT eligible for federal/state credit enhancement. Bonds are senior + subordinate lien on single-property cash flow. NO federal/state/insurer wrap. ~45+ deals issued 2019-2022 vintage totaling $8-10B aggregate.",
+   "what_it_masks": "NOTHING. This is STRUCTURAL ANTI-MASKING \u2014 bondholder takes full single-asset apartment-LLC credit exposure with no insurance, no GSE wrap, no state HFA backstop, no Section 8 voucher. Spread reflects project-level operator distress 1:1.",
+   "what_it_does_NOT_mask": "Anything. Default cascade as observed in 2024-2025: 7 of 14 CalCHA names defaulted or impaired; CSCDA CIA Westgate Phase 1 reserve fund drawn. Bonds trade 63-90 cents on the dollar on distressed names.",
+   "claims_pay_trigger": "Project-level revenue shortfall \u2192 senior lien default \u2192 trustee remedies. No external pay source.",
+   "signal_to_price_impact": "ZERO MASKING \u2014 STRUCTURAL ANTI-MASKING. Spread variance from +70 bps (top performing CSCDA CIA 1818 Platinum) to +475+ bps (Mira Vista Hills at 63.5 cents secondary) within the same unwrapped subsector. Spread tracks operator quality cleanly.",
+   "alpha_implication": "Framework's EXCLUSION value is concentrated here. Detector template (same shape as CFD `reserve_fund_burndown.py` + `delinquency_spike.py`): scan for occupancy decline \u2192 DSCR threshold \u2192 reserve fund burn \u2192 default cascade. Forward-looking alpha: identify 2019-2022 vintage workforce housing deals that have NOT YET impaired but exhibit early-warning operator-signal patterns. CalCHA + CSCDA CIA disclosures via EMMA continuing-disclosure are the primary data channel.",
+   "severity": "NONE",
+   "documentation_depth": "VERIFIED",
+   "verified_via": "5 anchor CUSIPs across 5 distinct obligors (126292BG5 / 126292BT7 / 126292CA7 / 12574TAB3 / 13013HAA8) with 2024-2026 trade prints; Real Deal 2024-08-21 reporting + Octus 2024-2025 reporting on CalCHA default cascade (Annadel, Mira Vista Hills, Serenity at Larkspur + 6 reserve-draw names).",
+   "verified_universe_size_estimate": 45,
+   "verified_impaired_count": 7,
+   "verified_aggregate_par_estimate_usd": 8500000000,
+   "source_artifacts": [
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/data/ca_affordable_housing_universe.json",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/outputs/CA_AFFORDABLE_HOUSING_SECTOR_SCOPING.md",
+    "https://therealdeal.com/sanfrancisco/2024/08/21/muni-bonds-for-workforce-housing-face-headwinds-at-bay-area-projects/",
+    "https://octus.com/resources/articles/serenity-at-larkspur-recapitalization-challenged-by-city-council/",
+    "https://www.municipalbonds.com/bonds/issue/126292BG5/",
+    "https://www.municipalbonds.com/bonds/issue/126292BT7/",
+    "https://www.municipalbonds.com/bonds/issue/126292CA7/",
+    "https://www.municipalbonds.com/bonds/issue/12574TAB3/",
+    "https://www.municipalbonds.com/bonds/issue/13013HAA8/"
+   ],
+   "cross_references": [
+    "gnma_passthrough_insurance",
+    "calhfa_program_credit_overcollateralization",
+    "charter_private_placement_opacity",
+    "stale_distress_pricing",
+    "cfd_redundant_signal_channels"
+   ],
+   "first_observed_session": "2026-05-28",
+   "_notes": "CRITICAL ANTI-MASKING FINDING. This subsector LOOKS like 'CA affordable housing muni' but is structurally single-asset apartment LLC debt with no credit enhancement. Mis-identification risk = high. Framework should explicitly tag `structure_class: essential_workforce_housing_unwrapped_jpa` on these CUSIPs to prevent confusion with wrapped affordable housing. The wrap-cluster catalog's primary prediction (federal wraps mask operator signal) DOES NOT APPLY to this subsector \u2014 the wrap simply doesn't exist. Largest sectoral-scale anti-masking finding from the wrap-cluster catalog work to date.",
+   "measured_test_2026_05_28": {
+    "test_name": "Unwrapped workforce housing spread distribution",
+    "n_anchors": 5,
+    "spread_range_bps": [
+     70,
+     475
+    ],
+    "median_performing_spread_bps": 102,
+    "median_distressed_spread_bps": 332,
+    "distress_secondary_pricing": "63.5 cents on Mira Vista Hills (Aug 2024)",
+    "interpretation": "Within unwrapped universe, market discriminates cleanly on operator quality. Spread variance from top to bottom (70 to 475 bps = ~400 bps gap) confirms NO masking."
+   }
+  },
+  {
+   "name": "AB 1054 California Wildfire Fund Backstop",
+   "short_name": "ab_1054_wildfire_fund_backstop",
+   "category": "state_backstop_fund",
+   "asset_classes": [
+    "ca_iou_electric_corporate_taxable",
+    "ca_iou_conduit_muni_tax_exempt",
+    "ca_cca_muni_indirect",
+    "ca_sb_254_ibank_securitization"
+   ],
+   "issuer": "State of California \u2014 California Earthquake Authority administers the Wildfire Fund; Department of Water Resources issues Charge Bonds for ratepayer-funded half ($10.5B); IOU shareholders contributed $10.5B at AB 1054 enactment (Jul 2019). SB 254 (Sep 19, 2025) added an $18B Continuation Account split evenly between shareholders ($9B) and ratepayers ($9B).",
+   "structural_property": "AB 1054 (Chapter 79, Stats 2019; signed Jul 12, 2019 post-PG&E Camp Fire bankruptcy) created a $21B state-administered fund that pays bondholder-relevant wildfire-liability claims when a participating IOU (PG&E, SCE, SDG&E) is found liable for catastrophic wildfire damage. Mechanism has THREE load-bearing structural elements: (1) The Fund itself ($21B initial + $18B SB 254 continuation = ~$39B headroom); (2) Annual Wildfire Safety Certification (issued by Office of Energy Infrastructure Safety) creates a 'prudent manager' PRESUMPTION that shifts burden to challenger; (3) If utility is found imprudent, shareholder repayment to Fund is CAPPED at 20% of trailing-three-year electric T&D revenue (e.g., ~$9B cap for SCE), provided no 'conscious or willful disregard.' Combined effect: utility liability is BOUNDED at a balance-sheet-manageable number even in worst-case finding, vs unbounded inverse-condemnation exposure pre-AB-1054 (PG&E Camp Fire $30B+ was the catalyzing event).",
+   "what_it_masks": "Catastrophic wildfire-equipment-liability tail risk on IOU bonds. Wildfire-event frequency in CA is NOT statistically rare (4 of last 8 years involved material loss events at one of the three IOUs). Without AB 1054 backstop, IOU bonds would carry inverse-condemnation-style unbounded-liability premium ~300-500 bps over corporate utility curve. With backstop intact, PG&E first mortgage bonds trade BBB- IG (Baa1/BBB-/BBB- as of Sep 2025) at ~150 bps over UST. SCE first mortgage bonds trade A3/BBB+ even with ACTIVE Eaton Fire Fund draw.",
+   "what_it_does_NOT_mask": "(1) HoldCo senior unsecured paper \u2014 PG&E Corp HoldCo notes still Ba1/BB+/BB+ HY because they sit below the secured first-mortgage tranche that the Fund protects. (2) Fund depletion itself \u2014 once cumulative draws exceed $21B + $18B continuation, the masking breaks for all three participants simultaneously (cross-utility contagion; structurally analogous to cal_mortgage_cascade_tail). (3) Lapsed Safety Certification \u2014 utility that doesn't renew loses the prudent-manager presumption and the 20% cap. (4) 'Conscious or willful disregard' findings \u2014 these bypass the 20% cap and expose unbounded liability (the framework signal for masking breakdown would be evidence in a CPUC/court case of explicit safety-policy disregard).",
+   "claims_pay_trigger": "Utility found liable for covered wildfire damage in CPUC/court proceeding -> utility files claim with California Earthquake Authority (Fund administrator) -> Fund pays bondholder-relevant liability -> if utility found imprudent, utility owes 20%-of-T&D-three-year repayment back to Fund -> if Fund depleted, SB 254 Continuation Account drawn; if both depleted, masking BREAKS for all participants.",
+   "signal_to_price_impact": "STRONG MASKING with ACTIVE STRESS TEST. Documented narrative: PG&E pre-Camp-Fire (2017) was A3/A-/A- at ~75-100 bps over UST; post-Camp-Fire (Jan 2019) defaulted to junk/distressed; emerged Jul 2020 at BB+ ~250-300 bps over UST; progressively tightened 2020-2024 (Fund unused); Moody's BBB+ -> Baa1 FMB upgrade Mar 27 2025 explicitly cited 'credit quality benefits provided by California's $21 billion wildfire legislation'; Fitch BBB- IG upgrade Sep 25 2025 explicitly cited SB 254 as enabling condition. Feb 2026 PG&E 30Y FMB priced at 6.00% (~150 bps over 30Y UST). Estimated total masking-absorbed premium: 300-400 bps vs pre-AB-1054 distressed levels. LIVE STRESS TEST: Jan 7 2025 Eaton Fire (SCE-suspected, 9,400 structures, 18 dead), formal SCE Fund draw Oct 2025, S&P Negative Outlook on EIX/SCE since Mar 2025. SCE FMB has so far HELD rating tier through the draw \u2014 the structure is being validated in real time. Public-power anti-control: LADWP (no AB 1054 backstop, suspected Palisades/Hurst Fire involvement Jan 2025) widened 50-60 bps immediately post-fires then recovered to +35 bps over MMD AAA \u2014 i.e., utilities WITHOUT backstop bear fire risk in spread, utilities WITH backstop carry it as tail-risk until Fund depleted.",
+   "alpha_implication": "Three modes the framework can extract: (1) EXCLUSION VALUE \u2014 avoid PG&E HoldCo / Edison Int'l HoldCo paper (HY); avoid SCE FMB while Eaton Fund draw is active and Negative Outlook persists; avoid LADWP power revenue during Palisades/Hurst investigation pendency (no backstop). (2) SELECTION VALUE \u2014 prefer SDG&E FMB (cleanest CA IOU operator, smallest WUI footprint, Fund never drawn) and SDG&E CalPFA/CSCDA conduit muni (tax-exempt wrapper for same thesis with TEY math applying); prefer PG&E FMB IG (structurally protected tranche, BBB- across all three agencies as of Sep 2025); prefer SMUD/MID/TID/IID tax-exempt public-power for backstop-independent diversification. (3) FORWARD-FLAG FOR MASKING BREAKDOWN \u2014 monitor cumulative Fund draws vs $39B combined headroom; if Eaton + next ignition exceed combined capacity, all three IOUs simultaneously face downgrade cascade. Memory parallel: cal_mortgage_cascade_tail.",
+   "severity": "HIGH (for IOU FMB tranches; mechanism is the structural reason these are IG); MEDIUM (for IOU HoldCo); HIGH-CONDITIONAL-ON-FUND-INTACT (would flip to NONE if Fund + SB 254 depleted).",
+   "documentation_depth": "DOCUMENTED",
+   "verified_via": "Primary-source rating-agency commentary: (a) Moody's Mar 27 2025 PG&E upgrade to Baa1 explicitly cited 'credit quality benefits provided by California's $21 billion wildfire legislation' (utilitydive.com); (b) Fitch Sep 25 2025 PG&E IG upgrade explicitly cited SB 254 enactment as enabling condition (energyconnects.com); (c) S&P Mar 2025 Negative Outlook on Edison Int'l / SCE explicitly cited 'risk of material depletion of California Wildfire Fund' (calmatters.org); (d) Moody's 2024 commentary on SDG&E flagged cross-utility contagion via Fund depletion. Primary-source legislative documentation: AB 1054 mechanics PDF on edison.com; SB 254 analysis on cawildfirefund.com + gtlaw.com 2025-10. Primary-source bond issuance: PG&E Feb 2026 $2.2B FMB 424B2 SEC filing; SCE May 2026 $500M FMB 424B1 SEC filing.",
+   "verified_universe_size": 25,
+   "verified_universe_size_iou_corporate": 3,
+   "verified_universe_size_iou_conduit": 4,
+   "verified_universe_size_cca_control": 9,
+   "verified_universe_size_public_power_anti_control": 8,
+   "source_artifacts": [
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/data/ca_iou_electric_universe.json",
+    "/Users/ajay/exalted/signalos/verticals/muni_credit/outputs/CA_IOU_ELECTRIC_SECTOR_SCOPING.md"
+   ],
+   "cross_references": [
+    "cal_mortgage",
+    "cal_mortgage_cascade_tail",
+    "fha_section_242",
+    "gnma_passthrough_insurance",
+    "rating_agency_lag_muni"
+   ],
+   "first_observed_session": "2026-05-28",
+   "_notes": "FIRST mechanism cataloged in the NEW `state_backstop_fund` category \u2014 structurally distinct from `insurance_wrap` (no annual premium; participation funded via upfront shareholder contribution + ratepayer non-bypassable charge, not insurance economics), `intercept_structure` (no pre-distribution diversion; Fund pays after liability determined), `sovereign_guarantee` (state not federal; CONDITIONAL on annual safety certification not unconditional), and `statutory_carveout` (active payment of claims, not exclusion-from-distribution). The mechanism's masking strength is being STRESS-TESTED in real time by the SCE Eaton Fire Fund draw initiated Oct 2025. If Eaton liability stays within combined $39B (AB 1054 $21B + SB 254 $18B) headroom + SCE 20% T&D cap, mechanism holds. If it overflows, all three CA IOU participants face simultaneous downgrade cascade \u2014 the analog of cal_mortgage cascade tail risk. Hostile-validator note: the often-cited '$5B per claim event cap' figure is INCORRECT \u2014 AB 1054 does NOT impose a per-event hard cap; the protections are (a) prudent-manager presumption from safety cert, (b) 20%-of-T&D shareholder repayment cap if imprudent, (c) Fund covers bondholder-relevant liability. The masking is real and bondholder-protective but the mechanism is bounded by the Fund's nominal capacity. Catalog upgrade path to VERIFIED requires per-CUSIP EMMA pull on CalPFA/CSCDA SDG&E + SCE conduit bonds + Bloomberg time-series on PG&E FMB 2018-2026 to size masking-mechanism strength quantitatively.",
+   "measured_evidence_2026_05_28": {
+    "test_name": "AB 1054 fund-backstop spread compression vs pre-AB-1054 baseline + public-power anti-control",
+    "narrative_anchors": [
+     {
+      "obligor": "PG&E Pacific Gas and Electric Co (PCG-utility)",
+      "pre_ab1054_state_2018": "A3 / A- / A- senior secured FMB at ~75-100 bps over UST",
+      "post_camp_fire_jan_2019": "Downgraded to junk in weeks; Ch 11 filed Jan 29 2019",
+      "emergence_jul_2020": "BB+ FMB ~250-300 bps over UST",
+      "current_2026_q1": "Baa1 / BBB- / BBB- FMB; 30Y issued Feb 2026 at 6.00% (~150 bps over 30Y UST)",
+      "interpretation": "Mechanism absorbed ~300-400 bps of pre-mechanism distressed spread. Narrative-quantified; exact bps need Bloomberg time series.",
+      "evidence_strength": "STRONG narrative; PRIMARY-source rating actions"
+     },
+     {
+      "obligor": "SCE Southern California Edison",
+      "post_eaton_state_2025": "A3 / BBB+ Negative / BBB+ Negative FMB; ACTIVE Fund draw announced Oct 2025; $10-15B estimated draw against $21B Fund",
+      "current_2026_q2": "FMB tier preserved; May 2026 $500M 4.95% Series 2026B due 2031 priced ~+145 bps over 5Y UST",
+      "interpretation": "Live stress test of mechanism. Despite causing the very claim that's drawing the Fund, SCE FMB has retained IG-equivalent (one-notch-below-PG&E) tier. S&P Negative Outlook is the market signal of partial masking breakdown.",
+      "evidence_strength": "PRIMARY-source SEC FWP filing; PRIMARY-source POLITICO Oct 2025 Fund draw announcement"
+     },
+     {
+      "obligor": "SDG&E San Diego Gas & Electric",
+      "current_2026_q1": "A2 / A / A- FMB approximate; cleanest CA IOU operator",
+      "moodys_2024_commentary": "Negative momentum possible if SDG&E wildfire risk unexpectedly increases OR state's wildfire fund faces depletion",
+      "interpretation": "Cross-utility contagion via Fund depletion is the documented tail. SDG&E individual operational risk is small; Fund-depletion risk is the dominant signal for SDG&E going forward.",
+      "evidence_strength": "PRIMARY-source Moody's commentary"
+     },
+     {
+      "obligor": "LADWP \u2014 Public Power Anti-Control",
+      "post_palisades_jan_2025": "Widened 50-60 bps over MMD AAA immediately post-fires",
+      "april_2026_issuance": "+65 bps over MMD AAA at primary; secondary tightened to +35 over by mid-2026",
+      "interpretation": "LADWP has NO AB 1054 backstop. Widening pattern in Jan 2025 fires demonstrates the spread differential vs IOUs that DO have backstop. This is the load-bearing anti-control: same geography, no backstop, wider widening.",
+      "evidence_strength": "PRIMARY-source Bond Buyer reporting"
+     }
+    ],
+    "verdict": "DOCUMENTED \u2014 mechanism is REAL, bondholder-protective, and currently under STRESS TEST. Catalog upgrade to VERIFIED requires per-CUSIP Bloomberg / EMMA quantitative pull.",
+    "data_quality_caveats": [
+     "Pre-AB-1054 to current spread compression estimate of 300-400 bps is narrative-anchored, not Bloomberg-pulled",
+     "Per-CUSIP EMMA bid-side spreads not pulled this session for CalPFA / CSCDA SDG&E + SCE conduit tax-exempt muni wrappers",
+     "Annual Wildfire Safety Certification status year-by-year for each IOU not enumerated (energysafety.ca.gov publishes annually)",
+     "First IBank SB-254 securitization not yet issued; new mechanism arm to monitor"
+    ],
+    "next_session_test": "(1) Bloomberg time-series pull on PG&E FMB 2018-2026 monthly spreads to size mechanism quantitatively. (2) EMMA per-CUSIP pull on CalPFA / CSCDA SDG&E + SCE conduit bonds for tax-exempt muni-investable wrapper. (3) Track Eaton plaintiff judgment progression vs Fund + SB 254 combined $39B headroom. (4) First IBank SB-254 securitization pricing when issued. (5) Compare PG&E FMB vs SDG&E FMB within-IG-rating spread differential as operator-quality signal under common backstop."
+   }
+  },
+  {
+   "name": "Dual-Class Voting Concentration",
+   "short_name": "dual_class_voting_concentration",
+   "category": "implicit_guarantee",
+   "asset_classes": [
+    "corporate_ipo_dd"
+   ],
+   "structural_property": "Class B super-voting shares (typically 10x) concentrate post-IPO control with founder/sponsor regardless of economic stake. Public float votes are diluted to single-digit influence even at majority economic ownership.",
+   "signal_to_price_impact": "Masks governance risk. Public-market discipline mechanism (proxy challenges, hostile bids, board replacement) is structurally suppressed. Live catch 2026-05-28: SpaceX (Musk 85.1%), Quantinuum (Honeywell 49.1%), Entrata (Silver Lake 10\u00d7 Class B), Firefly (AE Industrial >50% via SciTec proxies).",
+   "documentation_depth": "VERIFIED (fired on 4 of 5 IPOs scored 2026-05-28)",
+   "severity": "HIGH",
+   "detector_module": "verticals/buyside_dd/detectors/dual_class_voting_concentration.py",
+   "first_observed_session": "2026-05-28"
+  },
+  {
+   "name": "Related-Party Transaction Velocity",
+   "short_name": "related_party_transaction_velocity",
+   "category": "implicit_guarantee",
+   "asset_classes": [
+    "corporate_ipo_dd"
+   ],
+   "structural_property": "Pre-IPO governance often lacks audit-committee approval for related-party transactions. Sponsor/director-affiliated leases, services, and supply contracts generate large quasi-arm's-length cash flows.",
+   "signal_to_price_impact": "Masks value transfer from public-market investors to insiders. Live catch 2026-05-28: SpaceX $20.2B equipment leases to Director Gracias's Valor (~13% of LTM revenue); audit committee policy adopted only AFTER IPO.",
+   "documentation_depth": "VERIFIED",
+   "severity": "RED",
+   "detector_module": "verticals/buyside_dd/detectors/related_party_transaction_velocity.py",
+   "first_observed_session": "2026-05-28"
+  },
+  {
+   "name": "Up-C + TRA Value Extraction",
+   "short_name": "upc_tra_value_extraction",
+   "category": "intercept_structure",
+   "asset_classes": [
+    "corporate_ipo_dd"
+   ],
+   "structural_property": "Up-C (umbrella partnership C-corp) structure with Tax Receivable Agreement directs 85% of post-IPO tax shield value to pre-IPO holders via 15-25 year payment stream. Change-of-control termination payment depresses exit premium.",
+   "signal_to_price_impact": "EXTREME masking of value extraction. Public investors fund tax shield that flows to pre-IPO holders. Live catch 2026-05-28 Quantinuum: TRA captures 85% / $2.6B PV to Honeywell + Cambridge Quantum; $1.67B change-of-control payment.",
+   "documentation_depth": "VERIFIED",
+   "severity": "RED",
+   "detector_module": "verticals/buyside_dd/detectors/upc_tra_value_extraction.py",
+   "first_observed_session": "2026-05-28"
+  },
+  {
+   "name": "JOBS Act EGC Disclosure Exemption",
+   "short_name": "jobs_act_disclosure_exemption",
+   "category": "statutory_carveout",
+   "asset_classes": [
+    "corporate_ipo_dd"
+   ],
+   "structural_property": "JOBS Act emerging-growth-company status (revenue <$1.2B) lets issuers withhold: top-10 customer concentration, full executive comp (CD&A), SOX 404(b) auditor attestation, selected financial data table. Materially reduces what DD can extract from S-1.",
+   "signal_to_price_impact": "Masks customer concentration + executive incentive alignment + internal-controls quality. Live catch 2026-05-28: 4 of 5 IPOs invoked EGC exemptions; Entrata withheld top-10 customer % (load-bearing given REIT concentration).",
+   "documentation_depth": "VERIFIED",
+   "severity": "HIGH",
+   "detector_module": "verticals/buyside_dd/detectors/jobs_act_disclosure_exemption_audit.py",
+   "first_observed_session": "2026-05-28"
+  },
+  {
+   "name": "PE Sponsor Dividend Recap Pre-IPO",
+   "short_name": "pe_dividend_recap_pre_ipo",
+   "category": "sponsor_support",
+   "asset_classes": [
+    "corporate_ipo_dd"
+   ],
+   "structural_property": "PE sponsor takes special cash dividend within 24mo pre-IPO, financed by new debt. IPO proceeds then used to pay down the sponsor-caused debt. Net effect: public-IPO subscribers fund sponsor's exit financing.",
+   "signal_to_price_impact": "Transfers value from public float to PE sponsor. Live catch 2026-05-28 Entrata: Silver Lake $356M dividend Nov 2025 financed by $400M new term loan @ 6.4%; IPO proceeds slated to retire that debt.",
+   "documentation_depth": "VERIFIED",
+   "severity": "HIGH",
+   "detector_module": "verticals/buyside_dd/detectors/pe_dividend_recap_pre_ipo.py",
+   "first_observed_session": "2026-05-28"
+  },
+  {
+   "name": "Common-Control Merger Accounting Suppression",
+   "short_name": "common_control_merger_accounting",
+   "category": "statutory_carveout",
+   "asset_classes": [
+    "corporate_ipo_dd"
+   ],
+   "structural_property": "Common-control merger accounting combines absorbed-entity historicals at carrying value (no goodwill, no fair-value step-up). Without separate financial statements of the absorbed entity, investors cannot bridge prior acquisition price to current segment value.",
+   "signal_to_price_impact": "Masks losses/writedowns on absorbed acquisitions. Live catch 2026-05-28 SpaceX: Twitter $44B \u2192 X.AI \u2192 xAI \u2192 SpaceX absorption chain; S-1 explicitly states 'separate financial statements of xAI and X are not provided.' Investor cannot bridge $44B price to current AI segment value.",
+   "documentation_depth": "VERIFIED",
+   "severity": "HIGH",
+   "detector_module": "verticals/buyside_dd/detectors/common_control_merger_accounting.py",
+   "first_observed_session": "2026-05-28"
+  },
+  {
+   "name": "Insider Lockup Expiration Calendar Timing",
+   "short_name": "lockup_expiration_calendar",
+   "category": "sponsor_support",
+   "asset_classes": [
+    "corporate_ipo_dd"
+   ],
+   "structural_property": "Follow-on offering or secondary resale shelf filed within narrow window of insider lockup expiration enables insider monetization rather than primary capital raise. Pattern indicates 'public shareholders = the exit.'",
+   "signal_to_price_impact": "Masks insider distribution as 'capital raise.' Live catch 2026-05-28 Firefly: IPO 2025-08-07; lockup expired 2026-02-03; follow-on filed 2026-05-26 (108d later) with 8M secondary + 11.1M resale shelf = 13% of float as insider overhang.",
+   "documentation_depth": "VERIFIED",
+   "severity": "MEDIUM",
+   "detector_module": "verticals/buyside_dd/detectors/lockup_expiration_calendar.py",
+   "first_observed_session": "2026-05-28"
+  },
+  {
+   "name": "Comparable Public Company Valuation Anchor (anti-masking)",
+   "short_name": "comparable_public_company_anchor",
+   "category": "rating_agency_lag",
+   "asset_classes": [
+    "corporate_ipo_dd"
+   ],
+   "structural_property": "Direct public comparable trades at a multiple that anchors a fair-value estimate. ANTI-MASKING \u2014 when the comparable exists, the IPO's valuation framing can be checked against market-tested benchmark.",
+   "signal_to_price_impact": "Live catch 2026-05-28: Quantinuum vs IonQ (IonQ EV/Rev 11.5x \u2192 Quantinuum fair value $355M vs $12B IPO ask = 3% comp-implied). Firefly vs RKLB. Entrata vs AppFolio. When the comp exists, the IPO's framing can be falsified.",
+   "documentation_depth": "VERIFIED (anti-masking)",
+   "severity": "RED (when comp-implied <50% of IPO ask)",
+   "detector_module": "verticals/buyside_dd/detectors/comparable_public_company_anchor.py",
+   "first_observed_session": "2026-05-28"
+  },
+  {
+   "name": "Competitor Trial Omission (biotech sponsor)",
+   "short_name": "competitor_trial_omission",
+   "category": "implicit_guarantee",
+   "asset_classes": [
+    "diagnostics_biotech_dd"
+   ],
+   "structural_property": "Biotech sponsor S-1 'Competition' section selectively names competitors targeting the same biomarker/indication. Omission of advanced-stage competitors (Phase 2/3) understates competitive density.",
+   "signal_to_price_impact": "Masks pipeline overhang. Live catch 2026-05-28 Parabilis: S-1 names GSI competitors (Ogsiveo, varegacestat); omits Tegavivint (NCT04851119, Phase 2) and ALN-BCAT (NCT06600321, Alnylam siRNA).",
+   "documentation_depth": "VERIFIED",
+   "severity": "MEDIUM",
+   "detector_module": "verticals/buyside_dd/detectors/competitor_trial_omission.py",
+   "first_observed_session": "2026-05-28"
+  },
+  {
+   "name": "Primary-IPO vs Follow-on Pipeline Classification",
+   "short_name": "primary_ipo_vs_followon",
+   "category": "rating_agency_lag",
+   "asset_classes": [
+    "corporate_ipo_dd"
+   ],
+   "structural_property": "EDGAR full-text search returns S-1 filings without distinguishing primary IPO from post-IPO follow-on / secondary offering. Pipeline filter checks SEC submissions endpoint for prior 10-K/10-Q to classify.",
+   "signal_to_price_impact": "Without classification, follow-on offerings (e.g., Firefly 2026-05-26 S-1) get misframed as primary IPOs and trigger inappropriate DD scope.",
+   "documentation_depth": "VERIFIED",
+   "severity": "N/A (pipeline-level filter)",
+   "detector_module": "verticals/buyside_dd/ipo_pipeline.py (fetch_company_metadata.is_primary_ipo)",
+   "first_observed_session": "2026-05-28"
+  },
+  {
+   "name": "Underwriter archetype risk (FINRA/HSC-watchlist bookrunner)",
+   "short_name": "underwriter_archetype_risk",
+   "category": "channel_quality_filter",
+   "asset_classes": [
+    "corporate_ipo_dd"
+   ],
+   "issuer": "SEC-registered broker-dealers; FINRA-supervised IPO underwriters",
+   "structural_property": "Certain small-cap IPO underwriters (D. Boral, Spartan, Revere, Network 1, Maxim, Pacific Century, Blue Diamond, Ninth Eternity, Boustead) recur across IPOs that subsequently exhibit ramp-and-dump or first-day-pump-then-fade patterns. The underwriter itself is the carrier of the masking \u2014 its presence on the cover constitutes a higher prior on insider value extraction, lockup arbitrage, and post-IPO performance collapse.",
+   "what_it_masks": "Fundamental fair value \u2014 issuer can clear minimum-listing thresholds with a watchlist bookrunner that would not be possible with bulge-bracket diligence. Bookrunner's prior-cohort performance is rarely connected to the new issuer in retail-facing marketing.",
+   "what_it_does_NOT_mask": "Public records \u2014 FINRA AWCs, House Select Committee on the CCP referrals, SEC/PCAOB enforcement actions are searchable. The mask depends on retail not running the lookup.",
+   "verification_sources": [
+    "FINRA BrokerCheck",
+    "U.S. House Select Committee on the CCP letters",
+    "SEC enforcement actions",
+    "PCAOB AAERs"
+   ],
+   "documentation_depth": "VERIFIED",
+   "severity": "HIGH",
+   "first_observed_in_signalos_run": "2026-05-29 top-30 IPO DD batch (8 of 14 sub-$100M DECLINE verdicts had watchlist underwriters)",
+   "associated_detectors": [
+    "underwriter_archetype_risk",
+    "chinese_smallcap_ramp_dump_archetype"
+   ]
+  },
+  {
+   "name": "Chinese / Asia small-cap ramp-and-dump archetype",
+   "short_name": "chinese_smallcap_ramp_dump_archetype",
+   "category": "composite_archetype",
+   "asset_classes": [
+    "corporate_ipo_dd"
+   ],
+   "issuer": "Cayman / BVI holding companies with operating subsidiaries in mainland China, Hong Kong, Taiwan, Singapore, Malaysia, Japan, Korea",
+   "structural_property": "Composite of 9 features: (1) Cayman/BVI holdco, (2) watchlist underwriter, (3) deal sized at or just above Nasdaq's $25M China-issuer floor (May 2026 rule), (4) Pre-IPO Investors engineered at 4.9% each (sub-13D), (5) >50% insider voting via dual-class, (6) material founder-family RPTs, (7) sub-180-day lockup, (8) concurrent resale prospectus bypassing D&O lockup, (9) small/new PCAOB auditor. 4+ features = high-precision DECLINE signal.",
+   "what_it_masks": "Distinguishing a legitimate Asia-domiciled tech listing from an engineered cash-out vehicle. Individual features are unremarkable; the composite is the signal.",
+   "what_it_does_NOT_mask": "Each component is publicly disclosed in the S-1/F-1 \u2014 composite emerges only when you check all 9 together. The U.S. House Select Committee on the CCP's March 2026 letter and Nasdaq's May 2026 $25M floor are the regulatory acknowledgement that this archetype exists.",
+   "verification_sources": [
+    "S-1 / F-1 cover + Selling Stockholders + RPT + Auditor sections",
+    "HSC-China letters",
+    "Nasdaq Rule 5210 amendments",
+    "Donovan Jones / Renaissance Capital prior-deal performance tracking"
+   ],
+   "documentation_depth": "VERIFIED",
+   "severity": "HIGH",
+   "first_observed_in_signalos_run": "2026-05-29 top-30 IPO DD batch (11 names matched 5+ archetype features)",
+   "associated_detectors": [
+    "chinese_smallcap_ramp_dump_archetype",
+    "underwriter_archetype_risk",
+    "dual_class_voting_concentration",
+    "related_party_transaction_velocity"
+   ]
+  },
+  {
+   "name": "Natural-hazard exposure omission / single-peril framing",
+   "short_name": "hazard_exposure_omission",
+   "category": "disclosure_omission",
+   "asset_classes": [
+    "ca_school_go_muni",
+    "ca_mello_roos",
+    "private_re_credit",
+    "public_co_insurers",
+    "ccrc_muni"
+   ],
+   "issuer": "any issuer/sponsor with physical collateral or levy base (school districts, land-secured CFDs, RE sponsors, CCRCs)",
+   "structural_property": "Official statements and decks disclose the perils convention requires (CA: seismic, sometimes flood) while omitting the peril that currently moves value: wildfire-driven INSURANCE WITHDRAWAL. Nothing false is stated; the joint hazard distribution is simply never shown, and single-peril framing lets a 'diversified' portfolio concentrate the unmentioned peril.",
+   "what_it_masks": "That the collateral/levy base sits in tracts insurers are exiting -- marketability and assessed value degrade YEARS before any loss event, with no disclosure trigger because no covenant references insurability.",
+   "what_it_does_NOT_mask": "Actual loss events (immediately public) and post-event AV changes (assessor rolls, 1-2yr lag). The mask is the FORWARD exposure, not the realized loss.",
+   "claims_pay_trigger": "School GO: levy on surviving AV + Teeter collections -- payment survives even severe events (Camp Fire). The masked risk is chronic AV-base erosion + spread/mark deterioration, not default.",
+   "signal_to_price_impact": "Unpriced in small muni names (no agency coverage, no insurer-geography analysis in OS). Insurers (PLMR-style) price it internally; munis do not.",
+   "alpha_implication": "Exclusion/construction edge, not trading alpha: cap joint-peril concentration cheaply via FEMA NRI x district join before buying; the market prices these names on yield and rating class only.",
+   "severity": "moderate_chronic",
+   "documentation_depth": "validated_on_live_portfolio",
+   "verified_via": "CA sleeve 2026-06-10: 5/24 names >30% building value in high-fire tracts (Mendocino 91%) AFTER seismic optimization -- the EQ hedge concentrated fire. 3 swapped at zero yield cost.",
+   "source_artifacts": [
+    "verticals/buyside_dd/connectors/fema_nri_hazard.py",
+    "verticals/muni_credit/wildfire_overlay.py",
+    "verticals/muni_credit/build_sleeve_blend.py (FIRE_CAP)"
+   ],
+   "cross_references": [
+    "fema_nri_hazard (channel)",
+    "teeter_plan (collections backstop)",
+    "rating_conditional_wrap_compression (insured-wrap tail cover)"
+   ],
+   "first_observed_session": "2026-06-10",
+   "_notes": "Generalizes beyond fire: any single-peril 'de-risked' framing (flood-safe but fire-exposed, EQ-safe but flood-exposed). The check is one connector call per location."
+  },
+  {
+   "name": "On-time operating data masks chronically late audited financials",
+   "short_name": "operating_currency_masks_audit_staleness",
+   "category": "disclosure_timing",
+   "asset_classes": [
+    "all_muni",
+    "private_credit_obligors"
+   ],
+   "issuer": "small revenue-bond obligors / distressed-adjacent municipalities (validated: City of Atwater wastewater)",
+   "structural_property": "The issuer files its UNAUDITED operating-data report punctually every year \u2014 the surface any filing-currency screen checks \u2014 while the AUDITED financials run ~11 months late, generating repeat 15c2-12 failure-to-provide notices. A 'current filer' verdict is technically true and substantively misleading.",
+   "what_it_masks": "Whatever the audit would surface: auditor disputes, going-concern language, fund-transfer issues. Late audits correlate with weak finance offices and with the things weak finance offices produce.",
+   "what_it_does_NOT_mask": "The failure-to-file notices themselves \u2014 EMMA shows them plainly; the mask only works on screens that check operating-data currency instead of audit currency.",
+   "claims_pay_trigger": "None directly; it is a disclosure-hygiene tell, not a payment mechanism.",
+   "signal_to_price_impact": "Unpriced in small unrated names (nobody reads the notice trail).",
+   "alpha_implication": "DD/exclusion tell: split 'filing currency' into operating-data currency AND audit currency; repeat failure-to-file = REVIEW even when the latest audit finally landed.",
+   "severity": "minor_chronic",
+   "documentation_depth": "validated_on_live_purchase_candidate",
+   "verified_via": "Atwater 050002AW4 pre-trade scan 2026-06-11: 3 consecutive failure-to-file notices (03/2024, 03/2025, 03/2026), FY24-25 audit filed 05/2026 ~11mo after FYE, operating report punctual every year; bond bought-as-staged WITH the caveat (gross-rev first lien + AGM wrap survive it).",
+   "source_artifacts": [
+    "verticals/muni_credit/emma_continuing_disclosure.py",
+    "verticals/muni_credit/outputs/buylist_dd/cd_scan_p1.json",
+    "verticals/muni_credit/outputs/underwriting/"
+   ],
+   "cross_references": [
+    "emma_continuing_disclosure (channel)",
+    "late_filing (muni detector)",
+    "rating_conditional_wrap_compression (the AGM wrap that makes the caveat survivable)"
+   ],
+   "first_observed_session": "2026-06-11",
+   "_notes": "Generalizes to any regime with dual-track disclosure (unaudited ops + audited financials): private credit borrower reporting, charter-school CDAs."
+  },
+  {
+   "name": "Sponsor presents another entity's entitlement/land as its own project",
+   "short_name": "sponsor_presents_others_entitlement",
+   "category": "misattributed_control",
+   "asset_classes": [
+    "real_estate_development",
+    "private_re_credit",
+    "land_secured"
+   ],
+   "issuer": "RE development sponsors raising project equity/debt",
+   "structural_property": "The offering markets 'our $X, N-unit, for-sale project' but the city site-plan record names a DIFFERENT applicant/owner (commonly the master developer), a different unit count, and/or a different product type (entitled apartments vs. marketed for-sale rowhouses). The sponsor re-presents someone else's entitlement, on land it may not own, as its own \u2014 control/ownership/entitlement are misattributed.",
+   "what_it_masks": "That the sponsor may be only a prospective builder/contractor, not the owner/applicant; that the entitlement is in-review not approved; that the entitled product (rental apartments) differs from the marketed product (for-sale luxury); that the land is still the master developer's.",
+   "what_it_does_NOT_mask": "The public entitlement record itself \u2014 applicant/owner/units/product are all in the city site-plan filing; the mask only works on deck-internal reads that never pull the primary record.",
+   "claims_pay_trigger": "n/a (offering-integrity tell, not a cashflow mechanism)",
+   "signal_to_price_impact": "Decisive for the equity/debt investor: if the sponsor isn't a party to the entitlement, the represented control is fictional.",
+   "alpha_implication": "Diligence/exclusion: pull the entitlement record (laserfiche_weblink connector) and compare to the offering; sponsor-absence is a HIGH-severity kill.",
+   "severity": "high",
+   "documentation_depth": "validated_on_live_offering",
+   "verified_via": "AHC Sun Valley / Blackwood Groves Block 9, City file 24635 (2026-06-17): marketed as American Housing Corp's 33-unit for-sale rowhouse project; City record shows Bridger Land Group / Blackwood Land Fund LLC as applicant+owner (AHC absent), 30 apartment units. Blinded primary-source.",
+   "source_artifacts": [
+    "verticals/buyside_dd/connectors/laserfiche_weblink.py",
+    "verticals/buyside_dd/detectors/entitlement_control_mismatch.py",
+    "verticals/buyside_dd/outputs/ahc_sunvalley_20260617/DD_REPORT.md"
+   ],
+   "cross_references": [
+    "laserfiche_weblink (connector/M-source)",
+    "entitlement_control_mismatch (detector)",
+    "reference_browser_automation_gated_portals"
+   ],
+   "first_observed_session": "2026-06-17",
+   "_notes": "Benign explanation (sponsor is a contracted builder/JV partner) must be reconciled, not assumed \u2014 but the marketed-vs-entitled divergence is real on every structural axis. Generalizes to any project-finance offering verifiable against a primary entitlement/permit record."
+  },
+  {
+   "name": "Segment recast reallocation (intersegment-elimination collapse)",
+   "short_name": "segment_recast_reallocation",
+   "category": "presentation_masking",
+   "asset_classes": [
+    "us_equity",
+    "global_equity"
+   ],
+   "structural_property": "A segment redefinition retroactively moves costs between segments (typically by dropping an intersegment charge), so a load-bearing segment margin improves with ZERO change in consolidated economics \u2014 and because the recast is retroactive, the reallocation is invisible in every comparison the company publishes.",
+   "detection": "When segment definitions changed within the last 8 quarters AND a segment margin is load-bearing to the thesis: diff the last PRE-recast release against the current basis. The tell is the intersegment-eliminations line collapsing (TRIP: $(135)M -> ~$(4)M). Old-basis and new-basis totals must reconcile; the delta is the reallocation.",
+   "precedent": "TRIP 2026-08-07 court: 'Segment-Viator' FY24 adj EBITDA $33M (3.9%) became 'Experiences' $79.1M (9.4%) on identical $840M revenue \u2014 ~$46M of marketing moved off the segment via removal of the intersegment traffic charge. Verified against pre-recast 8-K 0000950170-25-023733. | CRM variant (2026-08-07): renamed-bucket SEEDING \u2014 5->2 line collapse where the surviving AI-named bucket received $555M of reclassified revenue from the retired lines' side with no bridge (old-basis sum != new-basis bucket on the same quarter). Detection identical: same-quarter dual-basis reconciliation; the tell is the partition failing.",
+   "recall_floor": {
+    "attribute": "segment_margin",
+    "trigger": "segment_definitions_changed_within_8q AND segment_margin_load_bearing",
+    "action": "diff pre-recast vs current basis; quantify reallocation before accepting any segment-margin claim"
+   },
+   "added": "2026-08-07"
+  },
+  {
+   "name": "Issuer volume metric inverting the market metric beneath it",
+   "short_name": "issuer_vs_market_volume_inversion",
+   "category": "presentation_masking",
+   "asset_classes": [
+    "us_equity",
+    "global_equity"
+   ],
+   "structural_property": "Share gain + a marquee-event month lets an issuer print volume GROWTH while its market shrinks; stacked variants: M&A revenue growth concealing organic segment EBITDA decline; non-GAAP add-backs absorbing one-offs; GAAP flattered by marking down the company's own crown jewel.",
+   "detection": "Never accept an issuer volume metric as a market read \u2014 pull the regulator/industry aggregate and difference out share + event effects.",
+   "precedent": "FLUT Q2-26: FanDuel handle +2.2% (incl. World-Cup June, share-adjusted) vs 8-state aggregate -3.9% (6 consecutive negative months).",
+   "added": "2026-08-07"
+  },
+  {
+   "name": "Signed-filing vs furnished-marketing divergence",
+   "short_name": "signed_vs_furnished_divergence",
+   "category": "disclosure_integrity",
+   "asset_classes": [
+    "us_equity",
+    "mining",
+    "development_stage"
+   ],
+   "structural_property": "Liability-bearing documents (QP-signed TRS under Section 18, audited statements, filed exhibits) carry one number; 'furnished not filed' 8-Ks/decks/PRs market a much larger one. The gap between what a professional will SIGN and what IR will SAY is a direct read on management honesty.",
+   "detection": "For any development-stage asset: locate the signed technical document, diff its NPV/capex/sensitivities against every furnished claim within +/-90 days; a gap >2x with missing discount rate/deck/sensitivity on the furnished side = fire.",
+   "precedent": "METC 2026-08-07: TRS $1.0bn (signed, sensitivity table) vs 8-K $8.0bn (furnished, no QP, no deck) five days apart; red 9/10.",
+   "added": "2026-08-07"
+  }
+ ],
+ "_cross_asset_clusters": {
+  "insurance_wrap_cluster": {
+   "mechanisms": [
+    "cal_mortgage",
+    "agm_bond_insurance",
+    "bam_bond_insurance",
+    "fha_section_242",
+    "gnma_passthrough_insurance",
+    "calhfa_program_credit_overcollateralization",
+    "freddie_mac_tel_passthrough",
+    "fha_542c_risk_share",
+    "section_8_hap_revenue_floor"
+   ],
+   "common_pattern": "Bond credit decoupled from underlying obligor via insurer / sovereign guarantee / state HFA program-credit overcollateralization. Signal-to-spread translation muted unless wrap source itself stressed. Framework adds value via forward-flag for wrap cascade tail risk and identification of uninsured subordinate tranches. CA Affordable Housing 2026-05-28 scoping added 4 new mechanisms covering the state-HFA / GSE-TEL / federal-risk-share / Section-8-HAP wrap taxonomy. Rating-conditional compression curve (AGM 0/140/360 bps at AA-/BBB-/CCC- underlying) generalizes across all wraps \u2014 compression magnitude scales with underlying-credit distress not just wrap rating."
+  },
+  "intercept_structure_cluster": {
+   "mechanisms": [
+    "csfa_lcff_intercept",
+    "pcsd_facility_credit",
+    "ccsa_jpa_pool",
+    "state_pension_intercept",
+    "go_bond_taxing_authority",
+    "rops_allocation_intercept"
+   ],
+   "common_pattern": "Pre-distribution payment diversion or pooled cash-flow structure provides 2-3 notch credit uplift while leaving operator-level signal partially visible. Framework can fire on operator credit but spreads tighter than pure operator credit would justify. ROPS allocation extends this cluster to property-tax-increment bonds where a county auditor-controller distributes RPTTF directly to bond trustee before host city / county receives revenue."
+  },
+  "statutory_carveout_cluster": {
+   "mechanisms": [
+    "teeter_carveout_mello_roos",
+    "reserve_fund_cushion",
+    "charter_private_placement_opacity",
+    "cfd_redundant_signal_channels",
+    "essential_workforce_housing_unwrapped_jpa"
+   ],
+   "common_pattern": "Statutory or structural rules that change which signals matter (or whether any market signal exists at all). Includes BOTH masking-present (reserve cushion delays bondholder default) and masking-absent (Teeter excludes Mello-Roos; CFD signal channels are redundant; essential / workforce housing JPA bonds are structurally unwrapped despite the affordable-housing label \u2014 CA 2026-05-28 finding) findings. Common cross-cluster pattern: sectors that LOOK wrapped via the institutional veneer (Mello-Roos statutory framework; CDIAC reporting; CSCDA/CalCHA conduit issuer) but the asset class either has explicit carve-outs from the masking layer (Teeter) or never had one in the first place (unwrapped workforce housing)."
+  },
+  "implicit_support_cluster": {
+   "mechanisms": [
+    "obligated_group_consolidation",
+    "donor_base_support",
+    "charter_authorizer_relationship",
+    "solvent_master_developer_implicit_support"
+   ],
+   "common_pattern": "Non-contractual support layers (sponsor solvency, donor base, authorizer relationship, joint-and-several group debt) that absorb single-name distress until aggregate-level pressure mounts."
+  },
+  "rating_lag_cluster": {
+   "mechanisms": [
+    "rating_agency_lag_muni",
+    "stale_distress_pricing"
+   ],
+   "common_pattern": "Temporal masking \u2014 rating action lags primary-source events; or stale-default reporting creates false-positive fresh-distress signals. Framework needs `years_since_first_default` filter for stale cases and explicit forward-lead-time tracking for genuine rating-lag alpha."
+  },
+  "state_backstop_fund_cluster": {
+   "mechanisms": [
+    "ab_1054_wildfire_fund_backstop"
+   ],
+   "common_pattern": "NEW CATEGORY 2026-05-28. State-administered fund that pays bondholder-relevant claims after liability is determined, with conditional access (annual safety certification) and a bounded shareholder-repayment cap. Distinct from insurance_wrap (no annual premium, no insurer-credit substitution; the IOU's own credit is preserved at IG ONLY because the fund caps tail liability). Distinct from intercept_structure (no pre-distribution diversion; fund pays after-the-fact). Distinct from sovereign_guarantee (state not federal; CONDITIONAL on certification; bounded by fund nominal capacity not state full-faith-and-credit). Common pattern: tail-risk absorption via a finite state-balance-sheet pool that itself becomes the secondary signal channel \u2014 once the fund is depleted, all participants face simultaneous breakdown (parallel to cal_mortgage cascade tail risk). Other candidate mechanisms in this category to explore: TX Permanent School Fund Bond Guarantee Program (analog at K-12 GO level with $100B+ capital), state-level mortgage-default reserves (NY SONYMA, etc.), state catastrophe bonds for wind/earthquake."
+  }
+ },
+ "_open_mechanisms_to_catalog_next": [
+  "USDA Rural Development hospital / housing insurance (sovereign analog to FHA 242)",
+  "California GO bond AB 8 fiscal-shift mechanism (specifically for school district credit)",
+  "Tobacco settlement revenue bonds (master settlement agreement implicit federal-state structure)",
+  "Hospital Provider Fee / Medicaid supplemental payment programs (federal+state hybrid revenue stream that masks payor-mix signals)",
+  "Catholic diocese / religious-order joint-and-several debt structures",
+  "Texas Permanent School Fund Bond Guarantee Program (analog to CSFA LCFF intercept but at K-12 GO level; could also be categorized as state_backstop_fund given $100B+ PSF capital pool)",
+  "State catastrophe-reserve funds (NY SONYMA mortgage-default reserve; state earthquake authorities; state windstorm pools) \u2014 siblings of ab_1054_wildfire_fund_backstop in the state_backstop_fund cluster"
+ ],
+ "mechanisms_count": 47
+}

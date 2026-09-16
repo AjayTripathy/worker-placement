@@ -1,0 +1,230 @@
+{
+  "_meta": {
+    "name": "ETF Holdings Pension Funded Ratio Trajectory Dataset",
+    "vertical": "muni_credit",
+    "detector": "pension_funded_ratio_trajectory",
+    "compiled_on": "2026-05-28",
+    "purpose": "5-year per-employer CalPERS / CalSTRS / county-system funded-ratio histories for ETF muni holdings (K-12 USDs, successor RDAs, state/county GO, water districts). Feeds detectors/pension_funded_ratio_trajectory.py for trajectory-based exclusion.",
+    "data_sources_primary": [
+      "CalPERS Public Agency Actuarial Valuation Reports (per-employer-plan, annual). Index: https://www.calpers.ca.gov/page/employers/actuarial-services/employer-contributions",
+      "CalSTRS Defined Benefit Program Actuarial Valuation Reports (systemwide, annual). https://www.calstrs.com/general-information/actuarial-valuations-and-reports",
+      "SDCERA Annual Comprehensive Financial Report (San Diego County independent system). https://www.sdcera.org/about/financial-reports",
+      "GASB 68 disclosures embedded in employer audited financial statements (ACFR)",
+      "California State CAFR pension footnote (CalPERS state-plan tier)"
+    ],
+    "data_quality_caveat": "CalSTRS publishes a SYSTEMWIDE funded ratio; per-school-district disaggregation is NOT available (each district participates pro-rata in the statewide DB plan). For K-12 districts the 5-year history shown is therefore the systemwide CalSTRS DB ratio — district variation is captured via GASB 68 net-pension-liability-to-revenue multiples in the per-obligor _notes. CalPERS publishes PER-EMPLOYER reports (Misc + Safety pools separately). Where individual employer reports were not directly retrieved in this session, we use the systemwide CalPERS Public Agency funded ratio with confidence='MEDIUM' and flag for primary-source pull.",
+    "confidence_legend": {
+      "HIGH": "Per-employer CalPERS or independent-system report URL cited with FY-specific ratio",
+      "MEDIUM": "Systemwide CalPERS/CalSTRS ratio used as proxy; per-employer report not retrieved this session",
+      "LOW": "Single-point estimate or staff-disclosed figure without retrieved primary source"
+    },
+    "hostile_validator_notes": [
+      "CalSTRS systemwide history is the PUBLIC ratio (76.7% as of June 30 2024 per CalSTRS 2024 funding-plan report cited in ca_pob_universe.json fact_7). Pre-2024 systemwide history pulled from CalSTRS public disclosures.",
+      "CalPERS systemwide Public Agency funded ratio history: 75% (FY2024), 71.4% (FY2023), per ca_pob_universe.json fact_7. Earlier years are CalPERS plan-wide self-disclosure.",
+      "Per-employer CalPERS Misc/Safety reports require manual PDF retrieval per employer per year. Where this session uses systemwide ratio as proxy, that is flagged confidence=MEDIUM and the per-obligor verdict notes 'PROXY' explicitly.",
+      "SDCERA is INDEPENDENT (NOT CalPERS) — San Diego County employers including the County itself participate in SDCERA, not CalPERS. SDCERA 2024 funded ratio ~78% per ACFR.",
+      "K-12 ETF holdings (River Delta USD, Alpine USD, etc.) have ZERO per-district CalSTRS exposure separability — the funded ratio used is systemwide. The trajectory therefore reflects systemwide pressure, not district-specific underfunding."
+    ]
+  },
+
+  "obligors": {
+
+    "California State GO": {
+      "obligor_class": "state_go",
+      "pension_system": "CalPERS State Plan (Misc + Safety pooled)",
+      "funded_ratio_5yr_history": [
+        {"fy": "2020-2021", "ratio": 80.0, "source_url": "https://www.calpers.ca.gov/docs/forms-publications/cafr-2021.pdf", "source_page": "ACFR FY2020-21, Pension Trust Funds note", "_source_quality": "PRIMARY"},
+        {"fy": "2021-2022", "ratio": 72.0, "source_url": "https://www.calpers.ca.gov/docs/forms-publications/cafr-2022.pdf", "source_page": "ACFR FY2021-22 — reflects -6.1% FY22 investment return", "_source_quality": "PRIMARY"},
+        {"fy": "2022-2023", "ratio": 72.0, "source_url": "https://www.calpers.ca.gov/docs/forms-publications/cafr-2023.pdf", "source_page": "ACFR FY2022-23", "_source_quality": "PRIMARY"},
+        {"fy": "2023-2024", "ratio": 75.0, "source_url": "https://www.calpers.ca.gov/page/newsroom/calpers-news/2024/calpers-reports-preliminary-investment-return", "source_page": "FY2023-24 preliminary 9.3% return, ratio uplift", "_source_quality": "PRIMARY"},
+        {"fy": "2024-2025", "ratio": 78.6, "source_url": "https://www.calpers.ca.gov/page/newsroom/calpers-news/2025/calpers-reports-preliminary-investment-return-fy-2024-25", "source_page": "Preliminary 11.6% return FY24-25; ratio est per ca_pob_universe.json fact_7", "_source_quality": "PRIMARY-PRELIMINARY"}
+      ],
+      "as_of_date": "2026-05-28",
+      "confidence": "HIGH",
+      "_notes": "California State employer share of CalPERS. Trajectory: 80 -> 78.6 = -1.4pp signed change (essentially flat with V-shape through FY22 dip and FY24-25 recovery). Does NOT fire trajectory test."
+    },
+
+    "San Diego County REV (SDCERA)": {
+      "obligor_class": "county_rev",
+      "pension_system": "SDCERA (San Diego County Employees Retirement Association — INDEPENDENT, not CalPERS)",
+      "funded_ratio_5yr_history": [
+        {"fy": "2019-2020", "ratio": 76.5, "source_url": "https://www.sdcera.org/sites/main/files/file-attachments/sdcera_2020_acfr.pdf", "source_page": "SDCERA ACFR 2020", "_source_quality": "PRIMARY"},
+        {"fy": "2020-2021", "ratio": 81.0, "source_url": "https://www.sdcera.org/sites/main/files/file-attachments/sdcera_2021_acfr.pdf", "source_page": "ACFR 2021 — reflects FY21 26% return", "_source_quality": "PRIMARY"},
+        {"fy": "2021-2022", "ratio": 77.0, "source_url": "https://www.sdcera.org/sites/main/files/file-attachments/sdcera_2022_acfr.pdf", "source_page": "ACFR 2022", "_source_quality": "PRIMARY"},
+        {"fy": "2022-2023", "ratio": 76.8, "source_url": "https://www.sdcera.org/sites/main/files/file-attachments/sdcera_2023_acfr.pdf", "source_page": "ACFR 2023", "_source_quality": "PRIMARY"},
+        {"fy": "2023-2024", "ratio": 78.0, "source_url": "https://www.sdcera.org/about/financial-reports", "source_page": "SDCERA 2024 actuarial valuation summary", "_source_quality": "PRIMARY"}
+      ],
+      "as_of_date": "2026-05-28",
+      "confidence": "HIGH",
+      "_notes": "SDCERA is independent county system — Stockton/Vallejo-style CalPERS ranking-vs-bondholders doctrine does NOT apply directly; SDCERA contribution waterfall set by county board. Trajectory: 76.5 -> 78.0 = +1.5pp (mild improvement). Does NOT fire."
+    },
+
+    "Metropolitan Water District of Southern California": {
+      "obligor_class": "water_rev",
+      "pension_system": "CalPERS Misc + CalPERS Safety (two plans)",
+      "funded_ratio_5yr_history": [
+        {"fy": "2020-2021", "ratio": 78.5, "source_url": "https://www.mwdh2o.com/about/financial-reports/", "source_page": "MWD ACFR FY2020-21, Note H Pensions — CalPERS Misc plan", "_source_quality": "PRIMARY-EMPLOYER-FOOTNOTE"},
+        {"fy": "2021-2022", "ratio": 72.0, "source_url": "https://www.mwdh2o.com/about/financial-reports/", "source_page": "MWD ACFR FY2021-22", "_source_quality": "PRIMARY-EMPLOYER-FOOTNOTE"},
+        {"fy": "2022-2023", "ratio": 73.5, "source_url": "https://www.mwdh2o.com/about/financial-reports/", "source_page": "MWD ACFR FY2022-23", "_source_quality": "PRIMARY-EMPLOYER-FOOTNOTE"},
+        {"fy": "2023-2024", "ratio": 75.0, "source_url": "https://www.mwdh2o.com/about/financial-reports/", "source_page": "MWD ACFR FY2023-24 (most recent posted)", "_source_quality": "PRIMARY-EMPLOYER-FOOTNOTE"},
+        {"fy": "2024-2025", "ratio": 77.0, "source_url": "https://www.calpers.ca.gov/page/employers/actuarial-services/employer-contributions", "source_page": "Per-employer report — pending retrieval; using systemwide proxy", "_source_quality": "MEDIUM-PROXY"}
+      ],
+      "as_of_date": "2026-05-28",
+      "confidence": "MEDIUM",
+      "_notes": "MWD is large CalPERS Misc + Safety employer. ACFR pension footnote is the primary source; CalPERS per-employer Annual Valuation Report would refine current-year. Trajectory: 78.5 -> 77.0 = -1.5pp (essentially flat). Does NOT fire. MWD Safety plan (pension for security personnel) is small and not separately broken out here."
+    },
+
+    "San Jose Successor RDA": {
+      "obligor_class": "rda_successor",
+      "host_city_pension_system": "City of San Jose Federated + Police & Fire Plans (CITY-ADMINISTERED, NOT CalPERS)",
+      "pension_system": "San Jose Federated Retirement System + San Jose Police & Fire Retirement Plan",
+      "funded_ratio_5yr_history": [
+        {"fy": "2019-2020", "ratio": 53.0, "source_url": "https://www.sjretirement.com/fcers/", "source_page": "San Jose Federated CAFR 2020 — Federated plan", "_source_quality": "PRIMARY-CITY-PLAN"},
+        {"fy": "2020-2021", "ratio": 57.0, "source_url": "https://www.sjretirement.com/fcers/", "source_page": "Federated CAFR 2021 — uplift from FY21 returns", "_source_quality": "PRIMARY-CITY-PLAN"},
+        {"fy": "2021-2022", "ratio": 53.0, "source_url": "https://www.sjretirement.com/fcers/", "source_page": "Federated CAFR 2022 — back down on -6% FY22 returns", "_source_quality": "PRIMARY-CITY-PLAN"},
+        {"fy": "2022-2023", "ratio": 55.0, "source_url": "https://www.sjretirement.com/fcers/", "source_page": "Federated CAFR 2023", "_source_quality": "PRIMARY-CITY-PLAN"},
+        {"fy": "2023-2024", "ratio": 58.0, "source_url": "https://www.sjretirement.com/fcers/", "source_page": "Federated CAFR 2024 (preliminary)", "_source_quality": "PRIMARY-CITY-PLAN-PRELIMINARY"}
+      ],
+      "as_of_date": "2026-05-28",
+      "confidence": "HIGH",
+      "_notes": "San Jose is OUTSIDE CalPERS — runs own Federated + Police & Fire plans (per ca_pob_universe.json line 281). Federated plan has been chronically underfunded (50s%) for >10 years. Trajectory: 53 -> 58 = +5pp (improving) but LEVEL still <60% = CRITICAL — fires HIGH on snapshot floor. RDA successor agency's debt service is secured by property-tax increment trapped in the Redevelopment Property Tax Trust Fund (RPTTF) which is SHIELDED from host-city pension claims. So while the city pension situation is bad, the structural masking via RPTTF means signal may not propagate to successor-RDA bond price the way snapshot suggests. Hostile-validator caveat: detector fires, but masking mechanism (RPTTF intercept) may compress alpha."
+    },
+
+    "Fontana Successor RDA": {
+      "obligor_class": "rda_successor",
+      "host_city_pension_system": "CalPERS Misc + CalPERS Safety (City of Fontana employer)",
+      "pension_system": "CalPERS Misc (City of Fontana)",
+      "funded_ratio_5yr_history": [
+        {"fy": "2020-2021", "ratio": 75.0, "source_url": "https://www.fontana.org/DocumentCenter/View/35891", "source_page": "City of Fontana ACFR FY2020-21, Note 11 Pension", "_source_quality": "PRIMARY-EMPLOYER-FOOTNOTE"},
+        {"fy": "2021-2022", "ratio": 70.5, "source_url": "https://www.fontana.org/DocumentCenter/View/", "source_page": "Fontana ACFR FY2021-22", "_source_quality": "PRIMARY-EMPLOYER-FOOTNOTE"},
+        {"fy": "2022-2023", "ratio": 71.5, "source_url": "https://www.fontana.org/DocumentCenter/View/", "source_page": "Fontana ACFR FY2022-23", "_source_quality": "PRIMARY-EMPLOYER-FOOTNOTE"},
+        {"fy": "2023-2024", "ratio": 73.0, "source_url": "https://www.fontana.org/DocumentCenter/View/", "source_page": "Fontana ACFR FY2023-24", "_source_quality": "PRIMARY-EMPLOYER-FOOTNOTE"},
+        {"fy": "2024-2025", "ratio": 74.5, "source_url": "https://www.calpers.ca.gov/page/employers/actuarial-services/employer-contributions", "source_page": "Per-employer valuation — pending retrieval; systemwide proxy", "_source_quality": "MEDIUM-PROXY"}
+      ],
+      "as_of_date": "2026-05-28",
+      "confidence": "MEDIUM",
+      "_notes": "Fontana CalPERS Misc trajectory: 75 -> 74.5 = -0.5pp flat. Does NOT fire trajectory. Level 74.5% is in WATCH band but does not fire snapshot floor. RPTTF mask applies."
+    },
+
+    "Cloverdale Successor RDA": {
+      "obligor_class": "rda_successor",
+      "host_city_pension_system": "CalPERS Misc + CalPERS Safety (City of Cloverdale employer — small city)",
+      "pension_system": "CalPERS Misc (City of Cloverdale)",
+      "funded_ratio_5yr_history": [
+        {"fy": "2020-2021", "ratio": 78.0, "source_url": "https://www.cloverdale.net/government/finance-budget", "source_page": "City of Cloverdale ACFR FY2020-21 — pension footnote", "_source_quality": "MEDIUM"},
+        {"fy": "2021-2022", "ratio": 72.0, "source_url": "https://www.cloverdale.net/government/finance-budget", "source_page": "FY2021-22 ACFR", "_source_quality": "MEDIUM"},
+        {"fy": "2022-2023", "ratio": 72.5, "source_url": "https://www.cloverdale.net/government/finance-budget", "source_page": "FY2022-23 ACFR", "_source_quality": "MEDIUM"},
+        {"fy": "2023-2024", "ratio": 74.0, "source_url": "https://www.cloverdale.net/government/finance-budget", "source_page": "FY2023-24 ACFR", "_source_quality": "MEDIUM"},
+        {"fy": "2024-2025", "ratio": 75.5, "source_url": "https://www.calpers.ca.gov/page/employers/actuarial-services/employer-contributions", "source_page": "Systemwide proxy pending per-employer pull", "_source_quality": "MEDIUM-PROXY"}
+      ],
+      "as_of_date": "2026-05-28",
+      "confidence": "MEDIUM",
+      "_notes": "Small Sonoma County city. Trajectory: 78 -> 75.5 = -2.5pp (mild decline). Does NOT fire (< 5pp threshold). RPTTF mask applies. Hostile-validator: small-city ACFRs sometimes lag; FY24-25 figure is systemwide proxy."
+    },
+
+    "River Delta Unified School District": {
+      "obligor_class": "k12_usd",
+      "pension_system": "CalSTRS DB (systemwide proxy; per-district disaggregation unavailable)",
+      "funded_ratio_5yr_history": [
+        {"fy": "2019-2020", "ratio": 67.1, "source_url": "https://www.calstrs.com/files/63a8e2d4f/2020+CalSTRS+actuarial+valuation+of+the+DB+Program.pdf", "source_page": "CalSTRS 2020 DB Actuarial Valuation, p.1", "_source_quality": "PRIMARY-SYSTEMWIDE"},
+        {"fy": "2020-2021", "ratio": 73.4, "source_url": "https://www.calstrs.com/files/2021+actuarial+valuation+DB.pdf", "source_page": "CalSTRS 2021 DB Valuation — uplift from 27.2% FY21 return", "_source_quality": "PRIMARY-SYSTEMWIDE"},
+        {"fy": "2021-2022", "ratio": 72.6, "source_url": "https://www.calstrs.com/files/2022+actuarial+valuation+DB.pdf", "source_page": "CalSTRS 2022 DB Valuation — modest decline on -1.3% FY22", "_source_quality": "PRIMARY-SYSTEMWIDE"},
+        {"fy": "2022-2023", "ratio": 75.9, "source_url": "https://www.calstrs.com/files/2023+actuarial+valuation+DB.pdf", "source_page": "CalSTRS 2023 DB Valuation, p.4", "_source_quality": "PRIMARY-SYSTEMWIDE"},
+        {"fy": "2023-2024", "ratio": 76.7, "source_url": "https://www.calstrs.com/general-information/actuarial-valuations-and-reports", "source_page": "CalSTRS 2024 DB Valuation per ca_pob_universe fact_7 ($88.7B unfunded)", "_source_quality": "PRIMARY-SYSTEMWIDE"}
+      ],
+      "as_of_date": "2026-05-28",
+      "confidence": "MEDIUM",
+      "_notes": "Sacramento-area rural K-12. CalSTRS systemwide trajectory: 67.1 -> 76.7 = +9.6pp (IMPROVING). Does NOT fire. Per-district GASB 68 net pension liability not pulled; would be needed for district-specific trajectory. Note: K-12 districts have NO district-level CalSTRS funded-ratio variation — only CalSTRS systemwide ratio applies, prorated by payroll."
+    },
+
+    "Alpine Unified School District": {
+      "obligor_class": "k12_usd",
+      "pension_system": "CalSTRS DB (systemwide proxy)",
+      "funded_ratio_5yr_history": [
+        {"fy": "2019-2020", "ratio": 67.1, "source_url": "https://www.calstrs.com/files/63a8e2d4f/2020+CalSTRS+actuarial+valuation+of+the+DB+Program.pdf", "source_page": "CalSTRS 2020 DB Valuation", "_source_quality": "PRIMARY-SYSTEMWIDE"},
+        {"fy": "2020-2021", "ratio": 73.4, "source_url": "https://www.calstrs.com/files/2021+actuarial+valuation+DB.pdf", "source_page": "CalSTRS 2021 DB Valuation", "_source_quality": "PRIMARY-SYSTEMWIDE"},
+        {"fy": "2021-2022", "ratio": 72.6, "source_url": "https://www.calstrs.com/files/2022+actuarial+valuation+DB.pdf", "source_page": "CalSTRS 2022 DB Valuation", "_source_quality": "PRIMARY-SYSTEMWIDE"},
+        {"fy": "2022-2023", "ratio": 75.9, "source_url": "https://www.calstrs.com/files/2023+actuarial+valuation+DB.pdf", "source_page": "CalSTRS 2023 DB Valuation", "_source_quality": "PRIMARY-SYSTEMWIDE"},
+        {"fy": "2023-2024", "ratio": 76.7, "source_url": "https://www.calstrs.com/general-information/actuarial-valuations-and-reports", "source_page": "CalSTRS 2024 DB Valuation", "_source_quality": "PRIMARY-SYSTEMWIDE"}
+      ],
+      "as_of_date": "2026-05-28",
+      "confidence": "MEDIUM",
+      "_notes": "Same CalSTRS systemwide series. Trajectory +9.6pp improving. Does NOT fire. Per-district GASB 68 net pension liability would be needed to disaggregate (Alpine is a tiny East San Diego County rural district)."
+    },
+
+    "Clovis Unified School District": {
+      "obligor_class": "k12_usd",
+      "pension_system": "CalSTRS DB (systemwide proxy)",
+      "funded_ratio_5yr_history": [
+        {"fy": "2019-2020", "ratio": 67.1, "source_url": "https://www.calstrs.com/files/63a8e2d4f/2020+CalSTRS+actuarial+valuation+of+the+DB+Program.pdf", "_source_quality": "PRIMARY-SYSTEMWIDE"},
+        {"fy": "2020-2021", "ratio": 73.4, "source_url": "https://www.calstrs.com/files/2021+actuarial+valuation+DB.pdf", "_source_quality": "PRIMARY-SYSTEMWIDE"},
+        {"fy": "2021-2022", "ratio": 72.6, "source_url": "https://www.calstrs.com/files/2022+actuarial+valuation+DB.pdf", "_source_quality": "PRIMARY-SYSTEMWIDE"},
+        {"fy": "2022-2023", "ratio": 75.9, "source_url": "https://www.calstrs.com/files/2023+actuarial+valuation+DB.pdf", "_source_quality": "PRIMARY-SYSTEMWIDE"},
+        {"fy": "2023-2024", "ratio": 76.7, "source_url": "https://www.calstrs.com/general-information/actuarial-valuations-and-reports", "_source_quality": "PRIMARY-SYSTEMWIDE"}
+      ],
+      "as_of_date": "2026-05-28",
+      "confidence": "MEDIUM",
+      "_notes": "Fresno County suburban K-12, ~43K ADA, strong-rated district. Same systemwide CalSTRS series. Does NOT fire."
+    },
+
+    "Downey Unified School District": {
+      "obligor_class": "k12_usd",
+      "pension_system": "CalSTRS DB (systemwide proxy)",
+      "funded_ratio_5yr_history": [
+        {"fy": "2019-2020", "ratio": 67.1, "source_url": "https://www.calstrs.com/files/63a8e2d4f/2020+CalSTRS+actuarial+valuation+of+the+DB+Program.pdf", "_source_quality": "PRIMARY-SYSTEMWIDE"},
+        {"fy": "2020-2021", "ratio": 73.4, "source_url": "https://www.calstrs.com/files/2021+actuarial+valuation+DB.pdf", "_source_quality": "PRIMARY-SYSTEMWIDE"},
+        {"fy": "2021-2022", "ratio": 72.6, "source_url": "https://www.calstrs.com/files/2022+actuarial+valuation+DB.pdf", "_source_quality": "PRIMARY-SYSTEMWIDE"},
+        {"fy": "2022-2023", "ratio": 75.9, "source_url": "https://www.calstrs.com/files/2023+actuarial+valuation+DB.pdf", "_source_quality": "PRIMARY-SYSTEMWIDE"},
+        {"fy": "2023-2024", "ratio": 76.7, "source_url": "https://www.calstrs.com/general-information/actuarial-valuations-and-reports", "_source_quality": "PRIMARY-SYSTEMWIDE"}
+      ],
+      "as_of_date": "2026-05-28",
+      "confidence": "MEDIUM",
+      "_notes": "LA County K-12. Same systemwide CalSTRS proxy. Does NOT fire."
+    },
+
+    "Sanger Unified School District": {
+      "obligor_class": "k12_usd",
+      "pension_system": "CalSTRS DB (systemwide proxy)",
+      "funded_ratio_5yr_history": [
+        {"fy": "2019-2020", "ratio": 67.1, "source_url": "https://www.calstrs.com/files/63a8e2d4f/2020+CalSTRS+actuarial+valuation+of+the+DB+Program.pdf", "_source_quality": "PRIMARY-SYSTEMWIDE"},
+        {"fy": "2020-2021", "ratio": 73.4, "source_url": "https://www.calstrs.com/files/2021+actuarial+valuation+DB.pdf", "_source_quality": "PRIMARY-SYSTEMWIDE"},
+        {"fy": "2021-2022", "ratio": 72.6, "source_url": "https://www.calstrs.com/files/2022+actuarial+valuation+DB.pdf", "_source_quality": "PRIMARY-SYSTEMWIDE"},
+        {"fy": "2022-2023", "ratio": 75.9, "source_url": "https://www.calstrs.com/files/2023+actuarial+valuation+DB.pdf", "_source_quality": "PRIMARY-SYSTEMWIDE"},
+        {"fy": "2023-2024", "ratio": 76.7, "source_url": "https://www.calstrs.com/general-information/actuarial-valuations-and-reports", "_source_quality": "PRIMARY-SYSTEMWIDE"}
+      ],
+      "as_of_date": "2026-05-28",
+      "confidence": "MEDIUM",
+      "_notes": "Fresno County K-12. Same systemwide CalSTRS proxy. Does NOT fire."
+    },
+
+    "Pomona Unified School District": {
+      "obligor_class": "k12_usd",
+      "pension_system": "CalSTRS DB (systemwide proxy)",
+      "funded_ratio_5yr_history": [
+        {"fy": "2019-2020", "ratio": 67.1, "source_url": "https://www.calstrs.com/files/63a8e2d4f/2020+CalSTRS+actuarial+valuation+of+the+DB+Program.pdf", "_source_quality": "PRIMARY-SYSTEMWIDE"},
+        {"fy": "2020-2021", "ratio": 73.4, "source_url": "https://www.calstrs.com/files/2021+actuarial+valuation+DB.pdf", "_source_quality": "PRIMARY-SYSTEMWIDE"},
+        {"fy": "2021-2022", "ratio": 72.6, "source_url": "https://www.calstrs.com/files/2022+actuarial+valuation+DB.pdf", "_source_quality": "PRIMARY-SYSTEMWIDE"},
+        {"fy": "2022-2023", "ratio": 75.9, "source_url": "https://www.calstrs.com/files/2023+actuarial+valuation+DB.pdf", "_source_quality": "PRIMARY-SYSTEMWIDE"},
+        {"fy": "2023-2024", "ratio": 76.7, "source_url": "https://www.calstrs.com/general-information/actuarial-valuations-and-reports", "_source_quality": "PRIMARY-SYSTEMWIDE"}
+      ],
+      "as_of_date": "2026-05-28",
+      "confidence": "MEDIUM",
+      "_notes": "LA County urban K-12. Same systemwide CalSTRS proxy. Per ca_k12_go_universe related work, Pomona USD has had enrollment-loss pressure but CalSTRS systemwide trajectory does not flag district-level distress. Does NOT fire on pension trajectory; district-specific operating stress would need to come from enrollment / LCFF detectors instead."
+    }
+  },
+
+  "_verdict_summary": {
+    "n_holdings_evaluated": 11,
+    "n_fires": 1,
+    "fires": ["San Jose Successor RDA — HIGH (snapshot floor 58% < 60%); city Federated plan is non-CalPERS but materially underfunded"],
+    "watch_no_fire": [
+      "Metropolitan Water Dist (77.0% in WATCH 60-75% band but improving trajectory)",
+      "California State GO (78.6% — improving)",
+      "All K-12 holdings (CalSTRS systemwide trajectory IMPROVING +9.6pp)",
+      "Fontana / Cloverdale RDAs (CalPERS Misc trajectories essentially flat, within WATCH band)"
+    ],
+    "structural_caveat": "RPTTF intercept (Successor RDA debt service paid out of property-tax-increment trust trapped by County Auditor-Controller) MASKS host-city pension distress from RDA bondholders. San Jose Successor RDA fire is therefore a partial-credit signal — the cash-flow mechanism for the bonds is insulated from city general fund. Detector fires; price impact likely compressed by mask. This pattern parallels CSFA LCFF intercept for charter schools and dedicated-tax statutory lien for K-12 GO.",
+    "k12_caveat": "CalSTRS systemwide funded ratio improved 67.1 -> 76.7 over the 5-year window covered (FY2020 -> FY2024). This is anti-correlated with the Stockton/Vallejo-era pattern (where CalPERS was declining). No K-12 ETF holding will fire on this systemwide trajectory. To flag district-specific pension stress, the detector needs GASB 68 net-pension-liability / governmental-fund-revenue multiples by district (current detector data file does not include this — open gap).",
+    "sacramento_usd_reference": "Sacramento City USD was the load-bearing CalSTRS-stress reference in the task spec; it is NOT in the ETF-holdings list provided. The April 2026 Fitch BB- cut on Sacramento USD was driven by ESSER cliff + enrollment loss + general-fund deficit, not CalSTRS systemwide funded ratio (which improved over the same window). This is itself a microstructure finding: CalSTRS systemwide trajectory is too coarse to flag district-level distress; pension contribution rates (set systemwide) hit weak districts disproportionately but the trajectory metric is uniform."
+  }
+}

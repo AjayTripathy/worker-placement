@@ -1,0 +1,97 @@
+{
+  "ticker": "QUBT",
+  "cutoff": "2024-09-01",
+  "filing": "0001213900-24-028799_10-K.txt",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "QCi was awarded a fourth NASA subcontract on Feb 14, 2024 to study sun-noise reduction in LIDAR images using the EQC; prime contractor is Analytical Mechanics Associates.",
+      "severity": "UNVERIFIABLE",
+      "supports": false,
+      "M_check": "usaspending.query_federal_presence + usaspending.query_dod_contracts",
+      "M_value": "INFLATION_SUSPECT (0 UEIs resolved across all 6 QCi/QPhoton/subsidiary name variants; 0 DoD contracts found for Quantum Computing Inc.). Note: 4 contracts to 'HQPHOTONICS INC' totaling $7.95M are name-collisions with a separate Maryland photonics firm (HQ Photonics) — not QPhoton, LLC.",
+      "interpretation": "The NASA subcontract claim is a flow-down through Analytical Mechanics Associates (the prime), so absence in usaspending direct-contractor data is consistent with sub-tier disclosure rather than fabrication. UEI absence is a YELLOW flag but the claim is small-dollar and the company-asserted role is subcontractor, not prime. Treat as UNVERIFIABLE rather than SEVERE — would need flow-down sub-award data to confirm or deny. Cohort-relevant note: the company has ZERO direct DoD UEI presence, so any forward J-Book exposure thesis would have to be entirely through sub-tier flow-down — materially smaller than what a J-Book primary contractor claim would imply."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "QCi expects to apply for and receive funding under the DOE Title 17 Clean Energy Financing Program (Loan Programs Office) to support its TFLN chip manufacturing buildout.",
+      "severity": "UNVERIFIABLE",
+      "supports": false,
+      "M_check": "doe_budget.query_program_funding (program_name='Title 17 Clean Energy Financing'; parent_office='LPO'); pentagon_jbook contractor lookup for QCI",
+      "M_value": "doe_budget NOT_FOUND for both Title 17 and LPO (corpus covers Office of Science programs ASCR/BES/BER/FES/HEP/NP — not the LPO loan-guarantee program). pentagon_jbook NOT_FOUND for 'Quantum Computing' contractor.",
+      "interpretation": "The Title 17 LPO program is real and historically active, but our DOE corpus doesn't cover LPO loan guarantees (it covers Office of Science appropriations). NOT_FOUND here is a coverage gap, not a flag. The claim itself is purely forward-looking ('plans to apply') — no contract, no obligation, no FY booking — so it is non-material to any J-Book divergence thesis. UNVERIFIABLE with a note that the claim is aspirational and structurally cannot be a SEVERE finding without a booked award."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "QCi expects to apply for and receive CHIPS Act funding (Commerce-administered, $52B program) for its TFLN chip fab buildout.",
+      "severity": "UNVERIFIABLE",
+      "supports": false,
+      "M_check": "doe_budget.query_program_funding + pentagon_jbook.query_program_funding for 'CHIPS Act'",
+      "M_value": "NOT_FOUND in both DOE and Pentagon J-Book corpora (CHIPS Act funding is administered by Commerce/NIST/NSTC, outside both corpora's scope).",
+      "interpretation": "The CHIPS Act exists and is real, but our corpora don't ingest Commerce/NIST CHIPS Program Office funding decisions. NOT_FOUND is a coverage gap, not a red flag. Like C2, the claim is purely aspirational ('plans to apply') — no booking, no obligation. UNVERIFIABLE; outside framework scope. Note for follow-up: a CHIPS award to QCi would be material public news and could be checked via SEC 8-K post-cutoff if relevant — at cutoff date 2024-09-01 there is no such 8-K in the corpus pre-cutoff."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "QCi's photonic / quantum / TFLN technology is positioned for DoD LIDAR / remote-sensing / quantum-secured-comms applications (drone/aircraft/satellite/space-based platforms).",
+      "severity": "UNVERIFIABLE",
+      "supports": false,
+      "M_check": "pentagon_jbook.query_program_funding by contractor_name (QCI, QPhoton) and by program_name ('quantum LIDAR', 'AFRL Quantum Networking')",
+      "M_value": "pentagon_jbook NOT_FOUND on QCI and QPhoton as contractor_name. 'quantum LIDAR' NOT_FOUND as a program. 'AFRL Quantum Networking' returns the IONQ-named program (FUNDED_SHRINKING at cutoff 2024 — but QUBT is not the contractor on that program; IonQ is). Of the 410 J-Book PEs in the corpus, ZERO list Quantum Computing Inc., QPhoton, or any QUBT subsidiary as a primary contractor.",
+      "interpretation": "The QUBT 10-K does NOT name any specific Pentagon Program Element, PE number, or named program of record — only generic 'positioning' language. This is the inverse of the YSS/IONQ pattern: rather than naming-a-PE-that's-being-defunded, QUBT names no PE at all. The J-Book divergence thesis cannot fire because there is no specific claim to test. The interesting adjacent finding is that AFRL Quantum Networking (the IonQ program) was already FUNDED_SHRINKING at cutoff 2024-09-01 (FY24 $12M vs FY23 $26M — >50% decline), suggesting structural weakness in the DoD quantum-networking funding envelope that would affect any future QUBT positioning attempt. Mark UNVERIFIABLE rather than SEVERE — the framework has nothing concrete to refute. Adjacent-cohort signal noted for cohort aggregation."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "QCi competes with IonQ, Rigetti, D-Wave, IBM, Google, etc.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "pentagon_jbook.query_program_funding (contractor_name='IonQ', 'Rigetti')",
+      "M_value": "IonQ matched on 3 programs (AFRL Quantum Networking [FUNDED_SHRINKING at cutoff], AFRL Qubitekk [FUNDED_STEADY post-acquisition], UMD Quantum subcontract [UNFUNDED_THIS_YEAR at cutoff]). Rigetti NOT_FOUND. Control claim — competitor listing is factual.",
+      "interpretation": "Verifies the competitive landscape narrative. PASS. Useful adjacent finding: of QUBT's two named close peers, IonQ has visible J-Book exposure (FUNDED_SHRINKING on its flagship AFRL program) — suggesting the public-pure-play quantum cohort faces structural Pentagon-funding headwinds even when QUBT itself has zero direct J-Book exposure."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "QCi has commenced buildout of a TFLN chip manufacturing facility at ASU Research Park in Tempe, AZ.",
+      "severity": "UNVERIFIABLE",
+      "supports": false,
+      "M_check": "epa_frs.query_facilities (AZ); bls_qcew.query_county_naics (Maricopa NAICS 3344 semiconductor mfg)",
+      "M_value": "EPA FRS: 0 facilities found for 'Quantum Computing' or 'QPhoton' in AZ at cutoff. BLS QCEW Maricopa NAICS 3344 (semi mfg) Q4 2023: 155 establishments, 23,626 employees — QUBT's claimed 9,261 sq ft fab is far too small to register in EPA FRS (which captures regulated industrial discharges) and would be plausibly subsumed in the ASU research-park leased footprint.",
+      "interpretation": "EPA absence is NOT a red flag for a research-scale 9,261 sq ft fab — TFLN photolithography at pre-production scale typically doesn't trigger EPA reporting thresholds. The facility claim is small and consistent with research/pilot scale. The 10-K explicitly says 'has begun buildout' and the lease is recently executed — production at the facility wasn't expected at cutoff. UNVERIFIABLE without a more specific facility-registration check, but the claim is plausibly sized."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Edison Patent Award (Jan 2024) for the quantum authentication / ZKP patent; patent granted in U.S. and 40+ countries during 2023.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "uspto_odp.query_assignee (Quantum Computing Inc., QPhoton, Stevens Institute)",
+      "M_value": "Quantum Computing Inc.: 6 total applications, 3 granted patents pre-cutoff. QPhoton: 0 patents under that exact name. Stevens Institute of Technology: 276 applications, 69 granted patents pre-cutoff (very active research IP base; consistent with the QPhoton / QCi exclusive license).",
+      "interpretation": "Patent claim is substantively supported — QCi has 3 granted U.S. patents at cutoff, including an Entropy Quantum Computing application and a granted Machine Learning Mapping for Quantum Processing patent (US 12,008,436). The Stevens Institute license background is also consistent — Stevens has a large, active patent portfolio. PASS."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "QCi holds a 30-year exclusive License Agreement (signed Dec 17, 2020) with Stevens Institute for QPhoton-related patents/know-how; 3.5% royalty obligation.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "uspto_odp.query_assignee (Stevens Institute of Technology) — re-uses C7.q3 result",
+      "M_value": "Stevens has 276 applications and 69 granted patents pre-cutoff — substantial IP base that supports the licensing claim. Public license-agreement disclosures are not directly testable via uspto_odp but the assignee record is consistent with the disclosed counterparty relationship.",
+      "interpretation": "PASS. The Stevens-Institute counterparty relationship is real and the underlying IP base is non-trivial. Note: the 9% equity stake to Stevens disclosed in the license terms is structurally dilutive to QUBT and the 3.5% royalty is non-trivial if commercialization actually occurs."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "Going concern doubt as of Dec 31, 2023: $2.06M cash, $19.94M annual burn, $1.44M working-capital deficit, $149.7M accumulated deficit; auditor (BF Borgers CPA PC) issued going-concern paragraph.",
+      "severity": "RED_FLAG_NEGATIVE",
+      "supports": true,
+      "M_check": "ucc_proxy.query_ucc_exposure (CIK 0001758009, 36-month window pre-cutoff)",
+      "M_value": "ucc_proxy: MODERATE_LIEN_EXPOSURE — 16 secured-debt term hits in SEC filings within the 36-month window (lien:9, security agreement:4, secured promissory note:2, ucc-1:1), no Item 2.03 8-Ks in window (so no NEW material secured-debt creation events) but the existing Streeterville unsecured note and Series A preferred redemption together with going-concern paragraph constitute substantive disclosure of distress.",
+      "interpretation": "This is the load-bearing finding for QUBT at cutoff 2024-09-01. The going-concern paragraph + $2.06M cash + $19.94M annual operating cash burn implies <2 months runway absent the ATM equity-issuance pipe ($25.5M raised in FY2023 via Ascendiant 3% ATM). Auditor is BF Borgers CPA PC — independently sanctionable concern (BF Borgers's PCAOB record is itself a yellow flag, though using post-cutoff knowledge here is not appropriate). The combination of (i) going-concern disclosure, (ii) zero direct DoD presence via UEI resolution, (iii) sub-$400K total revenue, and (iv) heavy ATM equity issuance is a classic small-cap quantum-narrative-with-distressed-finances profile. Mark RED_FLAG_NEGATIVE per disclosure of going concern; this is a self-reported red flag with material supporting M-source evidence. Distinct from the J-Book divergence pattern this cohort is testing — but a primary independent flag the framework SHOULD surface."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "Control test: do major DoD primes (Lockheed, Northrop, etc.) disclose QUBT/QPhoton as a supplier in their own 10-Ks?",
+      "severity": "UNVERIFIABLE",
+      "supports": false,
+      "M_check": "edgar_fts.query_fulltext (search 'Quantum Computing Inc.' and 'QPhoton' across Lockheed, Northrop, broad EDGAR)",
+      "M_value": "QPhoton in Lockheed (CIK 0000936468): 0 hits. QPhoton broad EDGAR: 50 hits but ALL are QUBT's own filings (8-K, 10-K, 10-K/A, 10-Q with QUBT CIK 0001758009). 'Quantum Computing Inc.' broad EDGAR: 50 hits, all QUBT self-references. Northrop CIK-scoped query errored (status 500) — treat as inconclusive.",
+      "interpretation": "Zero prime-contractor counterparty disclosures of QUBT or QPhoton in 36 months of EDGAR full-text data pre-cutoff. This is consistent with the absent UEI footprint (C1) and absent J-Book contractor presence (C4): QUBT has no documented supply-chain participation in DoD prime-contracted programs at cutoff. The 10-K's forward 'positioning for DoD' language is therefore not corroborated by any second-source counterparty disclosure. NOT a SEVERE finding because the QUBT 10-K does not make a specific claim of prime-supplier-status (the language is purely future-tense positioning), but it removes the implicit thesis that QCi has booked DoD pipeline today. UNVERIFIABLE — the absence is material context, not a falsified claim."
+    }
+  ]
+}

@@ -1,0 +1,81 @@
+{
+ "as_of": "2026-06-24",
+ "test": "BDC spread/event-driven frontrun backtest (Arm-A properly-powered), PILOT_SPEC \u00a71/\u00a74/\u00a76/\u00a77, amendments A-1/A-2/A-4/A-5",
+ "mechanism": {
+  "masking_channel": "quarterly printed NAV with ~30-45d 10-Q filing lag; market trades on stale prior-quarter NAV during lag",
+  "signal_channel": "derived NAV = re-mark last-printed floating-rate loan book for the HY-OAS credit-spread move (prior print -> quarter-end), models the OFFICIAL mark (smoothing 0.5, spread-duration 2.5y)",
+  "signal_to_price_latency": "NONE capturable: BDC price reprices contemporaneously with the spread move, and at no greater rate than zero-credit equity CEFs (generic risk-off), so no spread-driven lag to frontrun"
+ },
+ "panel": {
+  "bdcs": [
+   "ARCC",
+   "GBDC",
+   "OBDC",
+   "PSEC",
+   "FSK",
+   "MAIN"
+  ],
+  "quarters_per_bdc": {
+   "ARCC": 12,
+   "GBDC": 12,
+   "OBDC": 11,
+   "PSEC": 11,
+   "FSK": 12,
+   "MAIN": 12
+  },
+  "window": "2023-Q3 .. 2026-Q1 (NAV/holdings from primary 10-Q/10-K inline XBRL); spread FRED BAMLH0A0HYM2 2023-06..2026-06",
+  "N_bdc_quarter_events": 63,
+  "N_effective_independent_quarters": 11,
+  "filing_lag_days": "10-Q ~34-41d, 10-K ~49-59d (confirms the ~45d setup)"
+ },
+ "gate_amendment_logged": {
+  "locked_5pct_gate_fires": 1,
+  "why": "a 5% NAV move on a ~100%-L3 floating-rate book needs ~400bp of quarter-end spread move at smoothing0.5/dur2.5; largest QoQ HY-OAS move in 3yr was ~63bp -> locked gate is unreachable on the credit channel ex a GFC-scale event",
+  "bdc_scaled_gate_pct": 1.0,
+  "bdc_scaled_fires": 23,
+  "note": "scaled gate is a LABELED SECONDARY; the locked test is preserved and reported"
+ },
+ "results": {
+  "a_direction_hit_rate": {
+   "naive_all_events": 0.619,
+   "naive_n": 63,
+   "naive_sign_test_p": 0.0769,
+   "bdc_scaled_1pct_subset": 0.6956521739130435,
+   "bdc_scaled_n": 23,
+   "detrended_per_bdc": 0.6825,
+   "HONEST_quarter_clustered": 0.6364,
+   "HONEST_quarter_sign_test_p": 0.5488,
+   "bar": 0.65
+  },
+  "b_magnitude": {
+   "corr_derived_vs_realized": 0.16368148874280103,
+   "r2": 0.0267916297570597,
+   "detrended_corr": 0.2264
+  },
+  "c_convergence_and_pnl": {
+   "finding": "no capturable convergence: BDC price moves contemporaneously with spread (already priced), so the lag window holds no spread-driven gap to capture",
+   "contemporaneous_price_vs_spread_corr": {
+    "ARCC": -0.661,
+    "GBDC": -0.494,
+    "OBDC": -0.447,
+    "PSEC": 0.083,
+    "FSK": -0.483,
+    "MAIN": -0.699
+   },
+   "borrow_bidask": "moot (no edge); liquidity fine (ARCC b/a ~0.2%, PSEC ~0.4%); BDCs generally shortable but trade at discounts (long-side), no squeeze flag"
+  },
+  "placebo": {
+   "real_quarter_hit_rate": 0.6364,
+   "pct_of_random_shuffles_matching_or_beating": 0.218
+  }
+ },
+ "edge_A_minus_B": {
+  "edge_bdc": "NULL at honest N: 7/11 quarter-directions (63.6%), sign-test p=0.55, placebo 78th pctile, magnitude R^2=0.03",
+  "edge_control_ADX_USA": "zero by construction (daily NAV, no filing-lag NAV)",
+  "confound_check": "BDC price-vs-spread corr (ARCC -0.66, MAIN -0.70) does NOT exceed control CEFs (ADX -0.68, USA -0.82) -> the spread->price link is generic RISK-OFF beta, not a BDC-NAV computation edge",
+  "A_minus_B": "not positive / not significant"
+ },
+ "power_caveat": "2023-26 spreads were quiet: max QoQ HY-OAS move ~63bp; the famous Apr-2025 tariff spike (4.61) round-tripped to 2.96 by quarter-end so it never hit a printed mark. Effective independent N ~11 quarters. Low power to detect a credit-channel edge AND no edge detected.",
+ "confound_caveat": "idiosyncratic per-name credit marks (defaults/write-downs: PSEC -9.5%/qtr, FSK -6.2%/qtr) dominate the quarterly NAV move and are invisible to a broad spread index -> the spread channel is not where BDC NAV moves come from.",
+ "verdict": "\u00a77 FAILED. The aggregation/timing MOAT is real (quarterly lagged NAV, no continuous mark) but the spread-driven frontrun edge collapses to \"moat real but already priced\": the discount reprices with credit in real time and no faster than zero-credit equity CEFs, so edge(BDC)-edge(control) is not positive. Negative result is the finding."
+}

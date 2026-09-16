@@ -1,0 +1,464 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>lockup_expiry_scanner</title><style>
+body{margin:0;background:#0b0e12;color:#e8ebee;font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:26px 24px 90px}
+a{color:#8b7cf6} h1{font-size:23px;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:#7d858e;margin:0 0 20px;font-size:13px}
+h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:#7d858e;margin:24px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 10px;border-bottom:1px solid #242a31;text-align:left;vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#7d858e}
+.k{font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:20px}
+.k-generator{color:#c3b8fb;background:rgba(139,124,246,.15)}
+.k-detector{color:#eccb8a;background:rgba(217,164,65,.15)}
+.k-watcher{color:#8ee5c1;background:rgba(53,201,143,.15)}
+.k-evidence{color:#b3bcc6;background:rgba(138,147,158,.15)}
+.h-OK{color:#35c98f} .h-STALE{color:#d9a441} .h-ERROR{color:#e0736a} .h-NEVER_RUN{color:#8a939e}
+pre{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px;overflow-x:auto;font-size:12px;line-height:1.5}
+.panel{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px 18px;margin-bottom:12px}
+ul{margin:4px 0;padding-left:20px} li{margin-bottom:4px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+</style></head><body><div class="wrap"><h1>lockup_expiry_scanner</h1><p class="sub">registered capability · lockup_expiry_scanner</p><a href="signals.html">&larr; all signals</a><div class="panel" style="margin-top:10px"><span class="k k-generator">GENERATOR</span> &nbsp;<span class="h-NEVER_RUN"><b>NEVER_RUN</b></span> · last run <span class="mono">never</span></div><p>Stage 0b FLOW: the IPO/SPAC lock-up expiration forced-supply calendar.</p><form method="POST" action="/signals/run" style="margin:10px 0"><input type="hidden" name="name" value="lockup_expiry_scanner"><input name="symbol" placeholder="symbol (if applicable)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px"><input name="symbols" placeholder="universe, comma-sep (generators)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px;margin-left:6px"><button type="submit" style="background:#8b7cf6;color:#0b0e12;border:0;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;margin-left:6px">Run now</button></form><h2>Datasources</h2><ul><li>reference implementation: verticals/generators/lockup_expiry_scanner.py (see the code section for the feeds it touches)</li></ul><h2>Applies to</h2><ul><li><b>strategies:</b> value_band_entry</li></ul><h2>The code</h2><pre>&quot;&quot;&quot;lockup_expiry_scanner — Stage 0b FLOW: the IPO/SPAC lock-up expiration forced-supply calendar.
+
+A lock-up expiry is a DATED, price-INSENSITIVE forced-SUPPLY event. When a newly-public
+company IPOs, insiders / pre-IPO holders / VCs sign an underwriter lock-up (standard 180 days,
+sometimes 90/365) barring them from selling. On the expiry date that restriction lifts and a
+large locked share count can hit a thin public float for the first time — the mechanics are a
+pre-unlock drift-DOWN (holders front-run their own supply) and an unlock-DAY air-pocket. The
+trade is to buy the forced-seller washout, exactly the ADIG orphan-spin pattern in reverse-time:
+a mechanical, calendar-scheduled seller with no view on price.
+
+How it works (all free, no keys):
+  1. EDGAR EFTS full-text search for recent 424B4 (final IPO prospectus) filings over the last
+     ~200 days — each hit gives issuer, CIK, filing date (~= the IPO/pricing date).
+  2. Lock-up TERM: fetch the prospectus and parse the &quot;&lt;N&gt; days after the date of this prospectus&quot;
+     lock-up language (standard 180; 90/365 seen). If unparseable -&gt; DEFAULT 180, record flagged
+     lockup_days_estimated=True. unlock_date = ipo_date + lockup_days.
+  3. BUCKET on days-to-unlock: &#x27;imminent&#x27; = 0..21d (the actionable air-pocket window),
+     &#x27;upcoming&#x27; = 22..90d. Passed or &gt;90d are dropped.
+  4. Ticker resolved from EDGAR company_tickers.json (CIK-&gt;ticker); live price via yfinance for
+     CONTEXT only (optional, tolerates failure).
+
+Magnitude proxy (locked shares vs public float) is NOT cheaply available from the 424B4 cover in
+a machine-parseable way across issuers, so est_locked_pct_float is left None with a note — the DD
+step pulls the cover&#x27;s share counts / a later 10-Q shares-outstanding vs the IPO float. We do NOT
+fabricate the magnitude. Seed = EDGAR&#x27;s 424B4 stream; EXPAND (S-1/424B3 SPAC de-SPAC lockups,
+secondary-lockup tranches) in v2.
+
+    python3 verticals/generators/lockup_expiry_scanner.py
+Writes data/LOCKUP_EXPIRY.json. READ-ONLY — never places an order.
+&quot;&quot;&quot;
+from __future__ import annotations
+
+import datetime
+import json
+import re
+import urllib.parse
+import urllib.request
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+OUT = HERE / &quot;data&quot; / &quot;LOCKUP_EXPIRY.json&quot;
+HDRS = {&quot;User-Agent&quot;: &quot;signalos-research 4tripathy@gmail.com&quot;}
+
+LOOKBACK_DAYS = 200          # 424B4 filings this far back can still have a live/near lock-up
+DEFAULT_LOCKUP_DAYS = 180    # the standard underwriter lock-up; flagged when we fall back to it
+IMMINENT_MAX = 21            # 0..21 days to unlock = the actionable air-pocket window
+UPCOMING_MAX = 90            # 22..90 days = watch/pre-drift window
+MAX_PARSE = 60               # cap prospectus fetches (politeness / rate-limit) — newest first
+PRIOR_PERIODIC_YEARS = 1.0   # a 10-K/10-Q/20-F predating the 424B4 by &gt; this = NOT a fresh IPO
+BROKEN_IPO_PCT = 0.60        # current px &lt; this * IPO px = a badly broken IPO -&gt; value_trap flag
+
+
+def _get_json(url):
+    try:
+        with urllib.request.urlopen(urllib.request.Request(url, headers=HDRS), timeout=30) as r:
+            return json.load(r)
+    except Exception:
+        return {}
+
+
+def _submissions(cik10: str):
+    &quot;&quot;&quot;EDGAR submissions JSON for a 10-digit CIK. {} on any network/parse error.&quot;&quot;&quot;
+    return _get_json(f&quot;https://data.sec.gov/submissions/CIK{cik10}.json&quot;)
+
+
+def _ipo_eligibility(cik10: str, ipo_date: datetime.date):
+    &quot;&quot;&quot;Classify the issuer as fresh-IPO vs renamed-shell / established-follow-on.
+
+    The load-bearing discriminator is PRIOR PUBLIC-REPORTING HISTORY, not the name alone:
+      - a periodic report (10-K/10-Q/20-F) filed &gt; PRIOR_PERIODIC_YEARS before the 424B4 =&gt; the
+        issuer was ALREADY a reporting public company. If it ALSO carries a different former name
+        it&#x27;s a reverse-merger shell (Gemphire-&gt;NeuroBo-&gt;MetaVia: periodics back to 2016);
+        otherwise it&#x27;s an established-issuer follow-on / secondary (ProPetro, DAXOR). Both are
+        rejected — neither is a first-IPO lock-up.
+
+    A DIFFERENT former name WITHOUT prior periodic history is NOT a shell — it&#x27;s a legal-entity
+    re-org of a genuinely-fresh IPO (York Space Systems, ex-&#x27;Yellowstone Midco Holdings II, LLC&#x27;,
+    with no periodic filings predating its 424B4). Those PASS. Rejecting on formerNames alone
+    over-fired and killed real IPOs (York/YSS, EquipmentShare/EQPT).
+
+    Returns (is_ipo: bool, reject_reason: str|None). Network failure =&gt; (True, None): we do NOT
+    reject on missing data, only on positive evidence of a shell / follow-on.
+    &quot;&quot;&quot;
+    js = _submissions(cik10)
+    if not isinstance(js, dict) or not js:
+        return True, None                              # no evidence -&gt; don&#x27;t reject
+
+    def _norm(n: str):
+        n = re.sub(r&quot;[^a-z0-9 ]&quot;, &quot; &quot;, (n or &quot;&quot;).lower())
+        n = re.sub(r&quot;\b(inc|corp|corporation|ltd|llc|lp|plc|co|holdings?|company|group|the)\b&quot;, &quot; &quot;, n)
+        return re.sub(r&quot;\s+&quot;, &quot; &quot;, n).strip()
+    cur = _norm(js.get(&quot;name&quot;, &quot;&quot;))
+    former = js.get(&quot;formerNames&quot;) or []
+    diff_former = [str(f.get(&quot;name&quot;, &quot;&quot;)) for f in former
+                   if isinstance(f, dict) and _norm(f.get(&quot;name&quot;, &quot;&quot;)) and _norm(f.get(&quot;name&quot;, &quot;&quot;)) != cur]
+
+    cutoff = ipo_date - datetime.timedelta(days=int(365.25 * PRIOR_PERIODIC_YEARS))
+    recent = (js.get(&quot;filings&quot;) or {}).get(&quot;recent&quot;) or {}
+    forms = recent.get(&quot;form&quot;) or []
+    dates = recent.get(&quot;filingDate&quot;) or []
+    prior_periodic = None
+    for form, fd in zip(forms, dates):
+        if form in (&quot;10-K&quot;, &quot;10-Q&quot;, &quot;20-F&quot;, &quot;40-F&quot;, &quot;10-KSB&quot;, &quot;10-QSB&quot;):
+            try:
+                if datetime.date.fromisoformat(fd) &lt; cutoff:
+                    prior_periodic = (form, fd)
+                    break
+            except Exception:
+                continue
+
+    if prior_periodic:
+        form, fd = prior_periodic
+        if diff_former:
+            return False, (f&quot;renamed_shell (formerNames: {&#x27;, &#x27;.join(diff_former)}; &quot;
+                           f&quot;prior {form} {fd} predates IPO — a reverse-merger shell, not a first IPO)&quot;)
+        return False, f&quot;followon (prior {form} {fd} predates IPO — established reporting issuer)&quot;
+    return True, None
+
+
+def _efts_424b4(days=LOOKBACK_DAYS):
+    &quot;&quot;&quot;Recent final-IPO-prospectus (424B4) filings mentioning &#x27;lock-up&#x27;, newest first, paged.&quot;&quot;&quot;
+    end = datetime.date.today()
+    start = end - datetime.timedelta(days=days)
+    hits, seen = [], set()
+    for frm in (0, 100, 200):     # EFTS returns 100/page; 3 pages covers the 424B4 stream over ~200d
+        q = urllib.parse.urlencode({
+            &quot;forms&quot;: &quot;424B4&quot;, &quot;q&quot;: &#x27;&quot;lock-up&quot;&#x27;,
+            &quot;startdt&quot;: start.isoformat(), &quot;enddt&quot;: end.isoformat(), &quot;from&quot;: frm,
+        })
+        js = _get_json(f&quot;https://efts.sec.gov/LATEST/search-index?{q}&quot;)
+        page = js.get(&quot;hits&quot;, {}).get(&quot;hits&quot;, []) if isinstance(js, dict) else []
+        if not page:
+            break
+        for h in page:
+            _id = h.get(&quot;_id&quot;, &quot;&quot;)
+            if _id and _id not in seen:
+                seen.add(_id)
+                hits.append(h)
+    return hits
+
+
+def _cik_ticker_map():
+    &quot;&quot;&quot;CIK(10-digit str) -&gt; ticker from EDGAR&#x27;s company_tickers.json (tolerate failure).&quot;&quot;&quot;
+    js = _get_json(&quot;https://www.sec.gov/files/company_tickers.json&quot;)
+    out = {}
+    if isinstance(js, dict):
+        for v in js.values():
+            try:
+                out[str(v[&quot;cik_str&quot;]).zfill(10)] = v[&quot;ticker&quot;]
+            except Exception:
+                continue
+    return out
+
+
+def _prospectus_text(cik: str, _id: str):
+    &quot;&quot;&quot;Fetch + de-tag the 424B4 document body from an EFTS _id (&#x27;accession:filename&#x27;).&quot;&quot;&quot;
+    try:
+        acc, fn = _id.split(&quot;:&quot;)
+        accn = acc.replace(&quot;-&quot;, &quot;&quot;)
+        url = f&quot;https://www.sec.gov/Archives/edgar/data/{cik.lstrip(&#x27;0&#x27;)}/{accn}/{fn}&quot;
+        with urllib.request.urlopen(urllib.request.Request(url, headers=HDRS), timeout=45) as r:
+            html = r.read().decode(&quot;utf-8&quot;, &quot;ignore&quot;)
+        t = re.sub(r&quot;&lt;[^&gt;]+&gt;&quot;, &quot; &quot;, html)
+        return re.sub(r&quot;\s+&quot;, &quot; &quot;, t)
+    except Exception:
+        return &quot;&quot;
+
+
+# lock-up-day patterns in priority order. The standard underwriter clause is
+# &quot;...will not ... sell ... for a period of 180 days after the date of this prospectus&quot;.
+# We anchor the strongest patterns to lock-up / prospectus / closing language so a bare
+# &quot;N days&quot; (a quiet period, a notice window, a settlement cycle) can&#x27;t masquerade as the term.
+_LOCKUP_PATS = [
+    r&quot;lock-?up\s+(?:agreement|period)[^.]{0,160}?(\d{2,3})[\s-]*days&quot;,
+    r&quot;(?:for\s+a\s+period\s+of\s+)?(\d{2,3})[\s-]*days\s+after\s+the\s+date\s+of\s+this\s+prospectus&quot;,
+    r&quot;(\d{2,3})[\s-]*days\s+after\s+(?:the\s+)?(?:date\s+of\s+)?(?:the\s+)?closing&quot;,
+    r&quot;period\s+of\s+(\d{2,3})[\s-]*days&quot;,
+    r&quot;(\d{2,3})[\s-]*day\s+lock-?up&quot;,
+]
+
+
+def _parse_lockup_days(text: str):
+    &quot;&quot;&quot;Return (days, estimated) — parsed lock-up term or (DEFAULT, True) if unfound.
+
+    Only accepts plausible terms {60,75,90,120,180,270,360,365}; the loose &#x27;N days after
+    prospectus&#x27; clause can also catch quiet-period / notice windows, so we constrain to real
+    lock-up lengths. 75d matters — small-cap / shelf-takedown lock-ups run shorter than the
+    180d standard and a hard-coded 180 mis-dates the unlock (the MetaVia trap: 75d, not 180d).
+    &quot;&quot;&quot;
+    plausible = {60, 75, 90, 120, 180, 270, 360, 365}
+    for p in _LOCKUP_PATS:
+        for m in re.finditer(p, text, re.I):
+            try:
+                d = int(m.group(1))
+            except Exception:
+                continue
+            if d in plausible:
+                return d, False
+    return DEFAULT_LOCKUP_DAYS, True
+
+
+def _parse_ipo_price(text: str):
+    &quot;&quot;&quot;Best-effort IPO price/share from the 424B4 cover (&#x27;initial public offering price ... $X.XX&#x27;).
+    Returns float or None.&quot;&quot;&quot;
+    for p in (
+        r&quot;initial\s+public\s+offering\s+price\s+(?:of|is|was|per\s+share\s+(?:of|is|was)?)?\s*\$?\s*([0-9]{1,4}\.[0-9]{2})&quot;,
+        r&quot;public\s+offering\s+price\s+of\s+\$?\s*([0-9]{1,4}\.[0-9]{2})\s+per\s+share&quot;,
+        r&quot;\$?\s*([0-9]{1,4}\.[0-9]{2})\s+per\s+share&quot;,
+    ):
+        m = re.search(p, text, re.I)
+        if m:
+            try:
+                v = float(m.group(1))
+                if 0.10 &lt;= v &lt;= 1000:
+                    return round(v, 2)
+            except Exception:
+                continue
+    return None
+
+
+def _litigation_probe(issuer: str):
+    &quot;&quot;&quot;Securities-litigation flag — DELIBERATELY a no-op from EDGAR alone.
+
+    HONESTY NOTE (verified, do not re-add a naive EFTS query): confirming an ACTIVE securities-
+    fraud class action needs docket data that lives at the COURTS (CourtListener/RECAP), not
+    EDGAR. Every EFTS full-text attempt from here is a false-positive machine: &#x27;class action&#x27; is
+    risk-factor boilerplate in essentially every prospectus, and EFTS treats multiple quoted
+    phrases as OR (not AND) — so &#x27;&quot;BitGo&quot; &quot;securities class action&quot;&#x27; returns hundreds of hits
+    that merely mention BitGo, while a single combined phrase 500-errors. Emitting a warning off
+    that would flag EVERY name and mean nothing.
+
+    So this returns no hit by design. The RELIABLE value-trap tell we DO fire on is the broken-IPO
+    price ratio (below). Confirming litigation is the DD step&#x27;s job — the litigation-screen
+    connector (CourtListener) runs a real docket search per principal. Returns (False, None).&quot;&quot;&quot;
+    return False, None
+
+
+def _yf_price(ticker: str):
+    &quot;&quot;&quot;Live-ish last price for context only. Optional; tolerate any failure.&quot;&quot;&quot;
+    try:
+        import yfinance as yf
+        fi = yf.Ticker(ticker).fast_info
+        px = fi.get(&quot;last_price&quot;) or fi.get(&quot;lastPrice&quot;)
+        return round(float(px), 2) if px else None
+    except Exception:
+        return None
+
+
+def scan(with_prices: bool = True) -&gt; dict:
+    today = datetime.date.today()
+    hits = _efts_424b4()
+    tick = _cik_ticker_map()
+
+    # Dedup by CIK (keep the newest 424B4 per issuer) and pre-filter to plausible candidates:
+    # an IPO can be in-window only if SOME lock-up term in {90..365} lands its unlock in
+    # [today .. today+UPCOMING]. Concretely ipo_date must be within [today-365 .. today-69].
+    def _fdate(h):
+        return (h.get(&quot;_source&quot;, {}) or {}).get(&quot;file_date&quot;, &quot;&quot;)
+    hits.sort(key=_fdate, reverse=True)
+
+    cands, seen_cik = [], set()
+    for h in hits:
+        s = h.get(&quot;_source&quot;, {}) or {}
+        ciks = s.get(&quot;ciks&quot;) or ([s.get(&quot;cik&quot;)] if s.get(&quot;cik&quot;) else [])
+        cik10 = str(ciks[0]).zfill(10) if ciks else None
+        fdate = s.get(&quot;file_date&quot;)
+        if not cik10 or not fdate or cik10 in seen_cik:
+            continue
+        seen_cik.add(cik10)
+        try:
+            ipo_date = datetime.date.fromisoformat(fdate)
+        except Exception:
+            continue
+        age = (today - ipo_date).days
+        # shortest plausible term = 90d (unlock still ahead needs age&lt;=90+UPCOMING);
+        # longest = 365d (unlock already ahead needs age&lt;=365). age&gt;=69 so a 90d lock isn&#x27;t stale.
+        if age &lt; 90 - UPCOMING_MAX or age &gt; 365:
+            continue
+        cands.append((ipo_date, cik10, h, s))
+
+    # Parse-priority: the closer an IPO&#x27;s DEFAULT-180 unlock is to the actionable window, the more
+    # a real term matters — parse those first so the budget lands on likely IN-WINDOW names.
+    def _prio(c):
+        ipo_date = c[0]
+        return abs(((ipo_date + datetime.timedelta(days=DEFAULT_LOCKUP_DAYS)) - today).days)
+    cands.sort(key=_prio)
+
+    imminent, upcoming, rejected, parsed = [], [], [], 0
+    for ipo_date, cik10, h, s in cands:
+        name = (s.get(&quot;display_names&quot;) or [&quot;&quot;])[0]
+        mt = re.search(r&quot;\(([A-Z][A-Z.\-]{0,5})\)&quot;, name)
+        ticker = tick.get(cik10) or (mt.group(1) if mt else None)
+        issuer = re.sub(r&quot;\s*\([^)]*\)\s*&quot;, &quot; &quot;, name).strip()
+
+        # FIX 1 &amp; 3: reject renamed shells (formerNames) and established-issuer follow-ons
+        # (a periodic report predating the 424B4). Positive evidence only — missing data passes.
+        is_ipo, reject_reason = _ipo_eligibility(cik10, ipo_date)
+        if not is_ipo:
+            rejected.append({
+                &quot;issuer&quot;: issuer[:60], &quot;ticker&quot;: ticker, &quot;cik&quot;: cik10,
+                &quot;ipo_date&quot;: ipo_date.isoformat(), &quot;is_ipo&quot;: False,
+                &quot;reject_reason&quot;: reject_reason,
+            })
+            continue
+
+        lockup_days, estimated = DEFAULT_LOCKUP_DAYS, True
+        ipo_px = None
+        if parsed &lt; MAX_PARSE:
+            txt = _prospectus_text(cik10, h.get(&quot;_id&quot;, &quot;&quot;))
+            if txt:
+                lockup_days, estimated = _parse_lockup_days(txt)
+                ipo_px = _parse_ipo_price(txt)
+                parsed += 1
+
+        unlock = ipo_date + datetime.timedelta(days=lockup_days)
+        dte = (unlock - today).days
+        if dte &lt; 0:
+            # a PARSED term whose unlock already passed (the MetaVia 75d trap: expired in April) —
+            # bucket it as rejected/term_expired so it&#x27;s visible, not silently dropped.
+            rejected.append({
+                &quot;issuer&quot;: issuer[:60], &quot;ticker&quot;: ticker, &quot;cik&quot;: cik10,
+                &quot;ipo_date&quot;: ipo_date.isoformat(), &quot;is_ipo&quot;: True,
+                &quot;lockup_days&quot;: lockup_days, &quot;lockup_days_estimated&quot;: estimated,
+                &quot;unlock_date&quot;: unlock.isoformat(), &quot;days_to_unlock&quot;: dte,
+                &quot;reject_reason&quot;: f&quot;term_expired (unlock {unlock.isoformat()} already passed)&quot;,
+            })
+            continue
+        if dte &gt; UPCOMING_MAX:
+            continue
+
+        # SPAC IPO units/warrants: the OPERATING-company insider air-pocket applies at DE-SPAC,
+        # not at the SPAC&#x27;s own IPO lock-up — flag so the reader down-weights these (they dominate
+        # the 424B4 stream by count but aren&#x27;t the classic forced-seller washout).
+        is_spac = bool(re.search(r&quot;acquisition\s+corp|acquisition\s+ltd&quot;, issuer, re.I))
+        is_unit = bool(ticker and re.search(r&quot;(?:U|W|-WT|-UN|R)$&quot;, ticker))
+
+        price = _yf_price(ticker) if (with_prices and ticker) else None
+
+        # FIX 4: QUALITY / VALUE-TRAP FLAG (a warning, not a drop). A badly broken IPO
+        # (px &lt; BROKEN_IPO_PCT of the IPO price) or a litigation hit surfaces WITH a warning so a
+        # BitGo-style air-pocket isn&#x27;t mistaken for a clean buy. Row is kept — this informs the DD.
+        broken_pct = None
+        value_trap_risk = False
+        trap_reasons = []
+        if price and ipo_px:
+            ratio = price / ipo_px
+            # sanity-guard the parsed IPO price: a ratio &gt;3x almost always means the cover parser
+            # grabbed a wrong &#x27;$X.XX per share&#x27; figure (par value, option strike) rather than the
+            # real IPO price (York/YSS parsed $0.35 -&gt; a bogus 55x). Don&#x27;t emit a garbage ratio.
+            if 0 &lt; ratio &lt;= 3:
+                broken_pct = round(ratio, 3)
+                if broken_pct &lt; BROKEN_IPO_PCT:
+                    value_trap_risk = True
+                    trap_reasons.append(f&quot;broken IPO: ${price} vs ${ipo_px} IPO ({int(broken_pct*100)}% of issue)&quot;)
+        lit_hit, lit_note = _litigation_probe(issuer)
+        if lit_hit:
+            value_trap_risk = True
+            trap_reasons.append(lit_note)
+
+        rec = {
+            &quot;issuer&quot;: issuer[:60], &quot;ticker&quot;: ticker, &quot;cik&quot;: cik10,
+            &quot;ipo_date&quot;: ipo_date.isoformat(), &quot;is_ipo&quot;: True,
+            &quot;lockup_days&quot;: lockup_days, &quot;lockup_days_parsed&quot;: (not estimated),
+            &quot;lockup_days_estimated&quot;: estimated,
+            &quot;unlock_date&quot;: unlock.isoformat(), &quot;days_to_unlock&quot;: dte,
+            &quot;spac_or_unit&quot;: is_spac or is_unit,
+            &quot;est_locked_pct_float&quot;: None,          # NOT fabricated — DD pulls cover shares vs float
+            &quot;ipo_price&quot;: ipo_px, &quot;price&quot;: price, &quot;broken_ipo_pct&quot;: broken_pct,
+            &quot;value_trap_risk&quot;: value_trap_risk,
+            &quot;value_trap_reason&quot;: (&quot;; &quot;.join(trap_reasons) if trap_reasons else None),
+            &quot;note&quot;: (&quot;DEFAULT 180d lock-up (prospectus term not parsed) — verify&quot;
+                     if estimated else f&quot;lock-up term ({lockup_days}d) parsed from the 424B4&quot;)
+                    + (&quot;; SPAC/unit — air-pocket applies at DE-SPAC not this IPO, down-weight&quot; if (is_spac or is_unit) else &quot;&quot;)
+                    + (&quot;; VALUE-TRAP RISK — surfaced by magnitude but flagged: &quot; + &quot;; &quot;.join(trap_reasons) if value_trap_risk else &quot;&quot;),
+        }
+        (imminent if dte &lt;= IMMINENT_MAX else upcoming).append(rec)
+
+    # operating companies first (the real air-pocket), then by nearest unlock
+    imminent.sort(key=lambda r: (r[&quot;spac_or_unit&quot;], r[&quot;days_to_unlock&quot;]))
+    upcoming.sort(key=lambda r: (r[&quot;spac_or_unit&quot;], r[&quot;days_to_unlock&quot;]))
+    return {
+        &quot;asof&quot;: today.isoformat(), &quot;n_scanned&quot;: len(seen_cik),
+        &quot;n_prospectus_parsed&quot;: parsed,
+        &quot;imminent&quot;: imminent, &quot;upcoming&quot;: upcoming, &quot;rejected&quot;: rejected,
+        &quot;note&quot;: &quot;FLOW class — IPO lock-up expiry = a DATED, price-INSENSITIVE forced-SUPPLY event. &quot;
+                &quot;Standard 180d (90/365 seen). Mechanics: pre-unlock drift-down (holders front-run &quot;
+                &quot;their own supply) + an unlock-DAY air-pocket; the trade is BUYING the forced-seller &quot;
+                &quot;washout, not shorting into it (that&#x27;s crowded). &#x27;imminent&#x27; = 0-21d to unlock (the &quot;
+                &quot;actionable window), &#x27;upcoming&#x27; = 22-90d (pre-drift watch). Source = EDGAR 424B4 &quot;
+                &quot;full-text stream; lockup_days parsed from the prospectus where possible, else &quot;
+                &quot;DEFAULT 180 with lockup_days_estimated=True. est_locked_pct_float is None — the &quot;
+                &quot;magnitude (locked shares vs public float) is a DD pull from the cover / a later &quot;
+                &quot;10-Q, NOT fabricated. IPO-eligibility is enforced from the EDGAR submissions JSON: &quot;
+                &quot;renamed shells (formerNames non-empty, e.g. Gemphire-&gt;NeuroBo-&gt;MetaVia) and &quot;
+                &quot;established-issuer follow-ons (a 10-K/10-Q/20-F predating the 424B4 by &gt;1yr, e.g. &quot;
+                &quot;ProPetro) are moved to &#x27;rejected&#x27; with a reason, not surfaced as IPOs. A parsed &quot;
+                &quot;term whose unlock already passed goes to &#x27;rejected&#x27;/term_expired. Surviving names &quot;
+                &quot;carry value_trap_risk: a badly broken IPO (px &lt; 60% of issue) or a securities-&quot;
+                &quot;litigation EFTS hit is flagged (a WARNING, the row is kept — it informs the DD, it &quot;
+                &quot;is not deleted). EXPAND: SPAC de-SPAC 424B3 lockups + secondary-lockup tranches. &quot;
+                &quot;READ-ONLY; times the trade, never places it.&quot;,
+    }
+
+
+def main():
+    res = scan()
+    OUT.write_text(json.dumps(res, indent=1))
+    print(f&quot;=== IPO LOCK-UP EXPIRY SCANNER  {res[&#x27;asof&#x27;]}  &quot;
+          f&quot;({res[&#x27;n_scanned&#x27;]} recent IPOs scanned, {res[&#x27;n_prospectus_parsed&#x27;]} prospectuses parsed) ===&quot;)
+    print(f&quot;  IMMINENT (unlock in 0-{IMMINENT_MAX}d — the air-pocket window; buy the forced-seller washout):&quot;)
+    if not res[&quot;imminent&quot;]:
+        print(&quot;    (none in window)&quot;)
+    for r in res[&quot;imminent&quot;]:
+        px = f&quot;${r[&#x27;price&#x27;]}&quot; if r[&quot;price&quot;] else &quot;px?&quot;
+        est = &quot; ~est180&quot; if r[&quot;lockup_days_estimated&quot;] else &quot;&quot;
+        sp = &quot; [SPAC/unit]&quot; if r[&quot;spac_or_unit&quot;] else &quot;&quot;
+        vt = &quot;  ** VALUE-TRAP: &quot; + (r.get(&quot;value_trap_reason&quot;) or &quot;&quot;) if r.get(&quot;value_trap_risk&quot;) else &quot;&quot;
+        tk = r[&quot;ticker&quot;] or &quot;?&quot;
+        print(f&quot;    {tk:6} {r[&#x27;issuer&#x27;][:34]:34} unlock {r[&#x27;unlock_date&#x27;]} ({r[&#x27;days_to_unlock&#x27;]:+d}d, &quot;
+              f&quot;{r[&#x27;lockup_days&#x27;]}d{est})  IPO {r[&#x27;ipo_date&#x27;]}  {px}{sp}{vt}&quot;)
+    ops = [r for r in res[&quot;upcoming&quot;] if not r[&quot;spac_or_unit&quot;]]
+    print(f&quot;  UPCOMING (22-{UPCOMING_MAX}d — pre-drift watch; operating cos shown, SPAC/units hidden):&quot;)
+    for r in ops[:15]:
+        est = &quot; ~est180&quot; if r[&quot;lockup_days_estimated&quot;] else &quot;&quot;
+        tk = r[&quot;ticker&quot;] or &quot;?&quot;
+        print(f&quot;    {tk:6} {r[&#x27;issuer&#x27;][:34]:34} unlock {r[&#x27;unlock_date&#x27;]} ({r[&#x27;days_to_unlock&#x27;]:+d}d, &quot;
+              f&quot;{r[&#x27;lockup_days&#x27;]}d{est})&quot;)
+    if len(ops) &gt; 15:
+        print(f&quot;    ... +{len(ops) - 15} more operating-co upcoming&quot;)
+    n_spac_up = len(res[&quot;upcoming&quot;]) - len(ops)
+    if n_spac_up:
+        print(f&quot;    (+{n_spac_up} SPAC/unit upcoming suppressed — in JSON, down-weighted)&quot;)
+    rej = res.get(&quot;rejected&quot;, [])
+    print(f&quot;  REJECTED (not a fresh-IPO first lock-up — {len(rej)}):&quot;)
+    for r in rej[:20]:
+        tk = r.get(&quot;ticker&quot;) or &quot;?&quot;
+        print(f&quot;    {tk:6} {r[&#x27;issuer&#x27;][:34]:34} IPO {r[&#x27;ipo_date&#x27;]}  &lt;- {r.get(&#x27;reject_reason&#x27;)}&quot;)
+    if len(rej) &gt; 20:
+        print(f&quot;    ... +{len(rej) - 20} more rejected&quot;)
+    print(f&quot;[-&gt; {OUT.name}]&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</pre></div></body></html>

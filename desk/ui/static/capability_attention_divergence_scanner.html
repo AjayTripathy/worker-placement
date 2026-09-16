@@ -1,0 +1,131 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>attention_divergence_scanner</title><style>
+body{margin:0;background:#0b0e12;color:#e8ebee;font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:26px 24px 90px}
+a{color:#8b7cf6} h1{font-size:23px;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:#7d858e;margin:0 0 20px;font-size:13px}
+h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:#7d858e;margin:24px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 10px;border-bottom:1px solid #242a31;text-align:left;vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#7d858e}
+.k{font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:20px}
+.k-generator{color:#c3b8fb;background:rgba(139,124,246,.15)}
+.k-detector{color:#eccb8a;background:rgba(217,164,65,.15)}
+.k-watcher{color:#8ee5c1;background:rgba(53,201,143,.15)}
+.k-evidence{color:#b3bcc6;background:rgba(138,147,158,.15)}
+.h-OK{color:#35c98f} .h-STALE{color:#d9a441} .h-ERROR{color:#e0736a} .h-NEVER_RUN{color:#8a939e}
+pre{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px;overflow-x:auto;font-size:12px;line-height:1.5}
+.panel{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px 18px;margin-bottom:12px}
+ul{margin:4px 0;padding-left:20px} li{margin-bottom:4px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+</style></head><body><div class="wrap"><h1>attention_divergence_scanner</h1><p class="sub">registered capability · attention_divergence_scanner</p><a href="signals.html">&larr; all signals</a><div class="panel" style="margin-top:10px"><span class="k k-generator">GENERATOR</span> &nbsp;<span class="h-NEVER_RUN"><b>NEVER_RUN</b></span> · last run <span class="mono">never</span></div><p>Stage 0b generator: ATTENTION anomalies across the research universe</p><form method="POST" action="/signals/run" style="margin:10px 0"><input type="hidden" name="name" value="attention_divergence_scanner"><input name="symbol" placeholder="symbol (if applicable)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px"><input name="symbols" placeholder="universe, comma-sep (generators)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px;margin-left:6px"><button type="submit" style="background:#8b7cf6;color:#0b0e12;border:0;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;margin-left:6px">Run now</button></form><h2>Datasources</h2><ul><li>reference implementation: verticals/generators/attention_divergence_scanner.py (see the code section for the feeds it touches)</li></ul><h2>Applies to</h2><ul><li><b>strategies:</b> value_band_entry</li></ul><h2>The code</h2><pre>&quot;&quot;&quot;attention_divergence_scanner — Stage 0b generator: ATTENTION anomalies across the research universe
+(Wikipedia pageviews, the backtested instrument from the luxury-heat work).
+
+Generalizes the BRBY method: per name, YoY change in quarterly Wikipedia attention, z-scored across the
+universe. HONESTY (from the luxury backtest): attention correlates with fundamentals only MODESTLY
+(~0.4-0.5 ex-outliers) and has NO print-trading edge (priced-in test was NULL) — so anomalies here are
+diligence pointers, not signals. The demand-vs-drama disambiguation (search-up/news-down) needs the Google
+Trends leg, which rate-limits — flagged as the MANUAL second step on any anomaly worth chasing.
+
+Universe = research_ledger names (their wiki articles resolved via opensearch, cached).
+
+  python3 verticals/generators/attention_divergence_scanner.py
+Writes data/ATTENTION_ANOMALIES.json. READ-ONLY.
+&quot;&quot;&quot;
+from __future__ import annotations
+import json, datetime, statistics, urllib.parse, urllib.request
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[1]
+CACHE = HERE / &quot;data&quot; / &quot;wiki_title_cache.json&quot;
+OUT = HERE / &quot;data&quot; / &quot;ATTENTION_ANOMALIES.json&quot;
+UA = {&quot;User-Agent&quot;: &quot;signalos-research/1.0 (private research)&quot;}
+
+
+def _get(url):
+    try:
+        req = urllib.request.Request(url, headers=UA)
+        with urllib.request.urlopen(req, timeout=30) as r:
+            return json.load(r)
+    except Exception:
+        return None
+
+
+def _resolve_title(name: str, cache: dict) -&gt; str | None:
+    if name in cache:
+        return cache[name]
+    q = urllib.parse.urlencode({&quot;action&quot;: &quot;opensearch&quot;, &quot;search&quot;: name, &quot;limit&quot;: 1, &quot;format&quot;: &quot;json&quot;})
+    d = _get(f&quot;https://en.wikipedia.org/w/api.php?{q}&quot;)
+    title = (d[1][0].replace(&quot; &quot;, &quot;_&quot;) if d and d[1] else None)
+    cache[name] = title
+    return title
+
+
+def _monthly(title: str) -&gt; dict:
+    end = datetime.date.today().strftime(&quot;%Y%m%d&quot;) + &quot;00&quot;
+    d = _get(f&quot;https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/&quot;
+             f&quot;all-access/user/{urllib.parse.quote(title)}/monthly/2023010100/{end}&quot;)
+    return {f&quot;{i[&#x27;timestamp&#x27;][:4]}-{i[&#x27;timestamp&#x27;][4:6]}&quot;: i[&quot;views&quot;] for i in (d or {}).get(&quot;items&quot;, [])}
+
+
+def scan() -&gt; dict:
+    led = json.loads((ROOT / &quot;desk&quot; / &quot;data&quot; / &quot;research_ledger.json&quot;).read_text()).get(&quot;names&quot;, [])
+    cache = json.loads(CACHE.read_text()) if CACHE.exists() else {}
+    today = datetime.date.today()
+    rows = []
+    for n in led:
+        name = n.get(&quot;name&quot;) or n[&quot;ticker&quot;]
+        title = _resolve_title(name.split(&quot;(&quot;)[0].strip(), cache)
+        if not title:
+            continue
+        m = _monthly(title)
+        if len(m) &lt; 15:
+            continue
+        q = {}
+        for ym, v in m.items():
+            key = f&quot;{ym[:4]}Q{(int(ym[5:7]) - 1) // 3 + 1}&quot;
+            q.setdefault(key, []).append(v)
+        qa = {k: statistics.mean(v) for k, v in q.items()}
+        # drop the CURRENT in-progress quarter — 1-2 days of data compared as a full quarter fabricates -95% &quot;declines&quot;
+        now_q = f&quot;{today.year}Q{(today.month - 1) // 3 + 1}&quot;
+        qa.pop(now_q, None)
+        ks = sorted(qa)
+        if len(ks) &lt; 6:
+            continue
+        cur, prior = ks[-1], f&quot;{int(ks[-1][:4]) - 1}{ks[-1][4:]}&quot;
+        prev, prev_prior = ks[-2], f&quot;{int(ks[-2][:4]) - 1}{ks[-2][4:]}&quot;
+        if prior not in qa or prev_prior not in qa or not qa[prior] or not qa[prev_prior]:
+            continue
+        yoy = (qa[cur] / qa[prior] - 1) * 100
+        yoy_prev = (qa[prev] / qa[prev_prior] - 1) * 100
+        rows.append({&quot;ticker&quot;: n[&quot;ticker&quot;], &quot;name&quot;: name[:40], &quot;wiki&quot;: title,
+                     &quot;yoy_pct&quot;: round(yoy, 1), &quot;accel_pp&quot;: round(yoy - yoy_prev, 1),
+                     &quot;views_mo&quot;: round(qa[cur])})
+    CACHE.write_text(json.dumps(cache))
+    if len(rows) &gt;= 6:
+        mu = statistics.mean(r[&quot;accel_pp&quot;] for r in rows)
+        sd = statistics.pstdev(r[&quot;accel_pp&quot;] for r in rows) or 1
+        for r in rows:
+            r[&quot;z&quot;] = round((r[&quot;accel_pp&quot;] - mu) / sd, 2)
+    rows.sort(key=lambda r: -r[&quot;accel_pp&quot;])
+    return {&quot;asof&quot;: today.isoformat(), &quot;n_names&quot;: len(rows), &quot;hot&quot;: rows[:10], &quot;cold&quot;: rows[-8:][::-1],
+            &quot;note&quot;: &quot;diligence pointers only (backtest: ~0.4-0.5 corr to fundamentals, NULL print edge); demand-vs-drama check (search-up/news-down) = manual Trends step on anything worth chasing&quot;}
+
+
+def main():
+    res = scan()
+    print(f&quot;=== ATTENTION-DIVERGENCE SCANNER  {res[&#x27;asof&#x27;]}  ({res[&#x27;n_names&#x27;]} ledger names with wiki series) ===&quot;)
+    print(&quot;  HOT (attention accelerating):&quot;)
+    for r in res[&quot;hot&quot;]:
+        print(f&quot;   {r[&#x27;ticker&#x27;]:&lt;9} {r[&#x27;name&#x27;]:&lt;38} yoy {r[&#x27;yoy_pct&#x27;]:+8.1f}%  accel {r[&#x27;accel_pp&#x27;]:+8.1f}pp  z{r.get(&#x27;z&#x27;, 0):+5.1f}&quot;)
+    print(&quot;  COLD (attention rolling over):&quot;)
+    for r in res[&quot;cold&quot;]:
+        print(f&quot;   {r[&#x27;ticker&#x27;]:&lt;9} {r[&#x27;name&#x27;]:&lt;38} yoy {r[&#x27;yoy_pct&#x27;]:+8.1f}%  accel {r[&#x27;accel_pp&#x27;]:+8.1f}pp  z{r.get(&#x27;z&#x27;, 0):+5.1f}&quot;)
+    print(f&quot;  {res[&#x27;note&#x27;]}&quot;)
+    OUT.write_text(json.dumps(res, indent=1))
+    print(f&quot;[-&gt; {OUT.name}]&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</pre></div></body></html>

@@ -1,0 +1,291 @@
+<title>Centuri (CTRI) — Court Deck</title>
+<style>
+  :root{
+    --ink:#1b1d1f; --muted:#5d6167; --faint:#8d9197; --rule:#dfddd6;
+    --paper:#fffefb; --ground:#f2f0eb;
+    --break:#8a3324; --break-bg:#f6ece8;
+    --floor:#2e5e4e; --floor-bg:#e9f2ee;
+    --rung:#2b4a6f; --rung-bg:#e9eef5;
+  }
+  :root[data-theme="dark"], :root[data-theme="dark"] body{ color-scheme:dark; }
+  @media (prefers-color-scheme: dark){
+    :root{ --ink:#e8e6e1; --muted:#a5a9ae; --faint:#7d8187; --rule:#3a3c3e;
+      --paper:#232527; --ground:#1a1c1e;
+      --break:#d08a72; --break-bg:#3a2b24; --floor:#8fc0ad; --floor-bg:#24332d;
+      --rung:#9db8d8; --rung-bg:#263241; }
+  }
+  :root[data-theme="light"]{ --ink:#1b1d1f; --muted:#5d6167; --faint:#8d9197; --rule:#dfddd6;
+      --paper:#fffefb; --ground:#f2f0eb; --break:#8a3324; --break-bg:#f6ece8;
+      --floor:#2e5e4e; --floor-bg:#e9f2ee; --rung:#2b4a6f; --rung-bg:#e9eef5; }
+  :root[data-theme="dark"]{ --ink:#e8e6e1; --muted:#a5a9ae; --faint:#7d8187; --rule:#3a3c3e;
+      --paper:#232527; --ground:#1a1c1e; --break:#d08a72; --break-bg:#3a2b24;
+      --floor:#8fc0ad; --floor-bg:#24332d; --rung:#9db8d8; --rung-bg:#263241; }
+  body{font-family:Charter,Georgia,serif;color:var(--ink);background:var(--ground);margin:0;padding:0 16px;line-height:1.5;font-size:16.5px;}
+  .deck{max-width:840px;margin:0 auto;padding:40px 0 80px;}
+  .slide{background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:32px 38px 28px;margin:0 0 22px;position:relative;}
+  .sno{position:absolute;top:15px;right:20px;font-family:system-ui,sans-serif;font-size:11px;letter-spacing:.12em;color:var(--faint);}
+  .kicker{font-family:system-ui,sans-serif;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--rung);margin:0 0 10px;font-weight:600;}
+  h1{font-size:32px;line-height:1.12;margin:0 0 12px;text-wrap:balance;font-weight:700;}
+  h2{font-size:23px;line-height:1.2;margin:0 0 12px;text-wrap:balance;font-weight:700;}
+  h3{font-size:16.5px;margin:20px 0 6px;}
+  p{margin:0 0 12px;}
+  .big{font-size:18.5px;line-height:1.45;}
+  .fine{font-size:13px;color:var(--muted);}
+  .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px 22px;margin:14px 0 4px;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px 22px;margin:14px 0 4px;}
+  .cell{border-top:2px solid var(--ink);padding-top:8px;}
+  .cell .h{font-family:system-ui,sans-serif;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);font-weight:600;margin:0 0 4px;}
+  .cell .v{font-size:16.5px;font-weight:600;font-variant-numeric:tabular-nums;}
+  .cell .s{font-size:12.5px;color:var(--muted);}
+  .tbl{overflow-x:auto;}
+  table{border-collapse:collapse;width:100%;font-family:system-ui,sans-serif;font-size:13px;font-variant-numeric:tabular-nums;}
+  th{text-align:left;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);font-weight:600;padding:5px 12px 5px 0;border-bottom:1px solid var(--ink);}
+  td{padding:7px 12px 7px 0;border-bottom:1px solid var(--rule);vertical-align:top;}
+  td.n{text-align:right;white-space:nowrap;} th.n{text-align:right;}
+  .callout{border-left:3px solid var(--floor);background:var(--floor-bg);padding:12px 16px;margin:14px 0;font-size:14.5px;}
+  .warnout{border-left:3px solid var(--break);background:var(--break-bg);padding:12px 16px;margin:14px 0;font-size:14.5px;}
+  .scale{margin:18px 0 6px;overflow-x:auto;}
+  .scale svg{display:block;min-width:640px;}
+  .ax{stroke:var(--rule);stroke-width:1.5;}
+  .tick-r{stroke:var(--rung);stroke-width:3;}
+  .tick-f{stroke:var(--floor);stroke-width:3;}
+  .tick-s{fill:var(--break);}
+  .lb{font:600 11.5px system-ui,sans-serif;fill:var(--ink);}
+  .lb2{font:500 11px system-ui,sans-serif;fill:var(--muted);}
+  .legend{display:flex;gap:18px;flex-wrap:wrap;font-family:system-ui,sans-serif;font-size:12px;color:var(--muted);margin:4px 0 0;}
+  .sw{display:inline-block;width:12px;height:4px;border-radius:2px;vertical-align:middle;margin-right:5px;}
+  .tag{display:inline-block;font-family:system-ui,sans-serif;font-size:10.5px;font-weight:600;letter-spacing:.07em;text-transform:uppercase;padding:2px 8px;border-radius:3px;margin-right:6px;}
+  .t-ok{color:var(--floor);background:var(--floor-bg);}
+  .t-no{color:var(--break);background:var(--break-bg);}
+  .t-mid{color:var(--rung);background:var(--rung-bg);}
+  ul{margin:0 0 12px;padding-left:20px;} li{margin:0 0 7px;}
+</style>
+<div class="deck">
+
+<div class="slide">
+  <span class="sno">01</span>
+  <p class="kicker">Internal research · August 5, 2026 · full review of the August 4 break</p>
+  <h1>Centuri Holdings (CTRI): a utility-infrastructure contractor that beat by $126M, raised guidance, grew backlog 21% — and fell 21.5%, because the market finally priced what the income statement shows: flat operating income on +32% revenue</h1>
+  <p class="big">Verdict <b>5 out of 10</b>. The sell-off is a genuine de-rating, and our review ruled the de-rating <b>correct</b> — so this is <b>not a buy at market</b>. What it earns instead is a below-market limit ladder starting 10% lower, at the activist holder's own verified cost basis, plus a separate add that opens only if the November quarter proves the margins. Every order price, trigger, and kill condition is set in advance and dated.</p>
+  <div class="grid">
+    <div class="cell"><p class="h">Last close · Aug 4</p><p class="v">$21.88 · −21.5%</p><p class="s">5.51M shares traded vs 1.58M daily average; closed 15c off the session low</p></div>
+    <div class="cell"><p class="h">Probability-weighted fair value</p><p class="v">$26.31</p><p class="s">bear $17.00 (35%) · base $28.00 (45%) · bull $38.80 (20%)</p></div>
+    <div class="cell"><p class="h">Plan if approved</p><p class="v">~$25k · 0.75%</p><p class="s">half as a pre-earnings ladder ≤$19.75, half behind a post-earnings evidence gate</p></div>
+  </div>
+  <p class="fine"><b>Position:</b> no position; below-market limit orders may be placed after review. Nothing rests without approval.</p>
+</div>
+
+<div class="slide">
+  <span class="sno">02</span>
+  <h2>The pattern that demands respect: two ~20% crashes in 90 days — both on beats</h2>
+  <p>Twice this year Centuri has reported a quarter that beat expectations and lost a fifth of its value within a session. When a stock is punished twice for good headlines, the market is not confused — it is repricing the <b>quality</b> of the revenue, not the quantity. Our review examined whether that repricing was a mistake, and concluded it was not.</p>
+  <div class="tbl"><table>
+    <tr><th>Date</th><th>Event</th><th class="n">Reaction</th></tr>
+    <tr><td>2026-05-06</td><td>Q1 report: revenue beat, gross profit +76%, record $6.5B backlog</td><td class="n">+5.8%</td></tr>
+    <tr><td>2026-05-07</td><td>Strategy day ("Vision One Centuri"); all-time high $42.99 intraday, closed $41.80</td><td class="n">peak</td></tr>
+    <tr><td>2026-05-08</td><td>Day after the call and strategy day — no SEC filing that day; cause attributed to call content via secondary sources only (<b>unverified</b>)</td><td class="n"><b>−19.6% to $33.60</b></td></tr>
+    <tr><td>2026-08-04</td><td>Q2 report: revenue $962M (+33%, $126M above consensus), EPS beat, guidance raised</td><td class="n"><b>−21.5% to $21.88</b></td></tr>
+  </table></div>
+  <p><b>The August 4 tape, in detail:</b> the stock ran <b>+14.6% in the three sessions into the print</b> ($24.30 → $27.86) — longs were positioned for a good number and got one. It still gapped down to $25.05, faded all day with no stabilization bid, and closed at $21.88, 15 cents off the low, on 5.5M shares. Fresh 13-week and 26-week low. Peak-to-date: <b>−49.0% in 89 days</b>.</p>
+  <div class="warnout"><b>What this means for the plan:</b> management's framing has now failed twice in 90 days, and we should not volunteer to be the third party surprised. This is a falling knife on day zero of its low — a reason to set prices we would be glad to pay, not to catch it here.</div>
+</div>
+
+<div class="slide">
+  <span class="sno">03</span>
+  <h2>The margin autopsy: record revenue, zero incremental profit</h2>
+  <p class="big">First half of fiscal 2026: revenue up <b>$411M (+32%)</b>. Operating income: <b>$19.407M vs $19.446M</b> a year ago — flat to the third decimal. That single comparison is the whole crash.</p>
+  <div class="grid2">
+    <div class="cell"><p class="h">Q2 base gross margin</p><p class="v">7.9% vs 8.9%</p><p class="s">first year-over-year decline in the company's public record (−100bps)</p></div>
+    <div class="cell"><p class="h">Named causes cover ~95bps</p><p class="v">fuel −$6M · crew ramp −$3M</p><p class="s">but inside US Gas, fuel (~75bps) + ramp (~60bps) explain only ~60% of the segment's decline — a <b>−55bps residual management has not explained</b></p></div>
+    <div class="cell"><p class="h">Guidance raise, decomposed</p><p class="v">+$300M revenue → +$10M gross profit</p><p class="s">a 3.3% incremental margin, against a 7.8% company margin and an 8.7–9.7% 2029 target</p></div>
+    <div class="cell"><p class="h">The quiet cut inside the raise</p><p class="v">8.18% → 7.78%</p><p class="s">implied full-year base gross margin at guide midpoint, CUT 40bps inside a release headlined "RAISES GUIDANCE"</p></div>
+  </div>
+  <p><b>The $9M Chicago write-off is not part of this story.</b> It is a 2019-vintage claim against the City of Chicago, denied by the agency in 2024 and now written off to zero after an April 2026 court order — a legacy legal item, fully excluded from the base-margin figures above, and one of the bear arguments our review killed (slide 07). The margin problem is in the live book, not the legal drawer.</p>
+  <p class="fine">Mix is compounding the squeeze: US Gas — the lowest-margin segment at a 5.95% base gross margin — grew from 46.5% to 50.9% of revenue year over year.</p>
+</div>
+
+<div class="slide">
+  <span class="sno">04</span>
+  <h2>The structural finding: 77% of the book eats its own cost inflation, and "wait for H2" fails the history test</h2>
+  <p><b>From the 10-Q's contract-type note:</b> 77% of revenue is unit-price plus fixed-price work — the contractor, not the customer, bears cost increases. The escalators in those contracts reset <b>annually</b> and are <b>capped</b>, and the filing concedes it plainly: <i>"our actual costs at times can exceed the contractual caps."</i> This year's fuel and labor inflation is therefore genuinely unrecoverable until reset — the $6M fuel hit is a margin event, not a pass-through. Meanwhile competitively-bid work has grown from 17.6% of revenue in FY23 to <b>25.0%</b> now, which is where fixed-price estimating risk lives.</p>
+  <h3>The seasonality defense — tested against four years of quarters, and refuted</h3>
+  <p>The bull case says H2 margins of ~9.0% vs H1's 6.3% is "normal seasonality." The quarterly record says otherwise: <b>Q1 is the trough; Q2 through Q4 run in a tight band with no second-half step-up.</b> Q2-26's 7.9% is a 100bps miss <em>inside</em> the normal band — and the guide needs the decline to stop and fully reverse in one quarter.</p>
+  <div class="tbl"><table>
+    <tr><th>Base gross margin by quarter</th><th class="n">Q1-25</th><th class="n">Q2-25</th><th class="n">Q3-25</th><th class="n">Q4-25</th><th class="n">Q1-26</th><th class="n">Q2-26</th></tr>
+    <tr><td>Reported (non-GAAP reconciliations, 10-Qs/10-K)</td><td class="n">2.69%</td><td class="n">8.90%</td><td class="n">9.10%</td><td class="n">9.31%</td><td class="n">4.07%</td><td class="n"><b>7.90%</b></td></tr>
+  </table></div>
+  <div class="tbl"><table>
+    <tr><th>GAAP gross margin</th><th class="n">FY23</th><th class="n">FY24</th><th class="n">FY25</th><th class="n">FY26</th></tr>
+    <tr><td>Q1 alone (the trough)</td><td class="n">6.42%</td><td class="n">2.51%</td><td class="n">3.70%</td><td class="n">4.94%</td></tr>
+    <tr><td>Q2–Q4 blended (the "normal band")</td><td class="n">10.31%</td><td class="n">9.83%</td><td class="n">9.30%</td><td class="n">—</td></tr>
+  </table></div>
+  <p class="fine">Two honesty notes on the history itself: FY24's H1-to-H2 spread is inflated by $91.1M of second-half storm revenue at ~36% margin, and FY23's H2 (9.83%) was actually <em>below</em> its own Q2 (11.17%) — there is no H2 magic anywhere in the record. The FY23 base-margin series cannot be fully reconstructed because offshore-wind revenue is disclosed only as year-over-year deltas (<b>unverifiable</b>, noted on slide 11).</p>
+  <div class="warnout"><b>What the guide now requires:</b> every point of the $270–290M full-year base gross profit range needs roughly <b>9.0% H2 margins</b> (low end 8.98%, mid 9.03%, high 9.08%) — the range flexes revenue, never margin. The floor breaks at any H2 margin below <b>~8.55%</b>. Prior-year H2 comparators were 9.10% and 9.31%; the most recent quarter printed 7.90%.</div>
+</div>
+
+<div class="slide">
+  <span class="sno">05</span>
+  <h2>Why it's a 5 and not a 3: demand is not the problem — contract economics are</h2>
+  <p class="big">Everything about the order book says the franchise is intact. The dispute is entirely about what a dollar of that work earns.</p>
+  <div class="grid">
+    <div class="cell"><p class="h">Backlog</p><p class="v">$6.4B · +21% y/y</p><p class="s">+8% from year-end; ~83% under master service agreements</p></div>
+    <div class="cell"><p class="h">Bookings</p><p class="v">1.3x book-to-bill YTD</p><p class="s">~$450M of MSA renewals and expansions inside Q2's ~$850M of bookings (Q2 alone 0.9x)</p></div>
+    <div class="cell"><p class="h">Pipeline</p><p class="v">$16B · +23% q/q</p><p class="s">opportunity set, not contracts</p></div>
+    <div class="cell"><p class="h">Mandate-driven revenue</p><p class="v">59.4%</p><p class="s">US Gas (50.9%) + Canada (8.5%): gas-pipe replacement driven by safety mandates and utility rate base — nobody cancels this work in a downturn</p></div>
+    <div class="cell"><p class="h">Deleveraging</p><p class="v">3.7x → 2.6x</p><p class="s">net debt to adjusted EBITDA over the past year (company non-GAAP measure)</p></div>
+    <div class="cell"><p class="h">Growth vs the one cheaper peer</p><p class="v">+33% vs −5.4%</p><p class="s">the only contractor priced below CTRI (Primoris at 10.8x) has <em>declining</em> revenue</p></div>
+  </div>
+  <p class="fine"><b>Honest footnote on the backlog:</b> ~83% of it is management-estimated MSA revenue, explicitly including renewal options "reasonably certain to execute." The firm contracted number (remaining performance obligations on fixed-price work over one year) is $406.2M across 63 contracts. The pillar is real but soft — about 94% of "backlog" is an estimate, not a signed obligation.</p>
+</div>
+
+<div class="slide">
+  <span class="sno">06</span>
+  <h2>The AI-cycle check: the entry does not need the AI boom — and the "cheap vs peers" argument secretly does</h2>
+  <p>House discipline: every thesis states its sensitivity to the AI investment cycle. Centuri's direct datacenter exposure is small and new — a <b>$125M award</b> in Q2's bookings, about <b>2% of backlog</b>. Since 59.4% of revenue is mandate-driven gas work, a break in the AI cycle would mostly <b>remove the bull case rather than create new downside</b>. The entry does not require the cycle holding.</p>
+  <h3>But the peer "discount" is not what it looks like</h3>
+  <div class="tbl"><table>
+    <tr><th>Peer (same convention, Aug 4 close)</th><th class="n">EV/EBITDA</th><th class="n">EBITDA margin</th><th class="n">Revenue growth</th><th>Story attached to the multiple</th></tr>
+    <tr><td>Primoris (PRIM)</td><td class="n">10.8x</td><td class="n">6.2%</td><td class="n">−5.4%</td><td>the deteriorating name — cohort floor</td></tr>
+    <tr><td>MYR Group (MYRG)</td><td class="n">17.8x</td><td class="n">7.3%</td><td class="n">+20.2%</td><td>electric T&amp;D</td></tr>
+    <tr><td>Everus (ECG)</td><td class="n">18.2x</td><td class="n">8.9%</td><td class="n">+33.7%</td><td>electric / datacenter</td></tr>
+    <tr><td>Dycom (DY)</td><td class="n">18.3x</td><td class="n">12.9%</td><td class="n">+56.1%</td><td>digital infrastructure</td></tr>
+    <tr><td>MasTec (MTZ)</td><td class="n">18.9x</td><td class="n">8.0%</td><td class="n">+23.4%</td><td>power delivery — same ~8% margin, 19x</td></tr>
+    <tr><td>IES Holdings (IESC)</td><td class="n">26.8x</td><td class="n">13.8%</td><td class="n">+39.6%</td><td>datacenter electrical</td></tr>
+    <tr><td>Quanta (PWR)</td><td class="n">36.1x</td><td class="n">9.3%</td><td class="n">+41.1%</td><td>the AI-power flagship</td></tr>
+    <tr><td><b>Cohort median</b></td><td class="n"><b>18.3x</b></td><td class="n">8.9%</td><td class="n"></td><td></td></tr>
+    <tr><td><b>CTRI</b> (derived on the same convention)</td><td class="n"><b>~12.9x</b></td><td class="n">~6.8%</td><td class="n">+32.9%</td><td>51% gas-pipe replacement — no AI premium</td></tr>
+  </table></div>
+  <p><b>The ruling:</b> every expensive name in this cohort is an electric/power/datacenter story; the only two cheap ones are the two without it. CTRI's discount to the median <b>is</b> the AI premium it does not carry. Buying it for "convergence to 18.3x" is a leveraged bet on the AI capex cycle holding — the opposite of what its gas-heavy mix makes it look like. <b>Convergence is rejected; no scenario below assumes it.</b> Our base multiple is <b>11.0x</b> — above Primoris's deteriorating-name floor (CTRI grows 33%; Primoris shrinks), far below the AI cohort. The residual discount is earned: second-highest leverage in the set (~3.0x on the peer convention), second-lowest margin, margins compressing while the cohort's expand.</p>
+  <p class="fine">CTRI's ~12.9x on the peer convention is derived from filings, not company-reported — treat as approximate. Portfolio note: the household already carries substantial AI-complex exposure, so any bull-case payoff here is a concentration add, not a diversifier.</p>
+</div>
+
+<div class="slide">
+  <span class="sno">07</span>
+  <h2>The bear arguments we tried to sustain — and couldn't</h2>
+  <p>Credibility cuts both ways. The same review that refuted the bull's seasonality defense also tested every bear claim against the filings, and five of them died. Reporting the failures is what makes the surviving finding (slide 04) trustworthy.</p>
+  <div class="tbl"><table>
+    <tr><th>Bear claim</th><th>What the filings show</th><th>Status</th></tr>
+    <tr><td>H1 operating cash flow of −$15M signals a cash-conversion break</td><td>Prior-year H1 was also negative (−$11M); as a share of revenue the two halves are essentially identical (−0.89% vs −0.86%). Full-year 2025 operating cash flow was <b>+$78.1M</b>, with Q4 alone +$83.9M. Seasonal, not structural.</td><td><span class="tag t-no">Killed</span></td></tr>
+    <tr><td>Receivable quality is deteriorating; Chicago is the tip of the iceberg</td><td>Receivables + contract assets grew +33.8% against revenue +32.3% — in line. Chicago is a 2019-vintage municipal claim, denied in 2024, written off to zero in 2026: a legacy resolution, not a current-book signal.</td><td><span class="tag t-no">Killed</span></td></tr>
+    <tr><td>The Non-Union Electric segment's margin is collapsing</td><td>An artifact of storm work (30–36% margins) falling from $136.7M to $40.2M between years. Excluding storm, that segment's base margin <em>improved</em> from ~4.2% to ~8.2%.</td><td><span class="tag t-no">Killed</span></td></tr>
+    <tr><td>Covenant risk</td><td>Leverage ~2.6x (company proxy) against a covenant stepping 4.50x → 4.00x from the quarter ending after Sept 30, 2026; $307.7M of undrawn revolver. EBITDA would have to fall ~35% to bite.</td><td><span class="tag t-no">Killed</span></td></tr>
+    <tr><td>The capital structure hides dilution</td><td>No senior notes, no preferred, no warrants, no convertibles — zero hits in the 10-Q. Only routine employee equity awards and a 0.8% subsidiary minority.</td><td><span class="tag t-no">Killed</span></td></tr>
+  </table></div>
+  <p class="fine">One yellow flag retained on the watch list, not the kill list: unapproved change orders and claims rose from $47.8M to $56.7M (+19%) — revenue recognized on work customers have not yet approved. 7% of receivables and contract assets.</p>
+</div>
+
+<div class="slide">
+  <span class="sno">08</span>
+  <h2>The Icahn position: real anchor, honest counterweight — optionality, not thesis</h2>
+  <p class="big">Carl Icahn's vehicles hold <b>14,336,044 shares — 14.4%</b> — with a board designee seated since November 2025 and a verified average cost of <b>$19.74</b>. Our entire pre-earnings ladder sits at or below his basis.</p>
+  <ul>
+    <li><b>What's verified:</b> $19.74 average across the 11,849,549 shares with disclosed purchase prices. (The first 2,486,495 shares were bought below the 5% disclosure threshold with no price anywhere in the record — his true blended basis is <b>unverifiable</b>, but on the priced tranche the number is exact.)</li>
+    <li><b>The governance asset:</b> the cooperation agreement gives his designee a seat and a <b>committee-bypass right</b> — any board consideration of CEO/CFO appointment or employment, mergers, or material asset transactions must include him. His filing calls the stock "undervalued" with "no plans or proposals" — friendly, no strategic-review demand, no amendments filed to date.</li>
+    <li><b>The honest counterweight:</b> <b>11,465,749 of his shares (11.4% of the company) are registered for resale and fully unlocked</b> — no lock-up, sellable at will. The board seat survives down to 5,423,836 shares, so he can sell <b>8.9M shares and keep the seat</b>. The former parent's overhang is gone (slide 12); this one replaced it.</li>
+    <li><b>The story that wasn't:</b> "Icahn added $78M in March 2026" made headlines — but the share count is unchanged at 14,336,044 in both the March proxy and the May registration statement. The headline was a mark-to-market artifact of quarterly holdings reports, not a purchase.</li>
+  </ul>
+  <div class="callout"><b>Why this shapes the ladder rather than the thesis:</b> buying <em>above</em> an activist's basis in a name where he holds 11.5M unlocked, registered shares is paying for the wrong side of his option. At $19.75 and below, his position is support; at $21.88 it is supply risk. A filed reduction below ~10M shares kills the whole plan (slide 11).</div>
+</div>
+
+<div class="slide">
+  <span class="sno">09</span>
+  <h2>Scenarios: bear $17 · base $28 · bull $38.80 — weighted $26.31 against a $21.88 close</h2>
+  <div class="scale">
+    <svg viewBox="0 0 900 132" role="img" aria-label="CTRI price scale: ladder rungs 17.00 to 19.75, spot 21.88, bear 17.00, JPM Sell target 26.00, weighted fair value 26.31, base 28.00, bull 38.80">
+      <line class="ax" x1="30" y1="76" x2="870" y2="76"/>
+      <line class="tick-r" x1="81"  y1="76" x2="81"  y2="98"/><text class="lb"  x="81"  y="114" text-anchor="middle">17.00</text>
+      <line class="tick-r" x1="124" y1="76" x2="124" y2="98"/><text class="lb"  x="124" y="114" text-anchor="middle">18.25</text>
+      <line class="tick-r" x1="175" y1="76" x2="175" y2="98"/><text class="lb"  x="175" y="114" text-anchor="middle">19.75</text>
+      <line class="tick-f" x1="81"  y1="54" x2="81"  y2="76"/><text class="lb2" x="81"  y="48" text-anchor="middle">bear 17.00</text>
+      <line class="tick-f" x1="389" y1="54" x2="389" y2="76"/><text class="lb2" x="389" y="14" text-anchor="middle">JPM Sell PT 26.00</text>
+      <line class="tick-f" x1="400" y1="54" x2="400" y2="76"/><text class="lb2" x="404" y="48" text-anchor="middle">E[FV] 26.31</text>
+      <line class="tick-f" x1="458" y1="54" x2="458" y2="76"/><text class="lb2" x="462" y="28" text-anchor="middle">base 28.00</text>
+      <line class="tick-f" x1="828" y1="54" x2="828" y2="76"/><text class="lb2" x="828" y="48" text-anchor="middle">bull 38.80</text>
+      <circle class="tick-s" cx="248" cy="76" r="6"/><text class="lb" x="248" y="114" text-anchor="middle">spot 21.88</text>
+    </svg>
+    <div class="legend"><span><span class="sw" style="background:var(--rung)"></span>ladder rungs</span><span><span class="sw" style="background:var(--floor)"></span>scenario fair values &amp; street</span><span><span class="sw" style="background:var(--break);height:8px;width:8px;border-radius:50%"></span>last close</span></div>
+  </div>
+  <div class="tbl"><table>
+    <tr><th></th><th class="n">p</th><th class="n">FV</th><th>Thesis</th></tr>
+    <tr><td><b>Bear</b></td><td class="n">0.35</td><td class="n">$17.00</td><td>Q3 base margin ~8.2%; the guide's $270M floor breaks; capped escalators confirm fuel as a permanent margin event; third credibility failure in three quarters. Priced at the deteriorating-contractor multiple (8.5x 2027 EBITDA), which by then it deserves.</td></tr>
+    <tr><td><b>Base</b></td><td class="n">0.45</td><td class="n">$28.00</td><td>Q3 base margin 8.7–8.9%; full year lands in the low half of guide; 2027 revenue ~$4.0B at an 8.0% EBITDA margin as leverage passes through 2.0x. Multiple 11.0x — a wide but no longer punitive discount; <b>zero convergence to the AI cohort assumed</b>.</td></tr>
+    <tr><td><b>Bull</b></td><td class="n">0.20</td><td class="n">$38.80</td><td>The crew-ramp investment pays off as claimed; Q3 margin ≥9.0%, guide met; 2027 at an 8.5% margin, 13.0x — a partial re-rate toward MYR/MasTec as the growth is shown to earn something.</td></tr>
+  </table></div>
+  <p><b>E[FV] $26.31</b> — about +20% above the close, against a 35% probability of $17. <b>Street check:</b> JPMorgan's <b>Sell, $26 target</b> is the lowest published number on the street — and it sits <em>above</em> the price (it was struck July 22 with the stock at $27.51: a Sell with no downside). Cantor's $37.40 is two prints stale. Our fair value deliberately sits on the most bearish published target: the peer evidence pulled us up off an over-punitive multiple, and the credibility evidence keeps us at the bottom of the range.</p>
+</div>
+
+<div class="slide">
+  <span class="sno">10</span>
+  <h2>The plan: two branches, deliberately alternatives — never an AND-gate</h2>
+  <p class="big">Price and evidence are <b>negatively correlated</b> here: if the November quarter proves the margins, the stock will not be at $19.75; if the stock reaches $19.75 first, the evidence hasn't arrived yet. A plan demanding both a cheap price <em>and</em> confirmation would be an unfillable "no" dressed up as a plan. So the full position — <b>0.75% of deployable capital, ~$25k</b> (cut from the normal 1.2% cap for the contract-economics finding) — is split across two routes that each pay for what they get.</p>
+  <h3>Branch A — pre-earnings ladder: buy the price, accept the uncertainty (~$12.5k)</h3>
+  <div class="tbl"><table>
+    <tr><th>Rung</th><th class="n">Limit</th><th class="n">Shares</th><th class="n">~$</th><th>Anchor</th></tr>
+    <tr><td>A1</td><td class="n">$19.75</td><td class="n">253</td><td class="n">5,000</td><td>Icahn's verified average basis ($19.74); top of the band where the entire float was distributed in 2025 ($17.50–21.50)</td></tr>
+    <tr><td>A2</td><td class="n">$18.25</td><td class="n">241</td><td class="n">4,400</td><td>below the 52-week low ($19.04) — capitulation pricing</td></tr>
+    <tr><td>A3</td><td class="n">$17.00</td><td class="n">182</td><td class="n">3,100</td><td><b>exactly bear fair value</b> — the "margins never recover" case fully paid, the bull case free</td></tr>
+  </table></div>
+  <p class="fine">Good-till-canceled, nothing at market, nothing above $19.75. <b>Cancel-and-review two sessions before the Q3 print</b> (~Nov 4) — no blind orders resting into an earnings verdict.</p>
+  <h3>Branch B — post-evidence add: pay up for proof (~$12.5k plus whatever A left unfilled)</h3>
+  <p>Opens only if the Q3 report delivers <b>base gross margin ≥ 8.8% AND no cut to the $270M full-year gross profit floor</b>, subject to a valuation ceiling of <b>11.0x</b> EV to forward EBITDA at the post-print price. That margin number is the single fact separating "temporary crew-ramp investment" from "we bought market share on price" — and paying 11x for a <em>confirmed</em> inflection beats paying 10x for an unconfirmed one.</p>
+  <div class="warnout"><b>If the Q3 evidence fails</b> (base margin below 8.5% or a guidance cut): both branches close, and any Branch A fills go back under review for exit. The structural reading wins, and $17 is fair — not cheap.</div>
+</div>
+
+<div class="slide">
+  <span class="sno">11</span>
+  <h2>Tripwires — all dated — and the biggest number nobody can check</h2>
+  <div class="tbl"><table>
+    <tr><th>Trigger</th><th>When</th><th>Action</th></tr>
+    <tr><td>Q3 base gross margin &lt; 8.5%</td><td class="n">~Nov 4, 2026</td><td><b>Kill</b> — structural reading confirmed</td></tr>
+    <tr><td>Full-year base gross profit guide cut below $270M</td><td class="n">~Nov 4, 2026</td><td><b>Kill</b></td></tr>
+    <tr><td>Icahn files a reduction below ~10M shares</td><td class="n">any time</td><td><b>Kill</b> — the anchor is leaving through a registered shelf</td></tr>
+    <tr><td>Book-to-bill below 1.0x again in Q3</td><td class="n">~Nov 4, 2026</td><td>Halve any position (the full-year 1.2x target needs ~1.1x in H2)</td></tr>
+    <tr><td>Leverage back above 3.0x, or covenant headroom under 1.0 turn</td><td class="n">quarterly</td><td><b>Kill</b></td></tr>
+    <tr><td>Weekly diesel prices sustained &gt;10% above the Q2 average through Q4</td><td class="n">continuous</td><td>Shift the base case toward bear — the escalators are annual and capped</td></tr>
+    <tr><td>CEO or CFO departure</td><td class="n">any time</td><td>Full re-review immediately — Icahn's committee-bypass right makes this a live channel in both directions</td></tr>
+  </table></div>
+  <div class="warnout"><b>The top unverifiable input — JJ White's "&gt;$20M annual gross profit."</b> The company's H2 bridge leans on its July 20 acquisition of JJ White (~$62M cash), which management says adds over $20M of annual gross profit. The deal closed <em>after</em> the balance-sheet date: no purchase-price allocation, no pro-forma, no contribution disclosure exists anywhere. The comparable prior acquisition (Connect Utility Services) is running at a 10.8% gross margin inside a 16.0% segment — the playbook has been margin-dilutive. This is the single largest unverified number in the second-half math. First real look: the Q4 report (~Feb 2027).</div>
+  <p class="fine"><b>Covenant detail:</b> the leverage covenant steps from 4.50x to 4.00x starting with the quarter ending after Sept 30, 2026. Headroom on the company's 2.6x proxy is ~1.4 turns — but the actual credit-agreement ratio is <b>not disclosed</b> (the filing footnotes that it may differ), so the headroom is inferred, not stated. Watch item, not a worry, unless EBITDA falls ~35%.</p>
+</div>
+
+<div class="slide">
+  <span class="sno">12</span>
+  <h2>What was verified, claim by claim — including three corrections to our own starting file</h2>
+  <div class="tbl"><table>
+    <tr><th>Claim</th><th>How it was checked</th><th>Finding</th></tr>
+    <tr><td>Revenue $962M, +33%, $126M above consensus</td><td>8-K exhibit vs the consensus estimate</td><td><span class="tag t-ok">Confirmed</span>$961.986M vs $836.0M expected</td></tr>
+    <tr><td>Adjusted EPS $0.24 vs $0.19 expected; guidance raised</td><td>Q2 release vs the Q1 release</td><td><span class="tag t-ok">Confirmed</span>revenue and EBITDA ranges both raised</td></tr>
+    <tr><td>Base gross margin 7.9% vs 8.9%; fuel + crew-ramp ≈ 95bps</td><td>Recomputed from the release's own tables</td><td><span class="tag t-ok">Confirmed</span>7.89% vs 8.88%, to the dollar</td></tr>
+    <tr><td>H1 operating income flat on +$411M revenue</td><td>10-Q income statement</td><td><span class="tag t-ok">Confirmed</span>$19.407M vs $19.446M</td></tr>
+    <tr><td>Backlog $6.4B +21%; pipeline $16B +23% q/q</td><td>Release + 10-Q</td><td><span class="tag t-ok">Confirmed</span>with the 94%-estimate caveat (slide 05)</td></tr>
+    <tr><td>Adjusted EPS growth "+44%"</td><td>10-Q share count and interest expense</td><td><span class="tag t-mid">Context</span>financed by a 14% larger share count and $6.1M lower interest after the Nov-2025 equity raise — per-share growth is +26%, mostly the interest saving</td></tr>
+    <tr><td>Leverage 2.6x; covenant headroom 1.4–1.9 turns</td><td>10-Q debt note</td><td><span class="tag t-mid">Corrected</span>2.6x confirmed (down from 3.7x), but the covenant steps to 4.00x from Q3 — headroom is <b>~1.4 turns, not 1.9</b>; the actual covenant ratio is undisclosed</td></tr>
+    <tr><td>JJ White adds &gt;$20M annual gross profit</td><td>Acquisition note in the 10-Q</td><td><span class="tag t-mid">Unverifiable</span>closed post-balance-sheet; no pro-forma exists (slide 11)</td></tr>
+    <tr><td>Former parent (Southwest Gas) stake is an overhang</td><td>Registration statements + the parent's own 10-K</td><td><span class="tag t-no">Refuted</span><b>the stake has been zero since Sept 5, 2025</b> — all 71.7M shares distributed at $17.50–21.50; the separation agreement's restrictions are terminated. The real overhang is Icahn's 11.5M registered shares</td></tr>
+    <tr><td>Today's price is below Icahn's basis</td><td>13D purchase ladder, priced share by share</td><td><span class="tag t-no">Refuted</span>verified average $19.74 — <b>$21.88 is above his basis, not below</b>; the support is 10% lower</td></tr>
+    <tr><td>"Icahn added $78M in March 2026"</td><td>March proxy + May registration statement</td><td><span class="tag t-no">Refuted</span>share count unchanged at 14,336,044 on both dates — the headline was a valuation artifact of quarterly holdings reports</td></tr>
+    <tr><td>JPMorgan Sell, $26 target</td><td>Dated broker note (July 22)</td><td><span class="tag t-ok">Confirmed</span>struck with the stock at $27.51 — the street's lowest target now sits above the price</td></tr>
+  </table></div>
+  <p class="fine">Every kill of a bear claim (slide 07) went through the same process. Sources: the Aug 4 8-K and 10-Q, four years of prior 10-Qs/10-Ks, the Icahn 13D and cooperation agreement, five registration statements, the former parent's filings, and live exchange data on Aug 4.</p>
+</div>
+
+<div class="slide">
+  <span class="sno">13</span>
+  <h2>The prediction is frozen and grades in public — November 6, 2026</h2>
+  <p class="big">Written down on August 4, the day of the crash, never to be revised. The review grades against the tape on the session after the Q3 report, whatever happens. If these probabilities are badly wrong, that fact becomes part of the permanent record and recalibrates the next one.</p>
+  <div class="tbl"><table>
+    <tr><th>Leg</th><th class="n">Our probability</th><th class="n">Grades</th></tr>
+    <tr><td>Q3 fiscal 2026 base gross profit margin prints at or above 8.8%</td><td class="n"><b>0.50</b></td><td class="n">Nov 6, 2026</td></tr>
+    <tr><td>Full-year base gross profit guidance is not cut below $270M at the Q3 print</td><td class="n"><b>0.60</b></td><td class="n">Nov 6, 2026</td></tr>
+    <tr><td>CTRI closes above $21.88 on the session after the Q3 release</td><td class="n"><b>0.48</b></td><td class="n">Nov 6, 2026</td></tr>
+    <tr><td>Icahn files an amended disclosure showing a changed share count</td><td class="n"><b>0.28</b></td><td class="n">Dec 31, 2026</td></tr>
+  </table></div>
+  <div class="grid2">
+    <div class="cell"><p class="h">If the margin leg hits</p><p class="v">Branch B opens</p><p class="s">the margin path is credible — post-earnings add eligible, up to the 11.0x valuation ceiling</p></div>
+    <div class="cell"><p class="h">If it misses</p><p class="v">Ladder pulled, position re-reviewed</p><p class="s">the structural cost squeeze on capped escalators is confirmed — the name is dead for this cycle</p></div>
+  </div>
+  <p class="fine">Note the honesty in the numbers: a coin-flip on the decisive margin leg is exactly why the verdict is a 5/10 with below-market orders — not a conviction buy, and not a pass.</p>
+  <p class="fine"><b>Position:</b> no position; below-market limit orders may be placed after review. <b>Disclaimer.</b> This document is personal research, prepared for internal decision-making and informational purposes only. It is not financial, investment, tax, or legal advice, and not an offer or solicitation to buy or sell any security. Figures reflect a good-faith effort at verification against primary filings (8-Ks, 10-Qs, 10-Ks, ownership filings, registration statements) and live exchange data as of August 4, 2026; errors are possible and numbers go stale. Positions may change without notice. Do your own research.</p>
+</div>
+
+</div>

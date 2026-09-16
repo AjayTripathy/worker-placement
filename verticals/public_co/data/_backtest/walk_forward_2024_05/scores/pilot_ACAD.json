@@ -1,0 +1,132 @@
+{
+  "ticker": "ACAD",
+  "company": "ACADIA PHARMACEUTICALS INC",
+  "cutoff": "2024-05-15",
+  "filing": "0000950170-24-021473_10K.txt",
+  "filing_date": "2024-02-28",
+  "cik": "0001070494",
+  "sector": "Healthcare",
+  "industry": "Biotechnology",
+  "group": "walk_forward_2024",
+  "rfm_tuples": [
+    {
+      "claim_id": "C1",
+      "R": "Solvency / going-concern posture: 10-K asserts 'We expect that our cash, cash equivalents, and investment securities will be sufficient to fund our planned operations through and beyond the next 12 months.' Cash, cash equivalents and investments = $438.9M at 12/31/2023 vs $416.8M at 12/31/2022 (a $22.1M INCREASE, i.e. net cash provided by operating activities turned positive). No substantial-doubt language. Implicit honesty test: company is genuinely no longer cash-burning at the corporate level.",
+      "f": "If liquidity narrative is truthful, going_concern_local should return NO_GOING_CONCERN with zero current-period phrase matches, and the structured balance-sheet/cash-flow numbers should reconcile.",
+      "M_source": "going_concern_local.going_concern_from_text (on local 10-K text)",
+      "M_value": "signal=NO_GOING_CONCERN, n_matches=0, n_current_period=0, n_cure=0, n_historical=0. 10-K body confirms cash grew YoY ($416.8M -> $438.9M) and net product sales reached $726.4M (NUPLAZID $549.2M + DAYBUE $177.2M from April-2023 launch) vs $517.2M in 2022. Accumulated deficit $2.4B (historical losses, not current-period burn).",
+      "severity": "PASS",
+      "interpretation": "Solvency posture verifies cleanly. ACAD is NOT a going-concern or near-bankruptcy story. The -54.8% pre-cutoff drawdown is some OTHER story (almost certainly clinical-pipeline / DAYBUE launch-trajectory disappointment), not balance-sheet fragility. This is the most important framing fact: the lying-detector should not over-fire on a name whose cash trajectory is improving."
+    },
+    {
+      "claim_id": "C2",
+      "R": "Auditor: 'We have served as the Company's auditor since 2015' /s/ Ernst & Young LLP, San Diego, California, PCAOB ID 42. Implicit claim: stable Big 4 audit relationship through cutoff.",
+      "f": "If auditor narrative is truthful, the auditor name should match a Big-4 firm and there should be no recent Item 4.01 8-K resignation/dismissal in the lookback window.",
+      "M_source": "going_concern_local.auditor_change_from_text + 10-K cross-read for tenure statement",
+      "M_value": "Auditor detector mis-fired on the inline XBRL boilerplate ('AUDITOR_UNCLEAR', is_big4=False) but the literal text 'Ernst & Young LLP' appears explicitly at line 1844 with the tenure statement 'We have served as the Company's auditor since 2015' at line 2769. Cross-read: BIG4 (Ernst & Young), tenure ~9 years through cutoff, no resignation or disagreement language. PCAOB ID 42 = Ernst & Young LLP (confirmed via PCAOB registry conventions).",
+      "severity": "PASS",
+      "interpretation": "Auditor posture passes after manual cross-read corrects the M-source false negative. Big-4 firm, 9-year tenure, no resignation language. CLEAN_AUDITOR_TENURE de facto. The drawdown is NOT an auditor-walk story."
+    },
+    {
+      "claim_id": "C3",
+      "R": "Late-stage pipeline growth narrative: '[ADVANCE-2] leverages the same design and optimal therapeutic dose of 34 mg from the previous positive Phase 2 trial of ADVANCE-1. We completed enrollment in ADVANCE-2 and expect that top-line results will be available in the first quarter of 2024.' The 10-K frames ADVANCE-2 confidently under 'Advance our late-stage opportunities to drive further growth.' Implicit claim: the next major pipeline catalyst is on-track and likely positive given the ADVANCE-1 read-through.",
+      "f": "If the optimistic late-stage framing is durable, the next 8-K announcing ADVANCE-2 top-line should show a positive primary endpoint. If it does not, the 10-K's growth narrative collapses within the cutoff window.",
+      "M_source": "claim_evolution via edgar.list_filings + edgar.fetch_filing_text on subsequent 8-K (2024-03-11) and Q1 2024 10-Q (2024-05-09) — both PRE-CUTOFF",
+      "M_value": "8-K filed 2024-03-11 (11 days after the 10-K): 'On March 11, 2024, Acadia Pharmaceuticals Inc. announced top-line results of the Company's Phase 3 ADVANCE-2 trial evaluating pimavanserin for the treatment of negative symptoms of schizophrenia. The study did not meet its primary endpoint.' Q1 2024 10-Q (filed 2024-05-09, also pre-cutoff): 'In March 2024, we announced top-line results from the Phase 3 ADVANCE-2 trial evaluating pimavanserin for the treatment of negative symptoms of schizophrenia. Pimavanserin did not demonstrate a statistically significant improvement over placebo on the study's primary endpoint, the change from baseline to week 26 on the Negative Symptom Assessment-16 (NSA-16) total score.' Claim status = REFUTED_PRE_CUTOFF.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "interpretation": "Strongest finding in the file. The 10-K (Feb 28, 2024) builds a 'late-stage growth' narrative around ADVANCE-2 with anchoring language linking it to the prior positive ADVANCE-1 Phase 2. Eleven days later the Phase 3 missed its primary endpoint — wiping out what the 10-K had presented as the most important value-creating pipeline event for 2024. This is not retrospective hindsight: the failure is disclosed in a pre-cutoff 8-K and reaffirmed in a pre-cutoff 10-Q. The 10-K growth thesis on the second pimavanserin indication (after the dual CRLs on ADP) is invalidated within the lookback window. SEVERE_UNDERDELIVERY because the narrative is materially load-bearing for the 10-K's forward-looking growth case and collapses unambiguously inside cutoff."
+    },
+    {
+      "claim_id": "C4",
+      "R": "Regulatory durability of pimavanserin label-expansion strategy: 10-K honestly discloses two prior FDA CRLs for the dementia-related-psychosis / ADP sNDAs (April 2021 and August 2022) and states 'we are not planning to conduct any additional studies for pimavanserin in ADP.' But the strategy section then pivots to schizophrenia and 'ACP-204 in ADP' (a different molecule for the SAME indication where pimavanserin failed twice).",
+      "f": "Mode B derivation: if pimavanserin's label-expansion story is genuinely dead and ACP-204 is the replacement, the 10-K should foreground the pattern: TWO CRLs on the SAME indication with the SAME mechanism, AND a back-up molecule (ACP-204) that is still only at Phase 2 initiation Q4 2023. The 10-K should not bury this regulatory history under the optimistic 'late-stage growth' header.",
+      "M_source": "Filing self-text cross-read (Item 1 Business + Risk Factors)",
+      "M_value": "10-K discloses both CRLs at lines 590 and 635 inside risk-factor and business-narrative sections. CRL-1 (April 2021) was on DRP after the 'successful' Phase 3 HARMONY study. CRL-2 (August 2022) was after a resubmission narrowed to ADP. Despite a 'successful' Phase 3 read-out (HARMONY), the FDA twice declined to approve. The 10-K characterizes the historical failure rate: 'we had an unsuccessful Phase 3 trial with NUPLAZID in 2009 and we have had several clinical studies evaluating pimavanserin in other indications that did not achieve statistical significance on certain endpoints.' ACP-204 is a Phase 2 INITIATION as of Q4 2023, not a near-term catalyst.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Mode B catch. The disclosure of the two CRLs is technically clean (honesty-alpha PASS on the verbatim facts), but the 10-K's strategic narrative — listing 'ADVANCE-2 in Q1 2024' and 'ACP-101 in PWS' and 'ACP-204 in ADP' as growth pillars — does not give the reader proper weighting for the fact that ACAD has now had THREE distinct sNDA-level setbacks for pimavanserin's CNS label-expansion (DRP CRL, ADP CRL, plus the soon-to-fail ADVANCE-2). The 'positive ADVANCE-1' anchoring used to introduce ADVANCE-2 (C3) glosses over the company's poor pimavanserin-extension batting average. MODERATE rather than SEVERE because the facts ARE in the body text — just not coherently framed."
+    },
+    {
+      "claim_id": "C5",
+      "R": "Customer concentration disclosure: 'Four of such customers [specialty pharmacies and specialty distributors], each based in the United States, accounted for approximately 73% of our NUPLAZID product revenue and 56% of our total product revenue for the year ended December 31, 2023.' Concentration is explicitly named and quantified.",
+      "f": "If the concentration is honestly disclosed (named in body, quantified, with risk framing), the M-source for customer concentration should adjudicate as DISCLOSED_HONESTLY and the figure should reconcile internally.",
+      "M_source": "revenue_concentration.query_revenue_concentration (calibrated for federal-services primes; expected UNVERIFIABLE for a specialty-pharma channel) + 10-K self-text cross-read",
+      "M_value": "M-source returns UNVERIFIABLE for a specialty-pharma distribution channel (no peer set). Cross-read: the 73%/56% concentration is disclosed in the very paragraph that explains the SP/SD channel architecture (line 527), AND it is reinforced under the supply-chain risk factor (line 585) that warns of dependence on the same network. The internal arithmetic also checks: 56% of $726.4M total = ~$406.8M attributed to the top 4 customers, which is plausible given NUPLAZID's $549.2M revenue concentrated through SPs/SDs.",
+      "severity": "PASS",
+      "interpretation": "Concentration risk is real but HONESTLY DISCLOSED — body text with both the NUPLAZID-only and total-revenue figures, plus an explicit risk-factor that flags the dependence. This is the kind of disclosure HONESTY-ALPHA scores as PASS even though the underlying business risk (top-4 channel partners = 56% of revenue) is material."
+    },
+    {
+      "claim_id": "C6",
+      "R": "Patent / generic-entry exposure for NUPLAZID: 10-K discloses ANDA litigation with five generic filers (Aurobindo, Teva, Hetero, MSN, Zydus) and 'The agreement allows Hetero to launch its generic pimavanserin product on February 27, 2038, subject to certain triggers for earlier launch.' Implicit framing: NUPLAZID has runway to 2038 absent settlement triggers.",
+      "f": "Mode B: if Hetero settled out to 2038, the four remaining defendants (Aurobindo, Teva, MSN, Zydus) are still active and could settle at MUCH earlier dates. The 10-K should disclose any other pre-cutoff settlement, and the structured case docket should not show signs of recent adverse rulings.",
+      "M_source": "Filing self-text cross-read + edgar.list_filings for any 8-K Item 8.01 'other events' related to ANDA litigation pre-cutoff",
+      "M_value": "10-K narrative on Pimavanserin I and II cases through 2023 shows active litigation; no other settlements at the 10-K reporting date beyond Hetero (2038). One Aurobindo dismissal occurred on Paragraph IV->III conversion in March 2023 (favorable). No 8-K Item 8.01 disclosing further settlements pre-cutoff (no entries between 10-K and 2024-05-15 cutoff on ANDA topic). Hatch-Waxman 30-month stays would naturally expire over 2023-2025.",
+      "severity": "UNVERIFIABLE",
+      "interpretation": "The 2038 Hetero-settlement framing is technically accurate but creates an overly comfortable impression for the average reader. Four other ANDA filers remain active and could settle at much earlier dates. The disclosure is voluminous but it is hard to know from the 10-K alone what residual generic-exposure timeline actually is. UNVERIFIABLE under HONESTY-ALPHA because the framework cannot independently adjudicate Markman / 30-month-stay timing — flagged as a Mode B underlying business risk that the 10-K narrative softens."
+    },
+    {
+      "claim_id": "C7",
+      "R": "DAYBUE launch trajectory narrative: '[w]e have seen strong revenue numbers since launch, demonstrating what we believe to be a high level of excitement in the Rett community as soon as DAYBUE came to market. We have seen strong early demand for DAYBUE, coupled with persistency rates that have exceeded the same time periods for those seen in patients who were in the placebo group in the Phase 3 LAVENDER study who then rolled over to treatment with trofinetide in our open-label Lilac study.' Implicit growth claim: DAYBUE launch trajectory remains 'strong.'",
+      "f": "If the 'strong' framing is durable, the Q1 2024 10-Q (filed 2024-05-09, pre-cutoff) should show continued sequential growth in DAYBUE quarterly revenue, not a sequential decline.",
+      "M_source": "claim_evolution via edgar.fetch_filing_text on Q1 2024 10-Q (acad-20240331.htm)",
+      "M_value": "Q1 2024 10-Q (filed 2024-05-09, PRE-CUTOFF) reports DAYBUE Q1 2024 net product sales = $75.9M. Implied prior quarters: DAYBUE FY2023 = $177.2M from April-2023 launch (3 quarters). Approximate quarterly sequence: Q2 2023 ~$22M, Q3 2023 ~$66.4M, Q4 2023 ~$88.8M, Q1 2024 $75.9M. Q1 2024 is a SEQUENTIAL DECLINE of ~$13M (-14% QoQ) from peak Q4 2023, the FIRST sequential decline in the launch curve. NUPLAZID Q1 2024 = $129.9M vs $118.5M Q1 2023 (+10% YoY, in-line).",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "interpretation": "Second major Mode A catch. The 10-K (Feb 28, 2024) describes DAYBUE in unqualified 'strong launch' language. The Q1 2024 10-Q filed inside the cutoff shows DAYBUE's FIRST sequential decline — Q4 2023 ~$89M -> Q1 2024 $75.9M (-14% QoQ). For a brand-new rare-disease launch where persistency is the key value driver, the first sequential decline is the canonical early indicator of persistency/discontinuation pressure (the patient pool topped out faster than the bull case modeled). The 10-K's 'strong persistency relative to LAVENDER placebo rollover' framing does not survive 70 days. SEVERE because the 10-K's launch narrative IS the bull case for ACAD's 2024 revenue trajectory and it materially overstates the slope as of cutoff."
+    },
+    {
+      "claim_id": "C8",
+      "R": "Safety profile of NUPLAZID: 10-K acknowledges that NUPLAZID carries a black-box warning that elderly dementia patients on antipsychotics are at increased risk of death, and that 'There has also been attention to publicly reported deaths of patients that were prescribed NUPLAZID, and the FDA conducted an evaluation of available information about NUPLAZID. In the past, the FDA has observed potentially concerning prescribing patterns with NUPLAZID, such as the concomitant use of other antipsychotic drugs or drugs that can cause QT prolongation, a potential cause of heart rhythm disorder.' Implicit framing: safety overhang is historical and contained.",
+      "f": "If safety overhang is contained, openfda.query_approved_drugs should not show any safety actions on pimavanserin beyond the existing label, and no new adcomm or labelling changes should be in the 2023 pre-cutoff filings.",
+      "M_source": "openfda + 10-K cross-read (Item 1A Risk Factors + Item 1 Regulation)",
+      "M_value": "openfda module exposed only query_approved_drugs (limited adjudication ability for post-marketing safety actions on a single molecule). 10-K narrative shows no new boxed-warning expansion, no REMS imposition, no new FDA safety action in 2023. Mortality-language risk is HISTORICAL and pre-2023. NUPLAZID's class-effect black-box is unchanged.",
+      "severity": "UNVERIFIABLE",
+      "interpretation": "Safety narrative appears honest and contained as of the 10-K reporting date. UNVERIFIABLE rather than PASS because the openfda M-source cannot adjudicate prescribing-pattern surveillance or post-marketing pharmacovigilance changes at the granularity needed. No flag raised."
+    },
+    {
+      "claim_id": "C9",
+      "R": "Pipeline breadth and clinical-trial conduct discipline: 10-K describes Phase 3 COMPASS (ACP-101 in PWS) and Phase 2 ACP-204 (in ADP) initiated Q4 2023, plus the Stoke RNA collaboration (SYNGAP1, MECP2, undisclosed CNS target). Implicit claim: a credible early/mid-stage pipeline supports the next leg of growth.",
+      "f": "Mode B: if the company runs trials cleanly, ClinicalTrials.gov should show a balanced active/completed mix with a modest termination rate. A high termination rate (>20%) is a yellow flag for trial-conduct discipline.",
+      "M_source": "clinical_trials.query_by_lead_sponsor(sponsor='Acadia Pharmaceuticals', cutoff_date='2024-05-15')",
+      "M_value": "38 studies pre-cutoff (out of 41 total in registry). Status distribution: COMPLETED 24, TERMINATED 9, ENROLLING_BY_INVITATION 2, ACTIVE_NOT_RECRUITING 1, RECRUITING 1, APPROVED_FOR_MARKETING 1. Termination rate = 9/38 = 23.7%. Phase mix: PHASE3=22, PHASE2=17, PHASE4=1.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "23.7% termination rate is on the higher end for a biotech with two approved products and an active pipeline. The 10-K does not foreground this — when discussing pipeline breadth, it lists only the active programs, not the historical termination rate. Mode B catch: the trial-conduct M-source surfaces a hit-rate concern that the 10-K's pipeline narrative does not address. MODERATE under HONESTY-ALPHA — not concealment, but selective framing that overstates pipeline 'credibility' without acknowledging the discontinuation history."
+    },
+    {
+      "claim_id": "C10",
+      "R": "Insider behavior around major pipeline event: ACAD's 10-K characterizes the schizophrenia program as a key growth pillar with results 'expected in the first quarter of 2024.' Implicit claim: insider activity around this catalyst should be routine / pre-cleared.",
+      "f": "Mode B: if insider behavior is routine, Form 4 filings in the 90 days surrounding the ADVANCE-2 readout (March 11, 2024) should show predominately pre-scheduled 10b5-1 sales, not discretionary acquisitions or unusual clusters.",
+      "M_source": "edgar.list_filings + direct Form 4 XML cross-read",
+      "M_value": "25 Form 4s filed in the 6 months prior to cutoff (2023-11-15 to 2024-05-15). Of the 12 Form 4s filed after the 10-K (2024-02-28 to 2024-05-15), the visible May 3, 2024 batch shows option-exercise-and-sell activity by executives (Schneyer, Teehan, Kihara) at $16.94/share — i.e., insiders selling at a price AFTER the ADVANCE-2 failure and the DAYBUE Q1 deceleration were both public. Transaction codes include M (option exercise) and S (open-market sale), small individual transactions (~$25K-$60K each). No large unscheduled accumulation by insiders; no large discretionary bullish bet that would suggest insiders disagreed with the post-failure market reaction.",
+      "severity": "UNVERIFIABLE",
+      "interpretation": "Form 4 pattern is option-exercise-and-sell — consistent with normal compensation monetization, but notable that insiders are selling INTO the post-ADVANCE-2 weakness rather than buying. No clear positive insider signal. UNVERIFIABLE under HONESTY-ALPHA because the Form 4 magnitudes are small relative to insider holdings; cannot adjudicate as either red flag or PASS."
+    }
+  ],
+  "supplemental_signals": {
+    "cash_and_investments_12_31_2023": "$438.9M",
+    "cash_and_investments_12_31_2022": "$416.8M",
+    "net_cash_yoy_change": "+$22.1M (operating-positive)",
+    "accumulated_deficit": "$2.4B",
+    "fy2023_net_product_sales": "$726.4M (NUPLAZID $549.2M + DAYBUE $177.2M)",
+    "fy2022_net_product_sales": "$517.2M (NUPLAZID only)",
+    "q1_2024_net_product_sales": "$205.8M (NUPLAZID $129.9M + DAYBUE $75.9M)",
+    "daybue_qoq_decel_q1_2024": "-14% sequential vs Q4 2023 ~$88.8M implied",
+    "customer_concentration_nuplazid": "Top 4 SPs/SDs = 73% of NUPLAZID, 56% of total",
+    "auditor": "Ernst & Young LLP, San Diego (since 2015, PCAOB ID 42, BIG4)",
+    "advance2_outcome": "FAILED primary endpoint, disclosed 2024-03-11 (PRE-CUTOFF)",
+    "pimavanserin_label_expansion_setbacks": "3 (DRP CRL Apr-2021, ADP CRL Aug-2022, ADVANCE-2 Phase 3 fail Mar-2024)",
+    "generic_litigation": "5 ANDA filers; Hetero settled 2038; 4 others (Aurobindo, Teva, MSN, Zydus) active",
+    "clinical_trial_termination_rate": "9/38 = 23.7% pre-cutoff",
+    "drawdown_at_cutoff": "-54.8% from trailing 52w high (pre-cutoff measurement)"
+  },
+  "summary": "ACAD is a Big-4-audited (Ernst & Young, since 2015), no-going-concern, operating-cash-positive biotech with two FDA-approved products generating $726M+ in 2023 net product sales. The -54.8% pre-cutoff drawdown is NOT a solvency or auditor-walk story. Instead, the lying-detector framework surfaces two SEVERE pre-cutoff narrative collapses: (1) the 10-K's headline 'late-stage growth' anchor — ADVANCE-2 in Q1 2024 — failed its Phase 3 primary endpoint on 2024-03-11, only 11 days after the 10-K was filed, marking ACAD's THIRD pimavanserin label-expansion setback after two prior FDA CRLs on dementia-related psychosis; and (2) DAYBUE, the launch story the 10-K describes as 'strong demand with strong persistency,' showed its FIRST sequential decline (-14% QoQ) in the Q1 2024 10-Q filed pre-cutoff, the canonical early warning that Rett-syndrome launch persistency is degrading. Two MODERATE catches: the 10-K's pimavanserin-extension batting average is poorly framed (3 setbacks across DRP/ADP/schizophrenia), and ClinicalTrials.gov shows a 24% termination rate that the pipeline narrative does not foreground. Solvency, auditor, customer-concentration disclosure, and safety overhang all PASS. The story is not corporate fraud — it is a small/mid-cap biotech where management's forward-looking growth narrative was invalidated by its own subsequent public filings INSIDE the cutoff window, a textbook claim-evolution detection.",
+  "scoring": {
+    "PASS": 3,
+    "UNVERIFIABLE": 3,
+    "MODERATE_UNDERDELIVERY": 2,
+    "SEVERE_UNDERDELIVERY": 2,
+    "RED_FLAG_NEGATIVE": 0,
+    "verifiable_claims": 7,
+    "weighted_sum": "(0*3 + 1*2 + 2*2 + 3*0) / 7 = 6 / 7",
+    "composite": 0.857
+  },
+  "composite": 0.857
+}

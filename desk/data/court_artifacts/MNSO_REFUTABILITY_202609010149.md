@@ -1,0 +1,32 @@
+## MNSO — refutability triage
+
+Cohort of one. The prior court's named kill (S&D ex-SBC 27.0% vs 23.2%) is not just confirmed — management **guided it forward** on the 8/28 call, which changes the question from "did the cascade overshoot?" to "did the cascade price the guide?" It did. Three of the bull-side pillars in the court brief do not survive the primary.
+
+| ticker | class | refuting metric | current value/trend (cited) | next print date | note |
+|---|---|---|---|---|---|
+| MNSO | **DAMAGE-ARRIVING** (drifting STRUCTURAL) | Quarterly S&D ex-SBC as % of revenue — YoY delta must narrow to refute permanence | 26Q2 **27.0% vs 23.2%** (+3.8pp); 26H1 25.8% vs 23.1% (+2.7pp). Mgmt guides FY adj. profit margin **−3 to −4pp YoY** and "we hope that **2027** would be a turning point" ([PR](https://www.prnewswire.com/news-releases/miniso-group-announces-2026-june-quarter-and-interim-unaudited-financial-results-302862628.html); [call](https://www.fool.com/earnings/call-transcripts/2026/08/28/miniso-mnso-q2-2026-earnings-call-transcript/)) | **~2026-11-19** (yfinance-derived, UNCONFIRMED — no company PR names it) | Investment cycle is guided to *continue* through 2026; the crest is at best 2-3 quarters out, not now |
+
+**COURT-WORTHY (damage-absent, ranked):** *none.* No member qualifies — the narrative's predicted damage is present in the numbers **and** in management's own forward guide.
+
+### What the cascade did *not* price (all bearish — the asymmetry runs the wrong way)
+
+1. **Reported net profit growth is entirely a Yonghui artifact.** Share of equity-accounted investees swung from **−RMB138.9M to +RMB57.8M** (Yonghui alone +RMB60.3M vs a prior-year loss) — a **+RMB196.7M swing**, ~3.9× the entire RMB50.6M increase in profit for the period. Ex-equity-method, profit for the period **fell ~16% YoY**, not +5.6%. The red assignment expected Yonghui to be a *drag*; it is a *crutch*, which is worse.
+2. **"GM holds" is false like-for-like.** 26Q2 GM 45.3% includes a disclosed **1.2pp tariff benefit** → ~44.1% ex-tariff vs 44.3% prior. H1 44.3% "flat" includes 0.6pp → ~43.7% vs 44.3%. (Prior-period tariff effect isn't disclosed, so this is an approximation.) GM is not offsetting S&D — both legs are going the same direction.
+3. **Every segment decelerated hard in Q2 vs H1:** China +22.9% (vs +26.2% H1), Overseas **+9.1%** (vs +14.9%), TOP TOY **+16.9%** (vs +32.7%). Group H2 guided to **high-single-digit** revenue growth. The "revenue grew 22.4%" pillar is a backward-looking H1 average masking a sharp Q2 exit rate.
+4. **Balance sheet is no longer net cash.** Loans and borrowings RMB5,415M current + RMB1,751M non-current ≈ **RMB7.17bn vs RMB6.82bn cash**. Adding ~RMB6.0bn lease liabilities, lease-adjusted EV ≈ RMB26bn (~$3.7B) vs $2.79B market cap — **EV is ~32% above market cap**, so "~15x trailing on $2.79B" understates the multiple.
+
+**The one genuine bull datum:** on that same lease-adjusted basis, EV/adj. EBITDA is only **~5.8x** (FY26 adj. EBITDA ~RMB4.4–4.6bn), with returns of capital at **121% of adjusted net profit** in H1. That is not a rich multiple for mid-teens revenue growth — which is why this is a *wait*, not a permanent reject.
+
+⚠️ **Verification limitation that bears directly on sizing:** the lease-vs-debt split comes from a third-party aggregator, not the primary — SEC EDGAR and the MINISO IR PDF both returned **HTTP 403** to the fetch tool (no custom user-agent available without Bash). The lease liability is the single number that decides whether 5.8x is real. Treat it as unconfirmed.
+
+**MNSO.CNV CORPACT — could not verify at IBKR** (the IBKR connector is unauthenticated in this session; it needs authorization via claude.ai connector settings). On the public record there is **no live ADS tender offer** — nothing in any 6-K, PR, or HK filing. What does exist and would generate corporate-action lines: the **US$550M equity-linked (convertible) securities due 2032** issued Jan 2025 (the likely referent of a `.CNV` contract), the HK$2.0bn repurchase mandate effective 2026-06-30 with a ~US$51.3M Rule 10b5-1 ADS leg, and the H1 interim distribution. **Ruling: treat the tender read as stale/mis-parsed, not as a live tender.** Nothing here "changes everything."
+
+**Reversal trigger (unchanged, now dated):** manager-req velocity turning DOWN is still the right long trigger, but management has pre-announced the cycle runs through 2026 — so the detector should be armed for a **Q3/Q4 inflection**, and a trigger firing before the 11/19 print is more likely noise than crest.
+
+**PRINT PROXIMITY: 2026-11-19 — yfinance-derived, UNCONFIRMED (no company PR names the date; MINISO reported 26Q2 on 2026-08-28, so the Sept-quarter print is ~11 weeks out).** No print within 5 trading days → the print-decisive reconstruction is not triggered. Standing stance: **FLAT, band-below.** The named kill is confirmed by the primary *and* guided forward by management; the −64% drawdown priced the guide, per the earnings-dislocation lesson (headline IS the news). The lease-adjusted ~5.8x is the reason to keep a band rather than close the file.
+
+**COURT-WORTHINESS MNSO: 5/10** — a full court would refine the band, not flip the flat: the kill is management-confirmed and the bull pillars fail on the primary, but the ~5.8x lease-adjusted multiple and an unverified lease number leave real option value in a 2027 turn.
+
+Below the ≥6 auto-escalate threshold, so this does **not** route to a full red/blue bench. Two things I'd want before that changes: the lease liability confirmed off the primary interim statements, and one Q3 datapoint on the S&D ratio.
+
+Sources: [MINISO 26Q2/26H1 results PR](https://www.prnewswire.com/news-releases/miniso-group-announces-2026-june-quarter-and-interim-unaudited-financial-results-302862628.html) · [Q2 2026 earnings call transcript](https://www.fool.com/earnings/call-transcripts/2026/08/28/miniso-mnso-q2-2026-earnings-call-transcript/) · [US$550M equity-linked securities completion](https://ir.miniso.com/2025-01-14-MINISO-Group-Announces-Completion-of-US-550-Million-Equity-Linked-Securities) · [MNSO balance sheet aggregation](https://stockanalysis.com/stocks/MNSO/financials/balance-sheet/) · [HK$2.0bn buyback mandate 6-K](https://www.stocktitan.net/sec-filings/MNSO/6-k-miniso-group-holding-ltd-current-report-foreign-issuer-0e094b52661b.html)

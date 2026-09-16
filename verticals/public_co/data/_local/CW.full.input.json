@@ -1,0 +1,141 @@
+{
+  "ticker": "CW",
+  "cutoff": "2026-05-20",
+  "filing": "0001628280-26-007587_10-K.txt",
+  "filing_date": "2026-02-12",
+  "filing_age_days": 97,
+  "company_name": "Curtiss-Wright Corporation",
+  "cik": "0000026324",
+  "claims": [
+    {
+      "claim_id": "CW-01",
+      "claim_text": "Approximately 47% of 2025 net sales (~$1.647B) derived from contracts with U.S. Government agencies and prime contractors, with $1.647B in U.S. Government sales across segments.",
+      "subject": "Curtiss-Wright Corporation",
+      "predicate": "derives_us_govt_revenue",
+      "object_value": "$1,647,019 thousand in 2025 ($181M A&I, $762M Defense Electronics, $704M Naval & Power)",
+      "source_quote": "Approximately 47% of our total net sales for 2025... Total U.S. Government sales $ 1,647,019",
+      "category": "customer_pipeline",
+      "queries": [
+        {"mode": "A", "source": "usaspending.query_recipient_contracts", "kwargs": {"recipient_name": "Curtiss-Wright"}},
+        {"mode": "B", "source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "Curtiss-Wright"}}
+      ]
+    },
+    {
+      "claim_id": "CW-02",
+      "claim_text": "Curtiss-Wright supplies the Virginia-class submarine, Columbia-class submarine, and Ford-class aircraft carrier shipbuilding programs (naval propulsion, RCPs, valves, etc.) with significant production revenues.",
+      "subject": "Curtiss-Wright Naval & Power segment",
+      "predicate": "supplies_named_naval_programs",
+      "object_value": "Virginia-class, Columbia-class, Ford-class, SSN(X)",
+      "source_quote": "we are recognizing significant production revenues on the Ford class aircraft carrier, Columbia class and Virginia class submarines... as well as development revenues on the future generation SSN(X) submarine",
+      "category": "customer_pipeline",
+      "queries": [
+        {"mode": "A", "source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "Curtiss-Wright"}},
+        {"mode": "B", "source": "pentagon_jbook.query_program_funding", "kwargs": {"program_name": "Columbia class submarine"}}
+      ]
+    },
+    {
+      "claim_id": "CW-03",
+      "claim_text": "Curtiss-Wright supplies Reactor Coolant Pumps and control rod drive mechanisms for the Westinghouse AP1000 reactor design, and is actively pursuing business on leading Small Modular Reactor (SMR) designs.",
+      "subject": "Curtiss-Wright Naval & Power segment",
+      "predicate": "supplies_commercial_nuclear",
+      "object_value": "Westinghouse AP1000 RCPs and CRDMs; SMR pursuits",
+      "source_quote": "we provide Reactor Coolant Pumps (RCPs) and control rod drive mechanisms for commercial nuclear power plants, most notably to support the Generation III+ Westinghouse AP1000 reactor design. We are also actively engaged and pursuing business on the leading advanced Small Modular Reactor (SMR) designs",
+      "category": "counterparty_disclosure",
+      "queries": [
+        {"mode": "A", "source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Curtiss-Wright", "form_types": ["10-K", "10-Q"]}},
+        {"mode": "B", "source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Curtiss-Wright"}}
+      ]
+    },
+    {
+      "claim_id": "CW-04",
+      "claim_text": "In 2024 Curtiss-Wright completed two acquisitions for $235M total (inclusive of purchase price adjustments); zero acquisitions in 2025. $1.7B goodwill on balance sheet, indicating a serial-acquirer rollup model.",
+      "subject": "Curtiss-Wright Corporation",
+      "predicate": "executed_acquisitions",
+      "object_value": "2 acquisitions/$235M in 2024, 0 in 2025; $1.7B goodwill",
+      "source_quote": "In 2025, we did not complete any acquisitions. In 2024, we acquired two businesses for $235 million... We have $1.7 billion in goodwill as of December 31, 2025.",
+      "category": "rollup_thesis",
+      "queries": [
+        {"mode": "A", "source": "sec_filings.list_filings_by_form", "kwargs": {"cik": "0000026324", "form_type": "8-K"}},
+        {"mode": "B", "source": "acq_coherence.score_acquisition_coherence", "kwargs": {"parent_thesis": "Curtiss-Wright defense electronics + naval propulsion + commercial nuclear platform consolidator (Pivot to Growth)", "acquisitions": ["2024 acquisitions of two unnamed businesses for $235M", "$1.7B aggregate goodwill from historical roll-ups"]}}
+      ]
+    },
+    {
+      "claim_id": "CW-05",
+      "claim_text": "Curtiss-Wright operates 146 facilities worldwide as of Dec 31, 2025 (142 segment + 4 corporate), with 22 owned and 120 leased; principal domestic manufacturing in AZ, CA, NY, NC, OH, PA, SC, plus Canada/Mexico/UK.",
+      "subject": "Curtiss-Wright Corporation",
+      "predicate": "operates_global_facilities",
+      "object_value": "146 facilities (22 owned, 120 leased), domestic in 7 US states + Canada/Mexico/UK",
+      "source_quote": "As of December 31, 2025, we had 146 facilities worldwide... Our principal domestic manufacturing facilities are located in Arizona, California, New York, North Carolina, Ohio, Pennsylvania, and South Carolina",
+      "category": "physical_facility",
+      "queries": [
+        {"mode": "A", "source": "epa_frs.query_facilities", "kwargs": {"company_name": "Curtiss-Wright"}},
+        {"mode": "B", "source": "osha_establishments.query_establishments", "kwargs": {"company_name": "Curtiss-Wright"}}
+      ]
+    },
+    {
+      "claim_id": "CW-06",
+      "claim_text": "Curtiss-Wright disclosed share repurchase activity of ~934K shares for $465M in 2025 and $200M plus $200M 10b5-1 trading plans active in Q3/Q4 2025; additional $60M + $100M 10b5-1 plans take effect Jan 2, 2026.",
+      "subject": "Curtiss-Wright Corporation",
+      "predicate": "executed_buybacks_with_10b5-1",
+      "object_value": "$465M buyback 2025; new $60M+$100M plans Jan 2026",
+      "source_quote": "During 2025, the Company repurchased approximately 934,000 shares of its common stock for $465 million... two written trading plans under Rule 10b5-1... $200 million... $200 million...",
+      "category": "financial_distress",
+      "queries": [
+        {"mode": "A", "source": "sec_filings.list_filings_by_form", "kwargs": {"cik": "0000026324", "form_type": "8-K"}},
+        {"mode": "B", "source": "insider_vs_calendar.query_insider_sales_near_budget_events", "kwargs": {"cik": "0000026324", "window_days": 14, "start_date": "2024-01-01", "end_date": "2026-05-20"}}
+      ]
+    },
+    {
+      "claim_id": "CW-07",
+      "claim_text": "Curtiss-Wright claims patent / IP leadership as a core differentiator (precision manufacturing, MOSA defense electronics, COTS rugged systems, severe-service valves) supporting >400 platforms and >3,000 programs worldwide.",
+      "subject": "Curtiss-Wright Corporation",
+      "predicate": "holds_ip_portfolio",
+      "object_value": "patents and IP across MOSA defense electronics, RCPs, severe-service valves",
+      "source_quote": "While we take precautionary steps to protect our technological advantages and intellectual property and rely in part on patent, trademark, trade secret, and copyright laws... presence on more than 400 defense platforms and more than 3,000 programs worldwide.",
+      "category": "patent",
+      "queries": [
+        {"mode": "A", "source": "uspto_odp.query_assignee", "kwargs": {"assignee_name": "Curtiss-Wright"}},
+        {"mode": "B", "source": "uspto_odp.query_assignee", "kwargs": {"assignee_name": "Curtiss-Wright Controls"}}
+      ]
+    },
+    {
+      "claim_id": "CW-08",
+      "claim_text": "Curtiss-Wright passes ICFR with Deloitte & Touche unqualified opinion as of Dec 31, 2025; no material weakness disclosed. 2024 Restructuring Program substantially completed with $5M pre-tax charges in 2025 (vs. $16M in 2024).",
+      "subject": "Curtiss-Wright Corporation",
+      "predicate": "clean_icfr_opinion",
+      "object_value": "Deloitte unqualified ICFR opinion Feb 12, 2026; no material weakness",
+      "source_quote": "our report dated February 12, 2026, expressed an unqualified opinion on the Company's internal control over financial reporting",
+      "category": "icfr",
+      "queries": [
+        {"mode": "A", "source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Curtiss-Wright material weakness"}},
+        {"mode": "B", "source": "claim_evolution.query_claim_evolution", "kwargs": {"cik": "0000026324", "claim_topic": "material weakness restatement"}}
+      ]
+    },
+    {
+      "claim_id": "CW-09",
+      "claim_text": "No customer accounted for more than 10% of total net sales in 2025, 2024, or 2023 — diversified customer base, U.S. Government as aggregate top exposure at 47%/48%/46%.",
+      "subject": "Curtiss-Wright Corporation",
+      "predicate": "customer_concentration_disclosure",
+      "object_value": "No customer >10% of net sales; US Gov 47% aggregate in 2025",
+      "source_quote": "No customer accounted for more than 10% of our total net sales during 2025, 2024, or 2023.",
+      "category": "customer_concentration",
+      "queries": [
+        {"mode": "A", "source": "usaspending.query_recipient_contracts", "kwargs": {"recipient_name": "Curtiss-Wright"}},
+        {"mode": "B", "source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "Curtiss-Wright"}}
+      ]
+    },
+    {
+      "claim_id": "CW-10",
+      "claim_text": "Curtiss-Wright maintains active SAM.gov registration as a federal contractor (required for U.S. Government prime / sub contracts; 47% of revenue from federal).",
+      "subject": "Curtiss-Wright Corporation",
+      "predicate": "active_federal_contractor_registration",
+      "object_value": "Active SAM.gov entity required for federal awards",
+      "source_quote": "47% of our total net sales for 2025 ... derived from contracts with agencies of, and prime contractors to, the U.S. Government",
+      "category": "regulatory_milestone",
+      "queries": [
+        {"mode": "A", "source": "sam_entity.query_entity_by_uei", "kwargs": {"recipient_name": "Curtiss-Wright"}},
+        {"mode": "B", "source": "usaspending.query_federal_presence", "kwargs": {"recipient_name": "Curtiss-Wright"}}
+      ]
+    }
+  ]
+}

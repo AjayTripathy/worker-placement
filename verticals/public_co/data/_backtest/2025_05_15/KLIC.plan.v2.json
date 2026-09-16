@@ -1,0 +1,397 @@
+{
+  "ticker": "KLIC",
+  "cutoff": "2025-05-15",
+  "filing": "0000056978-24-000148_10K.txt",
+  "plan_version": 2,
+  "naics_domain": "semiconductors",
+  "naics_prefix": "33441",
+  "cohort_context": "AIRO-signature mechanical hit ('stock for services' + 'material weakness' co-occurrence in FY 10-K). KLIC is a profitable semi packaging-equipment maker with $577M cash, $151M of FY24 buybacks, and an active $0.80 annual dividend. The cohort screen hit is keyword boilerplate, not a distress fingerprint. Plan tests whether multi-source aggregation correctly SUPPRESSES this catalyst-rally name (forward +204.5%).",
+  "claims": [
+    {
+      "claim_id": "KLIC-1",
+      "claim_text": "KLIC is an SEC-registered Pennsylvania-incorporated public semiconductor capital equipment maker (NAICS 33441x family) with dual corporate offices in Singapore and Fort Washington PA, and is the same legal entity SAM.gov and federal registries would index.",
+      "source_quote": "K&S was incorporated in Pennsylvania in 1956. Our principal offices are located at 23A Serangoon North Avenue 5, #01-01, Singapore 554369 and 1005 Virginia Dr., Fort Washington, PA 19034",
+      "subject": "Kulicke and Soffa Industries Inc.",
+      "predicate": "is_registered_entity",
+      "object_value": "Pennsylvania-incorporated; PA + Singapore principal offices",
+      "category": "physical_facility",
+      "referent_type": "entity",
+      "m_source_status": "MAPPED",
+      "source_id": "sam_entity.query_entity_by_uei",
+      "source_params": {
+        "uei": "RESOLVE_VIA_USASPENDING_FIRST"
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "Pennsylvania Department of State business entity search",
+          "endpoint_or_method": "https://www.corporations.pa.gov/search/CorpSearch",
+          "rationale": "KLIC self-describes as PA-incorporated since 1956; an active PA franchise registration would corroborate the corporate-existence claim independent of federal registries.",
+          "expected_observable": "active corporate registration record with formation date",
+          "signal_direction": "absence or non-active status would contradict the basic existence claim",
+          "severity_if_contradiction": "SEVERE"
+        },
+        {
+          "source_label": "Singapore ACRA BizFile",
+          "endpoint_or_method": "https://www.bizfile.gov.sg (Singapore Accounting and Corporate Regulatory Authority)",
+          "rationale": "Singapore Serangoon HQ implies a registered Singapore subsidiary (likely Kulicke & Soffa Pte Ltd); ACRA holds the canonical registry.",
+          "expected_observable": "registered Singapore entity with active status and matching address",
+          "signal_direction": "absence at the Serangoon address would contradict the dual-HQ claim",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "semiconductors",
+      "claim_type_taxonomy": "existence",
+      "extraction_notes": "Existence is CANONICAL via sam_entity+osha per taxonomy. Note OSHA may underfire because KLIC's US footprint is small (PA + Santa Ana CA only). Creative extensions probe foreign jurisdictions where taxonomy is silent."
+    },
+    {
+      "claim_id": "KLIC-2",
+      "claim_text": "KLIC operates 7 named major facilities globally totaling ~726,000 sq ft, including 88,000 sq ft in Fort Washington PA and 65,000 sq ft in Santa Ana CA (the only two US sites).",
+      "source_quote": "Singapore Serangoon 251,000 sq. ft. ... China Suzhou 155,000 sq. ft. ... The Netherlands Eindhoven 116,000 sq. ft. ... United States Fort Washington, Pennsylvania 88,000 sq. ft. ... Santa Ana, California 65,000 sq. ft. ... Israel Haifa 31,000 sq. ft. ... Taiwan Taipei 20,000 sq. ft.",
+      "subject": "KLIC global facilities footprint",
+      "predicate": "operates_at_claimed_locations",
+      "object_value": "7 named facilities, ~726K sq ft total",
+      "category": "physical_facility",
+      "referent_type": "physical_object",
+      "m_source_status": "MAPPED",
+      "source_id": "osha_establishments.query_establishments",
+      "source_params": {
+        "company_name": "Kulicke",
+        "naics_prefix": "3344",
+        "match_mode": "word_boundary",
+        "max_results": 25
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "EPA FRS facility registry (US sites)",
+          "endpoint_or_method": "epa_emissions.query_facility_emissions with company_name='Kulicke' and claimed_locations=[{city:'Fort Washington',state:'PA'},{city:'Santa Ana',state:'CA'}]",
+          "rationale": "Semi packaging assembly typically falls below RCRA/TRI thresholds (no fab chemistry, no etchants at scale), so EPA absence is expected baseline rather than contradictory — but a positive hit at either named US address would strongly corroborate operational existence.",
+          "expected_observable": "FRS facility records or null at named addresses",
+          "signal_direction": "ABSENCE at named locations is UNVERIFIABLE for this domain (packaging equipment doesn't trigger EPA registries); PRESENCE elsewhere would be additional corroboration",
+          "severity_if_contradiction": "UNVERIFIABLE"
+        },
+        {
+          "source_label": "Montgomery County PA assessor (Fort Washington owned facility)",
+          "endpoint_or_method": "https://propertyrecords.montcopa.org/ — search by parcel address 1005 Virginia Dr, Fort Washington",
+          "rationale": "Filing states Fort Washington is OWNED (not leased); an assessor parcel record in KLIC's name would corroborate the 88,000 sq ft claim with an independent tax-roll observable.",
+          "expected_observable": "parcel record with owner name, assessed value, building sq ft",
+          "signal_direction": "absence or wrong-owner record would contradict the ownership claim; sq-ft mismatch would contradict scale",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Suzhou Industrial Park land/building registry (China)",
+          "endpoint_or_method": "Suzhou Industrial Park land-use records (public via Suzhou Natural Resources Bureau)",
+          "rationale": "Filing states Suzhou is OWNED (only other owned facility besides Fort Washington); a Chinese land-use record in a KLIC subsidiary's name would corroborate.",
+          "expected_observable": "land-use right record",
+          "signal_direction": "absence at claimed parcel would contradict the China facility claim",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Singapore IRAS / URA commercial property records",
+          "endpoint_or_method": "URA SPACE (https://www.ura.gov.sg/maps/) and IRAS property tax assessment search",
+          "rationale": "The Serangoon HQ is leased; Singapore commercial-lease and property-tax records would corroborate a tenant at the specific address and approximate floor area.",
+          "expected_observable": "commercial property with tenant or active commercial use at 23A Serangoon North Ave 5",
+          "signal_direction": "absence of commercial activity at address would contradict",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Satellite imagery (Sentinel-2 / Planet Labs)",
+          "endpoint_or_method": "Visual inspection of named addresses (Suzhou, Singapore Serangoon, Eindhoven) for industrial-park footprint matching 100-250K sq ft",
+          "rationale": "For the three largest facilities (>100K sq ft each), a building footprint inconsistent with the claimed sq ft would be a SES-style red flag.",
+          "expected_observable": "building footprint dimensions at named coordinates",
+          "signal_direction": "satellite shows empty lot or vastly smaller building than claimed footprint",
+          "severity_if_contradiction": "SEVERE (only fires on multi-orders-of-magnitude mismatch)"
+        }
+      ],
+      "domain": "semiconductors",
+      "claim_type_taxonomy": "facility_scope",
+      "extraction_notes": "Taxonomy says facility_scope is PROVISIONAL for semis (sam + osha + epa). KLIC's heavy non-US footprint means most taxonomy sources will underfire — creative extensions reach into county assessors, ACRA, URA, and satellite imagery, which the taxonomy does not yet cover."
+    },
+    {
+      "claim_id": "KLIC-3",
+      "claim_text": "KLIC employs 2,681 full-time + 65 temporary workers worldwide, with ~70 in Israel/Haifa; US headcount is concentrated in Fort Washington PA and Santa Ana CA.",
+      "source_quote": "2,681 full-time employees and 65 temporary workers worldwide. ... We have approximately 70 employees in Israel.",
+      "subject": "KLIC global headcount",
+      "predicate": "employs",
+      "object_value": "2,681 full-time + 65 temp; ~70 in Israel",
+      "category": "physical_facility",
+      "referent_type": "quantity",
+      "m_source_status": "MAPPED",
+      "source_id": "dol_h1b_lca.query_lca_filings",
+      "source_params": {
+        "employer_name": "Kulicke",
+        "match_mode": "word_boundary",
+        "max_results": 50
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "LinkedIn employee headcount (KLIC company page)",
+          "endpoint_or_method": "https://www.linkedin.com/company/kulicke-&-soffa/ — public headcount counter + geo breakdown",
+          "rationale": "Public-tier LinkedIn headcount is a directly comparable observable to the filing's 2,681 number; large divergence (e.g. <500 visible profiles for a 2,681-employee firm) would suggest workforce overstatement.",
+          "expected_observable": "associated-employee count and country distribution",
+          "signal_direction": "if LinkedIn count is <30% of claimed headcount, suggests overstatement; if >50%, corroborates",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Singapore MOM Fair Consideration Framework / WP / EP statistics",
+          "endpoint_or_method": "Singapore Ministry of Manpower employer-pass listings (where public) and PSI employer profiles",
+          "rationale": "KLIC's Singapore HQ is its largest facility (251K sq ft) and likely largest workforce. MOM data on Employment Pass holders by employer would corroborate the Singapore footprint.",
+          "expected_observable": "employer EP/S-pass count for Kulicke & Soffa Pte Ltd",
+          "signal_direction": "near-zero EP holders would be inconsistent with a 250K sq ft Singapore HQ operation",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Israel CBS / Israeli Innovation Authority — manufacturer registry (Haifa)",
+          "endpoint_or_method": "Israeli Tax Authority public business registry + IIA-listed grant recipients",
+          "rationale": "Filing claims ~70 employees in Haifa for an APS manufacturing+technology center; Israeli registries would corroborate a real operational presence.",
+          "expected_observable": "registered Israeli subsidiary in Haifa with employee count or industry classification",
+          "signal_direction": "absence in Israeli business registry at Haifa = contradiction",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "OSHA Form 300A US establishments (already in taxonomy)",
+          "endpoint_or_method": "osha_establishments.query_establishments with company_name='Kulicke', state='PA' and state='CA'",
+          "rationale": "Fort Washington PA (88K sq ft) and Santa Ana CA (65K sq ft) are large enough to likely cross the OSHA 20-employee threshold; OSHA Form 300A filings at those addresses would corroborate US-headcount sub-claim.",
+          "expected_observable": "annual_average_employees by establishment",
+          "signal_direction": "ABSENCE for US sites is mildly informative — KLIC's US ops are real but small; presence with low counts is expected baseline",
+          "severity_if_contradiction": "UNVERIFIABLE"
+        }
+      ],
+      "domain": "semiconductors",
+      "claim_type_taxonomy": "workforce",
+      "extraction_notes": "Workforce is CANONICAL via dol_h1b_lca per taxonomy (newly promoted). KLIC is a semi-equipment maker (H-1B-dense for engineers), so LCA filings should fire on US worksites. Major caveat: 2,681 is GLOBAL — H-1B only adjudicates the US slice. Creative extensions reach into Singapore MOM and Israeli CBS to test the global claim."
+    },
+    {
+      "claim_id": "KLIC-4",
+      "claim_text": "KLIC has no customer accounting for >10% of net revenue in FY24, FY23, or FY22; its major customer base is IDMs, OSATs, and foundry service providers — a diffuse industrial-customer mix rather than a megacap-concentrated book.",
+      "source_quote": "There was no customer with sales representing more than 10% of our net revenue in fiscal 2024.",
+      "subject": "KLIC customer concentration",
+      "predicate": "lacks",
+      "object_value": "no single >10% customer in FY24/23/22",
+      "category": "customer_pipeline",
+      "referent_type": "entity",
+      "m_source_status": "MAPPED",
+      "source_id": "megacap_namecheck.query_megacap_mentions",
+      "source_params": {
+        "small_cap_name": "Kulicke & Soffa",
+        "cutoff_date": "2025-05-15",
+        "megacap_subset": ["Apple", "Nvidia", "Microsoft", "Tesla", "Amazon"],
+        "window_days": 3650,
+        "forms": "10-K,10-Q,8-K"
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "OSAT industry public-filings cross-check (ASE, Amkor, JCET, Powertech)",
+          "endpoint_or_method": "edgar_fts.query_fulltext with search_term='Kulicke' restricted to cik=Amkor (0001047127) — and similar for ASE/JCET via foreign exchange filings where available",
+          "rationale": "KLIC's named customer types are OSATs (Amkor, ASE, JCET, Powertech). Amkor is a US-listed OSAT whose 10-K may name equipment vendors. A hit corroborates the OSAT-customer claim; absence is weak (vendors are rarely named in 10-Ks).",
+          "expected_observable": "mentions of Kulicke / K&S in Amkor 10-K/10-Q filings",
+          "signal_direction": "presence corroborates, absence is non-informative (vendor-side disclosure threshold is high)",
+          "severity_if_contradiction": "UNVERIFIABLE"
+        },
+        {
+          "source_label": "SEMI World Fab Forecast / SEMI equipment market reports",
+          "endpoint_or_method": "SEMI Org market-share reports for wire-bonder + advanced-packaging equipment",
+          "rationale": "SEMI tracks vendor market share for back-end equipment categories. KLIC's claim to leadership in ball/wedge bonding implies non-trivial unit-share in those segments.",
+          "expected_observable": "vendor market-share by sub-segment",
+          "signal_direction": "near-zero share in claimed leadership segments would contradict; non-trivial share corroborates",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Megacap earnings-call transcripts (Apple, NVDA, AMD, Samsung) full-text search for KLIC product names",
+          "endpoint_or_method": "search transcripts for 'RAPID Pro', 'APAMA', 'APTURA', 'Katalyst', 'LUMINEX' (KLIC product names) in megacap or fabless transcripts",
+          "rationale": "If megacap product roadmaps reference these tools by name, that's strong indirect customer corroboration.",
+          "expected_observable": "0..N mentions of KLIC product names in megacap transcripts",
+          "signal_direction": "presence is strong corroboration; absence is non-diagnostic (tool names rarely surface in earnings calls)",
+          "severity_if_contradiction": "UNVERIFIABLE"
+        }
+      ],
+      "domain": "semiconductors",
+      "claim_type_taxonomy": "commercial_customer",
+      "extraction_notes": "Commercial_customer is CANONICAL via megacap_namecheck per taxonomy. The interesting thing about KLIC's claim is the ABSENCE of customer concentration — testing whether KLIC's name appears in megacap filings at all. Recurring-relationship hits would corroborate a real industry presence; INFLATION_SUSPECT (0 hits) would be inconsistent with a 73-year-old industry leader."
+    },
+    {
+      "claim_id": "KLIC-5",
+      "claim_text": "KLIC maintains an active patent portfolio underpinning its wire-bonder, advanced-packaging (APTURA, CuFirst hybrid bonding), and mini-LED (LUMINEX) technology leadership claims.",
+      "source_quote": "The APTURA TM is a highly capable thermo-compression bonding system which supports ultra-fine-pitch fluxless direct-copper thermo-compression as well as the CuFirst TM hybrid bonding process. ... Our leadership in system-in-package ( SiP ), multi-chip module ( MCM ) and heterogeneous integration ...",
+      "subject": "KLIC IP portfolio",
+      "predicate": "holds_granted_patents_in",
+      "object_value": "wire bonding, advanced packaging, hybrid bonding, mini-LED die placement",
+      "category": "technology",
+      "referent_type": "intangible",
+      "m_source_status": "MAPPED",
+      "source_id": "uspto_odp.query_assignee",
+      "source_params": {
+        "assignee_name": "Kulicke",
+        "cutoff_date": "2025-05-15",
+        "categorize": {
+          "wire_bonding": ["wire bond", "ball bond", "wedge bond", "ribbon bond"],
+          "advanced_packaging": ["thermo-compression", "thermocompression", "hybrid bond", "fan-out", "flip chip", "wafer level"],
+          "display_led": ["mini-LED", "micro-LED", "LED", "display", "die placement", "die transfer"],
+          "tools_consumables": ["capillary", "bond tool", "bonding tool"]
+        }
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "European Patent Office (EPO) Espacenet — applicant search",
+          "endpoint_or_method": "https://worldwide.espacenet.com/patent/search?q=ap%3DKulicke",
+          "rationale": "KLIC's largest facility is in Singapore and its product development spans Eindhoven, Suzhou, and Haifa — non-US patent filings (EPO, JPO, KIPO) are highly likely. EPO portfolio depth corroborates global R&D claim that USPTO alone may understate.",
+          "expected_observable": "count of EPO patent families with Kulicke as applicant",
+          "signal_direction": "non-trivial EPO portfolio corroborates global R&D presence",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Singapore IPOS patent register",
+          "endpoint_or_method": "https://www.ipos.gov.sg — IP2SG public search by applicant",
+          "rationale": "KLIC's Singapore HQ implies a substantial Singapore patent portfolio under the Singapore subsidiary's name; an empty register would contradict the 'corporate HQ + technology center' framing.",
+          "expected_observable": "patent count + grant rate for Singapore subsidiary",
+          "signal_direction": "absence contradicts Singapore-as-tech-center claim",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "USPTO patent assignments database (reassignment chains)",
+          "endpoint_or_method": "https://assignment.uspto.gov/patent/index.html — search by assignee Kulicke",
+          "rationale": "Trade-secret + patent-licensing patterns sometimes show up as assignment transfers (e.g. acquired technology, divestments). A pattern of OUTBOUND assignments to non-KLIC entities would be concerning.",
+          "expected_observable": "assignment chain showing inbound vs outbound transfers",
+          "signal_direction": "heavy outbound assignment without explanation would suggest IP portfolio decay",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "UCLA CHIPS / Penn State CHIMES / Resonac consortium membership listings",
+          "endpoint_or_method": "Public membership pages of UCLA Center for Heterogeneous Integration and Performance Scaling, Penn State CHIMES, Resonac-led US-Joint Semiconductor Consortium",
+          "rationale": "KLIC names three specific R&D consortia. Each maintains a public industrial-member list; presence of KLIC on those lists would directly corroborate the partnership claim.",
+          "expected_observable": "KLIC listed as industrial member on at least 1 of 3 consortium pages",
+          "signal_direction": "absence on all 3 would contradict the partnership-network claim",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "semiconductors",
+      "claim_type_taxonomy": "patents_ip",
+      "extraction_notes": "Patents_ip is CANONICAL via uspto_odp per taxonomy. The interesting test is the categorize bucket — KLIC's tech-leadership claims span 4 sub-areas (wire bonding, advanced packaging, hybrid bonding, mini-LED); per-bucket grant counts adjudicate whether the breadth is real or marketing."
+    },
+    {
+      "claim_id": "KLIC-6",
+      "claim_text": "Approximately 90.6% of KLIC's FY24 net revenue and 53.3% of FY24 net revenue was shipped to customer locations outside the US, primarily Asia/Pacific and China — implying material China-export exposure subject to US BIS export controls and tariff regimes.",
+      "source_quote": "Approximately 90.6% and 91.2% of our net revenue for fiscal 2024 and 2023, respectively, was for shipments to customer locations outside of the U.S., primarily in the Asia/Pacific region. Approximately 53.3% and 38.6% of our net revenue for fiscal 2024 and 2023, respectively, was for shipments to customers headquartered in China.",
+      "subject": "KLIC China export exposure",
+      "predicate": "ships_to",
+      "object_value": "53.3% of FY24 revenue to China-HQ customers; 90.6% outside US",
+      "category": "production_volume",
+      "referent_type": "geographic_area",
+      "m_source_status": "PROPOSED",
+      "source_id": null,
+      "source_params": {},
+      "proposed_connector": {
+        "name": "bis_export_licenses.query_applicant",
+        "description": "US Bureau of Industry and Security (Department of Commerce) export license database — quarterly BIS license-application disclosures by applicant for ECCN-controlled items (notably 3B001/3B002 semiconductor equipment to China).",
+        "endpoint": "https://www.bis.doc.gov/index.php/documents/regulations-docs (BIS published quarterly statistics + FOIA-released license-by-applicant data); Commerce Department BIS data portal",
+        "access_pattern": "file_download",
+        "auth_required": false,
+        "sample_invocation": "Download BIS quarterly export-license CSV, filter applicant ~= 'Kulicke' and destination='CN'; aggregate license-value + denial-rate.",
+        "rationale": "Semi packaging equipment shipped to China-HQ customers is subject to BIS export-license review under the Oct 2022 / Oct 2023 expanded controls. Material US-export exposure with 0 BIS license activity = either non-controlled equipment (corroboration of 'mature packaging' positioning) or undisclosed compliance risk.",
+        "estimated_cost": "free (BIS public quarterly data) + FOIA for line-item detail",
+        "completeness": "all US-origin export-license applications subject to BIS jurisdiction",
+        "referent_type": "export_transaction",
+        "attribute": "license_value_destination_status"
+      },
+      "creative_extensions": [
+        {
+          "source_label": "US Customs / CBP bills of lading (export ATB records)",
+          "endpoint_or_method": "Panjiva, ImportYeti, S&P Global Market Intelligence customs feeds — outbound shipments from KLIC US entities (Fort Washington PA, Santa Ana CA)",
+          "rationale": "Filing claims 90.6% of revenue ships outside US. Customs export records would show actual outbound shipment volume from US facilities to Asia destinations; near-zero outbound from US is consistent with revenue being primarily booked through Singapore HQ (not US-export-controlled).",
+          "expected_observable": "shipment count + destination distribution from US ports",
+          "signal_direction": "very low US-port export volume vs claimed 90%+ international revenue corroborates Singapore-pass-through booking; very high US-port export volume would re-implicate BIS export-control risk",
+          "severity_if_contradiction": "UNVERIFIABLE (this is more of a structure-of-business test than a contradiction test)"
+        },
+        {
+          "source_label": "Singapore TradeNet / customs export filings",
+          "endpoint_or_method": "Singapore Customs TradeXchange aggregated trade statistics by HS code 8486 (semiconductor assembly machines)",
+          "rationale": "If KLIC's revenue passes through Singapore HQ, Singapore export records under HS 8486 should show material outbound shipments. Singapore's aggregated trade statistics are public; line-item by exporter requires subscription.",
+          "expected_observable": "Singapore HS 8486 export volume + destination split",
+          "signal_direction": "Singapore HS 8486 exports to China should be a substantial portion of total — corroborates if China-revenue claim is real",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "USTR / China-tariff Section 301 exclusion list",
+          "endpoint_or_method": "https://ustr.gov/issue-areas/enforcement/section-301-investigations — exclusion list lookups by HS code 8486",
+          "rationale": "Filing names tariffs as a risk; whether KLIC's exports fall under Section 301 tariffs (or have received exclusions) is publicly documented.",
+          "expected_observable": "tariff line-item status for HS 8486 / 8479.89 (semi packaging machinery)",
+          "signal_direction": "active Section 301 tariff exposure with no exclusion = material risk to claim",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "BIS Entity List / Unverified List cross-check",
+          "endpoint_or_method": "BIS Consolidated Screening List API (https://api.trade.gov/consolidated_screening_list/) — query KLIC's China-HQ customers (named in 10-K Exhibit 21 + analyst-coverage customer lists)",
+          "rationale": "If KLIC's named China customers are on BIS Entity List, every shipment requires license review — a structural risk the 10-K doesn't quantify.",
+          "expected_observable": "customer-list overlap with Entity List / Unverified List",
+          "signal_direction": "overlap = material undisclosed customer-concentration-vs-sanctions risk",
+          "severity_if_contradiction": "SEVERE if overlap with denied parties found"
+        }
+      ],
+      "domain": "semiconductors",
+      "claim_type_taxonomy": "supply_chain",
+      "extraction_notes": "Semiconductors.supply_chain is GAP per taxonomy — explicit creative-extension invitation. KLIC is a US-listed PA-incorporated firm with majority China-customer revenue; this is a high-leverage cell for BIS export-license + customs-BOL connectors that the catalog needs."
+    },
+    {
+      "claim_id": "KLIC-7",
+      "claim_text": "KLIC's FY24 financial profile shows operational stress (Project W cancellation reduced revenue ~$15M, generated $104.7M of restructuring/impairment charges, with $86.2M counterparty reimbursement from the customer) yet the company maintains $577.1M cash, an active dividend ($0.80/yr), and $151M of FY24 buybacks — i.e. a profitable mid-cap, NOT a distressed shell.",
+      "source_quote": "The cancellation of the Project resulted in the reduction of the Company's fiscal 2024 revenue by approximately $15 million. ... As of September 28, 2024, our total cash, cash equivalents and short-term investments were $577.1 million ... During the fiscal year ended September 28, 2024, the Company repurchased a total of approximately 3,221.0 thousand shares of common stock at an aggregate cost of approximately $151.0 million. ... [Project W] the Customer has agreed to reimburse the Company for certain costs and expenses ... in the aggregate amount of $ 86.2 million.",
+      "subject": "KLIC financial fingerprint",
+      "predicate": "exhibits",
+      "object_value": "healthy balance sheet (no distress markers); ICFR=effective per PwC; share buybacks + dividends ongoing",
+      "category": "financial_distress",
+      "referent_type": "amount",
+      "m_source_status": "MAPPED",
+      "source_id": "claim_evolution.query_claim_evolution",
+      "source_params": {
+        "cik": "0000056978",
+        "search_term": "Project",
+        "base_filing_date": "2024-11-14",
+        "cutoff_date": "2025-05-15",
+        "forms": "10-K,10-Q,8-K,DEF 14A"
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "SEC filings cadence — list of post-cutoff 10-Q / 8-K filings",
+          "endpoint_or_method": "sec_filings.list_filings_by_form with cik=0000056978, forms=['10-Q','8-K','DEFA14A','S-1','424B'], start_date=2024-11-14, cutoff_date=2025-05-15",
+          "rationale": "Calibrated distress-cluster H10 requires 2-3 markers in ~6 months. KLIC should show normal cadence (1 10-K, ~2 10-Q, dividend 8-Ks) without S-1 / 424B / NT-10 / 8-K Item 4.02. Absence of distress filings is meaningful here.",
+          "expected_observable": "filing count by form type post 11/14/2024",
+          "signal_direction": "normal cadence (no S-1, no NT-10, no Item 4.02) = healthy; presence of dilution/restatement filings would contradict the healthy framing",
+          "severity_if_contradiction": "SEVERE"
+        },
+        {
+          "source_label": "Project W counterparty identification via SEC fulltext search",
+          "endpoint_or_method": "edgar_fts.query_fulltext with search_term='Project W' or 'Project W cancellation' across all CIKs",
+          "rationale": "The 10-K is deliberately silent on which Customer cancelled Project W — but $15M revenue + $86.2M reimbursement implies a megacap (likely an advanced-display customer like Apple or Meta who terminated a micro-LED program in 2024). Identification would test the materiality / counterparty-disclosure asymmetry.",
+          "expected_observable": "matching 10-K/10-Q text from a megacap mentioning a comparable cancelled advanced-display program",
+          "signal_direction": "identifying the counterparty corroborates the reimbursement claim; nonidentification is non-diagnostic",
+          "severity_if_contradiction": "UNVERIFIABLE"
+        },
+        {
+          "source_label": "Nasdaq listing compliance check (KLIC remains compliant)",
+          "endpoint_or_method": "Nasdaq listing alerts / NLM noncompliance database",
+          "rationale": "Distress fingerprint for KLIC's cohort peers (LRHC, KULR, HDSN) typically includes Nasdaq noncompliance notices. KLIC absence on the noncompliance list is corroborating evidence of non-distress.",
+          "expected_observable": "active listing without minimum-bid-price or filing-delinquency notices",
+          "signal_direction": "active compliance corroborates non-distress; deficiency notice would contradict",
+          "severity_if_contradiction": "SEVERE"
+        }
+      ],
+      "domain": "semiconductors",
+      "claim_type_taxonomy": "financial_distress",
+      "extraction_notes": "Critical claim for the cohort test. The cohort screen flagged KLIC on 'stock for services' + 'material weakness' keyword cooccurrence, but the underlying numbers are tiny ($774K stock-for-services, ICFR concluded EFFECTIVE by management and PwC). claim_evolution should show normal post-filing cadence; H10 should NOT fire (no clustering). This claim is the framework's chance to correctly SUPPRESS a false positive."
+    }
+  ],
+  "summary": {
+    "n_claims": 7,
+    "mapped": 6,
+    "proposed": 1,
+    "none": 0,
+    "creative_extensions_total": 24,
+    "gap_cells_addressed": ["semiconductors.supply_chain", "semiconductors.production_count (touched via claim 6 BIS proposal)"],
+    "framework_expectations": "All canonical taxonomy cells should fire CLEANLY: usaspending=SUB_MATERIAL or RECURRING (KLIC has historical NIST/DoD R&D ties via CHIPS Act-adjacent consortia), sam_entity=active w/ matching NAICS, megacap_namecheck=RECURRING_RELATIONSHIP, uspto_odp=high grant count across categorize buckets, claim_evolution=REAFFIRMED (normal cadence). Expected dual-gate outcome: NO red flags, n_severe<2, composite<0.10 — framework should SUPPRESS this name (correctly, given +204.5% forward)."
+  }
+}

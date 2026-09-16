@@ -1,0 +1,137 @@
+{
+  "ticker": "GE",
+  "cutoff": "2024-09-01",
+  "filing": "0000040545-24-000027_10-K.txt",
+  "filing_form": "10-K",
+  "filing_date": "2024-02-02",
+  "report_date": "2023-12-31",
+  "company": "General Electric Company / GE Aerospace",
+  "cik": "0000040545",
+  "subject_notes": "Largest ITA holding (~19%). Commercial + military engines (F-35, B-21, CCA via Kratos teaming). Spun out from GE in 2024. The 10-K is the legacy GE pre-spin (Aerospace + Renewable + Power); Aerospace segment is the GE Aerospace going-forward business.",
+  "claims": [
+    {
+      "claim_id": "C1",
+      "claim_text": "GE Aerospace's XA100 next-generation large-combat engine architecture is positioned as a forward growth driver, supported by U.S. DoD and foreign-government budgets for fleet upgrade and modernization.",
+      "subject": "GE Aerospace",
+      "predicate": "forward_program_exposure",
+      "object_value": "XA100 (adaptive variable-cycle engine, F-35 re-engine candidate / NGAP-aligned)",
+      "source_quote": "we continue to forecast strong demand creating future growth opportunities for our Defense business. The U.S. Department of Defense and foreign governments have continued flight operations and have allocated budgets to upgrade and modernize their existing fleets, including support for next generation large-combat engine architecture such as Aerospace's XA100 program.",
+      "category": "jbook_program_pipeline",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"program_name": "XA100", "cutoff_date": "2024-09-01"}, "rationale": "Direct lookup for XA100 by program name in J-Book corpus."},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"program_name": "Adaptive Engine Transition Program", "cutoff_date": "2024-09-01"}, "rationale": "AETP is the umbrella under which XA100 was originally funded."},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"pe_number": "0604010F", "cutoff_date": "2024-09-01"}, "rationale": "Next Generation Adaptive Propulsion (NGAP) — the successor PE after AETP/XA100 was reorganized into NGAP."},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"pe_number": "0604004F", "cutoff_date": "2024-09-01"}, "rationale": "Advanced Engine Development — the parent PE that historically funded AETP/XA100 work."}
+      ]
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "GE Aerospace delivered the first two T901 flight-test engines to the U.S. Army in October 2023 to power Future Attack Reconnaissance Aircraft (FARA) prototypes, framed as a significant milestone for the Defense business.",
+      "subject": "GE Aerospace",
+      "predicate": "named_program_revenue",
+      "object_value": "T901 Improved Turbine Engine Program (ITEP) for FARA",
+      "source_quote": "In October 2023, Aerospace achieved a significant milestone with the U.S. Army's acceptance of the first two T901 flight test engines that will power the Future Attack Reconnaissance Aircraft prototypes.",
+      "category": "jbook_program_revenue",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"program_name": "T901", "cutoff_date": "2024-09-01"}, "rationale": "Direct lookup for T901 ITEP by program name."},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"program_name": "Future Attack Reconnaissance Aircraft", "cutoff_date": "2024-09-01"}, "rationale": "FARA host program — if FARA was cancelled, T901's primary platform disappears."},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"program_name": "FARA", "cutoff_date": "2024-09-01"}, "rationale": "FARA acronym search."},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"program_name": "Improved Turbine Engine Program", "cutoff_date": "2024-09-01"}, "rationale": "ITEP umbrella search."},
+        {"source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "General Electric Company", "cutoff_date": "2024-09-01"}, "rationale": "Cross-check that GE has been receiving DoD contracts that could include T901/FARA work."}
+      ]
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Defense-related sales were 6%, 7%, and 7% of GE total revenues for FY2023, FY2022, and FY2021 respectively, within the Aerospace segment — a small but real Pentagon-dependent revenue stream.",
+      "subject": "GE Aerospace segment",
+      "predicate": "revenue_concentration",
+      "object_value": "Defense-related sales = 6% of total revenues in FY2023 (down from 7% prior two years)",
+      "source_quote": "Within our Aerospace segment, defense-related sales were 6%, 7% and 7% of total revenues for the years ended December 31, 2023, 2022 and 2021, respectively.",
+      "category": "dod_customer_concentration",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "GE Aerospace", "cutoff_date": "2024-09-01"}, "rationale": "Find all J-Book PEs where GE Aerospace is named as a primary contractor."},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "General Electric", "cutoff_date": "2024-09-01"}, "rationale": "Alternate contractor-name search for jbook hits."},
+        {"source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "General Electric Company", "cutoff_date": "2024-09-01"}, "rationale": "Confirm scale of historical DoD obligations — sanity-check the 6-7% figure."},
+        {"source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "GE Aviation", "cutoff_date": "2024-09-01"}, "rationale": "GE Aviation is the legacy name for GE Aerospace; pulls additional historical contracts."}
+      ]
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "GE Aerospace defense-engine unit shipments declined sequentially: 553 (FY2021) -> 632 (FY2022) -> 556 (FY2023), a -12% YoY drop, while company narrative still calls out 'strong demand' and forward growth.",
+      "subject": "GE Aerospace Defense Engines",
+      "predicate": "unit_volume_trajectory",
+      "object_value": "FY2023 Defense engine shipments = 556 (vs 632 FY2022 = -12% YoY); FY2021 = 553",
+      "source_quote": "Sales in units... Defense Engines 556 (2023), 632 (2022), 553 (2021)... Defense revenues increased, primarily due to product mix and growth in development contract revenue, partially offset by 76 fewer engine shipments than the prior year.",
+      "category": "jbook_program_revenue",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"pe_number": "0207268F", "cutoff_date": "2024-09-01"}, "rationale": "Aircraft Engine Component Improvement Program — the operational-systems PE that funds GE/PW sustainment for installed AF engines."},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"pe_number": "0603216F", "cutoff_date": "2024-09-01"}, "rationale": "Aerospace Propulsion and Power Technology — upstream RDT&E for engine programs."},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"pe_number": "0604004F", "cutoff_date": "2024-09-01"}, "rationale": "Advanced Engine Development — historical AETP/XA100 PE."}
+      ]
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "GE Aerospace's defense engines power 'fighters, bombers, tankers, helicopters and surveillance aircraft' — implicitly including F-15/F-16 (F110), F/A-18 (F404), F-35 (off-prime, no propulsion on F-35 currently), B-21 (engines TBD/classified), and B-52 re-engining via the CF6-80C2 derivative (F138).",
+      "subject": "GE Aerospace defense engine platforms",
+      "predicate": "platform_exposure",
+      "object_value": "F-15, F-16, F-18, B-21, B-52 re-engine, helicopters",
+      "source_quote": "Our defense engines power a wide variety of defense aircraft including fighters, bombers, tankers, helicopters and surveillance aircraft, as well as marine applications.",
+      "category": "jbook_program_revenue",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"pe_number": "B02100", "cutoff_date": "2024-09-01"}, "rationale": "B-21 Raider procurement line — propulsion-relevant if engine is GE."},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"pe_number": "F01500", "cutoff_date": "2024-09-01"}, "rationale": "F-15 procurement — F110 GE engine."},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"pe_number": "0207146F", "cutoff_date": "2024-09-01"}, "rationale": "F-15EX — GE F110-129 engine."},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"pe_number": "0207142F", "cutoff_date": "2024-09-01"}, "rationale": "F-35 Squadrons — competitor program for GE's re-engine pitch (XA100)."},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"pe_number": "0207171F", "cutoff_date": "2024-09-01"}, "rationale": "F-15 EPAWSS — companion F-15 modernization line."}
+      ]
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "CFM's RISE (Revolutionary Innovation for Sustainable Engines) program is presented as GE Aerospace's single largest efficiency step change, targeting >=20% fuel-consumption reduction — a commercial (CFM JV with Safran) bet, not Pentagon-funded.",
+      "subject": "CFM International / GE Aerospace",
+      "predicate": "forward_commercial_program",
+      "object_value": "RISE — open-rotor next-gen narrowbody propulsion, FY2035+ entry into service",
+      "source_quote": "CFM's Revolutionary Innovation for Sustainable Engines (RISE) program represents our single largest efficiency step change, aiming to reduce fuel consumption and CO2 emissions by at least 20% compared to today's most efficient engines.",
+      "category": "rollup_thesis",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"program_name": "RISE", "cutoff_date": "2024-09-01"}, "rationale": "Control claim — RISE is commercial, J-Book should return NOT_FOUND, demonstrating that the company DOES distinguish between Pentagon-grounded and commercial-grounded forward claims."}
+      ]
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "GE Aerospace participated in NASA's Hybrid Thermally Efficient Core (HyTEC) program phase two, selected in December 2023 — federal R&D revenue but NASA (non-DoD).",
+      "subject": "GE Aerospace",
+      "predicate": "federal_rd_contract",
+      "object_value": "NASA HyTEC phase 2 selection (December 2023)",
+      "source_quote": "In December 2023, NASA selected Aerospace for phase two of the Hybrid Thermally Efficient Core program, which will significantly enhance fuel efficiency and reduce emis[sions]",
+      "category": "counterparty_disclosure",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"program_name": "Hybrid Thermally Efficient Core", "cutoff_date": "2024-09-01"}, "rationale": "Control: HyTEC is NASA-funded, should NOT appear in DoD J-Book — expected NOT_FOUND."}
+      ]
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Total sales to U.S. Government agencies were 8% of GE total revenues in FY2023, FY2022, and FY2021 — stable concentration but indicates roughly 2% of revenue comes from non-Aerospace federal customers (NASA, DOE, Power-segment government utility contracts).",
+      "subject": "GE consolidated",
+      "predicate": "us_government_revenue_concentration",
+      "object_value": "8% of total revenues from U.S. Government agencies, steady across 2021-2023",
+      "source_quote": "Total sales of equipment and services to agencies of the U.S. Government were 8% of total revenues for the years ended December 31, 2023, 2022 and 2021.",
+      "category": "dod_customer_concentration",
+      "queries": [
+        {"source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "General Electric Company", "cutoff_date": "2024-09-01"}, "rationale": "Confirm DoD obligation scale matches the 6-8% disclosure (GE 2023 total revenue $68.0B; 6% of that = ~$4.1B; check that DoD obligations are in this range cumulatively)."}
+      ]
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "GE Aerospace's Remaining Performance Obligation (RPO) backlog is anchored in long-duration services contracts ($212.6B services RPO of $267.2B total, with only 12% recognizable within 1 year, 42% within 5 years) — a balance-sheet claim independent of any one DoD program, but heavily commercial-engine-aftermarket-weighted.",
+      "subject": "GE Aerospace RPO backlog",
+      "predicate": "backlog_disclosure",
+      "object_value": "Total RPO $267.2B (equipment $54.7B / services $212.6B); services RPO 12%/42%/66%/82% recognized within 1/5/10/15 years",
+      "source_quote": "transaction price allocated to remaining (wholly or partially unsatisfied) performance obligations was $267,233 million... equipment-related remaining performance obligation of $54,675 million... services-related remaining performance obligations of $212,558 million of which 12%, 42%, 66% and 82% is expected to be recognized within 1, 5, 10 and 15 years.",
+      "category": "other",
+      "queries": [
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"query": "GE Aerospace LEAP long-term service agreement", "cik": "0000040545", "cutoff_date": "2024-09-01"}, "rationale": "Control claim — backlog disclosure should be corroborated by similar disclosures across filings; non-J-Book."}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,116 @@
+{
+  "ticker": "CWT",
+  "company": "CALIFORNIA WATER SERVICE GROUP",
+  "cutoff": "2025-05-15",
+  "filing": "0001035201-25-000003_10K.txt",
+  "filing_date": "2025-02-27",
+  "cik": "0001035201",
+  "sector": "Utilities",
+  "industry": "Utilities - Regulated Water",
+  "group": "boring_middle",
+  "rfm_tuples": [
+    {
+      "claim_id": "C1",
+      "R": "10-K Item 1A risk factor disclosure: 'management has in the past concluded that our internal control over financial reporting was not effective, which was remediated.' Current 10-K reports no current material weakness; Deloitte issued unqualified opinions on both financial statements and ICFR.",
+      "f": "going_concern_local.going_concern_from_text + auditor_change_from_text on the 10-K text; EDGAR FTS 'material weakness' filings prior to cutoff for CIK 0001035201",
+      "M_source": "going_concern_local + edgar_fts",
+      "M_value": "going_concern_from_text -> {'signal': 'NO_GOING_CONCERN', 'n_matches': 0}; auditor_change_from_text -> {'signal': 'UPGRADE_OR_LATERAL', 'firms_mentioned': ['Deloitte','KPMG'], 'n_resignation_lang': 0, 'n_disagreement_lang': 0}. EDGAR FTS 'material weakness' returned 20 hits including 10-Ks from 2019 and 2023; the language now is forward-risk boilerplate, not a current finding. Deloitte & Touche LLP signed San Francisco, Feb 27, 2025 and disclosed 'We have served as the Company's auditor since 2008' (17-year tenure).",
+      "severity": "PASS",
+      "interpretation": "No going-concern doubt, no auditor change, no current material weakness, multi-decade Big-4 auditor tenure with unqualified ICFR opinion. Disclosure of a prior remediated MW is a small honesty signal rather than a red flag."
+    },
+    {
+      "claim_id": "C2",
+      "R": "MD&A claims 2024 net income of $190.8M (EPS $3.25, +257% YoY) was 'primarily due to' the 2021 GRC cumulative adjustment retroactive to Jan 1, 2023. 'The net income benefit of the 2021 GRC from 2023 interim rate relief was approximately $64.0 million included in 2024 results.' Q1 2025 net income collapsed to $13.3M (EPS $0.22) vs $69.9M (EPS $1.21) in Q1 2024.",
+      "f": "claim_evolution: compare 2024 EPS narrative in 10-K (filed 2/27/25) vs Q1 2025 10-Q (filed 5/1/25) — does management acknowledge the 2024 earnings were non-recurring catch-up?",
+      "M_source": "claim_evolution (manual: 10-K MD&A vs 10-Q MD&A)",
+      "M_value": "Both 10-K and Q1 10-Q explicitly attribute the YoY swings to the 2021 GRC catch-up ($88.6M IRMA + $35.3M MWRAM in 2024; reversed comparable in Q1 2025 with $80.7M IRMA reversal + $16.3M MWRAM reversal driving -24.7% revenue and -81% net income vs Q1 2024). Disclosure is consistent across filings — no claim drift, no obscuring of the non-recurring nature.",
+      "severity": "PASS",
+      "interpretation": "Company is transparent that 2024's 257% EPS growth is a one-time 2021 GRC catch-up, not run-rate earnings. Q1 2025 normalization (EPS $0.22 vs $1.21) was foreshadowed in the 10-K and reiterated in the 10-Q. Honest framing of accounting noise."
+    },
+    {
+      "claim_id": "C3",
+      "R": "10-K Item 7 Liquidity: 'The dividend payout ratio was 34.3% in 2024, 113.8% in 2023, and 56.5% in 2022 for an average of 68.2% over the 3-year period. Our long-term targeted dividend payout ratio is 60%.' Board increased dividend for 58th consecutive year (Jan 2025).",
+      "f": "Mode B: given a regulated water utility paid out >100% of net income in 2023 and is funding $1.6B 2025-2027 capex plan, derive — should they be raising equity? Cross-check with S-3ASR / 424B5 filings on EDGAR.",
+      "M_source": "edgar.list_filings + edgar.fetch_filing_text",
+      "M_value": "Confirmed: on 2025-05-14 (one day before cutoff) CWT filed S-3ASR + 424B5 for a NEW $350M ATM equity program with 8 sales agents and 5 forward purchasers, replacing the April 2022 $350M ATM that was expiring. 8-K filed 2025-05-15 reports the Equity Distribution Agreement. The prior ATM had already issued $89.0M of common stock in 2024. The company is in active dilution mode to fund capex while still raising the dividend.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Mode B finding: Management presents '58 years of dividend increases' as a strength while running a 2023 payout of 113.8% (i.e., dividend exceeded net income) and refreshing a $350M ATM equity sleeve at exactly the cutoff date. Not concealed (the ATM is disclosed), but the optics of a 'consecutive dividend increase' marketing claim sit awkwardly next to >100% payout and standing equity-issuance machinery."
+    },
+    {
+      "claim_id": "C4",
+      "R": "10-K: 'We estimate a capital investment of approximately $226.0 million will be required to comply with the [PFAS] regulation.' 'The Company is a party to four separate class-action settlements... The Company expects to receive proceeds from settlements with the 3M Company and DuPont in the first half of 2025 and expects to receive proceeds from settlements with Tyco Fire Products LP and BASF Corporation in approximately late 2025 or early 2026.'",
+      "f": "Mode A existence: confirm PFAS settlements exist via EDGAR FTS for CWT. Mode B: is the $226M PFAS capex recovery mechanism in place? CPUC dismissed the PFAS-capital MA application in April 2024.",
+      "M_source": "edgar_fts.query_fulltext + 10-K rates/reg disclosure",
+      "M_value": "PFAS-MA application was DISMISSED WITHOUT PREJUDICE by CPUC on April 18, 2024. The 10-K confirms: 'Cal Water expects to refile its application in the first half of 2025.' EDGAR FTS for 'PFAS settlement' returned 0 hits for CWT (settlements named with 3M/DuPont/Tyco/BASF in the 10-K text but not in EDGAR fulltext index, consistent with class-action settlement docs not being SEC filings). $226M PFAS capex has no approved cost-recovery vehicle as of cutoff; only an expense-tracking memorandum account exists.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Honest about the dismissal and re-filing intent, but a $226M known regulatory-driven capex with no approved capital-recovery memorandum account is a real, disclosed earnings/rate-base risk. Settlement proceeds (timing 'first half 2025' / 'late 2025-early 2026') are forward-looking timing claims with no binding date."
+    },
+    {
+      "claim_id": "C5",
+      "R": "10-K: '2024 GRC application' filed July 8, 2024 'requesting rate changes effective January 1, 2026.' 'Cal Water has proposed to change 2024 rates to increase 2026 total revenue by $140.6 million, or 17.1%.' Q1 10-Q (5/1/25): 'Settlement discussions took place during April 2025, and hearings before the Administrative Law Judge are expected to occur in May 2025.' 'Associated rates set by the CPUC would become effective no sooner than January 2026.'",
+      "f": "claim_evolution: 10-K vs Q1 10-Q on 2024 GRC schedule; Mode B: does the precedent of 2021 GRC delay (over a year past statutory date, per the 10-K's own admission) create base-rate risk through all of 2026?",
+      "M_source": "claim_evolution + self_text (10-K own statement)",
+      "M_value": "10-K explicitly states: 'For example, the CPUC did not issue its decision on our 2021 GRC until March 2024, over a year later than expected, which caused uncertainty around and volatility in our financial and operating results until that time.' 10-Q maintains the same timeline (effective no sooner than Jan 2026) and confirms hearings still pending in May 2025. No schedule slippage between filings, but the company has self-disclosed that its main regulator delivered the prior GRC ~14 months late.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "The 17.1% rate-increase request is contested (CalPA filed responsive testimony, hearings ongoing in May 2025). Historical regulator behavior — admitted by management — argues the final 2024 GRC decision is unlikely to land cleanly by Jan 2026, creating another IRMA accrual cycle. This is openly disclosed but is a real near-term overhang."
+    },
+    {
+      "claim_id": "C6",
+      "R": "10-K Risk Factors: 'For example, accelerated land movement in Cal Water's Rancho Dominguez District in southern California has given rise to claims and lawsuits against Cal Water, including among other allegations, inverse condemnation.' Note 15 Contingencies: '$2.4 million for all known legal matters as of December 31, 2024 primarily due to potable water main leaks and other work related legal matters.'",
+      "f": "edgar_fts.query_fulltext('Rancho Palos Verdes landslide', cik='0001035201'); Mode A reserve vs disclosed risk magnitude",
+      "M_source": "edgar_fts + self_text",
+      "M_value": "EDGAR FTS confirmed 1 hit for 'Rancho Palos Verdes landslide' in this 10-K (no earlier CWT filings indexed for the term). CA Governor declared Rancho Palos Verdes landslide a state of emergency in 2024; FEMA/Cal OES are running a voluntary buyout. Cal Water discloses inverse-condemnation strict-liability exposure with NO quantification, but only a $2.4M aggregate legal reserve. Reserve is two orders of magnitude smaller than typical inverse-condemnation damages for a regulated CA utility (e.g., PG&E precedent), and the 10-K explicitly notes 'in December 2017, the CPUC denied recovery of costs that San Diego Gas & Electric Company incurred because of inverse condemnation.'",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "interpretation": "Mode B finding. Cal Water has a CA inverse-condemnation exposure on the Palos Verdes Peninsula landslide claims that is qualitatively flagged but quantitatively unreserved. The 10-K openly admits prior regulators (CPUC) refused to let utilities pass inverse-condemnation costs to customers. Tail risk is real and undisclosed in dollar terms."
+    },
+    {
+      "claim_id": "C7",
+      "R": "10-K: 'Approximately $210.4 million, or 23.2%, of our 2024 water utility revenues was derived from business and industrial customers. In Hawaii, we serve a number of large resorts, which if their water usage was reduced or ceased could have a material impact to our Hawaii operation.' Hawaii Water = 4.3% of consolidated revenue.",
+      "f": "Mode A: customer concentration claim. Mode B: any single-customer concentration disclosed > 5% (which would have been a 10-K material-customer trigger)?",
+      "M_source": "self_text scan",
+      "M_value": "No single customer named as material concentration (>5% of revenue). 23.2% business/industrial is diversified across regulated districts. Top single-resort exposure is in Hawaii's 4.3% of consolidated revenue — implicitly de minimis at the consolidated level. No 10% customer disclosure trigger.",
+      "severity": "PASS",
+      "interpretation": "Customer concentration is well within typical regulated-utility ranges. Disclosure of business/industrial 23.2% bucket is normal granularity; no hidden top-customer dependency."
+    },
+    {
+      "claim_id": "C8",
+      "R": "Form 4 activity: 88 Form 4s filed in March 2025 (43 on 3/6 and 46 on 3/11), with similar bursts in March of every year 2022-2025. Pre-cutoff total = 650 Form 4s.",
+      "f": "insider_vs_calendar: are these clustered near the $350M ATM filing (5/14) or the 10-K filing (2/27)? Sample Form 4 transaction codes to determine A (award) vs S (sale) vs F (tax withholding).",
+      "M_source": "form4 + insider_vs_calendar",
+      "M_value": "Sampled Form 4s from 3/6/2025 and 3/11/2025: BOTH use transaction Code F = shares withheld by issuer to satisfy tax-withholding on RSA vesting (Awards #691, #819). No Code S (open-market sales) observed in the sampled bursts. March clustering matches annual restricted-stock vesting cycle, not opportunistic selling around the 5/14 S-3ASR. Zero Form 4s filed between the 10-K filing (2/27) and the ATM announcement (5/14), and zero in the days immediately following the ATM.",
+      "severity": "PASS",
+      "interpretation": "Insider activity is routine compensation-driven tax withholding, not opportunistic selling. No insider behavior clustered to the 5/14 capital event — counts against the 'insiders front-running dilution' Mode B hypothesis."
+    },
+    {
+      "claim_id": "C9",
+      "R": "10-K Risk Factors: 'We are obligated to comply with specified debt covenants under certain of our loan and debt agreements.' 'The Company and Cal Water facilities contain financial covenants that require the Company and its subsidiaries' debt portion of the Company's consolidated total capitalization ratio not to exceed 66.7% and an interest coverage ratio of three or more to one... As of December 31, 2024, our consolidated total capitalization ratio was 45.8% and the interest coverage ratio was greater than seven to one.'",
+      "f": "self_text: covenant headroom check; verify quarterly persistence in Q1 10-Q.",
+      "M_source": "self_text (10-K) + claim_evolution (10-K vs 10-Q)",
+      "M_value": "10-K (12/31/24): cap ratio 45.8% vs 66.7% limit (20.9 pp headroom); interest coverage > 7x vs 3x limit (>4x headroom). Q1 10-Q (3/31/25): 'we are in compliance with all of the covenant requirements'; short-term borrowings rose from $205.0M (12/31/24) to $285.0M (3/31/25) consistent with seasonal water-business pattern explicitly described in MD&A. $125M of 5.22% First Mortgage Bonds were issued 10/22/2024 for 30-year term, used to refinance existing indebtedness. Cal Water authorized for up to $1.3B of new debt/equity through 2027 by CPUC (Aug 2024).",
+      "severity": "PASS",
+      "interpretation": "Substantial covenant headroom, refinancing executed, regulatory authority for incremental debt issuance approved. No covenant stress and the seasonality of revolver draws is openly disclosed in advance."
+    },
+    {
+      "claim_id": "C10",
+      "R": "10-K Risk Factors: 'Standard & Poor's Rating Agency issues a rating on Cal Water's ability to repay certain debt obligations. The credit rating agency could downgrade our credit rating based on reviews of our financial performance and projections or upon the occurrence of other events that could affect our business outlook.' (No specific current rating disclosed in the 10-K text.)",
+      "f": "Mode B: does the 10-K explicitly disclose the current S&P rating? If withheld, what is the implied posture?",
+      "M_source": "self_text scan",
+      "M_value": "The 10-K describes the existence of an S&P rating on Cal Water's debt as a risk factor (potential downgrade) but does NOT disclose the current rating in the text. EDGAR-fulltext search for 'A+' or 'AA-' or rating bands within this filing yields no current rating statement. This is a notable omission — peer water utilities (e.g., American Water, American States Water) generally disclose current ratings in their 10-Ks.",
+      "severity": "UNVERIFIABLE",
+      "interpretation": "Mode B observation: rating is alluded to but not stated. Without the rating, the reader cannot assess how close the company is to investment-grade boundary risk; the omission is mild but reduces investor visibility on cost-of-debt sensitivity. Cannot be verified inside the EDGAR/local m-source perimeter."
+    }
+  ],
+  "supplemental_signals": {
+    "deterministic_going_concern": "NO_GOING_CONCERN (0 matches)",
+    "deterministic_auditor": "UPGRADE_OR_LATERAL — Deloitte & Touche LLP, auditor since 2008, no resignation/disagreement language",
+    "capital_event_at_cutoff": "S-3ASR + 424B5 for new $350M ATM filed 2025-05-14 (T-1 from cutoff); 8-K confirming Equity Distribution Agreement filed 2025-05-15 (cutoff day)",
+    "GRC_cycle_risk": "2024 GRC pending; 2021 GRC was delivered 14 months late per company's own disclosure; 17.1% rate-increase request contested by CalPA",
+    "PFAS_capex_overhang": "$226M estimated capex with no approved capital-recovery memorandum account (PFAS-MA dismissed Apr 2024, planned refile H1 2025)",
+    "inverse_condemnation_exposure": "Palos Verdes Peninsula landslide claims; $2.4M total legal reserve (likely under-reserved for tail)",
+    "dividend_payout_ratio": "2023: 113.8% (dividend > net income); 2024: 34.3% (catch-up year); 3-yr avg 68.2% vs 60% target",
+    "deferred_revenue": "$113.4M net IRMA/MWRAM/WRAM/MCBA regulatory asset receivable balance at 12/31/24 (up from $64.2M YE23)",
+    "Q1_2025_run_rate": "Q1 EPS $0.22 vs Q1 2024 $1.21; clearly disclosed as 2021 GRC retroactive reversal, not deterioration"
+  },
+  "summary": "California Water Service Group is a textbook honest 'boring middle' regulated water utility with a 17-year Deloitte auditor relationship, unqualified ICFR opinion, no going-concern language, ample covenant headroom (45.8% cap ratio vs 66.7% limit; 7x+ interest coverage), and disclosure that is consistent between the 10-K and Q1 10-Q. The framework finds no lying. What it does find — and the company itself disclosures openly — is a cluster of disclosed near-term overhangs: a contested 2024 GRC with a 14-month historical delay precedent at the same regulator, a $226M PFAS capex with no approved capital-recovery vehicle, a Rancho Palos Verdes inverse-condemnation tail risk reserved at only $2.4M, a 2023 dividend payout of 113.8% of net income, and a new $350M ATM equity facility refreshed at T-1 from cutoff. Net: honest disclosure, but real dilution and regulatory-cycle pressure ahead of the 2024 GRC decision. Verdict: NEUTRAL.",
+  "composite": 0.65
+}

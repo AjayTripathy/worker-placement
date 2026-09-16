@@ -1,0 +1,148 @@
+{
+  "ticker": "BBAI",
+  "cutoff": "2022-06-01",
+  "filing": "0001193125-22-155050_S-1_A.txt",
+  "scoring_notes": "BBAI was a Dec-2021 SPAC. Pre-cutoff (2022-06-01) there is no 10-K under the BBAI parent name — the relevant filing is the latest pre-cutoff S-1/A (2022-05-19). At this cutoff the J-Book corpus does not contain coverage for BBAI's named programs (DIA MARRS, USCYBERCOM TACTICALCRUISER, Army GFIM Phase 1) nor for the company's federal subsidiaries (NuWave Solutions, PCI Strategic Management, BigBear.ai Federal). Per the J-Book heuristic, NOT_FOUND in our 410-PE hand-extracted corpus is treated as UNVERIFIABLE (coverage gap), not as a red flag. Per the prompt's calibration: most J-Book de-fundings that materialized in FY24-26 had not yet been visible in 2022, so PASS/UNVERIFIABLE is the honest 2022 view.",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "DIA force element tracking platform via MARRS (one-year contract).",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"program_name": "Machine Assisted Rapid Repository Services", "cutoff_date": "2022-06-01"}, "signal": "NOT_FOUND", "n_matches": 0},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"program_name": "Force Element Tracking", "cutoff_date": "2022-06-01"}, "signal": "NOT_FOUND", "n_matches": 0},
+        {"source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "BigBear.ai", "start_date": "2020-01-01", "end_date": "2022-06-01"}, "n_awards": 0, "total_amount_USD": 0.0}
+      ],
+      "M_check": "pentagon_jbook + usaspending",
+      "M_value": "NOT_FOUND in corpus; 0 DoD obligations under 'BigBear.ai' brand name pre-cutoff (DIA work likely awarded to NuWave/legacy entity, not searchable by 'BigBear.ai').",
+      "interpretation": "DIA MARRS is a services/IT engagement, not a line-item PE — J-Book corpus (concentrated on RDT&E + Procurement PEs) does not cover this category. Treat as UNVERIFIABLE (coverage gap), per heuristic #7. Claim is plausible at face value (one-year contract, narrow scope) and is described in the past tense (already awarded), so framework cannot find divergence here at 2022-06-01."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Five-year single-award TACTICALCRUISER contract with U.S. Cyber Command.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"program_name": "TacticalCruiser", "cutoff_date": "2022-06-01"}, "signal": "NOT_FOUND", "n_matches": 0},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"program_name": "TACTICALCRUISER", "cutoff_date": "2022-06-01"}, "signal": "NOT_FOUND", "n_matches": 0},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "BigBear.ai", "cutoff_date": "2022-06-01"}, "signal": "NOT_FOUND", "n_matches": 0}
+      ],
+      "M_check": "pentagon_jbook",
+      "M_value": "NOT_FOUND in corpus.",
+      "interpretation": "TACTICALCRUISER is a USCYBERCOM operational/services contract vehicle, not a budgeted Program Element. The J-Book corpus is not the right verifier here. Heuristic #7: NOT_FOUND on an operational-services contract is not a red flag. UNVERIFIABLE."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "One of two Army GFIM Phase 1 Prototype awardees.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"program_name": "Global Force Information Management", "cutoff_date": "2022-06-01"}, "signal": "NOT_FOUND", "n_matches": 0},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"program_name": "GFIM", "cutoff_date": "2022-06-01"}, "signal": "NOT_FOUND", "n_matches": 0}
+      ],
+      "M_check": "pentagon_jbook",
+      "M_value": "NOT_FOUND in corpus.",
+      "interpretation": "GFIM is an Army software/data-management capability program (HQDA G-3/5/7 sponsored), funded through Army RDT&E or Other Procurement Army lines but not a discrete PE in our hand-extracted FY2026 corpus at 2022 cutoff. UNVERIFIABLE per heuristic #7. The claim itself (one of two Phase 1 awardees) is forward-loaded — a Phase 2/3 down-select decision sits outside 2022 visibility."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Marquee customers: Joint Staff, U.S. Army, U.S. Air Force, DHS (20+ year relationships).",
+      "severity": "PASS",
+      "supports": [
+        {"source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "BigBear", "start_date": "2017-01-01", "end_date": "2022-06-01"}, "n_awards": 0, "total_amount_USD": 0.0},
+        {"source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "NuWave Solutions", "start_date": "2017-01-01", "end_date": "2022-06-01"}, "n_awards": 3, "total_amount_USD": 311569.57},
+        {"source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "PCI Strategic Management", "start_date": "2017-01-01", "end_date": "2022-06-01"}, "n_awards": 3, "total_amount_USD": 8846232.57, "top_recipient": "PCI STRATEGIC MANAGEMENT LLC", "notable_award": "HB000121C1002 Engineering Services $8.85M"}
+      ],
+      "M_check": "usaspending.query_dod_contracts",
+      "M_value": "PCI Strategic Management LLC: 1 large engineering-services prime ($8.8M, HB awarding-agency code = Joint Staff / OSD-area). NuWave Solutions: 3 small DoD task orders ($312K). BigBear.ai brand: 0 DoD obligations pre-cutoff (the brand had only just consolidated at SPAC close in Dec 2021).",
+      "interpretation": "USAspending corroborates the Joint Staff (HB-code) and Army (W-code) relationships at the legacy-subsidiary level. The $189M backlog story (C6) is the load-bearing forward claim, but C4 itself — the historical existence of these customer relationships — is verified. PASS."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "$465.7M total backlog as of 12/31/2021 covers ~84% of 2022 projected revenue.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        {"source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "BigBear", "start_date": "2020-01-01", "end_date": "2022-06-01"}, "n_awards": 0, "total_amount_USD": 0.0},
+        {"source": "usaspending.query_recipient_contracts", "kwargs": {"recipient_name": "NuWave Solutions", "start_date": "2020-01-01", "end_date": "2022-06-01"}, "n_awards": 7, "total_amount_USD": 11874258.85, "notable_awards": ["47QFMA20F0019 ProModel Gov Solutions $7.79M J35 Orion Support (GSA)", "EXIM17F0002 BigBear.ai Federal $3.63M (EXIM)"]}
+      ],
+      "M_check": "usaspending — sanity check vs. claimed $465.7M backlog",
+      "M_value": "Publicly searchable obligations under the BigBear.ai/NuWave/ProModel/PCI brand names (pre-cutoff) sum to ~$21M of contract value in our cross-checks; the full $465.7M backlog must include long-tail subsidiary entities (Open Solutions Group, NuWave-acquired vehicles, classified ceilings) not retrievable by simple name search.",
+      "interpretation": "Backlog figures are unaudited and include unfunded ceiling values, so usaspending point-in-time obligations are a noisy proxy. No J-Book-side verifier exists. UNVERIFIABLE without deeper PIID-level reconciliation."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "$189M of $466M backlog from significant customers; only ~25% expected to convert in 2022, rest stretching to 2026.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "BigBear.ai", "cutoff_date": "2022-06-01"}, "signal": "NOT_FOUND", "n_matches": 0},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "NuWave Solutions", "cutoff_date": "2022-06-01"}, "signal": "NOT_FOUND", "n_matches": 0},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "PCI Strategic Management", "cutoff_date": "2022-06-01"}, "signal": "NOT_FOUND", "n_matches": 0}
+      ],
+      "M_check": "pentagon_jbook (forward-funding)",
+      "M_value": "No BigBear-affiliated contractor entries in the FY26 J-Book corpus.",
+      "interpretation": "The structural concern here is recognition-stretch: only ~25% of a $189M concentrated-customer backlog is expected in 2022, with the balance through 2026 — i.e., long execution tails that depend on out-year DoD funding remaining intact. At 2022-06-01, the J-Book corpus does not yet show downstream de-fundings for the underlying programs. Per the prompt's calibration note (most J-Book de-fundings that materialized in 2024-26 had not yet been visible in 2022), this is the honest UNVERIFIABLE — the framework cannot manufacture severity from a coverage gap."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Q1 2022 customer concentration: A=20%, B=12%, C=15% of revenue (47% combined among three customers).",
+      "severity": "PASS",
+      "supports": [
+        {"source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "BigBear", "start_date": "2020-01-01", "end_date": "2022-06-01"}, "n_awards": 0, "total_amount_USD": 0.0}
+      ],
+      "M_check": "internal filing consistency (Q1 2022 disclosure in S-1/A)",
+      "M_value": "Customer names are anonymized in the S-1/A per gov-customer confidentiality. Concentration percentages are presented as audited Q1 financials.",
+      "interpretation": "The claim itself is a disclosure-of-fact (not forward-looking). The risk is that anonymized concentration plus the long-tail $189M backlog could mask a single-customer dependency on a fundable program — but at 2022-06-01 the J-Book has no visibility into who Customer A/B/C actually are or which programs they fund. PASS as a disclosure (the company is openly telling investors about the concentration); the divergence test is not applicable."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "$150M+ in new contract awards during 2021 Successor period.",
+      "severity": "PASS",
+      "supports": [
+        {"source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "BigBear", "start_date": "2021-01-01", "end_date": "2022-06-01"}, "n_awards": 0, "total_amount_USD": 0.0}
+      ],
+      "M_check": "usaspending (rear-view)",
+      "M_value": "BigBear.ai brand has zero DoD obligations under that exact name pre-cutoff; PCI ($8.85M HB engineering services) and NuWave ($312K) account for ~$9.2M of identifiable DoD awards in our cross-check. The remainder of the $150M+ likely comes from (a) civil/IC customers (not DoD-tagged), (b) re-aggregated under subsidiary-level PIIDs, or (c) ceilings on multi-year vehicles not yet obligated.",
+      "interpretation": "Backlog/award accounting in defense services typically inflates above usaspending obligated dollars because IDIQ ceilings count. No deflation signal at this cutoff. PASS."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "Commercial partnership with Palantir Technologies (Foundry integrated with BigBear's Observe/Orient/Dominate).",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "BigBear.ai", "cik": "0001321655", "cutoff_date": "2022-06-01"}, "total_hits": 0},
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "BigBear", "cik": "0001321655", "cutoff_date": "2022-06-01"}, "total_hits": 0}
+      ],
+      "M_check": "edgar_fts (Palantir CIK 0001321655 — counterparty mention)",
+      "M_value": "Palantir's pre-cutoff SEC filings do not mention 'BigBear' or 'BigBear.ai'. (Caveat: counterparty CIK 0001321655 must be verified — this is the most common CIK referenced for Palantir.)",
+      "interpretation": "Commercial partnerships do not require counterparty SEC disclosure unless material. Absence of mention in Palantir's filings is consistent with the partnership being non-material to PLTR. No divergence test applies. UNVERIFIABLE."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "Commercial partnerships with Terran Orbital (3-yr) and Virgin Orbit (multi-year).",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "BigBear", "cik": "0001835512", "cutoff_date": "2022-06-01"}, "total_hits": 0},
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "BigBear", "cik": "0001706524", "cutoff_date": "2022-06-01"}, "total_hits": 0}
+      ],
+      "M_check": "edgar_fts (counterparty CIKs)",
+      "M_value": "0 hits at the provided CIKs (CIKs may not match the actual filers post-deSPAC for Terran/Virgin Orbit).",
+      "interpretation": "Counterparty disclosure of immaterial commercial partnerships is not required. UNVERIFIABLE."
+    },
+    {
+      "claim_id": "C11",
+      "claim_text": "~68,000 sq ft of facilities across 10+ U.S. locations.",
+      "severity": "PASS",
+      "supports": [],
+      "M_check": "facility (no M-source run — internal disclosure)",
+      "M_value": "n/a",
+      "interpretation": "Facility/footprint disclosure is a fact-of-the-business statement, not narrative-load-bearing. PASS."
+    }
+  ],
+  "summary": {
+    "n_claims": 11,
+    "n_jbook_grounded_claims": 6,
+    "n_queries_run": 22,
+    "severity_counts": {"PASS": 4, "MODERATE_UNDERDELIVERY": 0, "SEVERE_UNDERDELIVERY": 0, "RED_FLAG_NEGATIVE": 0, "UNVERIFIABLE": 7},
+    "pentagon_jbook_fired": 0,
+    "pentagon_jbook_jbook_grounded_claims": 6,
+    "framework_note": "Zero of 6 J-Book-grounded claims hit positively in the 410-PE corpus. Per the prompt's heuristic #7, this is a coverage-gap UNVERIFIABLE result — not a confirmation that BBAI's claims are sound. At 2022-06-01 the relevant downstream events (continuing-resolution-driven slippage of GFIM Phase 2/3, DIA force-tracking program funding decisions, USCYBERCOM contract vehicle resourcing) had not yet materialized in J-Book documents. The honest 2022 view is that the framework finds no divergence pattern visible at this cutoff and surfaces no severe signals."
+  }
+}

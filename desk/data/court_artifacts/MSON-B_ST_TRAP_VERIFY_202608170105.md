@@ -1,0 +1,14 @@
+### MSON-B.ST (Midsona AB — Nordic/European organic, health-food and consumer-health brands: Friggs, Kung Markatta, Davert, Celnat, Vegetalia) — screen "‑2.1%/5d, ‑19.6%/21d = ‑23.3pp vs ^OMX, mcap $162M" — **SCREEN-MISCLASSIFIED**
+
+**KILL FACTS (the dislocation premise, not the company)**
+- The 21d window brackets the **17 July 2026 08:00 CEST** H1 print, which was an *improvement*: EBIT before items affecting comparability SEK 65m (41), margin 3.7% (2.3%); Q2 SEK 20m (4), 2.3% (0.5%); gross margin 29.5% (28.4) ([Q2 2026 interim report, p.1](https://storage.mfn.se/e8b6d4e6-c656-468b-96dd-b15792eb5e16/midsona-interim-report-q2-2026.pdf)). No company release since. This is a give-back from a 52w high after a ~+48%/6m run, not a discovery-state break: pack tape dd52 ‑24.2% but **pct_off_low +56.2%**. **Defect to file: `relative_return_window_catches_momentum_giveback`** — 21d relative return fires on mean reversion from a high; require pct_off_low < ~15% or a dated news anchor before tagging "dislocation."
+- FCF-quality flag (defect family 3/4): H1 CFO SEK 56m (40) is *entirely* the **SEK 57m property-insurance payment received March 2026** for the Castellcir fire. Derived by elimination — investing ‑35 is fully explained by intangibles (‑30 Risenta trademark) (report p.3–4). Ex-insurance, underlying H1 CFO ≈ 0, and after lease repayments ‑27 and dividends ‑32, cash flow for the period was **‑43**. Reported H1 EBIT 117 embeds **+52 of IAC**; effective tax 11.4% only because the gain met uncapitalised loss carryforwards (p.4).
+
+**LIVE FACTS**
+- Screen mcap **CONFIRMED, no share-count defect**: Stena Adactum 69,994,562 sh = 48.13% ⇒ 145,428,080 shares total ([company shareholder page, 29 Jul 2026](https://www.midsona.com/data/shareholders)); ×11.75 SEK ×0.095 = $162.3M. ✓
+- Balance sheet is real and self-owned: cash 282, **net debt 317 (447)**, 1.0x adj. EBITDA, unused facilities 463, equity/assets 68.4% (p.4). Mix shift is deliberate, not a melt: own consumer brands organic **+2.3%** vs contract manufacturing ‑11.1% (p.3).
+- Not cheap on clean numbers: EV ≈ SEK 2,025m / R12 EBIT-pre-IAC ≈ 161 (4.4% margin) ≈ **12.6x**; P/E 15.5x on R12 EPS 0.76 (R12 IAC nets ≈ 0, so EPS is *not* a windfall artifact). No-actor law: Stena at 48.1% + Jobson 9.6% ⇒ ~38% float; no buyback, dividend ~SEK 0.22 (32m paid H1), Swedish WHT 30%→15% treaty, no stamp.
+
+**RESOLVES ON:** 2026-10-22 Q3 report — the "strategic considerations" on Spain "will be clarified during the third quarter" (p.2) and Risenta production insourcing lands in Q4 ([calendar](https://www.midsona.com/financials)); 2027-02-02 FY print for the un-flattered cash-conversion year.
+
+**Disposition:** WATCH + tripwire — re-court on SEK ≤9.0 (≈10.5x EV/EBIT, a genuine discount) **or** a Spain exit/impairment on 22 Oct 2026. Do not advance on the current tape premise.

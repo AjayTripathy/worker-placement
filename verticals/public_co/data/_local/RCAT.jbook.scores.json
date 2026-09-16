@@ -1,0 +1,104 @@
+{
+  "ticker": "RCAT",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Teal Drones (RCAT subsidiary) was selected in November 2024 as a winner of the U.S. Army's Short Range Reconnaissance (SRR) Program of Record; Black Widow is the SRR product accepted into the Army program.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook returned NOT_FOUND for 'Short Range Reconnaissance' (program_name), 'SRR' (program_name), 'Teal Drones' (contractor) and 'Red Cat' (contractor). The J-Book corpus is restricted to Air Force RDT&E (269), Defense-wide incl. DARPA/MDA/SOCOM/OSD (74), and Space Force (67) — NO Army programs are present in the 410-PE corpus (Counter check confirmed 0 Army entries). SRR is an Army Program of Record so coverage gap applies (per Heuristic 7, NOT_FOUND outside corpus scope → UNVERIFIABLE).",
+        "USAspending shows TEAL DRONES INC with 27 DoD awards totaling only $2.16M lifetime; NONE are labeled SRR / Black Widow / Short Range Reconnaissance. Largest awards are individual Teal 2 buys ($750K USAFA, $240K VA National Guard) — not a Program-of-Record production lot. This is consistent with Army SRR Lot 1 production contracts being either (a) not yet obligated on USAspending at cutoff or (b) bundled under a parent prime not visible here. The claim of SRR PoR selection is not directly disprovable from these sources."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Short Range Reconnaissance')",
+      "M_value": "NOT_FOUND (Army programs outside J-Book corpus scope)",
+      "interpretation": "Coverage gap, not a red flag. The Signal OS J-Book corpus does not include Army RDT&E or Army Procurement P-40 lines, so it cannot verify the SRR Program of Record either way. USAspending shows minimal Teal Drones obligations and zero labeled SRR awards as of cutoff — note this as a coverage limitation rather than a divergence finding."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "FY 2025 consolidated revenue of $40.7M (up 128% vs FY 2024 $17.8M; up 739% vs eight-month Transition Period $4.9M) is attributable primarily to the commencement and scaling of drone deliveries to the U.S. Army under the SRR program.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": [
+        "Company attributes $40.7M FY2025 revenue primarily to SRR deliveries to the U.S. Army.",
+        "USAspending shows TEAL DRONES INC with $2.16M TOTAL DoD obligations across 27 awards (lifetime, all entities). Even allowing for FY25 timing, the recipient-name dataset shows no awards remotely matching the order-of-magnitude required to support $40.7M in SRR-attributed FY25 revenue. The largest single Teal Drones obligation in the dataset is $750K (USAFA, 74 Teal 2 drones).",
+        "Per Heuristic 6 (USAspending cross-check): if the company claims revenue from a named program and USAspending shows orders of magnitude less, the original revenue attribution may be inflated OR the contracts are obligated under a prime contractor / OTA / non-standard vehicle invisible to recipient_name queries.",
+        "pentagon_jbook NOT_FOUND for SRR (Army not in corpus) — cannot independently verify forward-year SRR funding trajectory."
+      ],
+      "M_check": "usaspending.query_dod_contracts(recipient_name='Teal Drones') + pentagon_jbook.query_program_funding(program_name='Short Range Reconnaissance')",
+      "M_value": "USAspending: $2.16M lifetime / 27 awards / 0 SRR-labeled. pentagon_jbook: NOT_FOUND (corpus gap).",
+      "interpretation": "Material under-delivery signal in the orthogonal source. The 20x gap between claimed $40.7M FY25 SRR revenue and observable $2.16M lifetime USAspending obligations to TEAL DRONES INC is a verifier divergence worth flagging. Caveats: (i) SRR Lot 1 obligations may be too recent to appear; (ii) Army production contracts on PoR can flow through OTA vehicles or prime contractors and not show under the sub's recipient name; (iii) J-Book Army coverage gap prevents forward-year confirmation. Severity SEVERE_UNDERDELIVERY rather than RED_FLAG_NEGATIVE because the USAspending lag/routing caveats are real and the company is publicly named as an SRR selectee — the framework should flag but not call fraud. If the parent agent observes that this is the load-bearing thesis claim (FY26 forward narrative hinges entirely on SRR scaling), promote to RED_FLAG_NEGATIVE."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Black Widow flight tested with Palantir VNav software, marketed as the first commercial demo of visual navigation software on a drone 'already accepted into a U.S. Army program' (forward narrative of Army program-of-record continuity).",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook NOT_FOUND — Army SRR is outside the 410-PE J-Book corpus.",
+        "Claim is a forward narrative / technology-integration milestone, not a current revenue commitment. The 'already accepted' language is consistent with the Nov-2024 SRR selection (Claim C1) and inherits its verifier status."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Short Range Reconnaissance')",
+      "M_value": "NOT_FOUND",
+      "interpretation": "Inherits UNVERIFIABLE from C1. Coverage-gap finding."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "FANG FPV drones are being developed as a payload deployable from AeroVironment's P550 UAS under a marsupial configuration, leveraging MOSA architecture (forward pipeline tied to AV's P550, which is itself an Army Future Tactical UAS / FTUAS-adjacent platform).",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook NOT_FOUND for 'Future Tactical Unmanned Aircraft System', 'FTUAS', and 'AeroVironment' (contractor) — both Army RDT&E PEs and AV's procurement lines are outside the present J-Book corpus.",
+        "Claim is a development roadmap (no booked revenue) — even with full coverage, this would be jbook_program_pipeline (forward), not jbook_program_revenue."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='FTUAS') / (contractor_name='AeroVironment')",
+      "M_value": "NOT_FOUND on all three queries",
+      "interpretation": "Coverage gap. Cannot test FTUAS funding trajectory or AV's procurement exposure with current corpus."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Teal 2 is Blue UAS Certified by the U.S. Department of Defense (DoD list of approved sUAS for government use).",
+      "severity": "PASS",
+      "supports": [
+        "USAspending corroborates real (if small) DoD purchasing of Teal 2 systems across multiple commands (USAFA, VA National Guard, Patrick SFB, etc.) — consistent with Blue UAS list eligibility.",
+        "Claim is binary (certified yes/no), not a forward-revenue claim — low underdelivery exposure."
+      ],
+      "M_check": "usaspending.query_dod_contracts(recipient_name='Teal Drones')",
+      "M_value": "27 awards, $2.16M; multiple Teal 2 buys including 'BLUE UAS CERTIFIED LIST' explicit in W912LQ25FA019 description",
+      "interpretation": "Verified — Blue UAS certification supported by award descriptions explicitly referencing the Blue UAS Cleared List."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Blue Ops, Inc. division (launched August 2025) is developing a family of USV (uncrewed surface vessel) weapons systems for defense markets — forward pipeline narrative tied to Navy/DoD USV demand.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "pentagon_jbook.query_program_funding(program_name='Maritime Systems') returned SOCOM PE 1160483BB with status FUNDED_SHRINKING: FY24 $158.9M → FY25 $200.8M → FY26 $120.5M (40% YoY cut in FY26).",
+        "SOCOM Unmanned ISR (PE 1160434BB) returned FUNDED_SHRINKING: FY24 $6.7M → FY25 $31.6M → FY26 $2.3M (93% YoY cut in FY26).",
+        "Per Heuristic 1, FUNDED_SHRINKING → MODERATE_UNDERDELIVERY for claimed-program-revenue claims. Blue Ops is a forward pipeline (no booked revenue yet) so materiality (Heuristic 2) is limited."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Maritime Systems') / (program_name='Unmanned ISR')",
+      "M_value": "Maritime Systems FUNDED_SHRINKING (FY26 $120M, -40% YoY); Unmanned ISR FUNDED_SHRINKING (FY26 $2.3M, -93% YoY)",
+      "interpretation": "Closest J-Book proxies for the USV/maritime-unmanned demand the Blue Ops thesis relies on are both shrinking in the FY26 PB. The Blue Ops launch narrative collides with a contracting SOCOM USV/unmanned ISR funding envelope. Note: this is a SOCOM proxy, not a direct Navy USV PE."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "FlightWave's Edge 130 (VTOL fixed-wing UAS for extended-range ISR) is part of the Red Cat product portfolio, supporting long-endurance ISR for defense customers.",
+      "severity": "PASS",
+      "supports": [
+        "USAspending shows FlightWave Aerospace with 8 DoD awards totaling $2.30M — confirms real DoD customer relationship, consistent with the claim.",
+        "pentagon_jbook NOT_FOUND for 'Edge 130' and 'FlightWave' — small-program coverage gap, not material."
+      ],
+      "M_check": "usaspending.query_dod_contracts(recipient_name='FlightWave Aerospace')",
+      "M_value": "8 awards, $2.30M",
+      "interpretation": "Product existence and DoD customer base verified via USAspending. No forward-revenue claim attached, so PASS."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Going-concern context: company has accumulated deficit of $196.8M at Dec 31, 2025 and has 'never been profitable'; ability to generate higher revenues and profitability depends on continued execution of Army programs.",
+      "severity": "PASS",
+      "supports": [
+        "Self-disclosed in 10-K — no external verifier needed for the disclosure itself.",
+        "Relevant as financial backdrop for scoring SRR-dependence claims (C2 above): with $196.8M accumulated deficit and never-profitable history, the company's solvency thesis is load-bearingly dependent on SRR scaling. This amplifies the materiality weight of any C2 underdelivery."
+      ],
+      "M_check": "internal disclosure / no M-source",
+      "M_value": "10-K self-disclosure",
+      "interpretation": "Disclosed accurately; included as context that elevates materiality of the SRR-revenue dependence flagged in C2."
+    }
+  ]
+}

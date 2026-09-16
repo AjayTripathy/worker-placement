@@ -1,0 +1,148 @@
+{
+  "ticker": "RGTI",
+  "cutoff": "2024-09-01",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Rigetti has a contracted partnership with AFRL to harness its fabrication capabilities for quantum networking hardware R&D.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending shows 10 DoD awards to RIGETTI & CO LLC totaling $4.53M; PIID prefixes FA8750 / FA8649 = AFRL Rome (merit-based small business R&D, not earmark line items).",
+        "Contract descriptions match the 10-K narrative: 'SYSTEMS-DRIVEN COMPONENT DEVELOPMENT FOR PHOTON-SUPERCONDUCTOR MULTI-NODE QUANTUM NETWORKS' (FA864921P0781 $1.5M; FA875025CB058 $1.3M).",
+        "pentagon_jbook has no Rigetti entry in by_entity.json (entity index covers 58 firms; no Rigetti)."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(contractor_name='Rigetti'), usaspending.query_dod_contracts(recipient_name='Rigetti')",
+      "M_value": "pentagon_jbook=NOT_FOUND (no Rigetti-specific PE in 410-PE corpus); usaspending=10 awards / $4.53M confirmed under AFRL Rome PIIDs.",
+      "interpretation": "Rigetti's AFRL relationship is real but at SBIR/small-business contracting scale, not a J-Book program line. PE-level NOT_FOUND is UNVERIFIABLE on the J-Book axis but usaspending confirms the claim itself — these are merit-based AFRL Rome awards (no earmark sponsor), structurally different from the IONQ AFRL Quantum Networking earmark line. Per heuristic #7, NOT_FOUND alone is not a red flag. Net: claim is corroborated."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Rigetti was awarded DARPA Quantum Benchmarking Phase 2 (Nov 2023), following Phase 1 (Mar 2022).",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "DARPA Quantum Benchmarking is a research program, not a Major Defense Acquisition Program with a dedicated PE line — typically funded under DARPA's omnibus 'Quantum-Enhanced Computation' or 'Quantum Information Sciences' research lines (DARPA RDT&E PE 0602702E / 0602303E).",
+        "pentagon_jbook returns NOT_FOUND for program_name='DARPA Quantum Benchmarking' / 'IMPAQT' / 'Imagining Practical Applications for a Quantum Tomorrow' — outside the 410-PE corpus coverage."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding with multiple program_name variants",
+      "M_value": "pentagon_jbook=NOT_FOUND for all variants",
+      "interpretation": "DARPA pure-research programs of this scale are not individually broken out in the J-Book corpus. Per heuristic #7, NOT_FOUND is UNVERIFIABLE not negative. Phase 2 award itself (Nov 2023) is contemporaneously announced and small relative to RGTI's $9-12M annual revenue."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Rigetti was awarded DARPA IMPAQT program project (SPEEQ) in September 2023.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "IMPAQT is a DARPA Information Innovation Office (I2O) program in the quantum-algorithms research portfolio — not a J-Book line item.",
+        "pentagon_jbook returns NOT_FOUND for 'DARPA IMPAQT' and 'Imagining Practical Applications for a Quantum Tomorrow'."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='IMPAQT' / 'Imagining Practical Applications for a Quantum Tomorrow')",
+      "M_value": "NOT_FOUND (both)",
+      "interpretation": "Below J-Book corpus granularity. UNVERIFIABLE per heuristic #7. The IMPAQT/SPEEQ award is a contemporaneous DARPA announcement and unlikely to be material to revenue (DARPA research awards typically $1-3M/yr)."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Partnership with NASA and DARPA for secure dynamic message scheduling using high-demand space and national security assets.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "Disclosure is exploratory ('we are exploring the application') — not a booked contract.",
+        "pentagon_jbook returns NOT_FOUND for variants ('DARPA secure dynamic message scheduling', 'DARPA Quantum-Inspired Classical Computing')."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='DARPA secure dynamic message scheduling' / 'DARPA Quantum-Inspired Classical Computing')",
+      "M_value": "NOT_FOUND (both)",
+      "interpretation": "Exploratory, non-quantified. UNVERIFIABLE — but the claim is appropriately hedged in the filing, so not a red flag."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "DOE/Fermilab/SQMS partnership; delivered 9-qubit QPU to Fermilab Q2 2023 as part of the Superconducting Quantum Materials and Systems Center.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "doe_budget matches SQMS to DOE 'Quantum Information Science' / 'Advanced Computing Technologies' / 'NQIS Research Centers' umbrellas.",
+        "All matched DOE programs have only FY2025 / FY2026 funding rows in the corpus (auto-extracted from FY2026 CBR), which are POST-cutoff (2024-09-01). doe_budget returns NOT_FOUND_IN_TIMERANGE under cutoff filter — as expected.",
+        "SQMS is one of five NQIS research centers established by Congress in the 2018 National Quantum Initiative Act and has been consistently funded by DOE Office of Science. The Q2 2023 QPU sale to Fermilab is a documented commercial transaction."
+      ],
+      "M_check": "doe_budget.query_program_funding(program_name='SQMS' / 'Superconducting Quantum Materials and Systems Center' / 'National Quantum Information Science Research Centers') with cutoff_date='2024-09-01'",
+      "M_value": "NOT_FOUND_IN_TIMERANGE for all variants under cutoff filter (corpus only contains FY25/FY26 rows from post-cutoff documents)",
+      "interpretation": "Coverage gap, not a red flag. SQMS funding is part of the congressionally-mandated NQIS centers program with strong bipartisan support; the QPU sale to Fermilab is a non-recurring transaction already booked. UNVERIFIABLE per heuristic #7."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Substantial majority of Rigetti's revenues are derived from technology development contracts with various partners (DARPA, AFRL, DOE/Fermilab, NASA, Innovate UK).",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "usaspending: total DoD contracts to RIGETTI & CO LLC since 2020 = $4.53M across 10 awards. Even spread over 4 years = ~$1.1M/yr DoD revenue.",
+        "FY2023 total revenue (per 10-K MD&A context) is in the $12M range with net loss $75.1M. So the 'substantial majority from development contracts' may be true but the absolute DoD slice is small.",
+        "No single-program revenue concentration disclosure — claim names DARPA/AFRL/DOE generically.",
+        "Crosswalk shows only ONE matched J-Book program for Rigetti contracts (AFRL Qubitekk Quantum Networking, $0.15M obligated — a 2020 contract). 9 of 10 USAspending contracts are unmatched to any J-Book PE — i.e., they are sub-PE SBIR/foundry awards, not line items.",
+        "pentagon_jbook: no Rigetti-named PE in 410-PE corpus."
+      ],
+      "M_check": "usaspending.query_dod_contracts(recipient_name='Rigetti') + pentagon_jbook(contractor_name='Rigetti')",
+      "M_value": "usaspending=10 awards / $4.53M / all SBIR-scale; pentagon_jbook=NOT_FOUND (no PE-level line)",
+      "interpretation": "The 'majority from development contracts' statement is literally true but the underlying contracts are small, fragmented SBIR/AFRL-Rome awards. The forward narrative depends on these continuing but none is a J-Book program line that could be tracked for material growth/shrink. Lack of PE-level exposure means the J-Book divergence pattern doesn't apply cleanly — but the concentration is in a contracting modality (SBIR) that is structurally constrained and won't scale to commercial revenue without QPU sales materializing. Score MODERATE on absolute-revenue-materiality grounds, not J-Book pattern grounds."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Rigetti UK awarded Innovate UK SBRI grant (Feb 2024) to deliver 24-qubit quantum computer to NQCC.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "Innovate UK is a UK government program, not in pentagon_jbook scope.",
+        "Award is contemporaneously announced; no contradicting evidence."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Innovate UK NQCC') + edgar_fts.query_fulltext",
+      "M_value": "pentagon_jbook=NOT_FOUND (out of scope)",
+      "interpretation": "Outside J-Book corpus scope (UK government). UNVERIFIABLE per heuristic #7. Claim is contemporaneously documented and not material to thesis."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "84 patents issued + 106 pending.",
+      "severity": "PASS",
+      "supports": [
+        "uspto_odp(assignee_name='Rigetti', cutoff_date='2024-09-01'): 296 total applications, 113 granted pre-cutoff.",
+        "Claim of 84 issued is conservative vs. 113 actually granted."
+      ],
+      "M_check": "uspto_odp.query_assignee(assignee_name='Rigetti', cutoff_date='2024-09-01')",
+      "M_value": "n_total_applications=296, n_granted=113",
+      "interpretation": "Patent count claim is conservatively stated vs. USPTO ODP record. PASS."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "Fab-1 is a 53,800 sq ft fabrication facility in Fremont, CA.",
+      "severity": "PASS",
+      "supports": [
+        "epa_frs returned 3 facilities for 'Rigetti' in CA including 'RIGETTI QUANTUM COMPUTING' at 47430 Seabridge Dr, Fremont, CA 94538 (Alameda County) — matching Fab-1.",
+        "Berkeley HQ also confirmed (775 Heinz Ave, Berkeley)."
+      ],
+      "M_check": "epa_frs.query_facilities(facility_name='Rigetti', state_abbr='CA')",
+      "M_value": "3 facilities; Fremont and Berkeley both registered",
+      "interpretation": "Facility footprint corroborated. PASS."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "Distribution agreements with AWS Braket, Microsoft Azure Quantum, ORNL.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "edgar_fts search 'Rigetti Quantum' returned 53 hits across Rigetti's own filings — consistent with the company's own contemporaneous disclosure.",
+        "Could not test counterparty disclosure (AWS / MSFT / ORNL counterparties don't itemize partners at this scale)."
+      ],
+      "M_check": "edgar_fts.query_fulltext(search_term='Rigetti Quantum')",
+      "M_value": "53 filings hits, all RGTI's own filings",
+      "interpretation": "No contradicting evidence; counterparty silence is expected at this scale. UNVERIFIABLE but immaterial to J-Book thesis."
+    }
+  ],
+  "summary": {
+    "n_claims": 10,
+    "n_queries_run": 18,
+    "severity_counts": {
+      "PASS": 3,
+      "MODERATE_UNDERDELIVERY": 1,
+      "SEVERE_UNDERDELIVERY": 0,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 6
+    },
+    "jbook_grounded_claims": ["C1","C2","C3","C4","C5","C7"],
+    "n_jbook_grounded": 6,
+    "n_jbook_fired_with_match": 0,
+    "n_jbook_returned_not_found": 6,
+    "key_finding": "Rigetti is NOT in the J-Book entity index (58 firms covered; Rigetti absent). USAspending confirms 10 small AFRL Rome / SBIR contracts totaling $4.53M — merit-based, not earmark-tied. Distinct from the IONQ pattern (IONQ has $51M AFRL Quantum Networking earmark line with FUNDED_SHRINKING / EARMARK_SUNSET signal). RGTI's risk profile at 2024-09-01 cutoff is dilution / cash-burn / commercial-traction (need additional capital by Q3 2025 per the 10-K), not J-Book program-cancellation. The J-Book divergence pattern doesn't fire against RGTI at this cutoff. Patents and facilities check out conservatively. C6 (substantial-majority revenue from dev contracts) is the closest soft signal: real contracts but small/fragmented, no path to scale visible.",
+    "blinding_compliance": "All pentagon_jbook and doe_budget calls passed cutoff_date='2024-09-01'. No WebFetch/WebSearch used. No post-cutoff knowledge applied to scoring. FY25/FY26 funding rows that appeared in earmark_detector output for the IONQ-AFRL line were excluded from RGTI scoring (RGTI is not the IONQ-AFRL contractor)."
+  }
+}

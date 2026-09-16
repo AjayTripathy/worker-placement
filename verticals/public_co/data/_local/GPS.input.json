@@ -1,0 +1,86 @@
+{
+  "ticker": "GPS",
+  "cutoff": "2026-05-16",
+  "filing": "0001628280-26-018573_10-K.txt",
+  "filing_form": "10-K",
+  "filing_date": "2026-03-17",
+  "report_date": "2026-01-31",
+  "company": "The Gap, Inc.",
+  "claims": [
+    {
+      "claim_id": "C1",
+      "category": "physical_facility",
+      "claim_text": "As of January 31, 2026, Gap Inc. operated 2,474 Company-operated stores across the US, Canada, Japan, and Taiwan, totaling approximately 29.6 million square feet, with approximately 1,000 additional franchise locations. Almost all stores are leased.",
+      "rubric_tier": "HIGH",
+      "rationale": "Store-count + lease commitments is a Layer-3 rubric HIGH (structural balance-sheet exposure). Slow-bleed retail names typically show declining net store counts; check trajectory and lease-portfolio.",
+      "queries": [
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Gap Inc", "cutoff_date": "2026-05-16", "start_date": "2024-01-01", "forms": "8-K"}, "expectation": "If material store-closure 8-Ks were filed, we should see them in the issuer's own 8-K stream; restrict to GPS cik to find closure announcements."}
+      ]
+    },
+    {
+      "claim_id": "C2",
+      "category": "vendor_relationship",
+      "claim_text": "Gap purchases private label and non-private label merchandise from approximately 200 vendors with factories in about 30 countries; two largest vendors accounted for ~9% and ~8% of total fiscal 2025 purchases; ~27% from Vietnam, ~21% from Indonesia.",
+      "rubric_tier": "HIGH",
+      "rationale": "Vendor concentration + sourcing geography is testable via supplier 10-K mentions and trade exposure. For apparel retailers, the disclosed concentration is on the supplier side; we check whether public apparel suppliers (HBI/LEVI/VFC/TPR) name Gap as a major customer.",
+      "queries": [
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Gap Inc", "cutoff_date": "2026-05-16", "cik": "0001359841", "start_date": "2022-01-01"}, "expectation": "Counterparty corroboration: does Hanesbrands name Gap as a customer? Gap is more of a private-label retailer, so absence is mild rather than HARD CONTRADICTION."},
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Old Navy", "cutoff_date": "2026-05-16", "cik": "0001359841", "start_date": "2022-01-01"}, "expectation": "Name-variant: Old Navy is the largest Gap brand by sales; check HBI 10-Ks for Old Navy mentions."}
+      ]
+    },
+    {
+      "claim_id": "C3",
+      "category": "financial_distress",
+      "claim_text": "Gap reports strong liquidity as of Jan 31, 2026: $2.616B cash + $386M short-term investments, $1.5B total debt (two senior notes due 2029 and 2031), no ABL borrowings, current ratio 1.75:1, working capital $2.477B. Fiscal 2025 net sales $15.4B (+2% YoY), net income $816M, free cash flow $823M.",
+      "rubric_tier": "HIGH",
+      "rationale": "Financial-distress markers per Heuristic 10. Gap has the OPPOSITE of distress markers — strong cash, dividend paying, $1B repo authorization, no going-concern. The claim worth testing is whether mall-REIT landlords still treat Gap as a top-tenant exposure (signaling lease commitments) vs. distress.",
+      "queries": [
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Gap Inc", "cutoff_date": "2026-05-16", "cik": "0001063761", "start_date": "2022-01-01"}, "expectation": "Simon Property Group (SPG) discloses top tenants; Gap historically appears in SPG's tenant list. Verify ongoing landlord-side disclosure."},
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "going concern", "cutoff_date": "2026-05-16", "cik": "0000039911", "start_date": "2018-01-01"}, "expectation": "Negative control: should be ZERO. If Gap had ever disclosed a going-concern qualifier this would be a SEVE distress marker. Expect 0."}
+      ]
+    },
+    {
+      "claim_id": "C4",
+      "category": "production_volume",
+      "claim_text": "Net sales for fiscal 2025 increased 2 percent to $15.4 billion compared with $15.1 billion for fiscal 2024; store and franchise sales increased 1 percent, online sales increased 4 percent. Gross margin 40.8% vs 41.3% prior year (50 bp compression).",
+      "rubric_tier": "HIGH",
+      "rationale": "Comp-sales trajectory is the core retail-distress signal (Heuristic 9). Test whether the marketing claim ('momentum/transformation') matches the financial-statement disclosure (only +1% store sales, gross margin compressed). The 2% top-line with margin compression is a SLOW-BLEED pattern.",
+      "queries": [
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Athleta", "cutoff_date": "2026-05-16", "cik": "0000039911", "start_date": "2024-01-01"}, "expectation": "Athleta is positioned as a growth narrative. Count 10-K/10-Q discussions to see if it remains highlighted."},
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Banana Republic", "cutoff_date": "2026-05-16", "cik": "0000039911", "start_date": "2024-01-01"}, "expectation": "Banana Republic is the other growth narrative."}
+      ]
+    },
+    {
+      "claim_id": "C5",
+      "category": "partnership",
+      "claim_text": "Gap Inc.'s integrated U.S. loyalty program was rebranded as 'Encore' in the first quarter of fiscal 2026. Old Navy, Gap, Banana Republic, and Athleta each have private-label and co-branded credit card programs through a third-party financing company.",
+      "rubric_tier": "LOW-to-MODERATE",
+      "rationale": "Marketing-tier loyalty claim. Credit-card partner is third-party; the disclosed counterparty (issuer) is not named in this filing. Brand-relevance claim is hard to falsify directly; loyalty rebranding is recent.",
+      "queries": [
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Encore", "cutoff_date": "2026-05-16", "cik": "0000039911", "start_date": "2025-01-01"}, "expectation": "Check that Encore is mentioned in Gap's filings (the in-house disclosure)."},
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Gap Inc", "cutoff_date": "2026-05-16", "cik": "0000927628", "start_date": "2022-01-01"}, "expectation": "Capital One (COF) discloses major card partners; Gap's third-party card issuer may be named here (or might be Barclays, Synchrony). Asymmetric mention test."}
+      ]
+    },
+    {
+      "claim_id": "C6",
+      "category": "other",
+      "claim_text": "On August 27, 2025, Gap and Baozun Inc. reached a decision NOT to proceed with the planned transition of Gap's operations in Taiwan to Baozun as a franchise partner (the China transition closed January 31, 2023). Gap continues to operate company-owned stores in Taiwan as of January 31, 2026.",
+      "rubric_tier": "MODERATE",
+      "rationale": "Heuristic 3 (planned vs operational): announced franchise transition in November 2022, executed for China in January 2023, but Taiwan transition was abandoned. This is a small but concrete planned-vs-executed gap that informs base rates for other retail transformation claims.",
+      "queries": [
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Baozun", "cutoff_date": "2026-05-16", "cik": "0000039911", "start_date": "2022-01-01"}, "expectation": "Verify Gap's own disclosures discuss Baozun across the 2022-2025 arc."},
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Baozun", "cutoff_date": "2026-05-16", "start_date": "2022-01-01"}, "expectation": "External corroboration: Baozun (a Chinese e-commerce service) may have its own SEC filings (ADRs); cross-check the franchise relationship."}
+      ]
+    },
+    {
+      "claim_id": "C7",
+      "category": "financial_distress",
+      "claim_text": "Gap has a voluntary supply-chain finance (SCF) program; outstanding obligations $390M (Jan 31, 2026) vs $387M (Feb 1, 2025), with $2.604B of invoices added and $2.601B settled in fiscal 2025. Gap states it is 'not a party' to the supplier-financing agreements and payment terms are not impacted by participation.",
+      "rubric_tier": "MODERATE",
+      "rationale": "SCF programs are a watch-item for vendor liquidity. Outstanding balance is stable, but the disclosure (per FASB ASU 2022-04) means Gap accepts an effective payment-term extension to suppliers. Worth flagging as a soft distress vector even though it currently looks normal-course.",
+      "queries": [
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "supply chain finance", "cutoff_date": "2026-05-16", "cik": "0000039911", "start_date": "2022-01-01"}, "expectation": "Check that SCF program has been consistently disclosed (ASU 2022-04 effective 2023)."}
+      ]
+    }
+  ]
+}

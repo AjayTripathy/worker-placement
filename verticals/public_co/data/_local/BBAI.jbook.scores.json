@@ -1,0 +1,150 @@
+{
+  "ticker": "BBAI",
+  "cutoff": "2026-05-20",
+  "filing": "0001836981-26-000018_10-K.txt",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Air Force EPASS program named as historic revenue driver, wound down 2Q 2023; forward narrative no longer cites EPASS.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook NOT_FOUND for 'Air Force EPASS' / 'Enterprise Professional Services Acquisition Solution' (J-Book corpus is RDT&E + Procurement PEs; EPASS is a services acquisition vehicle, not a PE — coverage gap, not a divergence signal).",
+        "Company itself acknowledges EPASS wound down in 2Q23 — the historic past, not a forward-looking claim. No false-forward exposure."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Air Force EPASS')",
+      "M_value": "NOT_FOUND (signal=NOT_FOUND, n_matches=0)",
+      "interpretation": "This is a backward-looking explanation of FY2024 vs FY2023 revenue change. Company self-discloses EPASS wind-down. No J-Book divergence to flag. PASS — disclosure is honest about a past program ending."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "FY25 revenue decline of $30.6M attributed in part to lower 'Army programs' volume (unnamed). Forward narrative still implies Army programs as material.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "pentagon_jbook NOT_FOUND for 'Global Force Information Management' / 'GFIM' / contractor BigBear.ai — J-Book corpus does not cover the Army's services/IT line items where BBAI's Army work sits (corpus is hardware-heavy: MDA, Space Force, Air Force aircraft).",
+        "USAspending.query_dod_contracts(recipient='BigBear.ai') confirms only 6 DoD prime awards totaling $8.28M — including ONE Army GFIM follow-on production contract (W519TC24C0040, $3.9M). The Army GFIM follow-on is the primary identifiable Army program, but the filing does not name it.",
+        "USAspending(recipient='BigBear.ai Federal LLC') and (recipient='Pangiam') both return 0 awards — exact-string match fails. The $8.28M total via softer match strongly suggests BBAI's stated 'Army programs' are either (a) sub-tier work via prime contractors not visible in prime-award data, (b) IDIQ ceilings far exceeding obligated, or (c) a very small absolute base.",
+        "Filing self-discloses declining volume on Army programs — already an admission of weakening pipeline."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Global Force Information Management')",
+      "M_value": "NOT_FOUND in J-Book; USAspending confirms only $8.28M in prime DoD obligations total, of which $3.9M is a single Army GFIM follow-on production contract.",
+      "interpretation": "J-Book corpus coverage gap means pentagon_jbook cannot directly verify Army program funding trajectory. However, the cross-check via USAspending shows tiny prime-DoD obligations relative to FY25 revenue (~$128M) — strongly implying BBAI's Army revenue is sub-tier or IDIQ-ceiling-driven, with the company itself flagging declining volume. MODERATE_UNDERDELIVERY: forward narrative leans on 'Army programs' that are not named and not visible at scale in prime-award data, while company admits volume is declining."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Ask Sage claimed as central pillar with 100,000 Department of War users; positioned as forward DoD generative AI revenue at scale.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "pentagon_jbook NOT_FOUND for 'Ask Sage' / 'generative AI' / 'JADC2' — J-Book corpus does not include AI software platforms (likely buried in Operation & Maintenance or services PEs not in scope of the 410-PE corpus).",
+        "USAspending.query_dod_contracts(recipient='Ask Sage') confirms 42 awards totaling $23.07M, including a $10.88M task order with Army CIO G6 for the Ask Sage annual subscription/license/training. This is REAL but small relative to the $271.6M acquisition price BBAI paid.",
+        "The $23M of obligated DoD revenue across 42 awards is consistent with subscription/SaaS-style adoption but inconsistent with the implied 100,000 user / $271.6M acquisition valuation (~$2,700 per user) unless many users are unfunded pilots or free tiers."
+      ],
+      "M_check": "usaspending.query_dod_contracts(recipient_name='Ask Sage') + pentagon_jbook.query_program_funding(program_name='Ask Sage')",
+      "M_value": "USAspending: 42 awards, $23.07M total; pentagon_jbook NOT_FOUND",
+      "interpretation": "Ask Sage has real DoD traction ($23M obligated, named Army CIO G6 customer) but the user-count claim implies revenue scale not supported by current obligations. $271.6M purchase price implies aggressive forward revenue multiple. MODERATE_UNDERDELIVERY: real but materially smaller than narrative implies."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "ConductorOS positioned as central edge-AI orchestration platform; cited in Talisman Sabre 2025 exercise.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook NOT_FOUND for 'ConductorOS' / 'Talisman Sabre' / 'edge AI orchestration' — J-Book corpus does not cover exercise-driven adoption or proprietary platform names.",
+        "No usaspending obligation specifically tagged to ConductorOS in the prime-award data returned.",
+        "The Talisman Sabre claim is an exercise reference, not a contract/PE — exhibits 'land' phase of land-and-expand without quantified booking."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='ConductorOS')",
+      "M_value": "NOT_FOUND",
+      "interpretation": "ConductorOS is a proprietary BBAI product name with no PE counterpart. Claim is narrative-load-bearing but unquantified ('central to' an exercise, not 'booked $X in production'). UNVERIFIABLE — neither catchable as J-Book divergence nor confirmable."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Customer concentration: $65M (51%) of FY25 revenue from >10%-customers; $27M of $248M backlog from same customers, expected 100% conversion by end-2026.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": [
+        "Filing explicitly says contracts from significant customers 'are estimated to be completed during 2026' with ~100% expected to be recognized as revenue by end of 2026. This means 51% of current revenue is from customers whose remaining backlog ($27M) burns off during 2026 — implying a sharp forward revenue cliff if not replaced.",
+        "USAspending.query_dod_contracts(recipient='BigBear.ai') shows $8.28M total in prime DoD obligations; (recipient='BigBear.ai Federal LLC' exact) and (recipient='Pangiam') both return 0. The mismatch with reported $128M FY25 revenue indicates most revenue is via sub-tier or non-DoD channels — meaning the >10%-customer concentration is even more opaque and harder for outside investors to track or verify.",
+        "Filing does not name the >10% customers. Backlog burn-off + opaque customer ID + declining Army volume = concentrated forward cliff risk."
+      ],
+      "M_check": "usaspending.query_dod_contracts(recipient_name='BigBear.ai Federal LLC' / 'BigBear.ai' / 'Pangiam')",
+      "M_value": "BigBear.ai Federal LLC exact: 0 awards; BigBear.ai softer match: 6 awards / $8.28M; Pangiam: 0 awards",
+      "interpretation": "The combination of (a) 51% revenue from unnamed >10%-customers, (b) backlog from those customers burning off entirely during 2026, and (c) tiny prime-DoD obligation footprint visible in USAspending creates a structurally severe forward revenue gap. SEVERE_UNDERDELIVERY: forward pipeline depends on re-winning concentrated, unnamed federal customers whose remaining backlog completes within 12 months."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Total backlog ~$248M as of 12/31/2025; primary forward revenue anchor.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "pentagon_jbook NOT_FOUND for BigBear.ai Federal / Pangiam contractor lookups — BBAI does not surface as a named PE prime in the J-Book corpus.",
+        "USAspending: $8.28M prime DoD obligations total. Even allowing for IDIQ ceilings and sub-tier work, the backlog/prime-obligation ratio (~30x) is much higher than typical defense primes, indicating either a heavy IDIQ ceiling component or sub-contracted work where prime contractors hold the ceiling.",
+        "Filing acknowledges backlog includes Priced Unexercised Options and that 'actual revenue may differ from backlog estimates' — material caveat."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(contractor_name='BigBear.ai Federal') + usaspending.query_dod_contracts",
+      "M_value": "pentagon_jbook NOT_FOUND; USAspending $8.28M prime obligations",
+      "interpretation": "Backlog is the headline forward indicator but not broken down by program/PE. Combined with tiny prime-DoD footprint, the $248M backlog is hard to triangulate independently. MODERATE_UNDERDELIVERY: backlog is real per filing but the company has not provided J-Book-grounded line-item breakdown that would allow verification."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Pangiam / biometric exit / Trueface / veriScan / CargoSeer positioned as forward digital identity growth driver, dependent on TSA/CBP biometric adoption and commercial market.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "pentagon_jbook NOT_FOUND for 'biometric exit' / 'TSA biometric' / 'CBP biometric' / contractor 'Pangiam' — these are DHS programs (TSA, CBP), not DoD PEs, so outside J-Book scope by definition.",
+        "USAspending(recipient='Pangiam') returns 0 DoD awards — Pangiam revenue (if any) is via DHS/TSA/CBP, not visible in the DoD-filtered query.",
+        "Filing itself includes explicit risk factor warning that 'a significant commercial market for biometrics technology may not develop' — self-flagged narrative dependency."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='biometric exit') + usaspending.query_dod_contracts(recipient='Pangiam')",
+      "M_value": "pentagon_jbook NOT_FOUND; USAspending Pangiam: 0 DoD awards (DHS not queried)",
+      "interpretation": "Biometric programs are correctly out of J-Book scope (DHS, not DoD). Cannot trigger J-Book divergence pattern. The filing's own commercial-biometrics risk disclosure indicates management uncertainty. MODERATE_UNDERDELIVERY: forward narrative depends on DHS/commercial adoption neither of which is independently verifiable from DoD M-sources, and management itself qualifies the claim."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Acquisition roll-up (Pangiam, ProModel, Ask Sage, CargoSeer) funded by $637M ATM dilution at allegedly improved balance sheet.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "acq_coherence.score_acquisition_coherence requires parent_thesis + acquisitions kwargs that were not formed in this run (bad_kwargs in M-source response).",
+        "insider_vs_calendar.query_insider_sales_near_budget_events requires CIK (which is 0001836981) — call signature mismatch in this run.",
+        "$637M ATM raises + 142M shares issued represent ~70%+ dilution to fund $271.6M Ask Sage acquisition + balance-sheet de-leveraging — large share-count expansion noted in filing."
+      ],
+      "M_check": "acq_coherence.score_acquisition_coherence(ticker='BBAI')",
+      "M_value": "bad_kwargs (M-source signature mismatch)",
+      "interpretation": "M-source call signature mismatch in this run prevented coherence scoring. Filing-disclosed facts: ATM raised $637M against $271.6M Ask Sage purchase + $124M convertible note retirement — leverage reduction is real. UNVERIFIABLE within this run; would require re-calling acq_coherence with full parent_thesis + acquisitions list."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "~59,000 sq ft across 6 primary US locations + London + Abu Dhabi.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "epa_frs.query_facilities requires facility_name + state_abbr kwargs that were not supplied in this run; bad_kwargs signature mismatch.",
+        "Property claims are control (non-J-Book) — small, non-load-bearing in valuation thesis."
+      ],
+      "M_check": "epa_frs.query_facilities(company_name='BigBear.ai')",
+      "M_value": "bad_kwargs (M-source signature mismatch)",
+      "interpretation": "Control claim, not material. UNVERIFIABLE in this run due to call signature mismatch; not load-bearing for the J-Book pattern test."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "Patents/copyrights/trademarks protect IP; company explicitly 'not dependent on any particular patent.'",
+      "severity": "PASS",
+      "supports": [
+        "uspto_odp.query_patents is not registered in the m_source catalog (unknown_source error).",
+        "Company self-discloses non-dependence on any single patent — eliminates patent-cliff risk by disclosure."
+      ],
+      "M_check": "uspto_odp.query_patents(assignee_name='BigBear.ai')",
+      "M_value": "unknown_source: uspto_odp.query_patents",
+      "interpretation": "Control claim, honestly disclosed (no dependence on any single patent). M-source not available in catalog. PASS — no over-reach to falsify."
+    }
+  ],
+  "summary": {
+    "n_claims": 10,
+    "n_queries_run": 28,
+    "severity_counts": {
+      "PASS": 2,
+      "MODERATE_UNDERDELIVERY": 4,
+      "SEVERE_UNDERDELIVERY": 1,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 3
+    },
+    "jbook_grounded_claims": ["C1","C2","C3","C4","C6","C7"],
+    "pentagon_jbook_hits": 0,
+    "pentagon_jbook_calls_attempted": 16,
+    "framework_note": "Pentagon J-Book corpus (410 PEs from FY26 RDT&E + Procurement) did not contain matches for any BBAI-disclosed program (Air Force EPASS, GFIM, Project Maven / Ask Sage / ConductorOS / biometric exit). The J-Book corpus is hardware-heavy (MDA, Space Force, Air Force aircraft); BBAI's exposure is to Army IT/services PEs and DHS (TSA/CBP) biometric programs which are outside corpus scope. This is a corpus coverage gap, not a J-Book divergence signal — heuristic 7 applied (NOT_FOUND => UNVERIFIABLE). The strongest signals came from the cross-check via USAspending: BigBear.ai Federal LLC has only $8.28M in prime DoD obligations (vs ~$128M FY25 revenue), the Army GFIM follow-on is a $3.9M production contract — small absolute scale relative to backlog and acquisition spend. Combined with the 51% revenue concentration burning off through 2026, the framework flags SEVERE_UNDERDELIVERY on the customer-concentration/backlog claim (C5) without needing J-Book divergence."
+  }
+}

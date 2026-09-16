@@ -1,0 +1,91 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Verdict outcomes (the grading loop)</title><style>
+body{margin:0;background:#0b0e12;color:#e8ebee;font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:26px 24px 90px}
+a{color:#8b7cf6} h1{font-size:23px;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:#7d858e;margin:0 0 20px;font-size:13px}
+h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:#7d858e;margin:24px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 10px;border-bottom:1px solid #242a31;text-align:left;vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#7d858e}
+.k{font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:20px}
+.k-generator{color:#c3b8fb;background:rgba(139,124,246,.15)}
+.k-detector{color:#eccb8a;background:rgba(217,164,65,.15)}
+.k-watcher{color:#8ee5c1;background:rgba(53,201,143,.15)}
+.k-evidence{color:#b3bcc6;background:rgba(138,147,158,.15)}
+.h-OK{color:#35c98f} .h-STALE{color:#d9a441} .h-ERROR{color:#e0736a} .h-NEVER_RUN{color:#8a939e}
+pre{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px;overflow-x:auto;font-size:12px;line-height:1.5}
+.panel{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px 18px;margin-bottom:12px}
+ul{margin:4px 0;padding-left:20px} li{margin-bottom:4px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+</style></head><body><div class="wrap"><h1>Verdict outcomes (the grading loop)</h1><p class="sub">registered capability · verdict_outcomes</p><a href="signals.html">&larr; all signals</a><div class="panel" style="margin-top:10px"><span class="k k-watcher">WATCHER</span> &nbsp;<span class="h-NEVER_RUN"><b>NEVER_RUN</b></span> · last run <span class="mono">never</span> · cadence 7d</div><p>The calibration spine: grades every adjudication old enough to judge (default 30d) against the tape since its verdict date. STARTER/OWN grade favorable on a positive move, KILL/AVOID on flat-or-down; WATCH is ungraded by design. Each grade writes a verdict_grade record to the learning ledger — the court&#x27;s own Brier book. Idempotent per adjudication (state cursor); grades are LOCAL (tickers — never leaves through the learning allowlist).</p><form method="POST" action="/signals/run" style="margin:10px 0"><input type="hidden" name="name" value="verdict_outcomes"><input name="symbol" placeholder="symbol (if applicable)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px"><input name="symbols" placeholder="universe, comma-sep (generators)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px;margin-left:6px"><button type="submit" style="background:#8b7cf6;color:#0b0e12;border:0;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;margin-left:6px">Run now</button></form><h2>Datasources</h2><ul><li>adjudications.jsonl (the office&#x27;s own verdicts)</li><li>Nasdaq free historical endpoint (or the tenant tape plugin)</li></ul><h2>Applies to</h2><ul><li><b>universal</b> — applies to every asset and strategy</li></ul><h2>The code</h2><pre>@capability(&quot;verdict_outcomes&quot;, &quot;watcher&quot;, &quot;Verdict outcomes (the grading loop)&quot;,
+            desc=&quot;The calibration spine: grades every adjudication old enough to &quot;
+                 &quot;judge (default 30d) against the tape since its verdict date. &quot;
+                 &quot;STARTER/OWN grade favorable on a positive move, KILL/AVOID on &quot;
+                 &quot;flat-or-down; WATCH is ungraded by design. Each grade writes a &quot;
+                 &quot;verdict_grade record to the learning ledger — the court&#x27;s own &quot;
+                 &quot;Brier book. Idempotent per adjudication (state cursor); grades &quot;
+                 &quot;are LOCAL (tickers — never leaves through the learning &quot;
+                 &quot;allowlist).&quot;,
+            datasources=[&quot;adjudications.jsonl (the office&#x27;s own verdicts)&quot;,
+                         &quot;Nasdaq free historical endpoint (or the tenant tape plugin)&quot;],
+            applies_to={&quot;universal&quot;: True}, cadence_days=7)
+def watch_verdict_outcomes(ctx):
+    import urllib.request as _u
+    folder = ctx[&quot;folder&quot;]
+    horizon = int(ctx.get(&quot;horizon_days&quot;, 30))
+    from officekit.learning import record as ledger_record
+    try:
+        from officekit_ai.court import load_adjudications
+    except ImportError:
+        return {&quot;graded&quot;: [], &quot;note&quot;: &quot;no court module&quot;}
+    adjs = load_adjudications(folder)
+    state = load_state(folder)
+    done = state.setdefault(&quot;verdict_outcomes&quot;, {})
+    today = datetime.date.today()
+    graded, skipped, errors = [], 0, []
+    for a in adjs:
+        if a[&quot;id&quot;] in done:
+            continue
+        word = (a.get(&quot;verdict&quot;) or &quot;&quot;).split(&quot; &quot;)[0]
+        if word == &quot;WATCH&quot;:
+            done[a[&quot;id&quot;]] = &quot;ungraded_watch&quot;
+            skipped += 1
+            continue
+        vdate = datetime.date.fromisoformat(a[&quot;date&quot;])
+        if (today - vdate).days &lt; horizon:
+            continue                                    # not ripe yet
+        try:
+            frm = vdate - datetime.timedelta(days=5)
+            url = (f&quot;https://api.nasdaq.com/api/quote/{a[&#x27;symbol&#x27;]}/historical&quot;
+                   f&quot;?assetclass=stocks&amp;fromdate={frm}&amp;todate={today}&amp;limit=9999&quot;)
+            req = _u.Request(url, headers={
+                &quot;User-Agent&quot;: &quot;Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36&quot;,
+                &quot;Origin&quot;: &quot;https://www.nasdaq.com&quot;, &quot;Referer&quot;: &quot;https://www.nasdaq.com/&quot;})
+            with _u.urlopen(req, timeout=20) as r:
+                rows = ((json.loads(r.read().decode()).get(&quot;data&quot;) or {})
+                        .get(&quot;tradesTable&quot;) or {}).get(&quot;rows&quot;) or []
+            closes = [(row[&quot;date&quot;], float(row[&quot;close&quot;].replace(&quot;$&quot;, &quot;&quot;).replace(&quot;,&quot;, &quot;&quot;)))
+                      for row in rows]
+            if len(closes) &lt; 2:
+                raise RuntimeError(&quot;no price rows&quot;)
+            latest = closes[0][1]
+            base = closes[-1][1]                        # oldest row ≈ verdict-date close
+            move = (latest / base - 1) * 100
+        except Exception as e:
+            errors.append(f&quot;{a[&#x27;symbol&#x27;]}: {type(e).__name__}&quot;)
+            continue
+        long_bias = word in (&quot;STARTER&quot;, &quot;OWN&quot;)
+        favorable = (move &gt; 0) if long_bias else (move &lt;= 0)
+        grade = {&quot;adjudication_id&quot;: a[&quot;id&quot;], &quot;symbol&quot;: a[&quot;symbol&quot;],
+                 &quot;strategy&quot;: a.get(&quot;strategy&quot;), &quot;verdict&quot;: a[&quot;verdict&quot;],
+                 &quot;verdict_date&quot;: a[&quot;date&quot;], &quot;horizon_days&quot;: (today - vdate).days,
+                 &quot;move_pct&quot;: round(move, 2), &quot;favorable&quot;: favorable}
+        ledger_record(Path(folder) / &quot;learning.jsonl&quot;, &quot;verdict_grade&quot;, grade,
+                      office_id=a.get(&quot;office_id&quot;))
+        done[a[&quot;id&quot;]] = &quot;graded&quot;
+        graded.append(grade)
+    save_state(folder, state)
+    n_fav = sum(1 for g in graded if g[&quot;favorable&quot;])
+    return {&quot;graded&quot;: graded, &quot;skipped_watch&quot;: skipped, &quot;errors&quot;: errors,
+            &quot;note&quot;: f&quot;{n_fav}/{len(graded)} favorable&quot; if graded else &quot;nothing ripe&quot;}
+</pre></div></body></html>

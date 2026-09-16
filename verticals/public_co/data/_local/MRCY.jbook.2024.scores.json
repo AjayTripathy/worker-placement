@@ -1,0 +1,141 @@
+{
+  "ticker": "MRCY",
+  "cutoff": "2024-09-01",
+  "filing": "0001049521-24-000029_10-K.txt",
+  "cohort": "jbook_exposure_divergence",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Mercury identifies F-35 as one of the named programs expected to be a large portion of future revenues in the coming years.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook (program_name='F-35') returned 2 matches: F-35 C2D2 (PE 0604840F) FUNDED_STEADY and F-35 Squadrons (PE 0207142F).",
+        "F-35 C2D2 funding history FY24/25/26 = $1,236.71M / $1,134.21M / $1,182.09M (steady, slight dip then recovery).",
+        "F-35 Squadrons (procurement) FY24/25/26 = $88.99M / $47.13M / $48.45M (FY25 step-down but still funded). Overall F-35 forward pipeline intact.",
+        "Source: PB 2026 Air Force RDT&E Vol III + Air Force Procurement (auto-extracted)."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "FUNDED_STEADY",
+      "interpretation": "The Pentagon's forward J-Book continues to fund F-35 C2D2 and F-35 Squadrons through FY26. Mercury's reliance on F-35 as a forward revenue driver is corroborated, not refuted, by the J-Book. No divergence."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Mercury identifies F/A-18 as a named program expected to be a large portion of future revenues.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook returned NOT_FOUND for both 'F/A-18' and 'F-18 Super Hornet'.",
+        "F/A-18 Super Hornet production line was historically closed by Boeing in FY25 plan, but the J-Book corpus we have (410 PEs, FY26 books) does not appear to include the legacy F/A-18 procurement P-40 line item.",
+        "Coverage gap: corpus does not include Navy F/A-18 Series Aircraft procurement line item."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "NOT_FOUND",
+      "interpretation": "Cannot test the divergence pattern. The J-Book corpus does not cover this program (out-of-corpus coverage gap, not a red flag per heuristic #7). Note: open-source reporting (no post-cutoff knowledge used here) had already indicated F/A-18 production line wind-down was contemplated in DoD planning; the corpus simply doesn't carry the line item to confirm forward funding."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Mercury identifies LTAMDS (Lower Tier Air and Missile Defense Sensor) as a named program expected to be a large portion of future revenues.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook returned NOT_FOUND for 'LTAMDS' and 'Lower Tier Air and Missile Defense Sensor'.",
+        "LTAMDS is the RTX Raytheon-led Patriot radar replacement (Army Missiles & Munitions procurement). The 410-PE corpus emphasizes RDT&E + select procurement and does not include Army Missile Procurement / Army Aircraft / Army Other Procurement specifically for LTAMDS.",
+        "Coverage gap: per the catalog description, corpus is heaviest on DARPA/MDA/SOCOM/OSD/Air Force RDT&E + Space Force/AF Procurement. LTAMDS Army Procurement is outside the seeded coverage."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "NOT_FOUND",
+      "interpretation": "Heuristic #7 applies: NOT_FOUND in J-Book is not a red flag when the program is known to be in an under-sampled corpus slice. LTAMDS is a high-visibility Army program presumed funded in FY25/26 within the broader Army budget — but this framework cannot confirm. Flag as UNVERIFIABLE / coverage gap."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Mercury identifies THAAD (Terminal High Altitude Area Defense) as a named program expected to be a large portion of future revenues.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook returned NOT_FOUND on 'THAAD' name match, but the canonical MDA THAAD PE 0603881C (Ballistic Missile Defense Terminal Defense Segment) IS in the corpus and returned FUNDED_STEADY.",
+        "Funding history FY24/25/26 = $224.46M / $285.28M / $508.90M (more than doubling) — strongly growing.",
+        "PE-number lookup succeeded where name-synonym lookup failed (note: corpus should add 'THAAD' as a synonym for PE 0603881C)."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "FUNDED_STEADY (effectively FUNDED_GROWING)",
+      "interpretation": "Heuristic #4 (PE name ambiguity) applied — the MDA Terminal Defense Segment IS the THAAD program. The forward J-Book shows the program growing materially through FY26 (FY26 budget more than 2x FY24). Mercury's THAAD revenue claim is fully corroborated by the J-Book. No divergence."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Mercury identifies Aegis (Navy combat system / Aegis BMD) as a named program expected to be a large portion of future revenues.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook returned 2 matches for 'Aegis BMD': PE 0603892C (AEGIS BMD) FUNDED_STEADY $601.05M / $649.26M / $588.44M FY24-26; and PE 0604878C (Aegis BMD Test) FUNDED_STEADY $186.38M / $115.55M / $153.62M.",
+        "Both PEs continue to be funded through FY26.",
+        "Note: this query hit MDA's Aegis BMD line; the much larger Navy SHIPBUILDING Aegis combat-system funding (separate appropriation) is outside this RDT&E-heavy corpus but would also be funded."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "FUNDED_STEADY",
+      "interpretation": "Aegis BMD continues to be funded with modest fluctuation. Mercury's narrative is corroborated. No divergence."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Mercury identifies 'Filthy Buzzard' (codename) and 'AMCS' as named programs expected to be a large portion of future revenues.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook returned NOT_FOUND for both 'Filthy Buzzard' and 'AMCS'.",
+        "'Filthy Buzzard' is plausibly a classified / Special Access Program (SAP) codename; such programs do not appear in unclassified J-Book line items.",
+        "'AMCS' is likely an internal acronym (possibly Airborne Mission Computer System / Advanced Multi-Computing System) and not a unique standalone PE.",
+        "Coverage gap is expected, not anomalous."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "NOT_FOUND",
+      "interpretation": "Cannot test divergence. Heuristic #7 applies; classified / acronym-only programs are out-of-scope for the unclassified J-Book corpus. This is the disclosure-vagueness signal the framework also flags in qualitative DD but cannot quantitatively score on the J-Book."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Mercury asserts L3Harris (12%), Lockheed (11%), and RTX (10%) accounted for ~33% of FY2024 net revenues; defense prime concentration drives forward revenue.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending.query_dod_contracts(recipient_name='Mercury Systems Inc') returned 157 DoD awards totaling $141.93M for Mercury Systems Inc.",
+        "Top awards include $25.0M Navy labor funding (N0042119F6104), $23.5M DARPA research (HR001118C0133), and $20.3M Navy radar modulator production (N6893624F0214).",
+        "Cross-check confirms the company is a real DoD contractor receiving substantive obligations (the 95% defense revenue and prime concentration is plausible)."
+      ],
+      "M_check": "usaspending.query_dod_contracts",
+      "M_value": "157 awards, $141.93M total",
+      "interpretation": "Direct DoD obligation footprint confirms Mercury's program exposure. Forward J-Book lookups on the named primes' programs (F-35, Aegis, THAAD) all returned FUNDED — the customer-concentration story is intact at the cutoff."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Mercury reports defense sales accounting for approximately 95% of total net revenues in FY2024, indicating overwhelming DoD program dependence.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending confirms substantial direct DoD contracting plus pass-through implied via top three primes (L3Harris/LMT/RTX) per the customer-concentration disclosure.",
+        "No J-Book-level red flag detected for the underlying program portfolio at the FY2024 cutoff."
+      ],
+      "M_check": "usaspending.query_dod_contracts",
+      "M_value": "157 awards / $141.93M direct + prime pass-through",
+      "interpretation": "DoD revenue dependence is confirmed and the major named programs are funded forward. No divergence with the J-Book at the FY24 cutoff."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "Mercury claims a 'record backlog' driven by 'recent significant design wins and bookings' as evidence of growth across multiple programs and verticals.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook(contractor_name='Mercury Systems') returned NOT_FOUND — Mercury is not listed as a primary contractor on any of the 410 seeded PEs.",
+        "This is expected for a Tier-2/3 subsystem supplier whose name does not appear on prime R-2 / P-40 line items.",
+        "Cannot independently verify the record-backlog claim with the available M-sources — would require company-specific backlog disclosure history and contract-by-contract delivery tracking."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding (contractor_name)",
+      "M_value": "NOT_FOUND (expected for Tier-2 sub)",
+      "interpretation": "Heuristic #7 applies (expected coverage gap for Tier-2 sub names). Note the qualitative concern in MD&A (FY24 revenue down -14% to $835M, FY24 net loss $137M, Revolver Amendment No. 6 reducing capacity, EBITDA-floor minimum to access full $900M) is in tension with the 'record backlog' narrative — but those concerns are not in scope for pentagon_jbook scoring and are flagged here only as context."
+    }
+  ],
+  "summary": {
+    "n_claims": 9,
+    "n_queries": 14,
+    "severity_counts": {
+      "PASS": 5,
+      "MODERATE_UNDERDELIVERY": 0,
+      "SEVERE_UNDERDELIVERY": 0,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 4
+    },
+    "jbook_grounded_claims": 6,
+    "jbook_fired_on": 3,
+    "thesis_outcome": "NO_JBOOK_DIVERGENCE_DETECTED",
+    "notes": "At the 2024-09-01 cutoff, none of the testable named programs (F-35, THAAD/Terminal Defense Segment, Aegis BMD) show forward de-funding in the corpus we have. The remaining three J-Book-grounded claims (F/A-18, LTAMDS, Filthy Buzzard/AMCS) are out-of-corpus and unverifiable. There is no J-Book exposure-divergence red flag for MRCY at this cutoff. Operational stress is visible elsewhere in the filing (net loss, Revolver renegotiation, on-time delivery problems, securities-class-action) but those are not J-Book divergence signals."
+  }
+}

@@ -1,0 +1,100 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>hiring_wave_scanner</title><style>
+body{margin:0;background:#0b0e12;color:#e8ebee;font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:26px 24px 90px}
+a{color:#8b7cf6} h1{font-size:23px;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:#7d858e;margin:0 0 20px;font-size:13px}
+h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:#7d858e;margin:24px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 10px;border-bottom:1px solid #242a31;text-align:left;vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#7d858e}
+.k{font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:20px}
+.k-generator{color:#c3b8fb;background:rgba(139,124,246,.15)}
+.k-detector{color:#eccb8a;background:rgba(217,164,65,.15)}
+.k-watcher{color:#8ee5c1;background:rgba(53,201,143,.15)}
+.k-evidence{color:#b3bcc6;background:rgba(138,147,158,.15)}
+.h-OK{color:#35c98f} .h-STALE{color:#d9a441} .h-ERROR{color:#e0736a} .h-NEVER_RUN{color:#8a939e}
+pre{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px;overflow-x:auto;font-size:12px;line-height:1.5}
+.panel{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px 18px;margin-bottom:12px}
+ul{margin:4px 0;padding-left:20px} li{margin-bottom:4px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+</style></head><body><div class="wrap"><h1>hiring_wave_scanner</h1><p class="sub">registered capability · hiring_wave_scanner</p><a href="signals.html">&larr; all signals</a><div class="panel" style="margin-top:10px"><span class="k k-generator">GENERATOR</span> &nbsp;<span class="h-NEVER_RUN"><b>NEVER_RUN</b></span> · last run <span class="mono">never</span></div><p>Stage 0b generator: HIRING WAVES across the research universe (LinkedIn guest,</p><form method="POST" action="/signals/run" style="margin:10px 0"><input type="hidden" name="name" value="hiring_wave_scanner"><input name="symbol" placeholder="symbol (if applicable)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px"><input name="symbols" placeholder="universe, comma-sep (generators)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px;margin-left:6px"><button type="submit" style="background:#8b7cf6;color:#0b0e12;border:0;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;margin-left:6px">Run now</button></form><h2>Datasources</h2><ul><li>reference implementation: verticals/generators/hiring_wave_scanner.py (see the code section for the feeds it touches)</li></ul><h2>Applies to</h2><ul><li><b>strategies:</b> quality_value</li></ul><h2>The code</h2><pre>&quot;&quot;&quot;hiring_wave_scanner — Stage 0b generator: HIRING WAVES across the research universe (LinkedIn guest,
+via the existing hiring_velocity connector machinery).
+
+Inverts the per-site verifier into a universe sweep: posting counts per book/ledger name, delta vs the last
+run&#x27;s state. A posting WAVE = capacity/GTM ramp 1-2 quarters before revenue; a freeze after a wave = the
+taper tell. Rate-limit-aware: sweeps &lt;=25 names per run, rotating through the universe (state remembers the
+cursor), 2s throttle, degrades honestly on blocks.
+
+  python3 verticals/generators/hiring_wave_scanner.py
+Writes data/HIRING_WAVES.json (+ rolling state). READ-ONLY.
+&quot;&quot;&quot;
+from __future__ import annotations
+import json, time, datetime, urllib.parse, urllib.request
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[1]
+STATE = HERE / &quot;data&quot; / &quot;hiring_wave_state.json&quot;
+OUT = HERE / &quot;data&quot; / &quot;HIRING_WAVES.json&quot;
+GUEST = &quot;https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search&quot;
+UA = {&quot;User-Agent&quot;: &quot;Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/124.0 Safari/537.36&quot;,
+      &quot;Accept-Language&quot;: &quot;en-US,en;q=0.9&quot;}
+BATCH = 25
+
+
+def _count_postings(company: str) -&gt; int | None:
+    &quot;&quot;&quot;Rough count of current US postings for a company via the guest search (cards on page 1 + total hint).&quot;&quot;&quot;
+    q = urllib.parse.urlencode({&quot;keywords&quot;: f&#x27;&quot;{company}&quot;&#x27;, &quot;location&quot;: &quot;United States&quot;, &quot;f_C&quot;: &quot;&quot;, &quot;start&quot;: 0})
+    try:
+        req = urllib.request.Request(f&quot;{GUEST}?{q}&quot;, headers=UA)
+        with urllib.request.urlopen(req, timeout=30) as r:
+            html = r.read().decode(&quot;utf-8&quot;, &quot;ignore&quot;)
+    except Exception:
+        return None
+    return html.count(&quot;base-card&quot;)            # job cards on the first page (0-25; saturates at 25)
+
+
+def scan() -&gt; dict:
+    led = json.loads((ROOT / &quot;desk&quot; / &quot;data&quot; / &quot;research_ledger.json&quot;).read_text()).get(&quot;names&quot;, [])
+    universe = [(n[&quot;ticker&quot;], (n.get(&quot;name&quot;) or n[&quot;ticker&quot;]).split(&quot;(&quot;)[0].strip()) for n in led]
+    st = json.loads(STATE.read_text()) if STATE.exists() else {&quot;cursor&quot;: 0, &quot;counts&quot;: {}}
+    start = st.get(&quot;cursor&quot;, 0) % max(len(universe), 1)
+    batch = [universe[(start + i) % len(universe)] for i in range(min(BATCH, len(universe)))]
+    today = datetime.date.today().isoformat()
+    moves, degraded = [], 0
+    for tkr, name in batch:
+        c = _count_postings(name)
+        time.sleep(2.0)
+        if c is None:
+            degraded += 1
+            continue
+        prev = (st[&quot;counts&quot;].get(tkr) or {}).get(&quot;count&quot;)
+        st[&quot;counts&quot;][tkr] = {&quot;count&quot;: c, &quot;date&quot;: today, &quot;prev&quot;: prev}
+        if prev is not None and abs(c - prev) &gt;= 8:
+            moves.append({&quot;ticker&quot;: tkr, &quot;name&quot;: name[:40], &quot;postings&quot;: c, &quot;prev&quot;: prev, &quot;delta&quot;: c - prev})
+    st[&quot;cursor&quot;] = (start + len(batch)) % max(len(universe), 1)
+    STATE.write_text(json.dumps(st))
+    moves.sort(key=lambda m: -abs(m[&quot;delta&quot;]))
+    return {&quot;asof&quot;: today, &quot;swept&quot;: len(batch), &quot;degraded&quot;: degraded, &quot;universe&quot;: len(universe),
+            &quot;moves&quot;: moves, &quot;counts_tracked&quot;: len(st[&quot;counts&quot;]),
+            &quot;note&quot;: &quot;page-1 card counts (saturate at 25) — a coarse wave/freeze tell, not a census; SignalOS verifies any move at the source before it seeds&quot;}
+
+
+def main():
+    res = scan()
+    print(f&quot;=== HIRING-WAVE SCANNER  {res[&#x27;asof&#x27;]}  (swept {res[&#x27;swept&#x27;]}/{res[&#x27;universe&#x27;]} ledger names, &quot;
+          f&quot;{res[&#x27;degraded&#x27;]} degraded, {res[&#x27;counts_tracked&#x27;]} tracked) ===&quot;)
+    if res[&quot;moves&quot;]:
+        for m in res[&quot;moves&quot;]:
+            arrow = &quot;WAVE&quot; if m[&quot;delta&quot;] &gt; 0 else &quot;FREEZE&quot;
+            print(f&quot;   {m[&#x27;ticker&#x27;]:&lt;9} {m[&#x27;name&#x27;]:&lt;38} {m[&#x27;prev&#x27;]} -&gt; {m[&#x27;postings&#x27;]}  ({m[&#x27;delta&#x27;]:+d})  {arrow}&quot;)
+    else:
+        print(&quot;   no &gt;=8-posting moves this sweep (baselines accumulate as the cursor rotates)&quot;)
+    print(f&quot;  {res[&#x27;note&#x27;]}&quot;)
+    OUT.write_text(json.dumps(res, indent=1))
+    print(f&quot;[-&gt; {OUT.name}]&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</pre></div></body></html>

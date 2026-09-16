@@ -1,0 +1,53 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Filing watch</title><style>
+body{margin:0;background:#0b0e12;color:#e8ebee;font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:26px 24px 90px}
+a{color:#8b7cf6} h1{font-size:23px;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:#7d858e;margin:0 0 20px;font-size:13px}
+h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:#7d858e;margin:24px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 10px;border-bottom:1px solid #242a31;text-align:left;vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#7d858e}
+.k{font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:20px}
+.k-generator{color:#c3b8fb;background:rgba(139,124,246,.15)}
+.k-detector{color:#eccb8a;background:rgba(217,164,65,.15)}
+.k-watcher{color:#8ee5c1;background:rgba(53,201,143,.15)}
+.k-evidence{color:#b3bcc6;background:rgba(138,147,158,.15)}
+.h-OK{color:#35c98f} .h-STALE{color:#d9a441} .h-ERROR{color:#e0736a} .h-NEVER_RUN{color:#8a939e}
+pre{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px;overflow-x:auto;font-size:12px;line-height:1.5}
+.panel{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px 18px;margin-bottom:12px}
+ul{margin:4px 0;padding-left:20px} li{margin-bottom:4px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+</style></head><body><div class="wrap"><h1>Filing watch</h1><p class="sub">registered capability · filing_watch</p><a href="signals.html">&larr; all signals</a><div class="panel" style="margin-top:10px"><span class="k k-watcher">WATCHER</span> &nbsp;<span class="h-NEVER_RUN"><b>NEVER_RUN</b></span> · last run <span class="mono">never</span> · cadence 1d</div><p>The disclosure watch, promoted: polls EDGAR submissions per held symbol; a NEW accession since last look is an event (read it, re-open the pack — the entity-disclosure-planes doctrine, US plane). Registered on holdings at purchase.</p><form method="POST" action="/signals/run" style="margin:10px 0"><input type="hidden" name="name" value="filing_watch"><input name="symbol" placeholder="symbol (if applicable)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px"><input name="symbols" placeholder="universe, comma-sep (generators)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px;margin-left:6px"><button type="submit" style="background:#8b7cf6;color:#0b0e12;border:0;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;margin-left:6px">Run now</button></form><h2>Datasources</h2><ul><li>SEC EDGAR submissions API (data.sec.gov)</li></ul><h2>Applies to</h2><ul><li><b>universal</b> — applies to every asset and strategy</li></ul><h2>The code</h2><pre>@capability(&quot;filing_watch&quot;, &quot;watcher&quot;, &quot;Filing watch&quot;,
+            desc=&quot;The disclosure watch, promoted: polls EDGAR submissions per &quot;
+                 &quot;held symbol; a NEW accession since last look is an event &quot;
+                 &quot;(read it, re-open the pack — the entity-disclosure-planes &quot;
+                 &quot;doctrine, US plane). Registered on holdings at purchase.&quot;,
+            datasources=[&quot;SEC EDGAR submissions API (data.sec.gov)&quot;],
+            applies_to={&quot;universal&quot;: True}, cadence_days=1)
+def watch_filings(ctx):
+    from officekit_research import SOURCES as EV, _cik
+    folder = ctx[&quot;folder&quot;]
+    data = ctx.get(&quot;office_data&quot;) or {}
+    symbols = sorted({str(h.get(&quot;company&quot;, &quot;&quot;)).upper()
+                      for s in data.get(&quot;sleeves&quot;, []) for h in s.get(&quot;holdings&quot;, [])
+                      if h.get(&quot;company&quot;)})
+    state = load_state(folder)
+    seen = state.setdefault(&quot;filing_watch&quot;, {})
+    events, errors = [], []
+    for sym in symbols:
+        try:
+            c = dict(ctx)
+            c.setdefault(&quot;cik&quot;, _cik(sym, ctx[&quot;contact&quot;]))
+            f = EV[&quot;filings&quot;](sym, c)
+            newest = f[&quot;recent&quot;][0][&quot;acc&quot;] if f[&quot;recent&quot;] else None
+            if newest and seen.get(sym) and seen[sym] != newest:
+                events.append({&quot;symbol&quot;: sym, &quot;new_since&quot;: seen[sym],
+                               &quot;latest&quot;: f[&quot;recent&quot;][0]})
+            if newest:
+                seen[sym] = newest
+        except Exception as e:
+            errors.append(f&quot;{sym}: {type(e).__name__}&quot;)
+    save_state(folder, state)
+    return {&quot;events&quot;: events, &quot;watched&quot;: symbols, &quot;errors&quot;: errors,
+            &quot;note&quot;: f&quot;{len(events)} new filing(s)&quot; if events else &quot;no changes&quot;}
+</pre></div></body></html>

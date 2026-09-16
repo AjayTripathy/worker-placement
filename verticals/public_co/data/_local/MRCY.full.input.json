@@ -1,0 +1,115 @@
+{
+  "ticker": "MRCY",
+  "cutoff": "2026-05-20",
+  "filing": "0001049521-25-000024_10-K.txt",
+  "filing_date": "2025-08-11",
+  "filing_age_days": 282,
+  "claims": [
+    {
+      "claim_id": "MRCY-001",
+      "claim_text": "Mercury's products are deployed on more than 300 programs and across 35 countries, including named DoD programs LTAMDS, KC-46, MH-60R/S, and THAAD which were the largest program revenue increases in FY2025.",
+      "subject": "Mercury Systems, Inc.",
+      "predicate": "delivers content to named DoD program(s)",
+      "object_value": "LTAMDS, KC-46, MH-60R/S, THAAD",
+      "source_quote": "The largest program increases were related to LTAMDS, KC-46, MH-60R/S, THAAD and a secure processing program",
+      "category": "customer_pipeline",
+      "queries": [
+        {"mode": "A", "source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "Mercury Systems"}, "purpose": "Confirm Mercury has DoD contracts (existence check; sub-tier to primes means most flows via primes, but Tier-2 should still have some direct DoD obligations)"},
+        {"mode": "B", "source": "pentagon_jbook.query_program_funding", "kwargs": {"program_name": "LTAMDS"}, "purpose": "Confirm LTAMDS is forward-funded in most recent PB releases - a sub-tier supplier benefits depend on prime program being live"},
+        {"mode": "B2", "source": "pentagon_jbook.query_program_funding", "kwargs": {"program_name": "THAAD"}, "purpose": "Confirm THAAD forward-funded"}
+      ]
+    },
+    {
+      "claim_id": "MRCY-002",
+      "claim_text": "Mercury sells to top U.S. and European defense prime contractors. Named primes (Raytheon for LTAMDS/THAAD, Lockheed for THAAD/KC-46 integration, Northrop, L3Harris) are implied counterparties; counterparty filings should reference Mercury or its products.",
+      "subject": "Mercury Systems, Inc.",
+      "predicate": "is supplier/sub-tier to",
+      "object_value": "Raytheon, Lockheed Martin, Northrop Grumman, L3Harris",
+      "source_quote": "we sell to the top U.S. and European defense prime contractors, the U.S. government and original equipment manufacturers ( OEM ) commercial aerospace companies",
+      "category": "counterparty_disclosure",
+      "queries": [
+        {"mode": "A", "source": "sam_entity.query_entity_by_uei", "kwargs": {"legal_business_name": "Mercury Systems"}, "purpose": "Confirm Mercury registered as federal contractor"},
+        {"mode": "B", "source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Mercury Systems", "cik": "0000101829"}, "purpose": "Raytheon (RTX) 10-K mentions of Mercury Systems"},
+        {"mode": "B2", "source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Mercury Systems", "cik": "0000936468"}, "purpose": "Lockheed Martin 10-K mentions of Mercury Systems"}
+      ]
+    },
+    {
+      "claim_id": "MRCY-003",
+      "claim_text": "Mercury maintains a 145,262 sq ft leased HQ/manufacturing in Andover, MA and a 125,756 sq ft facility in Phoenix, AZ (plus other major US facilities) which are core to onshore trusted-supply-chain claim.",
+      "subject": "Mercury Systems, Inc.",
+      "predicate": "operates EPA-regulated electronics manufacturing facilities at",
+      "object_value": "Andover MA, Phoenix AZ, Hudson NH, Torrance CA, Oxnard CA",
+      "source_quote": "Andover, MA 145,262 Leased ... Phoenix, AZ 125,756 Leased ... Hudson, NH 121,553 Leased",
+      "category": "physical_facility",
+      "queries": [
+        {"mode": "A", "source": "epa_frs.query_facilities", "kwargs": {"facility_name": "Mercury Systems"}, "purpose": "EPA FRS registration of facilities - electronics manufacturing with chemical/cleaning processes typically in FRS"},
+        {"mode": "B", "source": "osha_establishments.query_establishments", "kwargs": {"company_name": "Mercury Systems"}, "purpose": "OSHA establishment data corroborates US manufacturing footprint"}
+      ]
+    },
+    {
+      "claim_id": "MRCY-004",
+      "claim_text": "Mercury is engaged in M&A activity including the Star Lab asset acquisition (FY2025, $4.5M cash) and the divestiture of Plan-Les-Ouates Switzerland manufacturing operations to Cicor Group (FY2025).",
+      "subject": "Mercury Systems, Inc.",
+      "predicate": "completed acquisitions / divestitures",
+      "object_value": "Star Lab asset acquisition; Cicor Group divestiture",
+      "source_quote": "$4.5 million of cash paid in the asset acquisition of Star Lab ... sale of manufacturing operations to Cicor Group of $3.3 million",
+      "category": "rollup_thesis",
+      "queries": [
+        {"mode": "A", "source": "sec_filings.list_filings_by_form", "kwargs": {"cik": "0001049521", "form": "8-K"}, "purpose": "Confirm 8-K filings around Star Lab acquisition / Cicor divestiture"},
+        {"mode": "B", "source": "acq_coherence.score_acquisition_coherence", "kwargs": {"parent_thesis": "Mercury Systems Tier-2 defense electronics for mission-critical processing at the edge - RF / EW / sensor / radar", "acquisitions": ["Star Lab (security software for embedded systems)"]}, "purpose": "Aggregate rollup coherence with parent thesis"}
+      ]
+    },
+    {
+      "claim_id": "MRCY-005",
+      "claim_text": "Mercury claims patented IP / building blocks in processing including BuiltSECURE, BuiltSAFE, MBSE, and contributions to OpenVPX/VPX/SOSA standards. Licensing agreements and patents intangible carrying $1.08M (net) at FY2025.",
+      "subject": "Mercury Systems, Inc.",
+      "predicate": "holds granted patents in",
+      "object_value": "embedded military processing, RF/microwave, secure boot, cryptography",
+      "source_quote": "We maintain our technological edge by investing in critical capabilities and intellectual property ( IP or building blocks ) in processing ... BuiltSECURE technology can mitigate reverse engineering",
+      "category": "patent",
+      "queries": [
+        {"mode": "A", "source": "uspto_odp.query_assignee", "kwargs": {"assignee_name": "Mercury Systems"}, "purpose": "Confirm granted patents under Mercury Systems"},
+        {"mode": "B", "source": "uspto_odp.query_assignee", "kwargs": {"assignee_name": "Mercury Mission Systems"}, "purpose": "Subsidiary / acquired-entity assignee variant"}
+      ]
+    },
+    {
+      "claim_id": "MRCY-006",
+      "claim_text": "Mercury maintains effective ICFR (clean opinion from KPMG) as of June 27, 2025. However, the company faces an active securities class action (Sec 10(b)) where the court allowed 3 of 17 challenged statements to proceed in February 2025, with discovery ongoing.",
+      "subject": "Mercury Systems, Inc.",
+      "predicate": "discloses ICFR effective AND material securities litigation pending",
+      "object_value": "Effective ICFR; active 10(b) case (Carpenters Pension Trust Fund for Northern California, lead); 3 challenged statements proceed",
+      "source_quote": "management concluded that our internal control over financial reporting was effective as of June 27, 2025 ... On February 20, 2025, the Court issued an order that dismissed claims relating to 14 of 17 challenged statements and that allowed the remaining three challenged statements to proceed",
+      "category": "icfr_governance",
+      "queries": [
+        {"mode": "A", "source": "claim_evolution.query_claim_evolution", "kwargs": {"cik": "0001049521", "claim": "internal control over financial reporting effective", "lookback_years": 5}, "purpose": "Multi-year ICFR / material weakness evolution"},
+        {"mode": "B", "source": "sec_filings.list_filings_by_form", "kwargs": {"cik": "0001049521", "form": "10-K/A"}, "purpose": "Check for any restatements / 10-K amendments"}
+      ]
+    },
+    {
+      "claim_id": "MRCY-007",
+      "claim_text": "Mercury has substantial leverage: $591.5M drawn on a $900M revolver maturing Feb 28, 2027, with an October 2023 S-3ASR shelf on file (unlimited). FY2025 net loss $37.9M; significant equity raise capacity exists.",
+      "subject": "Mercury Systems, Inc.",
+      "predicate": "filed S-3ASR shelf registration enabling equity raises",
+      "object_value": "S-3ASR filed October 4, 2023; unlimited capacity",
+      "source_quote": "On October 4, 2023, we filed a shelf registration statement on Form S-3ASR with the SEC ... We have an unlimited amount available under the shelf registration statement.",
+      "category": "financial_distress",
+      "queries": [
+        {"mode": "A", "source": "sec_filings.list_filings_by_form", "kwargs": {"cik": "0001049521", "form": "S-3ASR"}, "purpose": "Confirm S-3ASR on file"},
+        {"mode": "B", "source": "insider_vs_calendar.query_insider_sales_near_budget_events", "kwargs": {"cik": "0001049521", "window_days": 14, "start_date": "2024-01-01", "end_date": "2026-05-20"}, "purpose": "Mode B: Form 4 insider sale clustering around PB releases / earnings - CLUSTERED_DISCRETIONARY would be SEVE/RED"}
+      ]
+    },
+    {
+      "claim_id": "MRCY-008",
+      "claim_text": "Mercury's FY2025 revenues totaled $912.0M (9.2% YoY growth) with no single customer >10% of revenue. The unnamed Customer A concentration is below threshold; however, indirect concentration through Raytheon/Lockheed (LTAMDS/THAAD) is likely meaningful.",
+      "subject": "Mercury Systems, Inc.",
+      "predicate": "discloses no single customer over 10% concentration",
+      "object_value": "0 customers >10% in FY2025/FY2024",
+      "source_quote": "There were no programs comprising 10% or more of our revenues for fiscal 2025 or 2024.",
+      "category": "customer_concentration",
+      "queries": [
+        {"mode": "A", "source": "usaspending.query_recipient_contracts", "kwargs": {"recipient_name": "Mercury Systems"}, "purpose": "Mode A: identify federal contract obligations / top federal subs"},
+        {"mode": "B", "source": "usaspending.query_federal_presence", "kwargs": {"recipient_name": "Mercury Mission Systems"}, "purpose": "Subsidiary variant"}
+      ]
+    }
+  ]
+}

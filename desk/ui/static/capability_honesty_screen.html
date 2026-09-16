@@ -1,0 +1,155 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Honesty screen (claim-verification pipeline)</title><style>
+body{margin:0;background:#0b0e12;color:#e8ebee;font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:26px 24px 90px}
+a{color:#8b7cf6} h1{font-size:23px;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:#7d858e;margin:0 0 20px;font-size:13px}
+h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:#7d858e;margin:24px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 10px;border-bottom:1px solid #242a31;text-align:left;vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#7d858e}
+.k{font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:20px}
+.k-generator{color:#c3b8fb;background:rgba(139,124,246,.15)}
+.k-detector{color:#eccb8a;background:rgba(217,164,65,.15)}
+.k-watcher{color:#8ee5c1;background:rgba(53,201,143,.15)}
+.k-evidence{color:#b3bcc6;background:rgba(138,147,158,.15)}
+.h-OK{color:#35c98f} .h-STALE{color:#d9a441} .h-ERROR{color:#e0736a} .h-NEVER_RUN{color:#8a939e}
+pre{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px;overflow-x:auto;font-size:12px;line-height:1.5}
+.panel{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px 18px;margin-bottom:12px}
+ul{margin:4px 0;padding-left:20px} li{margin-bottom:4px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+</style></head><body><div class="wrap"><h1>Honesty screen (claim-verification pipeline)</h1><p class="sub">registered capability · honesty_screen</p><a href="signals.html">&larr; all signals</a><div class="panel" style="margin-top:10px"><span class="k k-detector">DETECTOR</span> &nbsp;<span class="h-NEVER_RUN"><b>NEVER_RUN</b></span> · last run <span class="mono">never</span></div><p>The full lying-detector pipeline on one name: extract claims from the latest periodic filing, mechanically verify each against external authorities, score findings, aggregate. EXPENSIVE (LLM stages + external queries, minutes per name). A negative-selection filter: it excludes names whose disclosure diverges from verifiable reality — it never re-detects honestly disclosed bad news.</p><form method="POST" action="/signals/run" style="margin:10px 0"><input type="hidden" name="name" value="honesty_screen"><input name="symbol" placeholder="symbol (if applicable)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px"><input name="symbols" placeholder="universe, comma-sep (generators)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px;margin-left:6px"><button type="submit" style="background:#8b7cf6;color:#0b0e12;border:0;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;margin-left:6px">Run now</button></form><h2>Datasources</h2><ul><li>SEC EDGAR (filing text via officekit_research)</li><li>external verification authorities per claim (registries, procurement, courts — dispatched by the pipeline)</li><li>Anthropic API (extraction + scoring stages)</li></ul><h2>Applies to</h2><ul><li><b>strategies:</b> quality_drawdown, quality_value, value_band_entry</li></ul><h2>The code</h2><pre>&quot;&quot;&quot;Unified end-to-end runner. Same code path for any Provider.
+
+Stages:
+  1. provider.extract_and_pick(filing_text)       → claims + queries-per-claim
+  2. mechanically run queries                      → evidence-per-claim
+  3. provider.score(claim, evidence)               → finding-per-claim
+  4. aggregate into CompanyAnalysis, save JSON
+&quot;&quot;&quot;
+from __future__ import annotations
+
+import json
+import sys
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from pathlib import Path
+
+from .analysis_types import CompanyAnalysis, Evidence
+from .m_source_catalog import call as call_source
+from .providers import Provider
+
+
+HERE = Path(__file__).parent
+DATA = HERE / &quot;data&quot;
+
+
+def run_queries(queries) -&gt; list[Evidence]:
+    &quot;&quot;&quot;Mechanical query execution. Shared between providers.&quot;&quot;&quot;
+    out = []
+    for q in queries:
+        result = call_source(q.source, q.kwargs)
+        out.append(Evidence(source=q.source, kwargs=q.kwargs, result=result))
+    return out
+
+
+def analyze_company(
+    ticker: str,
+    cutoff_date: str,
+    filing_text: str,
+    provider: Provider,
+    cik: str = &quot;&quot;,
+    outcome: str | None = None,
+    outcome_detail: str = &quot;&quot;,
+    filing_name: str = &quot;&quot;,
+    hint_ciks: dict[str, str] | None = None,
+    out_dir: Path | None = None,
+    max_workers: int = 6,
+) -&gt; CompanyAnalysis:
+    print(f&quot;\n=== {ticker.upper()} (provider={provider.name}, cutoff={cutoff_date}) ===&quot;,
+          file=sys.stderr)
+
+    # Stage 1: extract claims + pick queries
+    claims, queries_per_claim = provider.extract_and_pick(
+        ticker, cutoff_date, filing_text, hint_ciks or {}
+    )
+    print(f&quot;  {len(claims)} claims extracted&quot;, file=sys.stderr)
+
+    # Stage 2: run queries (parallel across claims)
+    evidence_per_claim: dict[str, list[Evidence]] = {}
+
+    def _run(cl):
+        evs = run_queries(queries_per_claim.get(cl.claim_id, []))
+        return cl.claim_id, evs
+
+    with ThreadPoolExecutor(max_workers=max_workers) as ex:
+        futures = {ex.submit(_run, c): c for c in claims}
+        for fut in as_completed(futures):
+            try:
+                cid, evs = fut.result()
+                evidence_per_claim[cid] = evs
+            except Exception as e:
+                cid = futures[fut].claim_id
+                print(f&quot;  ! query failed for {cid}: {e}&quot;, file=sys.stderr)
+                evidence_per_claim[cid] = []
+
+    # Stage 3: score each claim from its evidence
+    findings_by_claim = {}
+    for c in claims:
+        try:
+            f = provider.score(c, evidence_per_claim.get(c.claim_id, []))
+        except Exception as e:
+            from .analysis_types import Finding
+            f = Finding(severity=&quot;UNVERIFIABLE&quot;, supports=None,
+                        M_check=&quot;scoring error&quot;, M_value=str(e)[:200],
+                        interpretation=f&quot;Provider {provider.name} score raised: {e}&quot;)
+        findings_by_claim[c.claim_id] = f
+        print(f&quot;  [{c.claim_id}] -&gt; {f.severity}  supports={f.supports}&quot;, file=sys.stderr)
+
+    analysis = CompanyAnalysis(
+        ticker=ticker,
+        cutoff_date=cutoff_date,
+        cik=cik,
+        outcome=outcome,
+        outcome_detail=outcome_detail,
+        filing=filing_name,
+        provider=provider.name,
+        claims=claims,
+        queries_per_claim=queries_per_claim,
+        evidence_per_claim=evidence_per_claim,
+        findings_by_claim=findings_by_claim,
+    )
+    if out_dir is not None:
+        analysis.save(out_dir / f&quot;{ticker}.{provider.name}.json&quot;)
+    return analysis
+
+
+def stage_extract_only(
+    ticker: str,
+    cutoff_date: str,
+    filing_text: str,
+    provider: Provider,
+    out_dir: Path,
+    hint_ciks: dict[str, str] | None = None,
+) -&gt; tuple[Path, Path]:
+    &quot;&quot;&quot;For LocalProvider workflow: run stages 1+2 (extract+queries+evidence)
+    so the analyst can read evidence and write scores afterwards.
+
+    Returns (input_path, evidence_path).
+    &quot;&quot;&quot;
+    claims, queries_per_claim = provider.extract_and_pick(
+        ticker, cutoff_date, filing_text, hint_ciks or {}
+    )
+    evidence_per_claim: dict[str, list[dict]] = {}
+    for c in claims:
+        evs = run_queries(queries_per_claim.get(c.claim_id, []))
+        evidence_per_claim[c.claim_id] = [
+            {&quot;source&quot;: e.source, &quot;kwargs&quot;: e.kwargs, &quot;result&quot;: e.result} for e in evs
+        ]
+    out_dir.mkdir(exist_ok=True, parents=True)
+    ev_path = out_dir / f&quot;{ticker}.evidence.json&quot;
+    ev_path.write_text(json.dumps({
+        &quot;ticker&quot;: ticker,
+        &quot;cutoff_date&quot;: cutoff_date,
+        &quot;evidence&quot;: evidence_per_claim,
+    }, indent=2, default=str))
+    return out_dir / f&quot;{ticker}.input.json&quot;, ev_path
+</pre></div></body></html>

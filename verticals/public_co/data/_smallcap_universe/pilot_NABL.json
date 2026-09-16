@@ -1,0 +1,109 @@
+{
+  "ticker": "NABL",
+  "company": "N-able, Inc.",
+  "cutoff": "2026-05-20",
+  "filing": "0001834488-26-000007_10-K.txt",
+  "filing_date": "2026-02-26",
+  "rfm_tuples": [
+    {
+      "claim_id": "C1",
+      "R": "FY2025 total revenue $511.4M (+9.7% YoY vs $466.1M in 2024 and +10.5% from 2023). Subscription revenue $506.2M (99.0% of total). Reports adjusted EBITDA of $153.2M and net loss of $(17.0)M (vs net income $31.0M in 2024).",
+      "f": "If true and audited cleanly, PwC (PCAOB ID 238) issues unqualified opinion and there is no going-concern paragraph, restatement, NT 10-K, auditor change, or material weakness disclosure within the 5-year lookback window.",
+      "M_source": "going_concern_detector.query_going_concern + auditor_change_tracker.query_auditor_changes + sec_filings.list_filings_by_form (CIK=0001834488, cutoff=2026-05-20)",
+      "M_value": "going_concern: signal=NO_GOING_CONCERN, n_matches=0 in 10-K filed 2026-02-26. auditor: signal=CLEAN_AUDITOR_TENURE, n_8k_item_401=0, n_disagreements=0, n_big4_resignations=0 across 2021-05-25 to 2026-05-24. No NT 10-K/NT 10-Q in 20 most recent filings. EDGAR FTS for 'restatement material weakness' = 0 hits.",
+      "severity": "PASS",
+      "interpretation": "Audited financials are clean. PwC retained without disagreement; no going-concern, restatement, or late-filing flags. Net-loss-to-income flip is real and disclosed, but driven by Adlumin amortization/interest expense, not by accounting irregularity."
+    },
+    {
+      "claim_id": "C2",
+      "R": "Total ARR $539.7M as of Dec 31, 2025 (+11.9% YoY vs $482.5M); customers with >$50K ARR grew from 2,349 to 2,671 (+13.7%); these large customers grew from ~57% to ~61% of total ARR.",
+      "f": "If the ARR/customer-cohort growth claim is real and durable (not a one-time pull-forward from the Long-Term Contract Initiative), the Q1 2026 10-Q should show sequential ARR growth and continuing customer expansion, not flat or declining values.",
+      "M_source": "claim_evolution.query_claim_evolution (search_term='total ARR', base=2026-02-26, cutoff=2026-05-20)",
+      "M_value": "evolution_status=REAFFIRMED_IN_STRUCTURED_DISCLOSURE. Q1 2026 10-Q (filed 2026-05-07) and Q1 8-K disclose: total ARR $548.0M as of 3/31/2026 (+11.2% YoY, +$8.3M sequential). Q1 2026 revenue $133.7M (+13.1% YoY, accelerating from FY25's +9.7%). Improving retention cited by CEO Pagliuca.",
+      "severity": "PASS",
+      "interpretation": "ARR claim affirmed in next quarter's structured disclosure. Sequential ARR growth ($8.3M Q4-25 to Q1-26) is consistent with ~11% trajectory. YoY decel from 11.9% to 11.2% is mild, not a tear-down. Revenue acceleration to 13.1% YoY is a positive surprise, not a deterioration."
+    },
+    {
+      "claim_id": "C3",
+      "R": "Dollar-based net revenue retention 'approximately 103%' for both FY2025 and FY2024 \u2014 reflects pricing/packaging changes and Long-Term Contract Initiative rationalization that 'began materially impacting NRR during three months ended June 30, 2024.'",
+      "f": "If the 103% NRR is a TROUGH (transitional impact of LTCI) and not a structural reset, subsequent quarterly NRR should stabilize or improve. If it is structural SaaS deterioration (cancellations/contraction), NRR should drift below 100% in 10-Qs filed after the 10-K.",
+      "M_source": "claim_evolution.query_claim_evolution (search_term='net revenue retention', base=2026-02-26, cutoff=2026-05-20)",
+      "M_value": "evolution_status=REAFFIRMED_IN_STRUCTURED_DISCLOSURE. Q1 2026 10-Q discloses 106% TTM NRR (Q1 2026) vs 101% TTM NRR (Q1 2025) \u2014 a 500 bps improvement.",
+      "severity": "PASS",
+      "interpretation": "NRR actually IMPROVED post-10-K (103% FY -> 106% TTM Q1 26), which makes the management framing ('LTCI impact rationalization') a verified TROUGH narrative, not a euphemism for churn. Strongest single positive signal."
+    },
+    {
+      "claim_id": "C4",
+      "R": "Effective tax rate 812.3% for FY2025 (income tax expense $19.4M on pre-tax income of only $2.4M). Driver: nondeductible items + valuation allowance addition of $5.8M in U.S. + $0.5M outside. Net deferred tax asset turned to positive $2.6M from $(1.4)M liability. Foreign earnings dominate (Intl pre-tax $57.9M vs U.S. $(55.5)M loss).",
+      "f": "If the 812% ETR is a one-time noise event driven by being near the zero-line, the Q1 2026 10-Q should NOT carry forward a similarly extreme rate or new material valuation-allowance additions; alternatively, if the U.S. business is structurally loss-making, subsequent filings should show continued VA additions and persistent U.S. losses.",
+      "M_source": "claim_evolution.query_claim_evolution (search_term='valuation allowance', base=2025-03-07, cutoff=2026-05-20)",
+      "M_value": "evolution_status=MENTIONED_INCIDENTALLY across 5 subsequent filings (10-K + 4 10-Qs); all 5 LLM classifications=UNRELATED (boilerplate tax-policy language only \u2014 no specific new VA disclosure quantified). Schedule II in 10-K shows tax VA grew $3.6M (2023) -> $4.9M (2023 EoY) -> $7.8M (2024) -> $14.0M (2025): cumulative U.S. taxable-income realization concerns are intensifying, not stable.",
+      "M_value_2": "Confirmed: VA tripled in 2 years ($4.9M -> $14.0M). Management discloses U.S. has $(55.5)M pretax loss with $75.9M U.S. NOL carryforward \u2014 the 'one-time' framing implied by ETR proximity to zero obscures a real, growing U.S.-segment unprofitability.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Honest distress (NOT lying): N-able discloses the U.S. losses and VA additions plainly in tax footnote. But the 812% ETR headline obscures the structural picture \u2014 U.S. operations have lost ~$118M pretax over 3 years (2023-25) and require ever-growing valuation allowances against U.S. DTAs. The 'AI-powered cybersecurity platform' growth story is being subsidized by international profits while U.S. burn intensifies. Mild underdelivery vs the clean growth narrative."
+    },
+    {
+      "claim_id": "C5",
+      "R": "Total debt $393.9M as of Dec 31, 2025 (up from $333.1M in 2024) at 6.59% variable rate; entered Amendment No. 2 to Credit Agreement on Nov 26, 2025; total cash interest commitments $178.4M over term. Adlumin acquisition Nov 20, 2024 drove $5.4M YoY increase in interest expense from deferred consideration liability + $3.3M one-time fees on the Nov 2025 amendment.",
+      "f": "If the credit amendment is routine refinancing, an 8-K Item 1.01 should disclose normal-course terms (extension/upsize/reprice). If it is distress refi, expect covenant relief language, increased pricing, restrictive covenants, or going-concern-adjacent disclosure.",
+      "M_source": "claim_evolution.query_claim_evolution (search_term='Adlumin', base=2025-03-07, cutoff=2026-05-20) + sec_filings.list_filings_by_form (8-K 2025-11-26 accession 0001834488-25-000178)",
+      "M_value": "8-K of 2025-11-26 confirms Amendment No. 2: (i) Term Loans increased from $336M to $400M (+$64M draw), (ii) maturity extended to Nov 26, 2032 (7-year extension). Proceeds explicitly earmarked for 'general corporate purposes including funding deferred consideration payments associated with the Company's November 2024 acquisition of Adlumin, Inc.'",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Not a red flag, but the optics undersell the substance: N-able raised $64M of incremental debt at 6.59% specifically to pay Adlumin earn-out/deferred consideration, while net loss flipped from +$31M to -$17M and stock is at -57% drawdown. Filing presents this as a clean refinancing; the underlying read is that Adlumin's all-in cost is higher than the headline acquisition value, financed with debt while the acquired entity has not yet produced positive incremental income. Honest disclosure, but the 'land-and-expand' growth story is partially debt-funded."
+    },
+    {
+      "claim_id": "C6",
+      "R": "Adlumin acquisition (closed Nov 20, 2024) drove most of the 10-K's incremental costs: amortization of acquired technologies +$13.4M, amortization of acquired intangibles +$1.7M (+618%), transaction-related G&A +$10.2M, bad-debt expense +$3.0M; AND drove ARR/revenue growth. Spinpanel acquisition (2024) also mentioned.",
+      "f": "If Adlumin is delivering the security/MDR revenue lift management claims, subsequent quarterly disclosures (8-K/10-Q) should AFFIRM Adlumin product traction; if it is failing, expect impairment language, customer attrition mentions, or product wind-down.",
+      "M_source": "edgar_fts.query_fulltext (search_term='Adlumin', cutoff=2026-05-20) \u2014 15 total hits; claim_evolution (search_term='Adlumin') 17 subsequent mentions REAFFIRMED",
+      "M_value": "Q1 2025 8-K (May 2025) describes Adlumin as active MDR product line \u2014 'Breach Prevention for Microsoft 365', 'State of the SOC Report' product launches. Nov 2025 8-K confirms continued deferred-consideration payments (i.e., earn-out hurdles being hit -> Adlumin meeting performance targets). No impairment language, no wind-down. Repeated mentions across 10-Ks, 10-Qs, 8-Ks for 18 months.",
+      "severity": "PASS",
+      "interpretation": "Adlumin claim is verified: integrated as named product line, continuing to launch new offerings, earn-out being paid (an integration is delivering enough value that contingent consideration is vesting). Verifies the inorganic-growth story is real, not a write-down trap."
+    },
+    {
+      "claim_id": "C7",
+      "R": "Item 9B: 'During the three months ended December 31, 2025, none of the Company's directors or officers adopted or terminated any purported Rule 10b5-1 plans and/or non-Rule 10b5-1 trading arrangements.'",
+      "f": "If true, no Form 4 filings during Q4 2025 should reflect newly-activated 10b5-1 sales by insiders; insider selling should be flat/light around earnings windows.",
+      "M_source": "insider_vs_calendar.query_insider_sales_near_budget_events (cik=0001834488, contractor_name='N-able', window_days=14)",
+      "M_value": "signal=NO_PROXIMATE_SALES, baseline_signal=NO_PROXIMATE_SALES. 48 Form 4 filings in trailing 365d, 40 total sale transactions, aggregate sale value only $3.15M (de minimis for a $850M+ market cap), 0 sales proximate to events, 0 discretionary proximate sales. Validators_run=true.",
+      "severity": "PASS",
+      "interpretation": "Insider activity is muted and disciplined. $3.15M of total insider sales in 12 months is essentially nothing \u2014 no pattern of executives dumping into the -57% drawdown, no front-running of earnings/credit amendment. Honest disclosure aligned with observed Form 4 behavior."
+    },
+    {
+      "claim_id": "C8",
+      "R": "Related-party transaction (Note in financial statements): 'Beginning in August 2025, through a third party, we engaged the brother-in-law of our chief executive officer as a consultant to provide AI strategy advising services. We incurred costs of $0.2 million... with payments of less than $0.1 million due as of December 31, 2025.'",
+      "f": "If this is a material conflict, expect either escalation (larger amounts in subsequent filings) or governance-disclosure flags (audit-committee review language, 8-K disclosure, shareholder objection). If immaterial and properly governed, expect static or wound-down disclosure with no further escalation.",
+      "M_source": "edgar_fts.query_fulltext + filing internal cross-check; quantitative test against total G&A expense base",
+      "M_value": "$0.2M total cost is 0.04% of FY2025 revenue ($511.4M) and 0.2% of FY2025 G&A ($91.7M). Engagement runs through a third party (intermediary structure, not direct payment to relative). Properly disclosed in Note 13 (Related Party Transactions) as required by ASC 850. No prior-period analog; no subsequent escalation flagged in claim_evolution windows for 'related party'.",
+      "severity": "PASS",
+      "interpretation": "Textbook clean related-party disclosure. Amount is de minimis, intermediated through a third party (suggesting governance/conflict-control), AI strategy advising is contextually plausible for an SMB cybersecurity SaaS. This is the OPPOSITE of obscuring \u2014 management volunteered a sub-$200K nepotism disclosure that they were not required to put in headline ink. Indicator of disclosure integrity."
+    }
+  ],
+  "composite": 0.25,
+  "summary": "NABL is HONEST DISTRESS, not LYING/OBSCURING. The headline drawdown (-56.9%) and reported net loss flip ($31M -> $(17)M) are real and largely driven by amortization/interest from the November 2024 Adlumin acquisition plus growing U.S.-segment unprofitability. However, the principal growth narrative (ARR $539.7M +11.9%, large-customer cohort +13.7%, 103% NRR as a trough) is VERIFIED in the Q1 2026 10-Q: ARR continued sequentially to $548.0M, NRR improved to 106% TTM, and revenue actually accelerated to +13.1% YoY. Adlumin is integrated as a named MDR product line with earn-out payments being made, not impaired. Auditor (PwC, PCAOB 238) is clean with no disagreements; no NT filings, no going-concern, no restatement. Two MODERATE_UNDERDELIVERY items: (C4) the 812% ETR optics obscure $118M of cumulative U.S. pre-tax losses 2023-25 with VA tripling from $4.9M to $14.0M, signalling structurally unprofitable U.S. operations; (C5) the Nov 2025 credit amendment took term loans from $336M to $400M specifically to fund Adlumin earn-out \u2014 debt-financed M&A in a -57% drawdown environment. Insider activity de minimis ($3.15M in 12 months, no front-running); related-party disclosure (CEO's brother-in-law AI consultant for $0.2M) is voluntarily and properly disclosed. Composite 0.25 indicates a name that is closer to PASS than DECEIT \u2014 a stock where the price action reflects honest operational headwinds (U.S. losses, leverage to fund M&A) rather than concealed deterioration. The verifier signal slightly leans against a SHORT thesis (claims are durable) and slightly toward a LONG mean-reversion thesis IF the U.S.-segment burn proves bounded by Adlumin synergies materializing.",
+  "queries_run": [
+    "going_concern_detector.query_going_concern",
+    "auditor_change_tracker.query_auditor_changes",
+    "sec_filings.list_filings_by_form",
+    "insider_vs_calendar.query_insider_sales_near_budget_events",
+    "megacap_namecheck.query_megacap_mentions",
+    "edgar_fts.query_fulltext (x3: 'Adlumin', 'Amendment No.2 Credit', 'N-able first quarter 2026', 'N-able restatement material weakness')",
+    "claim_evolution.query_claim_evolution (x4: 'net revenue retention', 'Long-Term Contract Initiative', 'annualized recurring revenue', 'total ARR', 'Adlumin', 'valuation allowance')",
+    "iborrow.get_borrow_rate"
+  ],
+  "side_signals": {
+    "iborrow": "fee_pct=0.4051, fee_30d_avg=0.4136, available_shares=2.8M, fee_trend=stable \u2014 borrow is cheap and available; no short-squeeze risk on either side.",
+    "megacap_mentions": "Across 19 megacap CIKs (AMZN, MSFT, AAPL, GOOG, META, NVDA, TSLA, etc.) over 10-year window: 0 hits \u2014 N-able is not name-checked by any megacap as a partner, competitor, customer, or acquisition target. Consistent with channel-led MSP-focused positioning, not an Amazon/Microsoft strategic asset.",
+    "long_term_contract_initiative": "claim_evolution status=SILENT_POST_CLAIM \u2014 no further LTCI mentions in post-10-K filings. Could indicate either (a) initiative completed and absorbed (benign) or (b) management moving on from the framing. Q1 2026 ARR continuity suggests (a)."
+  },
+  "scoring": {
+    "PASS": 6,
+    "UNVERIFIABLE": 0,
+    "MODERATE_UNDERDELIVERY": 2,
+    "SEVERE_UNDERDELIVERY": 0,
+    "RED_FLAG_NEGATIVE": 0,
+    "verifiable_claims": 8,
+    "weighted_sum": "(0*6 + 1*2 + 2*0 + 3*0) / 8 = 2 / 8",
+    "composite": 0.25
+  }
+}

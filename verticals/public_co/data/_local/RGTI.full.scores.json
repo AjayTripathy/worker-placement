@@ -1,0 +1,95 @@
+{
+  "ticker": "RGTI",
+  "scores": [
+    {
+      "claim_id": "RGTI-001",
+      "claim_text": "Rigetti has contracted relationships with DARPA, Fermilab/DOE SQMS, and AFRL.",
+      "severity": "PASS",
+      "supports": ["usaspending.query_recipient_contracts", "pentagon_jbook.query_program_funding"],
+      "M_check": "Mode A: USAspending shows 10 DoD awards to RIGETTI & CO, LLC totalling $4.53M (FY20-25), all AFRL (FA8649/FA8750/FA8751 prefixes). Award descriptions include 'PHOTON-SUPERCONDUCTOR MULTI-NODE QUANTUM NETWORKS' and 'HYBRID SUPERCONDUCTING-OPTICAL QUANTUM NETWORK NODES' — direct corroboration of the AFRL quantum networking claim. Mode B: Pentagon J-Book search for 'quantum' returns 3 programs but all attributed to IonQ/Qubitekk, not RGTI. RGTI's funding flows through SBIR/STTR/foundry-subscription DoD contracts, not a named Pentagon J-Book PE.",
+      "M_value": "DoD awards $4.53M / 10 contracts, all AFRL; no J-Book PE-line name match",
+      "interpretation": "PASS Mode A: AFRL relationship is real and registry-confirmed. Mode B reveals the federal relationship is research-grant scale ($4.5M aggregate over 5 years), not a forward-funded Pentagon program — small absolute size relative to $216M FY25 cash burn. The 10-K's framing as 'partnership' is accurate but the dollar magnitude is modest."
+    },
+    {
+      "claim_id": "RGTI-002",
+      "claim_text": "121 patents issued and 160 patents pending as of December 31, 2025.",
+      "severity": "PASS",
+      "supports": ["uspto_odp.query_assignee"],
+      "M_check": "Mode A: USPTO ODP query for assignee 'Rigetti' returns 310 total applications, 114 granted as of cutoff 2026-05-20. Mode B: variant queries confirm Rigetti & Co, LLC as the assignee on essentially all filings; portfolio is concentrated under a single legal entity. CPC codes include G06N 10/40 (quantum computing), B82Y 10/00 (nanotechnology), H10N 60/12 (superconducting devices) — directly aligned to claimed superconducting-qubit / multi-chip architecture.",
+      "M_value": "114 granted, 310 applications (10-K says 121 issued, 160 pending)",
+      "interpretation": "PASS. 10-K-claimed 121 issued is within rounding of 114 USPTO-granted (Rigetti also holds some non-US patents which would close the gap). Patent categories align with claimed business (quantum computing, superconducting devices). No Nikola-pattern divergence."
+    },
+    {
+      "claim_id": "RGTI-003",
+      "claim_text": "Fab-1 wafer fab in Fremont CA (53,800 sqft) + HQ in Berkeley CA (15,625 sqft).",
+      "severity": "PASS",
+      "supports": ["epa_frs.query_facilities", "osha_establishments.query_establishments"],
+      "M_check": "Mode A: EPA FRS returns 3 Rigetti facility records: 775 Heinz Ave, Berkeley CA 94710 (matches HQ); and 47430 Seabridge Dr, Fremont CA 94538 (matches Fab-1). Mode B: OSHA establishments query returns 0 matches — but per calibration heuristic 1 (light electronics / wafer-prototype fabs often not in OSHA / EPA enforcement databases), absence is not adverse.",
+      "M_value": "EPA FRS confirms both Berkeley + Fremont addresses; OSHA silent",
+      "interpretation": "PASS. EPA FRS independently confirms the physical existence of both leased facilities at the addresses implied by the disclosures. Fab-1 in Fremont is a real, registry-recorded facility."
+    },
+    {
+      "claim_id": "RGTI-004",
+      "claim_text": "Quanta Computer $35M PIPE + $250M reciprocal investment Collaboration Agreement (Feb-Apr 2025).",
+      "severity": "PASS",
+      "supports": ["sec_filings.list_filings_by_form", "edgar_fts.query_fulltext"],
+      "M_check": "Mode A: SEC EDGAR 8-K list shows three 8-Ks filed 2025-02-28 (accessions 0001104659-25-019199, 0001104659-25-019121, 0001104659-25-018599) — consistent with the Feb 27, 2025 Quanta Collaboration Agreement + Securities Purchase Agreement (the 10-K exhibit list cites the agreements as Exhibits 10.33 and 10.34 filed as 8-K 001-40140 10.1/10.2 on Feb 28, 2025). Mode B: edgar_fts confirms RGTI references appear in EDGAR; no contradicting counterparty disclosure issue.",
+      "M_value": "8-K filings 2025-02-28 align with agreement signing date",
+      "interpretation": "PASS Mode A: the Quanta deal is a real, filed transaction. Mode B caveat: Quanta is a Taiwan-headquartered foreign issuer (not SEC-registered), so we cannot cross-check Quanta's own disclosures via edgar_fts — this is a name-disclosure asymmetry, not a red flag."
+    },
+    {
+      "claim_id": "RGTI-005",
+      "claim_text": "$8.4M C-DAC purchase order for 108-qubit system (Jan 2026 announcement).",
+      "severity": "PASS",
+      "supports": ["sec_filings.list_filings_by_form"],
+      "M_check": "Mode A: SEC 8-K list shows accession 0001104659-26-004828 filed 2026-01-20 — consistent with the announced Jan 2026 C-DAC PO. Mode B: USAspending does NOT show C-DAC contracts because C-DAC is an Indian Govt entity (Ministry of Electronics IT, not US federal) — out-of-scope by source jurisdiction (heuristic 5). The PO is a private commercial sale to a foreign-government R&D customer; not expected to appear in US registries.",
+      "M_value": "8-K 2026-01-20 corroborates timing of announcement",
+      "interpretation": "PASS. The announcement is real and filed. Counterparty (C-DAC) is foreign-government and not in USAspending scope. $8.4M is material vs. RGTI's reported FY25 revenue scale (10-K's pre-revenue framing; $5.7M for two Novera POs in 2025 implies low-single-digit-millions current run-rate)."
+    },
+    {
+      "claim_id": "RGTI-006",
+      "claim_text": "$350M ATM completed June 2025 ($346.7M net); $35M Quanta PIPE; aggregate dilution material.",
+      "severity": "PASS",
+      "supports": ["sec_filings.list_filings_by_form", "insider_vs_calendar.query_insider_sales_near_budget_events"],
+      "M_check": "Mode A: An S-3 was filed 2023-12-11 (accession 0001193125-23-292657) — provides the shelf authority for the ATM described in the 10-K; no later S-3 in the list. Mode B: insider_vs_calendar (cik='0001838359', window_days=14, start_date='2024-01-01', end_date='2026-05-20') returns 33 total Form 4 sales totalling $39.9M, but ONLY 2 sales ($436K) within a 14-day window of named budget/fiscal events; 0 of those are discretionary (all 10b5-1). Signal = ROUTINE_10B5_1, not CLUSTERED_DISCRETIONARY.",
+      "M_value": "S-3 on file 2023-12-11; insider signal = ROUTINE_10B5_1 (no discretionary clustering)",
+      "interpretation": "PASS Mode A: ATM shelf is real and S-3-supported. Mode B (the higher-discrimination check): no discretionary insider clustering around the $350M raise — this is a positive signal vs. the typical SPAC/pre-revenue dilution pattern. $39.9M of insider sales over 2 years is non-trivial in absolute terms but the framework flags only discretionary-proximate-to-events sales as a red flag; RGTI's insider transactions are 10b5-1-governed."
+    },
+    {
+      "claim_id": "RGTI-007",
+      "claim_text": "Net losses $216.2M (2025) / $201.0M (2024); accumulated deficit $771.0M; pre-revenue at scale.",
+      "severity": "PASS",
+      "supports": ["claim_evolution.query_claim_evolution"],
+      "M_check": "Mode A: claim_evolution for 'going concern' (cik 0001838359, base 2026-03-04 -> cutoff 2026-05-20) returns 0 subsequent mentions in post-10-K filings — i.e., the 10-K narrative does not contain a going-concern warning, consistent with management's stated $573M+ cash position (implied from $439.1M FY25 financing activities and accumulated balance sheet position). Mode B: claim_evolution for 'material weakness' returns 0 subsequent mentions; no adverse ICFR finding propagated post-filing.",
+      "M_value": "0 going-concern mentions post-10-K; 0 material-weakness escalations",
+      "interpretation": "PASS. Losses are real (as disclosed) but there is no post-filing escalation to going-concern or material-weakness language, and the 10-K explicitly states management believes existing cash plus available-for-sale investments cover near-term needs. Losses are pre-revenue-at-scale expected, not adverse-finding-driven."
+    },
+    {
+      "claim_id": "RGTI-008",
+      "claim_text": "Innovate UK Quantum Missions Pilot Competition winner (April 2025) + NQCC upgrade + Riverlane QEC integration.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["usaspending.query_recipient_grants", "nasa_ntrs.query_ntrs"],
+      "M_check": "Mode A: USAspending grants query for 'Rigetti' returns 2 grants ($4.33M) — DOE ASST_NON_DESC0021661 ($2.31M) and DoD ASST_NON_FA95502510103 ($2.03M, FA9550 = AFOSR). Innovate UK is a UK government agency, NOT in USAspending scope. Mode B: NASA NTRS query returns 3 NASA-published Rigetti papers (Ames Research Center, funding NNA16BD14C, IAA 8839, plus one DARPA HR00112090058) — corroborates the broader claim that Rigetti collaborates with NASA-Ames (mentioned in the DARPA/NASA optimization-applications sentence).",
+      "M_value": "Innovate UK out of US-registry scope; NASA-Ames Rigetti collaboration corroborated via 3 NTRS papers",
+      "interpretation": "UNVERIFIABLE on the Innovate UK / NQCC / Riverlane piece (out-of-jurisdiction for US M-sources) per heuristic 5. The adjacent NASA-Ames claim Mode-B-corroborates via NASA NTRS (3 papers tied to Rigetti, funded under NNA16BD14C / DARPA HR00112090058). Net: no contradiction; partial corroboration."
+    },
+    {
+      "claim_id": "RGTI-009",
+      "claim_text": "Commercial partners AWS (Braket), Microsoft (Azure Quantum), Standard Chartered, Moody's.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["megacap_namecheck.query_megacap_mentions", "edgar_fts.query_fulltext"],
+      "M_check": "Mode A: megacap_namecheck (small_cap_name='Rigetti', cutoff='2026-05-20') across 19 megacaps returns total_hits=2, ALL from Amazon and ALL from 2020 (8-K accessions 0001018724-20-000002 and 0001018724-20-000028). Microsoft has 0 hits despite the Azure Quantum distribution claim. Signal = SUB_MATERIAL_RELATIONSHIP. Mode B: edgar_fts on Amazon CIK 0001018724 + 'Rigetti' confirms 2 historical hits (2020); no recent counterparty disclosure of Rigetti by AWS or Microsoft.",
+      "M_value": "2 megacap mentions, both Amazon FY2020; Microsoft 0 mentions; Standard Chartered & Moody's not SEC filers in scope",
+      "interpretation": "MODERATE_UNDERDELIVERY. Per heuristic 7, 0 mentions in a counterparty's filings is SEVERE only when (a) counterparty is large AND (b) claim is material AND (c) revenue from counterparty exceeds disclosure thresholds. Here AWS/MSFT are huge but Rigetti's QCaaS revenue through Braket/Azure is almost certainly below MSFT/AMZN's segment-disclosure thresholds (Rigetti's entire 2025 revenue is in the low-single-digit-millions). So the absence is consistent with sub-material distribution relationships — but the 10-K's framing of these as headline partnerships overstates their commercial materiality relative to what counterparty disclosure would suggest. MOD rather than SEVE because the partnerships almost certainly exist (Braket published listing) but their revenue weight to RGTI is unverifiable and likely small."
+    },
+    {
+      "claim_id": "RGTI-010",
+      "claim_text": "AFRL quantum networking + DARPA/NASA optimization contracts (named federal R&D programs).",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["usaspending.query_dod_contracts", "doe_budget.query_program_funding"],
+      "M_check": "Mode A: USAspending DoD contracts to RIGETTI & CO, LLC = 10 awards, $4.53M total, ALL AFRL (FA8649/FA8750/FA8751 prefixes; AFOSR award FA9550 in grants). Descriptions explicitly include 'photon-superconductor multi-node quantum networks' — direct registry-confirmation of the AFRL networking claim. Mode B: DOE budget query 'Superconducting Quantum Materials and Systems' fuzz-matches to Quantum Information Science program in HEP office, FY25 funded $50.6M, status FUNDED_STEADY. So the DOE QIS umbrella under which Fermilab/SQMS sits is FUNDED_STEADY — Mode B PASS on the DOE side.",
+      "M_value": "AFRL: 10 awards / $4.53M direct; DOE QIS FUNDED_STEADY FY25 $50.6M",
+      "interpretation": "MODERATE_UNDERDELIVERY (calibration: not on the federal-program risk axis, but on scale-vs-narrative). The federal contracts are REAL and the DOE/SQMS umbrella is healthy — but the AGGREGATE federal funding to RGTI ($4.53M DoD + $4.33M grants = ~$8.9M over 2020-2025) is small versus the 10-K's prominent framing of DARPA/AFRL/DOE/NASA as the headline customer pipeline. Per heuristic 10, this is the IDIQ-ceiling-vs-obligated-amount issue: obligated dollars are modest. Not a red flag (research-stage company), but a meaningful gap between narrative weight and dollar weight."
+    }
+  ]
+}

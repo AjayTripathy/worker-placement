@@ -1,0 +1,87 @@
+{
+  "ticker": "LIN",
+  "scores": [
+    {
+      "claim_id": "LIN-1",
+      "claim_text": "Linde reports 2025 total sales of $33,986 million (3% above 2024), with hydrogen disclosed as a primary process gas across all three geographic segments via SMR, ATR, low-carbon (blue) and renewable (green) electrolyzer pathways.",
+      "severity": "PASS",
+      "supports": [
+        "edgar_fts.query_fulltext: 8 filings containing 'Linde hydrogen' — top hits are Linde's own 10-K exhibits (2022-2026). Mature industrial gas leader with hydrogen as one of multiple process gases."
+      ],
+      "M_check": "edgar_fts.query_fulltext (search_term='Linde hydrogen', forms=10-K)",
+      "M_value": "total_hits=8; top_filings include LIN 10-K accessions across 2022-2026",
+      "interpretation": "Revenue magnitude ($34B) and multi-pathway hydrogen disclosure are consistent with the world's largest industrial gas company. Hydrogen is real product line embedded in long-cycle on-site contracts, NOT a forward-looking marketing claim. Heuristic 3 (planned vs operating) not triggered — Linde sells hydrogen to refining/chemicals customers via existing SMR plants operating under 10-20yr contracts. PASS."
+    },
+    {
+      "claim_id": "LIN-2",
+      "claim_text": "Linde owns and operates five major hydrogen-capable pipeline complexes in North America (northern Indiana, Houston, Gulf Coast of Texas, Detroit, and Louisiana) supplying on-site / tonnage customers under 10-20 year total-requirement contracts.",
+      "severity": "PASS",
+      "supports": [
+        "epa_frs (TX): n=38 Linde facilities incl. Freeport, Beaumont, Port Arthur — matches Gulf Coast / Houston pipeline geography.",
+        "epa_frs (LA): n=12 incl. 'LINDE INC - LINDE GEISMAR HYCO FACILITY 595' (Geismar) and 'LINDE INC - LINDE ST CHARLES HYDROGEN PRODUCTION PLANT' (Norco) and 'LINDE - GEISMAR SSU'.",
+        "epa_frs (IN): n=17 incl. 'LINDE - HAMMOND', 'LINDE - WHITING IN 5&6' (East Chicago), and 'LINDE CAPOC H2 PIPELINE REPLACEMENT PROJECT' (East Chicago) — confirms northern Indiana H2 pipeline complex."
+      ],
+      "M_check": "epa_frs.query_facilities (facility_name='Linde', state_abbr in {TX,LA,IN})",
+      "M_value": "TX=38, LA=12 (with named HyCO + St Charles H2 Production Plant), IN=17 (with explicit H2 pipeline replacement)",
+      "interpretation": "EPA FRS provides direct physical-facility corroboration with names that include 'HYCO' (H2/CO syngas) and 'HYDROGEN PRODUCTION PLANT' and 'H2 PIPELINE REPLACEMENT PROJECT' — exact match to claimed pipeline geography. Heuristic 1 (EPA-regulated H2) confirmed positive. PASS."
+    },
+    {
+      "claim_id": "LIN-3",
+      "claim_text": "Linde operates approximately 350 production facilities in the Americas (primarily cryogenic air separation plants, hydrogen plants and carbon dioxide plants).",
+      "severity": "PASS",
+      "supports": [
+        "epa_frs three-state sample (TX/LA/IN) alone returns 67 EPA-registered Linde sites; 'approximately 350' across Americas (US+Canada+Mexico+Brazil) is fully consistent."
+      ],
+      "M_check": "epa_frs.query_facilities (facility_name='Linde')",
+      "M_value": "TX+LA+IN = 67 facilities in just 3 US states — extrapolation to nationwide + Canada/Mexico/Brazil easily supports ~350",
+      "interpretation": "Sample-state EPA evidence consistent with claimed Americas footprint. Mature, asset-heavy operator. PASS."
+    },
+    {
+      "claim_id": "LIN-4",
+      "claim_text": "Linde holds a portfolio of proprietary patents covering hydrogen, synthesis gas, air separation and clean-energy technologies (R&D centers in Pullach Germany, Tonawanda NY, Burr Ridge IL, Shanghai).",
+      "severity": "PASS",
+      "supports": [
+        "uspto_odp Linde: n_total_applications=867, n_granted=225. Recent applications include 'CRYOGENIC AIR SEPARATION', 'METHOD FOR SEPARATING NITROGEN FROM LNG', 'METHOD AND APPARATUS FOR TREATING A HYDROCARBON MIXTURE' — all on-domain for industrial gas / H2 / syngas.",
+        "uspto_odp Praxair (Linde's 2018-merger predecessor): n_total_applications=804, n_granted=35. Combined Linde + Praxair = 260 granted patents."
+      ],
+      "M_check": "uspto_odp.query_assignee (assignee_name in {Linde, Praxair})",
+      "M_value": "Linde: 225 granted / 867 total apps; Praxair: 35 granted / 804 total apps",
+      "interpretation": "Heuristic 8: PASS threshold is n_granted >= 10 with on-domain hits. Linde alone has 22x that threshold with on-domain patents (air separation, syngas, hydrocarbon treatment, semiconductor gases). Genuine R&D operation. PASS."
+    },
+    {
+      "claim_id": "LIN-5",
+      "claim_text": "Linde anticipates continued growth in 'clean hydrogen' (blue + green H2) sales driven by decarbonization demand, with capability to produce green hydrogen via electrolysis using renewable energy and water.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending.query_recipient_grants: 6 DOE grants to Linde Inc — top is DEEE0011525 at $9.5M (DOE/EERE office, hydrogen/clean-energy program code), DEFE0032113 $1.45M, DEFE0031943 $1.35M, DEFE0026163 (all DOE Fossil Energy / EERE).",
+        "usaspending.query_recipient_contracts: 531 awards totaling $90.5M including NASA Kennedy Space Center liquid-hydrogen delivery orders (NNS17AA07D $10.6M, NNK15OW08D $10.0M, 80KSC020F0018 $10.3M) — direct evidence of operating H2 production & delivery to a federal customer."
+      ],
+      "M_check": "usaspending.query_recipient_grants + query_recipient_contracts (recipient_name='Linde Inc')",
+      "M_value": "6 DOE grants totaling ~$13M+ in H2/clean-energy R&D; 531 federal contracts totaling $90M with explicit liquid-H2 delivery line items to NASA KSC",
+      "interpretation": "Forward-looking 'clean hydrogen growth' statement is hedged language (no specific GW target, no specific named offtaker). But DOE grant footprint + actual liquid-H2 delivery contracts to NASA at multi-$10M scale demonstrate operating capability, not vaporware. Heuristic 3 (planned vs operating) is satisfied on the operating side — Linde delivers physical hydrogen today. No headline GW claim to disaggregate. PASS."
+    },
+    {
+      "claim_id": "LIN-6",
+      "claim_text": "Linde records a $1.2B contingent liability tied to advance payments on terminated Russian engineering projects with RusChemAlliance (RCA) and a $0.7B contingent liability for the Amur GPP matter with Gazprom; total ~$1.9B Russia-related liabilities recorded as of Dec 31 2025.",
+      "severity": "PASS",
+      "supports": [
+        "edgar_fts 'RusChemAlliance': 17 total hits, all from Linde's own 10-K/10-Q filings 2024-2026 — consistent serial disclosure across periods.",
+        "edgar_fts 'Amur GPP': 7 hits, all Linde filings 2025-2026."
+      ],
+      "M_check": "edgar_fts.query_fulltext (search_term in {RusChemAlliance, Amur GPP})",
+      "M_value": "RCA: 17 filings (all LIN); Amur GPP: 7 filings (all LIN)",
+      "interpretation": "Russia contingency disclosure is internally consistent, dollar-specific, and tracked across periods with HKIAC / SCC arbitration proceedings disclosed. $1.9B against $34B revenue + $28B goodwill is non-material per the company's own narrative; HKIAC anti-suit injunction granted in Linde's favor. This is a real but bounded legacy exposure already provisioned — not a distress signal. Heuristic 10 (delisting/going-concern fingerprints) not triggered (LIN is on Nasdaq, $200B+ market cap, $7.3B buyback authorization remaining). PASS."
+    },
+    {
+      "claim_id": "LIN-7",
+      "claim_text": "Linde repurchased $7.7B of ordinary shares under the October 2023 $15B buyback program through Dec 31 2025; $7.3B remains authorized.",
+      "severity": "PASS",
+      "supports": [
+        "Self-consistent with cash-flow data in MD&A ($4,578M net repurchases in 2025) and Q4 2025 monthly repurchase table (Oct 872k @ $449.30; Nov 1,045k @ $416.69; Dec 1,390k @ $412.33, ending Q4 with $7.301B remaining)."
+      ],
+      "M_check": "Internal cross-check: MD&A cash-flow vs Q4 monthly repurchase table",
+      "M_value": "$7.7B cumulative repurchased reconciles to $7.301B remaining of $15B authorization; Q4 2025 cash spent = ~$1.4B reconciles to monthly volume * average price",
+      "interpretation": "Buyback economics are internally consistent and rationally sized vs $10.35B operating cash flow in 2025. Opposite of hydrogen-distress fingerprint (ATM offerings / reverse splits / warrants). PASS."
+    }
+  ]
+}

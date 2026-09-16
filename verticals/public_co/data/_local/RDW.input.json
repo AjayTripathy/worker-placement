@@ -1,0 +1,82 @@
+{
+  "ticker": "RDW",
+  "cutoff": "2026-05-16",
+  "filing": "0001819810-26-000029_10-K.txt",
+  "filing_form": "10-K",
+  "filing_period": "FY2025 (year ended 2025-12-31, filed 2026-03-xx)",
+  "claims": [
+    {
+      "claim_id": "RDW-001",
+      "category": "customer_pipeline",
+      "claim_text": "Redwire performs directly or through prime contractors for U.S. national security agencies including U.S. Army, U.S. Marine Corps, U.S. Air Force, U.S. Space Force, DARPA, and the NRO; and civil agencies including NASA. Federal-government customer base is the dominant revenue source.",
+      "queries": [
+        {"M_source": "usaspending.query_recipient_contracts", "kwargs": {"recipient_name": "Redwire", "start_date": "2020-01-01", "end_date": "2026-05-16"}, "what_we_test": "Existence and dollar magnitude of federal contracts to Redwire across NASA / DoD / NRO / USSF — Layer 3 Rule 7 absence-is-contradiction."},
+        {"M_source": "usaspending.query_recipient_grants", "kwargs": {"recipient_name": "Redwire", "start_date": "2020-01-01", "end_date": "2026-05-16"}, "what_we_test": "DARPA Otter VLEO grant / cooperative-agreement awards to Redwire."}
+      ]
+    },
+    {
+      "claim_id": "RDW-002",
+      "category": "technology",
+      "claim_text": "Redwire owns proprietary 'patented and award-winning' Roll-Out Solar Array (ROSA) technology and a portfolio of space sensors/avionics/payloads with '50 years of on-orbit heritage', plus a broad spacecraft platform lineup (SabreSat, Phantom, Hammerhead, Thresher, Mako).",
+      "queries": [
+        {"M_source": "uspto_odp.query_assignee", "kwargs": {"assignee_name": "Redwire", "cutoff_date": "2026-05-16", "categorize": {"solar": ["solar", "array", "ROSA", "photovoltaic"], "spacecraft": ["spacecraft", "satellite", "orbital", "deployable"], "antenna": ["antenna", "RF", "phased"], "propulsion": ["propulsion", "thruster"]}}, "what_we_test": "Granted-patent count and topic distribution matching the claimed core tech areas. PASS at n_granted>=10 with topic hits."},
+        {"M_source": "uspto_odp.query_assignee", "kwargs": {"assignee_name": "Deployable Space Systems", "cutoff_date": "2026-05-16", "categorize": {"solar": ["solar", "array", "ROSA"]}}, "what_we_test": "ROSA originally developed at Deployable Space Systems (acquired by Redwire); test assignee-name variant."}
+      ]
+    },
+    {
+      "claim_id": "RDW-003",
+      "category": "partnership",
+      "claim_text": "Redwire is the prime mission integrator on DARPA's Otter VLEO air-breathing satellite program using its SabreSat platform, and Phantom is being used on ESA's Skimsat VLEO program.",
+      "queries": [
+        {"M_source": "usaspending.query_recipient_contracts", "kwargs": {"recipient_name": "Redwire", "awarding_agency": "Department of Defense", "start_date": "2022-01-01", "end_date": "2026-05-16"}, "what_we_test": "DARPA contract awards to Redwire (DARPA is in DoD); 'Otter' program absence would be a hard contradiction since DARPA prime-integrator awards at $-millions ARE in USAspending."},
+        {"M_source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "SabreSat", "cutoff_date": "2026-05-16"}, "what_we_test": "External validation: any third-party SEC filer mentions SabreSat platform."}
+      ]
+    },
+    {
+      "claim_id": "RDW-004",
+      "category": "partnership",
+      "claim_text": "Redwire has launched 42 PIL-BOX (Pharmaceutical In-space Laboratory Bio-crystal Optimization eXperiment) payloads through Dec 31, 2025 for partners 'including, but not limited to, Bristol Myers Squibb and Eli Lilly', with eleven active payload facilities built by Redwire on the ISS.",
+      "queries": [
+        {"M_source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Redwire", "cik": "0000014272", "cutoff_date": "2026-05-16"}, "what_we_test": "Counterparty disclosure: does Bristol Myers Squibb (CIK 0000014272) mention Redwire in any filing? Absence while named is a Rule-7 negative signal but BMS-scale research line items below materiality."},
+        {"M_source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Redwire", "cik": "0000059478", "cutoff_date": "2026-05-16"}, "what_we_test": "Counterparty disclosure: does Eli Lilly (CIK 0000059478) mention Redwire in any filing?"},
+        {"M_source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "PIL-BOX", "cutoff_date": "2026-05-16"}, "what_we_test": "External validation: any SEC filer mentions PIL-BOX program."}
+      ]
+    },
+    {
+      "claim_id": "RDW-005",
+      "category": "physical_facility",
+      "claim_text": "Redwire operates from 28 locations totaling approximately 910,000 sqft (23 in North America across 11 states + 5 in Europe). Headquarters in Jacksonville, FL. North American locations include CA (5), CO (4), FL (2), IN (2), NM (2), MI (2), VA (2), AL, MA, OR and Ontario (1 each).",
+      "queries": [
+        {"M_source": "epa_frs.query_facilities", "kwargs": {"facility_name": "Redwire", "state_abbr": "FL"}, "what_we_test": "FL HQ and facilities EPA-registered (real industrial sites should register)."},
+        {"M_source": "epa_frs.query_facilities", "kwargs": {"facility_name": "Redwire", "state_abbr": "CO"}, "what_we_test": "CO has 4 claimed facilities; one or more should appear in FRS if they involve real manufacturing/integration."},
+        {"M_source": "epa_frs.query_facilities", "kwargs": {"facility_name": "Redwire", "state_abbr": "CA"}, "what_we_test": "CA has 5 claimed facilities (highest count); FRS presence expected."}
+      ]
+    },
+    {
+      "claim_id": "RDW-006",
+      "category": "production_volume",
+      "claim_text": "Defense Tech segment includes Stalker UAS and Penguin UAS. On July 14, 2025, Stalker UAS was granted Authority to Operate by the DIU and placed on the DIU Blue UAS List. Stalker has 'thousands of flight hours across six continents' with U.S. Marine Corps and U.S. Army customers; Penguin C used by Ukraine Armed Forces, Latvia and Lithuania MoD, Royal Saudi Air Force.",
+      "queries": [
+        {"M_source": "usaspending.query_recipient_contracts", "kwargs": {"recipient_name": "Edge Autonomy", "start_date": "2020-01-01", "end_date": "2026-05-16"}, "what_we_test": "Edge Autonomy (now Redwire Defense Tech) UAS contracts with USMC/Army should appear in USAspending. Stalker/Penguin UAS contract dollars are USAspending-verifiable."},
+        {"M_source": "usaspending.query_recipient_contracts", "kwargs": {"recipient_name": "Jennings Technology", "start_date": "2020-01-01", "end_date": "2026-05-16"}, "what_we_test": "Stalker was originally Lockheed Skunk Works / Composite Engineering — test alt assignee."}
+      ]
+    },
+    {
+      "claim_id": "RDW-007",
+      "category": "financial_distress",
+      "claim_text": "Material weakness in internal controls over financial reporting (KPMG adverse opinion as of Dec 31, 2025). Net loss of $226.6M on $335.4M revenue in 2025. $94.5M cash + $35M revolver capacity; $88.4M JPMorgan term loan + $47.1M convertible preferred. Net EAC adjustments swung from -$17.7M (2024) to -$54.5M (2025). ATM-financed equity issuance of $518.4M in 2025.",
+      "queries": [
+        {"M_source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Redwire", "cik": "0001819810", "cutoff_date": "2026-05-16", "forms": "424B5,S-3"}, "what_we_test": "Confirm at-the-market / dilutive equity offering filings — distress marker per Heuristic 10."}
+      ]
+    },
+    {
+      "claim_id": "RDW-008",
+      "category": "partnership",
+      "claim_text": "Redwire's solar/power systems are flight-deployed on NASA's Imaging X-ray Polarimetry Explorer (IXPE), NASA's DART, NASA's Artemis I lunar mission, ISS, and Space Force GPS Satellite program. Redwire delivers 'multiple advanced RF payloads for a constellation of satellites for a national security satellite constellation in LEO' (likely Space Development Agency / NRO Proliferated LEO).",
+      "queries": [
+        {"M_source": "usaspending.query_recipient_contracts", "kwargs": {"recipient_name": "Redwire", "start_date": "2022-01-01", "end_date": "2026-05-16"}, "what_we_test": "Identify USSF / SDA / NRO awards to Redwire above the $-millions level; this tests the 'national security constellation' claim."},
+        {"M_source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Redwire", "cik": "0000936468", "cutoff_date": "2026-05-16"}, "what_we_test": "Lockheed Martin (LMT, CIK 0000936468) prime-contractor counterparty disclosure of Redwire as subcontractor on GPS / national-security constellation programs."}
+      ]
+    }
+  ]
+}

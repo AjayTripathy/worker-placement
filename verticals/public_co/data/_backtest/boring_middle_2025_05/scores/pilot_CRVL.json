@@ -1,0 +1,120 @@
+{
+  "ticker": "CRVL",
+  "company": "CorVel Corporation",
+  "cutoff": "2025-05-15",
+  "filing": "0000950170-24-064645_10K.txt",
+  "filing_date": "2024-05-24",
+  "cik": "0000874866",
+  "sector": "Financial Services",
+  "industry": "Insurance Brokers",
+  "group": "boring_middle",
+  "rfm_tuples": [
+    {
+      "claim_id": "C1",
+      "R": "The Company had revenues of $795 million in fiscal 2024, an increase of $77 million, or 11%, compared to $719 million for fiscal 2023... net income before tax increased to $95.1 million from $84.6 million in fiscal 2023, an increase of $10.5 million, or 12.5%.",
+      "f": "claim_evolution — verify the FY24 10-K's revenue and earnings trajectory remains intact (or accelerates) in the FY25 10-Qs filed before cutoff. Cross-check Q1 (Aug 2024), Q2 (Nov 2024), and Q3 (Feb 2025) 10-Qs.",
+      "M_source": "self_text + edgar.fetch_filing_text (FY25 Q3 10-Q acc 0000950170-25-015439)",
+      "M_value": "FY25 9M (Apr-Dec 2024) revenue $664M vs FY24 9M $588M = +12.9% YoY (vs +11% in FY24). FY25 9M net income $68.7M vs FY24 9M $56.8M = +21.0% YoY (vs +14.9% in FY24). FY25 Q3-alone (Oct-Dec 2024) revenue $228M vs prior-year-Q3 $202M = +12.7%; net income $23.8M vs $17.1M = +39%. Growth is ACCELERATING through 10 months post-10-K filing date.",
+      "severity": "PASS",
+      "interpretation": "Revenue and earnings claims in the 10-K are not only intact but accelerating into the cutoff date. No claim-evolution decay; the growth narrative is verifiable in subsequent 10-Qs."
+    },
+    {
+      "claim_id": "C2",
+      "R": "The Company has had virtually no interest-bearing debt for the past 33 years... As of March 31, 2024, the Company had $105.6 million in cash and cash equivalents... Working capital increased to $117.7 million at March 31, 2024 from $75.9 million at March 31, 2023... Net cash provided by operating activities increased to $99.2 million in fiscal 2024 from $82.3 million in fiscal 2023.",
+      "f": "going_concern_local + balance-sheet integrity check. Verify no debt, no covenants, no liquidity stress claims in the 10-K, and confirm pattern persists in Q3 10-Q.",
+      "M_source": "going_concern_local.going_concern_from_text + self_text + Q3 10-Q balance sheet",
+      "M_value": "going_concern_detector: signal=NO_GOING_CONCERN, n_matches=0. 10-K confirms no debt for 33 years. Q3 10-Q balance sheet shows no debt, $112M+ cash. No credit facility, no covenants, no LOC. Operating cash flow $99M in FY24 vs $46M of stock repurchases — comfortable coverage.",
+      "severity": "PASS",
+      "interpretation": "Zero-debt + 33-year clean-balance-sheet claim is real and unequivocal. There is no liquidity risk this filing could be obscuring."
+    },
+    {
+      "claim_id": "C3",
+      "R": "We have served as the Company's auditor since 2006. /s/ HASKELL & WHITE LLP, Irvine, California, May 24, 2024",
+      "f": "auditor_change_tracker — check tenure, Big-4 status, any resignations or disagreements (8-K Item 4.01) in last 5 years. Independent auditor's tenure is unusually long.",
+      "M_source": "going_concern_local.auditor_change_from_text + EDGAR 8-K Item 4.01 scan",
+      "M_value": "Haskell & White LLP — small Irvine CA regional accounting firm, NOT Big 4 / national tier 2. Auditor tenure = 18 years (since 2006). No 8-K Item 4.01 (auditor change) events found in pre-cutoff filings 2022-2025. Critical Audit Matter focuses on revenue-recognition estimation judgment around variable consideration (bill review services and directed care services) — appropriate given revenue-recognition complexity.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Mode B forensic flag: an 18-year tenure with a SMALL regional auditor (Haskell & White, not Big 4 or national second-tier) on an $800M+ revenue insurance-broker company is unusual. Audit-quality literature consistently flags long-tenure + small-auditor combinations as a risk factor for revenue-recognition manipulation, and the CAM is precisely revenue-recognition estimation. Not evidence of fraud — but a structural red flag that the framework should down-weight."
+    },
+    {
+      "claim_id": "C4",
+      "R": "No single customer represented more than 10% of revenues in fiscal 2024, or in the fiscal years ended March 31, 2023 and 2022. One customer accounted for 10% or more of accounts receivable as of March 31, 2024 and 2023.",
+      "f": "Mode A — verify the customer-concentration claim's internal consistency. Mode B — derive that if one customer is >10% of A/R (concentration in collections) while no customer >10% of revenue, the A/R customer must be unusually slow-paying or unusually large in one channel.",
+      "M_source": "self_text + edgar_fts.query_fulltext",
+      "M_value": "Internal claim is consistent and stable across 3 fiscal years. Concentration risk is moderate: no revenue concentration but persistent A/R concentration suggests one customer dominates one service line (likely a large TPA / state fund / municipal contract). Q3 10-Q does not re-disclose this footnote (normal for unaudited interim).",
+      "severity": "PASS",
+      "interpretation": "Customer concentration claim is honest, consistent and not alarming. The A/R concentration is meaningful but disclosed; no Mode B underdisclosure beyond the lack of customer-name detail (standard practice)."
+    },
+    {
+      "claim_id": "C5",
+      "R": "The loss of key personnel, especially V. Gordon Clemons, our Chairman, and Michael Combs, our Chief Executive Officer and President, or the inability to attract qualified employees, could have a material adverse effect on our business, financial condition, and results of operations.",
+      "f": "Mode B — derive: management identifies Clemons by name as a key person whose loss would be materially adverse. Verify (1) does Clemons remain Chairman through cutoff, (2) is there any pre-cutoff disclosure about a transition plan, and (3) cross-check Form 4 insider behavior of named key persons.",
+      "M_source": "EDGAR 8-K Item 5.02 scan + form4 parse_insider_sales",
+      "M_value": "MATERIAL EVENT: 8-K filed 2024-11-29 (acc 0001193125-24-268025) discloses that on Nov 26, 2024, V. Gordon Clemons (the named key-person Chairman) RETIRED as employee, board member, and Chairman, effective immediately. Filing states retirement is 'not a result of any disagreement.' Combs (already CEO/President) was appointed Chairman the same day. This occurred ~6 months after the 10-K explicitly named Clemons as a key person. Clemons had been re-elected by stockholders at the Aug 1, 2024 annual meeting (15.8M for / 295K withheld) — so resignation was within ~4 months of stockholder re-election. The 10-K provided no advance succession-plan disclosure for this transition.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Mode B catch — the 10-K's key-person risk-factor identified Clemons by name as critical, then 6 months later he retired abruptly. The Nov 2024 8-K is correctly filed and the 'not from disagreement' boilerplate is included. No deception, but the abrupt timing (within 4 months of stockholder re-election) combined with the heavy insider selling pattern (C7) is the kind of orderly-exit signature that a forensic reader should down-weight slightly."
+    },
+    {
+      "claim_id": "C6",
+      "R": "Implied claim from the FY24 10-K: as a $800M-revenue managed-care company with named Chairman V. Gordon Clemons, related-party / control-entity transactions should be transparently disclosed. The 10-K is silent on Corstar Holdings Inc.",
+      "f": "Mode B — derive: search EDGAR Form 4 filings for 10%-owner relationships, and check whether the 10-K Item 13 (Related-Party Transactions) discloses control-entity sales activity. The 10-K incorporates Item 13 by reference to the proxy, so check the proxy's standard footnote-or-not framing.",
+      "M_source": "form4 (Form 4 parsing for 10%+ owners) + self_text 10-K search for 'Corstar' / 'related party'",
+      "M_value": "CORSTAR HOLDINGS INC files Form 4s as a 10%+ owner of CRVL (verified via isTenPercentOwner=true field in one of its Form 4s, e.g. acc 0000950170-24-087005, filed 2024-07-26). 'Corstar' is NOT mentioned anywhere in the FY24 10-K body. Corstar Holdings sold 60,000 pre-split shares for $15.98M proceeds in the 12 months 2024-05-15 to 2025-05-15. The 10-K text contains zero occurrences of 'related party' or 'Corstar'. Item 13 details are incorporated by reference to the not-yet-filed 2024 proxy statement.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Mode B catch — Corstar is a 10%+ owner closely affiliated with Clemons (per public filings as a Schedule 13G filer historically). The 10-K body never names it as a beneficial owner of record, deferring entirely to the proxy. This is technically compliant (Item 12/13 may be incorporated by reference) but represents a thin disclosure relative to the actual control-entity exposure ($16M in pre-cutoff sales by the entity)."
+    },
+    {
+      "claim_id": "C7",
+      "R": "Implied claim — insider behavior (Form 4 sales by named executive officers and directors) should be consistent with the 10-K's growth narrative and the explicit key-person risk factor identifying Clemons as material.",
+      "f": "form4 — parse all Form 4 filings 2024-05-15 to 2025-05-15 (one-year pre-cutoff window). Tag transaction code S (open-market sale), aggregate proceeds by owner.",
+      "M_source": "form4 (manual parse of 67 Form 4 filings via fetch_form4_xml)",
+      "M_value": "67 Form 4 filings; 65 sale transactions; ~$45.1M of total open-market sale proceeds. Top sellers (12-month pre-cutoff): CORSTAR HOLDINGS (10% owner, Clemons-affiliated) $16.0M; V. Gordon Clemons (Chairman until Nov 26 2024) $9.7M; Alan Hoops (director) $5.6M; Jeffrey J. Michael (director) $3.9M; Maxim Shishin (CIO) $2.4M; Steven Hamerslag (director) $2.3M; Michael Combs (CEO) $1.8M; R. Judd Jessup (director) $1.4M; Brandon O'Brien (CFO) $1.2M. Clemons + Corstar combined = $25.7M (57% of all insider sales). Sales clustered before stock-split announcement (Dec 13, 2024). CEO/CFO sales are modest and consistent with option-exercise patterns.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Mode B catch — the Clemons axis (Chairman + Corstar entity) liquidated $25.7M in the year before his Nov 2024 retirement, concentrated in calendar 2024. This is consistent with a planned orderly exit, but the magnitude and clustering pre-retirement is a forensic signal that the 10-K's key-person risk-factor did not foreshadow. Director-level selling ($13.2M across 4 directors) is also material. CEO and CFO selling, however, is muted ($3.0M combined) — consistent with continued operational confidence."
+    },
+    {
+      "claim_id": "C8",
+      "R": "We continually forecast and manage our cash, investments, working capital balances and capital structure... Cash flows generated from operating activities are principally from earnings before non-cash expenses... the Company has had virtually no interest-bearing debt for the past 33 years... The Company has historically funded its operations and capital expenditures primarily from cash flow from operations.",
+      "f": "Mode A + B — verify that the buyback program is not draining cash beyond operating-cash-flow generation. Compute repurchase $ vs operating cash flow ratio. Verify there is no implicit borrowing through customer deposits.",
+      "M_source": "self_text balance sheet + cash-flow statement + Q3 10-Q comparison",
+      "M_value": "FY24: operating cash flow $99.2M, buybacks $45.7M, capex $29.2M — comfortably covered. FY23: OCF $82.3M, buybacks $93.7M — buybacks EXCEEDED OCF by $11.4M (a small drain). FY24 net buyback spending fell 51% YoY suggesting management throttled repurchases when capital usage exceeded generation. Q3 FY25 (9-month): buyback spending $36.5M vs $93.7M FY24 9-month YoY — substantially throttled. Customer deposits liability $88M (vs $80M FY23) represents customer claims-fund float, not company borrowing — modeled as a working-capital liability.",
+      "severity": "PASS",
+      "interpretation": "Cash management is disciplined. The FY23 over-spend was small and was visibly corrected in FY24/FY25. Customer deposits liability is genuinely customer claims float, not disguised debt."
+    },
+    {
+      "claim_id": "C9",
+      "R": "Implied claim — for an $800M-revenue managed-care company subject to state insurance regulation across 50 states, regulatory and counterparty mirror disclosures should reveal no distress signals from third parties.",
+      "f": "edgar_fts.query_fulltext — search 'CorVel' as counterparty mentions across non-CRVL filings 2023-01-01 to 2025-05-15.",
+      "M_source": "edgar_fts.query_fulltext (cutoff_date=2025-05-15)",
+      "M_value": "104 EDGAR full-text mentions of 'CorVel' in 10-K/10-Q/8-K filings 2023-01-01 to 2025-05-15. Top hits are CRVL's own filings (8-Ks, 10-K exhibits, proxy materials). No counterparty distress mentions, no broken-deal references, no third-party filer naming CorVel in a litigation / class action / regulatory enforcement context.",
+      "severity": "PASS",
+      "interpretation": "Counterparty mirror is clean. No external filer is signaling distress at CRVL."
+    },
+    {
+      "claim_id": "C10",
+      "R": "From time to time the Company is involved in legal proceedings arising in the ordinary course of business. Management believes that resolution of these matters will not result in any payment that, in the aggregate, would be material to its financial position or results of operations.",
+      "f": "Mode B — for a workers-comp/PPO/utilization-management company, healthcare-provider class-action litigation is a recurring risk. Verify no material accruals are being suppressed. Check for new lawsuits in the Q3 10-Q.",
+      "M_source": "self_text + Q3 10-Q legal proceedings + edgar_fts",
+      "M_value": "Q3 FY25 10-Q legal-proceedings section confirms the same boilerplate. No new lawsuits, no contingency accruals, no material commitments disclosed in subsequent filings. The 10-K's risk-factors specifically flag the recurring litigation pattern (providers challenging PPO/bill-review practices) but no concrete pending matter is identified.",
+      "severity": "PASS",
+      "interpretation": "Boilerplate legal-proceedings language is consistent across 10-K and Q3 10-Q. No evidence of suppressed material litigation accruals. Litigation risk is real but unrealized as of cutoff."
+    }
+  ],
+  "supplemental_signals": {
+    "auditor_signal": "MODERATE — Haskell & White LLP since 2006 (18-year tenure, small Irvine CA regional firm, not Big 4 or top-tier-national); CAM is revenue-recognition estimation around variable consideration. No 8-K Item 4.01 in last 3 years.",
+    "going_concern": "NO going-concern language; n_matches=0 from going_concern_local. Zero debt for 33 years, $105.6M cash at FY24 YE, working capital $117.7M.",
+    "insider_behavior": "MODERATE — 12-month pre-cutoff insider sales ~$45M total proceeds, of which $25.7M (57%) was the Clemons axis (Chairman + Corstar 10%-owner entity) followed by his abrupt Nov 26 2024 retirement. CEO Combs $1.8M and CFO O'Brien $1.2M — muted.",
+    "key_person_transition": "RED — Nov 26 2024 8-K (Item 5.02) discloses immediate retirement of named key-person Chairman V. Gordon Clemons; 10-K provided no succession-plan foreshadowing. Combs appointed Chairman same day.",
+    "stock_split": "Dec 24, 2024 — 3-for-1 forward stock split executed via Charter Amendment without stockholder vote (DGCL Sec 242(d)(1)). Authorized shares increased from 120M to 360M. Typical maneuver post-strong run.",
+    "growth_trajectory": "Accelerating into cutoff. FY24 revenue +11%, FY25 9-month revenue +12.9% YoY, FY25 Q3 net income +39% YoY. Growth in both segments (patient management and network solutions), driven primarily by existing-customer expansion.",
+    "balance_sheet": "Pristine — zero debt for 33 years, $105.6M cash + $88M customer deposits as fiduciary float, $98M A/R (DSO 39-44 days), $24M ROU asset (small lease portfolio after work-from-home rightsizing), goodwill $36.8M (small acquisition history).",
+    "buyback_discipline": "Disciplined — FY24 buybacks $45.7M (vs OCF $99M) after FY23 modest over-spend; throttled further in FY25 to ~$9.5M Q3. Lifetime: 38M+ shares repurchased for $794M (pre-split).",
+    "customer_concentration": "PASS — no customer >10% of revenue in FY22/23/24; one customer >10% of A/R in FY24 and FY23 (stable, not deteriorating).",
+    "counterparty_mirror": "Clean — 104 EDGAR full-text mentions of 'CorVel' 2023-01-01 to 2025-05-15, all from CRVL's own filings; no external distress signals.",
+    "related_party_disclosure": "WEAK — 10-K body does not mention 'Corstar' (10%-owner entity affiliated with Clemons) or 'related party'; Item 12/13 incorporated by reference to the proxy.",
+    "10q_evolution_through_cutoff": "Three pre-cutoff 10-Qs (Aug 2024, Nov 2024, Feb 2025) confirm accelerating revenue/earnings growth, continued zero-debt balance sheet, throttled buybacks. No restated prior periods, no late filings, no NT 10-Q/10-K."
+  },
+  "summary": "CRVL is a high-quality boring-middle name with a generally clean R/f/M disclosure profile (6 PASS / 4 MODERATE_UNDERDELIVERY / 0 SEVERE / 0 RED). The fundamentals are unimpeachable: 33 years of zero debt, $99M operating cash flow, +11% revenue growth in FY24 ACCELERATING to +12.9% in the FY25 9-month YTD reported in the Feb 2025 10-Q, no going-concern indicators, no customer-revenue concentration, clean counterparty mirror. The flags are governance/forensic rather than operational: (1) 18-year tenure with small regional auditor Haskell & White on an $800M-revenue company is a structural audit-quality risk factor, especially when paired with a revenue-recognition CAM; (2) the 10-K named Chairman Gordon Clemons as a key person whose loss would be materially adverse, and he then retired abruptly 6 months later (Nov 26 2024), with the 10-K providing no advance succession-plan disclosure; (3) the Clemons axis (Chairman + affiliated 10%-owner Corstar Holdings) liquidated ~$25.7M of stock in the 12 months pre-cutoff, concentrated before the Dec 2024 stock-split announcement and the Nov 2024 retirement; (4) the 10-K body is silent on Corstar despite its 10%+ ownership, deferring entirely to the proxy. Net read: not a distressed name, not a lying name — but the orderly Clemons exit and the small-auditor structural risk argue against a pure LONG-tier ranking. -14.3% pre-cutoff drawdown looks like a routine valuation reset on a quality compounder after a 3-for-1 split, not a forensic distress signal.",
+  "composite": 0.62,
+  "verdict": "NEUTRAL"
+}

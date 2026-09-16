@@ -1,0 +1,163 @@
+{
+  "ticker": "TXT",
+  "cutoff": "2023-01-15",
+  "filing": "0000217346-22-000005_10-K.txt",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Bell's major U.S. Government programs are the V-22 tiltrotor aircraft and the H-1 helicopter platforms, both in the production and support stage, and they represent a significant portion of Bell's revenues from the U.S. Government.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook.query_program_funding(program_name='V-22', cutoff_date='2023-01-15') -> NOT_FOUND_IN_TIMERANGE; only candidate is CV-22 (PE 0401318F, Air Force RDTE Vol IV), whose earliest funding row is FY2024 — corpus cannot speak to PIT 2023-01-15.",
+        "pentagon_jbook.query_program_funding(program_name='H-1', cutoff_date='2023-01-15') -> NOT_FOUND_IN_TIMERANGE; only candidate match is MH-139A (Boeing/Leonardo Grey Wolf), which is NOT Bell — this is a name-collision false positive from substring match on 'H-1' inside 'MH-139A'. Real Bell H-1 (AH-1Z Viper / UH-1Y Venom) is absent from corpus.",
+        "pentagon_jbook.query_program_funding(contractor_name='Bell Textron', cutoff_date='2023-01-15') -> NOT_FOUND."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "NOT_FOUND_IN_TIMERANGE / NOT_FOUND (corpus blind at PIT)",
+      "interpretation": "Corpus coverage gap, not a red flag. Per Rubric 7, NOT_FOUND -> UNVERIFIABLE. Critically: the seeded J-Book corpus is derived from the FY2026 President's Budget (published mid-2025), so its earliest year is FY2024 — every cutoff_date='2023-01-15' query lacks comparable forward data. Substantively at PIT, V-22 procurement was wrapping (final USMC/CMV-22B deliveries) and H-1 was in production tail; neither was zeroed in the FY2023 PB published Mar 2022, but our corpus cannot adjudicate that. Mode-B implied-verifier needed: would query the actual FY2023 PB documents and DoD Contracts Press releases at the PIT, which are outside our corpus."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Over the next several years, the H-1 helicopter program with the U.S. Government will be transitioning from the production stage to the support stage.",
+      "severity": "PASS",
+      "supports": [
+        "Self-disclosed winddown narrative — the company is itself flagging that H-1 production revenue will decline. This is *consistent* with a J-Book where AH-1Z/UH-1Y procurement is being phased out (USMC FY2022 procurement of UH-1Y/AH-1Z was the final new-build year per public record). The company is NOT overstating forward H-1 production exposure; it is signaling the transition itself.",
+        "pentagon_jbook.query_program_funding(program_name='AH-1Z|UH-1Y') -> NOT_FOUND (Marine Corps procurement-line items not in seeded corpus).",
+        "Materiality: claim explicitly describes a DEcrease in forward exposure; the divergence pattern this cohort tests (claimed strong / actually unfunded) does not apply because the company is disclosing the unfunding."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "NOT_FOUND (no AH-1Z/UH-1Y procurement line in corpus); claim is self-deflationary so default PASS",
+      "interpretation": "When the issuer itself discloses production winddown, divergence-pattern logic doesn't fire even though we cannot independently verify the J-Book trajectory. Defaults to PASS under Rubric 1's spirit (no overdelivery claim to falsify) plus Rubric 7 (NOT_FOUND != red flag)."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Bell's R&D costs increased largely related to the Future Vertical Lift programs (FLRAA / FARA next-gen Army rotorcraft pipeline).",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook.query_program_funding(program_name='FLRAA') -> NOT_FOUND.",
+        "pentagon_jbook.query_program_funding(program_name='FARA') -> NOT_FOUND.",
+        "pentagon_jbook.query_program_funding(program_name='Future Vertical Lift') -> NOT_FOUND.",
+        "pentagon_jbook.query_program_funding(program_name='V-280 Valor') -> NOT_FOUND.",
+        "Coverage gap: Army RDT&E PEs for FLRAA (PE 0203802A, Aviation Advanced Technology) and FARA (PE 0203801A, Rotorcraft Sciences) are NOT in the 410-PE seeded corpus, which is heavy on DARPA/Air Force/Space Force."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "NOT_FOUND (Army RDT&E coverage gap)",
+      "interpretation": "Per Rubric 7, NOT_FOUND on Army Aviation RDT&E PEs is a corpus coverage limitation, not a red flag. This is the most J-Book-load-bearing claim in the filing — Bell's forward thesis materially depends on FLRAA winning and FARA continuing — but the framework's seeded corpus cannot adjudicate Army Aviation PEs at PIT 2023-01-15. Note: FY2023 PB (Mar 2022) did fund both FLRAA and FARA RDT&E; FARA was canceled in Feb 2024 (post-cutoff, blinded). Implied-verifier (Mode B) would have flagged the Army's increasing reluctance to fund parallel FVL tracks even at PIT — outside our corpus."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Textron Systems' revenue concentration includes Shadow tactical UAS and Aerosonde, with U.S. Army's Afghanistan withdrawal cutting fee-for-service revenues by $79M in 2021.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "pentagon_jbook.query_program_funding(program_name='Shadow RQ-7') -> NOT_FOUND.",
+        "pentagon_jbook.query_program_funding(program_name='FTUAS') -> NOT_FOUND (Future Tactical UAS, the Shadow replacement competition — not in seeded corpus).",
+        "pentagon_jbook.query_program_funding(program_name='Aerosonde') -> NOT_FOUND.",
+        "Internal-claim-verification (Mode A): the company itself discloses the $79M decline tied to Afghanistan exit — confirmed in-text.",
+        "Implied-verification (Mode B): the underlying Shadow RQ-7 PE was being divested by the Army at PIT (Army announced Shadow divestiture as part of FY2023 Aviation Restructure), and FTUAS Increment 1 (the Shadow replacement) was a competitive process Textron Systems' Aerosonde HQ entry lost in the FY2023-FY2024 timeframe. The 10-K does NOT disclose that Shadow is being sunsetted; it only mentions Afghanistan-withdrawal effect on fee-for-service. This is a forward-pipeline omission."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "NOT_FOUND in corpus; substantive divergence inferred from public Army aviation modernization posture",
+      "interpretation": "Marked MODERATE despite NOT_FOUND because the Mode-B reading (the Shadow program-of-record was being structurally retired at PIT, not merely cyclically downscaled by Afghanistan exit) suggests Textron Systems' forward-pipeline narrative is materially incomplete. The J-Book corpus cannot independently confirm — but the divergence pattern logic fires on issuer omission of the structural retirement story. Severity capped at MODERATE because Textron Systems is only ~10% of revenue and Shadow is only part of that segment."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Approximately 26% of Textron's 2021 revenues were derived from contracts with the U.S. Government (incl. FMS).",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook.query_program_funding(contractor_name='Textron') -> NOT_FOUND.",
+        "pentagon_jbook.query_program_funding(contractor_name='Bell Textron') -> NOT_FOUND.",
+        "This is a historical revenue-share disclosure (backward-looking 2021 audited figure), not a forward-pipeline claim. Outside the divergence-pattern's scope; usaspending would be the right verifier (orthogonal cross-check, not run here)."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "NOT_FOUND (corpus has no contractor index for Textron)",
+      "interpretation": "Historical concentration disclosure, not a forward thesis. PASS by default; would require usaspending.query_dod_contracts to fully verify."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Textron Aviation's military trainer franchise includes the T-6 trainer (used by 20+ countries) and the AT-6 light attack military aircraft.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook.query_program_funding(program_name='T-6 Texan') -> NOT_FOUND.",
+        "pentagon_jbook.query_program_funding(program_name='AT-6 Wolverine') -> NOT_FOUND.",
+        "pentagon_jbook.query_program_funding(program_name='T-6') -> NOT_FOUND.",
+        "Corpus has 17 'T-6' substring hits in programs.json (mostly other programs); no actual T-6 Texan II training PE was seeded. T-6 Texan II is a sustainment-stage USAF/USN training aircraft; primary funding is in O&S not RDT&E."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "NOT_FOUND (T-6 sustainment-stage; AT-6 export-only after USAF declined)",
+      "interpretation": "Coverage gap. The claim itself is descriptive (existing product line), not a forward revenue concentration. Low J-Book load. UNVERIFIABLE; not a red flag."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Bell's backlog decreased $1.5B (28%) in 2021 due to revenues recognized on U.S. Government contracts in excess of new contracts received.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "pentagon_jbook.query_program_funding(contractor_name='Bell') -> NOT_FOUND.",
+        "pentagon_jbook.query_program_funding(program_name='V-22') -> NOT_FOUND_IN_TIMERANGE (CV-22 only).",
+        "Self-disclosure: 28% YoY backlog decline at Bell is a SIGNIFICANT forward-pipeline contraction the company discloses but does not link to specific program winddowns by name.",
+        "Mode-B reading: 28% backlog decline + H-1 production tail + V-22 MYP-III wrap-up imply Bell's program-of-record revenue is structurally exposed pending FLRAA decision (which at PIT 2023-01-15 was very recent — announced Dec 5, 2022, just 41 days before cutoff)."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "NOT_FOUND in corpus; substantive divergence inferred from backlog trajectory + program lifecycle",
+      "interpretation": "Backlog burndown of this magnitude (28%) at Bell, without disclosure of a replacement program-of-record, is a divergence signal even though pentagon_jbook cannot confirm. MODERATE because the FLRAA win (Dec 2022, pre-cutoff but post-filing) would substantially refill the pipeline — but this 10-K is dated Feb 2022, so its forward narrative had no FLRAA award visibility. The investor reading at PIT 2023-01-15 had to bridge the filing's stale-as-of-filing pipeline with the very recent FLRAA award."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Textron Systems' backlog decreased $412M in 2021 to $2.144B, primarily due to revenues recognized in excess of new contracts received.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "pentagon_jbook.query_program_funding(contractor_name='Textron Systems') -> NOT_FOUND.",
+        "pentagon_jbook.query_program_funding(program_name='Shadow') -> NOT_FOUND.",
+        "Backlog burndown without named replacement programs — consistent with the structural divergence pattern (legacy program winddown without disclosed forward program-of-record)."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "NOT_FOUND in corpus; backlog-burndown pattern flagged from self-disclosure",
+      "interpretation": "Same logic as C7: backlog declining without specific named-program forward replacement is a soft divergence signal. Textron Systems is small relative to Textron consolidated (~10%), so MODERATE not SEVERE."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "[CONTROL] ~29% of Textron's $2.5B 2022 purchase obligations represent purchase orders under firm U.S. Government contracts.",
+      "severity": "PASS",
+      "supports": [
+        "Control claim — non-J-Book — purchase-obligation disclosure with internal arithmetic check.",
+        "$2.5B * 29% = ~$725M committed under firm US Gov contracts in 2022, with full recourse under standard termination-for-convenience clauses.",
+        "No forward-pipeline overreach embedded."
+      ],
+      "M_check": "(none — control claim)",
+      "M_value": "n/a",
+      "interpretation": "Control claim. PASS — historical commitment with standard termination protection."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "[CONTROL] Textron operated 97 plants (52 U.S., 45 foreign), 58 owned, totaling ~23.3M sq ft, on January 1, 2022.",
+      "severity": "PASS",
+      "supports": [
+        "Control claim — facility footprint disclosure with concrete enumerable counts.",
+        "Could be cross-verified via epa_frs.query_facility_registry but not material to the J-Book divergence cohort."
+      ],
+      "M_check": "(none — control claim)",
+      "M_value": "n/a",
+      "interpretation": "Control claim. PASS — descriptive facility footprint, no forward-pipeline content."
+    }
+  ],
+  "summary": {
+    "n_claims": 10,
+    "n_jbook_grounded_claims": 8,
+    "n_control_claims": 2,
+    "n_queries_run": 21,
+    "pentagon_jbook_fired_on_jbook_grounded_claims": 8,
+    "pentagon_jbook_returned_actionable_signal": 0,
+    "coverage_gap_note": "All pentagon_jbook queries returned NOT_FOUND or NOT_FOUND_IN_TIMERANGE because (a) the corpus is built from FY2026 J-Book (published 2025), so its earliest funding row is FY2024 — incompatible with cutoff_date=2023-01-15; and (b) the corpus is biased toward DARPA/Air Force/Space Force PEs and lacks Army Aviation RDT&E (FLRAA PE 0203802A, FARA PE 0203801A) and the Navy/USMC procurement line items for V-22 / H-1 (AH-1Z, UH-1Y) that would be needed to test Bell's claims.",
+    "name_collision_warnings": [
+      "program_name='V-22' substring-matched CV-22 (Air Force variant, primarily Boeing/Bell joint). Acceptable but ambiguous: Bell is the rotorcraft builder of all V-22 variants but CV-22 is the AFSOC airframe, not the USMC MV-22B that drives most Bell revenue.",
+      "program_name='H-1' substring-matched MH-139A (Boeing/Leonardo Grey Wolf), which is NOT a Bell program. This is a false-positive substring match that scoring logic correctly downgraded to UNVERIFIABLE rather than treating as evidence."
+    ],
+    "severity_counts": {
+      "PASS": 4,
+      "MODERATE_UNDERDELIVERY": 3,
+      "SEVERE_UNDERDELIVERY": 0,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 3
+    },
+    "framework_finding": "PIT-2023 backtest exposes structural blind spot: a J-Book corpus seeded from FY2026 budget documents cannot adjudicate claims at a 2023 cutoff because the FY-history rows start at FY2024. For TXT specifically, the corpus is also missing the Army Aviation PEs that carry Bell's forward FVL (FLRAA/FARA) thesis. Genuine forward-divergence reasoning at PIT 2023-01-15 required Mode-B implied-verifier work against the FY2023 President's Budget (Mar 2022) and Army Aviation Restructure announcements — outside the seeded corpus."
+  }
+}

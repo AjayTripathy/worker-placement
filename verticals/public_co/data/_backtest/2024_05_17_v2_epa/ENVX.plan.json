@@ -1,0 +1,170 @@
+{
+  "ticker": "ENVX",
+  "cutoff": "2024-05-17",
+  "filing": "0001828318-24-000021_10K.txt",
+  "plan_version": 1,
+  "claims": [
+    {
+      "claim_id": "ENVX-1",
+      "claim_text": "Enovix selected a site for its high-volume Fab2 manufacturing facility in Penang, Malaysia at the Penang Science Park, with approximately 250,000 sq ft leased, and plans to begin operating its first Gen2 production line at this site in 2024.",
+      "source_quote": "In March 2023, we selected a site for Fab2 in Penang, Malaysia at the Penang Science Park. In 2024, we plan to begin operating our first production line at this site to produce cells with a 100% active silicon anode. ... Manufacturing Facility Malaysia 250,000 Leased",
+      "subject": "Enovix Corp. Fab2",
+      "predicate": "operates a manufacturing facility located in",
+      "object_value": "Penang, Malaysia (~250,000 sq ft leased)",
+      "category": "physical_facility",
+      "referent_type": "physical_object",
+      "m_source_status": "PROPOSED",
+      "source_id": null,
+      "source_params": {},
+      "proposed_connector": {
+        "name": "malaysia_ssm.query_company_facility",
+        "description": "Malaysian Companies Commission (Suruhanjaya Syarikat Malaysia / SSM) corporate registry plus Penang Science Park tenancy directory; verifies that a named foreign-subsidiary entity is registered and tenanted at a stated address.",
+        "endpoint": "https://www.ssm.com.my/Pages/eservices/MyData.aspx (SSM MyData) and https://www.penangsciencepark.com.my/ (Penang Science Park tenant directory)",
+        "access_pattern": "scrape",
+        "auth_required": true,
+        "sample_invocation": "GET MyData entity search for 'Enovix Malaysia Sdn Bhd'; cross-reference Penang Science Park tenant list for occupancy at Penang Science Park (Bayan Lepas / Batu Kawan).",
+        "rationale": "EPA FRS only covers US facilities; this Fab is in Malaysia, so the authoritative registry is SSM (company-existence + registered address) plus the Penang Science Park tenant directory (site-occupancy). No US-side connector exists.",
+        "estimated_cost": "$1/query (SSM MyData) or free (tenant directory)",
+        "completeness": "All Malaysian-registered companies (SSM); Penang Science Park tenants only.",
+        "referent_type": "facility",
+        "attribute": "registered_address_and_tenancy"
+      },
+      "extraction_notes": "epa_frs.query_facilities is US-only and cannot adjudicate a Malaysian facility. EDGAR fulltext for 'Penang' or 'Fab2' would only retrieve Enovix's own filings, not independent confirmation. Treat as structurally UNVERIFIABLE absent the proposed connector."
+    },
+    {
+      "claim_id": "ENVX-2",
+      "claim_text": "Enovix completed the acquisition of Routejade, Inc., a Korean battery manufacturer, on October 31, 2023 for approximately $15.8 million in cash plus 5,923,521 shares of Enovix common stock, vertically integrating electrode coating and battery-pack manufacturing.",
+      "source_quote": "On October 31, 2023, we closed a transaction to purchase Routejade, Inc. ( Routejade ), a battery manufacturer incorporated under the laws of Republic of Korea. ... cash consideration in the amount of approximately $15.8 million and 5,923,521 shares of common stock of the Company",
+      "subject": "Enovix Corp.",
+      "predicate": "acquired (closed transaction for)",
+      "object_value": "Routejade, Inc. (Korea) — $15.8M cash + 5,923,521 shares, closed 2023-10-31",
+      "category": "vendor_relationship",
+      "referent_type": "event",
+      "m_source_status": "MAPPED",
+      "source_id": "sec_filings.list_filings_by_form",
+      "source_params": {
+        "cik": "0001828318",
+        "forms": ["8-K"],
+        "start_date": "2023-10-01",
+        "cutoff_date": "2024-05-17",
+        "limit": 25
+      },
+      "proposed_connector": null,
+      "extraction_notes": "An acquisition of this size triggers an 8-K (Item 2.01) by ENVX; presence of a contemporaneous 8-K filed around 2023-10-31 with Item 2.01 adjudicates the closing event. Korean corporate-registry (NICE / DART) confirmation would be ideal but is out of catalog scope; SEC 8-K cadence is the cleanest in-catalog adjudication."
+    },
+    {
+      "claim_id": "ENVX-3",
+      "claim_text": "Enovix entered into a Manufacturing Agreement with YBS International Berhad on July 26, 2023 to support Fab2 production in Malaysia.",
+      "source_quote": "10.22 Manufacturing Agreement dated July 26, 2023, by and between Enovix Corporation and YBS International Berhad",
+      "subject": "Enovix Corp. / YBS International Berhad",
+      "predicate": "entered into a manufacturing agreement",
+      "object_value": "Manufacturing Agreement dated 2023-07-26",
+      "category": "partnership",
+      "referent_type": "entity",
+      "m_source_status": "MAPPED",
+      "source_id": "edgar_fts.query_fulltext",
+      "source_params": {
+        "search_term": "YBS International",
+        "cutoff_date": "2024-05-17",
+        "start_date": "2023-01-01",
+        "forms": "10-K,10-Q,8-K"
+      },
+      "proposed_connector": null,
+      "extraction_notes": "YBS International Berhad is a Malaysian (Bursa-listed) EMS firm with no SEC filings of its own; counterparty corroboration via 20-F is unavailable. EDGAR fulltext on 'YBS International' will return only ENVX's own filings — a soft check that ENVX has disclosed the YBS relationship in multiple filings (not just the exhibit list). Strict counterparty adjudication is UNVERIFIABLE through SEC sources."
+    },
+    {
+      "claim_id": "ENVX-4",
+      "claim_text": "As of December 31, 2023 Enovix held approximately 50 issued U.S. patents and approximately 160 issued foreign patents.",
+      "source_quote": "As of December 31, 2023, we had approximately 50 issued U.S. patents, approximately 160 issued foreign patents, approximately 30 pending U",
+      "subject": "Enovix Corp.",
+      "predicate": "holds issued U.S. patents",
+      "object_value": "~50 issued U.S. patents (and ~160 foreign)",
+      "category": "technology",
+      "referent_type": "intangible",
+      "m_source_status": "MAPPED",
+      "source_id": "uspto_odp.query_assignee",
+      "source_params": {
+        "assignee_name": "Enovix",
+        "cutoff_date": "2024-05-17",
+        "categorize": {
+          "battery_cell": ["battery", "anode", "cathode", "electrolyte", "lithium", "cell"],
+          "silicon_anode": ["silicon", "anode"],
+          "manufacturing": ["assembly", "stack", "laser", "patterning", "process"]
+        }
+      },
+      "proposed_connector": null,
+      "extraction_notes": "USPTO ODP n_granted compared against the ~50 issued-US-patent floor. Foreign patent count is out of USPTO scope (would need EPO/WIPO connector) — that sub-claim is not adjudicated here."
+    },
+    {
+      "claim_id": "ENVX-5",
+      "claim_text": "Enovix expects that at 80% Overall Equipment Effectiveness (OEE), each Gen2 manufacturing line will be able to produce at least 9.5 million batteries annually, depending on cell size.",
+      "source_quote": "We anticipate that at 80% overall equipment effectiveness ( OEE ), our Gen2 manufacturing line would be able to produce at least 9.5 million batteries annually, depending on cell size.",
+      "subject": "Enovix Gen2 manufacturing line",
+      "predicate": "forecasts annual unit-production capacity of",
+      "object_value": "≥9.5 million batteries per Gen2 line at 80% OEE",
+      "category": "production_volume",
+      "referent_type": "quantity",
+      "m_source_status": "NONE",
+      "source_id": null,
+      "source_params": {},
+      "proposed_connector": null,
+      "extraction_notes": "Forward-looking nameplate capacity at an assumed OEE that the company has not yet achieved. No external registry observes per-line throughput; only ENVX's own future 10-Q/10-K unit-shipped disclosures could test it. Pure aspirational engineering claim — calibration heuristic 3 (planned vs operational) flags it as not currently adjudicatable."
+    },
+    {
+      "claim_id": "ENVX-6",
+      "claim_text": "Enovix's cell architecture with its constraint system is designed to enable silicon anodes to achieve a minimum of 500 complete charge/discharge cycles to 80% remaining capacity, with plans to sample batteries in 2024 that extend cycle life to 1,000 cycles.",
+      "source_quote": "with its constraint system is designed to enable silicon anodes to achieve a minimum of 500 complete charge/discharge cycles to 80% remaining capacity. We plan to sample batteries in 2024 that extend cycle life to 1,000 cycles.",
+      "subject": "Enovix silicon-anode cell",
+      "predicate": "achieves cycle life of",
+      "object_value": "≥500 cycles to 80% capacity (target 1,000 in 2024)",
+      "category": "technology",
+      "referent_type": "quantity",
+      "m_source_status": "NONE",
+      "source_id": null,
+      "source_params": {},
+      "proposed_connector": null,
+      "extraction_notes": "Cycle-life claims of this kind require independent test-lab data with conditions specified (rate, temperature, depth-of-discharge). Cohort heuristic notes that without those conditions the claim is an aspirational research milestone. No US federal registry observes cell-level cycle-life test results; DOE/Argonne/NREL battery-testing data could in principle but only for DOE-funded programs. Treat as structurally UNVERIFIABLE."
+    },
+    {
+      "claim_id": "ENVX-7",
+      "claim_text": "Routejade contributed approximately 95% of Enovix's revenue for the fiscal year ended December 31, 2023 (i.e., the acquired Korean subsidiary, not the legacy Fremont silicon-anode product, drove almost all 2023 revenue).",
+      "source_quote": "Routejade constituted approximately 8% and 9% of our total assets and net assets, respectively, approximately 95% of our revenue and approximately 1% of our operating loss as of and for the fiscal year ended December 31, 2023",
+      "subject": "Routejade (acquired Korean subsidiary)",
+      "predicate": "share of consolidated revenue",
+      "object_value": "~95% of FY2023 revenue",
+      "category": "financial_distress",
+      "referent_type": "quantity",
+      "m_source_status": "MAPPED",
+      "source_id": "sec_filings.list_filings_by_form",
+      "source_params": {
+        "cik": "0001828318",
+        "forms": ["10-K", "10-Q"],
+        "start_date": "2022-01-01",
+        "cutoff_date": "2024-05-17",
+        "limit": 25
+      },
+      "proposed_connector": null,
+      "extraction_notes": "Adjudicated by cross-reading ENVX's own filings: pre-acquisition (Q1/Q2/Q3 2023) Product Revenue line items vs. FY2023 totals demonstrate whether legacy silicon-anode product revenue was near-zero. This is a within-filer consistency check, not external. Stronger external adjudication would need a Korean DART filing (Routejade pre-acq financials) — not in catalog."
+    },
+    {
+      "claim_id": "ENVX-8",
+      "claim_text": "Enovix has signed agreements to provide engineering and proof-of-concept samples to blue-chip companies in the consumer electronics industry (smartwatches, AR/VR, smartphones, fire/life/safety radios, laptops) but does not name any customer.",
+      "source_quote": "Over the past several years, we have signed agreements to provide engineering and proof of concept samples to blue-chip companies in the consumer electronic industry (smartwatches, augmented reality/virtual reality, smartphones, fire/life/safety radios, laptops).",
+      "subject": "Enovix Corp. customer pipeline",
+      "predicate": "has signed engineering/proof-of-concept sample agreements with",
+      "object_value": "unnamed 'blue-chip' consumer-electronics OEMs",
+      "category": "customer_pipeline",
+      "referent_type": "entity",
+      "m_source_status": "MAPPED",
+      "source_id": "edgar_fts.query_fulltext",
+      "source_params": {
+        "search_term": "Enovix",
+        "cutoff_date": "2024-05-17",
+        "start_date": "2021-01-01",
+        "forms": "10-K,10-Q,20-F"
+      },
+      "proposed_connector": null,
+      "extraction_notes": "Per Layer 3 Rule 7, named-counterparty corroboration is the discriminator: absent any named OEM, we use EDGAR fulltext on 'Enovix' to count external filers (Apple, OEMs that file 10-Ks, etc.) that reference Enovix. Zero external mentions = unnamed customer pipeline is unverifiable / soft contradiction of 'blue-chip' framing. Calibration heuristic 3: this is at the JDA-or-earlier stage (engineering/POC samples), nowhere near SOP; conflation risk is HIGH."
+    }
+  ]
+}

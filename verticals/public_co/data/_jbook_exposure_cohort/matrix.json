@@ -1,0 +1,1356 @@
+[
+  {
+    "ticker": "ARQQ",
+    "cik": "0001859690",
+    "company": "Arqit Quantum Inc.",
+    "status": "OK",
+    "n_claims": 9,
+    "n_scores": 9,
+    "n_jbook_hits": 5,
+    "severity_counts": {
+      "PASS": 1,
+      "MODERATE_UNDERDELIVERY": 2,
+      "SEVERE_UNDERDELIVERY": 1,
+      "RED_FLAG_NEGATIVE": 1,
+      "UNVERIFIABLE": 4
+    },
+    "composite_score": 1.4,
+    "filing": "0001104659-25-119500_20-F.txt",
+    "red_flag_claims": [
+      {
+        "claim_id": "C1",
+        "claim_text": "Arqit's first U.S. Department of War (DoD) contract is in partnership with a large, leading U.S. IT vendor; symmetric-key encryption integrated into that vendor's product offering to the U.S. government.",
+        "severity": "RED_FLAG_NEGATIVE",
+        "supports": [
+          "pentagon_jbook.query_program_funding(contractor_name='Arqit') => NOT_FOUND (n_matches=0)",
+          "pentagon_jbook.query_program_funding(contractor_name='Arqit Quantum') => NOT_FOUND (n_matches=0)",
+          "usaspending.query_dod_contracts(recipient_name='Arqit Quantum Inc.') => n_awards=0, total_amount=0.0",
+          "usaspending.query_dod_contracts(recipient_name='Arqit Limited') => n_awards=0, total_amount=0.0"
+        ],
+        "M_check": "pentagon_jbook + usaspending.query_dod_contracts",
+        "M_value": "J-Book NOT_FOUND on contractor; USAspending shows zero DoD awards on either Arqit Quantum Inc. or Arqit Limited",
+        "interpretation": "The company narrates a 'first U.S. Department of War contract' but neither the prime nor the unnamed channel-partner-as-prime route surfaces any DoD obligation tied to Arqit anywhere in USAspending. Even allowing for sub-tier obligations being invisible to USAspending's recipient view, the absence of any direct or pass-through obligation through 2026-05-20 is a hard contradiction to a material 'first DoW contract' claim. Per rubric heuristic #6 (USAspending shows ZERO obligations under the claimed program \u2192 RED_FLAG_NEGATIVE) and #7 (NOT_FOUND in J-Book is normally UNVERIFIABLE, but here the company has NOT named a PE, so we cannot blame coverage), the claim is inflated relative to verifiable contracting reality. RED_FLAG_NEGATIVE."
+      }
+    ],
+    "severe_claims": [
+      {
+        "claim_id": "C5",
+        "claim_text": "One customer represents >56% of FY2025 total revenue ($530k); FY2024 one customer = 10% of $293k; FY2023 two customers = 10% each of $640k.",
+        "severity": "SEVERE_UNDERDELIVERY",
+        "supports": [
+          "usaspending.query_dod_contracts(recipient_name='Arqit Quantum Inc.') => n_awards=0, total_amount=0.0",
+          "usaspending.query_federal_presence(name_variants=['Arqit Quantum Inc.','Arqit Quantum','Arqit Limited','Arqit']) => signal=INFLATION_SUSPECT, n_ueis_resolved=0, n_contracts=0, n_grants=0"
+        ],
+        "M_check": "usaspending.query_federal_presence + usaspending.query_dod_contracts",
+        "M_value": "INFLATION_SUSPECT \u2014 no UEIs resolved, no federal awards across any name variant",
+        "interpretation": "The customer-concentration *numbers* are factual (disclosed in audited footnote) and are verifiable as filed. The interpretive severity comes from cross-checking against the company's defense-narrative weight: government & military are claimed as the 'largest potential source of revenue' yet (a) total revenue across all categories is $530k, (b) one undisclosed customer drives 56% of that and is consistent with the Middle East IT reseller channel partner \u2014 not a US DoD relationship, (c) USAspending federal-presence returns INFLATION_SUSPECT across every reasonable Arqit name variant. Per rubric heuristic #6, USAspending zero-obligation against a claimed US-DoD-revenue narrative => SEVERE_UNDERDELIVERY at minimum. The fact that revenue rose to $530k while financing inflows rose to $47m (88x revenue) reinforces that the defense pipeline narrative is not converting to bookings."
+      }
+    ],
+    "moderate_claims": [
+      {
+        "claim_id": "C6",
+        "claim_text": "GTM is B-2-B-2-B channel model; named channel partners are Sparkle (Italy), Fabric/RSG (Canada), unnamed US IT vendor for DoW, unnamed Middle East IT vendor.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": [
+          "edgar_fts.query_fulltext(search_term='Arqit', cik='LMT/NOC/RTX/LHX/GD/BA/HON') => total_hits=0 across all 7 prime defense contractor CIKs"
+        ],
+        "M_check": "edgar_fts.query_fulltext",
+        "M_value": "Zero hits for 'Arqit' across LMT, NOC, RTX, LHX, GD, BA, HON filings \u2014 i.e., none of the megaprime US defense contractors mention Arqit in any of their public disclosures",
+        "interpretation": "If Arqit were materially integrated into the product offering of 'one of the largest IT vendors to the U.S. government' for a DoW contract, we would expect a counter-party trace. Zero hits across all seven defense primes is consistent with the channel partner being either (a) an IT-services vendor outside the top 7 (e.g., Leidos, SAIC, Booz, Accenture Federal, IBM Federal, Microsoft Federal, Oracle, GDIT) \u2014 plausible \u2014 or (b) a contract too small to be a counterparty-disclosure event. We can't fully refute, but the absence of any prime-disclosure reciprocation is one more data point of low-materiality. MODERATE_UNDERDELIVERY \u2014 the channel-partner story is plausible only at de-minimis scale; if it were the company-making contract the narrative implies, you would expect a trace."
+      },
+      {
+        "claim_id": "C9",
+        "claim_text": "FY2025 financing inflow $47.1m vs $0.53m revenue and $29.6m opex burn \u2014 equity-funded narrative.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": [
+          "insider_vs_calendar.query_insider_sales_near_budget_events(cik='0001859690') => signal=PROXIMATE_DISCRETIONARY; n_proximate_sales=1; CFO Nick Pointon sold $6,903 on 2026-04-20, 8 days before FY27 J-Book release (2026-04-28)"
+        ],
+        "M_check": "insider_vs_calendar.query_insider_sales_near_budget_events",
+        "M_value": "Single CFO discretionary sale of $6,903 in 8-day pre-J-Book window \u2014 small absolute size but matched event (PROXIMATE_DISCRETIONARY)",
+        "interpretation": "The financing-mix claim is factual (audited cash flow). The interpretive layer is: a company whose narrative depends on imminent DoD revenue conversion is funding itself almost entirely through ATM equity issuance ($37m in FY25 alone via the new $75m F-3 ATM program established Jan 2025). The insider-sales signal is weak in dollar terms ($6.9k) but the *match* on the FY27 J-Book release window is structurally consistent with the cohort thesis \u2014 small but non-zero. MODERATE_UNDERDELIVERY: the equity-funded posture combined with insider-sale-on-J-Book-release is consistent with a defense-pipeline narrative that is not converting, though the insider signal alone is below the dollar threshold for a stronger call."
+      }
+    ]
+  },
+  {
+    "ticker": "IONQ",
+    "cik": "0001824920",
+    "company": "IonQ, Inc.",
+    "status": "OK",
+    "n_claims": 11,
+    "n_scores": 12,
+    "n_jbook_hits": 5,
+    "severity_counts": {
+      "PASS": 4,
+      "MODERATE_UNDERDELIVERY": 1,
+      "SEVERE_UNDERDELIVERY": 1,
+      "RED_FLAG_NEGATIVE": 3,
+      "UNVERIFIABLE": 3
+    },
+    "composite_score": 1.3333333333333333,
+    "filing": "0001193125-26-071562_10-K.txt",
+    "red_flag_claims": [
+      {
+        "claim_id": "C1",
+        "claim_text": "IonQ names AFRL, DARPA, and Oak Ridge National Laboratory as government customers / partners \u2014 IonQ's AFRL trapped-ion / quantum-networking work is the company's flagship DoD program-of-record narrative; ORNL is the named DOE national-lab partner.",
+        "severity": "RED_FLAG_NEGATIVE",
+        "supports": "DIRECT_J-BOOK_HIT + DOE_COMPANION_CONFIRMS_PARTIAL",
+        "M_check": "pentagon_jbook.query_program_funding(program_name=AFRL Quantum Networking, cutoff=2026-05-20); doe_budget.query_program_funding(program_name=Advanced Computing Technologies, qis_only=True)",
+        "M_value": "pentagon_jbook: UNFUNDED_TWO_PLUS_YEARS \u2014 primary contractor IonQ Inc; FY22=$13M, FY23=$26M, FY24=$12M (all earmark-funded, never Pentagon-requested), FY25=$0, FY26=$0 (second consecutive unfunded year per FY26 bipartisan budget signed Jan 20 2026). PIID FA8750-22-C-1022 ($13.4M obligated via AFRL Rome FA8750 office). doe_budget (v2): ASCR Advanced Computing Technologies (includes NQISRCs incl. QSC@ORNL) = FUNDED_STEADY, FY25=$105.118M, FY26=$112.618M. IonQ NOT listed as a primary contractor on any DOE program in the 78-program corpus \u2014 DOE NQI funding goes to the labs (ORNL, Argonne, Brookhaven, Fermilab, LBNL) which then collaborate WITH IonQ, not TO IonQ.",
+        "interpretation": "CANONICAL J-BOOK DIVERGENCE \u2014 unchanged from v1. IonQ's marquee federal program-of-record (AFRL Rome quantum-networking contract) has been zero-funded by the Pentagon for two consecutive fiscal years through cutoff; pure congressional add (earmark) from FY22-FY24 that the Pentagon never requested. Earmark sponsors (Tester-MT, Cardin-MD, Van Hollen-MD, Hoyer-MD) lost majority power after Nov 2024 election; FY26 budget did not renew the line (EARMARK_SUNSET). v2 DOE companion: the ORNL portion of the claim IS funded \u2014 ASCR Advanced Computing Technologies grew $7.5M (~7%) FY25\u2192FY26, and IonQ has a documented ORNL relationship as a vendor (not as a prime contractor on DOE money). This is a small positive offset to the AFRL J-Book divergence but does NOT change severity: (a) the ORNL relationship is a collaboration, not a revenue line item \u2014 IonQ does not appear in any DOE program's primary_contractors list; (b) materiality test (heuristic 2): the AFRL line is the flagship DoD program-of-record at $13M historical revenue, while any DOE-pass-through ORNL revenue is not disclosed at a material level. Severity REMAINS RED_FLAG_NEGATIVE."
+      },
+      {
+        "claim_id": "C8",
+        "claim_text": "IonQ executed 7 acquisitions in ~12 months (ID Quantique, Lightsynq, Capella Space, Oxford Ionics, Vector Atomic, Skyloom, SkyWater-pending).",
+        "severity": "RED_FLAG_NEGATIVE",
+        "supports": "INCOHERENT_ROLLUP",
+        "M_check": "acq_coherence.score_acquisition_coherence(parent_thesis=quantum platform, acquisitions=[8])",
+        "M_value": "Aggregate signal=INCOHERENT_ROLLUP. 4 of 8 acquisitions scored low_coherence with is_revenue_synthetic=true: Capella Space (SAR Earth observation, score 0.05), Vector Atomic (atomic clocks/PNT, 0.35), Skyloom Global (optical inter-sat links, 0.35), SkyWater Technology (semiconductor foundry, 0.15). 4 scored high_coherence (Qubitekk, ID Quantique, Lightsynq, Oxford Ionics).",
+        "interpretation": "Unchanged from v1. Canonical IonQ-thesis rollup pattern: the parent loses its core federal revenue stream (AFRL Quantum Networking earmark zeroed) and pivots into incoherent acquisitions including a SAR satellite company, a semiconductor foundry, and a laser-comms company \u2014 none of which have technology overlap with trapped-ion quantum computing. Per heuristic 'acq_coherence.INCOHERENT_ROLLUP + pentagon_jbook.UNFUNDED' is the highest-precision fraud-pattern combination per the m-source catalog description. RED_FLAG_NEGATIVE: rollup is a textbook revenue-synthetic distraction from a J-Book-zeroed core line."
+      },
+      {
+        "claim_id": "C-INSIDER-SUPP",
+        "claim_text": "[SUPPLEMENTARY] Insider sales clustering around budget-vote dates while AFRL Quantum Networking was being zeroed.",
+        "severity": "RED_FLAG_NEGATIVE",
+        "supports": "INSIDER_VS_CALENDAR_CLUSTERED_DISCRETIONARY",
+        "M_check": "insider_vs_calendar.query_insider_sales_near_budget_events(cik=0001824920, lookback_days=730, cutoff=2026-05-20)",
+        "M_value": "99 Form 4 filings; 74 sales = $460.6M total; 14 proximate to budget events = $77.4M; 12 discretionary proximate; 4 unique proximate sellers. Top proximate sale: Peter Hume Chapman (ex-CEO) on 2025-03-11 (same day House passed FY25 full-year CR confirming AFRL earmark zeroing) \u2014 2 lots of 2,000,000 shares each at $18.72 = $74.9M discretionary (not 10b5-1). Concurrent discretionary sales by Rima Alameddine and Thomas G. Kramer on same day. Three named insiders also sold discretionarily on Sept 26 2024 (FY25 CR signed) and Dec 20 2024 (CR extended).",
+        "interpretation": "Unchanged from v1. CLUSTERED_DISCRETIONARY signal is unambiguous: the ex-CEO and two named officers sold discretionarily (non-10b5-1) on the exact dates of three budget actions that quietly zeroed out the AFRL Quantum Networking line. This is the canonical YSS/IONQ pattern explicitly called out in the m-source catalog description for insider_vs_calendar. Treats as RED_FLAG_NEGATIVE supplementary signal that reinforces claims C1 and C2."
+      }
+    ],
+    "severe_claims": [
+      {
+        "claim_id": "C2",
+        "claim_text": "IonQ states $370.0M in remaining performance obligations (mix funded + unfunded) and that 'anticipated future revenues from the U.S. government result from contracts awarded under various U.S. government programs.'",
+        "severity": "SEVERE_UNDERDELIVERY",
+        "supports": "INDIRECT_J-BOOK_HIT + DOE_NULL",
+        "M_check": "pentagon_jbook.query_program_funding(contractor_name=IonQ); earmark_detector.query_earmark_status(program_name=AFRL Quantum Networking); doe_budget.query_program_funding(contractor_name=IonQ)",
+        "M_value": "Three IonQ-attributed programs in J-Book: (a) AFRL Quantum Networking \u2014 UNFUNDED_TWO_PLUS_YEARS, (b) AFRL Qubitekk Quantum Networking \u2014 FUNDED_GROWING but small ($12.2M FY26), (c) UMD Quantum (IONQ subcontractor) \u2014 UNFUNDED_THIS_YEAR. Earmark detector: AFRL QN earmark sponsors lost majority post-Nov 2024; FY25 and FY26 enacted = $0. v2 DOE retry: doe_budget.query_program_funding(contractor_name='IonQ') returns NOT_FOUND across all 78 DOE programs (signal=NOT_FOUND, n_matches=0). The 10-K explicitly admits the $370M RPO 'includes unfunded orders' where funding 'has not been appropriated' \u2014 those are the J-Book-zeroed lines, not DOE lines.",
+        "interpretation": "Unchanged from v1. The $370M backlog is the most narrative-load-bearing forward number in the filing, but IonQ concedes in plain text that it includes UNFUNDED orders. The flagship AFRL Quantum Networking is zero-funded for the second consecutive FY through cutoff. v2 DOE retry materially STRENGTHENS the v1 reading: the $370M RPO cannot be implicitly defended as 'DOE-program revenue' because doe_budget shows IonQ has no contractor relationship with any DOE Office of Science program in the corpus. The forward backlog conversion narrative remains materially impaired. SEVERE_UNDERDELIVERY: the disclosed forward revenue depends on lines the Pentagon J-Book confirms are zeroed and the DOE corpus confirms IonQ is not a counterparty on."
+      }
+    ],
+    "moderate_claims": [
+      {
+        "claim_id": "C3",
+        "claim_text": "Three customers = 53% of FY2025 revenue; IonQ expects increasing concentration. Two customers = 77% in FY24; two = 58% in FY23.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": "CONCENTRATION_OVERLAP_WITH_J-BOOK",
+        "M_check": "usaspending.query_dod_contracts(recipient_name=IonQ Federal LLC) and (recipient_name=IonQ Inc); usaspending.query_federal_presence(name_variants=[IonQ variants])",
+        "M_value": "USAspending: IonQ Federal LLC = 0 DoD awards under that exact legal name. IonQ Inc = 0 DoD awards under that variant. usaspending.query_federal_presence (name_variants=[IonQ Inc, IonQ Federal LLC, IonQ Quantum Inc]) returns n_ueis_resolved=0, n_contracts=0, signal=INFLATION_SUSPECT. However, Qubitekk Inc (acquired Dec 2024, now IonQ subsidiary) has 8 prior DoD awards = $12.7M total, dominated by FA8750-25-CB-001 AFRL Quantum Network ($8.97M). Capella Space (acquired Jul 2025) has 9 DoD awards = $15.7M total. Per the ticker_pe_crosswalk: IonQ legacy = 33 contracts, $196.5M total.",
+        "interpretation": "Unchanged from v1. MIXED SIGNAL: (a) Customer concentration is admittedly high and rising, (b) federal-government share overlaps the J-Book-zeroed AFRL Quantum Networking line, (c) USAspending under direct IonQ legal variants returns zero \u2014 the company books DoD revenue via subsidiaries (Qubitekk Federal LLC, Capella Space Corp.) rather than 'IonQ Federal, LLC' as such. INFLATION_SUSPECT signal supports the view that the parent's federal-customer narrative is more acquisition-dependent than direct. MODERATE because the concentration claim itself is truthful (and disclosed) but the J-Book divergence on the underlying program puts the customer concentration at structural risk if a top-3 customer is the AFRL/AF Rome line whose program is zero-funded."
+      }
+    ]
+  },
+  {
+    "ticker": "BBAI",
+    "cik": "0001836981",
+    "company": "BigBear.ai Holdings, Inc.",
+    "status": "OK",
+    "n_claims": 10,
+    "n_scores": 10,
+    "n_jbook_hits": 5,
+    "severity_counts": {
+      "PASS": 0,
+      "MODERATE_UNDERDELIVERY": 6,
+      "SEVERE_UNDERDELIVERY": 3,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 1
+    },
+    "composite_score": 1.3333333333333333,
+    "filing": "0001836981-26-000018_10-K.txt",
+    "red_flag_claims": [],
+    "severe_claims": [
+      {
+        "claim_id": "C4",
+        "claim_text": "Revenue is heavily concentrated in U.S. government T&M (61%) and FFP (25%) contracts; positioned as a defense / national security AI prime.",
+        "severity": "SEVERE_UNDERDELIVERY",
+        "supports": [
+          "pentagon_jbook contractor=BigBear: NOT_FOUND (no tracked PE primary)",
+          "pentagon_jbook GFIM: NOT_FOUND (corpus gap)",
+          "pentagon_jbook Orion DSP / SHIELD: NOT_FOUND (corpus gap)",
+          "usaspending BBAI Federal: 8 contracts, $15.3M post-2022; largest single award $4.35M (ORION DSP via Tradewinds)",
+          "crosswalk file: 82 historical DoD contracts, $72M lifetime, 0 PEs matched into J-Book corpus, 25 unmatched samples",
+          "Q1 2026 10-Q: top customers A-E each 10-17%; 'Customer A' dropped from $6.5M (19%) Q1 2025 to ~$0 (0%) Q1 2026; revenue decline 'primarily due to lower volume on the Army programs'"
+        ],
+        "M_check": "pentagon_jbook (contractor + program names) + usaspending + crosswalk + Q1 disclosure",
+        "M_value": {
+          "BBAI_jbook_contractor_signal": "NOT_FOUND",
+          "BBAI_Federal_usa_n_awards": 8,
+          "BBAI_Federal_usa_total_M": 15.3,
+          "largest_recent_DoD_award_desc": "ORION DECISION SUPPORT PLATFORM via Tradewinds Solutions Marketplace ($4.35M)",
+          "second_largest": "GFIM Follow-on Production ($3.92M)",
+          "crosswalk_pes_matched": 0,
+          "Q1_2026_customer_A_pct": "0%",
+          "Q1_2025_customer_A_pct": "19%",
+          "Q1_2026_yoy_revenue_decline_drivers": "lower volume on the Army programs + one-time contracts in Q1 2025 that did not recur, partially offset by Ask Sage inclusion"
+        },
+        "interpretation": "This is the strongest J-Book divergence finding in the filing. The 10-K positions BBAI as a defense / national security AI prime concentrated in U.S. government T&M and FFP contracts (61% + 25% = 86%) \u2014 but the company does not name a single Program Element or program-of-record by name anywhere in the 10-K. USAspending reveals what the 10-K elides: the recent post-2022 contract footprint is a series of small task orders ($15.3M total, 8 awards) on Army IDIQs (GFIM, ARFORGEN AST, ORION DSP via Tradewinds, SHIELD initial order) plus Ex-Im Bank IGF lines. Critically, the Q1 2026 10-Q discloses that the top FY 2025 customer ('Customer A') fell from $6.5M (19% of revenue) to $0 in a single year, and the YoY revenue decline was 'primarily due to lower volume on the Army programs'. This is the pattern the J-Book divergence framework is designed to detect: forward revenue narrative depends on a program that is silently rolling off. The framework cannot pin the lost revenue to a specific UNFUNDED_* PE because (a) the 10-K never named the PE in the first place, and (b) the Army program in question (likely the ARFORGEN Synchronization Tool follow-on / GFIM legacy work) sits in O&M / IDIQ task-order pools, not in J-Book RDT&E PEs. SEVERE_UNDERDELIVERY because the Mode B implied-verification derivation (revenue mix vs. named programs) catches what the company explicitly chose not to disclose. The J-Book corpus's NOT_FOUND on every BBAI-named subject is informative: a real defense prime should appear in the by_entity index against AT LEAST one tracked PE \u2014 BBAI does not, and the crosswalk file (0 of 82 contracts matched into J-Book) confirms its revenue model is the wrong shape for the J-Book test."
+      },
+      {
+        "claim_id": "C5",
+        "claim_text": "Biometrics / digital identity (Pangiam) and customs (CargoSeer) are forward growth vectors tied to CBP / TSA / DHS programs.",
+        "severity": "SEVERE_UNDERDELIVERY",
+        "supports": [
+          "pentagon_jbook Customs: NOT_FOUND (DHS budgets separately from DoD, expected)",
+          "usaspending Pangiam: 0 federal contracts, $0",
+          "usaspending CargoSeer: 0 federal contracts, $0",
+          "10-Q Feb 3, 2026 shutdown note: 'the Department of Homeland Security continues to remain unfunded'"
+        ],
+        "M_check": "usaspending + 10-Q corroboration",
+        "M_value": {
+          "Pangiam_federal_n_awards": 0,
+          "Pangiam_federal_total_M": 0,
+          "CargoSeer_federal_n_awards": 0,
+          "CargoSeer_federal_total_M": 0,
+          "DHS_funding_status_per_10Q": "remains unfunded post-Feb 3, 2026 shutdown deal"
+        },
+        "interpretation": "Pangiam (acquired Feb 2024 for $70M) and CargoSeer (acquired Jan 2026 for $5M) jointly anchor BBAI's stated 'travel and trade' / 'digital identity' / 'customs' growth thesis. USAspending shows ZERO federal contract obligations for either entity \u2014 meaning the biometric / customs revenue, if it exists, runs through the BigBear.ai or BigBear.ai Federal entity rather than the subsidiary brand, OR runs through commercial / foreign-government channels not visible on USAspending. The Q1 2026 10-Q corroborates the structural concern: DHS (the primary domestic customer for biometric / customs enforcement work) 'continues to remain unfunded' as of the filing date. Forward DHS-anchored revenue from Pangiam/CargoSeer is therefore exposed to a continuing-resolution / partial-shutdown regime. SEVERE_UNDERDELIVERY: a $75M+ acquired portfolio (Pangiam + CargoSeer) shows no traceable federal contract footprint at the subsidiary level and the only named customer agency (DHS) is itself unfunded as of the filing date. The Pangiam acquisition was 18% of FY2024 BBAI market cap and the digital identity / biometric story is the principal non-defense revenue diversifier \u2014 so a zero-USAspending finding here directly contradicts the narrative. Note: it's possible Pangiam revenue runs through commercial airports and foreign governments (TSA contracts, Reagan National / MWAA contracts) which are NOT visible on USAspending as DoD/civilian contracts; that path remains UNVERIFIABLE on current M-sources. The SEVERE rating is calibrated to the size of the acquisition vs. zero traceable obligations."
+      },
+      {
+        "claim_id": "C9",
+        "claim_text": "Forward thesis depends on the January 2026 'AI Acceleration Strategy', 'Pace-Setting Projects', and 'AI Model Parity' policy framework.",
+        "severity": "SEVERE_UNDERDELIVERY",
+        "supports": [
+          "pentagon_jbook 'AI Acceleration Strategy': NOT_FOUND",
+          "pentagon_jbook 'AI Model Parity': NOT_FOUND",
+          "earmark_detector 'AI Acceleration': NOT_EARMARK (no matched earmarks)"
+        ],
+        "M_check": "pentagon_jbook + earmark_detector",
+        "M_value": {
+          "AI_Acceleration_Strategy_jbook_signal": "NOT_FOUND",
+          "AI_Model_Parity_jbook_signal": "NOT_FOUND",
+          "AI_Acceleration_earmark_signal": "NOT_EARMARK"
+        },
+        "interpretation": "The 10-K explicitly elevates the January 2026 'AI Acceleration Strategy' / 'Pace-Setting Projects' / 'AI Model Parity' policy framework to the level of THE principal forward growth catalyst. Pentagon_jbook returns NOT_FOUND for all three terms \u2014 meaning none of these slogans has yet been translated into a budgeted Program Element with appropriated dollars. The earmark_detector also returns NOT_EARMARK, suggesting no congressional sponsor has yet attached an earmark line to these initiatives. This is the policy-slogan-as-revenue-pipeline anti-pattern: a small-cap pinning its forward thesis to a White House initiative that has not yet appeared on a J-Book line. Pace-Setting Projects and Model Parity may yet become appropriated, but as of the cutoff (2026-05-20) \u2014 three months after the strategy was published in January 2026 \u2014 neither has shown up as a budgeted line. SEVERE_UNDERDELIVERY because the 10-K's principal forward growth narrative is anchored entirely on a slogan that does not yet correspond to any appropriated funding line in the J-Book corpus, and the company has chosen to elevate this slogan rather than disclose specific Program Elements where it is positioned to win."
+      }
+    ],
+    "moderate_claims": [
+      {
+        "claim_id": "C1",
+        "claim_text": "Ask Sage is used by '100,000 Department of War users' and is positioned as the central pillar anchored by the U.S. 'AI Acceleration Strategy' Pace-Setting Projects.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": [
+          "pentagon_jbook AI Acceleration: NOT_FOUND",
+          "pentagon_jbook Pace-Setting Projects: NOT_FOUND",
+          "pentagon_jbook contractor=Ask Sage: NOT_FOUND",
+          "usaspending Ask Sage DoD: 42 awards, $23.1M total"
+        ],
+        "M_check": "pentagon_jbook + usaspending cross-check",
+        "M_value": {
+          "jbook_signal": "NOT_FOUND",
+          "usaspending_n_awards": 42,
+          "usaspending_total_M": 23.07,
+          "largest_award_M": 10.88,
+          "largest_award_desc": "ANNUAL SUBSCRIPTION, YEARLY LICENSE, TRAINING, CLOUD STORAGE AND CUSTOM SERVICES IN SUPPORT OF THE CIO G6"
+        },
+        "interpretation": "The forward narrative is anchored on a January 2026 White House policy slogan ('AI Acceleration Strategy', 'Pace-Setting Projects', 'AI Model Parity') that has no traceable Program Element in the J-Book corpus \u2014 meaning the appropriated dollars supporting these initiatives, if any, are buried in service-specific PEs the 10-K does not name. Separately, the '100,000 Department of War users' figure for Ask Sage is at face tension with the company's actual federal contract footprint for Ask Sage: $23M total across 42 awards, dominated by a single $10.9M CIO G6 annual subscription task order. At ~$110/user/year if you took 100K users literally, that would imply $11M of subscription revenue \u2014 but the bulk of obligations are for a single CIO G6 contract, not a department-wide enterprise license. The user count likely reflects free / trial accounts and federal-tenant accounts that don't translate into paid subscriptions. The $271.6M Ask Sage purchase price implies ~12x trailing federal contract revenue, paid mostly in cash from August 2025 ATM proceeds. Calling this MODERATE rather than SEVERE because (a) the 42 awards DO show real DoD obligations, (b) FedRAMP / IL5-IL6 / Top Secret authorization is a verifiable status not a fictitious claim, and (c) Pace-Setting Projects may yet manifest as appropriated lines in FY27. But the J-Book test fires a NOT_FOUND signal, and the size of obligations relative to the $271.6M acquisition price suggests the forward thesis is built on user-count metrics rather than appropriated dollars."
+      },
+      {
+        "claim_id": "C3",
+        "claim_text": "ConductorOS was 'central to exercise Talisman Sabre' in 2025; positioned as flagship DoD-deployed edge-AI orchestration product.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": [
+          "pentagon_jbook Talisman Sabre: NOT_FOUND (correctly \u2014 exercise, not PE)",
+          "pentagon_jbook JADC2: NOT_FOUND",
+          "pentagon_jbook ABMS (PE 0604003F): FUNDED_GROWING (the natural funded umbrella for ConductorOS-class products)",
+          "usaspending BigBear DoD 2024-2026: 6 awards, $8.3M \u2014 no ABMS / JADC2 / INDOPACOM line items visible"
+        ],
+        "M_check": "pentagon_jbook (Talisman Sabre + JADC2 + ABMS) + usaspending",
+        "M_value": {
+          "talisman_sabre_signal": "NOT_FOUND (expected \u2014 exercise, not PE)",
+          "JADC2_signal": "NOT_FOUND",
+          "ABMS_signal": "FUNDED_GROWING",
+          "BBAI_DoD_2024_2026_n_awards": 6,
+          "BBAI_DoD_2024_2026_total_M": 8.28,
+          "BBAI_no_ABMS_or_JADC2_award_visible": true
+        },
+        "interpretation": "ABMS is FUNDED_GROWING \u2014 the natural appropriated home for edge-AI battle-management orchestration would be a strong forward tailwind IF BBAI were a named contractor. But: (a) BBAI is NOT in the J-Book entity index as a primary on ABMS or any JADC2-adjacent PE, (b) BBAI's recent DoD obligation footprint (6 awards, $8.3M, 2024-2026) contains zero ABMS / JADC2 / INDOPACOM line items, (c) Talisman Sabre is an exercise (INDOPACOM O&M, not RDT&E) \u2014 being 'central' to an exercise is a marketing claim, not a recurring revenue program. The MODERATE rating reflects two distinct concerns: the principal funded program adjacent to ConductorOS (ABMS) appears to be served by other primes, and the exercise-anchored narrative does not convert to a J-Book-tracked program-of-record. Pentagon_jbook DID fire on this claim (FUNDED_GROWING on ABMS) but the firing is against the GAP, not against BBAI's claimed exposure."
+      },
+      {
+        "claim_id": "C6",
+        "claim_text": "Operational readiness business 'streamlines manpower, equipment, and supply chain data', positioning the company in Army force-generation / readiness decision-support.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": [
+          "pentagon_jbook Readiness Decision Support Enterprise (PE 0207611F): FUNDED_STEADY (Air Force)",
+          "pentagon_jbook ARFORGEN AST: NOT_FOUND (corpus gap; this is an O&M / Army systems IT line, not RDT&E)",
+          "usaspending BBAI Federal: GFIM Follow-on Production $3.92M, ARFORGEN AST legacy ~$30M lifetime per crosswalk",
+          "Q1 2026 10-Q: 'lower volume on the Army programs' is the proximate cause of YoY revenue decline"
+        ],
+        "M_check": "pentagon_jbook + usaspending + Q1 disclosure",
+        "M_value": {
+          "RDSE_PE_0207611F_signal": "FUNDED_STEADY (Air Force readiness decision-support \u2014 adjacent but BBAI not on entity list)",
+          "ARFORGEN_AST_signal": "NOT_FOUND (Army O&M IT line, outside J-Book scope)",
+          "GFIM_follow_on_production_obligation": "$3.92M (one-time)",
+          "Q1_2026_Army_revenue_trend": "lower YoY"
+        },
+        "interpretation": "RDSE (Readiness Decision Support Enterprise) is FUNDED_STEADY in the Air Force J-Book \u2014 a directly adjacent funded program for a company branded around 'operational readiness'. The natural test: is BBAI on RDSE? The J-Book by_entity index does NOT list BBAI as a primary on RDSE, suggesting the Air Force RDSE customer relationship is either through a higher-tier prime (Leidos / CACI / SAIC) or BBAI is not on this program at all. Meanwhile BBAI's actual readiness-adjacent revenue is on the Army side (GFIM, ARFORGEN AST) \u2014 both outside the J-Book RDT&E corpus because they live in O&M / Army IT line items. The Q1 2026 10-Q explicitly cites 'lower volume on the Army programs' as the proximate cause of the YoY revenue decline. This is the J-Book divergence signal: the company's positioning ('operational readiness for the U.S. military') maps to a FUNDED_STEADY adjacent PE on which BBAI is not a primary, while BBAI's actual readiness revenue (Army GFIM, ARFORGEN AST) is rolling off. MODERATE rather than SEVERE because (a) GFIM follow-on production ($3.92M in 2024-25) is real but one-time, (b) the J-Book corpus does not cover the relevant Army O&M lines so absence is not dispositive, (c) RDSE remains a forward-funded adjacent opportunity that BBAI could compete on. Pentagon_jbook FIRED on this claim with a FUNDED_STEADY signal \u2014 but the materiality test cuts the other way (BBAI is not the named primary)."
+      },
+      {
+        "claim_id": "C7",
+        "claim_text": "Strongest financial position in company history; $461M cash; $637M ATM gross proceeds; $271.6M Ask Sage purchase + Pangiam + ProModel + CargoSeer rollup.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": [
+          "acq_coherence: tool needs structured target descriptions; raw 4-acquisition stack spans (i) biometrics for civilian travel/identity (Pangiam), (ii) discrete-event simulation for manufacturing (ProModel), (iii) generative AI platform for defense (Ask Sage), (iv) Israeli cargo-inspection AI (CargoSeer) \u2014 visibly heterogeneous categories",
+          "ATM facts: 142M shares issued for $637M gross proceeds in FY2025; 38.1M additional shares issued for 2029 note conversions; share count went from 251.6M (YE2024) to 436.9M (YE2025), a 74% dilution"
+        ],
+        "M_check": "acq_coherence (manually adjudicated)",
+        "M_value": {
+          "yoy_share_count_growth_pct": 73.7,
+          "ATM_gross_proceeds_FY25_M": 637,
+          "Ask_Sage_purchase_price_M": 271.6,
+          "acquisitions_count_2024_2026": 4,
+          "acquisition_categories_distinct": 4
+        },
+        "interpretation": "The 'strongest financial position in company history' claim is technically true in cash terms ($461M cash + AFS vs. $50M YE2024) but it was achieved via 74% share-count dilution (251.6M -> 436.9M shares) during a year when the stock was elevated by AI-narrative enthusiasm. The acquisitions stack is incoherent on its face: biometrics for civilian travel (Pangiam), discrete-event simulation for manufacturing (ProModel), generative AI for defense (Ask Sage), and Israeli customs cargo-inspection (CargoSeer) span four distinct sub-industries with no obvious cross-sell synergy. The Ask Sage acquisition consumed $267.6M cash \u2014 roughly equivalent to 42% of the FY2025 ATM gross proceeds. MODERATE rather than SEVERE because the cash position is real and the dilution is fully disclosed, but the pattern (raise equity into AI narrative -> deploy into thematically adjacent acquisitions -> claim improved financial position) is the classic small-cap roll-up signature that the framework is designed to flag. acq_coherence tool returned low_coherence on all four targets (data-insufficient mode); manual adjudication confirms the heterogeneity."
+      },
+      {
+        "claim_id": "C8",
+        "claim_text": "DHS remains unfunded post-Feb 3, 2026 shutdown deal; 'impact of the January shutdown did not have a meaningful impact on our results'.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": [
+          "10-Q explicit disclosure: 'the Department of Homeland Security continues to remain unfunded'",
+          "insider_vs_calendar: 38 Form 4 filings, $2.3M total sales, 5 sales proximate to budget events, $468K proximate value, 4 unique owners, FY25 year-end sales by Blankenship/McAleenan/Ricker"
+        ],
+        "M_check": "10-Q text + insider_vs_calendar",
+        "M_value": {
+          "n_form4_filings": 38,
+          "total_sales_USD": 2318418,
+          "n_proximate_to_budget_events": 5,
+          "proximate_value_USD": 467816,
+          "FY25_year_end_sellers": [
+            "Blankenship Carolyn",
+            "McAleenan Kevin",
+            "Ricker Sean Raymond"
+          ]
+        },
+        "interpretation": "The 10-Q frames the January 2026 shutdown as immaterial ('did not have a meaningful impact on our results') but simultaneously discloses that DHS \u2014 the principal customer agency for Pangiam's digital-identity / biometric work and CargoSeer's customs work \u2014 'continues to remain unfunded'. These two statements are in tension: if DHS revenue had been a meaningful share of BBAI's revenue mix, an extended DHS shutdown would have hit Q1 (it was self-described 'partial' Jan 31 to Feb 3, but DHS funding gap continues). The framing is consistent with DHS revenue being either small or not yet ramped \u2014 which contradicts the bullishness around Pangiam/CargoSeer positioning. Insider sales: 38 Form 4 filings totaling $2.3M, with 5 sales ($468K) clustered around budget events; notably Kevin McAleenan (former Acting DHS Secretary, now BBAI board / advisor) sold at FY25 year-end alongside CFO Ricker. The proximate dollar value is modest in absolute terms ($468K), but the pattern (DHS-experienced board member selling at FY25 year-end with DHS unfunded) is the textbook insider-vs-calendar signal. MODERATE: tension between 'immaterial shutdown' framing and 'DHS still unfunded' fact, plus modest insider-sale cluster at FY25 close among DHS-connected directors."
+      },
+      {
+        "claim_id": "C10",
+        "claim_text": "Company relies on patents / trade secrets but is 'not dependent on any particular patent or application'.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": [
+          "uspto_odp BigBear.ai: 1 application total, 0 granted, status 'Notice of Allowance Mailed'",
+          "uspto_odp Pangiam: 0 applications, 0 granted"
+        ],
+        "M_check": "uspto_odp",
+        "M_value": {
+          "BBAI_total_applications": 1,
+          "BBAI_granted_pre_cutoff": 0,
+          "Pangiam_total_applications": 0,
+          "Pangiam_granted": 0,
+          "BBAI_workforce_engineers_scientists": "67% of 579 employees = ~388 technical staff"
+        },
+        "interpretation": "BBAI has filed exactly 1 patent application (still pending grant) for 'Systems and Methods for Reverse Engineering-Based Detection of Vulnerabilities', and Pangiam has filed 0. For a company branded as a 'leading provider of Edge AI-powered decision intelligence' with 388 technical staff (67% of 579 employees), this is a strikingly thin patent estate. The 10-K's hedge ('not dependent on any particular patent or application') is technically defensible because there is nothing to depend on. Compared to peer AI primes (Palantir has hundreds of granted patents; Anduril has dozens; even Pangiam in the biometrics space would have benefitted from explicit IP positioning) this is a tell. The company's competitive moat is therefore necessarily customer relationships and cleared workforce \u2014 both of which the YoY 'Customer A' drop from 19% to 0% and the 'lower volume on Army programs' framing contradict. MODERATE: a defense-AI prime claiming differentiated 'edge AI' / 'biometrics' / 'predictive analytics' tech but with 0 granted patents is consistent with a services / system-integrator profile, not a product-IP profile. The patent test is orthogonal to J-Book but cross-corroborates the 'forward revenue anchored on positioning rather than appropriated programs' interpretation."
+      }
+    ]
+  },
+  {
+    "ticker": "QBTS",
+    "cik": "0001907982",
+    "company": "D-Wave Quantum Inc.",
+    "status": "OK",
+    "n_claims": 13,
+    "n_scores": 13,
+    "n_jbook_hits": 3,
+    "severity_counts": {
+      "PASS": 4,
+      "MODERATE_UNDERDELIVERY": 2,
+      "SEVERE_UNDERDELIVERY": 5,
+      "RED_FLAG_NEGATIVE": 1,
+      "UNVERIFIABLE": 1
+    },
+    "composite_score": 1.25,
+    "filing": "0001907982-26-000026_10-K.txt",
+    "red_flag_claims": [
+      {
+        "claim_id": "C5",
+        "claim_text": "Customer A = 67% of FY2025 revenue (vs 17% in FY2024); not named.",
+        "severity": "RED_FLAG_NEGATIVE",
+        "supports": [
+          "usaspending.query_federal_presence",
+          "usaspending.query_dod_contracts"
+        ],
+        "M_check": "usaspending.query_federal_presence(D-Wave variants) + usaspending.query_dod_contracts(D-Wave)",
+        "M_value": {
+          "federal_presence_signal": "INFLATION_SUSPECT",
+          "n_contracts": 0,
+          "contracts_amount_M": 0.0,
+          "dod_signal": {
+            "n_awards": 0,
+            "total_amount": 0.0
+          },
+          "fy2025_total_revenue_M": 24.6,
+          "implied_customer_a_M": 16.5
+        },
+        "interpretation": "Unchanged from v1. Customer A is ~$16.5M (67% of $24.6M FY2025 revenue) and went from 17%->67% YoY. USAspending shows ZERO federal contracts/grants under any D-Wave name variant, including the UEI-anchored D-Wave Government Inc. - so Customer A is NOT a U.S. federal customer. Cross-referencing the 10-K narrative, the most likely identity is Forschungszentrum Juelich, which 'purchased' the Advantage system in Feb 2025 and upgraded to Advantage2 throughout 2025. A single non-US public-research customer driving 67% of revenue inverts the 'broad commercial adoption' narrative the rest of the 10-K paints. RED_FLAG_NEGATIVE because the concentration is existential AND the customer's identity is suppressed."
+      }
+    ],
+    "severe_claims": [
+      {
+        "claim_id": "C1",
+        "claim_text": "D-Wave achieved 'awardable' status through the CDAO Tradewinds Solutions Marketplace.",
+        "severity": "SEVERE_UNDERDELIVERY",
+        "supports": [
+          "usaspending.query_federal_presence",
+          "usaspending.query_dod_contracts"
+        ],
+        "M_check": "usaspending.query_federal_presence(name_variants=[D-Wave Quantum, D-Wave Government Inc., D-Wave Systems, D-Wave US Inc., D-Wave Commercial Inc., D-Wave])",
+        "M_value": {
+          "n_ueis_resolved": 1,
+          "ueis": [
+            {
+              "name": "D-WAVE GOVERNMENT INC.",
+              "uei": "PATGKJM747F7",
+              "fy_amount_snapshot": 0.0
+            }
+          ],
+          "n_contracts": 0,
+          "contracts_amount_M": 0.0,
+          "n_grants": 0,
+          "grants_amount_M": 0.0,
+          "signal": "INFLATION_SUSPECT",
+          "usaspending_dod": {
+            "n_awards": 0,
+            "total_amount": 0.0
+          }
+        },
+        "interpretation": "INFLATION_SUSPECT (unchanged from v1). D-Wave Government Inc. is registered as a federal contractor (UEI PATGKJM747F7) but has $0 in contracts and $0 in grants across 2018-05/2026. Tradewinds 'awardable' status is a marketplace eligibility flag, not a contract - it confirms that no DoD program has actually obligated dollars to D-Wave. Claim materially overstates federal traction."
+      },
+      {
+        "claim_id": "C4",
+        "claim_text": "D-Wave formed a new business unit dedicated to U.S. government adoption, led by a public-sector executive.",
+        "severity": "SEVERE_UNDERDELIVERY",
+        "supports": [
+          "usaspending.query_federal_presence"
+        ],
+        "M_check": "usaspending.query_federal_presence(D-Wave Government Inc.)",
+        "M_value": {
+          "n_ueis_resolved": 1,
+          "uei": "PATGKJM747F7",
+          "n_contracts": 0,
+          "contracts_amount_M": 0.0,
+          "n_grants": 0,
+          "signal": "INFLATION_SUSPECT"
+        },
+        "interpretation": "Unchanged from v1. A federal contracting subsidiary (D-Wave Government Inc.) exists and is SAM-registered, but has obligated $0 across the entire 2018-2026 window - confirmed via UEI-anchored USAspending lookup. A 'new business unit' with a 'seasoned public sector executive' is forward narrative; there is no historical federal revenue base to extend. SEVERE_UNDERDELIVERY."
+      },
+      {
+        "claim_id": "C9",
+        "claim_text": "D-Wave addresses 'unique research and government classified applications' as a growth market.",
+        "severity": "SEVERE_UNDERDELIVERY",
+        "supports": [
+          "pentagon_jbook.query_program_funding",
+          "doe_budget.query_program_funding",
+          "usaspending.query_federal_presence"
+        ],
+        "M_check": "pentagon_jbook.query_program_funding(program_name='quantum') + doe_budget.query_program_funding(contractor='D-Wave') + doe_budget.query_program_funding(program_name='Quantum Information Science', qis_only=True)",
+        "M_value": {
+          "jbook_quantum_matches": 3,
+          "jbook_quantum_programs": [
+            {
+              "name": "AFRL Quantum Networking (IONQ)",
+              "status": "UNFUNDED_TWO_PLUS_YEARS",
+              "contractors": [
+                "IonQ"
+              ]
+            },
+            {
+              "name": "AFRL Qubitekk Quantum Networking",
+              "status": "FUNDED_STEADY",
+              "contractors": [
+                "Qubitekk (acquired by IonQ Dec 2024)"
+              ]
+            },
+            {
+              "name": "UMD Quantum (IONQ subcontractor)",
+              "status": "UNFUNDED_THIS_YEAR",
+              "contractors": [
+                "UMD / IonQ"
+              ]
+            }
+          ],
+          "jbook_dwave_contractor": {
+            "signal": "NOT_FOUND",
+            "n_matches": 0
+          },
+          "doe_budget_dwave_contractor_v2": {
+            "signal": "NOT_FOUND",
+            "n_matches": 0
+          },
+          "doe_budget_qis_v2": {
+            "n_matches": 3,
+            "programs": [
+              {
+                "name": "Advanced Computing Technologies",
+                "office": "ASCR",
+                "FY2025_M": 105.118,
+                "FY2026_M": 112.618,
+                "status": "FUNDED_GROWING",
+                "qis_relevant": true,
+                "contractors_listed": []
+              },
+              {
+                "name": "Basic Energy Sciences - Quantum Information Science Research",
+                "office": "BES",
+                "FY2026_M": 2241.0,
+                "status": "FUNDED_STEADY (FY2026 only)",
+                "qis_relevant": true,
+                "contractors_listed": []
+              },
+              {
+                "name": "Quantum Information Science",
+                "office": "HEP",
+                "FY2025_M": 50.566,
+                "FY2026_M": null,
+                "status": "FUNDED_STEADY (FY2025 only, no FY2026 line)",
+                "qis_relevant": true,
+                "contractors_listed": []
+              }
+            ],
+            "interpretation_note": "DOE-side QIS programs are largely funded (ASCR growing, BES funded), but D-Wave is NOT named as a primary contractor on any of them. DOE programs in the corpus mostly do not list specific commercial contractors, so 'not listed' is weak evidence, BUT the orthogonal usaspending check independently confirms D-Wave Government Inc. has $0 in grants across the entire 2018-2026 window - meaning even SBIR/STTR or laboratory subcontract dollars to D-Wave are absent."
+          },
+          "dwave_federal_presence_signal": "INFLATION_SUSPECT"
+        },
+        "interpretation": "v2 HARDENS to SEVERE_UNDERDELIVERY (was SEVERE_UNDERDELIVERY in v1; not changed in tier but evidentially strengthened). New evidence: (i) doe_budget.query_program_funding(contractor='D-Wave') returns NOT_FOUND - independent funding line, same answer; (ii) DOE-side QIS programs (ASCR Advanced Computing Technologies FUNDED_GROWING $105M->$112M, BES-QIS, HEP-QIS) ARE funded and growing, so the 'classified government applications' growth-market thesis cannot be deflected as 'we'd be funded if DOE were funded' - DOE *is* funded, and D-Wave is still not getting any of it. The DoD-side picture remains: only 3 DoD-quantum PEs in corpus, all IonQ-anchored, 2 of 3 UNFUNDED. Combined with $0 federal awards via USAspending (contracts AND grants), the 'classified government applications' growth pillar has zero obligated funding anywhere visible to the framework across BOTH DoD AND DOE M-sources. Note: corpus coverage gap - SBIR/STTR-level dollars below the PE-tracking threshold are possible but undocumented; the absence of any USAspending grant or contract makes that less likely."
+      },
+      {
+        "claim_id": "C10",
+        "claim_text": "D-Wave Government Inc. is the primary federal contracting entity.",
+        "severity": "SEVERE_UNDERDELIVERY",
+        "supports": [
+          "usaspending.query_federal_presence"
+        ],
+        "M_check": "usaspending.query_federal_presence(D-Wave Government variants)",
+        "M_value": {
+          "n_ueis_resolved": 1,
+          "uei": "PATGKJM747F7",
+          "duns": "079837872",
+          "n_contracts": 0,
+          "contracts_amount_M": 0.0,
+          "n_grants": 0,
+          "signal": "INFLATION_SUSPECT"
+        },
+        "interpretation": "Unchanged from v1. UEI exists, $0 in awards. The subsidiary functions as a registration vehicle without an operating federal contract footprint. SEVERE_UNDERDELIVERY relative to the framing that the entity is the 'primary federal contracting' arm."
+      },
+      {
+        "claim_id": "C13",
+        "claim_text": "[NEW v2] D-Wave annealing systems used at ORNL, LANL, Juelich Supercomputing Centre, USC ISI, NASA QuAIL, USRA - multi-DOE-lab footprint anchoring federal-relevance narrative; Science paper benchmarks Advantage2 vs ORNL Frontier supercomputer.",
+        "severity": "SEVERE_UNDERDELIVERY",
+        "supports": [
+          "doe_budget.query_program_funding",
+          "usaspending.query_federal_presence"
+        ],
+        "M_check": "doe_budget.query_program_funding(contractor='D-Wave'/'Oak Ridge'/'Los Alamos') + doe_budget(program='Oak Ridge Leadership Computing Facility') + doe_budget(program='Advanced Computing Technologies') + usaspending.query_federal_presence(D-Wave Systems/Government)",
+        "M_value": {
+          "doe_budget_dwave_contractor": {
+            "signal": "NOT_FOUND",
+            "n_matches": 0,
+            "note": "D-Wave appears in zero DOE Office of Science programs in the FY 2026 CBR corpus as a primary contractor."
+          },
+          "doe_budget_oak_ridge_contractor": {
+            "signal": "NOT_FOUND",
+            "n_matches": 0,
+            "note": "Corpus does not index ORNL as a primary contractor in this query path - corpus contractor fields are sparse for nat-lab-prime work."
+          },
+          "doe_budget_los_alamos_contractor": {
+            "signal": "NOT_FOUND",
+            "n_matches": 0
+          },
+          "doe_budget_oak_ridge_lcf_program": {
+            "signal": "FUNDED_STEADY (growing)",
+            "n_matches": 1,
+            "funding_history": {
+              "FY2024_M": 255.0,
+              "FY2025_M": 260.0,
+              "FY2026_M": 267.343
+            },
+            "note": "ORNL Leadership Computing Facility is FUNDED_GROWING - the host of Frontier supercomputer that the 10-K benchmarks against; ORNL has $267M FY2026 to spend, but D-Wave receives none of it."
+          },
+          "doe_budget_ascr_advanced_computing": {
+            "signal": "FUNDED_GROWING",
+            "n_matches": 1,
+            "funding_history": {
+              "FY2025_M": 105.118,
+              "FY2026_M": 112.618
+            },
+            "qis_relevant": true,
+            "note": "ASCR Advanced Computing Technologies (the home line for DOE quantum-computing R&D) is GROWING - so the headroom exists at DOE for quantum-vendor adoption, but D-Wave is not in the named contractor list."
+          },
+          "usaspending_dwave_v2": {
+            "n_contracts": 0,
+            "n_grants": 0,
+            "signal": "INFLATION_SUSPECT",
+            "note": "$0 in federal grants - meaning no DOE Office of Science research grant has been awarded directly to D-Wave Government Inc. in the entire 2018-2026 window. National-lab 'use' described in 10-K is therefore best-read as the lab buying time on D-Wave's commercial Leap cloud (not D-Wave receiving DOE grant dollars), or legacy decade-old research access."
+          }
+        },
+        "interpretation": "NEW v2 SEVERE_UNDERDELIVERY. The 10-K name-drops ORNL, LANL, NASA QuAIL, USC ISI, FZJ and USRA in a single 'institutions that have used our technology' sentence, immediately following a Lockheed Martin / Frontier supercomputer benchmark paragraph - framing for federal-research credibility. doe_budget cross-check: (a) the host program (Oak Ridge Leadership Computing Facility) is FUNDED_STEADY at $267M FY2026 and the umbrella DOE-quantum line (ASCR Advanced Computing Technologies) is FUNDED_GROWING $105M->$112M, so DOE *would* be a real funder if D-Wave were on contract; (b) doe_budget(contractor='D-Wave') returns NOT_FOUND - independent confirmation that D-Wave does not appear as a primary contractor on any DOE Office of Science program in the corpus; (c) usaspending shows $0 in grants AND $0 in contracts to D-Wave Government Inc. across 2018-2026. Reading: the national-lab name-drops are decade-old early-access references ('Since the Lockheed Martin engagement, our technology has been used...') and the Science-paper benchmark is a published comparison, not a paid engagement. None of this is current obligated revenue. SEVERE_UNDERDELIVERY because the claim is rhetorically load-bearing in Item 1 (Business) for the 'we are part of the U.S. federal quantum ecosystem' framing, but the DOE budget shows zero dollars flowing to D-Wave at the cutoff. The orthogonal-verification pattern is the canonical one: the company names DOE national labs they once enabled, while the live DOE budget shows the channel is open but not flowing to them."
+      }
+    ],
+    "moderate_claims": [
+      {
+        "claim_id": "C2",
+        "claim_text": "Davidson Technologies hosts the second U.S.-based D-Wave Advantage2 quantum computer in Huntsville, AL.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": [
+          "usaspending.query_federal_presence",
+          "pentagon_jbook.query_program_funding",
+          "doe_budget.query_program_funding"
+        ],
+        "M_check": "usaspending.query_federal_presence(Davidson Technologies) + pentagon_jbook.query_program_funding(contractor_name=D-Wave Government) + doe_budget.query_program_funding(contractor_name=D-Wave)",
+        "M_value": {
+          "davidson_federal_presence": {
+            "n_ueis_resolved": 1,
+            "n_contracts": 13,
+            "contracts_amount_M": 199.4,
+            "signal": "RECURRING_FEDERAL",
+            "top_award_M": 104.5,
+            "top_award_id": "FA861222CB005"
+          },
+          "pentagon_jbook_dwave_government": {
+            "signal": "NOT_FOUND",
+            "n_matches": 0
+          },
+          "pentagon_jbook_davidson": {
+            "signal": "NOT_FOUND",
+            "n_matches": 0
+          },
+          "doe_budget_dwave_v2": {
+            "signal": "NOT_FOUND",
+            "n_matches": 0
+          }
+        },
+        "interpretation": "v2 update: doe_budget.query_program_funding(contractor_name='D-Wave') also returns NOT_FOUND - independent confirmation that D-Wave does not appear as a primary contractor on any DOE Office of Science program in the FY 2026 CBR corpus (78 programs incl. 18 QIS-relevant). Davidson Technologies remains a real DoD prime ($199M lifetime, Air Force / MDA-adjacent) but its contracts are NOT quantum-computing PEs. Materiality unchanged: claim is about deployment, not revenue. MODERATE_UNDERDELIVERY held."
+      },
+      {
+        "claim_id": "C3",
+        "claim_text": "D-Wave worked with Davidson + Anduril on a missile-defense planning proof-of-concept (>=10x speedup, +45-60 missiles intercepted).",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": [
+          "pentagon_jbook.query_program_funding",
+          "usaspending.query_dod_contracts"
+        ],
+        "M_check": "pentagon_jbook.query_program_funding(program_name='missile defense') + usaspending.query_dod_contracts(D-Wave)",
+        "M_value": {
+          "jbook_missile_defense": {
+            "n_matches": 10,
+            "primary_matches_sample": [
+              "Ballistic Missile Defense Terminal Defense Segment (PE 0603881C)",
+              "Ballistic Missile Defense Midcourse Defense Segment (PE 0603882C)",
+              "Ballistic Missile Defense C2BMC (PE 0603896C)"
+            ],
+            "note": "Multiple MDA PEs are funded but NONE list D-Wave/Anduril/Davidson as primary contractors in the corpus."
+          },
+          "jbook_anduril": {
+            "signal": "NOT_FOUND"
+          },
+          "usaspending_dwave_dod": {
+            "n_awards": 0,
+            "total_amount": 0.0
+          }
+        },
+        "interpretation": "Unchanged from v1. MDA PEs (BMD Terminal/Midcourse/C2BMC) are real funded programs, but the J-Book corpus shows no D-Wave or Anduril as primary contractor on any of them. The 10-K language 'initial proof-of-concept' is explicit - this is unfunded R&D, not a program of record. There is zero booked revenue from missile defense. MODERATE because the company is honest about it being a 'PoC'."
+      }
+    ]
+  },
+  {
+    "ticker": "QUBT",
+    "cik": "0001758009",
+    "company": "Quantum Computing Inc.",
+    "status": "OK",
+    "n_claims": 11,
+    "n_scores": 11,
+    "n_jbook_hits": 4,
+    "severity_counts": {
+      "PASS": 2,
+      "MODERATE_UNDERDELIVERY": 2,
+      "SEVERE_UNDERDELIVERY": 4,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 3
+    },
+    "composite_score": 1.25,
+    "filing": "0001213900-26-022417_10-K.txt",
+    "red_flag_claims": [],
+    "severe_claims": [
+      {
+        "claim_id": "c1",
+        "claim_text": "QCi's anticipated future revenues from the U.S. government are expected to result from contracts awarded under various U.S. government programs.",
+        "severity": "SEVERE_UNDERDELIVERY",
+        "v2_revised": true,
+        "supports": [
+          "USAspending: Quantum Computing Inc. as a federal recipient \u2192 only 2 awards totaling $95,663 ($69,500 Commerce + $26,163 NASA SBIR). Zero DoD.",
+          "Pentagon J-Book (contractor_name=Quantum Computing/QCi/QPhoton) \u2192 NOT_FOUND for parent.",
+          "v2: DOE_budget (contractor_name=Quantum Computing Inc, QPhoton) \u2192 NOT_FOUND across all 78 DOE Office of Science programs including the 18 QIS-relevant lines. Independent corroboration: parent + QPhoton are not on any DOE program as a primary contractor.",
+          "Statement is forward-only and narrative-load-bearing for the entire 'multiple commercial and government customers' equity story at a multi-billion market cap."
+        ],
+        "M_check": "pentagon_jbook.query_program_funding + usaspending + doe_budget.query_program_funding",
+        "M_value": "pentagon_jbook NOT_FOUND / doe_budget NOT_FOUND / $0 DoD / $95K total federal contracts",
+        "interpretation": "Two independent federal forward-funding corpora (Pentagon J-Book + DOE Office of Science) both fail to identify QUBT/QPhoton as a contractor anywhere. Combined with $95K lifetime federal contract revenue at the parent, the 'anticipated future revenue from U.S. government programs' narrative is unsupported on both forward (budget-justification books) and backward (USAspending) axes. v1 SEVERE rating reaffirmed and HARDENED \u2014 v2 doe_budget independent corroboration removes the 'maybe the J-Book corpus just doesn't cover their lines' counterargument: the parent isn't on DOE-side QIS lines either."
+      },
+      {
+        "claim_id": "c4",
+        "claim_text": "QCi's quantum secured communication systems and the NuCrypt acquisition broaden QCi's quantum secured network product line for commercial and government customers.",
+        "severity": "SEVERE_UNDERDELIVERY",
+        "v2_revised": true,
+        "supports": [
+          "Pentagon J-Book (program_name='AFRL Quantum Networking') \u2192 UNFUNDED_TWO_PLUS_YEARS (FY25=$0, FY26=$0). Primary contractor is IonQ Inc. Funding history $13M(FY22) / $26M(FY23) / $12M(FY24) / $0(FY25) / $0(FY26).",
+          "earmark_detector('AFRL Quantum Networking') \u2192 EARMARK_SUNSET. Sponsors (Cardin-MD, Van Hollen-MD, Hoyer-MD, Tester-MT) lost majority/power; FY26 bipartisan budget signed Jan 20, 2026 did not renew.",
+          "Pentagon J-Book (contractor='NuCrypt') \u2192 NOT_FOUND.",
+          "v2: DOE_budget (program='Quantum Information Science') \u2192 FUNDED_STEADY at multiple lines (BES QIS Research $2,241M FY26; ASCR Advanced Computing Technologies $112M FY26 FUNDED_STEADY; HEP QIS $50.566M FY25 only).",
+          "v2: DOE_budget (program='SQMS') \u2192 FUNDED_STEADY ($50.566M, HEP). DOE_budget ('Q-NEXT','C2QA','National Quantum Initiative','NQISRC') \u2192 NOT_FOUND (corpus doesn't index NQI Centers by acronym, though SQMS resolves via synonym).",
+          "v2: DOE_budget (contractor='NuCrypt') \u2192 NOT_FOUND. NuCrypt is not on ANY DOE QIS line as a primary contractor either."
+        ],
+        "M_check": "pentagon_jbook + earmark_detector + doe_budget (program and contractor searches)",
+        "M_value": "DoD-side: UNFUNDED_TWO_PLUS_YEARS + EARMARK_SUNSET on AFRL Quantum Networking. DOE-side: QIS lines FUNDED but NuCrypt NOT a contractor on any.",
+        "interpretation": "v2 strengthens c4 by adding the DOE-side picture: the federal quantum-networking-research funding lines DO exist (DOE BES/ASCR QIS, HEP QIS) and they are funded \u2014 but QUBT/NuCrypt are not primary contractors on any of them. So the 'broaden quantum secured network product line for government customers' narrative falls in the gap: the DoD-side proxy program (AFRL Quantum Networking) is unfunded post earmark-sunset, AND the DOE-side QIS lines that ARE funded don't list NuCrypt or QUBT as contractors. The v2 doe_budget retry removes the v1 caveat 'maybe DOE-side picks up where DoD-side dropped' \u2014 it doesn't, for this contractor family. SEVERE_UNDERDELIVERY confirmed."
+      },
+      {
+        "claim_id": "c9",
+        "claim_text": "QCi FY2025 revenue was $682K (up 83% from $373K in FY2024), primarily derived from professional-services contracts provided to multiple commercial and government customers.",
+        "severity": "SEVERE_UNDERDELIVERY",
+        "v2_revised": true,
+        "supports": [
+          "USAspending: Quantum Computing Inc. as recipient \u2192 2 federal awards through 2026-05-20 \u2014 Commerce $69,500 + NASA $26,163. Zero DoD.",
+          "v2: DOE_budget (contractor=Quantum Computing Inc, QPhoton) \u2192 NOT_FOUND. The 'government customers' framing does not extend to DOE Office of Science either.",
+          "$95K federal total versus $682K reported revenue implies ~14% of total revenue is federal IF every dollar landed in FY25; the remaining 86% is commercial/non-federal, contradicting the 'multiple commercial and government customers' implication of substantive government revenue."
+        ],
+        "M_check": "usaspending + doe_budget",
+        "M_value": "$95K total federal contracts; 0 DoD; 0 DOE programs as contractor",
+        "interpretation": "Mode-B customer-concentration misrepresentation. Heuristic #6 (USAspending shows zero DoD obligations against claimed program forward narrative \u2192 SEVERE_UNDERDELIVERY). v2 DOE retry independently confirms zero DOE-side contractor presence; the 'government customers' label is sustained by sub-$70K Commerce + NASA SBIRs only. SEVERE retained."
+      },
+      {
+        "claim_id": "c11",
+        "claim_text": "QCi's vision is to 'lead the revolution in photonics and quantum information technology with scalable, accessible, and affordable solutions to bring quantum technology into reality' \u2014 an implied positioning against the federally funded Quantum Information Science (QIS) research portfolio.",
+        "severity": "SEVERE_UNDERDELIVERY",
+        "v2_new": true,
+        "supports": [
+          "DOE_budget (program='Quantum Information Science') \u2192 3 matches: ASCR Advanced Computing Technologies (FUNDED_STEADY $105M\u2192$112M), BES Quantum Information Science Research (FY26 $2,241M, marked FUNDED_STEADY though only one FY in corpus), HEP Quantum Information Science (FY25 $50.566M, FY26 missing \u2014 could be UNFUNDED_THIS_YEAR or coverage gap).",
+          "DOE_budget (parent_office='ASCR', qis_only=True) \u2192 4 QIS-relevant programs; Mathematical/Computational Sciences Research FUNDED_SHRINKING ($310M\u2192$271M), Computer Science Research FUNDED_SHRINKING ($77M\u2192$62M).",
+          "DOE_budget (parent_office='BES', qis_only=True) \u2192 BES QIS Research $2,241M FY26.",
+          "DOE_budget (parent_office='HEP', qis_only=True) \u2192 Theory FUNDED_SHRINKING ($42M\u2192$23M), QIS only FY25.",
+          "DOE_budget (contractor=Quantum Computing Inc, QPhoton, NuCrypt, Freedom Photonics) \u2192 NOT_FOUND across all 4 entity queries.",
+          "The DOE QIS funded portfolio exists at >$2.3B aggregate FY26 spend but QUBT's corporate family appears nowhere as a primary contractor."
+        ],
+        "M_check": "doe_budget.query_program_funding (program + parent_office + contractor)",
+        "M_value": "DOE QIS portfolio FUNDED; QUBT/QPhoton/NuCrypt/Freedom Photonics NOT_FOUND as contractors anywhere; two ASCR/HEP QIS-relevant lines FUNDED_SHRINKING",
+        "interpretation": "This is the explicit v2 test of the QUBT vision statement against the new DOE M-source. The hypothesis tested: 'QUBT positions to lead the quantum information technology revolution \u2192 there should be at least one DOE Office of Science line that lists a QUBT entity as a primary contractor or major awardee.' Result: ZERO matches across parent + 3 acquired sub names. The DOE QIS funding lines DO exist (BES QIS Research $2.241B, ASCR Advanced Computing Technologies $112M growing), so the 'no DOE QIS funding' counterfactual is rejected \u2014 DOE QIS is funded, QUBT is just not in it. Per heuristic #2 (forward-narrative-load-bearing claim with no booked program-of-record) and heuristic #6-analog (DOE budget shows zero obligations under claimed positioning), SEVERE_UNDERDELIVERY. Mode-B finding hardened by addendum M-source."
+      }
+    ],
+    "moderate_claims": [
+      {
+        "claim_id": "c2",
+        "claim_text": "QCi serves customers in aerospace and defense applications, in particular through LSI (Luminar Semiconductor) acquired February 2026.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "v2_revised": true,
+        "supports": [
+          "USAspending: Luminar Semiconductor, Inc. \u2192 0 DoD awards.",
+          "USAspending: Freedom Photonics LLC (an LSI subsidiary) \u2192 25 DoD awards, $25.8M historic obligations; predominantly SBIR/STTR Phase I/II.",
+          "Pentagon J-Book: NOT_FOUND for Luminar Semiconductor or Freedom Photonics as primary contractor on any current PE.",
+          "v2: DOE_budget (contractor_name=Luminar Semiconductor, Freedom Photonics) \u2192 NOT_FOUND on all 78 DOE programs. The acquired subs are not on DOE-side lines either."
+        ],
+        "M_check": "pentagon_jbook + usaspending + doe_budget",
+        "M_value": "LSI: 0 DoD / FP: 25 DoD $25.8M historic / J-Book NOT_FOUND / DOE NOT_FOUND",
+        "interpretation": "v2 doe_budget cross-check adds no new positive signal \u2014 Freedom Photonics is also not on DOE QIS lines. Defense exposure remains REAL but composed of small historic SBIRs at the sub level, with no forward program-of-record on either DoD or DOE side. Same MODERATE rating: historic SBIR floor exists but forward funded-line absent on both budget books."
+      },
+      {
+        "claim_id": "c7",
+        "claim_text": "Freedom Photonics, LLC (an LSI subsidiary) jointly owns and developed patents with Northrop Grumman Systems Corporation.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "v2_revised": false,
+        "supports": [
+          "uspto_odp.query_assignee('Freedom Photonics', cutoff 2026-05-20) \u2192 60 applications, 22 granted patents \u2014 confirms Freedom Photonics is a real patent-issuing assignee.",
+          "edgar_fts.query_fulltext('Freedom Photonics', cik=0001133421 Northrop Grumman) \u2192 0 hits across NOC's 10-K/10-Q/8-K/DEF14A filings to cutoff. Counterparty does NOT disclose the relationship.",
+          "Northrop Grumman would have to disclose only material partnerships; a single jointly-held patent is unlikely to meet NOC's materiality threshold."
+        ],
+        "M_check": "uspto_odp.query_assignee + edgar_fts.query_fulltext",
+        "M_value": "FP confirmed as 22-granted-patent assignee; NOC 10-K does not mention Freedom Photonics anywhere (0 hits)",
+        "interpretation": "v1 MODERATE retained \u2014 claim is technically true but partnership-narrative load is asymmetric. Useful Mode-B finding (per entity-resolution-before-verifier-dispatch heuristic: verifier is NOC's CIK, not QUBT's)."
+      }
+    ]
+  },
+  {
+    "ticker": "AIRO",
+    "cik": "0001927958",
+    "company": "AIRO Group Holdings, Inc.",
+    "status": "OK",
+    "n_claims": 8,
+    "n_scores": 8,
+    "n_jbook_hits": 5,
+    "severity_counts": {
+      "PASS": 1,
+      "MODERATE_UNDERDELIVERY": 4,
+      "SEVERE_UNDERDELIVERY": 2,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 1
+    },
+    "composite_score": 1.1428571428571428,
+    "filing": "0001493152-26-014116_10-K.txt",
+    "red_flag_claims": [],
+    "severe_claims": [
+      {
+        "claim_id": "C3",
+        "claim_text": "AIRO is pursuing DoD Blue UAS certification (target June 2026) to enable U.S. DoD sales of Sky-Watch / RQ-35 Heidrun small drones; certification expected to open access to U.S. small-UAS programs.",
+        "severity": "SEVERE_UNDERDELIVERY",
+        "supports": [
+          "pentagon_jbook(PE 0208201F Offensive small Unmanned Aircraft Systems) = FUNDED_STEADY but tiny \u2014 only $4.985M FY26 (0 in FY24 and FY25), USAF-only line",
+          "pentagon_jbook(PE 1160434BB SOCOM Unmanned ISR) = FUNDED_SHRINKING \u2014 collapsed from $31.6M FY25 to $2.3M FY26 (a 93% cut)",
+          "pentagon_jbook(program_name='Short Range Reconnaissance') = NOT_FOUND in corpus (Army SRR PoR \u2014 coverage gap; cannot verify)",
+          "usaspending(Sky-Watch) = 0 DoD awards through cutoff; usaspending(AIRO Drone) = 0 DoD awards; usaspending(AIRO Group) = 0 DoD awards"
+        ],
+        "M_check": "pentagon_jbook + usaspending",
+        "M_value": {
+          "0208201F_offensive_suas_status": "FUNDED_STEADY",
+          "0208201F_FY26_funded_M": 4.985,
+          "1160434BB_socom_unmanned_isr_status": "FUNDED_SHRINKING",
+          "1160434BB_yoy_change_pct": -92.8,
+          "sky_watch_dod_awards_count": 0,
+          "sky_watch_dod_obligated_USD": 0
+        },
+        "interpretation": "SEVERE_UNDERDELIVERY. Sky-Watch / RQ-35 Heidrun has ZERO DoD obligations in USAspending \u2014 the entire $70.5M+ FY25 Sky-Watch revenue (implied from 79% concentration on European NATO customers, foreign sovereigns) sits outside the U.S. budget. The 10-K narrative that Blue UAS certification will 'allow us to sell drones to the DoD' depends on a non-existent forward funding pool: PE 0208201F (Offensive sUAS) is real but only $5M of FY26 funding for the entire Air Force; SOCOM's Unmanned ISR PE just collapsed 93% YoY. The U.S. small-UAS Group-1/2 forward pipeline that AIRO is chasing (Heidrun competes with Skydio X10D, Teal Black Widow, AeroVironment Switchblade) does not have meaningful J-Book funding \u2014 most of the U.S. sUAS spend has migrated into PEO Soldier procurement and SOCOM lines that are shrinking. The Blue UAS certification milestone itself is a regulatory tick, not a revenue event; revenue requires program funding which the J-Book shows is thin to evaporating."
+      },
+      {
+        "claim_id": "C4",
+        "claim_text": "AIRO's military drones target the 'arsenals of the future' \u2014 U.S. military pivot to smaller/agile force using endurance UAVs.",
+        "severity": "SEVERE_UNDERDELIVERY",
+        "supports": [
+          "pentagon_jbook(PE 0305205F Endurance Unmanned Aerial Vehicles) = UNFUNDED_TWO_PLUS_YEARS \u2014 funded $30M in FY24, $0 in FY25 and $0 in FY26",
+          "pentagon_jbook(PE 1105219BB MQ-9 Unmanned Aerial Vehicle) = UNFUNDED_THIS_YEAR \u2014 $34.9M FY25 -> $0 FY26"
+        ],
+        "M_check": "pentagon_jbook",
+        "M_value": {
+          "0305205F_endurance_uav_status": "UNFUNDED_TWO_PLUS_YEARS",
+          "0305205F_n_consecutive_unfunded": 2,
+          "1105219BB_mq9_status": "UNFUNDED_THIS_YEAR"
+        },
+        "interpretation": "SEVERE_UNDERDELIVERY (on the rhetorical framing, not on AIRO's specific products). The 10-K's 'arsenals of the future' narrative implicitly maps Sky-Watch into the U.S. military's small/medium-altitude endurance UAV pool. The Air Force's Endurance UAV PE has been zeroed for two consecutive years and SOCOM's MQ-9 R&D line went to zero in FY26 \u2014 the very budget category AIRO is trying to position into has been actively defunded by the Pentagon. Caveat: Heidrun is a small Group-1 ISR drone, not an endurance MALE-class platform, so the actual product/PE mismatch (Endurance UAV PE was about MQ-1C/MQ-9-class systems) softens the call somewhat. But the broader narrative of riding a U.S. unmanned-systems tailwind into DoD revenue ignores that the Pentagon's FY26 J-Book moves AWAY from those PEs."
+      }
+    ],
+    "moderate_claims": [
+      {
+        "claim_id": "C1",
+        "claim_text": "AIRO's CDI / Coastal Defense is 'mandated recipient on a $5.7 billion IDIQ contract and a $1.9 million IDIQ contract' for adversary air / CAS / ISR / JTAC training with SEAL teams, Naval Air Warfare Center, and USAF Air Combat Command.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": [
+          "pentagon_jbook(PE 0604735F Combat Training Ranges) = FUNDED_STEADY, $139.5M FY26 (down from $160.8M FY25)",
+          "pentagon_jbook(PE 0207701F Full Combat Mission Training) = FUNDED_GROWING, $12.9M FY26",
+          "pentagon_jbook(PE 0207697F Distributed Training and Exercises) = FUNDED_STEADY, $4.4M FY26",
+          "usaspending(Coastal Defense Inc) = 277 awards, $18.3M total obligated since 2022; top awards are ~$1-4M JTAC AIR SERVICES / ISR SUPPORT SERVICES Q1-Q4 task orders against the IDIQ"
+        ],
+        "M_check": "pentagon_jbook + usaspending",
+        "M_value": {
+          "0604735F_combat_training_ranges_status": "FUNDED_STEADY",
+          "0207701F_full_combat_mission_training_status": "FUNDED_GROWING",
+          "0207697F_distributed_training_status": "FUNDED_STEADY",
+          "coastal_defense_total_obligated_2022_2026_USD": 18261549,
+          "coastal_defense_n_awards": 277
+        },
+        "interpretation": "MODERATE_UNDERDELIVERY rather than PASS. (a) The relevant J-Book training PEs are not unfunded \u2014 they're FUNDED_STEADY/GROWING, so the underlying training spend pool exists. (b) However, the $5.7B figure is an IDIQ CEILING (likely an Air Force contracted close-air-support / ISR training multi-vendor pool), and the actual obligations to Coastal Defense over 4 years are only $18.3M (about 0.3% of the ceiling). The 10-K language 'mandated recipient on a $5.7 billion IDIQ' is technically true but materially misleading \u2014 describing a multi-award task-order pool as if it were AIRO's contract creates the impression of $5.7B of forward backlog. The $1.9 MILLION (not billion) figure quoted alongside is consistent with the actual run-rate. Materiality is limited because Training is not where the 79% customer concentration lives, but the framing is the kind of 'IDIQ ceiling = backlog' inflation the framework should catch."
+      },
+      {
+        "claim_id": "C2",
+        "claim_text": "Training segment expects forward growth from U.S. Air Force pilot training pipeline (advanced / undergraduate pilot training).",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": [
+          "pentagon_jbook(PE 0605223F Advanced Pilot Training) = FUNDED_SHRINKING ($248.6M FY25 -> $172.4M FY26, -31% YoY)",
+          "pentagon_jbook(PE 0604233F Specialized Undergraduate Flight Training) = FUNDED_GROWING ($30M FY25 -> $66.2M FY26)",
+          "pentagon_jbook(PE 0801380F AF LVC Operational Training) = FUNDED_GROWING ($27.5M FY25 -> $33.9M FY26)"
+        ],
+        "M_check": "pentagon_jbook",
+        "M_value": {
+          "0605223F_advanced_pilot_training_status": "FUNDED_SHRINKING",
+          "0605223F_yoy_change_pct": -30.7,
+          "0604233F_undergraduate_status": "FUNDED_GROWING",
+          "0801380F_lvc_status": "FUNDED_GROWING"
+        },
+        "interpretation": "MODERATE \u2014 the largest pilot-training PE (Advanced Pilot Training, T-7A Red Hawk-adjacent) is shrinking 31% YoY, which is a headwind for contracted training providers riding USAF pilot-pipeline expansion. Two adjacent training PEs are growing, so the segment thesis isn't broken, but the rate of growth narrative in the 10-K ('We intend to expand our current training capabilities through the acquisition of a flight school...') implicitly assumes the USAF training pool is expanding. The Pentagon's FY26 J-Book signal is mixed-to-shrinking, not the unambiguous tailwind AIRO depicts. Downgrade-friendly because Training is a smaller segment than Drones."
+      },
+      {
+        "claim_id": "C5",
+        "claim_text": "Two customers = 79% of FY2025 consolidated revenue, all Drone segment (Sky-Watch sales to Netherlands / Denmark / Germany sovereign defense procurements).",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": [
+          "usaspending(Sky-Watch) = 0 DoD awards (confirms revenue is non-US)",
+          "usaspending(AIRO Group) = 0 DoD awards",
+          "pentagon_jbook(contractor_name='Sky-Watch') = NOT_FOUND (confirms zero current U.S. DoD program affiliation)"
+        ],
+        "M_check": "usaspending + pentagon_jbook (orthogonal)",
+        "M_value": {
+          "us_dod_concentration_implied_pct": 0,
+          "foreign_sovereign_concentration_pct": 79,
+          "ftc_concentration_two_customers": true
+        },
+        "interpretation": "MODERATE \u2014 concentration risk is real but the J-Book pattern doesn't apply directly because the revenue isn't U.S.-Pentagon-sourced; the two-customer 79% concentration sits with European NATO MoDs (Royal Danish, Bundeswehr, Royal Netherlands). The risk is that 2025 NATO drone surge \u2014 driven by post-Ukraine sovereign-buy programs \u2014 is potentially front-loaded and not recurring. The framework's J-Book primary verifier doesn't flag this directly (pentagon_jbook can't see foreign budgets), but the inverse implication is strong: AIRO's only proven revenue line is OUTSIDE the U.S. funding base that the 10-K narrative leans on for forward growth. Customer-concentration disclosure standard ASC 280 / Item 101 risk: loss of either of the two unnamed customers would impair >35% of consolidated revenue."
+      },
+      {
+        "claim_id": "C6",
+        "claim_text": "AIRO is a rollup of CDI training + Sky-Watch drones + Aspen Avionics + Agile Defense + Jaunt eVTOL + AIRO Drone; recent IPO; $210.6M accumulated deficit.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": [
+          "acq_coherence(parent_thesis=integrated aerospace+defense platform): mean_coherence=0.725, signal=MIXED_COHERENCE",
+          "Per-target: CDI=0.75 / Sky-Watch=0.85 / Aspen=0.75 / Agile Defense=0.25 (low) / Jaunt=0.85 / AIRO Drone=0.9",
+          "Agile Defense flagged as is_revenue_synthetic=True (IT/cyber service orthogonal to aerospace hardware thesis)"
+        ],
+        "M_check": "acq_coherence.score_acquisition_coherence",
+        "M_value": {
+          "mean_coherence": 0.725,
+          "signal": "MIXED_COHERENCE",
+          "n_low_coherence": 1,
+          "n_revenue_synthetic": 1
+        },
+        "interpretation": "MODERATE \u2014 coherence is MIXED, not INCOHERENT. The aerospace verticals (drones / avionics / training / eVTOL) share customer overlap and a defensible 'aerospace and defense platform' label. However, this scorer assesses *strategic* fit, not financial integration: the 10-K shows essentially zero revenue synergy yet (Drone segment = 79% of revenue alone with two customers; Training, Avionics, and eVTOL contribute the residual 21% combined; eVTOL is pre-revenue with 2027/2031 cert timelines). The rollup thesis substitutes acquired narrative breadth for organic earnings \u2014 accumulated deficit of $210.6M against tiny revenue base is consistent with a pre-traction conglomerate. SPAC-rollup risk factor stands but does not rise to RED."
+      }
+    ]
+  },
+  {
+    "ticker": "RDW",
+    "cik": "0001819810",
+    "company": "Redwire Corporation",
+    "status": "OK",
+    "n_claims": 12,
+    "n_scores": 12,
+    "n_jbook_hits": 7,
+    "severity_counts": {
+      "PASS": 3,
+      "MODERATE_UNDERDELIVERY": 4,
+      "SEVERE_UNDERDELIVERY": 2,
+      "RED_FLAG_NEGATIVE": 1,
+      "UNVERIFIABLE": 2
+    },
+    "composite_score": 1.1,
+    "filing": "0001819810-26-000029_10-K.txt",
+    "red_flag_claims": [
+      {
+        "claim_id": "C12",
+        "claim_text": "Material weaknesses in ICFR + adverse KPMG opinion as of Dec 31, 2025 \u2014 control-environment disclosure.",
+        "severity": "RED_FLAG_NEGATIVE",
+        "supports": "contradicted",
+        "M_check": "insider_vs_calendar.query_insider_sales_near_budget_events(cik='0001819810') + edgar_fts.query_fulltext('Redwire')",
+        "M_value": "insider_vs_calendar: signal=PROXIMATE_DISCRETIONARY; n_form4_filings=57; n_proximate_sales=21 (ALL discretionary, ZERO via 10b5-1); proximate_value_usd=$858.7M sold by 2 unique owners (AE Red Holdings, Bain Capital Credit). Three matched budget-event clusters: (a) 2025-09-30 fiscal-year-end \u2014 Bain Capital sold $86.1M 13 days prior; (b) 2026-01-20 bipartisan budget signed (SDA Transport Layer T3 unfunded confirmed in committee print) \u2014 AE Red sold $438.6M across 13 transactions clustered \u00b16-8 days; (c) 2026-04-28 FY27 J-Book release confirming Tranche 3 Transport Layer second-year unfunded + SDA dissolution \u2014 AE Red sold $334.0M across 7 transactions, including a $231.8M block 6 days BEFORE the J-Book release. edgar_fts confirms 353 EDGAR filings mentioning Redwire under their own CIK.",
+        "interpretation": "This is the textbook YSS/IONQ signature applied to RDW. Per heuristic 6 cross-check + insider-vs-calendar primary signal: $858M of proximate discretionary insider sales clustered around exactly the two budget events that confirmed SDA Transport Layer T3 going unfunded (claim C2's primary verifier). The largest single block ($231.8M, AE Red Holdings) sold 6 days BEFORE the FY27 J-Book confirmation. Combined with the company's own admission of material weakness + KPMG adverse opinion on ICFR + 2025 settlement of the Lemen Securities-Class-Action over prior misleading disclosures, the disclosure-quality picture is severely compromised. RED_FLAG_NEGATIVE."
+      }
+    ],
+    "severe_claims": [
+      {
+        "claim_id": "C2",
+        "claim_text": "Redwire claims it is 'delivering multiple advanced RF payloads for a constellation of satellites for a national security satellite constellation in LEO' \u2014 unnamed but the only plausible LEO national-security-satellite-constellation customers in FY25 are SDA's Proliferated Warfighter Space Architecture (Transport Layer T0-T2, Transport Layer T3, Tracking Layer T3).",
+        "severity": "SEVERE_UNDERDELIVERY",
+        "supports": "contradicted",
+        "M_check": "pentagon_jbook.query_program_funding(pe='1206410SF') + (program_name='Transport Layer') + (program_name='Tracking Layer')",
+        "M_value": "PE 1206410SF returns 3 candidate PWSA programs: (a) Tranche 3 Transport Layer status=UNFUNDED_TWO_PLUS_YEARS (FY25 $0, FY26 $0; primes named are York Space Systems, Lockheed Martin, Northrop Grumman \u2014 NOT Redwire; replacement_program='Space Data Network (SDN) Backbone'; replacement_sole_source='SpaceX (Starshield)'); (b) SDA Transport Layer T0-T2 status=FUNDED_SHRINKING; (c) Tranche 3 Tracking Layer (PWSA) status=FUNDED_STEADY ($3.5B Dec 2025 across Lockheed, NG, L3Harris, Rocket Lab \u2014 RDW also NOT a named prime).",
+        "interpretation": "MAJOR J-BOOK DIVERGENCE. The forward growth narrative for Redwire's Space segment (which carries $299.8M of the $411.2M backlog) leans on an unnamed 'national security LEO constellation' that is almost certainly PWSA. Per FY26/FY27 J-Books: Tranche 3 Transport Layer is unfunded for the second straight year, SDA is being dissolved as a standalone agency, and the replacement (Space Data Network) is sole-sourced to SpaceX/Starshield \u2014 closed to Redwire. Tranche 3 Tracking Layer is funded but Redwire is NOT a named prime contractor on it. SDA Transport T0-T2 is FUNDED_SHRINKING. RDW is at best a sub on legacy T0-T2 production. This is SEVERE_UNDERDELIVERY by J-Book calibration heuristic 1 (UNFUNDED_THIS_YEAR/TWO_PLUS_YEARS \u2192 SEVERE/RED), tempered by the materiality test (rule 2) \u2014 RDW says 'multiple advanced RF payloads' (forward, sub-tier) rather than naming it as % revenue, so SEVERE rather than RED. The replacement_program field (rule 3) does NOT rescue Redwire because the replacement is sole-sourced to SpaceX."
+      },
+      {
+        "claim_id": "C4",
+        "claim_text": "Stalker UAS received DIU Authority to Operate / Blue UAS List status on July 14, 2025; positioned as DoD program-of-record growth lever.",
+        "severity": "SEVERE_UNDERDELIVERY",
+        "supports": "contradicted",
+        "M_check": "pentagon_jbook.query_program_funding(program_name='Stalker'/'Blue UAS'/'Group 2 UAS') + usaspending.query_dod_contracts(recipient_name='Edge Autonomy')",
+        "M_value": "pentagon_jbook: NOT_FOUND on Stalker, Blue UAS, Group 2 UAS (corpus coverage gap). usaspending DoD awards to 'Edge Autonomy' (across all subsidiaries): n_awards=1, total=$1.48M \u2014 single FY25 Stalker FMS sale to Guyana Defence Force via Navy. ZERO direct U.S. DoD obligations to Edge Autonomy under any major DoD program of record.",
+        "interpretation": "USAspending cross-check (heuristic 6) reveals the canonical pattern: company narrative paints Stalker as a DoD program-of-record growth lever via Blue UAS listing, but post-listing federal obligations to Edge Autonomy LLC are essentially zero ($1.48M FMS to a third-country). RDW disclosed (Note: Edge Autonomy contributed $107M FY25 revenue, but mostly from foreign-military / Ukraine / commercial channels \u2014 not direct US DoD). Even allowing pentagon_jbook NOT_FOUND as a coverage gap, the usaspending verifier shows the forward 'streamlined DoD deployment via Blue UAS' claim is not converting to actual US DoD obligations. SEVERE_UNDERDELIVERY on the implied forward-revenue pipeline (heuristic 6: 'pentagon_jbook says UNFUNDED_* AND usaspending shows ZERO obligations under the claimed program \u2192 the original claim itself was inflated \u2192 RED_FLAG_NEGATIVE'). Downgraded to SEVERE rather than RED because the claim is forward-looking pipeline not booked revenue."
+      }
+    ],
+    "moderate_claims": [
+      {
+        "claim_id": "C3",
+        "claim_text": "Redwire claims its Space segment supports U.S. Space Force's GPS Satellite program (flight heritage).",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": "partial",
+        "M_check": "pentagon_jbook.query_program_funding(program_name='GPS III')",
+        "M_value": "Match: GPS III Follow-On (PE 1203269SF) \u2014 status=FUNDED_SHRINKING; FY24 $237.97M \u2192 FY25 $240.25M \u2192 FY26 $179.25M (-25% YoY in FY26). 'GPS Satellite' and 'GPS IIIF' specific synonyms NOT_FOUND.",
+        "interpretation": "Pentagon J-Book shows GPS III Follow-On is shrinking ~25% in FY26. Per heuristic 1, FUNDED_SHRINKING \u2192 MODERATE_UNDERDELIVERY. Per heuristic 2 (materiality), Redwire references GPS only as 'flight heritage' (past supplier), not as a forward-growth program \u2014 the materiality is therefore limited. Net: MODERATE_UNDERDELIVERY for a flight-heritage citation against a shrinking PE."
+      },
+      {
+        "claim_id": "C6",
+        "claim_text": "46.9% of FY2025 revenue (~$157M) from national-security customers (Army, USMC, USAF, USSF, DARPA, NRO + allied agencies).",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": "partial",
+        "M_check": "usaspending.query_dod_contracts(recipient_name='Redwire'/'Redwire Space') + pentagon_jbook(contractor_name='Redwire'/'Edge Autonomy')",
+        "M_value": "usaspending 'Redwire' search returned 26 DoD awards totaling $85.2M lifetime \u2014 but the top awards are to LOADPATH LLC (a Roccor predecessor, $19.9M + $15.4M + $10.9M + $3.4M + $2.1M + $1.0M = ~$52.7M), with Redwire Space Solutions LLC contributing $38.1M and Redwire Space Missions LLC ~$5.8M (AFRL satellite modeling). Total Redwire-family lifetime DoD direct obligations \u2248 $85M. Pentagon J-Book lists ZERO programs naming Redwire or Edge Autonomy as a primary contractor (n_matches=0 in both lookups).",
+        "interpretation": "Two problems: (1) The lifetime direct DoD obligation footprint ($85M total since 2010-ish) is small vs. the claimed FY25 national-security revenue of ~$157M alone. The gap must be filled by (a) subcontracts through primes (Lockheed/NG \u2014 not visible in usaspending) and (b) allied-agency (foreign-MoD) revenue. The 10-K aggregates 'U.S. + allied' national-security customers, so 'allied' carries a big share. (2) Pentagon J-Book having NO Redwire-named-prime PE means RDW has no forward visibility as a J-Book line item \u2014 they are entirely a sub-tier supplier whose forward revenue depends on primes' allocations. This is a structural fragility, not a contradiction of the disclosure. MODERATE_UNDERDELIVERY: claim is not false but the forward durability is weaker than narrative implies."
+      },
+      {
+        "claim_id": "C7",
+        "claim_text": "$411.2M total contracted backlog ($299.8M Space + $111.4M Defense Tech) characterized as 'firm funded executed contracts'.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": "partial",
+        "M_check": "usaspending.query_dod_contracts(recipient_name='Loadpath'/'Made In Space')",
+        "M_value": "Loadpath LLC (Roccor predecessor) shows $53.5M lifetime DoD awards (8 awards, biggest $19.9M ASSIST + $15.4M ALACRITY + $10.9M space structures). 'Made In Space' usaspending returned data not loaded here. Note that the 10-K explicitly states 'many of these contracts are cancellable by customers for convenience' (10-K risk factor). The 'firm funded' label sits alongside a cancellation-for-convenience disclosure.",
+        "interpretation": "Backlog itself is plausibly real (subsidiary-level award trails support it), but two qualifiers downgrade quality: (a) the cancellability disclosure undercuts the 'firm funded' framing; (b) the FY25 net unfavorable EAC adjustments totaled -$54.5M (Defense Tech: $12.9M loss reserve + Space Europe $14.1M unfavorable + others) \u2014 backlog\u2192revenue conversion is impaired. Per the J-Book pattern (cross-checked with claim C12 insider sales), the forward visibility implied by 'firm funded' is materially softer than headline. MODERATE_UNDERDELIVERY."
+      },
+      {
+        "claim_id": "C11",
+        "claim_text": "Edge Autonomy acquisition (Jun 2025) \u2014 $1.025B consideration, $721M goodwill (70% of purchase), $34.7M goodwill+intangible impairment booked Q4 2025; concurrent ~$1B equity raise + Adams Street paydown + new JPM term loan. Eight-acquisition rollup (Hera, Made In Space, Adcole, Roccor, Deployable Space Systems, Oakman, Techshot, Edge Autonomy).",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": "partial",
+        "M_check": "acq_coherence.score_acquisition_coherence(parent_thesis='space and defense tech', 8 acquisitions, cutoff=2026-05-20)",
+        "M_value": "n_acquisitions_scored=8, mean coherence=0.80, signal=COHERENT_ROLLUP (NOT incoherent). Per-acquisition: Edge Autonomy 0.75, Hera 0.85, Made In Space 0.75, Adcole 0.85, Roccor 0.85, Deployable Space Systems 0.85, Oakman 0.75, Techshot 0.75. n_low_coherence=0; n_revenue_synthetic=0.",
+        "interpretation": "Acquisitions are individually thesis-coherent (rollup of space-tech adjacencies). However: (i) goodwill is 70% of purchase price for Edge Autonomy, (ii) $34.7M goodwill+intangible impairment was already booked Dec 2025 \u2014 six months after closing \u2014 which is an extremely fast write-down signal, (iii) the $107M Edge Autonomy revenue contribution at ~$1.025B purchase = ~9.6x sales for a UAS company. Even with COHERENT_ROLLUP, the magnitude and speed-to-impairment are red flags. The acquisition is coherent in 'theme' but stressed in 'price' \u2014 MODERATE_UNDERDELIVERY on capital-allocation discipline. Not the J-Book pattern; pairs with C12 below."
+      }
+    ]
+  },
+  {
+    "ticker": "RCAT",
+    "cik": "0000748268",
+    "company": "Red Cat Holdings, Inc.",
+    "status": "OK",
+    "n_claims": 10,
+    "n_scores": 10,
+    "n_jbook_hits": 4,
+    "severity_counts": {
+      "PASS": 2,
+      "MODERATE_UNDERDELIVERY": 2,
+      "SEVERE_UNDERDELIVERY": 0,
+      "RED_FLAG_NEGATIVE": 1,
+      "UNVERIFIABLE": 5
+    },
+    "composite_score": 1.0,
+    "filing": "0001628280-26-019861_10-K.txt",
+    "red_flag_claims": [
+      {
+        "claim_id": "C10",
+        "claim_text": "Material weakness in internal control over financial reporting persists for second straight year as of 12/31/2025.",
+        "severity": "RED_FLAG_NEGATIVE",
+        "supports": [
+          "10-K explicitly states disclosure controls 'were not effective' and material weaknesses 'existed in prior year'",
+          "Concurrent: 73% revenue concentration on a single program, 88% A/R concentration, recent KPMG auditor change (served as auditor since 2025), and Critical Audit Matter on 'Determination of performance obligations for certain revenue contracts'",
+          "insider_vs_calendar.query_insider_sales_near_budget_events: signal PROXIMATE_DISCRETIONARY \u2014 $1.05M of insider sales in 14-day window around fiscal-year-end (Sept 30, 2025), including a discretionary sale by CFO Christopher Moe one day before FY-end ($109K) and a $940K disposition by Hitchcock"
+        ],
+        "M_check": "sec_filings.list_filings_by_form + insider_vs_calendar",
+        "M_value": "Material weakness DISCLOSED (repeat); insider sales PROXIMATE_DISCRETIONARY around fiscal-year-end",
+        "interpretation": "This is not a J-Book claim but is the most concrete framework-actionable signal in the filing. Repeat material weakness + KPMG CAM on performance-obligation determination + 73% single-customer revenue concentration + discretionary insider selling around the period close is a stack of red flags. Score RED_FLAG_NEGATIVE for control quality, independent of the J-Book divergence pattern."
+      }
+    ],
+    "severe_claims": [],
+    "moderate_claims": [
+      {
+        "claim_id": "C3",
+        "claim_text": "One customer (Army/SRR) accounted for 73% of FY2025 revenue; Customer A 88% of A/R at 12/31/2025.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": [
+          "Customer concentration is structural and acknowledged in 10-K Risk Factors",
+          "pentagon_jbook NOT_FOUND for SRR \u2014 Army coverage gap means we cannot independently verify the customer's forward-funding posture",
+          "Materiality is existential: 73% of revenue + 88% of A/R from a single customer means a slip in Army SRR Lot-2/Lot-3 funding or schedule would zero forward revenue overnight"
+        ],
+        "M_check": "pentagon_jbook.query_program_funding + usaspending.query_recipient_contracts",
+        "M_value": "concentration verified from filing; J-Book status of underlying program UNVERIFIABLE (Army coverage gap)",
+        "interpretation": "The concentration claim itself is internally consistent and disclosed honestly. The risk is not the claim \u2014 it's the *unverifiable* nature of forward funding for the single program (SRR) producing all the revenue. Per heuristic #2 materiality test, a 73% revenue concentration on Program X tagged UNVERIFIABLE should be elevated above pure UNVERIFIABLE because the framework cannot rule out forward weakness. Marking MODERATE_UNDERDELIVERY to reflect the structural fragility, not because we have a J-Book negative \u2014 but because the corpus gap prevents us from giving a PASS, and there is no obligation-side cross-check large enough to corroborate the $29.7M revenue concentration (USAspending shows only $2.16M Teal DoD obligations)."
+      },
+      {
+        "claim_id": "C9",
+        "claim_text": "Blue Ops launched Aug 2025, first USV delivered to FL showroom Q4 2025; expanding into all-domain via USV weapons.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": [
+          "usaspending.query_recipient_contracts(recipient_name='Blue Ops'): 0 awards, $0 \u2014 no government obligations under Blue Ops name as of cutoff",
+          "acq_coherence: query failed due to API signature mismatch (requires parent_thesis + acquisitions kwargs we didn't pre-build)",
+          "First USV described as delivered to 'Florida showroom' \u2014 i.e., a marketing-stage prototype, not a customer delivery"
+        ],
+        "M_check": "usaspending.query_recipient_contracts + acq_coherence (skipped)",
+        "M_value": "Zero government contracts under Blue Ops; product described as showroom-stage",
+        "interpretation": "Mode B observation: the all-domain pivot via Blue Ops USV is announced narrative without obligation-side evidence. Combined with $172.5M Sept 2025 equity raise to fund expansion, and the share-price-sensitive 'Florida showroom' delivery framing rather than a DoD acceptance, this resembles a thesis-broadening narrative built on top of an under-verified core (SRR). MODERATE_UNDERDELIVERY for incoherence between the all-domain story and the absence of any Blue Ops contracting footprint."
+      }
+    ]
+  },
+  {
+    "ticker": "KTOS",
+    "cik": "0001069258",
+    "company": "Kratos Defense & Security Solutions, Inc.",
+    "status": "OK",
+    "n_claims": 12,
+    "n_scores": 12,
+    "n_jbook_hits": 8,
+    "severity_counts": {
+      "PASS": 4,
+      "MODERATE_UNDERDELIVERY": 3,
+      "SEVERE_UNDERDELIVERY": 2,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 3
+    },
+    "composite_score": 0.7777777777777778,
+    "filing": "0001069258-26-000013_10-K.txt",
+    "red_flag_claims": [],
+    "severe_claims": [
+      {
+        "claim_id": "C5",
+        "claim_text": "Kratos positions its Valkyrie tactical drone (and broader UCAV / loyal-wingman portfolio) for the USAF/USMC Collaborative Combat Aircraft (CCA) opportunity, including teaming with Northrop Grumman on the MUX TACAIR CCA prime award, and describes ongoing internally funded Valkyrie production ahead of contract award.",
+        "severity": "SEVERE_UNDERDELIVERY",
+        "supports": true,
+        "M_check": "pentagon_jbook.query_program_funding(program_name='Collaborative Combat Aircraft', pe_number='0207147F')",
+        "M_value": "PE 0207147F (Collaborative Combat Aircraft, AF RDT&E Vol II): FUNDED_SHRINKING. FY24 $0 \u2192 FY25 $711.747M \u2192 FY26 $111.365M, i.e. a -84% (-$600M) year-over-year cut in the named PE that underlies Kratos's CCA pipeline.",
+        "interpretation": "CCA is one of the most prominent forward-revenue narratives in Kratos's 10-K (multiple mentions, the GE Aerospace teaming explicitly cites 'CCA-type aircraft' as the use case, and the MUX TACAIR / Northrop teaming is described as a significant 'recent' competitive win). The named AF CCA PE just absorbed an ~84% cut from FY25 to FY26 \u2014 Increments 1 (Anduril/General Atomics) appear funded through completion but the FY26 number suggests the budget is allocated to specific prime variants, with much less for follow-on Increment 2 / MUX TACAIR variant work. Per heuristic 1 (FUNDED_SHRINKING = MODERATE) but per heuristic 2 magnitude is severe (-84% / -$600M YoY on a named, narrative-load-bearing PE for the company); per the materiality test, Kratos's exposure is via sub-tier teaming (Northrop is the MUX TACAIR prime; Kratos provides the air vehicle), so the impact is significant but not existential. SEVERE_UNDERDELIVERY: the forward CCA pipeline narrative is structurally weaker than the filing implies because budget commitment to non-Increment-1 CCAs has collapsed."
+      },
+      {
+        "claim_id": "C6",
+        "claim_text": "Kratos describes its GE Aerospace teaming agreement on the GEK800 and GEK1500 small turbofan/turbojet engines as a key forward-revenue driver supporting CCAs and unmanned aerial systems, citing successful October 2025 altitude testing on the GEK800.",
+        "severity": "SEVERE_UNDERDELIVERY",
+        "supports": true,
+        "M_check": "pentagon_jbook.query_program_funding(program_name='Aerospace Propulsion and Power Technology', pe_number='0603216F'); query_program_funding(program_name='Next Generation Adaptive Propulsion')",
+        "M_value": "PE 0603216F (Aerospace Propulsion and Power Technology, AF RDT&E Vol I): UNFUNDED_TWO_PLUS_YEARS \u2014 FY24 $92.129M \u2192 FY25 $0 \u2192 FY26 $0. PE 0604010F (Next Generation Adaptive Propulsion): FUNDED_SHRINKING FY24 $573.832M \u2192 FY26 $330.27M (-42%).",
+        "interpretation": "The closest AF RDT&E lines to GEK800/GEK1500 small affordable turbofan engines are: 0603216F (Aerospace Propulsion and Power Technology \u2014 small-engine and air-breathing propulsion S&T) which is zeroed for 2+ years, and 0604010F (Next Generation Adaptive Propulsion \u2014 F-35-class engines, less directly relevant) which is funded but shrinking. The S&T pipeline that would fund expendable-engine prototyping is gone in the corpus PEs. Compounded with claim C5 (CCA PE cut by 84%), the GE/Kratos engine investment depends on a market where both the platform PE (CCA) and the propulsion S&T PE (0603216F) are simultaneously contracting. SEVERE_UNDERDELIVERY: the Oklahoma turbofan facility and GE teaming forward narrative requires DoD demand-pull that the named RDT&E PEs no longer support."
+      }
+    ],
+    "moderate_claims": [
+      {
+        "claim_id": "C2",
+        "claim_text": "Kratos is the prime sole-source producer of USAF BQM-167 (production year 21) and USN BQM-177 (production year 7) jet target drones, and explicitly identifies the BQM-167 and BQM-177 as programs that 'could represent a large portion of our future revenues'.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": true,
+        "M_check": "pentagon_jbook.query_program_funding(program_name='Aerial Targets', pe_number='0305116F'); usaspending.query_dod_contracts",
+        "M_value": "PE 0305116F (Aerial Targets, AF RDT&E Vol IV) FUNDED_SHRINKING: FY24 $6.671M \u2192 FY25 $6.085M \u2192 FY26 $5.081M (-24% over 3yr). USAspending confirms $238.8M BQM-177A SSAT FRP contract (N0001923C0021), $119.3M AFSAT Lot 14-16 production (FA867818C0002), plus 458 total Kratos DoD awards ($1.67B+).",
+        "interpretation": "The RDT&E line for Aerial Targets is shrinking modestly but remains funded. Per heuristic 8 (Procurement vs RDT&E), the BQM-167/177 production claim is a P-40 procurement-line claim (USN SSAT FRP, USAF AFSAT lot buys) not an R-2 line \u2014 the corpus does not include the matching procurement P-40 line, only the RDT&E development PE. The 3-year sub-25% RDT&E decline is consistent with mature programs in sustained sole-source production with declining residual development, not a divergence signal. However, the management's forward language ('large portion of our future revenues') depends on continued procurement lot awards which the J-Book corpus cannot confirm; MODERATE_UNDERDELIVERY pending corpus extension to AF/USN aerial-target procurement P-40 lines. Past awards real (usaspending), so revenue line credible near-term; forward growth narrative not yet contradicted."
+      },
+      {
+        "claim_id": "C4",
+        "claim_text": "Kratos cites a $116.7 million prime contract from the U.S. Space Development Agency to create and operate the Advanced Fire Control Ground Infrastructure (AFCGI) and notes a clean September 2025 PDR \u2014 explicitly tying forward revenue to continued SDA program execution.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": true,
+        "M_check": "pentagon_jbook.query_program_funding(program_name='SDA Transport Layer'); query_program_funding(program_name='Tranche 3 Tracking Layer'); query_program_funding(program_name='Advanced Fire Control')",
+        "M_value": "AFCGI itself: NOT_FOUND. Related SDA Transport Layer T3 (PE 1206410SF): UNFUNDED_TWO_PLUS_YEARS (replacement: SpaceX Starshield/SDN backbone). Tranche 3 Tracking Layer (1206410SF): FUNDED_STEADY at $3.5B FY26 (Lockheed, Northrop, L3Harris, Rocket Lab as primes \u2014 Kratos NOT named). Per program description: 'SDA is being dissolved as a standalone agency.'",
+        "interpretation": "AFCGI is the ground-system layer; the orbital tranches that AFCGI must integrate with are bifurcated \u2014 Transport Layer T3 is unfunded 2+ years with the requirement rolled into SpaceX Starshield/SDN, while Tracking Layer T3 is fully funded. Kratos's $116.7M past award is real (2024). Forward exposure to AFCGI depends on (a) whether the dissolution of SDA preserves the ground-control sole-source position and (b) whether SDN/Starshield routes integration work back to Kratos or to SpaceX. MODERATE \u2014 the institutional churn (SDA dissolution noted in corpus) materially clouds the forward AFCGI pipeline that Kratos relies on, even though the past contract is funded. Coverage gap on AFCGI line item precludes SEVERE designation."
+      },
+      {
+        "claim_id": "C7",
+        "claim_text": "Kratos cites the Erinyes, Dark Fury, Zeus 1 / Zeus 2 hypersonic vehicle and solid-rocket-motor portfolio as core forward-revenue platforms tied to OUSD(R&E) hypersonic flight test demand, with a 'recent $100 million total potential value hypersonic system program award'.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": true,
+        "M_check": "pentagon_jbook.query_program_funding(program_name='Hypersonics Prototyping', pe_number='0604033F'); query_program_funding(program_name='Hypersonic Defense')",
+        "M_value": "PE 0604033F (Hypersonics Prototyping, AF RDT&E Vol II): UNFUNDED_TWO_PLUS_YEARS \u2014 FY24 $27.903M \u2192 FY25 $0 \u2192 FY26 $0. PE 0604181C (MDA Hypersonic Defense): FUNDED_STEADY $228.962M \u2192 $200.627M.",
+        "interpretation": "Mixed signal: the AF hypersonics-prototyping S&T pipeline is zeroed for 2+ years (where Kratos's Erinyes/Dark Fury internally funded flight vehicles would normally win subcontracts), while MDA Hypersonic Defense (where Zeus SRMs serve as targets) remains steady. The $1.45B MACH-TB 2.0 (separately funded through OUSD R&E TRMC, not in J-Book corpus) is the dominant funding source for Kratos hypersonic test work and offsets the AF-side cut. Per heuristic 8 (RDT&E vs procurement, here R&D vs test-bed funding), and given Kratos has alternate hypersonic-demand channels, MODERATE_UNDERDELIVERY: the AF-side claim of broad hypersonic R&D pull is weaker than the filing implies."
+      }
+    ]
+  },
+  {
+    "ticker": "ASTS",
+    "cik": "0001780312",
+    "company": "AST SpaceMobile, Inc.",
+    "status": "OK",
+    "n_claims": 9,
+    "n_scores": 9,
+    "n_jbook_hits": 5,
+    "severity_counts": {
+      "PASS": 3,
+      "MODERATE_UNDERDELIVERY": 2,
+      "SEVERE_UNDERDELIVERY": 1,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 3
+    },
+    "composite_score": 0.6666666666666666,
+    "filing": "0001780312-26-000006_10-K.txt",
+    "red_flag_claims": [],
+    "severe_claims": [
+      {
+        "claim_id": "C2",
+        "claim_text": "AST has a direct ~$30M SDA agreement for the 'Europa Track 2 commercial solutions program'.",
+        "severity": "SEVERE_UNDERDELIVERY",
+        "supports": [
+          "pentagon_jbook.query_program_funding(program_name='Tranche 3 Transport Layer') \u2192 UNFUNDED_TWO_PLUS_YEARS (FY25 $0, FY26 $0). Tranche 3 is the SDA next-gen commercial-vehicle solicitation under which 'Europa Track 2' would fall",
+          "_note from corpus: 'SDA is being dissolved as a standalone agency. Requirements are being rolled into the Space Data Network (SDN) backbone, sole-sourced to SpaceX (Starshield).'",
+          "pentagon_jbook.query_program_funding(program_name='Space Data Network (SDN)') \u2192 status UNFUNDED_THIS_YEAR for FY26, FUNDED_GROWING starting FY27 \u2014 BUT sole-source to SpaceX Starshield; AST is not listed as contractor",
+          "pentagon_jbook.query_program_funding(program_name='Commercial SATCOM' PE 1206445SF) \u2192 FUNDED_STEADY at $132M FY26 (orthogonal alternative pathway, but ASTS is not named contractor)",
+          "Europa Track 2 not directly in J-Book corpus by name \u2014 but the umbrella commercial-solutions program for SDA next-tranche is T3 Transport Layer, which is UNFUNDED_TWO_PLUS"
+        ],
+        "M_check": "pentagon_jbook.query_program_funding(program_name='Tranche 3 Transport Layer') + Space Data Network (SDN) replacement check",
+        "M_value": "T3 Transport: UNFUNDED_TWO_PLUS_YEARS; SDN replacement is SpaceX sole-source",
+        "interpretation": "This is the canonical J-Book divergence catch. The company names a forward-leaning $30M SDA commercial-solutions program. The J-Book shows SDA's Tranche 3 Transport (the parent commercial-vehicle architecture) was zeroed in FY25 and FY26 (Congress added $500M and Pentagon rejected it); SDA itself is being dissolved, with requirements absorbed into SDN, sole-sourced to SpaceX. The replacement_program field is populated \u2014 per heuristic 3 (reorganization caveat) funding has moved, not disappeared \u2014 but moved AWAY from AST to a different sole-source contractor. So this is a structural disclosure gap: AST's narrative implies a live SDA-direct pipeline; J-Book shows the pathway is closing and the next-architecture incumbent is SpaceX. SEVERE_UNDERDELIVERY: the $30M contract value may be honored to completion, but the implied forward pipeline ('positions us to win Phase 3' style narrative) is broken. Not RED_FLAG because the $30M is small relative to company scale and ASTS is not narrative-load-bearing on this single program."
+      }
+    ],
+    "moderate_claims": [
+      {
+        "claim_id": "C1",
+        "claim_text": "AST has a $43.0M SDA prime-contractor pass-through contract for testing services with initial BB satellites.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": [
+          "pentagon_jbook PE 1206410SF (SDA Transport Layer T0-T2) returned FUNDED_SHRINKING / NOT_FOUND_IN_TIMERANGE \u2014 T0-T2 funded through completion; no follow-on tranches beyond T2 will be awarded",
+          "pentagon_jbook same PE \u2014 T3 Transport Layer entry returned UNFUNDED_TWO_PLUS_YEARS (FY25=$0, FY26=$0); replacement = SDN sole-sourced to SpaceX",
+          "usaspending.query_dod_contracts: 0 awards / $0 obligations under recipient 'AST & Science LLC' or 'AST SpaceMobile' (consistent with company's prime-contractor pass-through framing \u2014 not a refutation but means no independent verification of $43M figure)",
+          "usaspending.query_federal_presence: AST & Science LLC UEI K1RFS1YJSE65 has $0.15M federal contracts total (NASA only), signal SUB_MATERIAL_FEDERAL"
+        ],
+        "M_check": "pentagon_jbook.query_program_funding(program_name='SDA Transport Layer Tranches 0-2') and usaspending.query_dod_contracts(recipient_name='AST & Science LLC')",
+        "M_value": "T0-T2: FUNDED_SHRINKING (residual delivery work only, no new awards); usaspending: 0 DoD awards to AST",
+        "interpretation": "Past $43M SDA contract via prime is plausible (T0-T2 residual work is still being delivered). Forward expansion is unlikely: the SDA T0-T2 wind-down means this prime-contractor flow ends; T3 Transport (the natural follow-on) is UNFUNDED_TWO_PLUS_YEARS and being absorbed by SpaceX-sole-source SDN. Score MODERATE because the disclosed claim is a historical contract value (already booked), not a forward revenue dependency. The forward-pipeline concern (which would normally bump to SEVERE) is partially offset because ASTS does NOT claim this is material % of revenue \u2014 they have $2.8B cash and rely on commercial MNO revenue thesis, not DoD."
+      },
+      {
+        "claim_id": "C6",
+        "claim_text": "AST expects future revenue contributions from U.S. government or prime contractors for non-commercial BB satellite use.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": [
+          "Forward-looking narrative; depends on SDA / MDA pathways already analyzed (C1, C2, C3)",
+          "pentagon_jbook.query_program_funding(program_name='Commercial SATCOM') \u2192 FUNDED_STEADY $132M FY26 \u2014 pathway exists but AST not named contractor",
+          "pentagon_jbook(SDN) \u2192 next-gen sole-sourced to SpaceX (not AST)",
+          "T3 Transport (the SDA next-tranche) UNFUNDED_TWO_PLUS_YEARS"
+        ],
+        "M_check": "Composite check across SDA T3, SDN, Commercial SATCOM PEs",
+        "M_value": "Forward DoD pipeline ASTS implies is structurally narrowing \u2014 SDA dissolving, SDN sole-source SpaceX, T3 zeroed",
+        "interpretation": "The narrative-load-bearing 'future government revenue' language depends on programs that are in fact UNFUNDED (T3 Transport) or sole-sourced to competitors (SDN\u2192SpaceX). Even Commercial SATCOM, the steadiest pathway, does not name AST as a primary contractor. MODERATE not SEVERE because (a) the forward-revenue claim is hedged ('expects'), (b) ASTS's primary thesis is commercial MNO revenue, not DoD \u2014 DoD is incremental upside, not load-bearing. If ASTS were marketed as primarily-defense (like IonQ Federal narrative), this would be SEVERE."
+      }
+    ]
+  },
+  {
+    "ticker": "RKLB",
+    "cik": "0001819994",
+    "company": "Rocket Lab USA, Inc.",
+    "status": "OK",
+    "n_claims": 10,
+    "n_scores": 10,
+    "n_jbook_hits": 5,
+    "severity_counts": {
+      "PASS": 5,
+      "MODERATE_UNDERDELIVERY": 3,
+      "SEVERE_UNDERDELIVERY": 0,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 2
+    },
+    "composite_score": 0.375,
+    "filing": "0001819994-26-000013_10-K.txt",
+    "red_flag_claims": [],
+    "severe_claims": [],
+    "moderate_claims": [
+      {
+        "claim_id": "C3",
+        "claim_text": "Photon spacecraft can fly as a secondary payload on launches conducted under the National Security Space Launch (NSSL) program of the U.S. Space Force, framing NSSL as part of RKLB's go-to-market.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": [
+          "pentagon_jbook.query_program_funding(program_name='National Security Space Launch') -> FUNDED_SHRINKING. PE 1206853SF, Space Force RDT&E. History: FY24 $156.97M -> FY25 $103.39M -> FY26 $6.60M. ~96% drop FY24->FY26 on the RDT&E line.",
+          "Note: the corpus line is the RDT&E PE 1206853SF (EMD phase). The procurement / launch-services obligation lines for NSSL Phase 3 sit under separate AF / Space Force procurement appropriations not captured at this PE.",
+          "RKLB framing is opportunistic / pipeline ('Photon can also fly... as a secondary payload'), not booked revenue. Per heuristic 2, pipeline claim against shrinking program -> downgrade to MODERATE.",
+          "RKLB has not won an NSSL prime; Neutron is not yet certified. The shrinking RDT&E line plus no prime award means the implied pipeline RKLB is dressing up is thin."
+        ],
+        "M_check": "pentagon_jbook.query_program_funding",
+        "M_value": "FUNDED_SHRINKING (PE 1206853SF, $156M -> $103M -> $6.6M FY24-FY26)",
+        "interpretation": "Mild divergence flag. NSSL is named as a go-to-market path; the RDT&E line is collapsing. Pipeline-not-revenue framing keeps this at MODERATE rather than SEVERE \u2014 but worth noting RKLB lists NSSL in the same sentence as Neutron, which has not flown."
+      },
+      {
+        "claim_id": "C8",
+        "claim_text": "Rocket Lab reports a $12.8M unfavorable cumulative catch-up adjustment to revenue on a single contract for FY 2025, signaling cost-to-complete deterioration on a long-term fixed-price (likely government) contract.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": [
+          "edgar_fts.query_fulltext for cumulative catch-up adjustment -> 0 corroborating hits (this is RKLB's own disclosure; tool not designed to corroborate the issuer's own filings).",
+          "Self-disclosed: $12.8M downward revenue catch-up on one contract is ~2.1% of FY25 revenue ($601.8M). The 17-bus MDA Contract delivery delay (C6) is the most likely identity.",
+          "Recurring net losses ($198M FY25, $190M FY24, $182M FY23) with a known major fixed-price program slipping suggests programmatic cost-to-complete deterioration."
+        ],
+        "M_check": "issuer self-disclosure (edgar_fts NOT_APPLICABLE)",
+        "M_value": "$12.8M EAC adjustment on single contract; $7.9M net downward",
+        "interpretation": "Single-contract EAC writedown alongside recurring losses is a moderate underdelivery signal on execution. Not a J-Book divergence (the divergence is internal cost-management, not Pentagon funding)."
+      },
+      {
+        "claim_id": "C10",
+        "claim_text": "Rocket Lab cumulatively grew revenue to $601.8M (FY25) vs $436.2M (FY24) vs $244.6M (FY23), with continued net losses ($198M FY25). Forward narrative leans on SDA T3 plus GEOST plus HASTE plus Neutron to bend the curve.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": [
+          "Four-pillar forward narrative crosschecked component-by-component:",
+          "  SDA T3: pentagon_jbook = FUNDED_STEADY (Tracking Layer) -> SUPPORTS (C1 PASS).",
+          "  GEOST: $98M DoD past awards + coherent acquisition -> SUPPORTS (C5 PASS).",
+          "  HASTE: NOT_FOUND in J-Book corpus, no booked PE-tagged revenue -> COVERAGE GAP / UNVERIFIABLE (C2).",
+          "  Neutron: not flown as of cutoff; NSSL pipeline backing it is FUNDED_SHRINKING (C3 MODERATE).",
+          "Three years of accelerating revenue growth ($244M -> $436M -> $602M) with widening absolute net losses ($183M -> $190M -> $198M) -> operating leverage not yet materializing."
+        ],
+        "M_check": "pentagon_jbook.query_program_funding (Rocket Lab contractor)",
+        "M_value": "1 RKLB primary program (Tracking Layer T3, FUNDED_STEADY); pipeline pillars HASTE and Neutron-via-NSSL show coverage gap and shrinking funding respectively",
+        "interpretation": "Half the forward thesis (SDA T3 + GEOST integration) is corroborated by J-Book. The other half (HASTE hypersonic test + Neutron via NSSL) is either outside the corpus or backed by a shrinking PE. Persistent losses despite top-line growth means execution risk remains. Net: not a J-Book divergence short, but pipeline-pillars are not all standing on funded ground."
+      }
+    ]
+  },
+  {
+    "ticker": "RGTI",
+    "cik": "0001838359",
+    "company": "Rigetti Computing, Inc.",
+    "status": "OK",
+    "n_claims": 12,
+    "n_scores": 12,
+    "n_jbook_hits": 5,
+    "severity_counts": {
+      "PASS": 4,
+      "MODERATE_UNDERDELIVERY": 2,
+      "SEVERE_UNDERDELIVERY": 0,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 6
+    },
+    "composite_score": 0.3333333333333333,
+    "filing": "0001104659-26-023454_10-K.txt",
+    "red_flag_claims": [],
+    "severe_claims": [],
+    "moderate_claims": [
+      {
+        "claim_id": "C1",
+        "claim_text": "Rigetti lists AFRL as a key multi-year development partnership for quantum networking hardware research and superconducting quantum computing networking.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": [
+          "pentagon_jbook returned the AFRL Quantum Networking PE (program_id=afrl-quantum-networking-ionq) with status UNFUNDED_TWO_PLUS_YEARS \u2014 the largest AFRL quantum-networking PE in the J-Book corpus is unfunded for FY25 and FY26 (bipartisan budget signed Jan 20, 2026).",
+          "earmark_detector confirms that AFRL Quantum Networking PE was a congressional earmark whose sponsors (Cardin, Van Hollen, Hoyer, Tester) lost majority in Nov-2024 election \u2014 EARMARK_SUNSET, structurally durable defunding.",
+          "However, the corpus attributes that PE to IonQ, not Rigetti. Rigetti's own USAspending DoD contracts are smaller SBIR/AFWERX-style awards (FA864921P0781, FA875025CB058) totaling ~$4.5M of obligated work, not the $54.5M earmark line.",
+          "Rigetti's claim is qualitative ('partnership') not a named PE / revenue-concentration claim, so the J-Book hit does not directly map to a Rigetti revenue line."
+        ],
+        "M_check": "pentagon_jbook.query_program_funding(program_name='AFRL Quantum Networking') + earmark_detector + usaspending.query_dod_contracts(recipient_name='Rigetti')",
+        "M_value": "AFRL Quantum Networking PE = UNFUNDED_TWO_PLUS_YEARS (FY25 0M, FY26 0M; FY22-24 peaks: 13/26/12M); EARMARK_SUNSET. USAspending shows Rigetti receives small AFRL SBIR-style awards (~$4.5M total).",
+        "interpretation": "Unchanged from v1. The named AFRL quantum-networking line item in the Pentagon J-Book is unfunded for two consecutive years and the supporting earmark coalition has lost power. Rigetti's AFRL exposure is real but appears structurally smaller and routed through different SBIR/AFWERX vehicles than IonQ's congressionally-added line. The forward narrative ('AFRL partnership') is somewhat weakened by the broader collapse of the AFRL quantum-networking funding envelope: even if Rigetti's own SBIRs continue, the AFRL appetite for funding sole-source quantum-networking primes via earmarks has reversed. MODERATE rather than SEVERE because Rigetti did not name a specific PE or quantify revenue concentration tied to AFRL.",
+        "category": "jbook_program_pipeline",
+        "v2_delta": "no change \u2014 DoD-only claim, doe_budget not applicable"
+      },
+      {
+        "claim_id": "C4",
+        "claim_text": "Substantial majority of current revenues from development contracts; expects this to continue for several more years.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": [
+          "pentagon_jbook.query_program_funding(contractor_name='Rigetti') = NOT_FOUND \u2014 Rigetti is not the primary contractor on any covered J-Book PE.",
+          "doe_budget.query_program_funding(contractor_name='Rigetti') = NOT_FOUND \u2014 v2 add: Rigetti is also not a named primary contractor on any of the 78 DOE Office of Science programs in the corpus. Federal program-of-record exposure on the DOE side is also below program-level granularity.",
+          "usaspending.query_dod_contracts shows ~$4.5M total DoD obligations across 10 awards (FY20-25) with the largest single award being $1.5M (FA864921P0781, Photon-Superconductor Multi-Node Quantum Networks).",
+          "Rigetti's net loss was $216.2M in FY25; ~$4-5M of total federal contracting volume is too small to credibly represent 'substantial majority of revenue' unless total revenue is itself very small (which the 10-K language implies).",
+          "Broader environment: DOE ASCR Advanced Computing Technologies (NQISRCs) FUNDED_GROWING in FY26 (+7.1%) is a tailwind for any company adjacent to NQISRCs, but DOE HEP Theory and HEP Energy-Frontier are SHRINKING. AFRL quantum-networking earmark zeroed (v1 finding) is the dominant headwind.",
+          "The risk here is that the 'development contracts' Rigetti relies on are predominantly small SBIR/AFWERX/STTR awards rather than program-of-record dollars \u2014 neither J-Book nor DOE corpus shows Rigetti as a primary contractor on a program-of-record."
+        ],
+        "M_check": "pentagon_jbook + doe_budget (contractor) + usaspending.query_dod_contracts + usaspending.query_recipient_grants",
+        "M_value": "Both pentagon_jbook AND doe_budget return NOT_FOUND for Rigetti as primary contractor on covered program lines. USAspending total DoD contract volume ~$4.5M, total DoD+DOE grants $4.3M; collectively under $10M of federal R&D obligations on record \u2014 modest compared to $216M annual loss. NQISRC umbrella (Advanced Computing Technologies) FY26 +7.1% partial offset.",
+        "interpretation": "v2: dual-agency NOT_FOUND on Rigetti as primary contractor is now confirmed across both Pentagon J-Book AND DOE Office of Science budget request \u2014 making the finding stronger. Rigetti's claim that development contracts are the 'substantial majority' of revenue is technically defensible only because total revenue is tiny. NEITHER federal-budget corpus shows Rigetti at program-of-record granularity. The forward narrative depends on continuing small SBIR/research contracts in a mixed federal quantum funding environment (NQISRC umbrella growing, but AFRL quantum-networking line zeroed via earmark sunset, HEP Theory shrinking). MODERATE underdelivery risk for the forward narrative; the company makes no explicit PE-named revenue-concentration claim so it cannot be marked SEVERE.",
+        "category": "dod_customer_concentration",
+        "v2_delta": "v1=MODERATE_UNDERDELIVERY (single-agency NOT_FOUND); v2=MODERATE_UNDERDELIVERY (dual-agency NOT_FOUND). Severity unchanged but confidence in the finding is higher."
+      }
+    ]
+  },
+  {
+    "ticker": "PL",
+    "cik": "0001836833",
+    "company": "Planet Labs PBC",
+    "status": "OK",
+    "n_claims": 12,
+    "n_scores": 12,
+    "n_jbook_hits": 8,
+    "severity_counts": {
+      "PASS": 6,
+      "MODERATE_UNDERDELIVERY": 2,
+      "SEVERE_UNDERDELIVERY": 0,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 4
+    },
+    "composite_score": 0.25,
+    "filing": "0001193125-26-119957_10-K.txt",
+    "red_flag_claims": [],
+    "severe_claims": [],
+    "moderate_claims": [
+      {
+        "claim_id": "PL-008",
+        "claim_text": "Capex 26% of revenue ($79.9M FY26) building Pelican + medium-res satellites; ROIC depends on signed SwAF contract + future D&I demand.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": [
+          "pentagon_jbook(program_name=Pelican)=NOT_FOUND",
+          "pentagon_jbook(program_name=commercial imagery)=NOT_FOUND",
+          "pentagon_jbook(program_name=Tactically Responsive Space)=FUNDED_SHRINKING ($48M\u2192$40M\u2192$33M FY24-26, -31% over 3yr)",
+          "pentagon_jbook(program_name=Commercial SATCOM)=FUNDED_STEADY"
+        ],
+        "M_check": "pentagon_jbook",
+        "M_value": "Adjacent Space Force commercial-procurement PEs are mixed: 'Commercial SATCOM' FUNDED_STEADY at $132M, but the analogous demand-signal PE for tactically-responsive commercial space ('Tactically Responsive Space') is FUNDED_SHRINKING. No Pelican-specific PE.",
+        "interpretation": "Pelican constellation is a major capex bet ($79.9M/yr) whose forward government demand (beyond the SwAF book) is undisclosed at PE level. The closest J-Book proxy for tactically-responsive commercial-space demand is shrinking ($48\u2192$33M). Apply heuristic 1 mapping but downweight by heuristic 2 (no specific revenue claim attached to a specific PE) \u2014 MODERATE_UNDERDELIVERY: capex commitment exceeds the disclosed, named, forward-funded Pentagon procurement signal. Note: this is a soft moderate \u2014 the SwAF deal substantially de-risks the capex thesis on the commercial side."
+      },
+      {
+        "claim_id": "PL-012",
+        "claim_text": "10-K contains ZERO references to named Pentagon Program Elements (no PE numbers, no Project Maven, no EOCL, no SDA, no NRO/NGA in prose, no DIU, no JADC2, no Replicator, no Tradewind).",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": [
+          "Stripped 10-K (627K chars) keyword search: 0 PE numbers, 0 NRO mentions in prose, 0 NGA prose mentions (only XBRL fragments), 0 'Project Maven', 0 'EOCL', 0 'SDA', 0 'DIU', 0 'JADC2', 0 'Replicator'",
+          "vs $180M (58.6% of revenue) attributable to Defense & Intelligence segment",
+          "vs 14 USAspending DoD awards confirming real DoD relationship including 'ELECTRO OPTICAL SATELLITE DATA IMAGERY SUBSCRIPTIONS' (likely NRO EOCL family) and 'HYBRID ARCHITECTURE DEMONSTRATIONS' (likely SDA-adjacent)"
+        ],
+        "M_check": "pentagon_jbook (negative finding) + usaspending (positive finding)",
+        "M_value": "USAspending shows Planet IS doing EOCL-adjacent and hybrid-architecture (SDA-adjacent) DoD work \u2014 yet the 10-K narrative is silent on these program names. The filing reports D&I segment as a single anonymous $180M bucket.",
+        "interpretation": "DIVERGENCE \u2014 but the inverse of the typical pattern. Most J-Book-cohort divergences are 'company names a program, J-Book shows it unfunded'. Here the divergence is 'usaspending confirms named DoD program-of-record exposure, but 10-K declines to name any program'. This is a DISCLOSURE-COMPLETENESS concern under MD&A specificity rules (Item 303 \u2014 would expect a 58.6%-of-revenue segment to call out top programs). MODERATE_UNDERDELIVERY: the framework cannot do its J-Book divergence test BECAUSE the company has structured its disclosure to avoid naming the programs the test would target. Net: insufficient specificity prevents verifier dispatch; this is a Mode-B (implied verification) flag \u2014 the absence of program names is itself the signal."
+      }
+    ]
+  }
+]

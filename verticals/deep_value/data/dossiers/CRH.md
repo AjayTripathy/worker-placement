@@ -1,0 +1,12 @@
+# CRH — CRH plc (cement/aggregates; NYSE)
+**Sleeve:** ukraine_reconstruction_b · **Verdict:** WATCH · DD-verified 2026-06-29
+
+**Conviction:** QUALITY-at-FULL-price riding PEAK US construction — DD DOWNGRADE STARTER->WATCH
+
+## Thesis
+
+CORE Option-B — the SAFETY + LIQUIDITY leg. GATE: Vanguard 9.5%, 87% institutional, NO controller = PASS. EXPOSURE: the LARGEST physical Ukraine footprint of any dispersed name — 5 cement plants, 6.75 Mt capacity, soon Ukraine #1 producer (bought Buzzis Dyckerhoff Ukraine late-2024; $500m/25yr, $80m since the war). Cement = THE rebuild material. BUT North America ~75% of net income, group rev ~$35bn -> Ukraine ~1% of group = MOST DILUTED; you own CRH for liquidity/safety, Ukraine is a free option (~+2-5% attributable on a ceasefire). ~$108.28, -12.9% YTD, P/E ~16x EV/EBITDA ~11x, IG balance sheet, US-listed (max liquidity). NYSE contract 655276609. Pair: CRH<->Holcim (cleanest cement harvest rotation). || DD VERIFIED 2026-06-29 (FY2025 SEC 10-K/8-K primary): DOWNGRADED STARTER->WATCH. NOT deep value, richer than the screen said. Rev .4bn, adj-EBITDA .70bn (20.5%), dil EPS .51, net debt ,151m (1.84x). EV ~.9bn / EV-EBITDA 11.4x trailing (10.6x FY26 guide); P/E 19.8x trailing (~18x guide) — NOT 16x (that is a sell-side forward-adj number). CYCLE = PEAK: Americas ~71% of EBITDA; IIJA is in its FINAL year (expires Sep-30-2026), highway spend cresting to ~+1%, 2027 air-pocket risk (Highway Trust Fund bn gap). MODE-B (strongest): ORGANIC REVENUE NEGATIVE in ALL 3 segments — ~100% of growth was M&A (+net debt .6bn YoY), price gains now decelerating (cement +1%) = textbook late-cycle. Honesty CLEAN (full organic bridge disclosed). Ukraine 5 plants/6.75Mt but <1% of group = rounding-error option. WATCH for a better entry or post-IIJA-cliff clarity. || EDGE-BATCH 2026-06-30 (base lens): thesis_type=RISK_PREMIUM. Paid to bear US late-cycle/IIJA-cliff risk on a serial acquirer at full 11.4x/19.8x on peak Americas earnings. Mode-B organic-negative tell = DILIGENCE (CRH own 8-K bridge). 16x was sell-side fwd-adj; trailing 19.8x. ~71% is SEGMENT EBITDA not group.
+
+
+---
+*Research card auto-generated from the SignalOS research ledger (2026-06-29). Where a full deep-dive exists (DD_* / SLEEVE_* docs), that document carries the worked valuation, Mode-B pass, and primary sources.*

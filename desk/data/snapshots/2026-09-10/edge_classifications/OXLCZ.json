@@ -1,0 +1,60 @@
+{
+ "ticker": "OXLCZ",
+ "date": "2026-08-05",
+ "court": "exit_band_derivation_20260806 (slice 3 of 4)",
+ "_note": "EC file CREATED by the exit-band pass; the name's court record lives in desk/data/research_ledger.json names[] (and, for PRCT, in desk/data/resolution_packs.json). This file did not previously exist.",
+ "exit_band_20260806": {
+  "as_of": "2026-08-05",
+  "effective": "2026-08-06 session",
+  "classification": "ALERTS+EXEMPTION (NO POSITION -- nothing to exit)",
+  "exemption_reason": "OXLCZ IS NOT HELD. Verified two ways: (1) the IBKR positions cache (desk/ui/data/positions_cache.json, asof 2026-08-05 10:35:22 ET, 56 rows) contains no OXLCZ row; (2) the full symbol enumeration of that cache was read and OXLCZ does not appear. No position => no exit band is owed and no contract-section-6 violation exists.",
+  "instrument": "Oxford Lane Capital 5.00% SENIOR NOTE due 2027-01-31, callable since Jan-2024 (callable now). NOT a term preferred -- the record carries an explicit identity correction against confusing it with OXLCP (redeemed 2026-06-01) or framing it as 'a baby bond with optionality'.",
+  "LEDGER_VS_BROKER_DIVERGENCE": {
+   "finding": "The ledger carries OXLCZ as OWNABLE with an entry_plan describing LIVE resting orders: 'raise 24.65 (order 1185116452) -> ~24.75' and 'CANCEL the redundant 24.50 (order 1185116450)'.",
+   "method": "IBKR get_order_instructions.",
+   "result": "The account returns an EMPTY instruction set -- {\"instructions\":[]}. Neither order exists. (Note: this call returns saved instructions; if the orders were placed directly in TWS rather than as instructions they would not appear here, so treat this as strong but not conclusive.)",
+   "consequence": "The ledger's entry_plan for this name describes a broker state that is not observable. Reconcile before acting on it. Flagged for the principal -- I did not touch the ledger."
+  },
+  "time_criticality": "The note matures 2027-01-31 and is callable NOW. The record's whole thesis is a near-zero-duration pull-to-$25 ('seven months senior to a crash everyone can see'). As of 2026-08-05 that is ~6 months, and the annualised yield on any residual discount is mechanically rising as the clock runs. The ENTRY decision is close to expiring on its own; if the intent is to own it, it needs a decision now, not a stale below-market limit.",
+  "upside_trim": "N/A -- no position. Also structurally N/A even if held: upside is HARD-CAPPED at the $25 par call, so there is no trim band to derive above par. The correct exit for this instrument is maturity or call, not a limit.",
+  "downside_alerts": [
+   {
+    "level": 24.45,
+    "type": "ALERT",
+    "source": "ledger alert_below",
+    "applies": "only if a position is established"
+   },
+   {
+    "level": null,
+    "type": "ALERT",
+    "source": "record",
+    "condition": "a CALL NOTICE on EDGAR (none as of the record's 2026-07-16 sweep) -- same par outcome, sooner"
+   },
+   {
+    "level": null,
+    "type": "ALERT",
+    "source": "record",
+    "condition": "OXLC distress signal -- the CLO-equity NAV is largely irrelevant to a senior note ABSENT DEFAULT, so the alert is default risk, not NAV"
+   }
+  ],
+  "tax": "N/A -- no position, no lot, no character. If established: coupon income is ordinary; a pull-to-par gain from a sub-$25 purchase is a short-term capital gain on any purchase after ~2026-01-31 given the 2027-01-31 maturity.",
+  "catalyst_review": {
+   "primary": "2027-01-31 maturity; call notice at any time",
+   "action_owed": "reconcile the ledger's phantom resting orders against the broker, then either place a real order or retire the entry plan with a stated reason (the bands-rest-by-default doctrine's forced-decision surface)"
+  },
+  "unverified": [
+   "whether the two ledger-cited order IDs were ever live at IBKR",
+   "no live quote pulled -- there is no position and no order, so a quote would not change any decision this pass"
+  ],
+  "_common": {
+   "derived": "2026-08-05 (US session, ~15:05-15:20 ET)",
+   "contract": "courts_20260804/_CONTRACT.md sec.6 (EXIT BANDS REST BY DEFAULT, 2026-08-05 principal-ratified)",
+   "slice": "exit_band_derivation slice 3 of 4",
+   "price_basis": "IBKR live snapshot (SMART, `last`) cross-checked against 12x ONE_DAY bars, outside_rth=false. Bid/ask spreads are wide on the thin names at this hour; `last` and the daily bar close agree within a cent on OLLI/J/CI/HCA/BKE/IBEX/EQT and within 0.4% on LDOS/III/PRCT/BAH.",
+   "lot_dates_source": "IBKR get_account_trades YEAR_TO_DATE (execution blotter), not the ledger narrative",
+   "tax_rates_used": "short-term ~50% combined (fed+CA, house figure per the no-premium-selling-taxable doctrine); long-term ~24% combined (the figure the BAH record itself used)",
+   "SLICE_WIDE_TAX_FINDING": "ZERO of the 11 held positions in this slice has reached its one-year mark. Earliest long-term dates: BAH and J on 2027-05-27; the July cohort (BKE/IBEX/EQT/HCA/LDOS/OLLI) on 2027-07-07..14; III 2027-07-17; CI 2027-07-23; PRCT 2027-07-25. Every upside trim resting today therefore prices in SHORT-TERM dollars at ~50%, roughly double the long-term drag. This is a level input, not a reason to skip the band: a trim that only clears on strength is still wrong-side-safe, but the rungs below were set at court BULL/ceiling values (not base values) partly for this reason.",
+   "wrong_side_test": "Every rung below is a SELL limit ABOVE the market; it can only fill on strength, so it cannot fill on the thesis-killer. Downside kills are ALERT-class only -- no resting stops anywhere in this slice (a stop is the sell-side fills-on-the-cut trap)."
+  }
+ }
+}

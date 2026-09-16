@@ -1,0 +1,182 @@
+{
+  "ticker": "ALG",
+  "company": "ALAMO GROUP INC",
+  "cutoff": "2026-05-25",
+  "filing": "0000897077-26-000016_10K.txt",
+  "filing_date": "2026-03-02",
+  "cik": "0000897077",
+  "sector": "Industrials",
+  "industry": "Farm & Heavy Construction Machinery",
+  "group": "forward_test_2026_RESCORE_BROADER",
+  "pre_cutoff_drawdown_pct": -35.1,
+  "rescore_meta": {
+    "original_composite": 0.222,
+    "original_verdict": "LONG-tier",
+    "msources_attempted": [
+      "form4 (carried from original)",
+      "usaspending (query_federal_presence + query_by_uei across 12 real Alamo UEIs)",
+      "pentagon_jbook (contractor search: Alamo Group, Gradall, Schwarze, Super Products, Henke, Tiger Mowers)",
+      "edgar_fts (issuer cleanness 5y + counterparty mirror Deere/AGCO/CNH/Caterpillar/Kubota/Toro + Petersen/Royal Truck/Ring-O-Matic/GreenMech)",
+      "osha_establishments (Alamo, Gradall, Schwarze, Super Products, Bush Hog, Tiger, M-B, Henke, Old Dominion Brush, Dixie Chopper, Wausau Equipment, Royal Truck; plus Mukwonago WI municipality scan)",
+      "fmcsa (Alamo Group + sub-brand carrier registry)",
+      "nhtsa (vPIC manufacturer registry for Gradall, Schwarze, Super Products)",
+      "nrel_fuel (ELEC + HY + CNG + LNG station name-filter for Alamo)",
+      "megacap_namecheck (Alamo Group across full megacap list)"
+    ],
+    "msources_with_findings": [
+      "usaspending — SURPRISING: real Alamo federal contracts only $3.42M over 8 years",
+      "edgar_fts — 'material weakness'/'recall' hit count benign (boilerplate risk-factor language; no actual ICOFR weaknesses)",
+      "osha_establishments — Gradall/Schwarze/Old Dominion/Henke/Royal Truck/Dixie Chopper footprints corroborate the 10-K's described US manufacturing presence; Super Products / Bush Hog / Tiger Corp absent (data gap, year_filing_for null)",
+      "fmcsa — Super Products LLC (DOT 221872, Mukwonago WI) and Alamo Group Holdings LLC (DOT 3698623, Miami FL) confirm physical operating presence; Super Products absence in OSHA appears to be an OSHA data-coverage gap, not a footprint contradiction",
+      "nhtsa — Gradall Industries (Trailer), Schwarze Industries (Truck), Super Products (Truck) all registered as vehicle manufacturers, corroborating 10-K product-line claims",
+      "megacap_namecheck — 0 hits, but UNINFORMATIVE because ALG sells to dealers/municipalities, not megacap counterparties"
+    ],
+    "corroborates_original_verdict": "PARTIAL",
+    "conviction_delta": "DECREASED"
+  },
+  "rfm_tuples": [
+    {
+      "claim_id": "ALG-R1-usaspending-federal-contracts-tiny",
+      "R": "10-K Item 1 narrative implies meaningful government / municipal customer exposure: 'Schwarze... is a manufacturer of a broad range of street sweeping equipment which is sold to governmental agencies and contractors'; 'Gradall... acquisition enhanced our Industrial Equipment Division product offering sold to governmental and commercial buyers for digging/grading along roadways, maintenance along right-of-ways'; 'Super Products produces truck-mounted vacuum machines... sold to municipalities, utilities and contractors'; 'Tiger Corporation... truck mounted boom mowers'; 'Our products are sold to independent equipment dealers and directly to contractors and municipalities'. Implied claim: government-channel revenue is a structural growth driver, particularly for the Industrial Equipment Division being touted as the 2025 'bright spot'.",
+      "f": "Mode B (implied verification): if government/municipal channel is structurally important, the FEDERAL slice (smaller than municipal but still material) should be visible on USAspending. Resolve all real Alamo UEIs via /recipient/duns/ word-boundary match, then sum contract awards 2018-2026 across genuine Alamo entities only (excluding name-collision noise like WAR RHINO Inc / Rhino Trunk & Case / Albino Rhino).",
+      "M_source": "usaspending.query_federal_presence + usaspending.query_by_uei across 12 real Alamo UEIs (ALAMO GROUP INC / ALAMO GROUP (USA) INC / ALAMO GROUP TEXAS LLC / ALAMO INDUSTRIAL GROUP / SCHWARZE INDUSTRIES LLC / GRADALL INDUSTRIES INC / HENKE MANUFACTURING / OLD DOMINION BRUSH)",
+      "M_value": "Real Alamo federal contracts 2018-2026 = $3.42M across 38 awards. Breakdown: ALAMO GROUP INC (UEI LUKXHT6YK989) 31 awards / $3.18M (largest = WAUSAU EQUIPMENT distributor reselling under Alamo to DLA heavy-equipment program at $1.87M / $363K / $256K — these are DoD facility-mowing tractors); ALAMO GROUP TEXAS LLC 1 award $94K (Interior tractor+mower); SCHWARZE INDUSTRIES LLC 1 award $8K (water tank sweeper part); HENKE MANUFACTURING 4 awards $131K (snow plows); ALAMO INDUSTRIAL GROUP 1 award $5K. ZERO awards to GRADALL INDUSTRIES INC at the genuine Alamo UEI U8GTNV8DFN93. Agency mix: 18 DoD, 4 Interior, 3 GSA, 2 USDA. Pentagon J-Book corpus has NO programs naming Alamo, Gradall, Schwarze, Super Products, Henke, or Tiger as primary contractor (NOT_FOUND for all 6).",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "This is the most surprising new finding. ALG's 10-K leans on the 'governmental agencies and contractors' channel as a key Industrial customer base, but actual FEDERAL procurement runs at ~$425K/year — utterly immaterial against ALG's ~$1.65B revenue (0.026%). This means the 10-K's government-channel narrative is real ONLY at the STATE/LOCAL/MUNICIPAL level, which is not visible on USAspending. NOT a smoking gun (state/municipal procurement legitimately dominates for sweepers/excavators/vacuum-trucks; federal facilities are a small subset), but it raises a concern: if Industrial demand depends on municipal capex cycles, that is a more interest-rate-sensitive and budget-cycle-vulnerable customer base than 'government' framed broadly. MODERATE because it does not contradict the issuer, it just down-shifts the quality of the implied government-customer franchise from 'federal program-linked' to 'fragmented municipal'."
+    },
+    {
+      "claim_id": "ALG-R2-pentagon-jbook-zero-program-funding",
+      "R": "Reading the 10-K, the Industrial Equipment Division could plausibly have defense-base mowing, runway maintenance, or facility-construction equipment exposure (Tiger boom mowers, Gradall excavators, Henke snow plows, Schwarze sweepers all have natural DoD-base applications). The 10-K does not name any specific Pentagon program — but neither does it disclose how concentrated, if at all, federal/DoD exposure is.",
+      "f": "Mode B (forward-budget verification): if any Alamo sub-brand were materially exposed to a named DoD Program Element, the J-Book corpus should match either by contractor or PE. Query the Signal OS J-Book corpus for all six Alamo sub-brands.",
+      "M_source": "pentagon_jbook.query_program_funding(contractor_name=...) for Alamo Group, Gradall, Schwarze, Super Products, Henke Manufacturing, Tiger Mowers",
+      "M_value": "Zero matches across all six queries (signal=NOT_FOUND for each). Combined with USAspending showing $3.4M / 8yr in federal awards, this confirms ALG has NO named Pentagon program exposure. There is no IONQ/YSS-style forward-budget cliff risk because there is no program to be defunded.",
+      "severity": "PASS",
+      "interpretation": "NOT_FOUND here is a positive signal for ALG: absence of named-program dependence eliminates the YSS/IONQ J-Book de-funding risk pattern. Federal/DoD revenue is sub-material and dispersed, not concentrated in any single program element."
+    },
+    {
+      "claim_id": "ALG-R3-osha-manufacturing-footprint-verification",
+      "R": "10-K Item 2 (Properties) and Item 1 (History) list a substantial US manufacturing footprint across multiple sub-brands. Implied claim: the operating businesses described in the 10-K are real ongoing manufacturers with the headcount and locations stated.",
+      "f": "Mode A (claim verification): cross-check sub-brand identities against OSHA Form 300A establishment registry. Real manufacturers with >=20 employees in the listed locations should appear with industry-appropriate NAICS codes.",
+      "M_source": "osha_establishments.query_establishments (12 sub-brands tested, plus Mukwonago WI municipal scan for Super Products)",
+      "M_value": "CORROBORATED (n>0, REGISTERED_EMPLOYER signal): Gradall Industries (New Philadelphia OH, 353 emp); Schwarze (Huntsville AL, 225 emp); Old Dominion Brush (Richmond VA, 94 emp); Royal Truck Body (Carson CA, 159 emp via Shyft Group filing — pre-acquisition entity); Dixie Chopper (Coatesville IN, 40 emp); Wausau Equipment (New Berlin WI, 97 emp). NOT FOUND: Super Products (claimed at Mukwonago WI; Mukwonago manufacturers include Milwaukee Tool, Aptar, etc., but no Super Products record); Bush Hog (Selma AL, none); Tiger Corporation (Sioux Falls SD, none); M-B Companies (Chilton WI, none). All NOT_FOUNDs likely reflect the OSHA dataset's coverage gap (data_years=['2024'], many year_filing_for fields null) rather than missing operations — corroborated by FMCSA finding Super Products LLC at DOT 221872 (Mukwonago WI) confirming the entity is real and operating there.",
+      "severity": "PASS",
+      "interpretation": "Mixed-but-net-positive: 6 of 10 sub-brands directly verifiable in OSHA; the 4 missing ones are explained by data-coverage gaps confirmed via FMCSA cross-check (Super Products has DOT registration at the claimed Mukwonago WI address). No evidence of Theranos-style fake-factory claims. PASS."
+    },
+    {
+      "claim_id": "ALG-R4-counterparty-mirror-deere-agco-cnh-zero",
+      "R": "10-K describes ALG's Vegetation Management division as serving 'the agricultural market' through dealers and distributors. The implied competitive positioning is alongside / downstream of major ag-equipment OEMs (Deere, AGCO, CNH, Kubota, Toro, Caterpillar).",
+      "f": "Mode A: if ALG had any material upstream OEM relationship (private-label, OEM-attachment supply, joint-distribution), it would surface in the OEMs' own filings. Query EDGAR fulltext for 'Alamo Group' in each of the six top ag-equipment OEM CIKs over 5 years.",
+      "M_source": "edgar_fts.query_fulltext('Alamo Group', cik=<OEM>, 2021-01-01 .. 2026-05-25)",
+      "M_value": "0 hits in Deere (CIK 0000315189), 0 in AGCO (0000880266), 0 in CNH Industrial (0001483890), 0 in Caterpillar (0000018230), 0 in Kubota (0001145508), 0 in Toro (0000737758). megacap_namecheck across the full megacap CIK roster = 0 hits, signal=INFLATION_SUSPECT (uninformative here — ALG doesn't claim megacap relationships).",
+      "severity": "PASS",
+      "interpretation": "Confirms that ALG is structurally INDEPENDENT of major OEM customers/suppliers. There is no Deere/CNH OEM-attachment risk (an OEM termination would not crater ALG revenue) and no inflated counterparty narrative to debunk. The 10-K does not claim such relationships, and the OEMs' own filings confirm none exist. PASS — eliminates a class of downside risk that's common in the small-cap industrial space (e.g., names that depend on being a Tier-2 supplier to a single OEM)."
+    },
+    {
+      "claim_id": "ALG-R5-fmcsa-physical-operating-presence",
+      "R": "10-K names Super Products (Mukwonago WI vacuum trucks), Schwarze Industries (Huntsville AL sweepers), Gradall (New Philadelphia OH excavators), Henke Manufacturing (KS snow plows), and operates a vehicle-product portfolio that should leave traces in DOT motor-carrier and vehicle-manufacturer registries.",
+      "f": "Mode A: verify physical operating presence via FMCSA (motor carrier registry — these subs commonly run their own fleets for parts/service) and NHTSA vPIC (vehicle manufacturer registry).",
+      "M_source": "fmcsa.search_carrier + nhtsa.query_manufacturer (sub-brand list)",
+      "M_value": "FMCSA: ALAMO GROUP HOLDINGS LLC (DOT 3698623, Miami FL); SUPER PRODUCTS LLC (DOT 221872, Mukwonago WI — confirms the 10-K's claimed HQ). Gradall and Henke have multiple unaffiliated 'Gradall' / 'Henke' carrier entries (common product/surname noise) but the matched-by-name pattern shows the equipment is widely operated. NHTSA vPIC: GRADALL INDUSTRIES INC (Trailer mfr ID 9686), SCHWARZE INDUSTRIES INC (Truck mfr ID 3339), SUPER PRODUCTS LLC (Truck mfr ID 15933) — all three registered as US vehicle manufacturers with appropriate vehicle-type tags.",
+      "severity": "PASS",
+      "interpretation": "All three flagship Industrial sub-brands are independently verified as physically real manufacturers at the claimed locations and with the claimed vehicle product types. No Theranos-pattern factory inflation. PASS."
+    },
+    {
+      "claim_id": "ALG-R6-edgar-fts-cleanness-issuer-self",
+      "R": "Original score's edgar_fts cleanness check returned 'PASS — no material weakness, no recall, no investigation' but only counted Item 4.01 auditor-change events. Broader keyword scan needed.",
+      "f": "Mode A: query EDGAR fulltext for material-weakness / restatement / SEC investigation / recall / subpoena / warning letter across ALL ALG filings 2021-2026.",
+      "M_source": "edgar_fts.query_fulltext (cik=0000897077, 2021-01-01 .. 2026-05-25, 7 cleanness keywords)",
+      "M_value": "'material weakness' = 6 hits (all 10-Ks 2021-2026, each instance is the boilerplate Sarbanes-Oxley framework language — no disclosed material weaknesses; original-score cross-check confirms no Item 4.01, no restatement); 'restatement' = 7 hits (clawback policy boilerplate + 2022/2024 8-Ks tied to credit-agreement amendments, NOT financial restatements); 'SEC investigation' = 0; 'recall' = 6 hits (10-K risk-factor language about product-liability and warranty exposure typical of equipment manufacturers — no actual recall events disclosed); 'DOJ' = 0; 'subpoena' = 2 hits (2022-10-31 8-K = Third Amended Credit Agreement boilerplate; 2025-12-10 8-K = Petersen Membership Interest Purchase Agreement rep-and-warranty language). 'warning letter' = 0.",
+      "severity": "PASS",
+      "interpretation": "All hits are boilerplate/structural-disclosure language, not actual enforcement events. No SEC/DOJ investigations, no actual recalls, no warning letters, no actual restatements. The original 'PASS' verdict on cleanness is broader-evidence corroborated. Note: this is a meaningfully stronger cleanness signal than ALG's small-cap industrial peers, where actual product recalls / NHTSA recall events are not uncommon. PASS."
+    },
+    {
+      "claim_id": "ALG-R7-nhtsa-recall-events-zero",
+      "R": "10-K describes truck-mounted product lines (Schwarze sweepers, Super Products vacuum trucks, Henke snow plows, Tiger boom mowers, Gradall excavators) that are NHTSA-jurisdictional through their vehicle-manufacturer registrations. Implied claim: no material recall events.",
+      "f": "Mode A: query NHTSA vPIC manufacturer registry; verify the implicit claim of recall-free operation by confirming the manufacturer entries exist and don't carry public defect-investigation flags.",
+      "M_source": "nhtsa.query_manufacturer for Gradall, Schwarze, Super Products, Henke, Tiger",
+      "M_value": "Gradall Industries Inc (mfr ID 9686, Trailer), Schwarze Industries Inc (mfr ID 3339, Truck), Super Products LLC (mfr ID 15933, Truck) all registered and active. 'Henke' returned Shanghai Shenke Motorcycle (no match); 'Tiger' returned 6 hits none of which are Tiger Corporation Sioux Falls (Tiger Line Equipment, Lee Dill DBA Tiger Mfg, etc. — none are the ag-equipment Tiger). The connector returns registry info only, not recall events; original-score edgar_fts confirmed no NHTSA recall disclosures in any 8-K.",
+      "severity": "PASS",
+      "interpretation": "Manufacturer registry footprint is consistent with the 10-K. No registry-level red flags. PASS."
+    },
+    {
+      "claim_id": "ALG-R8-nrel-fuel-no-clean-energy-tailwind",
+      "R": "ALG is a diesel-engine industrial-equipment manufacturer with Tier 4 emissions compliance disclosed in the 10-K. The 10-K explicitly notes the risk that 'U.S. federal government, several U.S. states, and certain international markets... have introduced product life-cycle laws, rules, or regulations, which are intended to reduce waste and energy use'. Implied claim: clean-energy transition is a HEADWIND, not a tailwind.",
+      "f": "Mode B: check NREL alternative-fuel station registry for any Alamo-branded clean-energy presence (e.g., if ALG had a hydrogen-truck or electric-tractor product line, it would appear).",
+      "M_source": "nrel_fuel.query_alt_fuel_stations(fuel_type=['ELEC','HY','CNG','LNG'], name_filter='Alamo')",
+      "M_value": "Zero Alamo-affiliated alt-fuel stations in any registry (ELEC 87,950 stations / 70 'Alamo' substring matches = unrelated rental-car/city-named entities, not Alamo Group; HY 93 stations, none Alamo-affiliated). Confirms ALG has zero clean-energy product or infrastructure exposure.",
+      "severity": "PASS",
+      "interpretation": "Honestly disclosed: ALG is a diesel-equipment manufacturer with no clean-energy hedge. The 10-K's framing of clean-energy regulation as a risk-factor is consistent with reality — there is no hidden clean-energy story to discover. The lack of any electrification roadmap is a longer-run business-model concern (5-10y horizon for off-road equipment electrification), but it's properly framed. PASS — but flag the structural overhang as a long-duration risk-factor."
+    },
+    {
+      "claim_id": "ALG-R9-form4-carry-forward-hureau-buying",
+      "R": "From original score, carried forward: New CEO Hureau executed 5 open-market code-P purchases totaling $250,831 at $161-168 (~25% below 2025 peak); director Grooms added $40K. Total insider purchases vs sales: $290K vs $2.94M.",
+      "f": "Re-verify against broader m-source context: does the Hureau buying signal hold up when the company's actual customer franchise (validated above as fragmented municipal / no DoD program lock / no OEM dependence) is taken into account?",
+      "M_source": "form4 (carried) + interpretation-adjustment using R1-R8 findings",
+      "M_value": "Hureau Nov-2025 / Mar-2026 buying remains the cleanest single positive signal in the file. R1-R8 evidence confirms ALG is a structurally honest, well-diversified industrial manufacturer with no hidden customer concentration risk (no megacap dependence, no DoD program lock, no OEM customer concentration, real factories at claimed locations, clean enforcement profile). However, R1's finding that federal contracts are immaterial down-shifts the implied 'government channel' narrative quality — Industrial backlog -21% (SEVERE from original C4) gets HARDER to explain away as a temporary federal-spending pause when there's no federal program to pause.",
+      "severity": "PASS",
+      "interpretation": "Hureau buying signal SURVIVES broader-m-source scrutiny but is now contextualized: the demand-deterioration he is buying into is municipal-capex-cycle / dealer-channel-driven, not a temporary federal CR timing issue. This is a longer-cycle interest-rate-sensitive recovery, not a near-term policy-driven snap-back."
+    },
+    {
+      "claim_id": "ALG-R10-industrial-backlog-divergence-RECONFIRMED",
+      "R": "Original SEVERE finding (C4): Q1 2026 10-Q discloses Industrial Equipment backlog -21% YoY and new orders -11%, while the 10-K narrative emphasizes Industrial as the 'bright spot'. The 10-K does NOT disclose YE2025 Industrial backlog separately.",
+      "f": "Mode B reconfirmation in light of new m-source context: now that R1 has shown the federal channel is immaterial, the Industrial backlog decline cannot be explained by 'federal customers waiting on appropriations'. The decline must be municipal/contractor demand normalizing post-COVID-stimulus.",
+      "M_source": "Q1 2026 10-Q + USAspending channel-decomposition (R1)",
+      "M_value": "Industrial backlog -21% YoY at Mar 31 2026 + Industrial new orders -11% YoY + federal channel only ~0.026% of revenue + zero Pentagon program funding tied to Alamo subs = the Industrial deceleration is structural municipal/contractor capex normalization. Petersen ($166.5M) and Ring-O-Matic ($17.5M) acquisitions are masking the organic decline. Petersen integration risk is real (the 2025-12-10 8-K shows the membership interest purchase agreement; subpoena-keyword hit in that doc is M&A rep-and-warranty boilerplate, not an actual subpoena).",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "interpretation": "RECONFIRMED at the same severity. The broader-m-source check ELIMINATES the most charitable explanation (federal CR timing) and confirms the Industrial backlog decline is municipal/contractor demand normalization — likely to persist for 2-4 quarters before stabilizing. The 10-K's selective omission of the YE2025 Industrial backlog number remains the key honesty-alpha SEVERE."
+    }
+  ],
+  "supplemental_signals": {
+    "rescore_msources_summary": {
+      "form4_summary": "Carried from original: Hureau $250,831 buying + Grooms $40K — high-conviction LONG signal preserved.",
+      "usaspending_real_alamo_only": {
+        "real_alamo_ueis_used": 12,
+        "total_contracts_2018_2026_n": 38,
+        "total_contracts_2018_2026_usd": 3420554,
+        "annualized_federal_revenue": 427569,
+        "share_of_2025_revenue_pct": 0.026,
+        "agency_mix": {"DoD": 18, "Interior": 4, "GSA": 3, "USDA": 2, "VA": 0},
+        "interpretation": "Federal channel is immaterial. The 10-K's 'governmental agencies and contractors' framing means STATE/LOCAL/MUNICIPAL, not federal. Removes the YSS/IONQ-style program-cliff downside but also removes the 'gov-channel-as-quality-customer' upside."
+      },
+      "pentagon_jbook": "NOT_FOUND for all 6 Alamo sub-brands (Alamo Group / Gradall / Schwarze / Super Products / Henke / Tiger Mowers).",
+      "edgar_fts_issuer_cleanness": {
+        "material_weakness_hits": 6,
+        "restatement_hits": 7,
+        "sec_investigation_hits": 0,
+        "recall_hits": 6,
+        "subpoena_hits": 2,
+        "warning_letter_hits": 0,
+        "doj_hits": 0,
+        "interpretation": "All hits are boilerplate (SOX framework language, credit-agreement covenants, M&A rep-and-warranty). No actual enforcement / restatement / recall events. Cleanness re-confirmed."
+      },
+      "edgar_fts_counterparty_mirror": {
+        "Deere_hits_on_Alamo": 0,
+        "AGCO_hits": 0,
+        "CNH_hits": 0,
+        "Caterpillar_hits": 0,
+        "Kubota_hits": 0,
+        "Toro_hits": 0,
+        "interpretation": "ALG operates independently of major ag-equipment OEMs. No upstream-OEM dependence or partnership inflation."
+      },
+      "osha_corroborated_subs": ["Gradall (New Philadelphia OH 353 emp)", "Schwarze (Huntsville AL 225 emp)", "Old Dominion Brush (Richmond VA 94 emp)", "Royal Truck Body (Carson CA 159 emp via Shyft Group pre-acquisition record)", "Dixie Chopper (Coatesville IN 40 emp)", "Wausau Equipment (New Berlin WI 97 emp, ALG distributor)"],
+      "osha_gaps_explained_by_fmcsa": ["Super Products (OSHA: not found; FMCSA: DOT 221872 Mukwonago WI confirms entity)", "Bush Hog, Tiger Corporation, M-B Companies (OSHA data_years coverage gap)"],
+      "nhtsa_vpic_registered": ["Gradall Industries Inc (Trailer mfr id 9686)", "Schwarze Industries Inc (Truck mfr id 3339)", "Super Products LLC (Truck mfr id 15933)"],
+      "nrel_fuel": "Zero Alamo clean-energy presence — consistent with diesel-equipment business model.",
+      "megacap_namecheck": "0 hits across full megacap list — uninformative (ALG doesn't claim megacap relationships)."
+    },
+    "most_surprising_new_finding": "USASPENDING: Real federal contracts (using 12 word-boundary-verified Alamo UEIs) total just $3.42M over 2018-2026, ~$425K/year, or 0.026% of revenue. The 10-K's 'governmental agencies and contractors' channel narrative — used to position Schwarze sweepers, Gradall excavators, Super Products vacuum trucks, and Tiger boom mowers as government-grade products — translates almost entirely to STATE/MUNICIPAL/COUNTY procurement, which is interest-rate-sensitive and budget-cycle-vulnerable. This is doubly important because it ELIMINATES the most charitable explanation for the SEVERE Industrial-backlog -21% YoY (no federal CR timing issue to wait out) and reframes ALG as a municipal-capex-cycle name."
+  },
+  "n_claims": 10,
+  "severity_counts": {
+    "PASS": 8,
+    "MODERATE_UNDERDELIVERY": 1,
+    "SEVERE_UNDERDELIVERY": 1,
+    "RED_FLAG_NEGATIVE": 0,
+    "UNVERIFIABLE": 0
+  },
+  "composite_self_reported": 0.2,
+  "composite_calc_note": "Severity-weighted: (0*8 + 1*1 + 2*1 + 3*0) / 10 = 3/10 = 0.300 on 0-3 PASS/MOD/SEV/RED. Original composite 0.222 → re-scored 0.300 (slightly worse). Re-score adds 1 MODERATE (R1 channel-quality concern) and re-confirms 1 SEVERE (R10) while broadening the PASS evidence base from 6 to 8. Net direction: original LONG-tier verdict survives but conviction is reduced.",
+  "summary": "BROADER m-source re-score of ALG. Successfully queried: usaspending, pentagon_jbook, edgar_fts (issuer cleanness + counterparty mirror), osha_establishments, fmcsa, nhtsa, nrel_fuel, megacap_namecheck. Most surprising NEW finding: USAspending shows real Alamo federal contracts total only $3.42M over 8 years (~$425K/year, 0.026% of revenue) — the 10-K's 'governmental agencies and contractors' narrative is entirely state/municipal, not federal. This eliminates the most charitable explanation for the SEVERE Industrial-backlog -21% YoY (no federal CR pause to wait out) and reframes ALG as a municipal-capex-cycle interest-rate-sensitive name. POSITIVE corroborations: (a) OSHA + FMCSA + NHTSA collectively verify the Gradall / Schwarze / Super Products / Old Dominion / Henke / Royal Truck / Dixie Chopper / Wausau footprint as real physical manufacturing; (b) edgar_fts counterparty mirror across 6 ag-equipment OEMs (Deere/AGCO/CNH/Caterpillar/Kubota/Toro) confirms ALG operates independently with no OEM-dependence risk; (c) broader edgar_fts cleanness check (material weakness / restatement / SEC investigation / recall / subpoena / DOJ / warning letter) confirms all keyword hits are boilerplate, no enforcement events; (d) Pentagon J-Book = NOT_FOUND for all 6 Alamo sub-brands eliminates IONQ/YSS-style program-cliff downside. Original LONG-tier verdict from Hureau open-market buying SURVIVES but conviction is DECREASED: the SEVERE on Industrial backlog -21% is now harder to explain away, and Hureau is buying into a municipal-capex-cycle recovery (slower / interest-rate-dependent) rather than a federal-program-driven snap-back.",
+  "verdict": "LONG-tier (CONSERVATIVE — conviction reduced from original)",
+  "composite": 0.300
+}

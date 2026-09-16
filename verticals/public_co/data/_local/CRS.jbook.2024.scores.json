@@ -1,0 +1,106 @@
+{
+  "ticker": "CRS",
+  "cutoff": "2024-09-01",
+  "filing": "0000017843-24-000014_10-K.txt",
+  "cohort": "jbook_exposure_divergence",
+  "framework_summary": "Carpenter Technology's pre-cutoff 10-K (FY2024) contains ZERO named DoD Program Elements, ZERO named Pentagon programs (no F-35, F-22, hypersonic, Skyborg, CCA, B-21, etc.), and ZERO named prime contractor customers. A&D is reported as a single end-use market line ($1,538.8M, 56% of FY2024 sales) without contractor or program disaggregation. Under the J-Book divergence framework, there are NO program-specific claims for pentagon_jbook to falsify — so the framework correctly returns PASS / UNVERIFIABLE rather than firing false-positive RED_FLAGs. This is the expected profile of a Tier-3 commercial-led A&D specialty alloys mill (sells titanium/nickel/cobalt billet & powder to engine OEMs, who in turn sell to primes). The J-Book divergence pattern is structurally inapplicable to this exposure profile.",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Aerospace and Defense was the largest end-use market at $1,538.8M, representing 56% of total net sales in FY2024.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending.query_dod_contracts(recipient_name='Carpenter Technology Corporation') returned only n_awards=5, total $3.14M in direct DoD obligations — vastly smaller than the $1,538.8M A&D revenue line, confirming that A&D revenue flows through commercial primes (engine OEMs, airframe OEMs), not direct DoD contracts. Claim is consistent with this Tier-3 commercial-led structure."
+      ],
+      "M_check": "usaspending.query_dod_contracts + pentagon_jbook.query_program_funding(contractor_name='Carpenter Technology')",
+      "M_value": "usaspending: 5 awards / $3.14M total (DSCS strategic buffer steel, ingot production, etc.); pentagon_jbook: NOT_FOUND (Carpenter not named on any of 410 R-2/P-40 line items)",
+      "interpretation": "The 56% A&D revenue concentration is a real, verifiable claim — it just isn't J-Book-grounded. Carpenter is a raw-material supplier, not a prime, so PE-level exposure is structurally invisible. No divergence pattern; PASS."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Backlog of approximately $2,256.6M as of June 30, 2024, substantially all expected to ship within fiscal years 2025 and 2026.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "Backlog is not program-specified — the filing does not tie any portion of the $2.26B backlog to a named DoD program element.",
+        "pentagon_jbook NOT_FOUND for Carpenter; usaspending direct DoD awards too small ($3.14M) to materially populate $2.26B backlog → backlog is dominantly commercial."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(contractor_name='Carpenter') + usaspending.query_dod_contracts",
+      "M_value": "pentagon_jbook signal=NOT_FOUND; usaspending DoD-direct = $3.14M (immaterial vs. backlog)",
+      "interpretation": "Backlog claim is unverifiable against the J-Book corpus because there are no program-level hooks. Cannot falsify. UNVERIFIABLE per heuristic #7 (NOT_FOUND in J-Book is not a red flag; the corpus simply doesn't cover Tier-3 raw-material suppliers)."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Pioneer in specialty alloys 'specifically engineered for additive manufacturing processes' — implying DoD additive-manufacturing exposure.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook(program_name='additive manufacturing') returned NOT_FOUND — the J-Book corpus does not index any DoD program by the bare phrase 'additive manufacturing'; DoD additive programs typically live under broader umbrellas (e.g., DARPA materials, AFRL ManTech) not surfaced by name.",
+        "uspto_odp confirms 7 granted patents pre-cutoff under Carpenter Technology Corporation (29 total applications including pending), with titles like 'HIGH MOLYBDENUM DUPLEX STAINLESS STEEL' and 'LOW COEFFICIENT OF THERMAL EXPANSION ALLOYS' — additive-friendly alloy chemistries, but not program-tied."
+      ],
+      "M_check": "pentagon_jbook + uspto_odp.query_assignee",
+      "M_value": "pentagon_jbook=NOT_FOUND; uspto_odp: 7 granted, 29 total applications",
+      "interpretation": "The additive positioning is real (patent + facility evidence) but the claim does not name a DoD program → not falsifiable by J-Book. UNVERIFIABLE."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Approximately 45% of net sales under firm-price long-term arrangements with annual volume commitments.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "Filing does not name LTA counterparties.",
+        "edgar_fts(search_term='Carpenter Technology', cik=Lockheed Martin 0000936468) returned 0 hits — Lockheed does not name Carpenter in any pre-cutoff filing, consistent with Tier-3 supplier-to-engine-OEM structure where the LTAs are with RTX/Pratt & Whitney/GE Aerospace/Honeywell rather than primes."
+      ],
+      "M_check": "usaspending + edgar_fts (Lockheed counterparty disclosure)",
+      "M_value": "usaspending DoD direct = $3.14M; edgar_fts at Lockheed CIK = 0 hits",
+      "interpretation": "LTAs are with commercial primes/engine OEMs, not DoD — no Pentagon program element to verify against. The claim is unverifiable in the J-Book frame but is internally consistent. UNVERIFIABLE."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Carpenter Additive powder products manufacturing facility in Athens, Alabama.",
+      "severity": "PASS",
+      "supports": [
+        "epa_frs returned 5 EPA-registered facilities under 'Carpenter Technology' in Alabama, all in Limestone County (Tanner/Athens area), including 'CARPENTER TECHNOLOGY CORP - ATHENS SOUTH FACILITY' and the main 22059 Thomas L Hammons Rd site. Athens, AL operations exist and are independently registered."
+      ],
+      "M_check": "epa_frs.query_facilities",
+      "M_value": "5 EPA-registered facilities in Limestone County, AL",
+      "interpretation": "Control claim verified. PASS."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Owns a number of US and international patents.",
+      "severity": "PASS",
+      "supports": [
+        "uspto_odp confirms 7 granted patents pre-cutoff (29 total applications including pending) under 'Carpenter Technology Corporation' assignee — patent portfolio exists and is materially specialty-alloy chemistry-focused."
+      ],
+      "M_check": "uspto_odp.query_assignee",
+      "M_value": "7 granted, 29 total applications pre-cutoff",
+      "interpretation": "Control claim verified (the 'a number of patents' wording is hedged so even 7 satisfies). PASS."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "A&D revenue grew from $790.2M (FY22, 43%) to $1,538.8M (FY24, 56%) — implied forward A&D pipeline strength.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook(contractor_name='Carpenter Technology', cutoff_date='2024-09-01') = NOT_FOUND — confirming the growth is NOT dependent on any specific Pentagon line item that could be zeroed in the J-Book. Heuristic #7 explicitly says NOT_FOUND is UNVERIFIABLE not RED.",
+        "usaspending DoD-direct contracts only $3.14M total — A&D growth is overwhelmingly commercial-aerospace driven (Boeing/Airbus narrow-body recovery + LEAP/GTF/Trent engine ramps), with defense as a small Tier-3 tail.",
+        "Per the J-Book divergence framework definition: this pattern fires when companies name PEs and the J-Book zeros them. Carpenter names ZERO PEs → no divergence possible → no signal."
+      ],
+      "M_check": "pentagon_jbook + usaspending (compound)",
+      "M_value": "pentagon_jbook=NOT_FOUND; usaspending DoD = $3.14M (immaterial)",
+      "interpretation": "The forward A&D thesis is real and largely commercial-aviation-driven. Not exposed to the J-Book divergence pattern. PASS (not unverifiable — we have positive evidence the company is NOT in the at-risk profile)."
+    }
+  ],
+  "summary_stats": {
+    "n_claims": 7,
+    "n_jbook_grounded_claims": 4,
+    "n_control_claims": 3,
+    "pentagon_jbook_fired_with_signal": 0,
+    "pentagon_jbook_returned_NOT_FOUND": 3,
+    "severity_counts": {
+      "PASS": 4,
+      "MODERATE_UNDERDELIVERY": 0,
+      "SEVERE_UNDERDELIVERY": 0,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 3
+    },
+    "framework_verdict": "Carpenter Technology does NOT exhibit the J-Book Exposure Divergence pattern at the 2024-09-01 cutoff. Its A&D revenue is commercial-aviation-led with negligible direct DoD obligations ($3.14M), so there are no PE-level claims to falsify. This is a correct-rejection control case for the framework — the model returns PASS/UNVERIFIABLE rather than fabricating a divergence signal."
+  }
+}

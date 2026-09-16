@@ -1,0 +1,207 @@
+{
+  "ticker": "ASIX",
+  "company": "AdvanSix Inc.",
+  "cutoff": "2024-05-15",
+  "filing": "0001673985-24-000014_10K.txt",
+  "filing_date": "2024-02-16",
+  "cik": "0001673985",
+  "sector": "Basic Materials",
+  "industry": "Specialty Chemicals",
+  "group": "walk_forward_2024",
+  "rfm_tuples": [
+    {
+      "claim_id": "C1",
+      "R": "Report of Independent Registered Public Accounting Firm (PricewaterhouseCoopers LLP, PCAOB ID 238): 'In our opinion, the consolidated financial statements referred to above present fairly, in all material respects, the financial position of the Company as of December 31, 2023 and 2022 ... Also in our opinion, the Company maintained, in all material respects, effective internal control over financial reporting as of December 31, 2023.' Item 9: 'Changes in and Disagreements with Accountants on Accounting and Financial Disclosure — Not Applicable.'",
+      "f": "Mode A — Verify Big-4 auditor identity, tenure, absence of resignations or disagreements via 8-K Item 4.01 lookback; Mode B — derive whether the unqualified opinion is consistent with the Critical Audit Matter (goodwill) that was added this cycle.",
+      "M_source": "m_sources.auditor_change_tracker.query_auditor_changes(cik='0001673985', cutoff_date='2024-05-15') + 10-K Item 9 + auditor's report (PCAOB ID 238 = PwC)",
+      "M_value": "signal=CLEAN_AUDITOR_TENURE; n_8k_item_401=0; n_big4_resignations=0; n_disagreements=0 in 5-year lookback to 2019-05-17. Auditor = PricewaterhouseCoopers LLP (Big 4) with unqualified opinion on both financial statements AND ICFR. Item 9 explicitly 'Not Applicable.' One Critical Audit Matter added — Quantitative Goodwill Impairment Assessment (goodwill = $56.2M) — where PwC notes management 'performed a quantitative impairment assessment as of October 28, 2023 ... Due to the share price and current market trend' (i.e., the auditor flagged that the equity market signal forced an out-of-cycle test). No impairment recorded.",
+      "severity": "PASS",
+      "interpretation": "Clean Big-4 audit with effective ICFR. The CAM is notable because PwC explicitly ties the out-of-cycle goodwill test to the share-price decline, but the test result was no impairment. Audit quality is a material counterweight to the -36.3% drawdown narrative."
+    },
+    {
+      "claim_id": "C2",
+      "R": "'At December 31, 2023, the Company had approximately $30 million of cash on hand with approximately $329 million of additional capacity available under the revolving credit facility ... We were in compliance with all of our covenants at December 31, 2023 and through the date of the filing of this Annual Report on Form 10-K.' Financial covenants: Consolidated Interest Coverage Ratio >=3.00:1.00; Consolidated Leverage Ratio <=3.75:1.00 (from Q4'23 onward, stepped down from 4.00:1.00).",
+      "f": "Mode A — Verify covenant compliance language and absence of amendments/waivers in 10-K + most recent pre-cutoff 10-Q; Mode B — derive whether a 21% sales drop and the $75M incremental Q1'24 borrowing leaves cushion under the stepped-down 3.75x leverage covenant.",
+      "M_source": "10-K Item 7 Liquidity + Note 9 Long-Term Debt + Q1'24 10-Q (accession 0001673985-24-000067, filed 2024-05-03)",
+      "M_value": "Q4'23: $170M drawn on $500M senior secured revolver (Truist agent); $329M available; covenant ratio stepped TIGHTER from 4.00 to 3.75x at Q4'23 (planned step at facility inception 2021, NOT an amendment under distress). Only amendment in 2023 was the June 27, 2023 LIBOR-to-SOFR transition (mechanical, not credit-driven). Q1'24 10-Q (filed 2024-05-03): $245M drawn (+$75M), $254M available, 'in compliance with all of our covenants at March 31, 2024 and through the date of the filing.' Q1'24 net loss $17.4M (vs Q1'23 +$35.0M), operating cash flow -$36.2M (vs +$1.6M). Maturity 2026-10-27.",
+      "severity": "PASS",
+      "interpretation": "Covenants intact at FY-end and Q1'24. Leverage step-down was pre-scheduled, not a distress amendment. The Q1 swing to negative operating cash flow + $75M revolver draw indicates cushion is eroding, but no covenant amendments, waivers, or going-concern language. 18-month runway to 2026 maturity is comfortable."
+    },
+    {
+      "claim_id": "C3",
+      "R": "'In 2023, the Company's 10 largest customers accounted for approximately 39% of total sales. Our largest customer is Shaw Industries Group Inc. (\"Shaw\"), one of the world's largest consumers of caprolactam and Nylon 6 resin. We sell caprolactam and Nylon 6 resin to Shaw under a long-term agreement. Sales to Shaw were 11% of our total sales for the year ended December 31, 2023, and 12% for the years ended December 31, 2022 and 2021.' Average customer relationship length: ~20 years.",
+      "f": "Mode A — Verify the long-term Shaw agreement exists in EDGAR exhibits; Mode B — derive concentration trend and counterparty stability.",
+      "M_source": "m_sources.edgar_fts.query_fulltext('AdvanSix', cutoff_date='2024-05-15', forms='10-K') + 10-K Item 1 (line ~60757)",
+      "M_value": "EDGAR FTS confirms 'exhibit1036_shawamendment.htm' filed with FY2022 10-K (accession 0001673985-23-000007), corroborating that the Shaw long-term agreement is a contracted, amendable instrument — not just narrative. Shaw % of sales is stable-to-declining: 12%/12%/11% (2021/2022/2023). Top-10 concentration is 40%/39%/39% — stable. Shaw is a private subsidiary of Berkshire Hathaway (Berkshire owns Shaw Industries since 2001), a financially solid counterparty.",
+      "severity": "PASS",
+      "interpretation": "Customer concentration claim verifies via exhibit existence and is on the low end (11% largest) of small-cap-chemicals norms. Berkshire-backed counterparty is the opposite of a credit-risk concentration. Mode-B inference: declining Shaw share (12 -> 11%) over weak FY23 is consistent with end-market softness (carpet/textile) rather than account loss."
+    },
+    {
+      "claim_id": "C4",
+      "R": "'Sales decreased in 2023 compared to 2022 by $412.0 million (approximately 21%) due to (i) net unfavorable market-based pricing (approximately 17%) primarily reflecting reduced ammonium sulfate pricing amid lower raw material input costs and a more stable global nitrogen fertilizer supply environment, as well as lower nylon pricing due to unfavorable supply and demand conditions and (ii) unfavorable raw material pass-through pricing (approximately 5%).' Volume change: (2.5)%. Acquisition contribution: +0.6%.",
+      "f": "Mode A — Verify decomposition adds up and is consistent with cash-flow direction; Mode B — derive what management did NOT say: how much of the price collapse is structural (commodity cycle reverting from 2022 spike) vs company-specific.",
+      "M_source": "10-K MD&A Results of Operations (line ~185181) + Cash Flow Summary (line ~210559) + Q1'24 10-Q (line ~57382)",
+      "M_value": "Volume (2.5)% + Pre-tax pricing (22.0)% + Acquisition +0.6% = -21.2% reconciles. Operating cash flow decreased $156.1M (-57%, $273.6M to $117.6M). Q1'24 continued the trend: sales -15.7% (volume -6.7%, price -9.0%). Self-disclosed framing correctly identifies the principal driver (ammonium sulfate price normalization post-2022 fertilizer spike). Notably, the 'increased $4.7M, or 169%' interest expense framing for a small absolute number ($7.5M) is the only conspicuous magnification — not omission.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Top-line decline is honestly attributed to commodity cycle normalization, which is verifiable cyclically (nitrogen / ammonium sulfate global pricing fell broadly in 2023 vs 2022). However the disclosure does not quantify how much of the 2022 base was a one-time fertilizer spike vs sustainable run-rate, so investors cannot triangulate the structural floor. Mode-B finding: cyclical floor disclosure gap."
+    },
+    {
+      "claim_id": "C5",
+      "R": "'In January 2024, the Company experienced a process-based operational disruption at its Frankford, Pennsylvania manufacturing site temporarily reducing phenol and acetone production at the facility, as well as production at its Hopewell and Chesterfield, Virginia facilities. As a result of a delayed ramp to targeted utilization rates, the Company recognized an unfavorable impact to pre-tax income in the first quarter 2024 of approximately $27 million ... The Company returned to targeted utilization rates at its Frankford, Pennsylvania manufacturing site, as well as across its value chain, prior to quarter end.' (Q1'24 10-Q)",
+      "f": "Mode A — Verify the 8-K disclosure timing and the $27M magnitude; Mode B — derive whether the framing 'returned to targeted utilization rates ... prior to quarter end' is supported by the Q1 result trajectory.",
+      "M_source": "Q1'24 10-Q (line ~56342) + 8-K filed 2024-01-19 (accession 0001673985-24-000005, 'update on plant production rates')",
+      "M_value": "Jan 19 2024 8-K furnished a press release on plant production rates under Item 7.01 (Regulation FD) — timely disclosure within ~14 days of the January event. $27M Q1 pre-tax impact is the entirety of the $23.4M Q1 pre-tax loss plus more — i.e., the disruption fully explains the swing from profit to loss this quarter. Management states return to targeted rates before quarter-end. Frankford is the only U.S. phenol-from-cumene producer at scale, so this directly cascades to Hopewell (caprolactam) and Chesterfield (nylon resin) — the integrated supply chain is precisely as vulnerable as the company disclosed in risk factors.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Truthful disclosure of a material operational event with prompt 8-K, quantified Q1 impact, and a verifiable return-to-rate statement. Mode-B residual: the integrated-supply-chain vulnerability is an inherent structural risk that management discloses but does not insure against, and the $27M one-event hit on a $336M quarterly revenue base (8% of sales) shows the operational leverage cuts both ways."
+    },
+    {
+      "claim_id": "C6",
+      "R": "'Sales to Shaw were 11% of our total sales for the year ended December 31, 2023.' Average customer relationship ~20 years. '10 largest customers accounted for approximately 39% of total sales.' No customer concentration of trade accounts receivable at Dec 31, 2023 and 2022.",
+      "f": "Mode B — derive: if Shaw and the top-10 are stable, the 2023 sales drop CANNOT be customer-specific; it must be price-driven (matches C4) or volume-mix-driven (matches C4). Cross-check internal consistency.",
+      "M_source": "10-K Item 1 (line ~287312) + Note customer concentration (line ~321800) + MD&A C4",
+      "M_value": "Top-10 concentration: 40%/39%/39% over 2021-2023 — flat. Shaw: 12%/12%/11% — slight decline. AR concentration: none material. This is internally consistent with the C4 attribution that the 21% revenue decline is pricing (17%) and pass-through cost (5%), not customer losses. No customer-attrition narrative is buried in the 10-K — verified by negative search for 'lost customer', 'discontinued account', 'non-renewal.' Counterparty quality: Shaw is Berkshire Hathaway-owned.",
+      "severity": "PASS",
+      "interpretation": "Mode-B cross-check passes. The revenue decline is supported by macro/price evidence and is internally consistent with stable customer relationships. This is an honesty-framework PASS rather than a 'business is healthy' PASS — the price-cycle weakness is real, but the disclosure is not obscuring a hidden customer-loss story."
+    },
+    {
+      "claim_id": "C7",
+      "R": "'The timing, declaration, amount and payment of dividends to stockholders, if any, will be within the sole discretion of our Board of Directors.' Dividend history disclosed: 2/16/2024 $0.160; 11/3/2023 $0.160; 8/4/2023 $0.160; 5/5/2023 $0.145; 2/17/2023 $0.145. Increased 16% in 2022 and another 10% in 2023. Subsequent event (Q1'24 10-Q): Board declared $0.160 dividend on May 3, 2024 payable May 28, 2024.",
+      "f": "Mode A — Verify dividend continuation post Q1 loss via 8-K; Mode B — derive whether dividend is covered by FCF after operating loss and capex step-up.",
+      "M_source": "10-K Item 5 dividend table + Q1'24 10-Q Subsequent Events (line ~41704) + 8-K 2024-05-03 (accession 0001673985-24-000064)",
+      "M_value": "Dividend MAINTAINED at $0.160 in May 2024 declaration (8-K confirmed 2024-05-03) despite Q1'24 net loss of $17.4M and operating cash use of $36.2M. 2024 capex guided to $140-150M (vs $107M in 2023, +30-40% YoY) — meaning capex requirements are RISING while operating cash flow is falling. Annual dividend run-rate ~$17M (~$4.3M/qtr × 4) is small relative to $329M revolver capacity but is NOT covered by Q1'24 FCF. Insider Form 4 activity (6 mo pre-cutoff): GC Kintiroglou sold 13,161 shares ($359K), CEO Kane sold 10,000 shares ($282K) — both under pre-arranged 10b5-1 plans entered Nov 9 2023 (GC: 17,518 shares + 8,130 options) and Dec 8 2023 (CEO: 60,000 shares). Plans expire Feb/Mar 2025. No open-market buying.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Dividend continuation through Q1 loss + capex step-up is the most aggressive capital-allocation choice in the filing. Mode-B inference: management is signaling confidence in a snapback by maintaining the dividend and capex programs, but the math requires either price recovery or further revolver draw. CEO/GC 10b5-1 plans entered in Nov/Dec 2023 (after weak Q3 results) for moderate amounts are a soft yellow flag — not screaming distress (plan sizes are <2% of named-officer holdings typically), but the absence of any insider open-market buying after a -36% drawdown is a missed conviction signal."
+    },
+    {
+      "claim_id": "C8",
+      "R": "'We assumed from Honeywell all HSE liabilities and compliance obligations related to the past and future operations of our current business as of the spin-off, as well as all HSE liabilities associated with our three current manufacturing locations assumed from Honeywell that are used in our current operations, including any cleanup or other liabilities related to any contamination that may have occurred at such locations in the past.'",
+      "f": "Mode A — Verify the spin-off indemnification structure and any accrued environmental reserve; Mode B — derive the asymmetric tail risk from indemnifying a 70+ year operating history at Hopewell (active since 1929 as Allied Signal) without an offsetting reserve from Honeywell.",
+      "M_source": "10-K Item 7 Liquidity (line ~198517) + risk factors (line ~65255) + estimated environmental compliance costs $1.7M aggregate 2024-2028 (line ~199895)",
+      "M_value": "10-K estimates environmental compliance costs at $1.7M aggregate for 2024-2028 — i.e., the on-balance-sheet accrued environmental reserve is trivial relative to the size of the indemnification structure (3 Honeywell-legacy sites, multi-decade history at Hopewell and Frankford). The 2016 spin-off transferred ALL legacy HSE liabilities to AdvanSix per the disclosure. No quantification of probability-weighted contingent liability is provided.",
+      "severity": "UNVERIFIABLE",
+      "interpretation": "Standard chemical-industry contingent-liability gap — the disclosed accrual ($1.7M 5-year compliance) is materially incommensurate with the breadth of the indemnification (decades of operation at legacy Honeywell facilities). Investors cannot independently verify the tail. This is not unique to ASIX (every spin-co with environmental indemnification has this gap) but the disclosure-vs-quantification asymmetry is real. Not a 'lie' — UNVERIFIABLE by construction."
+    },
+    {
+      "claim_id": "C9",
+      "R": "Critical Audit Matter (PwC): 'Quantitative Goodwill Impairment Assessment ... management changed the annual impairment assessment date to the last day of October close and performed an additional impairment assessment as of October 28, 2023. Due to the share price and current market trend, management performed a quantitative impairment assessment as of October 28, 2023 ... Management's cash flow projections for the reporting unit included significant judgments and assumptions, including revenue growth rate, EBITDA margin, and weighted average cost of capital rate.' No impairment recorded; goodwill remained $56.2M.",
+      "f": "Mode B — derive what this CAM tells you about how close ASIX came to a goodwill impairment trigger, given the share-price decline and the assessment-date change mid-cycle.",
+      "M_source": "Auditor's CAM section (line ~236840) + Note 2 Goodwill (line ~218136)",
+      "M_value": "Three structural facts: (1) Assessment date was CHANGED mid-year from Mar 31 to Oct 28 — an unusual mid-cycle policy revision that conveniently captures the share price downdraft window; (2) Management explicitly cites 'share price and current market trend' as the trigger for a quantitative (not qualitative) test — an admission that the qualitative screen was probably going to fail; (3) WACC and EBITDA-margin assumptions are flagged as the key sensitivities. Test result: fair value > carrying — no impairment. Cushion is not disclosed.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Honest CAM disclosure but the underlying narrative — mid-cycle assessment-date change + share-price-trigger quantitative test that passed — implies ASIX is close to a goodwill impairment trigger if the FY24 EBITDA-margin recovery does not materialize. The auditor implicitly signals 'we looked hard at this and it passed by some margin we won't quantify.' Mode-B priority finding."
+    },
+    {
+      "claim_id": "C10",
+      "R": "Insider Trading Arrangements (Item 9B): 'On November 9, 2023, Achilles B. Kintiroglou ... entered into a trading plan ... for the sale of 17,518 shares and 8,130 stock options ... plan will expire on February 28, 2025. On December 8, 2023, Erin N. Kane, the Company's President and Chief Executive Officer, entered into a trading plan ... for the sale of 60,000 shares. Ms. Kane's plan will expire on March 7, 2025.' (Q1'24 10-Q added: March 13, 2024 Christopher Gramm, VP & Controller, 14,000 shares + 10,374 options.)",
+      "f": "Mode A — Verify each 10b5-1 plan via Form 4 reporting; Mode B — derive whether the timing (Nov-Dec 2023, immediately after weak Q3 results disclosed Nov 3) reflects opportunistic distress selling vs annual-cycle compensation planning.",
+      "M_source": "10-K Item 9B (line ~353958) + Q1'24 10-Q Item 5 (line ~89360) + m_sources.form4 ad-hoc aggregation 2023-11-01 to 2024-05-15 = 21 Form 4 filings",
+      "M_value": "Form-4 ad-hoc aggregation Nov 2023 - May 2024: Kintiroglou (GC) — 6 sale transactions, 13,161 shares total at avg $27.30, gross proceeds ~$359K; Kane (CEO) — 4 sale transactions, 10,000 shares total at avg $28.16, gross proceeds ~$282K. No open-market purchases ('P' code) by ANY named executive in the same window. CEO plan size (60,000 shares) vs typical CEO holdings (~few hundred K shares of restricted + options) is moderate, not large. Plans entered AFTER Q3'23 release (Nov 3, 2023) on which sales had begun declining. Three plans by three different officers in ~4 months (CEO, GC, Controller) is more clustered than a single annual cycle.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Programmatic 10b5-1 sales are not per se a red flag, but Mode-B reading: (a) the timing immediately follows a weak earnings release in a year of -36% drawdown, (b) three different officers entering plans within ~4 months suggests coordinated reading of the same internal indicators, (c) the complete absence of any open-market insider buying after a -36% drawdown signals no internal conviction that the stock is mispriced low. This is a soft signal, not a screaming sell, but it weighs against the management 'we maintained the dividend because we are confident' message in C7."
+    }
+  ],
+  "supplemental_signals": {
+    "auditor": {
+      "firm": "PricewaterhouseCoopers LLP",
+      "pcaob_id": "238",
+      "big4": true,
+      "signal": "CLEAN_AUDITOR_TENURE",
+      "n_resignations_5y": 0,
+      "n_disagreements": 0,
+      "icfr_opinion": "EFFECTIVE",
+      "critical_audit_matter": "Quantitative Goodwill Impairment Assessment (changed assessment date Mar 31 -> Oct 28 2023, quantitative test triggered by share-price decline, passed)"
+    },
+    "going_concern": {
+      "signal": "NO_GOING_CONCERN",
+      "matches_in_10K": 0,
+      "matches_in_Q1_10Q": 0,
+      "interpretation": "No substantial-doubt language; consistent with $30M cash + $329M revolver capacity at FY-end and $20.6M cash + $254M revolver capacity at Q1'24."
+    },
+    "covenant_amendments": {
+      "n_amendments_2023": 1,
+      "amendment_nature": "LIBOR -> SOFR transition (mechanical, June 27 2023) — NOT credit-driven",
+      "stepped_covenant": "Pre-scheduled tightening from 4.00x to 3.75x Leverage Ratio at Q4'23 (set at facility inception 2021, not a distress amendment)",
+      "compliance_status_at_filing": "in compliance, both 10-K and Q1'24 10-Q"
+    },
+    "customer_concentration": {
+      "top_customer": "Shaw Industries Group Inc. (Berkshire Hathaway subsidiary)",
+      "top_customer_pct_2023": 11,
+      "top10_pct_2023": 39,
+      "trend": "stable to declining (12/12/11 for Shaw; 40/39/39 for top-10)",
+      "ar_concentration": "no material concentration of receivables"
+    },
+    "operational_disruption": {
+      "event": "Frankford process-based disruption, January 2024",
+      "8k_disclosure_date": "2024-01-19",
+      "q1_pre_tax_impact_M": 27,
+      "resolution": "returned to targeted utilization rates prior to Q1 quarter-end",
+      "interpretation": "Timely disclosure, quantified, resolved — but illustrates the integrated-supply-chain operational leverage."
+    },
+    "capital_actions": {
+      "dividend_2023_per_qtr": "$0.145 -> $0.160 (raised 10% during weak year)",
+      "dividend_May_2024_declaration": "$0.160 maintained despite Q1 loss",
+      "share_repurchases_2023_M": 46.2,
+      "share_repurchases_authorization_remaining_M": 65.2,
+      "2024_capex_guide_M": "140-150 (vs 107 in 2023, +30-40% YoY)",
+      "revolver_balance_2023_year_end_M": 170,
+      "revolver_balance_q1_2024_M": 245,
+      "interpretation": "Aggressive capital allocation (sustained dividend + step-up capex + buybacks + revolver draw) during a cyclical trough. Implies management confidence in a snapback, but math depends on price recovery."
+    },
+    "insider_form4_aggregate_Nov2023_May2024": {
+      "open_market_buys": 0,
+      "open_market_sells_under_10b5_1": {
+        "Kane_Erin_CEO": {"transactions": 4, "shares": 10000, "gross_proceeds": 281598},
+        "Kintiroglou_GC": {"transactions": 6, "shares": 13161, "gross_proceeds": 359333}
+      },
+      "10b5_1_plan_entries": [
+        {"date": "2023-11-09", "officer": "Kintiroglou GC", "shares": 17518, "options": 8130, "expiry": "2025-02-28"},
+        {"date": "2023-12-08", "officer": "Kane CEO", "shares": 60000, "expiry": "2025-03-07"},
+        {"date": "2024-03-13", "officer": "Gramm VP Controller", "shares": 14000, "options": 10374, "expiry": "2025-06-18"}
+      ],
+      "interpretation": "Three named-executive 10b5-1 plans within ~4 months (Nov-Mar) following the weakest quarterly result of the cycle; zero open-market buying after a -36% drawdown. Programmatic but clustered."
+    },
+    "edgar_fts_corroboration": {
+      "Shaw_agreement_exhibit": "exhibit1036_shawamendment.htm filed with FY2022 10-K (accession 0001673985-23-000007)",
+      "interpretation": "Long-term Shaw contract is a real, amendable, on-file instrument — not narrative-only."
+    },
+    "claim_evolution_vs_FY2022_10K": {
+      "new_in_FY2023_10K": [
+        "Goodwill assessment date changed from Mar 31 to Oct 28",
+        "Quantitative goodwill impairment test triggered by share-price decline (passed)",
+        "Oben alliance exit (Sep 8 2023) with $11.4M gain",
+        "Exit from low-margin oximes products and legacy ammonium-sulfate licensee",
+        "U.S. Amines acquired Feb 2022; FY23 is full-year contribution + integration",
+        "Three 10b5-1 plans entered in 4-month window (Nov-Mar)",
+        "Revolver drawn balance $170M (vs prior FY $115M, +$55M)"
+      ],
+      "absent_distress_markers": [
+        "No going-concern language",
+        "No covenant amendments under distress (only LIBOR/SOFR mechanical + pre-scheduled step)",
+        "No auditor change",
+        "No material weakness",
+        "No prior-period restatement",
+        "No NT (late-filing) notifications",
+        "Dividend maintained AND raised 10% during weak year"
+      ]
+    },
+    "honesty_framework_summary": {
+      "what_management_disclosed_well": [
+        "21% revenue decline with clear price/volume/acquisition decomposition",
+        "Frankford disruption — timely 8-K, quantified $27M Q1 impact, resolution timing",
+        "Stepped covenant ratios disclosed as pre-scheduled, not distress-driven",
+        "Customer concentration percentages stable and named (Shaw at 11%)",
+        "Goodwill CAM acknowledges share-price trigger for out-of-cycle test"
+      ],
+      "what_management_obscured_or_underdelivered": [
+        "How much of the FY22 base was a one-time fertilizer price spike vs sustainable run-rate (no quantification)",
+        "Goodwill impairment cushion magnitude (CAM passed but margin not disclosed)",
+        "Environmental indemnification probability-weighted tail (only compliance accrual of $1.7M 5-yr disclosed)",
+        "Coverage analysis of the dividend by FCF after the step-up capex (math is implicit)"
+      ],
+      "verdict_rationale": "Honesty framework (R/f/M) is designed to short LIARS, not bad businesses. ASIX is a cyclical chemicals issuer in a price-cycle trough with HONEST disclosure: Big-4 auditor unqualified, no covenant amendments under distress, customer concentration disclosed and stable, operational disruption disclosed timely with quantification, dividend continuity even at a loss. The 6 moderate findings are structural (cyclical floor undisclosed, tail risk unquantified) not deceptive. This is a LONG-tier name within the honesty-alpha framework: bad-looking but honestly-disclosed -36% drawdown."
+    }
+  },
+  "summary": "ASIX's FY2023 10-K (filed 2024-02-16) and Q1'24 10-Q (filed 2024-05-03) describe a cyclical chemicals issuer in a price-cycle trough with HONEST disclosure: PwC (Big 4) unqualified opinion on both financial statements and ICFR, no covenant amendments under distress (only mechanical LIBOR/SOFR + pre-scheduled step-down), no going-concern language, $30M cash + $329M revolver capacity at FY-end stepping to $20.6M + $254M at Q1'24, customer concentration stable (Shaw at 11%, top-10 at 39%, ~20-year average customer relationships, Berkshire-owned counterparty), Frankford operational disruption disclosed via timely 8-K Jan 19 2024 with quantified $27M Q1 pre-tax impact and resolution before quarter-end. Sales declined 21% in FY23 ($412M) primarily on ammonium-sulfate and nylon price normalization (-17%) with raw-material pass-through (-5%) — decomposition reconciles. Soft yellow flags: (a) three named-executive 10b5-1 plans entered in Nov-Mar window for moderate amounts with zero open-market insider buying after a -36% drawdown, (b) goodwill impairment assessment date changed mid-cycle to Oct 28 with a share-price-triggered quantitative test that PASSED (CAM), (c) dividend maintained AND raised through the trough while 2024 capex stepped up 30-40% YoY — aggressive but not opaque. The honesty framework is designed to exclude liars, not bad cyclical businesses; the framework PASSES this name. Verdict: LONG-tier — cyclical drawdown with clean disclosure quality.",
+  "verdict": "LONG",
+  "composite": 0.82
+}

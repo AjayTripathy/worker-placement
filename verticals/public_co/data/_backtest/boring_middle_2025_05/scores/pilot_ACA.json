@@ -1,0 +1,119 @@
+{
+  "ticker": "ACA",
+  "company": "Arcosa, Inc.",
+  "cutoff": "2025-05-15",
+  "filing": "0001739445-25-000026_10K.txt",
+  "filing_date": "2025-02-28",
+  "cik": "0001739445",
+  "sector": "Industrials",
+  "industry": "Engineering & Construction",
+  "group": "boring_middle",
+  "rfm_tuples": [
+    {
+      "claim_id": "C1",
+      "R": "As of December 31, 2024, we were in compliance with all such financial covenants. ... The Credit Agreement requires the maintenance of certain ratios related to leverage and interest coverage. ... provide that such ratio shall be no greater than 5.00 to 1.00 during the fourth quarter of 2024 and the next two fiscal quarters, 4.50 to 1.00 for the next following two fiscal quarters, and 4.00 to 1.00 for each fiscal quarter thereafter.",
+      "f": "going_concern_detector + manual scan for going-concern language, covenant default, forbearance, waiver. Also verify covenant compliance forward through Q1 2025 10-Q (filed 2025-05-07).",
+      "M_source": "going_concern_local + self_text + Q1 2025 10-Q (0001739445-25-000067)",
+      "M_value": "Zero matches for 'going concern' or 'substantial doubt' in the 10-K text. One 'waiver' hit is to the Code of Conduct (unrelated). Nine 'breach' hits all refer to customer/supplier contract breach risk, not lender. Q1 2025 10-Q explicitly reiterates 'As of March 31, 2025, we were in compliance with all such financial covenants' and SOFR margin actually STEPPED DOWN from 2.50% to 2.00% and commitment fee from 0.45% to 0.35% (leverage ratio improved enough to drop a pricing tier).",
+      "severity": "PASS",
+      "interpretation": "Disclosure matches reality. Stavola-induced leverage spike is being absorbed cleanly — pricing-grid step-down between YE24 and Q1 25 is hard evidence the covenant cushion is widening, not shrinking."
+    },
+    {
+      "claim_id": "C2",
+      "R": "Revenues from GE Vernova, Inc. (GE Vernova), a customer in our Engineered Structures segment, constituted 10.8%, 8.1%, and 9.3% of consolidated revenues for the years ended December 31, 2024, 2023, and 2022, respectively.",
+      "f": "Mode B — verify the GE Vernova relationship via EDGAR counterparty-mirror search; check if GE Vernova's own filings reference Arcosa as a supplier and whether any cancellation/dispute language exists. Also check wind tower backlog trajectory ($1.1B since IRA passage).",
+      "M_source": "edgar_fts.query_fulltext + 10-K backlog disclosures + Q1 2025 10-Q backlog table",
+      "M_value": "EDGAR FTS for 'GE Vernova Arcosa' and '\"GE Vernova\" Arcosa wind tower' returned ZERO hits (counterparty mirror is silent — neither party publicly references the other in distress contexts). Backlog trajectory: Eng. Structures utility/wind/related backlog $1,366.7M (Q1 24) -> $1,190.8M (Q4 24) -> $1,094.1M (Q1 25), -20% YoY. 10-K disclosed 64% of YE24 backlog to be delivered in 2025; Q1 25 disclosure reduced that to 59%, consistent with new orders being slower to fill the gap. MD&A explicitly notes 'The timing of new orders may be unpredictable, particularly as the market adjusts to a new administration.'",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "GE Vernova concentration is honestly disclosed (10.8% and rising). Bigger Mode B catch: Engineered Structures backlog is down 20% YoY by Q1 2025 and management's own forward-looking language flags wind-order timing risk under the new administration — a genuine soft underbelly for a name where wind towers are the growth thesis."
+    },
+    {
+      "claim_id": "C3",
+      "R": "We have served as the Company's auditor since 2015. /s/ ERNST & YOUNG LLP",
+      "f": "auditor_change_tracker — 5-year lookback for 8-K Item 4.01, Big 4 resignations, reportable disagreements.",
+      "M_source": "auditor_change_tracker (8-K Item 4.01 scan via EDGAR, lookback_start 2020-05-16)",
+      "M_value": "n_8k_item_401: 0; n_big4_resignations: 0; n_disagreements: 0; signal: CLEAN_AUDITOR_TENURE. EY tenure now 10 years (since spin-off from Trinity Industries in 2018, audit relationship since 2015). May 14 2025 8-K shows shareholders ratified EY for FY2025 by 45.9M For / 0.23M Against.",
+      "severity": "PASS",
+      "interpretation": "Clean Big 4 auditor history. Critical Audit Matter is Stavola business-combination valuation (mineral-reserve fair value), which is appropriate disclosure given the $1.2B acquisition — no signs of audit stress."
+    },
+    {
+      "claim_id": "C4",
+      "R": "On October 1, 2024, we completed the acquisition of the construction materials business of Stavola Holding Corporation and its affiliated entities ('Stavola') for $1.2 billion in cash... The purchase price was funded with a $700.0 million secured term loan facility (the Term Loan) that matures in October 2031 and $600.0 million of 6.875% senior notes (the 2024 Notes) that mature in August 2032.",
+      "f": "Verify the Stavola transaction details and capital structure changes against EDGAR — confirm the 8-K/A pro-forma financials were filed and counterparty existence is real.",
+      "M_source": "edgar_fts.query_fulltext('Stavola Holding', cutoff_date='2025-05-15')",
+      "M_value": "27 EDGAR hits for 'Stavola Holding': 8-K filed 2024-08-06 (announcement, with target standalone Q1/Q3 2024 financials as exhibits) and 8-K/A filed 2024-12-16 (pro-forma combined statements + EY consent + auditor's report on Stavola standalone). Acquisition closed October 1, 2024 as disclosed. Term Loan ($700M @ SOFR+225bps, mat. Oct 2031) and 6.875% 2032 Notes ($600M) both confirmed via 10-K Note 8 and Q1 10-Q. Total debt $1.7B at YE24.",
+      "severity": "PASS",
+      "interpretation": "Real, large, fully-papered acquisition with target audited standalone financials filed on 8-K/A. Stavola is a genuine NJ aggregates platform (5 quarries + 12 asphalt plants + 3 recycled sites) — not a shell or related-party deal. EY signed off on the carve-out audit and the combined pro-forma."
+    },
+    {
+      "claim_id": "C5",
+      "R": "Implied claim — for a name down 20.8% pre-cutoff in a 'boring middle' industrial, insiders should NOT be aggressively selling if management believes the thesis (Stavola integration + wind tower backlog + barge replacement cycle) is intact.",
+      "f": "insider_vs_calendar / form4 — parse ALL Form 4s 2024-01-01 to 2025-05-14, classify by transaction code (P=open-market purchase, S=open-market sale, F=tax-withholding, A=grant), aggregate dollar volume, identify who is buying/selling at what price.",
+      "M_source": "form4.fetch_form4_xml on all 64 pre-cutoff Form 4s (Jan 2024 - May 2025)",
+      "M_value": "Non-derivative transaction counts: A (grant)=29, F (tax withhold)=23, P (open-market buy)=7, S (open-market sale)=5, G (gift)=1. Open-market PURCHASES totaled $2,139,300 vs SALES of $2,162,907 (roughly balanced gross but the COMPOSITION is striking). CEO Antonio Carrillo bought $1.4M+ across 4 transactions (Aug 2024 @ $80-82, Mar 2025 @ $78-79). Director Steven Demetriou bought 6,000sh @ $87.70 on 2024-09-12 ($526K). Director Rhys Best bought 1,500sh @ $79.84 on 2025-03-05 ($120K) — 10 weeks before cutoff. ALL FIVE OPEN-MARKET SALES occurred May-Aug 2024 by Group Presidents Cole/Collins/Stevenson at $83-89 (pre-Stavola-driven drawdown). No CEO/CFO open-market sales in the entire window.",
+      "severity": "PASS",
+      "interpretation": "Strong Mode B FAVORABLE signal. As the stock drew down from ~$110 (mid-2024) to ~$83 (May 2025), the CEO, a director, and another director all stepped in with open-market purchases at $78-88 — including a $120K buy by Director Best ten weeks before cutoff. There is no insider distribution into the drawdown; the buy-side activity is consistent with management viewing the post-Stavola leverage and -20.8% drawdown as opportunity, not distress."
+    },
+    {
+      "claim_id": "C6",
+      "R": "Since the passage of the IRA we have received new orders of $1.1 billion for delivery through 2028, a large portion of which will support wind energy expansion projects in the Southwest.",
+      "f": "claim_evolution — compare the wind-tower backlog narrative between the 10-K (2025-02-28) and the Q1 2025 10-Q (2025-05-07). Look for claim drift in the 'since IRA' headline number and the order-timing language.",
+      "M_source": "self_text 10-K vs Q1 2025 10-Q + backlog tables",
+      "M_value": "The '$1.1B of new orders since IRA passage for delivery through 2028' number is REPEATED verbatim in both the 10-K and the Q1 10-Q — no claim inflation, but also no NEW orders added in the intervening ~10 weeks despite ongoing customer dialogue. Engineered Structures utility/wind/related backlog: $1,366.7M (Mar 2024) -> $1,190.8M (Dec 2024) -> $1,094.1M (Mar 2025). 10-K had 64% of backlog scheduled for 2025 delivery; Q1 10-Q shows only 59% of the (smaller) Q1 backlog for 2025. Q1 10-Q adds the cautionary phrase: 'The timing of new orders may be unpredictable, particularly as the market adjusts to a new presidential administration.'",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "No outright dishonesty — both filings disclose the same $1.1B IRA-era cumulative number and the declining backlog is transparently tabled. But the implied wind-order momentum is stalling: zero net new wind orders in the most recent 10-week window, 20% YoY backlog decline, and management itself adds the 'new administration' caveat in Q1 10-Q. The growth claim is real-but-aging."
+    },
+    {
+      "claim_id": "C7",
+      "R": "Backlog of inland barges $280.1M at December 31, 2024 ... Approximately 92% of the unsatisfied performance obligations for inland barges in our Transportation Products segment are expected to be delivered during 2025.",
+      "f": "claim_evolution — verify the barge-replacement-cycle thesis by tracking backlog trajectory and order intake between the 10-K and Q1 10-Q.",
+      "M_source": "self_text 10-K vs Q1 2025 10-Q backlog tables",
+      "M_value": "10-K: barge backlog $280.1M at YE24 (+10.4% YoY). Q1 10-Q: barge backlog $333.6M at Mar 31, 2025 (+19.1% from YE24, +13.3% YoY). $142M of new tank-barge orders booked in Q1 2025 'extending tank barge backlog well into 2026'. Q1 barge revenue $84.4M vs $79.7M YoY (+5.9%).",
+      "severity": "PASS",
+      "interpretation": "Mode B confirms — the barge replacement-cycle thesis is materializing in real time. Backlog stepped up materially Q-over-Q with new orders genuinely landing. Counter-weight to the wind-tower softness in C6."
+    },
+    {
+      "claim_id": "C8",
+      "R": "As of December 31, 2024, our total debt (excluding debt issuance costs) was approximately $1.7 billion ... If interest rates average one percentage point more in fiscal year 2025 than they did during 2024, our interest expense would increase by $7.0 million. In comparison, at December 31, 2023, we estimated that an average increase of one percentage point would increase interest expense by $1.6 million.",
+      "f": "Mode B — derive whether the Stavola-induced leverage is being honestly framed for interest-rate sensitivity. Verify the $7.0M sensitivity number against the Term Loan balance and check Q1 2025 actual interest expense trajectory.",
+      "M_source": "self_text + Q1 2025 10-Q interest expense",
+      "M_value": "$700M Term Loan @ SOFR+225bps is the only variable-rate exposure; $7.0M sensitivity = ~1% of $700M, confirms 10-K math (sensitivity nearly QUADRUPLED YoY from $1.6M to $7.0M, honestly disclosed). Q1 2025 interest expense: $28.3M vs $8.3M prior-year Q1 (+$20M YoY, annualized ~$113M vs 2024 full-year $70.9M) — the step-up in interest expense is REAL and confirmed by the Q1 10-Q. No interest-rate hedge in place against the Term Loan (10-K Note 7 confirms the prior swap expired in October 2023 and was not replaced).",
+      "severity": "PASS",
+      "interpretation": "Honest disclosure of a real cash-flow risk. The Stavola financing dramatically increased rate-sensitivity (4x YoY) and management disclosed it cleanly. The pricing-grid step-down in Q1 25 (SOFR margin 250 -> 200bps) modestly offsets, but $700M unhedged variable-rate exposure is a genuine watch-item for forward periods."
+    },
+    {
+      "claim_id": "C9",
+      "R": "Implied claim — Stavola's $1.2B purchase-price-allocation should not trigger subsequent impairment if the mineral-reserve fair-value assumptions (weighted-average cost of capital, average selling price, EBITDA margin) prove reasonable.",
+      "f": "Mode B — the EY Critical Audit Matter explicitly flags Stavola mineral-reserve valuation as the area of 'significant estimation uncertainty'. Check Q1 2025 segment performance for the acquired Stavola business to see if the underlying assumptions are tracking.",
+      "M_source": "self_text 10-K (PCAOB CAM) + Q1 2025 10-Q segment results",
+      "M_value": "Q1 2025 Construction Products revenue $262.8M vs $251.2M YoY (+4.6%) — but PRE-existing legacy aggregates business comparable, so all incremental ~$11.6M is Stavola contribution against a $1.2B purchase price (NJ market is winter-seasonal, so Q1 is dilutive). Management acknowledges 'the seasonally dilutive impact of the acquired Stavola business, which is more impacted by the winter months than our legacy operations.' No impairment recognized. Construction Products segment operating profit DECLINED YoY despite the acquisition contribution. Goodwill on the YE24 balance sheet is $1,002.7M (vs $530.9M YE23) and Construction Products intangibles stepped up materially.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "EY's CAM is justified: Stavola's purchase-price allocation rests on forward EBITDA margin and selling-price assumptions for NJ-metro aggregates. Q1 25 already shows segment operating profit decline despite the acquisition — disclosed as 'seasonal' but worth tracking. Material goodwill/intangible step-up creates non-trivial impairment risk if NJ infrastructure-spending cycle softens or interest-rate-sensitive private construction stalls. No active red flag, but the largest line on the balance sheet now depends on assumptions EY itself flagged as the key audit estimate."
+    },
+    {
+      "claim_id": "C10",
+      "R": "Arcosa periodically evaluates for potential impairment the carrying values of Arcosa's long-lived assets ... [and] In August 2024, the Company completed the sale of its steel components business ... we recognized a pre-tax loss of $21.6 million on the sale of the business.",
+      "f": "Mode B — check whether divestitures and small impairments are being used as routine 'kitchen-sink' adjustments to clean up segment narratives, and whether the divestiture cadence is consistent with the stated portfolio-transformation strategy.",
+      "M_source": "self_text 10-K Item 7 + Cash Flow Statement + Q1 10-Q",
+      "M_value": "Divestiture cadence over 2018-2024: storage tanks ($271.6M proceeds, Oct 2022, +$189M gain), steel components ($110M consideration, Aug 2024, -$21.6M loss). 2024 also includes $5.8M impairment charge and a $2.1M loss on sale of businesses. Sale of depleted land gains were $10.3M (2024), $28.2M (2023, includes a one-off $21.8M gain), $11.7M (2022) — recurring but lumpy, prior-year mix flatters the 2023 base. Steel components $30M earnout marked at $15.4M fair-value at YE24 (50% haircut already taken) and seller's note $25M.",
+      "severity": "PASS",
+      "interpretation": "Portfolio reshaping is consistent with stated strategy (exit cyclical legacy Trinity-era businesses to fund aggregates/wind growth). Loss on steel components is honestly recognized; earnout marked at 50% haircut already shows conservative posture. Depleted-land gains are a recurring non-core income line that flatters operating profit comparability but is fully disclosed in segment tables."
+    }
+  ],
+  "supplemental_signals": {
+    "auditor_signal": "PASS — Ernst & Young LLP since 2015 (Big 4, unqualified), 10-year tenure, no resignations/disagreements. Shareholders ratified EY for FY25 by 99.5% on 2025-05-14. CAM is Stavola business-combination valuation (appropriate scope).",
+    "going_concern": "NO going-concern or substantial-doubt language in 10-K or Q1 2025 10-Q. In compliance with all financial covenants as of both YE24 and Q1 25. Credit-spread step-down (SOFR margin 250 -> 200bps) between filings indicates leverage cushion is widening.",
+    "insider_behavior": "POSITIVE — over 16 months pre-cutoff (Jan 2024 - May 2025): 7 open-market BUYS totaling $2.14M (CEO Carrillo $1.4M+, Directors Demetriou $526K + Best $120K) vs 5 open-market SALES totaling $2.16M (all by Group Presidents in May-Aug 2024 before the drawdown). NO CEO/CFO open-market sales. Director Best bought 10 weeks before cutoff at $79.84.",
+    "covenant_grid_step_down": "Q1 2025 10-Q shows SOFR margin on revolver dropped from 2.50% to 2.00% and commitment fee from 0.45% to 0.35% between YE24 and Q1 25 — concrete evidence that net leverage ratio improved enough to clear a pricing tier in one quarter.",
+    "backlog_dynamics": "Mixed. Engineered Structures (utility/wind/related) backlog declining: $1,366.7M (Q1 24) -> $1,190.8M (Q4 24) -> $1,094.1M (Q1 25), -20% YoY. Inland barges backlog improving: $253.7M (YE23) -> $280.1M (YE24) -> $333.6M (Q1 25), +19.1% Q-over-Q. Net: weakness concentrated in wind-tower order intake under new administration policy uncertainty.",
+    "stavola_integration": "Q1 25 Construction Products revenue +4.6% YoY (Stavola contribution offset by NJ winter seasonality on legacy business); segment operating profit declined YoY. Goodwill stepped up to $1.0B from $531M. EY CAM flags this as the key audit estimate. No impairment recognized; worth tracking.",
+    "counterparty_mirror": "EDGAR FTS clean — Stavola Holding shows 27 hits, ALL Arcosa's own filings (proper 8-K/A pro-forma disclosure with EY consent and target audit). GE Vernova counterparty mirror returns zero hits (silent in both directions — no signal either way).",
+    "interest_rate_sensitivity": "Rate sensitivity 4x higher YoY ($1.6M -> $7.0M per 100bps) due to $700M Term Loan, no swap in place. Honestly disclosed in 10-K Item 7A. Forward periods exposed to SOFR movement.",
+    "segment_concentration": "GE Vernova 10.8% of consolidated revenue (rising from 8.1% YoY) — single-customer concentration in Engineered Structures wind towers. Disclosed cleanly but a key dependency.",
+    "claim_evolution_check": "$1.1B 'IRA-era cumulative wind orders for delivery through 2028' is repeated VERBATIM in 10-K (Feb 28 2025) and Q1 10-Q (May 7 2025) — no claim inflation, but also no incremental orders booked in the 10-week window, and Q1 10-Q adds a fresh 'new administration' caveat.",
+    "share_repurchase": "Board authorized new $50M program effective Jan 2025 - Dec 2026 to replace expired program. ZERO repurchases in 2024 under prior program (capital deployed for Stavola/Ameron instead). Dividend held flat at $0.20/yr."
+  },
+  "summary": "ACA is a clean honest industrial disclosure with mostly PASS R/f/M tuples. The 'boring middle' -20.8% drawdown looks like a sentiment penalty for the post-Stavola leverage spike (debt $1.7B, interest expense step-up from $28M to ~$71M run-rate, 4x rate-sensitivity) rather than concealed distress. Big 4 auditor (EY, 10-year tenure) with appropriate CAM, no going-concern language, in compliance with all financial covenants at both YE24 and Q1 25 — and concretely the SOFR margin actually stepped DOWN from 250 to 200bps between filings, evidence the leverage cushion is widening within one quarter of Stavola closing. Insider behavior is favorable: CEO Carrillo bought $1.4M+ open-market, two directors bought (incl. Best $120K ten weeks before cutoff), zero CEO/CFO sales — the buy-side is leaning into the drawdown. Three MODERATE flags worth noting: (C2/C6) Engineered Structures backlog declining 20% YoY with zero net new wind orders in the 10-week window between filings and management's own 'new administration' caveat — the wind-tower growth thesis is decelerating; (C9) Stavola purchase-price allocation rests on the mineral-reserve fair-value assumptions EY explicitly flagged as the CAM, with $1.0B of new goodwill on the balance sheet and Q1 25 Construction Products operating profit already declining YoY (disclosed as seasonal). Inland barge backlog is offsetting positively (+19% Q-over-Q with $142M of new tank-barge orders extending into 2026). Net read: honestly disclosed, balance-sheet-stretched but de-leveraging in real time, with insiders buying — closer to a LONG-tier candidate than a SHORT.",
+  "composite": 0.74,
+  "verdict": "LONG-tier"
+}

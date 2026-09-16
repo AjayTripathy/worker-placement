@@ -1,0 +1,68 @@
+{
+  "ticker": "SYM",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Walmart ~85% of FY25 revenue; Symbotic deployed in all 42 Walmart regional DCs under 2022 MAA",
+      "severity": "PASS",
+      "supports": ["walmart_8k_repeated_mentions"],
+      "M_check": "edgar_fts.query_fulltext(search_term='Symbotic', cik='0000104169')",
+      "M_value": "14 total hits across Walmart filings (all 8-K earnings releases / presentations) spanning 2023-2026. 5 hits in 2025-2026 alone (2025-02-20, 2025-05-15, 2025-08-21, 2025-11-20, 2026-02-19). 0 hits in WMT 10-K body text — but Walmart's quarterly earnings call presentations repeatedly cite Symbotic, satisfying Layer 3 Rule 7 counterparty-disclosure threshold for material customer corroboration.",
+      "interpretation": "PASS. Strong counterparty corroboration. The customer-concentration claim (85% of revenue from Walmart) is supported by Walmart's repeated and explicit naming of Symbotic in management's earnings materials over multiple years. Stage-ladder: this is scaled multi-site / recurring revenue, the most advanced stage on the robotics ladder."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Jan 2025 ASR acquisition from Walmart + 2025 Walmart MAA: 400 micro-fulfillment system commitment, $520M dev funding to SYM",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["walmart_2025_2026_earnings_mentions"],
+      "M_check": "edgar_fts.query_fulltext(search_term='Symbotic'/'Advanced Systems and Robotics'/'micro-fulfillment', cik='0000104169')",
+      "M_value": "Walmart's 8-K earnings presentations in 2025 and 2026 (5 filings post-deal close) continue to mention Symbotic, but neither 'Advanced Systems and Robotics' nor 'micro-fulfillment' appears in Walmart EDGAR filings (0 hits each). The 400-unit purchase commitment is CONTINGENT on satisfaction of defined performance metrics, and as of Sept 27, 2025 SYM is operating only 'several' micro-fulfillment systems with first next-gen prototypes planned for calendar 2026. Walmart's own deal disclosure detail is thin.",
+      "interpretation": "MODERATE_UNDERDELIVERY. The headline '400-unit + $520M' figure is real-contract but mostly contingent and forward-looking. Calibration Heuristic 3 (planned vs operational) and Heuristic 9 (pilot vs deployment conflation) apply: 'several' operating micro-fulfillment systems vs 400 promised is a wide ladder gap. Walmart's lack of granular EDGAR disclosure of micro-fulfillment / ASR (only the parent name reaches earnings slides) is consistent with the deal being non-material from Walmart's vantage — appropriate for the size of Walmart, but it means the framework cannot independently verify pace of deployment milestones from the counterparty side."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "GreenBox JV with SoftBank (SYM 35% / SoftBank 65%): $7.5B 6-year commitment; $11.6B remaining performance obligation at Sept 27, 2025; SYM max exposure $1.57B incl. $1.56B future funding commitments",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["greenbox_widely_referenced_in_sym_filings"],
+      "M_check": "edgar_fts.query_fulltext(search_term='GreenBox Systems')",
+      "M_value": "33 EDGAR fulltext hits for 'GreenBox Systems'; all from Symbotic's own filings (no third-party SEC filer corroboration — SoftBank's relevant entity SVF II Strategic Investments AIV LLC and Sunlight Investment Corp are not regular SEC filers). GreenBox commercial agreement and amendments are filed as SYM exhibits. FY25 GreenBox-related revenue recognized: $83.0M (vs $6.0M FY24). Contract liabilities to GreenBox: $142.7M; deferred revenue ramping.",
+      "interpretation": "MODERATE_UNDERDELIVERY. The JV structure and commitments are real and disclosed, but the $7.5B / $11.6B headline backlog with a 35%-owned VIE that SYM must FUND (max exposure $1.57B) raises Heuristic 11 concerns: the second-largest 'customer' is one in which SYM is a material equity participant and funding source. SoftBank's investment is investment-not-customer-revenue per Heuristic 4. Actual GreenBox revenue ($83M FY25) is only ~1.1% of $7.5B commitment, six years in nominal term but only ~2.5 years actually elapsed since the July 2023 commitment — slow start vs the trajectory required to hit $7.5B by July 2029, with optional 2-year extension. No counterparty side independent SEC corroboration."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Approximately 1,100 issued and/or pending patents in robotics/AI/autonomous systems",
+      "severity": "PASS",
+      "supports": ["uspto_228_granted"],
+      "M_check": "uspto_odp.query_assignee(assignee_name='Symbotic')",
+      "M_value": "USPTO Open Data Portal: n_total_applications=446, n_granted=228 for assignee 'Symbotic' (Symbotic LLC). Recent applications include 'AUTONOMOUS TRANSPORT VEHICLE WITH SYNERGISTIC VEHICLE DYNAMIC RESPONSE' (2025-12-09), 'CLIMBING ROBOT WITH COMPLIANT PINION DRIVE' (2025-11-11), 'AUTONOMOUS TRANSPORT VEHICLE WITH VISION SYSTEM' (2025-11-18), 'WAREHOUSING SCALABLE STORAGE STRUCTURE' (2025-12-09), 'ORDER FULFILLMENT SYSTEM WITH AUTOMATED DISPENSING' (2025-12-29). Strong concentration in robotics, autonomous vehicles, warehouse storage, vision — directly matching claimed technology areas.",
+      "interpretation": "PASS per Heuristic 8 (n_granted >= 10 with claimed-technology hits). Company headline '~1,100 issued and/or pending' is higher than USPTO ODP US count (446 applications, 228 granted) — gap likely reflects foreign patent filings + CasePick legacy entity + pending non-US filings, plus the 'and/or' framing. Tech-area concentration is unambiguously real. No Nikola pattern."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Material weakness in ICFR re cost-of-revenue timing (FY25, adverse Grant Thornton opinion) + prior FY24 material weakness on revenue recognition (remediated FY25) + pending securities class actions (Decker/Traina) alleging false statements on rev rec, deployment times, internal controls",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": ["sym_19_self_disclosure_hits_for_material_weakness", "active_securities_class_actions"],
+      "M_check": "edgar_fts.query_fulltext(search_term='material weakness', cik='0001837240')",
+      "M_value": "19 hits in SYM's own filings for 'material weakness'. Two consecutive fiscal years (FY24, FY25) of material-weakness disclosure. FY24 weakness was on revenue recognition (cost overruns not billable) — directly on the revenue line. FY25 weakness shifted to cost-of-revenue timing — which under percentage-of-completion accounting ALSO impacts revenue recognition. Grant Thornton (independent auditor) issued an adverse opinion on ICFR for FY25. Two putative securities class actions (Fox dismissed; Decker → amended as Traina) pending; Traina specifically alleges misstatements on 'revenue recognition, deployment times, and internal controls' for the Feb 2024-Feb 2025 class period; motion to dismiss hearing was scheduled for Dec 16, 2025.",
+      "interpretation": "SEVERE_UNDERDELIVERY. Per Heuristic 11 (revenue-recognition pattern, robotics-specific) and Heuristic 9 (pilot vs deployment conflation tied to deployment-time misstatement allegations in the class action), this is the central forensic-disclosure concern. The framework should treat any forward-revenue or backlog-conversion claim by SYM with elevated skepticism while (a) the adverse ICFR opinion remains outstanding, (b) the second consecutive material-weakness disclosure is unremediated, and (c) the Traina securities class action is unresolved. Note: the FY25 weakness is self-characterized as 'immaterial' in actual misstatement terms — but the persistence of weakness across two cycles, with auditor adverse opinion, is itself the red flag."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "C&S Wholesale Grocers is an affiliate / related-party customer; shared executives with SYM; FY revenue from C&S: $12.2M (FY25), $58.9M (FY24), $15.8M (FY23)",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["cs_wholesale_widely_referenced_in_third_party_filings"],
+      "M_check": "edgar_fts.query_fulltext(search_term='C&S Wholesale')",
+      "M_value": "339 EDGAR fulltext hits for 'C&S Wholesale' across multiple filers (SpartanNash, Albertsons, Kroger M&A filings, Symbotic DEF 14As). C&S itself is private (no SEC filings of its own), but it is a real, large, frequently-named grocery wholesaler. SYM's revenue from C&S declined sharply from $58.9M FY24 to $12.2M FY25 (-79%), per SYM's own related-party note.",
+      "interpretation": "MODERATE_UNDERDELIVERY. The relationship is real and corroborated by third-party filings. Concern: (1) related-party customer with shared executives is a governance/conflict flag per the 10-K's own risk factor; (2) the steep FY24→FY25 revenue decline from C&S (-79%) is not highlighted in management discussion but is visible only in the related-party note — suggesting that one of the few non-Walmart commercial customers is rapidly de-scaling. This sharpens, rather than mitigates, the Walmart-concentration risk."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Q1 FY2025 commercial agreement with Nueva Wal-Mart de Mexico to deploy systems in two locations near Mexico City",
+      "severity": "UNVERIFIABLE",
+      "supports": ["no_walmex_sec_filings_to_check"],
+      "M_check": "edgar_fts.query_fulltext(search_term='Symbotic', cik='0001037925')",
+      "M_value": "0 hits — but Walmart de Mexico (Walmex) is BMV-listed in Mexico, not an SEC filer in its own right (its consolidated activity rolls up into Walmart Inc.'s 10-K, where Symbotic appears at parent-customer level in earnings materials but Walmex-specific contracts would not). Per Calibration Heuristic 5 (source-jurisdiction mismatch) and Heuristic 2 (foreign-issuer caveat), absence of EDGAR mention of this specific Walmex sub-contract is expected.",
+      "interpretation": "UNVERIFIABLE within the framework's catalog. The claim is small in scope (2 sites), is plausibly an extension of the existing Walmart relationship, and is not material enough to expect SEC disclosure on the counterparty side. No contradiction signal; no positive corroboration signal."
+    }
+  ]
+}

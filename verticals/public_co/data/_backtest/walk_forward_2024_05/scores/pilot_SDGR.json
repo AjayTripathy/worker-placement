@@ -1,0 +1,142 @@
+{
+  "ticker": "SDGR",
+  "company": "Schrödinger, Inc.",
+  "cutoff": "2024-05-15",
+  "filing": "0001490978-24-000018_10K.txt",
+  "filing_date": "2024-02-28",
+  "cik": "0001490978",
+  "sector": "Healthcare",
+  "industry": "Health Information Services",
+  "group": "walk_forward_2024",
+  "rfm_tuples": [
+    {
+      "claim_id": "C1",
+      "R": "Solvency / going-concern posture: 10-K states 'As of December 31, 2023, we had cash, cash equivalents, restricted cash, and marketable securities of $468.8 million. We believe that our existing cash, cash equivalents, and marketable securities as of December 31, 2023 will be sufficient to fund our operating expenses and capital expenditure requirements through at least the next 24 months.' No substantial-doubt language. Implicit claim: balance sheet is not the source of the -57.8% drawdown.",
+      "f": "If liquidity narrative is truthful, going_concern_local should return NO_GOING_CONCERN with zero current-period phrase matches, AND the pre-cutoff Q1 2024 10-Q should show cash still ample relative to burn.",
+      "M_source": "going_concern_local.going_concern_from_text on local 10-K text + claim_evolution cross-read against Q1 2024 10-Q (filed 2024-05-01, pre-cutoff)",
+      "M_value": "signal=NO_GOING_CONCERN, n_matches=0, n_current_period=0, n_cure=0, n_historical=0. Q1 2024 10-Q reaffirms: 'cash, cash equivalents, restricted cash, and marketable securities of $435.7 million' as of 3/31/2024 — i.e., ~$33M sequential cash decline in one quarter against a Q1 loss from operations of -$67.4M (vs -$30.5M Q1 2023, +121% YoY). Implied cash runway against operating burn alone is ~13 quarters/3+ years; 10-K's 24-month statement is consistent on the headline but understates the acceleration in burn.",
+      "severity": "PASS",
+      "interpretation": "Solvency posture verifies cleanly — SDGR is NOT a near-bankruptcy or going-concern name. The drawdown is a story about deteriorating economics (operating burn 2x'ing YoY in Q1 2024) and collapsing drug-discovery revenue (see C3), not balance-sheet fragility. ~$436M cash + 24-month guidance is honest at the headline; the worsening burn rate IS visible in the very pre-cutoff Q1 10-Q the company filed."
+    },
+    {
+      "claim_id": "C2",
+      "R": "Auditor: '/s/ KPMG LLP ... We have served as the Company's auditor since 2010. Portland, Oregon February 28, 2024' and front-page 'Auditor Firm Id: 185 Auditor Name: KPMG LLP'. Implicit claim: stable Big-4 audit relationship of ~14 years through cutoff.",
+      "f": "If auditor narrative is truthful, the auditor_change_from_text detector should return CLEAN_BIG4_TENURE with no resignation/disagreement language, AND no Item 4.01 8-K in the pre-cutoff window.",
+      "M_source": "going_concern_local.auditor_change_from_text + EDGAR 8-K index scan",
+      "M_value": "signal=CLEAN_BIG4_TENURE, firms_mentioned=['KPMG'], n_firms=1, n_resignation_lang=0, n_disagreement_lang=0, is_big4=True. EDGAR 8-K index for CIK 0001490978 shows no Item 4.01 (auditor change) filing pre-cutoff.",
+      "severity": "PASS",
+      "interpretation": "Auditor posture clean. Big-4 (KPMG) since 2010, 14-year tenure, no resignation or disagreement language. CLEAN_AUDITOR_TENURE. The drawdown is NOT an auditor-walk story."
+    },
+    {
+      "claim_id": "C3",
+      "R": "Headline growth narrative: '[w]e generated total revenue of $216.7 million, $181.0 million, and $137.9 million in 2023, 2022, and 2021, respectively, representing year-over-year growth of 20% and 31%, respectively' and 'We generated drug discovery revenue of $57.5 million in 2023, an increase of 27% compared to 2022, largely driven by the achievement of milestones from our collaborative programs.' Implicit framing: a durable 20%+ top-line growth profile across both software and drug-discovery segments.",
+      "f": "If the 20%+ growth framing is durable, the Q1 2024 10-Q filed 2024-05-01 (PRE-CUTOFF) should show top-line at least flat-to-up YoY, and drug-discovery revenue should not collapse vs the year-ago quarter.",
+      "M_source": "claim_evolution via edgar.fetch_filing_text on Q1 2024 10-Q (sdgr-20240331.htm)",
+      "M_value": "Q1 2024 10-Q reports: Software products and services $33.4M (Q1 2024) vs $32.2M (Q1 2023), +4% YoY (i.e., growth rate is HALF the FY2023 software rate of +17%). Drug discovery $3.2M vs $32.6M — a -90% YoY COLLAPSE driven by absence of milestone payments. TOTAL revenue $36.6M (Q1 2024) vs $64.8M (Q1 2023) = -43% YoY DECLINE. Loss from operations widened from -$30.5M (Q1 2023) to -$67.4M (Q1 2024), +121% YoY worsening. Net loss $54.7M Q1 2024 vs net income $129.1M Q1 2023 (the prior year was boosted by Nimbus). Claim status = REFUTED_PRE_CUTOFF.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "interpretation": "Top finding. The 10-K (Feb 28, 2024) anchors investors on a +20%/+31% multi-year top-line and a +27% drug-discovery growth print, framing both as durable. The Q1 2024 10-Q filed 14 days BEFORE cutoff shows total revenue collapsing -43% YoY (drug discovery -90%, software decelerating from +17% to +4%). This is not retrospective hindsight: the data is in a pre-cutoff filing the company itself published. The 10-K's growth narrative is materially load-bearing for the bull case and is invalidated within the cutoff window."
+    },
+    {
+      "claim_id": "C4",
+      "R": "Net income / earnings power claim: 'Our net income for the year ended December 31, 2023 was $40.7 million and our net losses for the years ended December 31, 2022 and 2021 were $149.2 million and $101.2 million, respectively.' Implicit framing for a non-specialist reader: SDGR turned profitable in 2023.",
+      "f": "Mode B: if 2023 profitability is genuine operating-leverage emergence, loss from operations should be narrowing YoY, and the net income figure should not depend on a single non-recurring item.",
+      "M_source": "Filing self-text cross-read (Item 7 MD&A consolidated statements of operations)",
+      "M_value": "10-K Item 7 income statement: Loss from operations WIDENED from -$146.8M (2022) to -$177.4M (2023), -$30.6M / +21% YoY. The reported $40.7M net income is mechanically explained by a single non-recurring item: 'the $147.2 million cash distributions we received from Nimbus Therapeutics, LLC, or Nimbus, on account of our equity stake in Nimbus, following the acquisition by Takeda...of Nimbus Lakshmi, Inc., and its TYK2 inhibitor NDI-034858'. Stripping the Nimbus distribution: 'net income' becomes a ~-$106M loss, IN LINE with operating-loss trajectory. Q1 2024 10-Q corroborates the unwind: with no Nimbus-style distribution, Q1 2024 swung to a $54.7M net loss vs $129.1M Q1 2023 net income (which itself was Nimbus-boosted).",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Mode B catch. The 10-K's prominently-placed $40.7M 'net income' line creates an impression of a profitability inflection while operating losses actually WIDENED 21% YoY. The $147M Nimbus distribution is disclosed (so this is not concealment) but its load-bearing role in producing the headline 'profit' is not foregrounded with the same prominence as the net income figure. The Q1 2024 pre-cutoff 10-Q confirms the underlying economics: absent another Nimbus-style windfall, SDGR is still a deeply loss-making company with accelerating burn."
+    },
+    {
+      "claim_id": "C5",
+      "R": "Customer / channel concentration: '[F]or the year ended December 31, 2023, we had one customer accounted for 16 % of total revenues' and separately 'For the year ended December 31, 2023, we had one customer that makes up 14% of total software revenue.' Plus 'one customer accounted for 26 % of total accounts receivable' and 'two customers accounted for 42 % and 22 % of total contract assets, respectively' at 12/31/2023.",
+      "f": "If concentration is honestly disclosed (named axis, quantified, with risk framing) AND there is no narrative discrepancy across versions of the 10-K, the M-source should return DISCLOSED_HONESTLY and the figures should reconcile internally.",
+      "M_source": "revenue_concentration.query_revenue_concentration (calibrated for federal-services primes; expected UNVERIFIABLE for a computational-chemistry/SaaS+biotech name) + Filing self-text cross-read",
+      "M_value": "M-source UNVERIFIABLE for this business model (no peer set). Cross-read: 16% top revenue customer, 14% top software customer, AND 26% AR concentration on a single customer, AND 42%+22% contract-asset concentration on two customers. Concentration is disclosed in the notes (Note 2(l) of the financial statements) but is NOT discussed in plain English in the Risk Factors. 16% revenue concentration is also DOWN from 2022 (one customer at 16% of revenues is a year-over-year change vs prior year noted at the same threshold — i.e., not a new emergent risk, but a persistent feature).",
+      "severity": "PASS",
+      "interpretation": "Customer concentration IS disclosed and quantified, including the more aggressive AR and contract-asset concentrations. Honesty-alpha PASS — material risk but disclosed. The 26%/42%+22% receivable/contract-asset concentration is the more interesting underlying business risk (single counterparty controlling >25% of receivables = collection-risk amplifier) but the 10-K reports it in the financial-statement notes."
+    },
+    {
+      "claim_id": "C6",
+      "R": "Material weakness disclosure / internal-controls posture: '[I]n connection with the audit of our consolidated financial statements for the year ended December 31, 2022, we and our independent registered public accounting firm identified a material weakness in our internal control over financial reporting. While we remediated this material weakness as of December 31, 2023...' and the same Item 9A states 'management concluded that our internal control over financial reporting was effective as of December 31, 2023. Our independent registered public accounting firm, KPMG LLP, has issued an attestation report.' Implicit claim: material weakness identified during 2022 audit was remediated by 12/31/2023 and KPMG concurred.",
+      "f": "Mode B: if remediation is genuine and KPMG concurred, the 10-K should contain BOTH (a) management's effectiveness conclusion AND (b) a clean KPMG attestation in Item 9A, with no qualifying language. Also, the material-weakness was specific enough that the description of remediation steps should be concrete.",
+      "M_source": "Filing self-text cross-read (Item 9A) + auditor_change_from_text (no resignation flags)",
+      "M_value": "10-K Item 9A states management concluded ICFR was effective at 12/31/2023; KPMG issued an attestation report. The original 2022 material weakness was disclosed (existed during the 2022 audit) and described as remediated 'in connection with our implementation of the remediation efforts described above'. auditor_change_from_text returned CLEAN_BIG4_TENURE with n_resignation_lang=0 and n_disagreement_lang=0. The description of the original MW and the specific remediation actions is at a high level rather than a specific control-by-control breakdown but is consistent with typical 10-K disclosure norms.",
+      "severity": "PASS",
+      "interpretation": "Material-weakness lifecycle is disclosed honestly: existed during 2022 audit, remediated by 12/31/2023, KPMG concurred. Auditor did not resign or disagree. PASS under honesty-alpha despite the fact that the existence of a recent material weakness is itself a yellow flag — the framework's job is to verify disclosure, not to penalize honest disclosure of historical control issues."
+    },
+    {
+      "claim_id": "C7",
+      "R": "Proprietary pipeline narrative: '[W]e initiated dosing in a Phase 1 clinical trial of SGR-1505 in patients with relapsed or refractory B-cell lymphomas and we anticipate reporting initial data from the trial in late 2024 or 2025... We also initiated dosing in a Phase 1 clinical trial of SGR-2921 in patients with relapsed or refractory acute myeloid leukemia or high-risk myelodysplastic syndrome, and we anticipate reporting initial data from the trial in late 2024 or 2025.' Plus 'we plan to initiate a Phase 1 clinical trial of SGR-3515 by the end of 2024'. Implicit claim: three differentiated proprietary Phase 1 readouts on a 2024-2025 cadence.",
+      "f": "If the proprietary pipeline is operating cleanly, clinical_trials.query_by_lead_sponsor should show the two named INDs (SGR-1505, SGR-2921) as ACTIVE/RECRUITING with start dates consistent with the 10-K narrative and no early-termination signal as of cutoff.",
+      "M_source": "clinical_trials.query_by_lead_sponsor(sponsor='Schrödinger', cutoff_date='2024-05-15')",
+      "M_value": "Registry returns 2 studies pre-cutoff: NCT05544019 (SGR-1505) status RECRUITING, start 2023-04-10, PHASE1; NCT05961839 (SGR-2921) start 2023-09-27, PHASE1. As of cutoff the SGR-2921 trial was active (it was started Sept 2023). SGR-3515 is properly disclosed as not-yet-initiated (IND submitted March 2024 per Q1 10-Q, no NCT registration expected before clearance). Registry status at cutoff is consistent with the 10-K narrative. No clinical-trial M-source RED flag.",
+      "severity": "PASS",
+      "interpretation": "Proprietary clinical pipeline narrative is consistent with the public registry as of 2024-05-15. Pipeline is genuinely early (two Phase 1s, one IND), so the readout cadence is far enough out that the narrative cannot be invalidated within the cutoff window. PASS on disclosure consistency."
+    },
+    {
+      "claim_id": "C8",
+      "R": "Collaborator portfolio breadth claim: '[W]e have entered into collaborations with BMS, Bright Angel Therapeutics Inc., Eli Lilly and Company, or Lilly, Morphic Holding, Inc., or Morphic, Otsuka Pharmaceutical Co., Ltd., or Otsuka, Sanofi S.A., Structure Therapeutics Inc. (formerly ShouTi, Inc.), and Takeda' and 'As of December 31, 2023, we had 19 active collaborative drug discovery programs.' BMS specifically: '[W]e are eligible to receive up to $1.5 billion in total milestone payments across the potential targets currently subject to the collaboration, of which we have received $25.0 million.'",
+      "f": "Mode B: if the $1.5B BMS milestone framing is durable, the drug-discovery revenue line should show steady milestone-driven recognition. The $25M received-to-date figure relative to $1.5B max ceiling (~1.7% utilization) should be reconcilable to the recent revenue trajectory.",
+      "M_source": "Filing self-text cross-read against drug-discovery revenue trajectory in 10-K + Q1 2024 10-Q",
+      "M_value": "FY2023 drug-discovery revenue $57.5M (+27% YoY) is consistent with milestone-bearing collaboration revenue. But the Q1 2024 10-Q shows drug-discovery services revenue from contracts collapsing to $2.7M (vs $31.8M Q1 2023). On a forward run-rate basis, this implies the milestone cadence has slowed dramatically. The $25M cumulative received vs $1.5B ceiling is technically accurate but the 10-K's framing of '$1.5B eligible milestones' as a forward-pointing growth indicator does not survive the Q1 2024 -90% drug-discovery revenue print. Disclosure is honest at the contract level; the FRAMING of milestone economics as a 'growth flywheel' is contradicted by the Q1 2024 milestone realization.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Mode B catch. SDGR's collaboration breadth is real and the BMS $1.5B max ceiling is a contractual fact. But the company's growth story relies on milestone realization, and the Q1 2024 10-Q (pre-cutoff) shows the milestone engine collapsed to ~$2.7M in services revenue. The forward-pointing optimistic framing of collaboration economics is materially overstated relative to the most recent pre-cutoff data point. MODERATE rather than SEVERE because the BMS contract terms are accurate as-stated and the company does have a real collaborator portfolio."
+    },
+    {
+      "claim_id": "C9",
+      "R": "Cohort growth claim within software business: 'We had 222, 227, and 190 customers with an annual contract value, or ACV, of at least $100,000, which represented 83%, 82%, and 80% of our total ACV, for the years ended December 31, 2023, 2022, and 2021, respectively' and 'For the year ended December 31, 2023, we had 54 customers with an ACV of at least $500,000 compared to 52 for the year ended December 31, 2022... we had 27, 18, and 15 customers [with ACV >= $1M]'. The 10-K embeds these in the 'growth' narrative.",
+      "f": "Mode B: if 'widespread biopharma adoption' is genuinely accelerating, the $100K+ ACV customer count should be growing year over year. If the headline $100K+ cohort is actually shrinking YoY, the 'broad adoption' framing is internally inconsistent.",
+      "M_source": "Filing self-text cross-read (Item 1 Business + Item 7 MD&A)",
+      "M_value": "$100K+ ACV customer count: 190 (2021) -> 227 (2022) -> 222 (2023). That is a -5 customer DECLINE / -2.2% YoY in the headline cohort, the first contraction in the disclosed series. The $500K+ cohort grew 52 -> 54 (+2 customers / +3.8%) and the $1M+ cohort grew 18 -> 27 (+9 customers / +50%). The growth IS at the high end but the broad $100K+ base contracted. The 10-K presents these numbers but does not call out the directional break in the $100K+ cohort.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Mode B catch. The 10-K's 'broad adoption' framing rests on a softmax of cohort growth numbers; the broadest cohort actually contracted YoY. Big-customer growth is real (+9 at $1M+) but the base of mid-tier customers is shrinking — typical late-stage SaaS-with-customer-rationalization pattern. The 10-K presents the data faithfully but the growth narrative gets the framing wrong. MODERATE."
+    },
+    {
+      "claim_id": "C10",
+      "R": "Insider behavior around the deterioration: 10-K describes the proprietary pipeline and software growth as the bull case. Implicit claim: insider behavior is routine and aligned with the published growth thesis.",
+      "f": "Mode B: if insiders agree with the growth thesis, Form 4 filings in the 6 months before cutoff should show normal compensation-driven activity, and the pattern shouldn't show concentrated selling INTO any reported strength or unusual buying INTO any weakness.",
+      "M_source": "edgar.list_filings filtered to Form 4 + edgar.fetch_form4_xml parsed for transaction codes and prices",
+      "M_value": "15 Form 4s filed 2023-11-15 through 2024-05-15. Dominant pattern is grant activity (transaction code 'A' = equity awards/RSU vests) — March 5, 2024 batch shows 60K-126K share grants to directors and officers (Akinsanya 120K, Farid 126K+87K, Lorton 60K, Abel 60K, Tran 60K, Dugan 60K). One small open-market sale (code S) by Geoffrey Porges of 3,315 shares at $26.353 on 2024-03-05. One option-exercise (code M, $4.34 strike) by Lorton for 5,574 shares. NO insider open-market BUYING into the drawdown — i.e., despite the stock being -57.8% off the 52-week high, no insider was bullish enough to buy on the open market in the 6 months before cutoff.",
+      "severity": "UNVERIFIABLE",
+      "interpretation": "The Form 4 pattern is normal-grant-activity-with-no-discretionary-buy. The ABSENCE of open-market insider buying during a -57.8% drawdown is a soft yellow flag — at this level of distress an insider with strong conviction in the published growth thesis might be expected to step in. But Form 4 magnitudes and the limited 6-month window make this UNVERIFIABLE rather than a clear red flag. No active insider RED signal; no positive insider PASS signal either."
+    }
+  ],
+  "supplemental_signals": {
+    "cash_and_securities_12_31_2023": "$468.8M",
+    "cash_and_securities_3_31_2024": "$435.7M",
+    "qoq_cash_decline": "-$33.1M in Q1 2024 (pre-cutoff)",
+    "fy2023_total_revenue": "$216.7M (+20% YoY)",
+    "fy2023_software_revenue": "$159.1M (+17% YoY)",
+    "fy2023_drug_discovery_revenue": "$57.5M (+27% YoY)",
+    "q1_2024_total_revenue": "$36.6M (-43% YoY)",
+    "q1_2024_software_revenue": "$33.4M (+4% YoY, decel from +17%)",
+    "q1_2024_drug_discovery_revenue": "$3.2M (-90% YoY)",
+    "fy2023_loss_from_operations": "-$177.4M (+21% YoY worsening from -$146.8M)",
+    "q1_2024_loss_from_operations": "-$67.4M (+121% YoY worsening from -$30.5M)",
+    "fy2023_net_income": "$40.7M (boosted by $147.2M Nimbus distribution; underlying op loss -$177M)",
+    "q1_2024_net_loss": "-$54.7M (no Nimbus boost in 2024)",
+    "accumulated_deficit": "$338.4M",
+    "customer_concentration_total_revenue": "16% (one customer FY2023)",
+    "customer_concentration_software_revenue": "14% (one customer FY2023)",
+    "ar_concentration": "26% one customer at 12/31/2023",
+    "contract_asset_concentration": "42% + 22% (two customers) at 12/31/2023",
+    "auditor": "KPMG LLP, Portland OR (since 2010, PCAOB ID 185, BIG4)",
+    "material_weakness": "Identified in 2022 audit, remediated by 12/31/2023, KPMG attestation clean",
+    "active_collaborative_programs": 19,
+    "bms_milestone_ceiling": "$1.5B max, $25M received to date (1.7% utilization)",
+    "proprietary_pipeline": "SGR-1505 (MALT1, Ph1 recruiting), SGR-2921 (CDC7, Ph1 active), SGR-3515 (WEE1/MYT1, IND submitted Mar 2024)",
+    "drawdown_at_cutoff": "-57.8% from trailing 52w high (pre-cutoff measurement)",
+    "form4_pattern_6mo_pre_cutoff": "15 filings, predominantly equity grants (A-code) to directors/officers; one small open-market sale; ZERO open-market buys"
+  },
+  "summary": "SDGR is a Big-4-audited (KPMG since 2010), no-going-concern, well-capitalized ($436M cash at 3/31/2024) computational-chemistry+drug-discovery business whose -57.8% drawdown is NOT a solvency or audit-walk story. It is a story of growth-thesis collapse INSIDE the cutoff window. The 10-K (Feb 28, 2024) anchors investors on a +20%/+31% multi-year top-line, +17% software growth, +27% drug-discovery growth, and a headline $40.7M 'net income'. The Q1 2024 10-Q filed 2024-05-01 — fourteen days BEFORE cutoff — shows total revenue collapsing to -43% YoY (drug discovery -90%, software decelerating to +4%) and loss from operations widening +121% YoY. Two MODERATE Mode B catches: (a) the $40.7M FY2023 net income is mechanically a $147M one-time Nimbus distribution masking a -$177M operating loss that actually WIDENED 21% YoY, and (b) the $100K+ ACV customer cohort contracted YoY (227 -> 222) — the first decline in the disclosed series, but the 'broad adoption' narrative does not foreground it. Customer concentration (16% top, 26% AR, 42%+22% contract assets), the BMS $1.5B headline, and the proprietary clinical pipeline are all honestly disclosed at the contract/note level. Auditor, material-weakness remediation, and going-concern all PASS. No open-market insider buying during the drawdown. Verdict: SHORT-tier — the headline FY2023 growth/profit narrative is invalidated by the company's own pre-cutoff Q1 2024 print.",
+  "scoring": {
+    "PASS": 5,
+    "UNVERIFIABLE": 1,
+    "MODERATE_UNDERDELIVERY": 3,
+    "SEVERE_UNDERDELIVERY": 1,
+    "RED_FLAG_NEGATIVE": 0,
+    "verifiable_claims": 9,
+    "weighted_sum": "(0*5 + 1*3 + 2*1 + 3*0) / 9 = 5 / 9",
+    "composite": 0.556
+  },
+  "composite": 0.556
+}

@@ -1,0 +1,136 @@
+{
+  "ticker": "CW",
+  "cutoff": "2023-01-15",
+  "filing": "0000026324-22-000004_10-K.txt",
+  "cohort": "jbook_exposure_divergence",
+  "scores": [
+    {
+      "claim_id": "CW-01",
+      "claim_text": "Curtiss-Wright expects continued funding for Columbia class SSBN production and provides nuclear propulsion content.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["pentagon_jbook: NOT_FOUND for 'Columbia class submarine'", "usaspending: CURTISS-WRIGHT ELECTRO-MECHANICAL CORPORATION shows 832 awards / $226.9M including N0010423CZA21 motor/actuator awards from NAVSEA"],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Columbia class submarine')",
+      "M_value": "NOT_FOUND (J-Book corpus is RDT&E + select procurement; Columbia is funded primarily via Navy SCN / NNPI line items outside the 410-PE corpus). USAspending confirms CW EMD is a sole-source NAVSEA supplier of large motor/actuator units (top award $57.6M, FY2023).",
+      "interpretation": "Corpus-coverage gap (per rubric heuristic 7: NOT_FOUND != red flag). Columbia/Virginia/Ford funding line items live in Navy SCN procurement (not RDT&E PEs in our corpus). Independent NAVSEA award flow ($226.9M to CWEM at the prime-supplier level) corroborates the claim. No J-Book divergence detectable here."
+    },
+    {
+      "claim_id": "CW-02",
+      "claim_text": "Curtiss-Wright expects Virginia class SSN production funding to continue.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["pentagon_jbook: NOT_FOUND for both 'Virginia class submarine' and 'SSN attack submarine'", "usaspending: CWEM contracts indicate NAVSEA propulsion/actuation supply"],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Virginia class submarine'); also 'SSN attack submarine'",
+      "M_value": "NOT_FOUND in J-Book RDT&E corpus.",
+      "interpretation": "Same coverage gap as CW-01. Per heuristic 7 + heuristic 8 (procurement vs RDT&E split): Virginia class is funded under SCN procurement P-40 lines, not in the 410-PE corpus. Cannot verify divergence; cohort framework simply has no signal on this claim."
+    },
+    {
+      "claim_id": "CW-03",
+      "claim_text": "Curtiss-Wright expects Ford-class aircraft carrier (CVN-78) production funding to continue.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["pentagon_jbook: NOT_FOUND for 'Ford class aircraft carrier' and 'CVN-78'"],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Ford class aircraft carrier'); also 'CVN-78'",
+      "M_value": "NOT_FOUND in J-Book corpus (Ford class is SCN procurement, not RDT&E PE).",
+      "interpretation": "Corpus coverage gap (heuristic 7). No divergence signal available; framework cannot test this claim."
+    },
+    {
+      "claim_id": "CW-04",
+      "claim_text": "Approximately 50% of 2021 total net sales were derived from U.S. defense programs; total U.S. Government sales $1.25B for 2021.",
+      "severity": "PASS",
+      "supports": ["usaspending.query_dod_contracts(recipient_name='Curtiss-Wright') returned 2,362 awards totaling $325M visible in queryable window. CWEM (832 awards, $227M) + CWDS (748 awards, $195M) confirm material recurring DoD revenue across naval and defense-electronics arms."],
+      "M_check": "usaspending.query_dod_contracts(recipient_name='Curtiss-Wright')",
+      "M_value": "2,362 DoD awards, $325M aggregated visible. Awarding agency: DoD across Navy, Air Force, Army. Top descriptions: ALTERNATING-C MOTOR, ACTUATOR MECHANICAL, PACSTAR tactical-comm contract, F-35 data acquisition.",
+      "interpretation": "USAspending independently confirms the structural DoD revenue concentration. Awards span the named segments (Naval propulsion via CWEM, ground tactical comms via CWDS PACSTAR, F-35 data acquisition via CWDS). The 50% DoD share is consistent with observed contract flow."
+    },
+    {
+      "claim_id": "CW-05",
+      "claim_text": "Defense Electronics expects to benefit from increased funding on C4ISR, EW, cyber, encryption, unmanned-systems programs.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["pentagon_jbook: NOT_FOUND_IN_TIMERANGE for 'Electronic Warfare Development' (PE 0604270F) and 'Multi-Platform Electronic Warfare Equipment' (PE 0207040F) at cutoff 2023-01-15. Programs matched the corpus but no funding rows in the queryable window."],
+      "M_check": "pentagon_jbook.query_program_funding(pe_number='0604270F'); pe_number='0207040F'",
+      "M_value": "primary_match found in corpus but status=NOT_FOUND_IN_TIMERANGE (FY26 books, cutoff predates the FY26 window).",
+      "interpretation": "Claim is generic forward-looking optimism naming a broad category, not a specific PE or contract line. Both EW PEs are in the corpus but the FY26 book data does not span back to 2023-01-15. Per rubric (NOT_FOUND_IN_TIMERANGE -> UNVERIFIABLE). Note that the claim itself is too vague to be a strong test of the J-Book pattern: it names categories ('EW programs') without dollarized commitment."
+    },
+    {
+      "claim_id": "CW-06",
+      "claim_text": "Curtiss-Wright (DS division) supplies data-acquisition and embedded-computing content on fighters incl. F-35, with platform-level content across UAVs, helicopters, surface ships, submarines.",
+      "severity": "PASS",
+      "supports": ["pentagon_jbook: F-35 C2D2 (PE 0604840F) matched corpus but NOT_FOUND_IN_TIMERANGE at cutoff. However usaspending shows direct CWDS award FA486123F0045 for $12.2M titled '59 TES HIGH SPEED DATA ACQUISITION COMPONENTS FOR F-35 COCKPIT AND WEAPONS BAY' — directly confirming the F-35 data-acquisition content claim. CWDS total: 748 awards / $195M."],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='F-35'); usaspending.query_dod_contracts(recipient_name='Curtiss-Wright DS')",
+      "M_value": "F-35 C2D2 in J-Book corpus (PE 0604840F), out of timerange at cutoff. Independent USAspending hit FA486123F0045 ($12.2M, F-35 cockpit/weapons-bay data acquisition) directly verifies the platform-content claim.",
+      "interpretation": "Cross-check via USAspending corroborates F-35 platform content (heuristic 6 inverse: company actually received the contracts it implicitly claims). F-35 program is the largest live DoD acquisition program and is well-funded through 2023. No divergence signal."
+    },
+    {
+      "claim_id": "CW-07",
+      "claim_text": "Curtiss-Wright supplies tactical communications (PACSTAR) and electronics stabilization to ground-vehicle modernization and battlefield network management.",
+      "severity": "PASS",
+      "supports": ["usaspending: CWDS award W56JSR20C0012 'PACSTAR CONTRACT. BASE YEAR PLUS 4 OPTION YEARS.' $47.4M — directly verifies the PacStar tactical-comm claim. pentagon_jbook NOT_FOUND for generic 'tactical communications' (no PACSTAR PE in corpus)."],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='tactical communications'); usaspending.query_dod_contracts(recipient_name='Curtiss-Wright DS')",
+      "M_value": "USAspending confirms multi-year IDIQ-style PACSTAR contract; J-Book corpus does not contain a discrete PACSTAR PE (likely funded under Army OPA / WIN-T / Integrated Tactical Network lines outside the 410-PE set).",
+      "interpretation": "Cross-source verification (USAspending) directly confirms PacStar revenue. Heuristic 7 applies for J-Book miss (PACSTAR is a tactical-comm procurement, not an RDT&E PE). No divergence signal; claim is corroborated."
+    },
+    {
+      "claim_id": "CW-08",
+      "claim_text": "U.S. Government sales 2021 = $1.255B (Aerospace & Industrial $155M; Defense Electronics $600M; Naval & Power $499M).",
+      "severity": "PASS",
+      "supports": ["usaspending aggregated CW family: 2,362 awards, $325M visible; CWEM $227M + CWDS $195M = $422M just from the two top DoD-facing subs, in the queryable USAspending window."],
+      "M_check": "usaspending.query_dod_contracts(recipient_name='Curtiss-Wright')",
+      "M_value": "Aggregate DoD contract value consistent with the $1.25B segment-level disclosure when accounting for prime-sub relationships (much of CW's Naval & Power revenue flows through prime shipbuilders HII / GD-EB and is invisible to a direct-recipient usaspending lookup).",
+      "interpretation": "Bottom-up USAspending direct awards are an order-of-magnitude floor consistent with disclosed segment-level US-Gov sales. No inflation signal detected. Heuristic 6 applies in the positive direction: the claimed revenue is real and observable."
+    },
+    {
+      "claim_id": "CW-09",
+      "claim_text": "EMD remains the RCP supplier for Westinghouse AP1000 (US + China). Feb 2022 settlement with WEC: CW pays $15M Q1 2022 + $10M Q1 2023 to release all open claims; secures right-of-first-refusal for future AP1000 projects.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["pentagon_jbook: NOT_FOUND for 'AP1000' (commercial nuclear program, not DoD; expected miss). 10-K disclosure itself: liquidated-damages settlement with $25M cumulative cash outflow + $13M Q4-2021 charge indicates the legacy AP1000 contracts produced losses not gains, despite still being held out as a forward-looking revenue platform."],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='AP1000')",
+      "M_value": "NOT_FOUND in J-Book corpus (correctly: AP1000 is commercial DOE/utility-side, not DoD J-Book). The diagnostic comes from internal disclosure: contractual delivery failures + $25M settlement payments + ROFR (not firm orders) is weak forward visibility.",
+      "interpretation": "Out-of-scope for J-Book pattern (commercial nuclear, not Pentagon). However the *self-disclosed* underdelivery on the AP1000 program (LD settlement, no new firm orders, only ROFR) is a soft narrative-load-bearing claim that the framework would not catch purely from J-Book. Marked MODERATE_UNDERDELIVERY based on within-filing evidence; J-Book signal itself = UNVERIFIABLE (correctly out of corpus scope)."
+    },
+    {
+      "claim_id": "CW-10",
+      "claim_text": "Curtiss-Wright agreed to acquire Safran Aerosystems Arresting Company for $240M cash, ~$70M FY21 sales, expected to close Q3 2022.",
+      "severity": "PASS",
+      "supports": ["edgar_fts: 4 hits for 'Safran Aerosystems Arresting' all in Curtiss-Wright filings (8-K 2022-02-24, 10-Q 2022-08-04, 10-Q 2022-11-03, 10-K 2022-02-24) — disclosure is internally consistent across subsequent quarterly filings."],
+      "M_check": "edgar_fts.query_fulltext(search_term='\"Safran Aerosystems Arresting\"')",
+      "M_value": "4 EDGAR full-text hits, all Curtiss-Wright filings spanning Feb-Nov 2022, indicating ongoing disclosure consistent with the announced acquisition.",
+      "interpretation": "Counterparty/transaction control claim verified via EDGAR cross-filing consistency. Control claim (non-J-Book) passes."
+    },
+    {
+      "claim_id": "CW-11",
+      "claim_text": "Cheswick PA facility carries a $45.6M surety bond for NRC decommissioning financial assurance; CW does not intend to close the facility.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["epa_frs.query_facility: unknown_source (catalog does not expose an EPA FRS facility lookup in the current build). No alternate facility verifier executed."],
+      "M_check": "epa_frs.query_facility(facility_name='Curtiss-Wright Cheswick Pennsylvania')",
+      "M_value": "M-source not available in current catalog build.",
+      "interpretation": "Control claim — could not be verified via available M-sources. Treated as UNVERIFIABLE per rubric. Note: the Cheswick facility was widely understood at the cutoff date to host EMD naval-nuclear manufacturing; the 'do not intend to close' assertion is forward-looking and not falsifiable from the 10-K alone."
+    }
+  ],
+  "summary": {
+    "n_claims": 11,
+    "n_queries_executed": 16,
+    "severity_counts": {
+      "PASS": 5,
+      "MODERATE_UNDERDELIVERY": 1,
+      "SEVERE_UNDERDELIVERY": 0,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 5
+    },
+    "jbook_grounded_claims": 7,
+    "jbook_grounded_claim_ids": ["CW-01","CW-02","CW-03","CW-05","CW-06","CW-07","CW-08"],
+    "pentagon_jbook_fired_on": 4,
+    "pentagon_jbook_hit_claim_ids": ["CW-05","CW-06"],
+    "note": "pentagon_jbook returned a primary_match (corpus hit) on CW-05 (EW Development PE 0604270F + Multi-Platform EW Equipment PE 0207040F) and CW-06 (F-35 C2D2 PE 0604840F), both with status NOT_FOUND_IN_TIMERANGE at the 2023-01-15 cutoff. The dominant CW exposure programs (Columbia, Virginia, Ford-class shipbuilding; naval nuclear propulsion; AP1000 commercial nuclear) sit outside the 410-PE RDT&E corpus and registered NOT_FOUND. Per rubric heuristic 7, these are coverage gaps, not divergences. Cross-source verification via USAspending corroborated the company's claimed F-35 and PACSTAR exposures and the segment-level DoD revenue scale. No J-Book divergence pattern detected at cutoff. The single MODERATE flag (CW-09) comes from within-filing self-disclosure of AP1000 underdelivery and is independent of the J-Book signal.",
+    "j_book_query_outcomes": {
+      "Columbia class submarine": "NOT_FOUND (out of corpus scope)",
+      "Virginia class submarine": "NOT_FOUND (out of corpus scope)",
+      "SSN attack submarine": "NOT_FOUND",
+      "Ford class aircraft carrier": "NOT_FOUND (out of corpus scope)",
+      "CVN-78": "NOT_FOUND",
+      "Electronic Warfare Development (0604270F)": "NOT_FOUND_IN_TIMERANGE",
+      "Multi-Platform EW Equipment (0207040F)": "NOT_FOUND_IN_TIMERANGE",
+      "F-35 / F-35 C2D2 (0604840F)": "NOT_FOUND_IN_TIMERANGE",
+      "tactical communications": "NOT_FOUND",
+      "Curtiss-Wright DS (contractor)": "NOT_FOUND",
+      "AP1000": "NOT_FOUND (correctly out of scope; commercial not DoD)"
+    }
+  }
+}

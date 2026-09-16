@@ -1,0 +1,456 @@
+{
+  "ticker": "ALMU",
+  "cutoff": "2025-05-15",
+  "filing": "0001213900-24-082694_10K.txt",
+  "plan_version": 2,
+  "naics_domain": "semiconductors",
+  "naics_prefix": "33441",
+  "cohort_context": "AIRO-signature mechanical hit ('stock for services' + 'material weakness' keyword co-occurrence in FY24 10-K). ALMU is a pre-revenue compound-semiconductor R&D shop (GaAs/InP-on-Si photodetectors for LiDAR, AR/VR, AI/quantum comms) headquartered in Goleta, CA with 11 FTE and a small cleanroom. FY24 revenue was $918,554 — of which $853,798 (93%) came from six federal contracts totaling $1,323,237 awarded by Navy/OSD/DOE. Forward +103.4% — catalyst rally. The prior framework run scored composite=0.000 and emit=False (correctly, by composite), but a SUB_MATERIAL_FEDERAL flag previously fired with MODERATE severity for the federal claim — that was wrong because for a $918K-revenue company $1.32M of fed contracts IS material; the size threshold is the wrong frame. The corrected calibration is UNVERIFIABLE-or-PASS when the named agencies + UEI both check out. This plan tests whether the framework's existence/federal/patent/H1B fingerprint cleanly resolves to PASS or to a real contradiction, rather than mis-firing on a $5M flat-dollar threshold designed for $500M-mcap companies.",
+  "claims": [
+    {
+      "claim_id": "ALMU-1",
+      "claim_text": "Aeluma, Inc. is a Delaware-incorporated semiconductor R&D company (originally formed 21-Aug-2020 as 'Parc Investments, Inc.', renamed June 2021) operating from 27 Castilian Drive, Goleta, California 93117 — and is the same legal entity SAM.gov and federal contractor registries would index under one UEI.",
+      "source_quote": "Aeluma was incorporated in Delaware on August 21, 2020, under the name Parc Investments, Inc.; the name was changed to Aeluma, Inc. in June 2021. Our principal executive offices are located at 27 Castilian Drive, Goleta, California 93117.",
+      "subject": "Aeluma, Inc.",
+      "predicate": "is_registered_entity",
+      "object_value": "Delaware corp; principal office Goleta, CA 93117",
+      "category": "physical_facility",
+      "referent_type": "entity",
+      "m_source_status": "MAPPED",
+      "source_id": "sam_entity.query_entity_by_uei",
+      "source_params": {
+        "uei": "RESOLVE_VIA_USASPENDING_FIRST"
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "Delaware Division of Corporations entity search",
+          "endpoint_or_method": "https://icis.corp.delaware.gov/Ecorp/EntitySearch/NameSearch.aspx — search 'Aeluma' and 'Parc Investments'",
+          "rationale": "ALMU self-declares Delaware incorporation in Aug 2020 with a specific name-change history; the DE registry should show the formation date, current name 'Aeluma, Inc.', and the prior 'Parc Investments, Inc.' name change with matching dates.",
+          "expected_observable": "active Delaware corporation record with formation date 2020-08-21 and name-change history Parc Investments -> Aeluma",
+          "signal_direction": "absent record or non-matching formation date would contradict the basic existence + name-change narrative",
+          "severity_if_contradiction": "SEVERE"
+        },
+        {
+          "source_label": "California Secretary of State business search (foreign-qualified entity)",
+          "endpoint_or_method": "https://bizfileonline.sos.ca.gov/search/business — search 'Aeluma'",
+          "rationale": "ALMU's principal office is in CA; a DE entity operating in CA must file as a foreign corporation with the CA SOS. Absence would be a real contradiction of the operating-from-CA claim.",
+          "expected_observable": "active foreign-qualification record for Aeluma, Inc. with Goleta CA agent address",
+          "signal_direction": "absent record would contradict the CA-operations claim",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Santa Barbara County assessor parcel record (27 Castilian Dr, Goleta)",
+          "endpoint_or_method": "https://assessor.countyofsb.org/assessor/ — parcel lookup for 27 Castilian Dr, Goleta CA 93117",
+          "rationale": "ALMU leases (triple-net) the building from SBR Associates LP; the parcel record would show the building exists at the claimed address with industrial/light-manufacturing zoning consistent with a cleanroom buildout.",
+          "expected_observable": "parcel with owner SBR Associates LP and a non-zero improvements assessment consistent with a small industrial building",
+          "signal_direction": "no parcel at the address, or zoning that excludes light manufacturing, would contradict the physical-cleanroom claim",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "semiconductors",
+      "claim_type_taxonomy": "existence",
+      "extraction_notes": "Existence is CANONICAL via sam_entity+osha for semis. OSHA Form 300A will not fire (11 FTE is far below the 20-emp threshold and the semi-mfg industry has weak 300A coverage at this scale) — that absence is UNINFORMATIVE per the taxonomy's calibration note. SAM is the primary test; UEI must be resolved via usaspending first. Creative extensions probe DE+CA business registries and the county parcel — these are independent existence tests below the federal-registry tier."
+    },
+    {
+      "claim_id": "ALMU-2",
+      "claim_text": "Aeluma was awarded six federal contracts totaling $1,323,237 for FY24 (year ended 30-Jun-2024) from the U.S. Navy, the Office of the Secretary of Defense (OSD), and the Department of Energy (DOE), all firm-fixed-price for services and material delivery — and these represent 93% of FY24 revenue ($853,798 of $918,554 was government-contract revenue).",
+      "source_quote": "For the year ended June 30, 2024, we were awarded several contracts, totaling $1,323,237, some of which is from the U.S. Navy, the Office of the Secretary of Defense, and the Department of Energy ... For the year ended June 30, 2024, the Company was awarded six government contracts of $1,323,237 ... For the year ended June 30, 2024, the Company recognized its revenue of $918,554, of which $853,798 was from government contracts",
+      "subject": "Aeluma federal contract portfolio",
+      "predicate": "was_awarded_federal_contracts",
+      "object_value": "$1,323,237 across 6 firm-fixed-price contracts from Navy + OSD + DOE in FY24",
+      "category": "customer_pipeline",
+      "referent_type": "amount",
+      "m_source_status": "MAPPED",
+      "source_id": "usaspending.query_federal_presence",
+      "source_params": {
+        "name_variants": ["Aeluma", "Aeluma Inc", "Aeluma, Inc.", "Parc Investments"],
+        "start_date": "2020-08-21",
+        "end_date": "2025-05-15",
+        "include_grants": true
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "USAspending sub-award lookup (Navy / OSD prime-contractor flowdowns)",
+          "endpoint_or_method": "https://api.usaspending.gov/api/v2/search/spending_by_award/ with subawards=true and recipient_name=Aeluma",
+          "rationale": "Small-cap R&D shops frequently appear as SUBAWARDEES under university or prime-contractor flowdowns (e.g., a Navy ONR award to UC Santa Barbara might pass through to Aeluma). Prime-only searches miss these and produce false-negative INFLATION_SUSPECT signals for genuine federal-funded R&D firms.",
+          "expected_observable": "list of subaward records with Aeluma as subawardee, prime recipient = university or defense prime",
+          "signal_direction": "presence of subaward flowdowns CORROBORATES the federal-research narrative; absence narrows to direct prime contracts only",
+          "severity_if_contradiction": "UNVERIFIABLE (subaward coverage is reporting-threshold-gated and sparse)"
+        },
+        {
+          "source_label": "DoD SBIR/STTR awards database (sbir.gov)",
+          "endpoint_or_method": "https://www.sbir.gov/api/awards.json?firm=Aeluma — list Phase I/II awards by Navy, OSD, AFRL, ARL, DARPA",
+          "rationale": "DoD SBIR/STTR is the canonical funnel by which seedling compound-semi companies receive Navy/OSD/AFRL money for materials R&D. SBIR.gov has authoritative per-award detail (program, topic code, dollar amount, contracting agency) that USAspending sometimes aggregates incompletely. This is the SINGLE BEST corroborator for ALMU's claim and is structurally absent from the canonical taxonomy.",
+          "expected_observable": "list of SBIR/STTR award records keyed by firm 'Aeluma', with agency, phase, topic_code, dollar_amount, start_date",
+          "signal_direction": "6 awards totaling ~$1.3M from Navy/OSD/DOE would corroborate exactly; 0 awards would be HARD CONTRADICTION; partial match (e.g., only Navy) would partially corroborate",
+          "severity_if_contradiction": "SEVERE if 0 SBIR/STTR awards found AND USAspending also shows INFLATION_SUSPECT"
+        },
+        {
+          "source_label": "DoD STTR/SBIR Topics RSS — published Navy / OSD / AFRL solicitation library",
+          "endpoint_or_method": "https://www.dodsbirsttr.mil/topics-app/ — match award topic codes against Aeluma's stated tech (compound-semi photodetectors, SWIR LiDAR, eye-safe sensing)",
+          "rationale": "Each DoD SBIR award maps to a published topic code with a tech description. Cross-checking ALMU's claimed tech against the topic descriptions of its claimed awards is an internal-consistency test: do the awards actually fund what ALMU says they fund?",
+          "expected_observable": "topic codes for awards matching SWIR-photodetector / compound-semi / heterogeneous-integration descriptions",
+          "signal_direction": "mismatch (e.g., awards are for software services unrelated to photonics) would contradict the 'federally-funded compound-semi R&D' framing",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "DARPA program-office press releases + program manager portfolios",
+          "endpoint_or_method": "https://www.darpa.mil/news (filtered by year) + DARPA MTO program pages (e.g., LUMOS, T-MUSIC, AISP, Microsystems Technology Office program lists)",
+          "rationale": "ALMU's technology (GaAs/InP-on-Si heterogeneous integration, eye-safe SWIR LiDAR, quantum-photonics communications) sits squarely in DARPA MTO's Microsystems Technology Office portfolio (LUMOS, T-MUSIC). If ALMU were a real DARPA performer, MTO press releases or program-manager portfolio pages would name them. Absence in DARPA MTO press releases is not contradiction (much DARPA work is non-public), but presence is high-quality CORROBORATION beyond USAspending.",
+          "expected_observable": "DARPA MTO press release or program-page mention of Aeluma as performer/awardee",
+          "signal_direction": "presence corroborates; absence is UNVERIFIABLE (DARPA performer lists are not exhaustively public)",
+          "severity_if_contradiction": "UNVERIFIABLE"
+        },
+        {
+          "source_label": "DOE Office of Science / SBIR Phase III conversion tracker",
+          "endpoint_or_method": "https://science.osti.gov/sbir + https://www.osti.gov/biblio search 'Aeluma'",
+          "rationale": "DOE SBIR awards (Office of Science, NETL, etc.) appear in OSTI's bibliographic catalog with technical reports. An Aeluma OSTI hit would corroborate the DOE side of the FY24 claim with an independent observable (a deliverable technical report, not just an award number).",
+          "expected_observable": "OSTI bibliographic entry citing Aeluma as performer + a technical report",
+          "signal_direction": "presence corroborates; absence narrows the DOE side to early-stage no-deliverable-yet awards (still consistent with FY24 fresh awards)",
+          "severity_if_contradiction": "UNVERIFIABLE"
+        },
+        {
+          "source_label": "AFRL / Naval Research Lab contractor-pubs lists",
+          "endpoint_or_method": "https://apps.dtic.mil — DTIC technical report search for 'Aeluma' or PI name 'Klamkin'",
+          "rationale": "DTIC catalogs DoD-funded technical reports; appearance of an Aeluma- or Klamkin-authored report on a Navy/OSD-funded program would be an independent OBSERVABLE of program performance, not just contract award.",
+          "expected_observable": "DTIC report record with Aeluma or Klamkin as author and Navy/OSD as funder",
+          "signal_direction": "presence corroborates; absence is UNVERIFIABLE (most early-Phase reports are not yet released)",
+          "severity_if_contradiction": "UNVERIFIABLE"
+        },
+        {
+          "source_label": "UCSB technology-transfer / sponsored-research filings",
+          "endpoint_or_method": "https://research.ucsb.edu/research/sponsored-projects-services + UCSB Office of Technology & Industry Alliances grant announcements",
+          "rationale": "Aeluma's CEO Jonathan Klamkin is a UCSB ECE professor; ALMU has historical ties to UCSB's compound-semi labs. UCSB-side sponsored-research records would show whether prime DARPA/Navy awards flow through UCSB with Aeluma as subawardee — explaining why direct USAspending lookup might be sparse.",
+          "expected_observable": "UCSB sponsored-research records with Klamkin as PI and Aeluma as industry partner / subawardee",
+          "signal_direction": "presence corroborates the prime-via-university funding model; absence is UNVERIFIABLE (university-side records are not consistently public)",
+          "severity_if_contradiction": "UNVERIFIABLE"
+        }
+      ],
+      "domain": "semiconductors",
+      "claim_type_taxonomy": "federal_customer",
+      "extraction_notes": "Federal_customer is CANONICAL via usaspending for semis. CRITICAL CALIBRATION: usaspending.signal=SUB_MATERIAL_FEDERAL fires below $5M lifetime; that flat threshold is wrong for sub-$1M-revenue R&D firms like ALMU where $1.32M IS material (93% of revenue). The framework should NOT treat SUB_MATERIAL_FEDERAL as a contradiction here — only INFLATION_SUSPECT (0 UEIs, 0 awards) would be a hard contradiction of the stated Navy+OSD+DOE relationship. Creative extensions reach into SBIR.gov, DARPA MTO, DTIC, OSTI, and UCSB sponsored-research because the prime-contract vs subaward vs SBIR distinction matters at this scale — the cleanest single test that the framework lacks is a DEDICATED sbir.gov connector that returns per-firm SBIR/STTR awards. That should be the top promotion candidate from this plan."
+    },
+    {
+      "claim_id": "ALMU-3",
+      "claim_text": "Aeluma has filed several patent applications with the USPTO and 'several patents have been issued', constituting the legal foundation for its compound-semiconductor heterogeneous-integration technology (GaAs/InGaAs on silicon substrates).",
+      "source_quote": "Aeluma has filed several patent applications with the United States Patent and Trademark Office (USPTO), and several patents have been issued. We have filed trademarks for the name Aeluma and the slogan Sensing Reimagined with the USPTO. We maintain protection of trade secrets that include know-how and process recipes.",
+      "subject": "Aeluma patent portfolio",
+      "predicate": "has_filed_and_been_granted_patents",
+      "object_value": "several USPTO applications + several issued patents (compound-semi photodetector / heterogeneous-integration tech)",
+      "category": "technology",
+      "referent_type": "intangible",
+      "m_source_status": "MAPPED",
+      "source_id": "uspto_odp.query_assignee",
+      "source_params": {
+        "assignee_name": "Aeluma",
+        "cutoff_date": "2025-05-15",
+        "categorize": {
+          "photodetector": ["photodetector", "photodiode", "photodetection", "image sensor", "imaging"],
+          "compound_semi": ["GaAs", "InGaAs", "InP", "indium gallium arsenide", "compound semiconductor", "III-V"],
+          "heterogeneous_integration": ["heterogeneous", "integration", "silicon substrate", "wafer bonding", "epitaxial", "epitaxy"],
+          "lidar_swir": ["LiDAR", "shortwave infrared", "SWIR", "1550", "1600", "eye safe"]
+        }
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "Google Patents fallback search by inventor name",
+          "endpoint_or_method": "https://patents.google.com/?inventor=Jonathan+Klamkin OR inventor=Klamkin assignee=Aeluma",
+          "rationale": "Many small-cap semi patents are filed under the inventor (CEO Jonathan Klamkin is a UCSB ECE professor with an extensive personal patent history) and then assigned to the company. Pure assignee-name search may miss patents that were filed in inventor's name before assignment to Aeluma, OR may double-count patents assigned to UCSB Regents instead of Aeluma directly.",
+          "expected_observable": "list of patents by inventor Klamkin with assignee Aeluma OR Regents of UCSB",
+          "signal_direction": "presence in inventor space corroborates personal-IP-backed-company narrative; pure-UCSB-assignment with no Aeluma exclusive license would weaken the 'core IP' claim",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "USPTO PAIR / Assignment database (assignment recordation)",
+          "endpoint_or_method": "https://assignment.uspto.gov/patent/index.html#/patent/search — search assignee 'Aeluma'",
+          "rationale": "USPTO Patent Assignment database shows actual recorded assignments. If patents were assigned FROM UCSB Regents TO Aeluma (license or assignment), the assignment events would appear here. This adjudicates whether Aeluma OWNS its IP or merely LICENSES it from UCSB.",
+          "expected_observable": "assignment records moving patents from individual inventors or UCSB Regents to Aeluma, Inc.",
+          "signal_direction": "presence of assignments corroborates IP ownership; absence + UCSB-only assignment would mean Aeluma's 'core IP' is a UCSB license, not company-owned",
+          "severity_if_contradiction": "MODERATE (license != ownership but is still a valid R&D model)"
+        },
+        {
+          "source_label": "USPTO trademark TESS search for 'Aeluma' and 'Sensing Reimagined'",
+          "endpoint_or_method": "https://tmsearch.uspto.gov — exact-mark search",
+          "rationale": "ALMU specifically claims trademark filings for the name and slogan; a TESS lookup verifies both filings exist with correct registrant.",
+          "expected_observable": "active trademark filings for AELUMA and SENSING REIMAGINED with registrant Aeluma, Inc.",
+          "signal_direction": "absence would contradict the explicit trademark claim",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "semiconductors",
+      "claim_type_taxonomy": "patents_ip",
+      "extraction_notes": "Patents_ip is CANONICAL via uspto_odp for semis. The categorize buckets test whether the patent portfolio matches the claimed tech areas (compound semi + heterogeneous integration + photodetector + SWIR LiDAR). 'Several' is vague — a meaningful PASS requires at least 3-5 granted patents in the relevant buckets. CEO Klamkin's UCSB affiliation makes the assignee-name search potentially incomplete; inventor-name + USPTO Assignment DB are essential corroborators."
+    },
+    {
+      "claim_id": "ALMU-4",
+      "claim_text": "Aeluma operates a manufacturing and R&D cleanroom at its Goleta, CA headquarters with 'key manufacturing equipment' installed, with 11 full-time employees and 2 part-time employees as of 30-Jun-2024 (majority in engineering).",
+      "source_quote": "We have established a manufacturing and R&D facility at our headquarters in Goleta, California. We have installed key equipment and we plan to control our core materials manufacturing and development ... At June 30, 2024, Aeluma had 11 full-time employees, 2 part-time employees, and consultants. The majority of employees work in engineering.",
+      "subject": "Aeluma Goleta manufacturing facility + workforce",
+      "predicate": "operates_facility_with_workforce",
+      "object_value": "Goleta CA cleanroom; 11 FT + 2 PT employees; majority engineering",
+      "category": "physical_facility",
+      "referent_type": "physical_object",
+      "m_source_status": "MAPPED",
+      "source_id": "dol_h1b_lca.query_lca_filings",
+      "source_params": {
+        "employer_name": "Aeluma",
+        "state": "CA",
+        "city": "Goleta",
+        "match_mode": "word_boundary",
+        "only_certified": true,
+        "max_results": 20
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "OSHA Establishment Search (corroboration, expected to be empty)",
+          "endpoint_or_method": "osha_establishments.query_establishments with company_name='Aeluma', state='CA', naics_prefix='3344'",
+          "rationale": "Per taxonomy calibration note, OSHA Form 300A requires 20+ employees in covered industries and the semi-mfg industry has weak 300A coverage at this scale. ALMU has 11 FTE so 300A non-filing is the EXPECTED baseline, not contradiction. Included as confirmation that the expected null actually is null.",
+          "expected_observable": "0 establishments matching Aeluma in CA",
+          "signal_direction": "absence here is UNINFORMATIVE per taxonomy; presence at 20+ emp scale would be a SURPRISE worth investigating",
+          "severity_if_contradiction": "UNVERIFIABLE"
+        },
+        {
+          "source_label": "Santa Barbara County Air Pollution Control District (SBCAPCD) permit registry",
+          "endpoint_or_method": "https://www.ourair.org/permits/ — search by facility address '27 Castilian Dr, Goleta'",
+          "rationale": "Compound-semi cleanroom operations using MOCVD/MBE epitaxy emit hazardous air pollutants (arsenic, phosphorus, organometallics) that trigger local air-district permits in California. SBCAPCD permits would be the most direct external observable of a real operating cleanroom at the claimed address — far more informative than EPA FRS (which fires at federal scale only).",
+          "expected_observable": "air-quality permit at 27 Castilian Dr in Aeluma's name (or prior tenant) with permitted equipment list",
+          "signal_direction": "presence with epitaxy-related equipment corroborates the cleanroom claim; absence is concerning if the equipment is operational",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "California Department of Toxic Substances Control (DTSC) Hazardous Waste Tracking System (HWTS)",
+          "endpoint_or_method": "https://hwts.dtsc.ca.gov/ — search EPA ID and generator status for 27 Castilian Dr Goleta",
+          "rationale": "Compound-semi epitaxy generates regulated hazardous waste (solvent waste, etchant waste, metal-contaminated rinse). Any operating cleanroom in CA must be a registered hazardous waste generator with DTSC. This is the canonical CA-state hazwaste registry; absence at an operating cleanroom address would be a real contradiction.",
+          "expected_observable": "active EPA ID number with Aeluma as generator at the Goleta address",
+          "signal_direction": "presence corroborates an OPERATING cleanroom (not just equipment-installed-and-idle); absence narrows the claim to 'equipment present, operations not yet ramped'",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "LinkedIn headcount snapshot for Aeluma",
+          "endpoint_or_method": "https://www.linkedin.com/company/aeluma/people — count employees with 'Aeluma' as current employer",
+          "rationale": "11 FTE + 2 PT is a small, externally verifiable headcount. LinkedIn typically over-counts (former employees still listed) so target is 'approximately 13-25'. A massive divergence (e.g., 0 or 100) would contradict the disclosed scale.",
+          "expected_observable": "approximately 13-25 people listing Aeluma as current employer (engineering-heavy)",
+          "signal_direction": "0-2 listings would contradict (no real workforce); 50+ listings would suggest undisclosed scaling",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "BLS QCEW NAICS-3344 employment in Santa Barbara County",
+          "endpoint_or_method": "https://www.bls.gov/cew/data.htm — QCEW Santa Barbara County NAICS 3344 (semi mfg) quarterly employment",
+          "rationale": "Santa Barbara County NAICS 3344 employment is small enough that an 11-FTE addition is detectable in QCEW quarterly counts. A QCEW reading consistent with ~tens of NAICS-3344 employees in SB County corroborates that small specialty-semi shops do operate at this scale in the county.",
+          "expected_observable": "QCEW NAICS-3344 SB County employment in the low hundreds (consistent with Aeluma + a handful of peers)",
+          "signal_direction": "QCEW = 0 in SB County NAICS-3344 would contradict the regional-cluster narrative",
+          "severity_if_contradiction": "UNVERIFIABLE (QCEW small-cell suppression often hides single-firm cells)"
+        }
+      ],
+      "domain": "semiconductors",
+      "claim_type_taxonomy": "facility_scope",
+      "extraction_notes": "Facility_scope is PROVISIONAL for semis. Mapped to dol_h1b_lca because semi is H-1B-dense per taxonomy and the workforce is engineering-heavy. Note: ALMU is small enough (11 FTE) that H-1B count may be 0-3; calibration is asymmetric (presence is informative, absence less so for a sub-20 shop). Creative extensions reach into CA-state environmental registries (SBCAPCD air permits, DTSC hazwaste) which are the RIGHT cell for sub-federal-scale semi-fab existence — far better than EPA FRS for this size."
+    },
+    {
+      "claim_id": "ALMU-5",
+      "claim_text": "Aeluma is operating as a going concern with substantial doubt: net loss of $4,562,295 for FY24 and $5,379,582 for FY23, accumulated deficit of $13,624,361 at 30-Jun-2024, and explicit going-concern doubt disclosed; further, the company issued $3,145,000 in zero-coupon convertible notes between 5-Aug-2024 and 27-Aug-2024 (maturing Jun-2026, conversion price floor 85% of VWAP).",
+      "source_quote": "The Company incurred a net loss of $ 4,562,295 and $ 5,379,582 for the years ended June 30, 2024 and 2023, respectively, and has accumulated deficit of $ 13,624,361 at June 30, 2024 ... These conditions raise doubt about the Company's ability to continue as a going concern ... Between August 5, 2024 and August 27, 2024, we issued convertible promissory notes in the aggregate principal amount of $3,145,000 to 10 accredited investors, pursuant to a private note financing. The Notes mature in June 2026 and do not carry any interest ... the applicable conversion price will not be lower than 85% of the 5-day VWAP",
+      "subject": "Aeluma financial distress profile",
+      "predicate": "exhibits_going_concern_and_dilutive_financing",
+      "object_value": "GC doubt; -$4.56M FY24 net loss; -$13.6M accum deficit; $3.145M 0% conv notes at 85%-of-VWAP",
+      "category": "financial_distress",
+      "referent_type": "event",
+      "m_source_status": "MAPPED",
+      "source_id": "claim_evolution.query_claim_evolution",
+      "source_params": {
+        "cik": "0001828805",
+        "search_term": "going concern",
+        "base_filing_date": "2024-09-27",
+        "cutoff_date": "2025-05-15",
+        "forms": "10-K,10-Q,8-K,DEF 14A,S-1,S-1/A"
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "SEC EDGAR filing-cadence audit (S-1, S-3, 424B, ATM-related 8-Ks)",
+          "endpoint_or_method": "sec_filings.list_filings_by_form with cik='0001828805' and forms=['S-1','S-1/A','S-3','424B5','424B3','8-K'] between 2024-09-27 and 2025-05-15",
+          "rationale": "Distress-cluster fingerprint per heuristic H10 requires multiple markers within a ~6mo window. Beyond the disclosed GC + conv-notes, a follow-on S-1/S-3 + ATM-style 424B + reverse-split 8-K would confirm the distress cluster. Empty filing cadence post-10-K = inconsistent with the funding need implied by GC doubt.",
+          "expected_observable": "list of post-10-K registration/issuance filings",
+          "signal_direction": "multiple dilutive filings within 6mo CORROBORATES distress; long silence is inconsistent with stated funding need",
+          "severity_if_contradiction": "MODERATE (silence after stated funding need is its own signal — could mean covert ATM or could mean uplisting acquisition)"
+        },
+        {
+          "source_label": "OTC Markets Aug-2024 -> May-2025 share-price + volume series",
+          "endpoint_or_method": "OTC Markets / Yahoo Finance daily OHLCV for ALMU between 2024-08-01 and 2025-05-15",
+          "rationale": "The Aug-2024 0%-coupon conv-notes have an $85% VWAP conversion price; the dilutive economics depend on actual VWAP during the look-back. A rapidly rising share price during the cutoff window would PARTIALLY MUTE the dilution because the conversion is capped at $3.50 ceiling — important for sizing the actual dilution overhang.",
+          "expected_observable": "daily VWAP series; %ile of fwd VWAP relative to $3.50 ceiling and $2.68 floor",
+          "signal_direction": "share price >$3.50 throughout the window CAPS dilution at the ceiling (less bad); share price below floor MAXES dilution (worse)",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Audit firm Pinnacle Accountancy Group of Utah / equivalent PCAOB inspection record",
+          "endpoint_or_method": "https://pcaobus.org/oversight/inspections/inspection-reports — search auditor name (resolve from 10-K signature page)",
+          "rationale": "Going-concern opinions issued by sanctioned or repeatedly-deficient audit firms are weaker signals than those from clean firms. PCAOB inspection records for the auditor calibrate the credibility of the GC opinion itself.",
+          "expected_observable": "PCAOB inspection report with deficiency count for ALMU's auditor",
+          "signal_direction": "high deficiency count weakens the GC opinion (auditor may be overly cautious or low-rigor)",
+          "severity_if_contradiction": "UNVERIFIABLE"
+        }
+      ],
+      "domain": "semiconductors",
+      "claim_type_taxonomy": "financial_distress",
+      "extraction_notes": "Financial_distress is CANONICAL via claim_evolution + sec_filings for semis. Per heuristic H10, single-marker distress (just GC doubt) is common; the cluster here is GC + accumulated $13.6M deficit + 0%-coupon conv notes at 85%-VWAP, which IS multi-marker within ~2mo and DOES fire H10. The forward window (Sep-2024 through May-2025) will tell us whether the company resolved via uplisting/financing or compounded the distress. Note: the 'going concern' language itself is mostly stage-of-life for a pre-revenue R&D firm and is not, in isolation, a short signal — the framework should NOT score this MODERATE unless the cluster propagates."
+    },
+    {
+      "claim_id": "ALMU-6",
+      "claim_text": "Aeluma is pursuing commercial customer partnerships in mobile/consumer electronics, automotive LiDAR, robotics, AR/VR, and AI/quantum communications — explicitly naming Apple as the LiDAR-in-smartphones market leader and explicitly clarifying that 'Apple does not currently use our technology in any of their products'.",
+      "source_quote": "In the mobile market, Apple arguably leads in terms of deploying advanced capabilities such as LiDAR sensing in their devices; Apple does not currently use our technology in any of their products ... Our current strategy is to pursue partnerships with system integrators, including mobile and consumer electronics manufacturers, LiDAR companies and Tier 1 automotive suppliers ... We are now delivering wafers and chips to some customers, primarily for R&D and sampling purposes.",
+      "subject": "Aeluma commercial customer pipeline",
+      "predicate": "is_pursuing_but_not_yet_landed",
+      "object_value": "No named megacap customer; explicit Apple-NOT-a-customer disclosure; R&D/sampling-stage only",
+      "category": "customer_pipeline",
+      "referent_type": "intangible",
+      "m_source_status": "MAPPED",
+      "source_id": "megacap_namecheck.query_megacap_mentions",
+      "source_params": {
+        "small_cap_name": "Aeluma",
+        "cutoff_date": "2025-05-15",
+        "megacap_subset": ["Apple", "Nvidia", "Microsoft", "Amazon", "Alphabet", "Tesla", "Samsung"],
+        "window_days": 1825,
+        "forms": "10-K,10-Q,8-K"
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "claim_evolution on ALMU's own subsequent 10-Q/10-K filings for named-customer evolution",
+          "endpoint_or_method": "claim_evolution.query_claim_evolution with cik='0001828805', search_term='customer', base_filing_date='2024-09-27', cutoff_date='2025-05-15'",
+          "rationale": "Per H7, megacap-side disclosure of a small-cap is asymmetrically rare; the better test is ALMU's OWN subsequent filings. If ALMU has NOT named a megacap customer in any 10-Q between Sep-2024 and May-2025, the 'pursuing partnerships' framing is honest stage-of-life, not an inflation. If a megacap suddenly appears in a 10-Q without a corresponding 8-K, that's the more diagnostic event.",
+          "expected_observable": "list of subsequent ALMU filings with customer-relationship language",
+          "signal_direction": "honest narrative continues = no contradiction; sudden megacap mention without 8-K = inflation concern",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Aeluma press-release archive on company website + GlobeNewswire / ACCESSWIRE",
+          "endpoint_or_method": "https://www.aeluma.com/news + Google site: search 'aeluma.com' + GlobeNewswire 'Aeluma' search",
+          "rationale": "Marketing claims of customer pilots often appear in press releases before 10-Q disclosure. Cross-checking press release cadence against 10-K customer-pipeline language reveals whether marketing language is consistent with regulatory disclosure (or whether PR over-claims).",
+          "expected_observable": "list of dated press releases mentioning customer wins or pilots",
+          "signal_direction": "PR claims customers that 10-K does not name = INFLATION concern; PR cadence consistent with 'pursuing partnerships' = corroboration",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "III-V compound-semi industry analyst reports (Yole Group, OMDIA, Strategy Analytics)",
+          "endpoint_or_method": "Yole Group SWIR Imaging report (annual) + OMDIA imaging-sensor market share — search 'Aeluma' in named-startup pages",
+          "rationale": "ALMU explicitly cites Yole Development for market data; reciprocally, Yole's SWIR-imaging market reports name competitive entrants. Aeluma appearing in Yole/OMDIA startup tracking would be third-party CORROBORATION of technology credibility (independent of revenue).",
+          "expected_observable": "Aeluma named in Yole / OMDIA / Strategy Analytics III-V semi market report startup section",
+          "signal_direction": "presence corroborates tech credibility; absence is UNVERIFIABLE (analyst coverage is unevenly distributed across startups)",
+          "severity_if_contradiction": "UNVERIFIABLE"
+        },
+        {
+          "source_label": "Stanford SystemX Alliance member list + university-consortium memberships",
+          "endpoint_or_method": "https://systemx.stanford.edu/industry-affiliates + UCSB ECE industry-affiliate pages",
+          "rationale": "Compound-semi startups commonly join university research consortia (SystemX, MIT MTL, Berkeley BWRC) for early customer/partner visibility. Aeluma's UCSB connection (CEO Klamkin) makes UCSB consortium membership a near-certain corroborator; SystemX would be aspirational.",
+          "expected_observable": "Aeluma in any listed industry-affiliate roster",
+          "signal_direction": "presence corroborates 'pursuing partnerships' framing with named institutional channels",
+          "severity_if_contradiction": "UNVERIFIABLE"
+        }
+      ],
+      "domain": "semiconductors",
+      "claim_type_taxonomy": "commercial_customer",
+      "extraction_notes": "Commercial_customer is CANONICAL via megacap_namecheck for semis per taxonomy. IMPORTANT CALIBRATION: ALMU explicitly disclaims megacap relationships ('Apple does not currently use our technology'). This is the OPPOSITE of an inflation pattern — it's an explicit non-claim. The framework should NOT fire megacap_namecheck as a contradiction here; INFLATION_SUSPECT (0 hits) is the EXPECTED baseline and is CONSISTENT with the filing. A 1-2-hit RESULT (sub-material relationship) would be a SURPRISE worth investigating. This is a 'test that the test calibrates correctly' claim — the framework must distinguish 'small-cap claims megacap customer + megacap silent' (red flag) from 'small-cap explicitly says no megacap customer + megacap silent' (consistent)."
+    },
+    {
+      "claim_id": "ALMU-7",
+      "claim_text": "Aeluma issued shares for services / consulting on multiple occasions (the AIRO-signature 'stock for services' trigger): 723,008 shares to advisors at $0.01-$0.02/share in June 2021 (deferred compensation $1.37M), 150,000 shares to a consultant at $2.00/share in Mar-2022 ($300K), and 150,000 shares to a consultant in Nov-2022.",
+      "source_quote": "In June 2021, the Company sold 723,008 shares of common stock to certain individuals in exchange for future management advisory services, for discounted prices price ranging from $.0104 to $.0195 per share ... Related to these issuances, the Company has recorded deferred compensation of $1,372,435 ... In March 2022, the Company signed an agreement to issue 150,000 shares of common stock valued at $300,000 to a consultant for providing consulting services ... On November 7, 2022, we issued 150,000 shares of common stock to a consultant for providing consulting services to us.",
+      "subject": "Aeluma equity-for-services issuance pattern",
+      "predicate": "issued_stock_in_lieu_of_cash_compensation",
+      "object_value": "723K + 150K + 150K shares = ~1.02M shares issued for services (~8.4% of pre-IPO share count)",
+      "category": "vendor_relationship",
+      "referent_type": "amount",
+      "m_source_status": "MAPPED",
+      "source_id": "claim_evolution.query_claim_evolution",
+      "source_params": {
+        "cik": "0001828805",
+        "search_term": "stock for services",
+        "base_filing_date": "2024-09-27",
+        "cutoff_date": "2025-05-15",
+        "forms": "10-K,10-Q,8-K,S-1,S-1/A"
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "Section 16 insider Form 4 filings + S-1 selling-shareholder schedule cross-reference",
+          "endpoint_or_method": "sec_filings.list_filings_by_form with cik='0001828805' and forms=['4','3','S-1','S-1/A','S-3'] + map issued-shares from Note 4 to named selling shareholders in any S-1",
+          "rationale": "Stock-for-services issuances at deep-discount ($0.01/share) followed by an S-1 registration of those same shares for resale is the AIRO-signature distress pump. Cross-referencing the named recipients in the 10-K against subsequent Form 4 filings and S-1 selling-shareholder schedules reveals whether the 'advisory shares' are actually being dumped into the market.",
+          "expected_observable": "list of Form 4 filings by share recipients showing resale activity post-vesting",
+          "signal_direction": "rapid post-vesting Form 4 sales + S-1 registration = AIRO-signature pump-and-dump; sustained holding = legitimate advisor comp",
+          "severity_if_contradiction": "SEVERE (this is the canonical AIRO-cohort red-flag if it lights up)"
+        },
+        {
+          "source_label": "Recipient-identity reverse search (LinkedIn / FINRA BrokerCheck on individual recipients)",
+          "endpoint_or_method": "Once recipient names appear on Form 4 or S-1, search LinkedIn for affiliations + BrokerCheck for prior microcap-pump enforcement history",
+          "rationale": "AIRO-signature companies often issue advisor shares to known microcap-pump promoters with enforcement histories. Identifying advisor-share recipients as ex-FINRA-sanctioned promoters is the strongest qualitative red flag in the cohort.",
+          "expected_observable": "individual's prior promotional or sanctioned history",
+          "signal_direction": "ex-sanctioned promoter as advisor recipient = SEVERE red flag; legitimate technical advisor (e.g., UCSB faculty colleague) = corroboration of legit R&D firm",
+          "severity_if_contradiction": "SEVERE"
+        }
+      ],
+      "domain": "semiconductors",
+      "claim_type_taxonomy": "financial_distress",
+      "extraction_notes": "Mapped to financial_distress because the AIRO-signature 'stock for services' is exactly the cluster heuristic the cohort screen was designed to catch. CALIBRATION: at ALMU, the advisor-share issuances date to 2021-22 and are pre-IPO founder/advisor comp at a UCSB-connected R&D firm — that's typical seed-stage practice and NOT the same pattern as a post-Reg-A pump. The creative extension (recipient-identity reverse search) is the test that distinguishes legitimate UCSB-adjacent advisors from microcap-pump promoters. This is THE diagnostic test for whether the AIRO mechanical screen is identifying real distress at ALMU or a false positive."
+    },
+    {
+      "claim_id": "ALMU-8",
+      "claim_text": "Aeluma claims a technology and manufacturing edge based on heterogeneous integration of compound semiconductor (GaAs/InGaAs/InP) materials on large-diameter (up to 12-inch) silicon substrates — explicitly distinguishing its approach from incumbent InGaAs sensors built on 2-4-inch InP substrates and citing competitive suppliers Hamamatsu, Sumitomo, Teledyne/FLIR, and Excelitas.",
+      "source_quote": "Our technology is based on heterogeneous integration of compound semiconductor materials on large-diameter substrates such as silicon ... we have the ability to realize many more sensor chips per wafer ... whereas competing InGaAs photodetectors are manufactured on indium phosphide (InP) substrates that are typically between 2 to 4 inches in diameter ... The major suppliers of InGaAs sensors include Hamamatsu, Sumitomo, Teledyne/FLIR, Excelitas, and others",
+      "subject": "Aeluma compound-semi heterogeneous-integration technology",
+      "predicate": "is_differentiated_via",
+      "object_value": "GaAs/InGaAs/InP epitaxy on up to 12-inch Si substrates (vs. incumbent 2-4-inch InP)",
+      "category": "technology",
+      "referent_type": "intangible",
+      "m_source_status": "PROPOSED",
+      "source_id": null,
+      "source_params": {},
+      "proposed_connector": {
+        "name": "sbir_gov.firm_awards",
+        "description": "SBIR.gov per-firm awards API — returns Phase I/II/III SBIR and STTR awards by firm name, with agency, topic code, phase, award amount, contract number, and start date. Canonical funnel for DARPA/Navy/AFRL/NSF small-business R&D money.",
+        "endpoint": "https://www.sbir.gov/api/awards.json?firm={firm_name}&rows=200",
+        "access_pattern": "api",
+        "auth_required": false,
+        "sample_invocation": "GET https://www.sbir.gov/api/awards.json?firm=Aeluma&rows=200",
+        "rationale": "DoD SBIR/STTR is structurally the largest non-USAspending channel by which compound-semi startups receive DARPA/Navy/OSD/AFRL R&D money. USAspending has incomplete coverage of SBIR Phase I/II at sub-$5M scale and frequently shows INFLATION_SUSPECT for legitimate SBIR-funded firms. A dedicated sbir.gov connector directly adjudicates ALMU-style federal-research claims at the right cell of the taxonomy (semi + federal_customer + sub-material scale).",
+        "estimated_cost": "free",
+        "completeness": "all DoD + DOE + NSF + HHS + DHS SBIR/STTR awards since 1983 (~200k records)",
+        "referent_type": "federal_award",
+        "attribute": "sbir_phase_and_amount"
+      },
+      "creative_extensions": [
+        {
+          "source_label": "uspto_odp categorize on tech-area buckets (already mapped in ALMU-3)",
+          "endpoint_or_method": "uspto_odp.query_assignee with categorize buckets for heterogeneous_integration, compound_semi, photodetector, lidar_swir",
+          "rationale": "The tech-differentiation claim is best adjudicated by whether ALMU's patent portfolio actually covers the claimed buckets. Already mapped in ALMU-3; cross-listed here as a tech-validation observable.",
+          "expected_observable": "USPTO assignee categorize result showing ≥1 patent in heterogeneous_integration AND ≥1 in photodetector",
+          "signal_direction": "presence in BOTH buckets corroborates the differentiation claim; absence in either weakens",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Google Scholar publication search for 'Klamkin' + 'heterogeneous integration' + 'InGaAs'",
+          "endpoint_or_method": "https://scholar.google.com/scholar?q=Klamkin+heterogeneous+integration+InGaAs+silicon",
+          "rationale": "Klamkin is a UCSB ECE professor; a real heterogeneous-integration tech leader would have peer-reviewed publications backing the claim. A strong publication record corroborates technical credibility (and complements patent search).",
+          "expected_observable": "peer-reviewed papers by Klamkin on III-V-on-Si epitaxy / heterogeneous integration",
+          "signal_direction": "strong publication record corroborates; sparse record weakens (could mean trade-secret-focused, or could mean weak credentials)",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Compound-semi industry trade association / SEMI standards committee membership",
+          "endpoint_or_method": "https://www.semi.org/en/communities + IEEE Photonics Society industry membership",
+          "rationale": "Real semi technology firms participate in SEMI standards / IEEE Photonics industry groups. Membership rosters are corroborative of legitimate industry presence.",
+          "expected_observable": "Aeluma in SEMI / IEEE Photonics member rosters",
+          "signal_direction": "presence corroborates; absence is UNVERIFIABLE (membership is voluntary)",
+          "severity_if_contradiction": "UNVERIFIABLE"
+        }
+      ],
+      "domain": "semiconductors",
+      "claim_type_taxonomy": "patents_ip",
+      "extraction_notes": "Tech-differentiation claims have no clean direct catalog adjudicator. PROPOSED a new sbir_gov.firm_awards connector — this is the single biggest missing piece in the taxonomy for the (semi, federal_customer) cell at sub-$5M scale. Cross-references USPTO categorize (ALMU-3) and Google Scholar (creative ext) which TOGETHER triangulate technical credibility. The sbir_gov connector is the highest-value promotion candidate from this plan because it adjudicates ALL DARPA/Navy/AFRL claims at the (small-cap, R&D-stage) scale where USAspending is structurally noisy."
+    }
+  ]
+}

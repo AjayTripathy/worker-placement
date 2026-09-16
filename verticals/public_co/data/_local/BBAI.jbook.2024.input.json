@@ -1,0 +1,140 @@
+{
+  "ticker": "BBAI",
+  "cik": "0001836981",
+  "cutoff": "2024-09-01",
+  "filing": "0001628280-24-011538_10-K.txt",
+  "filing_form": "10-K",
+  "filing_date": "2024-03-15",
+  "report_date": "2023-12-31",
+  "secondary_filing": "0001628280-24-036497_10-Q.txt",
+  "secondary_filing_date": "2024-08-09",
+  "extraction_notes": "BBAI 10-K (FY2023) is unusually generic about Pentagon programs — uses 'DoD/IC/DHS/Army programs/Air Force programs' language without naming specific Program Elements or PE numbers. The only named program in pre-cutoff filings is 'Air Force EPASS' (Engineering, Professional and Administrative Support Services), mentioned in 10-Q only as 'wound down in Q2 2023'. Customer concentration is anonymized as Customer A/B/C. This non-disclosure-of-program-names is itself a J-Book-pattern signal: the framework cannot map narrative revenue to specific PEs because the issuer hasn't named them.",
+  "claims": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Revenue from Army programs increased in FY2023 due to new contract awards and higher volume; Army programs are a material revenue driver for BBAI's National Security segment.",
+      "subject": "BigBear.ai Holdings, Inc.",
+      "predicate": "earns_revenue_from",
+      "object_value": "U.S. Army programs (unnamed PE / contract specifics not disclosed)",
+      "source_quote": "Revenues increased ... primarily as a result of increased revenue on certain Army programs as a result of new contract awards and higher volume",
+      "category": "jbook_program_revenue",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "args": {"contractor_name": "BigBear.ai Federal", "cutoff_date": "2024-09-01"}},
+        {"source": "pentagon_jbook.query_program_funding", "args": {"contractor_name": "BigBear.ai", "cutoff_date": "2024-09-01"}},
+        {"source": "usaspending.query_dod_contracts", "args": {"recipient_name": "BigBear.ai Federal, LLC", "cutoff_date": "2024-09-01"}}
+      ]
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Air Force EPASS program (Engineering, Professional and Administrative Support Services) was a revenue source that wound down in Q2 2023 — but BBAI still discloses Air Force programs as part of go-forward narrative.",
+      "subject": "BigBear.ai Holdings, Inc.",
+      "predicate": "earns_revenue_from",
+      "object_value": "Air Force EPASS (Engineering, Professional and Administrative Support Services)",
+      "source_quote": "decreased volume from the Air Force EPASS program which wound down in the second quarter of 2023",
+      "category": "jbook_program_revenue",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "args": {"program_name": "EPASS", "cutoff_date": "2024-09-01"}},
+        {"source": "pentagon_jbook.query_program_funding", "args": {"program_name": "Engineering Professional and Administrative Support Services", "cutoff_date": "2024-09-01"}}
+      ]
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Three customers contributed in excess of 10% of consolidated revenue in FY2023, comprising 49% of revenue (Customer A 21%, Customer B 16%, Customer C 12%). Customer identities are not disclosed; BBAI characterizes them as U.S. government / federal customers with classified work.",
+      "subject": "BigBear.ai Holdings, Inc.",
+      "predicate": "concentration_of_revenue",
+      "object_value": "3 anonymized customers = 49% of FY2023 revenue ($75.97M of $155.16M)",
+      "source_quote": "revenue earned from customers contributing in excess of 10% of consolidated revenues were derived from three customers comprising 49% of revenue for the twelve months ended December 31, 2023 ... Customer A $33,266 21% Customer B 24,560 16% Customer C 18,143 12%",
+      "category": "dod_customer_concentration",
+      "queries": [
+        {"source": "usaspending.query_dod_contracts", "args": {"recipient_name": "BigBear.ai Federal, LLC", "cutoff_date": "2024-09-01"}},
+        {"source": "usaspending.query_federal_presence", "args": {"recipient_name": "BigBear.ai Federal, LLC", "cutoff_date": "2024-09-01"}}
+      ]
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Approximately $89 million of $168 million total backlog as of 12/31/2023 is attributable to significant customers; BBAI expects to recognize ~53% of that by end of 2024 with the remainder by end of 2026 — i.e., a multi-year forward dependency on the same concentrated customer base.",
+      "subject": "BigBear.ai Holdings, Inc.",
+      "predicate": "forward_revenue_expectation",
+      "object_value": "$89M backlog from significant customers, recognition through FY2026",
+      "source_quote": "As of December 31, 2023, about $89 million of our approximate $168 million of total backlog is attributable to these significant customers ... we expect to recognize approximately 53% of that amount as revenue by the end of 2024, with the remainder to be recognized as revenue by the end of 2026",
+      "category": "jbook_program_pipeline",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "args": {"contractor_name": "BigBear.ai Federal", "cutoff_date": "2024-09-01"}},
+        {"source": "usaspending.query_dod_contracts", "args": {"recipient_name": "BigBear.ai Federal, LLC", "cutoff_date": "2024-09-01"}}
+      ]
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "BBAI positions itself as a beneficiary of the Jan 11, 2024 National Defense Industrial Strategy (NDIS) and the DoD's strategic call to connect sensors across all armed services with AI — a forward-narrative tied to JADC2/CJADC2-adjacent investments BBAI claims to be making.",
+      "subject": "BigBear.ai Holdings, Inc.",
+      "predicate": "narrative_dependency_on",
+      "object_value": "DoD AI/sensors-across-services modernization (JADC2-adjacent)",
+      "source_quote": "in response to the strategic call to action by DoD to connect sensors across all branches of the armed forces powered by artificial intelligence, we made targeted investments into foundational software capabilities ... We expect these investments to continue in 2024",
+      "category": "jbook_program_pipeline",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "args": {"program_name": "JADC2", "cutoff_date": "2024-09-01"}},
+        {"source": "pentagon_jbook.query_program_funding", "args": {"program_name": "CJADC2", "cutoff_date": "2024-09-01"}},
+        {"source": "pentagon_jbook.query_program_funding", "args": {"program_name": "Joint All Domain Command and Control", "cutoff_date": "2024-09-01"}}
+      ]
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "BBAI describes a Project Maven / DARPA narrative as part of its national security positioning (per cohort metadata; the 10-K itself uses the generic phrase 'AI for defense' rather than naming Maven directly — a notable disclosure-gap given cohort framing).",
+      "subject": "BigBear.ai Holdings, Inc.",
+      "predicate": "claimed_participation_in",
+      "object_value": "Project Maven / DARPA programs",
+      "source_quote": "[cohort metadata: 'Project Maven / DARPA narrative'] — the 10-K names neither Maven nor a specific DARPA PE; describes only 'AI for defense' generically.",
+      "category": "jbook_program_pipeline",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "args": {"program_name": "Project Maven", "cutoff_date": "2024-09-01"}},
+        {"source": "pentagon_jbook.query_program_funding", "args": {"program_name": "Maven Smart System", "cutoff_date": "2024-09-01"}},
+        {"source": "pentagon_jbook.query_program_funding", "args": {"contractor_name": "BigBear.ai", "cutoff_date": "2024-09-01"}}
+      ]
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Pangiam acquisition (closed 2/29/2024, $70M in stock) positions BBAI as a 'foundational leader' in vision AI / digital identity for global trade, travel, and digital identity — including border protection, TSA/CBP customers — forming the post-cutoff growth narrative.",
+      "subject": "BigBear.ai Holdings, Inc.",
+      "predicate": "acquired_for_growth",
+      "object_value": "Pangiam Intermediate Holdings, LLC ($70M stock consideration, 61.8M shares at $1.3439)",
+      "source_quote": "On February 29, 2024, the Company completed the acquisition of Pangiam ... The combination of BigBear.ai and Pangiam creates one of the industry's most comprehensive vision and edge AI portfolios ... positioning the Company as a foundational leader in how artificial intelligence is operationalized at the edge",
+      "category": "rollup_thesis",
+      "queries": [
+        {"source": "usaspending.query_federal_presence", "args": {"recipient_name": "Pangiam", "cutoff_date": "2024-09-01"}},
+        {"source": "acq_coherence.score_acquisition_coherence", "args": {"ticker": "BBAI", "cutoff_date": "2024-09-01"}}
+      ]
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "BBAI claims a TAM of approximately $80 billion in 2024 growing to $272 billion by 2028 across Edge AI, Vision AI, and Digital Twin — a 3.4x TAM-growth narrative used to justify the Pangiam rollup and forward growth.",
+      "subject": "BigBear.ai Holdings, Inc.",
+      "predicate": "claims_TAM",
+      "object_value": "$80B (2024) → $272B (2028) TAM across Edge AI / Vision AI / Digital Twin",
+      "source_quote": "Our suite of technology solutions and expertise allows us to target a total addressable market (TAM) of approximately $80 billion in 2024, growing to $272 billion by 2028, based upon third-party industry reports",
+      "category": "other",
+      "queries": []
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "BBAI has approximately 480 employees as of 12/31/2023, the vast majority of whom hold active security clearances, with headquarters in Columbia MD and offices in Ann Arbor MI / Chantilly VA / Charlottesville VA / McLean VA — implying significant security-cleared workforce serving classified contracts.",
+      "subject": "BigBear.ai Holdings, Inc.",
+      "predicate": "operates_facilities",
+      "object_value": "~480 employees, 5 office locations, vast majority security-cleared",
+      "source_quote": "As of December 31, 2023, we had approximately 480 employees, the vast majority of which hold an active security clearance",
+      "category": "facility",
+      "queries": []
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "Virgin Orbit (a stated material commercial-space customer) declared bankruptcy in Q2 2023 — a prior named-customer loss that BBAI absorbed; the resulting gross-margin compression and $1.4M bad debt reserve illustrate how customer loss flows through.",
+      "subject": "BigBear.ai Holdings, Inc.",
+      "predicate": "lost_customer",
+      "object_value": "Virgin Orbit (Chapter 11, Q2 2023; $1,425 bad-debt reserve)",
+      "source_quote": "lower volume from Virgin Orbit as a result of Virgin Orbit's bankruptcy announcement in the second quarter of 2023 ... bad debt reserves of $1,425 related to the settlement of Virgin Orbit's Chapter 11 bankruptcy proceedings",
+      "category": "counterparty_disclosure",
+      "queries": [
+        {"source": "edgar_fts.query_fulltext", "args": {"query": "BigBear.ai", "cutoff_date": "2024-09-01"}}
+      ]
+    }
+  ]
+}

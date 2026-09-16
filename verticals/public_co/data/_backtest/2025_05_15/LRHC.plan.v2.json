@@ -1,0 +1,472 @@
+{
+  "ticker": "LRHC",
+  "cutoff": "2025-05-15",
+  "filing": "0001213900-25-032211_10K.txt",
+  "plan_version": 2,
+  "domain": "real_estate_construction",
+  "naics_basis": "531 (real-estate brokerage) + 236 (construction-adjacent via roll-up) — primary economic activity is NAICS 531210 (Offices of Real Estate Agents and Brokers)",
+  "filing_picked_rationale": "Most recent FY 10-K (filed 2025-04-15, FY ended 2024-12-31). Contains the going-concern paragraph, ICFR material weakness disclosure, stock-for-services issuances, MCA financing, Nasdaq deficiency status, agent count, office count, and counterparty (Final Offer) partnership claim. No 10-Q between this filing and the cutoff materially changes the picture.",
+  "claims": [
+    {
+      "claim_id": "LRHC-1",
+      "claim_text": "La Rosa's corporate and franchised brokerage offices are staffed with 2,769 licensed real estate brokers and sales associates as of March 31, 2025.",
+      "source_quote": "Our real estate brokerage offices, both corporate and franchised, are staffed with 2,769 licensed real estate brokers and sales associates as of March 31, 2025.",
+      "subject": "La Rosa Holdings Corp.",
+      "predicate": "claims_licensed_agent_count",
+      "object_value": "2769",
+      "category": "production_volume",
+      "referent_type": "quantity",
+      "m_source_status": "PROPOSED",
+      "source_id": null,
+      "source_params": {},
+      "proposed_connector": {
+        "name": "state_real_estate_licensees.query_affiliated_licensees",
+        "description": "Aggregator over state real-estate-licensing-board public lookup databases, returning the count of active licensees affiliated with a named brokerage firm.",
+        "endpoint": "Per-state: Florida DBPR (https://www.myfloridalicense.com/wl11.asp), Texas TREC (https://www.trec.texas.gov/apps/license-holder-search/), California DRE (https://www.dre.ca.gov/PublicASP/pplinfo.asp), Georgia GREC (https://grec.state.ga.us/grec-search/), North Carolina NCREC (https://www.ncrec.gov/RecsearchOnline.aspx), Puerto Rico DACO. Affiliated-licensee endpoints typically return list of license holders with status, expiration, and primary broker.",
+        "access_pattern": "scrape",
+        "auth_required": false,
+        "sample_invocation": "for state in [FL, CA, TX, GA, NC, PR]: state_re_board.query_affiliated_licensees(broker_name='La Rosa Realty')",
+        "rationale": "Real-estate brokerage is the most aggressively-regulated 'agent count' claim in any domain — every salesperson must hold an active state license affiliated with one and only one broker. Filing claims 2,769 licensees, of which the bulk should be FL-licensed under 'La Rosa Realty'. State public lookup is the canonical adjudicator. Each licensee is publicly addressable.",
+        "estimated_cost": "free",
+        "completeness": "Complete for FL+CA+TX+GA+NC; PR may require manual lookup. Affiliated-by-firm filter is exposed in FL DBPR + TX TREC; CA DRE requires reverse-lookup by individual license number.",
+        "referent_type": "license_holder",
+        "attribute": "active_status_and_affiliation"
+      },
+      "creative_extensions": [
+        {
+          "source_label": "Florida DBPR (Department of Business and Professional Regulation) MyFloridaLicense",
+          "endpoint_or_method": "https://www.myfloridalicense.com/wl11.asp — search by Primary Name = 'La Rosa Realty'; filter status=Active; aggregate by license type (sales associate vs broker)",
+          "rationale": "Florida is the corporate HQ and the documented majority of offices (Celebration, Kissimmee, Davenport, Jacksonville, Miami, etc.) — FL DBPR should show the lion's share of the 2,769 licensees if the count is real",
+          "expected_observable": "count of active sales-associate + broker-associate licenses listing 'La Rosa Realty' or 'La Rosa Realty, LLC' as employing broker",
+          "signal_direction": "if FL active-affiliated count is much smaller than the claim's implied FL share, the headline agent count is inflated",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "NAR (National Association of Realtors) member directory & state MLS broker-of-record listings",
+          "endpoint_or_method": "MLS broker-of-record searches via local boards (e.g. Stellar MLS in Central FL, Bright MLS, CRMLS); each MLS publishes office-level membership counts",
+          "rationale": "MLS membership is a paid annual subscription so total MLS-active La Rosa Realty members is a denominator floor for productive agents",
+          "expected_observable": "office-level MLS-active member counts summed across La Rosa offices",
+          "signal_direction": "MLS-active count >> 0 corroborates; if much smaller than 2,769 then the claimed roster is heavily inactive",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "LinkedIn 'people who work at La Rosa Realty'",
+          "endpoint_or_method": "linkedin.com/company/la-rosa-realty-llc — public employee-count widget + manual count of self-identified agents",
+          "rationale": "Brokerage agents commonly list their broker on LinkedIn; a 2,769-agent firm should have hundreds to thousands of self-identified members",
+          "expected_observable": "LinkedIn-reported headcount and agent self-identifications",
+          "signal_direction": "if LinkedIn count is in mid-thousands, corroborates; if it's a few hundred, the headline includes many inactive or never-onboarded names",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "real_estate_construction",
+      "claim_type_taxonomy": "workforce",
+      "extraction_notes": "Real-estate brokerage workforce is uniquely public via state licensing boards — taxonomy lookup for real_estate_construction.workforce is not pre-populated, but the proposed state-licensee connector would be canonical. Note: 'staffed with' here means 'independent-contractor agents affiliated with the brokerage', not W-2 employees, so OSHA 300A is not a fit (OSHA counts W-2 employees and brokerages typically have a tiny W-2 staff). H-1B LCA is also not a fit — sales agents are not H-1B candidates."
+    },
+    {
+      "claim_id": "LRHC-2",
+      "claim_text": "La Rosa operates 26 La Rosa Realty corporate real estate brokerage offices and branches in Florida, California, Texas, Georgia, North Carolina and Puerto Rico, plus 6 franchised offices and 3 affiliated offices.",
+      "source_quote": "We have 26 La Rosa Realty corporate real estate brokerage offices and branches located in Florida, California, Texas, Georgia, North Carolina and Puerto Rico. The Company also has 6 La Rosa Realty franchised real estate brokerage offices and branches and 3 affiliated real estate brokerage offices, that pay us fees in 7 states in the United States and Puerto Rico.",
+      "subject": "La Rosa Holdings Corp.",
+      "predicate": "operates_brokerage_offices_count",
+      "object_value": "26 corporate + 6 franchised + 3 affiliated",
+      "category": "physical_facility",
+      "referent_type": "physical_object",
+      "m_source_status": "PROPOSED",
+      "source_id": null,
+      "source_params": {},
+      "proposed_connector": {
+        "name": "state_real_estate_offices.query_registered_offices",
+        "description": "State real-estate-commission registered-office lookup, returning every brokerage branch office licensed in the named brokerage entity's chain.",
+        "endpoint": "FL DBPR Real Estate (Bureau of Education and Testing) — searches BrokerOffice; TX TREC Branch Office Search; CA DRE Branch Office Search; GA GREC office registry; NC NCREC Firm Office Search",
+        "access_pattern": "scrape",
+        "auth_required": false,
+        "sample_invocation": "state_re_offices.query_registered_offices(broker_name='La Rosa Realty', states=['FL','CA','TX','GA','NC','PR'])",
+        "rationale": "Every brokerage office must be licensed as a branch with its supervising broker registered. State office count = ground truth on the 26-office claim. The same registry corroborates address (matches Item 2 of 10-K) and supervising-broker continuity.",
+        "estimated_cost": "free",
+        "completeness": "Complete for all 50 states + PR; coverage of branch-vs-main-office distinction is universal.",
+        "referent_type": "brokerage_office",
+        "attribute": "active_registration"
+      },
+      "creative_extensions": [
+        {
+          "source_label": "County property-appraiser business-tangible-personal-property (TPP) returns",
+          "endpoint_or_method": "Florida county property appraisers (Orange, Osceola, Polk, Miami-Dade, Duval) publish TPP filings online; search by 'La Rosa Realty' as filer",
+          "rationale": "Operating a brokerage office triggers TPP filings (desks, computers, etc.) at the county level. Multiple TPP returns across FL counties corroborate a multi-office FL footprint.",
+          "expected_observable": "list of TPP-filing addresses + assessed value per office location",
+          "signal_direction": "presence at multiple FL counties corroborates; single-county only would contradict 6+ FL office claim",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Google Maps / Google My Business listings",
+          "endpoint_or_method": "Places API search 'La Rosa Realty' across FL, CA, TX, GA, NC, PR; filter to verified businesses with operating hours",
+          "rationale": "A real operating office is virtually always listed on Google Maps with hours, photos, and reviews. Listed-and-verified count = floor on real office count.",
+          "expected_observable": "verified-business count by city/state",
+          "signal_direction": ">= 26 verified listings = corroborates; << 26 = real office count inflated",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Stellar MLS office directory (Central Florida)",
+          "endpoint_or_method": "stellarmls.com Member Search — by Office Name 'La Rosa Realty'",
+          "rationale": "Stellar MLS is the dominant MLS in Orlando/Tampa where most La Rosa FL offices sit; each office must be a separate MLS member office to access the MLS feed",
+          "expected_observable": "Stellar-MLS-registered office count under La Rosa branding",
+          "signal_direction": "corroboration for FL office count; absence would be inconsistent with active brokerage operations",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "real_estate_construction",
+      "claim_type_taxonomy": "facility_scope",
+      "extraction_notes": "Taxonomy returns PROVISIONAL with sam_entity primary — but LRHC is not federally-aligned and won't usefully describe its 26 offices in a single SAM record. State real-estate-license-board branch-office registries are the genuine canonical source. Office addresses are public artifacts."
+    },
+    {
+      "claim_id": "LRHC-3",
+      "claim_text": "Independent auditor's report expresses substantial doubt about LRHC's ability to continue as a going concern; FY2024 net loss of $14,349,996 versus $7,823,763 in FY2023, with negative working capital of $4,026,469 on Dec 31, 2024 and cash of only $1,442,901.",
+      "source_quote": "Our independent registered public accounting firm s report contains an explanatory paragraph that expresses substantial doubt about our ability to continue as a going concern. The Company has incurred recurring net losses, including a net loss of $14,349,996 for the year ended December 31, 2024, compared to $7,823,763 for the year ended December 31, 2023... On December 31, 2024, the Company had a cash balance of $ 1,442,901 and negative working capital of $ 4,026,469.",
+      "subject": "La Rosa Holdings Corp.",
+      "predicate": "has_going_concern_qualification",
+      "object_value": "FY2024 net loss $14.35M; cash $1.44M; working capital -$4.03M; loss growing 83% YoY",
+      "category": "financial_distress",
+      "referent_type": "event",
+      "m_source_status": "MAPPED",
+      "source_id": "claim_evolution.query_claim_evolution",
+      "source_params": {
+        "cik": "0001879403",
+        "search_term": "going concern",
+        "base_filing_date": "2025-04-15",
+        "cutoff_date": "2025-05-15",
+        "forms": "10-K,10-Q,8-K,DEF 14A"
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "SEC filings cadence — sec_filings.list_filings_by_form for 8-K item 3.01 (Notice of Failure to Satisfy a Continued Listing Rule)",
+          "endpoint_or_method": "sec_filings.list_filings_by_form(cik='0001879403', forms=['8-K'], start_date='2024-10-01', cutoff_date='2025-05-15'); also S-1, S-3, 424B prospectus supplements for evidence of dilution cadence",
+          "rationale": "A real going-concern + Nasdaq-deficiency trajectory leaves a distinctive 8-K cadence: 3.01 (listing deficiency), 8.01 (compliance update), and frequent 424B supplements as ATM is drawn down",
+          "expected_observable": "8-K filings tagged 3.01/8.01 + frequent S-1/S-3 amendments and 424B prospectus supplements",
+          "signal_direction": "elevated cadence corroborates distress; sparse cadence would contradict the going-concern framing",
+          "severity_if_contradiction": "SEVERE"
+        },
+        {
+          "source_label": "edgar_fts.query_fulltext on focal CIK for distress markers",
+          "endpoint_or_method": "edgar_fts.query_fulltext(search_term='going concern', cik='0001879403', start_date='2023-01-01', cutoff_date='2025-05-15') — count quarters where the phrase appears",
+          "rationale": "Multi-period self-disclosure of going-concern language is the registry-side analog of distress-cluster fingerprinting (H10)",
+          "expected_observable": "count of filings containing 'going concern' — expect monotonically increasing or stable; absence of the term in newer filings would be SILENT_POST_CLAIM (a soft signal of either resolution OR concealment)",
+          "signal_direction": "persistent presence across 10-Qs corroborates a sustained distress trajectory",
+          "severity_if_contradiction": "SEVERE"
+        }
+      ],
+      "domain": "real_estate_construction",
+      "claim_type_taxonomy": "financial_distress",
+      "extraction_notes": "Canonical CANONICAL cell — claim_evolution + sec_filings cadence. The claim is self-attesting (the filing itself contains it); the test is whether the trajectory persists across subsequent filings. Distress fingerprint here is dense: going-concern + 83% YoY loss growth + negative working capital + Nasdaq deficiency + reverse-split contemplated + serial dilution + MCA usage = H10 'cluster' easily satisfied (>=5 markers within 6 months)."
+    },
+    {
+      "claim_id": "LRHC-4",
+      "claim_text": "Disclosure controls and procedures are ineffective; CEO and Interim CFO concluded DCP ineffective due to limited finance-department resources — ICFR material weakness disclosure pattern (the AIRO-signature flag).",
+      "source_quote": "Based upon this evaluation, our Chief Executive Officer and Interim Chief Financial Officer concluded that our disclosure controls and procedures are ineffective, as we are a newly publicly traded company with limited resources in our finance department, and we are in the process of esta[blishing]",
+      "subject": "La Rosa Holdings Corp.",
+      "predicate": "discloses_material_weakness_DCP_ineffective",
+      "object_value": "DCP ineffective as of 2024-12-31",
+      "category": "financial_distress",
+      "referent_type": "event",
+      "m_source_status": "MAPPED",
+      "source_id": "claim_evolution.query_claim_evolution",
+      "source_params": {
+        "cik": "0001879403",
+        "search_term": "material weakness",
+        "base_filing_date": "2025-04-15",
+        "cutoff_date": "2025-05-15",
+        "forms": "10-K,10-Q,8-K"
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "SEC EDGAR Form NT (Notification of inability to timely file)",
+          "endpoint_or_method": "sec_filings.list_filings_by_form(cik='0001879403', forms=['NT 10-K','NT 10-Q'], start_date='2023-01-01', cutoff_date='2025-05-15')",
+          "rationale": "Companies with a real ICFR material weakness frequently also file NT 10-K / NT 10-Q (late-filing notices). Presence corroborates an ICFR breakdown; absence is a soft signal that the deficiency is narrow.",
+          "expected_observable": "count of NT-form filings",
+          "signal_direction": "presence corroborates the depth of the material weakness; multiple NTs = severe",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Auditor identity & PCAOB Form AP (audit-firm-of-record disclosure) — PCAOB ARM (Auditor Search)",
+          "endpoint_or_method": "https://pcaobus.org/oversight/inspections/firm-inspection-reports + Form AP search by issuer name 'La Rosa Holdings' for FY24",
+          "rationale": "Identifies the audit firm; small-cap going-concern issuers often use small PCAOB-inspected firms with quality deficiencies. Identifies auditor turnover (Item 4.01 8-Ks).",
+          "expected_observable": "audit-firm name, PCAOB inspection history, presence of auditor-change 8-Ks",
+          "signal_direction": "auditor turnover or sanctioned firm corroborates ICFR depth",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "real_estate_construction",
+      "claim_type_taxonomy": "financial_distress",
+      "extraction_notes": "Material weakness is the AIRO-signature flag the cohort screen fired on. Claim_evolution tracks whether subsequent 10-Qs continue to disclose it (REAFFIRMED — normal) or whether remediation is claimed but suspect."
+    },
+    {
+      "claim_id": "LRHC-5",
+      "claim_text": "Multiple stock-for-services issuances post-cutoff: 1,723,530 shares to a consulting agreement on Feb 20 2025; 300,000 + 200,000 shares for marketing on Feb 20/24 2025; 250,000 shares for marketing on Apr 7 2025; plus 2,933,219 shares to CEO Joseph La Rosa on Feb 5 2025 for services — the AIRO-pattern stock-for-services dilution.",
+      "source_quote": "On February 5, 2025, the Company issued the CEO an aggregate of 2,933,219 unregistered shares of common stock... as a compensation for the services rendered pursuant to his employment agreement... On February 20, 2025, the Company entered into a consulting agreement pursuant to which the Company agreed to issue 1,723,530 shares of the Company s common stock for services rendered. On February 20 and 24, 2025, the Company entered into marketing agreements pursuant to which the Company agreed to issue 300,000 and 200,000 shares of the Company s common stock, respectively, for services rendered... On April 7, 2025, the Company entered into a marketing agreement pursuant to which the Company agreed to issue 250,000 shares of the Company s common stock for services rendered.",
+      "subject": "La Rosa Holdings Corp.",
+      "predicate": "issues_stock_for_services",
+      "object_value": "~5.4M+ shares total in Q1 2025 issued for services (consulting/marketing/CEO comp) vs already-distressed share count and $0.20 stock price",
+      "category": "financial_distress",
+      "referent_type": "event",
+      "m_source_status": "MAPPED",
+      "source_id": "edgar_fts.query_fulltext",
+      "source_params": {
+        "search_term": "stock for services",
+        "cik": "0001879403",
+        "cutoff_date": "2025-05-15",
+        "start_date": "2023-01-01",
+        "forms": "10-K,10-Q,8-K,DEF 14A,S-1,S-3,424B5"
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "SEC Form 4 / Form 3 insider transaction filings",
+          "endpoint_or_method": "sec_filings.list_filings_by_form(cik='0001879403', forms=['4','3','5'], start_date='2024-01-01', cutoff_date='2025-05-15'); also 8-K Item 3.02 (Unregistered Sales of Equity Securities)",
+          "rationale": "Stock-for-services issuances to officers/directors must be reported on Form 4 within 2 business days. Cadence + total volume of insider Form 4s with code 'A' (grant) is the direct registry-side test.",
+          "expected_observable": "count and total share volume of Form 4 acquisitions for services/comp",
+          "signal_direction": "high cadence of Form 4 grants corroborates the dilution thesis; subsequent insider sales (code S) confirm a 'paid in stock, sold immediately' pattern",
+          "severity_if_contradiction": "SEVERE"
+        },
+        {
+          "source_label": "8-K Item 3.02 (Unregistered Sales of Equity Securities) + S-1/S-3 registration cadence",
+          "endpoint_or_method": "sec_filings.list_filings_by_form(cik='0001879403', forms=['8-K','S-1','S-1/A','S-3','S-3/A','S-8'], start_date='2024-01-01', cutoff_date='2025-05-15')",
+          "rationale": "Each stock-for-services issuance to a consultant typically triggers a 3.02 disclosure and a subsequent S-1 resale registration. The cadence is a clean external proxy for the rate of 'paying with shares' behavior.",
+          "expected_observable": "count of 3.02 disclosures + S-1/S-3 amendments registering resale of consultant shares",
+          "signal_direction": "elevated cadence corroborates pay-in-stock behavior; especially diagnostic when paired with ATM activity",
+          "severity_if_contradiction": "SEVERE"
+        },
+        {
+          "source_label": "ATM (At-The-Market) prospectus supplement filings (424B5)",
+          "endpoint_or_method": "sec_filings.list_filings_by_form(cik='0001879403', forms=['424B5'], cutoff_date='2025-05-15')",
+          "rationale": "ATM with A.G.P./Alliance Global Partners disclosed in filing; ATM sales of 7.67M shares in Q1 2025 alone is itself a distress fingerprint — the registry-side fingerprint is the 424B5 cadence.",
+          "expected_observable": "count of 424B5 supplements + share-issuance volume",
+          "signal_direction": "frequent supplements corroborate active dilution; combined with stock-for-services = the AIRO-cohort pattern",
+          "severity_if_contradiction": "SEVERE"
+        }
+      ],
+      "domain": "real_estate_construction",
+      "claim_type_taxonomy": "financial_distress",
+      "extraction_notes": "Pure stock-for-services with the cohort's AIRO-signature linguistic match. Combined with Q1 2025 ATM (7.67M shares) and CEO grant (2.93M shares), the Q1 2025 share issuance count materially exceeds the prior YE share count — classic late-stage zombie equity-dilution pattern. Pair with LRHC-3 going-concern for H10 cluster scoring."
+    },
+    {
+      "claim_id": "LRHC-6",
+      "claim_text": "LRHC has used merchant cash advance (MCA) financing — Cedar Advance LLC and Arin Funding LLC — selling future receipts at deep discounts (e.g. $500K for $761K of future receipts at $23K/week; $420K for $588K at $15.5K/week; $403.75K for $616.25K at $15.4K/week).",
+      "source_quote": "In May 2024, we entered into a standard merchant cash advance agreement with Cedar Advance LLC ('Cedar') where we sold in the aggregate $761,250 in future receipts of the Company for $500,000... In October 2024, we entered into a standard merchant cash advance agreement with Arin Funding LLC ('Arin') where we sold in the aggregate $588,000 in future receipts of the Company for $420,000.",
+      "subject": "La Rosa Holdings Corp.",
+      "predicate": "uses_merchant_cash_advance_financing",
+      "object_value": "Cedar (May 2024 + Oct 2024); Arin (Oct 2024); implied APRs >50%",
+      "category": "financial_distress",
+      "referent_type": "event",
+      "m_source_status": "MAPPED",
+      "source_id": "edgar_fts.query_fulltext",
+      "source_params": {
+        "search_term": "merchant cash advance",
+        "cik": "0001879403",
+        "cutoff_date": "2025-05-15",
+        "start_date": "2023-01-01",
+        "forms": "10-K,10-Q,8-K"
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "UCC-1 filings — Florida Secured Transaction Registry (FLSTR)",
+          "endpoint_or_method": "https://search.sunbiz.org/Inquiry/CorporationSearch/SecuredTransactions — debtor name 'La Rosa Holdings' + 'La Rosa Realty'",
+          "rationale": "MCA lenders ALWAYS file UCC-1 on the future-receipts collateral. UCC-1 count under a debtor name is a clean external proxy for the number of small alternative-financing lenders the company has tapped. Distressed real-estate brokerages typically accumulate 5+ UCCs from MCA shops.",
+          "expected_observable": "count of UCC-1 filings naming La Rosa entities as debtor; secured-party names (Cedar, Arin, and any others)",
+          "signal_direction": "many UCCs (esp. from MCA-known names like Cedar Advance, Arin Funding, EBF Partners, Pearl Capital, etc.) = SEVERE distress; few UCCs = corroborates the disclosed scope only",
+          "severity_if_contradiction": "SEVERE"
+        },
+        {
+          "source_label": "New York State UCC filings (DOS-1500 system)",
+          "endpoint_or_method": "https://appext20.dos.ny.gov/pls/ucc_public/web_search.main_frame — many MCA shops are NY-based and file there",
+          "rationale": "MCA shops domiciled in NY/NJ file UCC there; cross-state UCC sweep catches anything FL misses",
+          "expected_observable": "additional UCC-1 hits beyond FL registry",
+          "signal_direction": "presence reveals undisclosed MCAs",
+          "severity_if_contradiction": "SEVERE"
+        },
+        {
+          "source_label": "PACER — federal-court complaint search ('confession of judgment' or 'judgment by consent' MCA collection actions)",
+          "endpoint_or_method": "pacer.uscourts.gov + state court (NY, FL) civil dockets — defendant 'La Rosa Holdings' or 'La Rosa Realty' or related subsidiaries; also Florida State Courts (https://www.flcourts.gov/case-search)",
+          "rationale": "When an MCA borrower defaults, the lender typically files a confession-of-judgment lawsuit. Presence of such suits is HARD evidence the company is failing the weekly payment schedule.",
+          "expected_observable": "civil-court complaints filed by Cedar Advance LLC, Arin Funding LLC, or similar MCA names against La Rosa entities",
+          "signal_direction": "presence = SEVERE — borrower is in default; absence = at least servicing the MCAs",
+          "severity_if_contradiction": "SEVERE"
+        }
+      ],
+      "domain": "real_estate_construction",
+      "claim_type_taxonomy": "financial_distress",
+      "extraction_notes": "MCA usage is a high-signal distress marker — the implied APR on the May 2024 Cedar advance is roughly 100%+. MCAs are the financing of last resort. Pair with the Feb 2025 SPA which used proceeds to pay off the MCAs ($354K to Cedar, $340K to Arin) — i.e. LRHC effectively refinanced loan-shark debt with convertible notes. UCC-1 search is the canonical external adjudicator."
+    },
+    {
+      "claim_id": "LRHC-7",
+      "claim_text": "On Feb 4, 2025, LRHC entered into a Securities Purchase Agreement issuing a $5,500,000 Senior Secured Convertible Note maturing Feb 4, 2027, plus 16 Incremental Warrants each exercisable for up to $2,500,000 of additional Notes at an exercise price of $2,256,250 — total purchase price $4,963,750 for an Initial Note plus warrants.",
+      "source_quote": "On February 4, 2025... the Company issued to the Investor: (i) a Senior Secured Convertible Note in the original principal amount of $ 5,500,000 which matures on February 4, 2027 (the Initial Note ); and (ii) sixteen (16) warrants ( Incremental Warrants ), each to purchase additional Notes in an original principal amount up to $ 2,500,000 at an exercise price of $ 2,256,250 ... The purchase price paid by the Investor under the SPA for the Initial Note and Incremental Warrants was $ 4,963,750.",
+      "subject": "La Rosa Holdings Corp.",
+      "predicate": "issues_senior_secured_convertible_note_with_warrants",
+      "object_value": "$5.5M Note + 16x $2.5M Incremental Warrants; 9.75% OID; matures 2027-02-04",
+      "category": "financial_distress",
+      "referent_type": "event",
+      "m_source_status": "MAPPED",
+      "source_id": "sec_filings.list_filings_by_form",
+      "source_params": {
+        "cik": "0001879403",
+        "forms": ["8-K", "S-1", "S-1/A", "S-3", "S-3/A", "424B5"],
+        "start_date": "2025-02-01",
+        "cutoff_date": "2025-05-15",
+        "limit": 50
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "Convertible-note holder identity via 13G/13D filings",
+          "endpoint_or_method": "sec_filings.list_filings_by_form(cik='0001879403', forms=['SC 13G','SC 13D','SC 13G/A'], cutoff_date='2025-05-15')",
+          "rationale": "The 'institutional investor' counterparty in the SPA — particularly with this structure (incremental warrants, baby convertibles with adjustable conversion prices) — is almost certainly a death-spiral financier. 13G/13D filings would name them.",
+          "expected_observable": "13G/13D filer names",
+          "signal_direction": "if name matches known death-spiral funds (e.g. Anson, Hudson Bay, L1 Capital, Streeterville, Alpha Capital, etc.), severely corroborates dilution thesis",
+          "severity_if_contradiction": "SEVERE"
+        },
+        {
+          "source_label": "Track-record cohort search — edgar_fts for prior SPAs with same structure",
+          "endpoint_or_method": "edgar_fts.query_fulltext(search_term='Incremental Warrants', cutoff_date='2025-05-15', forms='8-K') — count other issuers using identical language",
+          "rationale": "Standard-template SPAs with 'Incremental Warrants exercisable for additional Notes' are a known death-spiral structure. Cross-issuer template matching identifies the financier's portfolio + outcomes.",
+          "expected_observable": "count of other small-cap issuers with same SPA template + their subsequent stock performance",
+          "signal_direction": "the template is overwhelmingly used by sub-$1 small-caps that subsequently dilute aggressively",
+          "severity_if_contradiction": "SEVERE"
+        }
+      ],
+      "domain": "real_estate_construction",
+      "claim_type_taxonomy": "financial_distress",
+      "extraction_notes": "Convertible note + 16 incremental-warrant structure is the textbook 'toxic financing' template — every $2.5M warrant exercise drops another tranche of dilutive paper into the float. The 9.75% OID + 12% annual rate is loan-shark grade for a public co. This is the catalyst that drove the -99.9% forward outcome."
+    },
+    {
+      "claim_id": "LRHC-8",
+      "claim_text": "Nasdaq notified LRHC on Oct 10 2024 that it failed the $1.00 minimum bid price rule, granted an initial 180-day compliance period (to April 8 2025), then a second 180-day period (to Oct 6 2025); as of the date of the report common stock has not regained compliance; closing price on April 14 2025 was $0.201 per share.",
+      "source_quote": "On October 10, 2024, we received a letter from the Nasdaq Listing Qualifications Department notifying us that... our common stock had not maintained a minimum closing bid price of $1.00 per share... As of April 8, 2025, the Common Stock has not regained compliance with the Bid Price Rule... If the Company chooses to implement a reverse stock split, it must complete the split no later than ten business days prior to the end of the Second Compliance Period... On April 14, 2025, the closing price for our Common Stock as reported on The Nasdaq Capital Market was $0.201 per share.",
+      "subject": "La Rosa Holdings Corp.",
+      "predicate": "subject_to_nasdaq_minimum_bid_price_deficiency",
+      "object_value": "Bid Price Rule failure since Aug-Oct 2024; second compliance deadline Oct 6 2025; current price $0.201",
+      "category": "financial_distress",
+      "referent_type": "event",
+      "m_source_status": "MAPPED",
+      "source_id": "sec_filings.list_filings_by_form",
+      "source_params": {
+        "cik": "0001879403",
+        "forms": ["8-K"],
+        "start_date": "2024-10-01",
+        "cutoff_date": "2025-05-15",
+        "limit": 50
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "Nasdaq Listing Council public deficiency tracking / Nasdaq Trader website",
+          "endpoint_or_method": "https://listingcenter.nasdaq.com/ — Listing Deficiency dataset (the public-facing daily deficiency-status feed)",
+          "rationale": "Nasdaq publishes a daily list of issuers under deficiency with rule code (5550(a)(2) for the bid price rule); cross-check confirms the company's compliance status independent of the issuer's own disclosure",
+          "expected_observable": "LRHC listed under rule 5550(a)(2) deficiency with compliance deadline",
+          "signal_direction": "presence corroborates; absence would suggest a quietly-resolved status",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "iborrow.get_borrow_rate — short borrow availability + fee",
+          "endpoint_or_method": "iborrow.get_borrow_rate(ticker='LRHC')",
+          "rationale": "Distressed sub-$1 names typically have elevated borrow fees and limited shares-available, both of which are tradable signals. Use to verify that the short leg is actually executable.",
+          "expected_observable": "borrow fee %, shares available, 30-day moving average",
+          "signal_direction": "rising fee + low availability = market consensus on impending dilution/wipeout (corroborates); cheap stable borrow would be inconsistent with distress (weak signal)",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "real_estate_construction",
+      "claim_type_taxonomy": "financial_distress",
+      "extraction_notes": "Sub-$1 + Nasdaq deficiency + reverse-split-imminent is the most reliable single-fingerprint marker for AIRO-cohort wipeouts. Pair with LRHC-3, LRHC-4, LRHC-5, LRHC-7 — five clustered distress markers within 6 months easily clears H10 dual-gate."
+    },
+    {
+      "claim_id": "LRHC-9",
+      "claim_text": "In March 2024 LRHC officially launched a partnership with Final Offer, an online bidding platform; Final Offer is made available to real estate brokers on LRHC's platform in Florida, California and Georgia.",
+      "source_quote": "In March 2024, the Company officially launched its partnership with Final Offer, online platform that allows sellers to establish a minimum sales price and other deal terms online and pre-approved buyers to make bidding offers. Final Offer is available to real estate brokers on the Company s platform in key markets across Florida, California and Georgia, with plans to expand the offering across the organization.",
+      "subject": "La Rosa Holdings Corp. / Final Offer",
+      "predicate": "partners_with_technology_provider",
+      "object_value": "Final Offer (private company)",
+      "category": "partnership",
+      "referent_type": "entity",
+      "m_source_status": "MAPPED",
+      "source_id": "edgar_fts.query_fulltext",
+      "source_params": {
+        "search_term": "Final Offer",
+        "cutoff_date": "2025-05-15",
+        "start_date": "2024-01-01",
+        "forms": "10-K,10-Q,8-K,DEF 14A"
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "Final Offer's own corporate presence — Crunchbase/PitchBook (entity record), state secretary-of-state business filing (FinalOffer.com Inc.)",
+          "endpoint_or_method": "Massachusetts Secretary of the Commonwealth corporations search (Final Offer is Boston-based) + Crunchbase company-page partner mentions",
+          "rationale": "Tests counterparty existence + size. Partnership claims with private startups are testable via the startup's own public footprint (funding rounds, press releases naming partner brokerages).",
+          "expected_observable": "Final Offer company status (active), funding history, public partner list including or omitting La Rosa Realty",
+          "signal_direction": "Final Offer listing La Rosa as a partner corroborates; absence is moderate (small startups often don't publicly enumerate brokerage partners)",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Press release archives via prnewswire/businesswire + state real-estate-board press releases",
+          "endpoint_or_method": "businesswire.com search 'Final Offer La Rosa' + 'La Rosa Realty Final Offer' between 2024-03-01 and 2025-05-15",
+          "rationale": "A real product partnership typically generates joint press releases. Absence suggests a low-substantive integration.",
+          "expected_observable": "press releases naming both parties",
+          "signal_direction": "presence corroborates; absence is weak (some integrations are quietly announced)",
+          "severity_if_contradiction": "UNVERIFIABLE"
+        }
+      ],
+      "domain": "real_estate_construction",
+      "claim_type_taxonomy": "commercial_customer",
+      "extraction_notes": "Final Offer is a private real-estate-tech startup (Massachusetts-based); not a megacap. megacap_namecheck is NOT a fit. claim_evolution would test whether LRHC keeps re-mentioning Final Offer in later 10-Qs (REAFFIRMED = real ongoing partnership; SILENT_POST_CLAIM = vendor relationship faded). edgar_fts looking across ALL filers (no cik filter) tests whether OTHER brokerages also mention Final Offer (corroborates the platform's real existence)."
+    },
+    {
+      "claim_id": "LRHC-10",
+      "claim_text": "Joseph La Rosa serves as both founder and majority stockholder; on multiple 2024 financings he personally approved Nasdaq-required stockholder approvals in his capacity as majority holder (acting unilaterally for 20.99%+ share issuance), creating a related-party governance pattern where the founder approves his own company's dilutive financings on behalf of all shareholders.",
+      "source_quote": "On February 20, 2024, Joseph La Rosa, as the majority stockholder of the Company, in accordance with Nasdaq Listing Rules 5635(b) and 5635(d), approved the transaction and issuance of the shares upon conversion of the February Note and exercise of the February Warrants, which was effective on March 31, 2024, or 20 days after the commencement of mailing of the definitive information statement regarding this approval to the stockholders of the Company.",
+      "subject": "Joseph La Rosa",
+      "predicate": "self_approves_dilutive_financings_as_majority_holder",
+      "object_value": "Used majority-holder consent on Feb 2024, Apr 2024, Jul 2024 financings — bypassing public shareholder vote",
+      "category": "vendor_relationship",
+      "referent_type": "person",
+      "m_source_status": "MAPPED",
+      "source_id": "sec_filings.list_filings_by_form",
+      "source_params": {
+        "cik": "0001879403",
+        "forms": ["DEF 14A", "DEF 14C", "PRE 14C", "PRE 14A", "4", "3", "5", "SC 13G", "SC 13D"],
+        "start_date": "2023-01-01",
+        "cutoff_date": "2025-05-15",
+        "limit": 50
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "SEC Form 4 / Schedule 13D Joseph La Rosa beneficial-ownership trail",
+          "endpoint_or_method": "edgar_fts.query_fulltext(search_term='Joseph La Rosa', cik='0001879403', cutoff_date='2025-05-15') + sec_filings.list_filings_by_form(cik=0001879403, forms=['4','3','5','SC 13D','SC 13D/A','SC 13G'])",
+          "rationale": "Tests how the founder's ownership percentage has evolved through the dilution cycle. Aggressive dilution often dilutes the founder's own stake — if his 13D/A shows the percentage dropping despite share grants, that's a structural signal.",
+          "expected_observable": "founder's beneficial-ownership percentage over time + share-grant transactions",
+          "signal_direction": "founder receiving stock grants to backfill dilution corroborates the 'pay-in-stock' pattern; absence of 13D/A amendments after material dilution would suggest the company is hiding ownership evolution",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "PACER / Florida state-court civil dockets — Joseph La Rosa personally",
+          "endpoint_or_method": "Florida state civil-court search (Osceola/Orange County) + PACER party search 'Joseph La Rosa' + 'Joe La Rosa'",
+          "rationale": "Background check on the controlling principal. Personal civil judgments, prior failed-business actions, or regulatory orders are highly diagnostic for related-party-controlled small caps.",
+          "expected_observable": "civil docket items naming Joseph La Rosa personally",
+          "signal_direction": "presence of unfavorable judgments = MODERATE severity addition; absence is uninformative",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Florida real-estate-license database — Joseph La Rosa personal license status + disciplinary history",
+          "endpoint_or_method": "https://www.myfloridalicense.com/wl11.asp — licensee 'Joseph La Rosa' broker license # + disciplinary case search at Florida Real Estate Commission",
+          "rationale": "Controlling principal of a brokerage must hold an active broker license in FL; FREC disciplinary cases are public",
+          "expected_observable": "license status (Active/Inactive/Suspended) + open or closed disciplinary cases",
+          "signal_direction": "any disciplinary action would be a MODERATE-to-SEVERE governance signal",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "real_estate_construction",
+      "claim_type_taxonomy": "financial_distress",
+      "extraction_notes": "Founder-controlled small-cap with majority-holder written-consent dilution pattern is a structural governance flag. Strictly, this is a related-party-governance claim, not pure financial distress — but it functions as a distress fingerprint because it removes the standard public-shareholder check on dilutive transactions. Maps to financial_distress in the taxonomy because the catalog's claim_evolution+sec_filings combo is the best fit."
+    }
+  ]
+}

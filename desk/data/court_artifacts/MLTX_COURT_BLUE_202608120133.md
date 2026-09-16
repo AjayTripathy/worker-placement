@@ -1,0 +1,23 @@
+## BLUE BENCH — MLTX — RED CASE: PARTIALLY OVERTURNED
+
+PACK: acknowledged. Nothing superseded. Runner WARN adjudicated first: red's text quotes "dd52 −73.6%", matching the pack's −0.736 — the +73.6 flag is a parser sign-artifact; red's tape framing is pack-consistent. No credit withheld.
+
+**Per-finding rulings:**
+
+1. {No verifiable placebo delta until H1 2027 | CT.gov v2 NCT06641076 + [Lancet BE OPTIMAL](https://www.thelancet.com/journals/lancet/article/piis0140-6736(22)02302-9/fulltext) | CT.gov CONFIRMED: 3-arm placebo-controlled, triple-blind, primary ACR50 Wk16, est. completion 2027-02-04; blinding-to-Wk52 corroborated | **REDUCED**}. Red overstates the fog two ways. (a) "Met all endpoints" + a title claiming *significant* improvements means significance vs placebo is asserted at topline — a VELA-2-style significance miss on the disclosed endpoints is already off the table; the hidden variable is magnitude only. (b) Magnitude is bounded: BE OPTIMAL's bio-naïve placebo ACR50 was **10%** (28/281) vs bimekizumab 44% — PsA ACR50 placebo rates are stable ~10-15%, unlike the volatile HS HiSCR placebo that killed VELA-2. MLTX's 42.1% absolute therefore implies a delta near ~30pp, parity with Bimzelx. Residual kill: parity ≠ differentiation, and confirmation waits until H1 2027 — that stands.
+2. {C-suite sold ~$5M at ~$20 | red's multi-source corroboration + pack Form 4 cluster 7/02–7/29 | CONFIRMED | **SUSTAINED**}. Correctly tagged SIZING; sales were 10b5-1 (Mar-2026) at $20+, ~20% above tape — caps enthusiasm, not a signal at $16.6.
+3. {Shelf armed into the print | pack filing inventory; S-3ASR text unreadable (EDGAR 403 persists) | filing dates CONFIRMED | **REDUCED**}. S-3ASR same-day as the 10-Q is routine WKSI mechanics (automatic shelves conventionally file with a periodic report; the 2023 shelf hits 3-year expiry in 2026 — UNVERIFIED, filing unreadable), and S-8 is plan housekeeping. Supply-before-launch stays near-certain via runway math, but "management armed a raise while holding the delta" reads intent into calendar mechanics.
+4. {Approvability is issuer-paraphrased | coverage gap, both benches | **SUSTAINED** as PLAUSIBLE-only} — red properly didn't rest the verdict on it.
+5. {Wk52 67.2% as-observed | red's own source | CONFIRMED | **REDUCED**}. The OC basis *resolves the brief's open question in the thesis's favor*: like-for-like with Bimzelx's observed-case >55%, both comparably survivorship-inflated. "Not differentiation evidence" overstates; it's weak-but-directional durability support.
+6. {Tape sold the news | pack px 16.59 vs 17.93 prior | CONFIRMED | **SUSTAINED**}.
+7. {EV upper bound, Hercules unverifiable | EDGAR 403 + IR timeouts re-confirmed this session | CONFIRMED gap | **SUSTAINED**}.
+
+**NEW FINDINGS RED MISSED:** (1) The placebo-floor bound above — the decisive omission; red treated PsA like HS. (2) Red's FLAT-before-Nov ignores two dated, company-guided, buyer-favorable events inside the window: BLA submission ~9/30 and acceptance/priority-review ~end-Nov, against a price 18% below where a $230M institutional book cleared in June. (3) Selection judgment: red attacked the right leg (differentiation) but won only a reduction, then padded kill weight with routine mechanics (#3).
+
+**DETECTORS CONSULTED:** concur with red on all 14 rulings as written (clinicaltrials_lookup FIRED — my CT.gov pull confirms; multi_venue_disclosure_consistency FIRED but softened: significance claimed, magnitude withheld; runway_calculator FIRED directionally; remainder NOT-FIRED/UNCHECKABLE per red, no contests).
+
+**NET POSITION AFTER BOTH BENCHES:** The thesis's STARTER survives at reduced size — half-starter, staged. What killed red's FLAT: significance is established, the delta is floor-bounded ~high-20s pp, and the shelf timing is mechanics, not tell. What survives of red: differentiation unconfirmable until H1 2027, telegraphed supply, insider distribution at $20 — so no adds before filing acceptance; add only on priority-review grant or IZAR delta ≥25pp confirmed; exit trigger = RTF or delta <15pp at unblinding. **Conviction: 7/10.**
+
+Sources: [Lancet BE OPTIMAL](https://pubmed.ncbi.nlm.nih.gov/36493791/) · [CT.gov NCT06641076](https://clinicaltrials.gov/api/v2/studies/NCT06641076) · [Rheum-Live/search corroboration of blinding language](https://www.rheum-live.com/view/sonelokimab-meets-all-endpoints-phase-3-izar-1-psa-trial) · pack filing inventory.
+
+> [runner pack_field_misquote_check — WARN, not a reject: dd52: bench quotes +73.6 vs pack -73.6. Adjudicator: audit this bench's tape framing against the pack before crediting drawdown-anchored findings.]

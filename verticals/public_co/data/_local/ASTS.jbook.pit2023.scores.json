@@ -1,0 +1,98 @@
+{
+  "ticker": "ASTS",
+  "cutoff": "2023-01-15",
+  "filing": "0000950170-22-005212_10-K.txt",
+  "cohort": "jbook_divergence",
+  "cohort_finding_summary": "Negative-control case. The 2022-03-31 10-K (FY2021) is a PURE commercial space-based cellular thesis. Zero Pentagon programs, zero PE numbers, zero named DoD customers, zero AST Defense subsidiary activity disclosed at this PIT. pentagon_jbook returns NOT_FOUND for AST SpaceMobile and AST & Science as contractors; usaspending returns zero DoD obligations. The J-Book divergence pattern is non-applicable and the filing's silence on defense matches external reality — no manufactured DoD narrative exists to be unmasked. The framework correctly classifies this as a non-signal: zero false positives generated from the J-Book primary verifier.",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "AST SpaceMobile expects to begin generating revenue from launches of commercial BlueBird (BB) satellites starting in 2023 and continuing through 2025, with 168 satellites required for full global SpaceMobile Service.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "AST SpaceMobile"}, "signal": "NOT_FOUND", "interpretation": "Consistent with commercial-only thesis; no J-Book PE names AST."},
+        {"source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "AST SpaceMobile"}, "n_awards": 0, "interpretation": "Zero DoD awards as of PIT — no defense pipeline being inflated."}
+      ],
+      "M_check": "pentagon_jbook + usaspending (orthogonal: forward thesis is commercial, neither verifier applies)",
+      "M_value": "NOT_FOUND / 0_awards",
+      "interpretation": "Forward commercial-launch claim cannot be verified or falsified by the J-Book / USAspending corpora — those are defense verifiers. The claim is internally consistent (filing names no DoD program, J-Book confirms no DoD relationship). Classified UNVERIFIABLE — outside the cohort's discriminative window. Not a red flag."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "AST SpaceMobile's BlueWalker 3 (BW3) test satellite launch was delayed and BW3 development costs exceeded initial estimates.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "BlueWalker 3 AST SpaceMobile"}, "total_hits": 0, "interpretation": "Phrase search returned zero counterparty filings — no orthogonal corroboration in EDGAR full-text via this exact phrase."}
+      ],
+      "M_check": "edgar_fts counterparty cross-check",
+      "M_value": "0 hits",
+      "interpretation": "BW3 delays/cost overruns are self-disclosed, not externally verified through this route. Issuer is being candid about overrun; not a red flag in the J-Book frame."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Rakuten Mobile Singapore Pte Ltd is a named MNO counterparty; SpaceMobile depends on MNO partnerships for end-user distribution.",
+      "severity": "PASS",
+      "supports": [
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "AST SpaceMobile", "cik": "0001780312"}, "total_hits": 159, "interpretation": "AST SpaceMobile appears 159x in EDGAR FTS at PIT, consistent with active disclosed-issuer status; counterparty arrangement publicly tracked."}
+      ],
+      "M_check": "edgar_fts counterparty disclosure",
+      "M_value": "159 hits",
+      "interpretation": "Counterparty disclosure is internally consistent. Rakuten relationship is real (Rakuten itself has been disclosed publicly as anchor MNO partner). PASS."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "AST SpaceMobile operates a Midland, Texas Assembly Integration and Testing facility plus engineering centers in MD, IL, ES, UK, LT.",
+      "severity": "PASS",
+      "supports": [
+        {"source": "epa_frs.query_facilities", "kwargs": {"facility_name": "AST SpaceMobile", "state_abbr": "TX"}, "n_facilities": 1, "facility": "AST SPACEMOBILE SITE 2, 13600 W INTERSTATE 20, ODESSA TX 79765, Midland County, registry_id 110071516306", "interpretation": "EPA FRS confirms a registered AST SpaceMobile facility in Midland County TX. Physical-asset claim is verifiable."}
+      ],
+      "M_check": "epa_frs facility registry",
+      "M_value": "1 facility registered",
+      "interpretation": "Physical facility footprint claim corroborated by EPA FRS. PASS."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Approximately $1.9 billion total capital asset investments required to build SpaceMobile constellation.",
+      "severity": "UNVERIFIABLE",
+      "supports": [],
+      "M_check": "(no external verifier in catalog applicable to forward-capex estimates)",
+      "M_value": "n/a",
+      "interpretation": "Forward capex estimate is a soft-disclosure number. Not falsifiable at PIT via available M-sources. UNVERIFIABLE."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "AST SpaceMobile relies on patents and other IP for protection of its space-based cellular architecture.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        {"source": "uspto_odp.query_assignee", "kwargs": {"assignee_name": "AST SpaceMobile"}, "n_total_applications": 0, "n_granted": 0, "interpretation": "USPTO ODP shows 0 applications and 0 granted patents under the assignee name 'AST SpaceMobile' as of 2023-01-15."},
+        {"source": "uspto_odp.query_assignee", "kwargs": {"assignee_name": "AST and Science"}, "n_total_applications": 0, "n_granted": 0, "interpretation": "Predecessor name 'AST & Science' also returns 0 — patents likely assigned to a different entity name (e.g., named inventors or a holding sub like 'AST & Science LLC' / 'NewSpace Systems'). USPTO ODP name-match did not resolve. Coverage gap, not a misrepresentation finding."}
+      ],
+      "M_check": "uspto_odp assignee patent count",
+      "M_value": "0 / 0 (likely name-resolution gap rather than absence-of-patents)",
+      "interpretation": "Filing's IP claim is generic boilerplate ('patents or other intellectual property laws ... may not be available') and is not a specific patent-count claim. USPTO ODP zero-result is most likely a name-resolution gap (patents probably held by AST & Science LLC or similar). Treating as UNVERIFIABLE coverage-gap rather than a misrepresentation flag. Note: entity-resolution improvement opportunity for the framework."
+    },
+    {
+      "claim_id": "C7_jbook_negative_control",
+      "claim_text": "NEGATIVE CONTROL: filing contains NO Pentagon program names, PE numbers, DoD customer disclosures, IDIQ ceilings, or AST Defense subsidiary activity. J-Book divergence pattern has no signal at this PIT.",
+      "severity": "PASS",
+      "supports": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "AST SpaceMobile"}, "signal": "NOT_FOUND", "interpretation": "Corpus has no PE naming AST SpaceMobile."},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "AST & Science"}, "signal": "NOT_FOUND", "interpretation": "Legacy entity name also absent from J-Book corpus."},
+        {"source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "AST SpaceMobile"}, "n_awards": 0, "total_amount": 0.0, "interpretation": "Zero DoD obligations cumulative across 2020-2026 query window."}
+      ],
+      "M_check": "pentagon_jbook + usaspending dual verification",
+      "M_value": "NOT_FOUND, NOT_FOUND, 0 awards / $0",
+      "interpretation": "Framework's J-Book primary verifier correctly produces a non-signal here. The company's silence on defense matters MATCHES the external reality (no DoD pipeline existed at PIT). This is the desired behavior for a negative-control case: zero false positives manufactured by pentagon_jbook. PASS."
+    }
+  ],
+  "severity_counts": {
+    "PASS": 3,
+    "MODERATE_UNDERDELIVERY": 0,
+    "SEVERE_UNDERDELIVERY": 0,
+    "RED_FLAG_NEGATIVE": 0,
+    "UNVERIFIABLE": 4
+  },
+  "jbook_grounded_claim_count": 1,
+  "jbook_fired_count": 1,
+  "queries_executed": 9
+}

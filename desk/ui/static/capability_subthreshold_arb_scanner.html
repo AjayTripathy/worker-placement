@@ -1,0 +1,664 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>subthreshold_arb_scanner</title><style>
+body{margin:0;background:#0b0e12;color:#e8ebee;font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:26px 24px 90px}
+a{color:#8b7cf6} h1{font-size:23px;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:#7d858e;margin:0 0 20px;font-size:13px}
+h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:#7d858e;margin:24px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 10px;border-bottom:1px solid #242a31;text-align:left;vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#7d858e}
+.k{font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:20px}
+.k-generator{color:#c3b8fb;background:rgba(139,124,246,.15)}
+.k-detector{color:#eccb8a;background:rgba(217,164,65,.15)}
+.k-watcher{color:#8ee5c1;background:rgba(53,201,143,.15)}
+.k-evidence{color:#b3bcc6;background:rgba(138,147,158,.15)}
+.h-OK{color:#35c98f} .h-STALE{color:#d9a441} .h-ERROR{color:#e0736a} .h-NEVER_RUN{color:#8a939e}
+pre{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px;overflow-x:auto;font-size:12px;line-height:1.5}
+.panel{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px 18px;margin-bottom:12px}
+ul{margin:4px 0;padding-left:20px} li{margin-bottom:4px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+</style></head><body><div class="wrap"><h1>subthreshold_arb_scanner</h1><p class="sub">registered capability · subthreshold_arb_scanner</p><a href="signals.html">&larr; all signals</a><div class="panel" style="margin-top:10px"><span class="k k-generator">GENERATOR</span> &nbsp;<span class="h-NEVER_RUN"><b>NEVER_RUN</b></span> · last run <span class="mono">never</span></div><p>Stage 0b CARRY generator: SUB-THRESHOLD all-cash merger arb.</p><form method="POST" action="/signals/run" style="margin:10px 0"><input type="hidden" name="name" value="subthreshold_arb_scanner"><input name="symbol" placeholder="symbol (if applicable)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px"><input name="symbols" placeholder="universe, comma-sep (generators)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px;margin-left:6px"><button type="submit" style="background:#8b7cf6;color:#0b0e12;border:0;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;margin-left:6px">Run now</button></form><h2>Datasources</h2><ul><li>reference implementation: verticals/generators/subthreshold_arb_scanner.py (see the code section for the feeds it touches)</li></ul><h2>Applies to</h2><ul><li><b>strategies:</b> value_band_entry</li></ul><h2>The code</h2><pre>&quot;&quot;&quot;subthreshold_arb_scanner — Stage 0b CARRY generator: SUB-THRESHOLD all-cash merger arb.
+
+THE CAPACITY CEILING IS THE EDGE. Merger-arb funds run billions and can&#x27;t be bothered with a
+$200M all-cash take-out — the absolute $-edge per name is too small to move their book and the
+target&#x27;s float can&#x27;t absorb their size. So SMALL cash deals (&lt;~$500M target equity value) carry a
+WIDER spread for the SAME regulatory / financing / MAC break risk as a large deal that arb desks
+crowd to a few bps. A small investor + AI reading EVERY recent merger 8-K captures that neglected
+carry — the office capacity-ceiling edge (fee-replication CARRY, ours by design).
+
+v1 finds RECENT all-cash merger agreements from PRIMARY SEC data — nothing fabricated:
+  1. DISCOVER   EDGAR EFTS full-text search over 8-K / DEFM14A for merger-agreement language in the
+                last ~120 days -&gt; target issuer CIK + the announcing exhibit URL.
+  2. PARSE      the CASH per-share consideration (&quot;$X.XX per share in cash&quot;) from the exhibit text;
+                stock/mixed deals with no clean cash number are SET ASIDE (skipped_non_cash), never guessed.
+  3. RESOLVE    CIK -&gt; ticker (SEC company_tickers.json); pull LIVE price + shares out (yfinance).
+  4. SIZE       deal_value_est = offer x shares_out; KEEP only sub-threshold (&lt; ~$500M).
+  5. SPREAD     spread = (offer - price) / price; annualized if a target/expected close is stated.
+
+Break risk is REAL and larger for small deals (financing contingencies, MAC outs, thin sponsors) —
+every candidate carries a break-risk caveat and, where cheap, the announced financing/regulatory
+conditions. A wide spread is NOT free money: the DD/court step is why the market pays that spread.
+Unresolvable tickers self-drop (reported, never silent). NO offer prices are fabricated — real filings only.
+
+    python3 verticals/generators/subthreshold_arb_scanner.py [--days 120] [--max-value 500]
+Writes data/SUBTHRESHOLD_ARB.json. READ-ONLY. (A CARRY generator — never an order.)
+&quot;&quot;&quot;
+from __future__ import annotations
+
+import argparse
+import datetime
+import json
+import re
+import time
+import urllib.parse
+import urllib.request
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+OUT = HERE / &quot;data&quot; / &quot;SUBTHRESHOLD_ARB.json&quot;
+HDRS = {&quot;User-Agent&quot;: &quot;signalos-research 4tripathy@gmail.com&quot;}
+
+TICKERS_MAP = &quot;https://www.sec.gov/files/company_tickers.json&quot;
+EFTS = &quot;https://efts.sec.gov/LATEST/search-index&quot;
+ARCHIVE = &quot;https://www.sec.gov/Archives/edgar/data/{cik}/{acc_nodash}/{doc}&quot;
+
+# full-text queries that surface a cash merger agreement / announcement. Each is an EFTS phrase.
+QUERIES = [
+    &#x27;&quot;per share in cash&quot;&#x27;,
+    &#x27;&quot;Agreement and Plan of Merger&quot;&#x27;,
+]
+FORMS = &quot;8-K,DEFM14A,DEFA14A,SC 14D9&quot;
+
+# sub-threshold ceiling ($ target equity value) — where the arb desks stop bothering.
+DEFAULT_MAX_VALUE_M = 500.0
+# a computed offer must be a sane equity take-out price; outside this = a mis-parse (e.g. a bond
+# redemption price, a per-unit distribution) -&gt; discard rather than emit a fabricated offer.
+OFFER_LO, OFFER_HI = 0.50, 2000.0
+
+# &quot;$X.XX per share in cash&quot; and close cousins. Ordered most-specific first; first sane hit wins.
+CASH_PATS = [
+    r&quot;\$\s*([0-9]{1,4}(?:,[0-9]{3})*(?:\.[0-9]{1,4})?)\s+(?:in\s+cash\s+)?per\s+share(?:\s+in\s+cash)?&quot;,
+    r&quot;\$\s*([0-9]{1,4}(?:,[0-9]{3})*(?:\.[0-9]{1,4})?)\s+per\s+(?:share\s+of\s+common\s+stock\s+)?in\s+cash&quot;,
+    r&quot;cash\s+(?:payment|consideration)\s+of\s+\$\s*([0-9]{1,4}(?:,[0-9]{3})*(?:\.[0-9]{1,4})?)\s+per\s+share&quot;,
+    r&quot;\$\s*([0-9]{1,4}(?:,[0-9]{3})*(?:\.[0-9]{1,4})?)\s+per\s+share\s+of\s+(?:common\s+stock|the\s+Company)&quot;,
+]
+# NON-DEAL / non-binding tells: a &quot;$X per share&quot; that is NOT a signed all-shares cash take-out.
+# These are the dominant full-text false positives — a going-private PROPOSAL (indication of interest,
+# not a signed agreement), or a PIPE/investment where someone buys NEW shares FROM the company at $X.
+NONDEAL_TELLS = [
+    r&quot;non-?binding&quot;, r&quot;indication\s+of\s+interest&quot;, r&quot;preliminary\s+(?:non-?binding\s+)?proposal&quot;,
+    r&quot;proposes\s+a\s+going-private&quot;, r&quot;has\s+(?:agreed|proposes)\s+to\s+acquire\s+[\d,]+\s+shares&quot;,
+    r&quot;purchase\s+(?:of\s+)?[\d,]+\s+shares&quot;, r&quot;private\s+placement&quot;, r&quot;subscription\s+agreement&quot;,
+    r&quot;at\s+a\s+price\s+of\s+at\s+least&quot;, r&quot;letter\s+of\s+intent&quot;,
+]
+# POSITIVE tells that this IS a definitive all-shares cash acquisition (require at least one).
+DEAL_TELLS = [
+    r&quot;definitive\s+(?:merger\s+)?agreement&quot;, r&quot;Agreement\s+and\s+Plan\s+of\s+Merger&quot;,
+    r&quot;each\s+(?:issued\s+and\s+outstanding\s+)?share.{0,40}(?:converted|cancelled|right\s+to\s+receive)&quot;,
+    r&quot;outstanding\s+shares?.{0,60}(?:acqui|merger|will\s+be\s+(?:converted|cancelled))&quot;,
+    r&quot;tender\s+offer&quot;, r&quot;take[\s-]private&quot;, r&quot;will\s+be\s+acquired&quot;, r&quot;to\s+be\s+acquired\s+by&quot;,
+    r&quot;merger\s+consideration&quot;,
+]
+
+# SPAC / de-SPAC tells: a &quot;$X per share&quot; here is trust/redemption or a business-combination value,
+# NOT a cash take-out of an operating target. These belong to spac_trust_arb_scanner, not this one.
+SPAC_TELLS = [
+    r&quot;blank\s+check&quot;, r&quot;business\s+combination&quot;, r&quot;trust\s+account&quot;, r&quot;Surviving\s+Pubco&quot;,
+    r&quot;redeem\w*\s+(?:their\s+)?(?:public\s+)?shares&quot;, r&quot;Class\s+A\s+ordinary\s+shares&quot;,
+    r&quot;initial\s+public\s+offering.{0,40}trust&quot;, r&quot;de-?SPAC&quot;,
+]
+
+# tells that the deal is stock / mixed (no clean cash number) — set aside, don&#x27;t guess.
+STOCK_TELLS = [
+    r&quot;exchange\s+ratio&quot;, r&quot;shares?\s+of\s+(?:the\s+)?(?:acquir|parent|buyer)&quot;, r&quot;stock-for-stock&quot;,
+    r&quot;fixed\s+exchange&quot;, r&quot;per\s+share\s+in\s+(?:the\s+form\s+of\s+)?(?:stock|shares|equity)&quot;,
+    r&quot;elect(?:ion)?\s+to\s+receive\s+(?:either\s+)?(?:cash\s+or|stock)&quot;,
+]
+# expected-close phrasing -&gt; a rough close date/quarter for annualization.
+CLOSE_PATS = [
+    r&quot;expected\s+to\s+close\s+(?:in|by|during|no\s+later\s+than)\s+(?:the\s+)?([A-Za-z0-9,\s]{4,40}?)(?:\.|,|\s+subject|\s+and)&quot;,
+    r&quot;clos(?:e|ing)\s+is\s+expected\s+(?:in|by|during)\s+(?:the\s+)?([A-Za-z0-9,\s]{4,40}?)(?:\.|,|\s+subject)&quot;,
+    r&quot;anticipated\s+to\s+(?:be\s+)?clos(?:e|ing)?\s+(?:in|by|during)\s+(?:the\s+)?([A-Za-z0-9,\s]{4,40}?)(?:\.|,|\s+subject)&quot;,
+]
+# ---------------------------------------------------------------------------
+# DEAL-QUALITY GATES (added after e2e DD: the &quot;wider spread, same risk&quot; thesis only holds for CLEAN
+# small deals). Two independent traps the raw scanner used to surface as clean carry:
+#   * BOARD-REJECTED / HOSTILE — DXLG: an unsolicited, board-REJECTED tender by Camac/Zodiac. The
+#     target board unanimously recommends stockholders REJECT; the ~30% spread correctly prices a
+#     near-zero close probability. NOT a clean arb -&gt; EXCLUDE.
+#   * UNCOMMITTED FINANCING — LSTA: a SIGNED, board-recommended deal, but the bidder&#x27;s own words are
+#     &quot;do not have committed financing&quot;; only a non-binding LOI backs it. The ~7% spread prices real
+#     break risk. NOT clean carry -&gt; EXCLUDE (or strongly flag).
+#
+# board_stance (from the TARGET&#x27;s recommendation in its SC 14D9 / merger proxy):
+#   &#x27;rejected&#x27;    — board recommends REJECT / vote AGAINST, or the offer is unsolicited / hostile /
+#                   not approved by the Board  -&gt; EXCLUDE.
+#   &#x27;recommended&#x27; — board recommends FOR / accept / adopt (a friendly, board-approved deal).
+#   &#x27;unknown&#x27;     — not determinable from the text -&gt; keep as candidate WITH a review flag.
+BOARD_REJECT_TELLS = [
+    r&quot;recommends?\s+that\s+(?:the\s+)?(?:stockholders|shareholders|holders).{0,30}\breject\b&quot;,
+    r&quot;recommends?\s+that\s+(?:the\s+)?(?:stockholders|shareholders|holders).{0,40}\bnot\s+tender\b&quot;,
+    r&quot;recommends?\s+(?:that\s+)?(?:stockholders|shareholders).{0,30}vote\s+against&quot;,
+    r&quot;\bunsolicited\s+(?:tender\s+)?offer\b&quot;, r&quot;\bhostile\s+(?:tender\s+)?offer\b&quot;,
+    r&quot;not\s+approved\s+by\s+the\s+Board&quot;, r&quot;reject\s+the\s+offer&quot;,
+]
+BOARD_RECOMMEND_TELLS = [
+    r&quot;(?:Board|board\s+of\s+directors).{0,60}recommends?\s+that\s+(?:the\s+)?(?:stockholders|shareholders|holders).{0,40}(?:accept|tender|adopt|approve|vote\s+(?:for|in\s+favor))&quot;,
+    r&quot;unanimously\s+(?:recommends?|approved|adopted)&quot;,
+    r&quot;recommends?\s+that\s+(?:its\s+)?(?:stockholders|shareholders)\s+vote\s+(?:for|in\s+favor)&quot;,
+    r&quot;Board.{0,40}(?:approved|adopted)\s+the\s+(?:Merger\s+)?Agreement&quot;,
+]
+
+# financing (from the offer / merger docs — SC TO-T, merger 8-K exhibit, DEFM14A, SC 14D9):
+#   &#x27;uncommitted&#x27; — the bidder lacks firm money: &quot;do not have committed financing&quot;, a non-binding /
+#                   LOI backing, a financing condition/out  -&gt; EXCLUDE or strongly flag.
+#   &#x27;committed&#x27;   — firm money: committed-financing / equity- or debt-commitment letter, fully
+#                   financed, no financing condition.
+#   &#x27;unknown&#x27;     — not determinable -&gt; keep as candidate WITH a review flag.
+# Two tiers so a truthful positive phrase can&#x27;t be misread. A deal can say &quot;not subject to a financing
+# condition&quot; (a POSITIVE — no financing OUT) while the bidder STILL has no committed money (LSTA says
+# BOTH). The decisive UNCOMMITTED tell is the bidder plainly stating it lacks committed money / has only
+# an LOI — that STRONG tell governs unconditionally. The WEAK tells (a bare &quot;financing condition&quot;,
+# &quot;subject to ... financing&quot;) only decide when no explicit committed statement is present, and are
+# written to NOT fire on the negated positive form (&quot;no/not ... financing condition&quot;).
+FIN_UNCOMMITTED_STRONG = [
+    r&quot;(?:do|does)\s+not\s+have\s+committed\s+financing&quot;, r&quot;no\s+committed\s+financing&quot;,
+    r&quot;lack\w*\s+committed\s+financing&quot;, r&quot;non-?binding&quot;, r&quot;letter\s+of\s+intent&quot;,
+    r&quot;no\s+assurance.{0,40}financing&quot;,
+]
+# the weak &quot;financing condition&quot; tell must NOT fire on the common POSITIVE phrasing where the deal says
+# it is NOT subject to a/any financing condition — those are stripped before the weak match runs.
+FIN_NOT_COND_PATS = [
+    r&quot;not\s+subject\s+to\s+(?:a|an|any|the)?\s*financing\s+condition&quot;,
+    r&quot;no\s+financing\s+condition&quot;, r&quot;without\s+(?:a|any)\s+financing\s+condition&quot;,
+    r&quot;free\s+of\s+(?:a|any)\s+financing\s+condition&quot;,
+]
+FIN_UNCOMMITTED_WEAK = [
+    r&quot;subject\s+to\s+(?:the\s+availability\s+of\s+|obtaining\s+|receipt\s+of\s+)?financing&quot;,
+    r&quot;financing\s+condition&quot;,
+]
+# committed tells: an explicit commitment letter / fully-financed / no-out statement. (The bare phrase
+# &quot;committed financing&quot; is deliberately NOT here — it is ambiguous, appearing in BOTH &quot;has committed
+# financing&quot; and &quot;do not have committed financing&quot;; the STRONG uncommitted list already catches the
+# negative form first, so we require an unambiguous positive commitment phrase here.)
+FIN_COMMITTED_TELLS = [
+    r&quot;equity\s+commitment\s+letter&quot;, r&quot;debt\s+commitment\s+letter&quot;, r&quot;fully\s+financed&quot;,
+    r&quot;not\s+subject\s+to\s+(?:a|an|any|the)?\s*financing\s+condition&quot;, r&quot;no\s+financing\s+condition&quot;,
+    r&quot;financing\s+commitment&quot;, r&quot;(?:has|have)\s+(?:obtained|secured)\s+(?:the\s+)?(?:committed\s+)?financing&quot;,
+]
+
+# financing / regulatory condition tells to capture cheaply for the break-risk note.
+COND_TELLS = {
+    &quot;financing_contingent&quot;: r&quot;financing\s+condition|committed\s+financing|debt\s+financing|subject\s+to.{0,40}financing&quot;,
+    &quot;HSR/antitrust&quot;: r&quot;Hart-Scott-Rodino|HSR|antitrust|regulatory\s+approval&quot;,
+    &quot;CFIUS&quot;: r&quot;CFIUS|foreign\s+investment&quot;,
+    &quot;shareholder_vote&quot;: r&quot;stockholder\s+approval|shareholder\s+vote|special\s+meeting&quot;,
+    &quot;go_shop&quot;: r&quot;go-shop|solicitation\s+period&quot;,
+    &quot;tender_offer&quot;: r&quot;tender\s+offer|exchange\s+offer&quot;,
+}
+
+
+def _get_json(url):
+    try:
+        with urllib.request.urlopen(urllib.request.Request(url, headers=HDRS), timeout=30) as r:
+            return json.load(r)
+    except Exception:
+        return None
+
+
+def _get_text(url, limit=400_000):
+    try:
+        with urllib.request.urlopen(urllib.request.Request(url, headers=HDRS), timeout=30) as r:
+            raw = r.read(limit)
+        txt = raw.decode(&quot;utf-8&quot;, &quot;ignore&quot;)
+        # strip tags -&gt; plain text for regex
+        txt = re.sub(r&quot;(?is)&lt;(script|style)[^&gt;]*&gt;.*?&lt;/\1&gt;&quot;, &quot; &quot;, txt)
+        txt = re.sub(r&quot;(?s)&lt;[^&gt;]+&gt;&quot;, &quot; &quot;, txt)
+        txt = txt.replace(&quot;&amp;nbsp;&quot;, &quot; &quot;).replace(&quot;&amp;#160;&quot;, &quot; &quot;).replace(&quot;&amp;amp;&quot;, &quot;&amp;&quot;)
+        txt = re.sub(r&quot;&amp;#\d+;&quot;, &quot; &quot;, txt)
+        return re.sub(r&quot;\s+&quot;, &quot; &quot;, txt)
+    except Exception:
+        return None
+
+
+def _cik_ticker_map():
+    &quot;&quot;&quot;{cik_int: TICKER} from the SEC master file (first/primary ticker per CIK).&quot;&quot;&quot;
+    d = _get_json(TICKERS_MAP)
+    out = {}
+    if isinstance(d, dict):
+        for row in d.values():
+            try:
+                cik = int(row[&quot;cik_str&quot;])
+                if cik not in out:                      # keep the primary listing
+                    out[cik] = str(row[&quot;ticker&quot;]).upper()
+            except Exception:
+                continue
+    return out
+
+
+def _efts(query, startdt, enddt):
+    &quot;&quot;&quot;EFTS full-text hits: list of {cik, name, date, doc_url, acc}.&quot;&quot;&quot;
+    hits = []
+    params = urllib.parse.urlencode({&quot;q&quot;: query, &quot;forms&quot;: FORMS, &quot;startdt&quot;: startdt, &quot;enddt&quot;: enddt})
+    d = _get_json(f&quot;{EFTS}?{params}&quot;)
+    if not isinstance(d, dict):
+        return hits
+    for h in (d.get(&quot;hits&quot;, {}).get(&quot;hits&quot;) or []):
+        try:
+            _id = h[&quot;_id&quot;]                                # &quot;&lt;accession&gt;:&lt;doc&gt;&quot;
+            acc, doc = _id.split(&quot;:&quot;, 1)
+            src = h.get(&quot;_source&quot;, {})
+            ciks = src.get(&quot;ciks&quot;) or []
+            if not ciks:
+                continue
+            cik = int(ciks[0])
+            acc_nodash = acc.replace(&quot;-&quot;, &quot;&quot;)
+            url = ARCHIVE.format(cik=cik, acc_nodash=acc_nodash, doc=doc)
+            hits.append({&quot;cik&quot;: cik, &quot;name&quot;: (src.get(&quot;display_names&quot;) or [&quot;?&quot;])[0],
+                         &quot;date&quot;: src.get(&quot;file_date&quot;), &quot;acc&quot;: acc, &quot;doc_url&quot;: url})
+        except Exception:
+            continue
+    return hits
+
+
+def _parse_cash(txt):
+    &quot;&quot;&quot;First SANE $/share cash offer in the text, or None. Returns float.&quot;&quot;&quot;
+    for pat in CASH_PATS:
+        for m in re.finditer(pat, txt, re.I):
+            try:
+                v = float(m.group(1).replace(&quot;,&quot;, &quot;&quot;))
+            except Exception:
+                continue
+            if OFFER_LO &lt;= v &lt;= OFFER_HI:
+                return v
+    return None
+
+
+def _looks_stock(txt):
+    return any(re.search(p, txt, re.I) for p in STOCK_TELLS)
+
+
+def _is_nondeal(txt):
+    &quot;&quot;&quot;True if the &#x27;$X/share&#x27; is a non-binding proposal or a share-purchase/PIPE, not an all-shares take-out.&quot;&quot;&quot;
+    return any(re.search(p, txt, re.I) for p in NONDEAL_TELLS)
+
+
+def _is_definitive_deal(txt):
+    &quot;&quot;&quot;True if the text carries definitive all-shares cash-acquisition language.&quot;&quot;&quot;
+    return any(re.search(p, txt, re.I) for p in DEAL_TELLS)
+
+
+def _is_spac(txt, name):
+    &quot;&quot;&quot;True if this is a SPAC / de-SPAC business combination (belongs to the trust-arb scanner).&quot;&quot;&quot;
+    # SPAC naming convention: &quot;... Acquisition Corp&quot; / &quot;... Merger Corp&quot; / blank-check.
+    if re.search(r&quot;Acquisition\s+Corp|\bMerger\s+(?:Corp|Sub|II|III|IV|V)\b|Blank\s+Check&quot;, name or &quot;&quot;, re.I):
+        return True
+    # a single decisive de-SPAC phrase suffices; otherwise require two weaker tells.
+    if re.search(r&quot;Surviving\s+Pubco|blank\s+check|de-?SPAC&quot;, txt, re.I):
+        return True
+    return sum(bool(re.search(p, txt, re.I)) for p in SPAC_TELLS) &gt;= 2
+
+
+def _board_stance(txt):
+    &quot;&quot;&quot;Target board&#x27;s recommendation: &#x27;rejected&#x27; | &#x27;recommended&#x27; | &#x27;unknown&#x27;.
+    REJECT wins ties — a hostile/unsolicited offer is disqualifying even if some &#x27;recommend&#x27; boilerplate
+    is present elsewhere (a target&#x27;s REJECT 14D9 still quotes the bidder&#x27;s &#x27;recommends you tender&#x27;).&quot;&quot;&quot;
+    if any(re.search(p, txt, re.I) for p in BOARD_REJECT_TELLS):
+        return &quot;rejected&quot;
+    if any(re.search(p, txt, re.I) for p in BOARD_RECOMMEND_TELLS):
+        return &quot;recommended&quot;
+    return &quot;unknown&quot;
+
+
+def _financing(txt):
+    &quot;&quot;&quot;Deal financing quality: &#x27;uncommitted&#x27; | &#x27;committed&#x27; | &#x27;unknown&#x27;.
+    A STRONG uncommitted tell (&#x27;do not have committed financing&#x27; / LOI / non-binding) governs
+    unconditionally — LSTA states both this AND &#x27;No Financing Condition&#x27;, and the lack of committed money
+    is the break risk. An explicit committed statement otherwise wins over a merely WEAK uncommitted tell
+    (a bare &#x27;financing condition&#x27; / &#x27;subject to financing&#x27;) so a truthful &#x27;not subject to a financing
+    condition, fully financed&#x27; deal is not mislabeled.&quot;&quot;&quot;
+    if any(re.search(p, txt, re.I) for p in FIN_UNCOMMITTED_STRONG):
+        return &quot;uncommitted&quot;
+    if any(re.search(p, txt, re.I) for p in FIN_COMMITTED_TELLS):
+        return &quot;committed&quot;
+    # strip the POSITIVE &quot;not subject to a/any financing condition&quot; phrasings so the weak tell below
+    # (a bare &quot;financing condition&quot;) doesn&#x27;t misread a deal that explicitly has NO financing out.
+    weak_txt = txt
+    for p in FIN_NOT_COND_PATS:
+        weak_txt = re.sub(p, &quot; &quot;, weak_txt, flags=re.I)
+    if any(re.search(p, weak_txt, re.I) for p in FIN_UNCOMMITTED_WEAK):
+        return &quot;uncommitted&quot;
+    return &quot;unknown&quot;
+
+
+def _parse_close(txt):
+    for pat in CLOSE_PATS:
+        m = re.search(pat, txt, re.I)
+        if m:
+            phrase = re.sub(r&quot;\s+&quot;, &quot; &quot;, m.group(1)).strip(&quot; ,.&quot;)
+            if 3 &lt;= len(phrase) &lt;= 40:
+                return phrase
+    return None
+
+
+def _conditions(txt):
+    return [label for label, pat in COND_TELLS.items() if re.search(pat, txt, re.I)]
+
+
+def _acquirer(txt, target_name):
+    &quot;&quot;&quot;Best-effort acquirer name from the announcement lede.&quot;&quot;&quot;
+    m = re.search(r&quot;(?:acqui\w+\s+by|be\s+acquired\s+by|merger\s+with|agreement\s+with)\s+([A-Z][A-Za-z0-9&amp;.,\- ]{2,50}?)(?:,| in| for| under| pursuant| a )&quot;, txt)
+    if m:
+        return m.group(1).strip(&quot; ,.&quot;)
+    return None
+
+
+def _close_to_days(phrase, today):
+    &quot;&quot;&quot;Rough days-to-close from a quarter/month phrase like &#x27;the fourth quarter of 2026&#x27;.&quot;&quot;&quot;
+    if not phrase:
+        return None, None
+    p = phrase.lower()
+    yr = None
+    ym = re.search(r&quot;(20[2-3][0-9])&quot;, p)
+    if ym:
+        yr = int(ym.group(1))
+    q = None
+    for qn, keys in {4: [&quot;fourth&quot;, &quot;q4&quot;], 3: [&quot;third&quot;, &quot;q3&quot;], 2: [&quot;second&quot;, &quot;q2&quot;], 1: [&quot;first&quot;, &quot;q1&quot;]}.items():
+        if any(k in p for k in keys):
+            q = qn
+            break
+    months = {&quot;january&quot;: 1, &quot;february&quot;: 2, &quot;march&quot;: 3, &quot;april&quot;: 4, &quot;may&quot;: 5, &quot;june&quot;: 6,
+              &quot;july&quot;: 7, &quot;august&quot;: 8, &quot;september&quot;: 9, &quot;october&quot;: 10, &quot;november&quot;: 11, &quot;december&quot;: 12}
+    mo = next((mn for name, mn in months.items() if name in p), None)
+    target = None
+    if yr and q:
+        target = datetime.date(yr, q * 3, 28)                    # end of the quarter
+    elif yr and mo:
+        target = datetime.date(yr, mo, 15)
+    elif yr:
+        target = datetime.date(yr, 12, 31)
+    if not target:
+        return None, phrase
+    return (target - today).days, phrase
+
+
+def _yf_price_shares(ticker):
+    &quot;&quot;&quot;(price, shares_out) live via yfinance; either may be None.&quot;&quot;&quot;
+    import yfinance as yf
+    try:
+        tk = yf.Ticker(ticker)
+        fi = getattr(tk, &quot;fast_info&quot;, {}) or {}
+        px = fi.get(&quot;last_price&quot;) or fi.get(&quot;lastPrice&quot;)
+        sh = fi.get(&quot;shares&quot;) or fi.get(&quot;shares_outstanding&quot;)
+        if px is None or sh is None:
+            info = {}
+            try:
+                info = tk.info or {}
+            except Exception:
+                info = {}
+            px = px or info.get(&quot;regularMarketPrice&quot;) or info.get(&quot;previousClose&quot;)
+            sh = sh or info.get(&quot;sharesOutstanding&quot;)
+        if px is None:
+            hist = tk.history(period=&quot;5d&quot;)
+            if len(hist):
+                px = float(hist[&quot;Close&quot;].dropna().iloc[-1])
+        return (float(px) if px else None), (float(sh) if sh else None)
+    except Exception:
+        return None, None
+
+
+def scan(days=120, max_value_m=DEFAULT_MAX_VALUE_M) -&gt; dict:
+    today = datetime.date.today()
+    startdt = (today - datetime.timedelta(days=days)).isoformat()
+    enddt = today.isoformat()
+    cikmap = _cik_ticker_map()
+
+    # 1) discover unique (cik, doc) announcements across the queries
+    seen_docs = set()
+    docs = []
+    for q in QUERIES:
+        for h in _efts(q, startdt, enddt):
+            key = (h[&quot;cik&quot;], h[&quot;doc_url&quot;])
+            if key in seen_docs:
+                continue
+            seen_docs.add(key)
+            docs.append(h)
+        time.sleep(0.3)
+
+    n_scanned = 0
+    candidates, all_cash, skipped_non_cash, dropped, excluded = [], [], [], [], []
+    seen_cik = set()
+
+    for h in docs:
+        cik = h[&quot;cik&quot;]
+        if cik in seen_cik:                              # one deal per target
+            continue
+        txt = _get_text(h[&quot;doc_url&quot;])
+        time.sleep(0.25)
+        if not txt:
+            continue
+        n_scanned += 1
+        ticker = cikmap.get(cik)
+        name = re.sub(r&quot;\s*\(CIK.*$&quot;, &quot;&quot;, h[&quot;name&quot;]).strip()
+
+        offer = _parse_cash(txt)
+        if offer is None:
+            if _looks_stock(txt):
+                skipped_non_cash.append({&quot;cik&quot;: cik, &quot;ticker&quot;: ticker, &quot;name&quot;: name,
+                                         &quot;date&quot;: h[&quot;date&quot;], &quot;why&quot;: &quot;stock/mixed — no clean cash/share number&quot;})
+            continue
+
+        # GATE: a &quot;$X per share in cash&quot; is only a tradeable arb if it&#x27;s a DEFINITIVE all-shares take-out.
+        # A NONDEAL tell (non-binding, proposal, share-purchase, subscription, &quot;at least&quot;) VETOES — a signed
+        # take-out never calls itself non-binding, and a generic &quot;definitive agreement&quot; in a safe-harbor
+        # disclaimer must NOT rescue it (GDC going-private PROPOSAL, GBR investor buying 2M shares both did that).
+        if _is_spac(txt, name):
+            skipped_non_cash.append({&quot;cik&quot;: cik, &quot;ticker&quot;: ticker, &quot;name&quot;: name, &quot;date&quot;: h[&quot;date&quot;],
+                                     &quot;why&quot;: &quot;SPAC / de-SPAC business combination — trust/redemption value, not an operating-target take-out (see spac_trust_arb)&quot;,
+                                     &quot;parsed_number&quot;: round(offer, 4)})
+            continue
+        if _is_nondeal(txt):
+            skipped_non_cash.append({&quot;cik&quot;: cik, &quot;ticker&quot;: ticker, &quot;name&quot;: name, &quot;date&quot;: h[&quot;date&quot;],
+                                     &quot;why&quot;: &quot;non-binding proposal / PIPE / share-purchase / LOI — not a signed all-shares cash deal&quot;,
+                                     &quot;parsed_number&quot;: round(offer, 4)})
+            continue
+        if not _is_definitive_deal(txt):
+            skipped_non_cash.append({&quot;cik&quot;: cik, &quot;ticker&quot;: ticker, &quot;name&quot;: name, &quot;date&quot;: h[&quot;date&quot;],
+                                     &quot;why&quot;: &quot;no definitive-agreement / all-shares language (ambiguous)&quot;,
+                                     &quot;parsed_number&quot;: round(offer, 4)})
+            continue
+        seen_cik.add(cik)
+
+        # DEAL-QUALITY GATES: the &quot;wider spread, same risk&quot; thesis only holds for CLEAN small deals.
+        # 1) BOARD STANCE — a board-REJECTED / hostile / unsolicited offer prices a near-zero close prob;
+        #    the spread is NOT carry, it&#x27;s a broken-deal discount. EXCLUDE (DXLG lands here).
+        # 2) FINANCING — an UN-committed bidder (only a non-binding LOI, &quot;do not have committed financing&quot;,
+        #    or a financing out) carries real break risk that a clean deal doesn&#x27;t. EXCLUDE (LSTA here).
+        # &#x27;unknown&#x27; on either passes through as a candidate but is REVIEW-flagged (free-text is best-effort).
+        board_stance = _board_stance(txt)
+        financing = _financing(txt)
+        if board_stance == &quot;rejected&quot;:
+            excluded.append({&quot;ticker&quot;: ticker, &quot;name&quot;: name, &quot;cik&quot;: cik, &quot;date&quot;: h[&quot;date&quot;],
+                             &quot;reason&quot;: &quot;board_rejected&quot;, &quot;board_stance&quot;: board_stance,
+                             &quot;financing&quot;: financing, &quot;parsed_offer&quot;: round(offer, 4),
+                             &quot;why&quot;: &quot;target board recommends REJECT / offer is unsolicited-hostile — &quot;
+                                    &quot;spread prices a near-zero close probability, not clean carry&quot;,
+                             &quot;source_doc&quot;: h[&quot;doc_url&quot;]})
+            continue
+        if financing == &quot;uncommitted&quot;:
+            excluded.append({&quot;ticker&quot;: ticker, &quot;name&quot;: name, &quot;cik&quot;: cik, &quot;date&quot;: h[&quot;date&quot;],
+                             &quot;reason&quot;: &quot;uncommitted_financing&quot;, &quot;board_stance&quot;: board_stance,
+                             &quot;financing&quot;: financing, &quot;parsed_offer&quot;: round(offer, 4),
+                             &quot;why&quot;: &quot;bidder lacks committed financing (non-binding LOI / &#x27;do not have &quot;
+                                    &quot;committed financing&#x27; / financing out) — spread prices real break risk&quot;,
+                             &quot;source_doc&quot;: h[&quot;doc_url&quot;]})
+            continue
+
+        if not ticker:
+            dropped.append({&quot;cik&quot;: cik, &quot;name&quot;: name, &quot;offer_cash_per_share&quot;: offer,
+                            &quot;why&quot;: &quot;no SEC ticker (private/foreign/OTC target) — can&#x27;t price&quot;})
+            continue
+
+        price, shares = _yf_price_shares(ticker)
+        if not price:
+            dropped.append({&quot;cik&quot;: cik, &quot;ticker&quot;: ticker, &quot;name&quot;: name, &quot;offer_cash_per_share&quot;: offer,
+                            &quot;why&quot;: &quot;no live price (yfinance unresolved — likely already closed/delisted)&quot;})
+            continue
+
+        deal_value = offer * shares if shares else None
+        close_phrase = _parse_close(txt)
+        days_to_close, expected_close = _close_to_days(close_phrase, today)
+        conds = _conditions(txt)
+        acquirer = _acquirer(txt, name)
+        spread = (offer - price) / price if price else None
+        annualized = None
+        if spread is not None and days_to_close and days_to_close &gt; 0:
+            annualized = spread * (365.0 / days_to_close)
+
+        wide = spread is not None and spread &gt; 0.40      # &gt;40% &quot;live-deal&quot; spread = hostile/broken OR stale/mis-parse
+        review_flags = []
+        if board_stance == &quot;unknown&quot;:
+            review_flags.append(&quot;board_stance UNKNOWN — confirm the target board recommends FOR (not a hostile offer) in the SC 14D9 / proxy&quot;)
+        if financing == &quot;unknown&quot;:
+            review_flags.append(&quot;financing UNKNOWN — confirm the bidder has committed financing (commitment letters), not just an LOI&quot;)
+        cond_note = (&quot;; &quot;.join(conds) if conds else &quot;no explicit conditions parsed&quot;) + \
+                    &quot; | BREAK RISK: small all-cash deals break MORE than large ones (financing/MAC/thin sponsor) &quot; \
+                    &quot;— a wide spread PRICES that risk. Verify the financing commitment + regulatory path in DD.&quot;
+        if review_flags:
+            cond_note = &quot;REVIEW: &quot; + &quot; ; &quot;.join(review_flags) + &quot; | &quot; + cond_note
+        if wide:
+            cond_note = &quot;WIDE-SPREAD FLAG (&gt;40%): market implies a LOW close-probability (hostile/unsolicited/likely-fail) &quot; \
+                        &quot;OR the parsed offer is stale/superseded — verify the deal is LIVE and firm before trusting the spread. &quot; + cond_note
+
+        row = {
+            &quot;ticker&quot;: ticker, &quot;name&quot;: name, &quot;cik&quot;: cik, &quot;announce_date&quot;: h[&quot;date&quot;],
+            &quot;offer_cash_per_share&quot;: round(offer, 4),
+            &quot;price&quot;: round(price, 4),
+            &quot;spread_pct&quot;: round(spread * 100, 2) if spread is not None else None,
+            &quot;deal_value_est&quot;: round(deal_value) if deal_value else None,
+            &quot;deal_value_est_m&quot;: round(deal_value / 1e6, 1) if deal_value else None,
+            &quot;sub_threshold&quot;: (deal_value is not None and deal_value &lt; max_value_m * 1e6),
+            &quot;expected_close&quot;: expected_close,
+            &quot;days_to_close&quot;: days_to_close,
+            &quot;annualized_spread&quot;: round(annualized * 100, 1) if annualized is not None else None,
+            &quot;wide_spread_flag&quot;: wide,
+            &quot;board_stance&quot;: board_stance,
+            &quot;financing&quot;: financing,
+            &quot;review_flags&quot;: review_flags,
+            &quot;acquirer&quot;: acquirer,
+            &quot;conditions_note&quot;: cond_note,
+            &quot;source_doc&quot;: h[&quot;doc_url&quot;],
+        }
+        all_cash.append(row)
+        # a candidate = sub-threshold (or unknown-size, flagged) AND a POSITIVE spread (price below offer)
+        if spread is not None and spread &gt; 0 and (row[&quot;sub_threshold&quot;] or deal_value is None):
+            candidates.append(row)
+
+    candidates.sort(key=lambda r: -(r[&quot;spread_pct&quot;] or -99))
+    all_cash.sort(key=lambda r: -(r[&quot;spread_pct&quot;] if r[&quot;spread_pct&quot;] is not None else -99))
+
+    sub = [r for r in candidates if r[&quot;sub_threshold&quot;]]
+    unknown_size = [r for r in candidates if r[&quot;deal_value_est&quot;] is None]
+
+    return {
+        &quot;asof&quot;: today.isoformat(),
+        &quot;window_days&quot;: days,
+        &quot;max_value_m&quot;: max_value_m,
+        &quot;n_scanned&quot;: n_scanned,
+        &quot;n_all_cash&quot;: len(all_cash),
+        &quot;candidates&quot;: candidates,
+        &quot;all_cash_deals&quot;: all_cash,
+        &quot;excluded&quot;: excluded,
+        &quot;skipped_non_cash&quot;: skipped_non_cash,
+        &quot;dropped&quot;: dropped,
+        &quot;distribution&quot;: {
+            &quot;n_candidates&quot;: len(candidates),
+            &quot;n_sub_threshold_known&quot;: len(sub),
+            &quot;n_unknown_size&quot;: len(unknown_size),
+            &quot;n_excluded&quot;: len(excluded),
+            &quot;median_spread_pct&quot;: round(sorted(r[&quot;spread_pct&quot;] for r in candidates)[len(candidates) // 2], 2) if candidates else None,
+        },
+        &quot;caveats&quot;: [
+            &quot;DEAL-QUALITY GATE: the wider-spread-same-risk thesis holds only for CLEAN small deals. Deals &quot;
+            &quot;whose TARGET board recommends REJECT (unsolicited/hostile) or whose bidder lacks committed &quot;
+            &quot;financing (non-binding LOI / &#x27;do not have committed financing&#x27; / a financing out) are moved to &quot;
+            &quot;`excluded` with a reason — the spread there prices a broken/under-financed deal, not neglected &quot;
+            &quot;carry. board_stance / financing == &#x27;unknown&#x27; pass through but carry a REVIEW flag (free-text &quot;
+            &quot;parsing is best-effort; confirm the SC 14D9 recommendation + the commitment letters in DD).&quot;,
+            &quot;THE SPREAD IS THE BREAK-RISK PREMIUM: a wide spread on a small deal is NOT free money — small &quot;
+            &quot;all-cash deals break MORE often (financing contingencies, MAC outs, thin/PE sponsors, regulatory &quot;
+            &quot;surprises). The DD/court step is verifying the financing commitment letter + antitrust path + &quot;
+            &quot;the definitive agreement&#x27;s outs before sizing.&quot;,
+            &quot;OFFER PRICE is regex-parsed from the announcing 8-K/press exhibit (&#x27;$X.XX per share in cash&#x27;) — &quot;
+            &quot;verify against the DEFINITIVE merger agreement (a lede number can be a headline value that a &quot;
+            &quot;later amendment/CVR adjusts). Numbers outside ${:.2f}-${:.0f} are discarded as mis-parses.&quot;.format(OFFER_LO, OFFER_HI),
+            &quot;DEAL VALUE = offer x yfinance shares-outstanding (may be stale / exclude options/RSUs/net-debt) — &quot;
+            &quot;it&#x27;s a SIZE SCREEN for the sub-threshold gate, not a precise enterprise value.&quot;,
+            &quot;DAYS-TO-CLOSE is parsed from soft language (&#x27;expected to close in Q4 2026&#x27;) and mapped to the &quot;
+            &quot;quarter-end — annualized_spread is therefore approximate; a stated drop-dead date (DD pull) is firmer.&quot;,
+            &quot;STOCK / MIXED / COLLAR deals with no clean cash number are SET ASIDE in skipped_non_cash (never &quot;
+            &quot;guessed) — v2 parses exchange ratios + collars.&quot;,
+            &quot;A NEGATIVE spread (price above offer) usually means the market expects a BUMP, a competing bid, or &quot;
+            &quot;the parsed offer is stale/superseded — shown in all_cash_deals, excluded from candidates.&quot;,
+            &quot;Targets with no SEC ticker (private/foreign/OTC) or no live price (already-closed/delisted) &quot;
+            &quot;self-drop into `dropped` — reported, never silently omitted.&quot;,
+        ],
+        &quot;note&quot;: &quot;CARRY class — SUB-THRESHOLD merger arb. Arb funds skip small all-cash deals (&lt;${:.0f}M) because &quot;
+                &quot;the absolute $-edge can&#x27;t move a big book and the float can&#x27;t absorb their size, so small deals &quot;
+                &quot;carry a WIDER spread for the SAME regulatory/financing/MAC break risk — a capacity-ceiling edge &quot;
+                &quot;that&#x27;s ours by design (fee-replication CARRY). Discovers recent cash merger agreements via EDGAR &quot;
+                &quot;EFTS full-text (8-K/DEFM14A), parses the cash/share from PRIMARY exhibits, prices live via &quot;
+                &quot;yfinance, gates on deal value &lt; ${:.0f}M, sorts by spread. Break risk is REAL and larger for &quot;
+                &quot;small deals — every candidate carries the announced financing/regulatory conditions + a &quot;
+                &quot;break-risk caveat (the DD/court step). NO offer prices fabricated — real filings only. &quot;
+                &quot;EXPAND (v2: parse stock/collar deals, regulatory/financing-condition SCORING, &quot;
+                &quot;break-rate-adjusted spread).&quot;.format(max_value_m, max_value_m),
+    }
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument(&quot;--days&quot;, type=int, default=120, help=&quot;EFTS lookback window (days)&quot;)
+    ap.add_argument(&quot;--max-value&quot;, type=float, default=DEFAULT_MAX_VALUE_M, help=&quot;sub-threshold ceiling ($M target equity value)&quot;)
+    args = ap.parse_args()
+
+    res = scan(days=args.days, max_value_m=args.max_value)
+    OUT.write_text(json.dumps(res, indent=1))
+    d = res[&quot;distribution&quot;]
+    print(f&quot;=== SUB-THRESHOLD MERGER-ARB SCANNER  {res[&#x27;asof&#x27;]}  &quot;
+          f&quot;({res[&#x27;n_scanned&#x27;]} filings scanned, {res[&#x27;n_all_cash&#x27;]} all-cash, {d[&#x27;n_candidates&#x27;]} candidates) ===&quot;)
+    print(f&quot;  window {res[&#x27;window_days&#x27;]}d | ceiling ${res[&#x27;max_value_m&#x27;]:.0f}M | &quot;
+          f&quot;{d[&#x27;n_sub_threshold_known&#x27;]} sub-threshold(known-size) + {d[&#x27;n_unknown_size&#x27;]} unknown-size | &quot;
+          f&quot;median spread {d[&#x27;median_spread_pct&#x27;]}%&quot;)
+    if res[&quot;candidates&quot;]:
+        print(&quot;  SUB-THRESHOLD CASH-ARB CANDIDATES (positive spread; verify financing + break risk in DD):&quot;)
+        for r in res[&quot;candidates&quot;][:15]:
+            dv = f&quot;${r[&#x27;deal_value_est_m&#x27;]:.0f}M&quot; if r[&quot;deal_value_est_m&quot;] else &quot;size?&quot;
+            ann = f&quot;  ann {r[&#x27;annualized_spread&#x27;]:.0f}%&quot; if r[&quot;annualized_spread&quot;] is not None else &quot;&quot;
+            cl = f&quot;  ~{r[&#x27;expected_close&#x27;]}&quot; if r[&quot;expected_close&quot;] else &quot;&quot;
+            wf = &quot;  [WIDE-verify-live]&quot; if r.get(&quot;wide_spread_flag&quot;) else &quot;&quot;
+            print(f&quot;    {r[&#x27;ticker&#x27;]:6} {r[&#x27;name&#x27;][:26]:26} px ${r[&#x27;price&#x27;]:7.2f}  offer ${r[&#x27;offer_cash_per_share&#x27;]:7.2f}  &quot;
+                  f&quot;{r[&#x27;spread_pct&#x27;]:+6.2f}%  {dv:&gt;7}{cl}{ann}{wf}&quot;)
+    else:
+        print(&quot;  no positive-spread sub-threshold cash deals this run (honest: small cash M&amp;A is episodic).&quot;)
+        if res[&quot;all_cash_deals&quot;]:
+            print(&quot;  all-cash deals seen (any size / sign):&quot;)
+            for r in res[&quot;all_cash_deals&quot;][:8]:
+                dv = f&quot;${r[&#x27;deal_value_est_m&#x27;]:.0f}M&quot; if r[&quot;deal_value_est_m&quot;] else &quot;size?&quot;
+                sp = f&quot;{r[&#x27;spread_pct&#x27;]:+.2f}%&quot; if r[&quot;spread_pct&quot;] is not None else &quot;n/a&quot;
+                print(f&quot;    {r[&#x27;ticker&#x27;]:6} {r[&#x27;name&#x27;][:26]:26} px ${r[&#x27;price&#x27;]:7.2f}  offer ${r[&#x27;offer_cash_per_share&#x27;]:7.2f}  {sp:&gt;8}  {dv:&gt;7}&quot;)
+    if res[&quot;excluded&quot;]:
+        print(f&quot;  EXCLUDED on deal-quality gate ({len(res[&#x27;excluded&#x27;])}):&quot;)
+        for x in res[&quot;excluded&quot;][:10]:
+            print(f&quot;    {(x.get(&#x27;ticker&#x27;) or x[&#x27;name&#x27;][:16]):16} {x[&#x27;reason&#x27;]:22} &quot;
+                  f&quot;board={x[&#x27;board_stance&#x27;]:11} fin={x[&#x27;financing&#x27;]}&quot;)
+    if res[&quot;skipped_non_cash&quot;]:
+        print(f&quot;  set aside (stock/mixed, no clean cash #): {[x.get(&#x27;ticker&#x27;) or x[&#x27;name&#x27;][:16] for x in res[&#x27;skipped_non_cash&#x27;][:10]]}&quot;)
+    if res[&quot;dropped&quot;]:
+        print(f&quot;  dropped (no ticker / no price, {len(res[&#x27;dropped&#x27;])}): {[x.get(&#x27;ticker&#x27;) or x[&#x27;name&#x27;][:14] for x in res[&#x27;dropped&#x27;][:10]]}&quot;)
+    print(f&quot;[-&gt; {OUT.name}]&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</pre></div></body></html>

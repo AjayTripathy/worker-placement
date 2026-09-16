@@ -1,0 +1,153 @@
+{
+  "ticker": "QUBT",
+  "cik": "0001758009",
+  "cutoff": "2026-05-20",
+  "filing": "0001213900-26-022417_10-K.txt",
+  "cohort": "jbook_exposure_divergence",
+  "summary": {
+    "n_claims": 10,
+    "n_queries_run": 27,
+    "severity_counts": {
+      "PASS": 2,
+      "MODERATE_UNDERDELIVERY": 2,
+      "SEVERE_UNDERDELIVERY": 3,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 3
+    },
+    "j_book_grounded_claims": 5,
+    "pentagon_jbook_fired_on": 1,
+    "headline_finding": "QUBT 10-K does NOT name a specific PE/program — there is no direct J-Book divergence in named-program-revenue claims. But Mode-B implied verification surfaces a SEVERE underdelivery: company asserts forward DoD revenue and 'multiple government customers' yet USAspending shows the parent legal entity (Quantum Computing Inc.) has only $95K of total federal contracts ($69.5K Commerce + $26K NASA SBIR) and $0 DoD obligations through 2026-05-20. DoD revenue claimed via narrative comes ENTIRELY from acquired subs (Freedom Photonics $25.8M historic SBIRs, NuCrypt $5.3M, QPhoton $7.9M), with no current Pentagon J-Book PE coverage. The adjacent AFRL Quantum Networking PE — the closest J-Book proxy for the 'quantum secured network for government customers' narrative — is UNFUNDED_TWO_PLUS_YEARS with EARMARK_SUNSET (sponsors lost power post-2024). The acquisition spree (LSI $110M, NuCrypt, QPhoton) scores COHERENT_ROLLUP (mean 0.85) — technologically vertical, not an incoherent distraction. Counterparty cross-check: Northrop Grumman 10-K/10-Q filings do NOT mention 'Freedom Photonics' — the jointly-developed-patent narrative is not material to Northrop."
+  },
+  "scores": [
+    {
+      "claim_id": "c1",
+      "claim_text": "QCi's anticipated future revenues from the U.S. government are expected to result from contracts awarded under various U.S. government programs.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": [
+        "USAspending: Quantum Computing Inc. as a federal recipient → only 2 awards totaling $95,663 ($69,500 Commerce + $26,163 NASA SBIR). Zero DoD.",
+        "Pentagon J-Book (contractor_name=Quantum Computing/QCi/QPhoton) → NOT_FOUND for parent. No PE assigns QUBT (or any QUBT-named legal entity) as primary contractor.",
+        "Statement is forward-only and narrative-load-bearing for the entire 'multiple commercial and government customers' equity story at a multi-billion market cap."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding + usaspending.query_dod_contracts + usaspending.query_recipient_contracts",
+      "M_value": "NOT_FOUND (J-Book) / 0 DoD contracts / $95K total federal contracts as Quantum Computing Inc.",
+      "interpretation": "Forward DoD-revenue narrative is unsupported by either pre-cutoff booked federal contracts at the parent entity or any J-Book PE attribution. This is the J-BOOK DIVERGENCE PATTERN in Mode B form: the company has anchored its government-customer thesis to non-existent named programs (it names none) while pre-cutoff federal contracting data shows the parent legal entity has effectively zero federal revenue base. Heuristic #6 (USAspending shows zero obligations under claimed program) — but here the company claimed unnamed programs, which makes the claim formally unfalsifiable yet substantively hollow."
+    },
+    {
+      "claim_id": "c2",
+      "claim_text": "QCi serves customers in aerospace and defense applications, in particular through LSI (Luminar Semiconductor) acquired February 2026.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "USAspending: Luminar Semiconductor, Inc. → 0 DoD awards.",
+        "USAspending: Freedom Photonics LLC (an LSI subsidiary) → 25 DoD awards, $25.8M historic obligations; 34 non-DoD awards (NASA, NSF, etc.).",
+        "Pentagon J-Book: NOT_FOUND for Luminar Semiconductor or Freedom Photonics as primary contractor on any current PE.",
+        "Freedom Photonics' awarded contracts are predominantly SBIR/STTR Phase I/II awards (sub-$2M each), not prime-program-of-record positions."
+      ],
+      "M_check": "pentagon_jbook + usaspending.query_dod_contracts (LSI, Freedom Photonics, QPhoton)",
+      "M_value": "LSI: 0 DoD / Freedom Photonics: 25 DoD ($25.8M historic) / QPhoton: 4 DoD ($7.95M) — but J-Book NOT_FOUND for all three as named primary contractors",
+      "interpretation": "Defense exposure is REAL but is composed of small SBIR/STTR awards at acquired subsidiaries, NOT a program-of-record position in the FY26 J-Book. The 'aerospace and defense applications' framing is technically supported by historic SBIRs but does not translate to forward-funded PE pipeline. Heuristic #1 (FUNDED_GROWING/STEADY → PASS) does not apply because no PE matches; classifying as MODERATE per heuristic #2 (forward-narrative-load-bearing with no booked program-of-record at parent)."
+    },
+    {
+      "claim_id": "c3",
+      "claim_text": "QCi's Quantum Photonic Vibrometer is positioned for remote vibration/sensing applications including detecting obscured and non-line-of-sight objects, with LiDAR enhancements usable from aircraft, drones, and satellites.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "Pentagon J-Book (program_name='Quantum Photonic Vibrometer' / 'quantum sensing' / 'quantum LiDAR') → NOT_FOUND.",
+        "No specific Pentagon program-of-record disclosed for the product; claim is positioning language only."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding (multiple program-name queries)",
+      "M_value": "NOT_FOUND (J-Book corpus does not have a 'Quantum Photonic Vibrometer' PE)",
+      "interpretation": "Heuristic #7: NOT_FOUND ≠ red flag — the v1 J-Book corpus is 410 PEs and the QPV product line may simply not have a dedicated PE (vibrometers fit under broader photonics R&D umbrellas). Treat as UNVERIFIABLE coverage gap. Aspirational positioning, not a J-Book divergence."
+    },
+    {
+      "claim_id": "c4",
+      "claim_text": "QCi's quantum secured communication systems and the NuCrypt acquisition broaden QCi's quantum secured network product line for commercial and government customers.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": [
+        "Pentagon J-Book (program_name='AFRL Quantum Networking') → UNFUNDED_TWO_PLUS_YEARS (FY25=$0, FY26=$0). The matching program in the corpus is the AFRL Quantum Networking line whose primary contractor is IonQ Inc — funding history $13M(FY22) / $26M(FY23) / $12M(FY24) / $0(FY25) / $0(FY26).",
+        "Pentagon J-Book (program_name='Quantum Network') → UNFUNDED_TWO_PLUS_YEARS (same primary program plus AFRL Qubitekk Quantum Networking which is FUNDED_STEADY).",
+        "earmark_detector(program_name='AFRL Quantum Networking') → EARMARK_SUNSET. Sponsors (Cardin-MD, Van Hollen-MD, Hoyer-MD, Tester-MT) lost majority/power; FY26 bipartisan budget signed Jan 20, 2026 did not renew.",
+        "Pentagon J-Book (contractor_name='NuCrypt') → NOT_FOUND — NuCrypt is not on any PE as primary contractor; USAspending shows $5.3M historic DoD SBIRs only.",
+        "Pentagon J-Book (program_name='Quantum Information Science') → NOT_FOUND in the local corpus."
+      ],
+      "M_check": "pentagon_jbook + earmark_detector + usaspending (NuCrypt)",
+      "M_value": "UNFUNDED_TWO_PLUS_YEARS + EARMARK_SUNSET on the closest analogous federal program; primary contractor on that PE is a competitor (IonQ), not QUBT.",
+      "interpretation": "The closest J-Book proxy for 'quantum secured network for government customers' — the AFRL Quantum Networking earmark — is UNFUNDED for two consecutive FYs after the political sponsors lost power. Per heuristic #5 (UNFUNDED_* + EARMARK_SUNSET → bump severity up). Even though QUBT is not the named primary contractor on this PE, this is the entire federal funded line for the product category QUBT claims to serve. NuCrypt's historic DoD revenue is SBIR-scale ($5.3M lifetime), inadequate to ground a 'broaden quantum secured network product line' forward narrative when the only program-of-record-scale funding line in the category is zeroed. Heuristic #2 (forward, not booked) suggests downgrade to MODERATE, but the EARMARK_SUNSET bump and the structural absence of a funded competitor PE in this domain net to SEVERE_UNDERDELIVERY."
+    },
+    {
+      "claim_id": "c5",
+      "claim_text": "QCi is developing its TFLN chip fab (AZ Chips Facility at Arizona State University Research Park) targeting a TFLN-devices market growing from $190.4M (2022) to $1.9B (2029).",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "usaspending.query_recipient_grants(Quantum Computing) → 0 federal grants.",
+        "epa_frs.query_facilities(Quantum Computing, AZ/NJ) → 0 EPA-registered facilities found — but EPA FRS is incomplete for non-emitting R&D labs."
+      ],
+      "M_check": "usaspending.query_recipient_grants + epa_frs.query_facilities",
+      "M_value": "0 federal grants; 0 EPA registered facilities (likely not threshold-triggering for a small TFLN R&D fab)",
+      "interpretation": "Market-research-cited TAM claim. Out of scope for J-Book pattern. Cannot be falsified through the M-source catalog; classifying as UNVERIFIABLE per heuristic #7."
+    },
+    {
+      "claim_id": "c6",
+      "claim_text": "QCi acquired Luminar Semiconductor, Inc. for $110.0 million in February 2026 via Section 363 bankruptcy stalking-horse sale.",
+      "severity": "PASS",
+      "supports": [
+        "acq_coherence.score_acquisition_coherence: parent thesis vs. {QPhoton, LSI, NuCrypt} → mean coherence 0.85; aggregate signal COHERENT_ROLLUP.",
+        "Per-acquisition scores: QPhoton 0.95, LSI 0.85, NuCrypt 0.75 — all 'high_coherence' (LLM Haiku 4.5).",
+        "USAspending corroborates LSI parent ($0 DoD) but Freedom Photonics sub has substantive SBIR history."
+      ],
+      "M_check": "acq_coherence.score_acquisition_coherence + usaspending",
+      "M_value": "COHERENT_ROLLUP (mean 0.85); n_low_coherence=0; total_low_coherence_value=$0",
+      "interpretation": "Acquisitions are technologically vertical to the integrated-photonics core thesis — NOT the IONQ-style incoherent rollup pattern. PASS on the rollup-incoherence test. The 363-stalking-horse mechanism is itself a noted balance-sheet maneuver but not a J-Book divergence signal; record as PASS for this rubric."
+    },
+    {
+      "claim_id": "c7",
+      "claim_text": "Freedom Photonics, LLC (an LSI subsidiary) jointly owns and developed patents with Northrop Grumman Systems Corporation.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "uspto_odp.query_assignee('Freedom Photonics', cutoff 2026-05-20) → 60 applications, 22 granted patents — confirms Freedom Photonics is a real patent-issuing assignee.",
+        "edgar_fts.query_fulltext('Freedom Photonics', cik=0001133421 Northrop Grumman) → 0 hits across NOC's 10-K/10-Q/8-K/DEF14A filings to cutoff. Counterparty does NOT disclose the relationship.",
+        "Northrop Grumman would have to disclose only material partnerships; a single jointly-held patent is unlikely to meet NOC's materiality threshold."
+      ],
+      "M_check": "uspto_odp.query_assignee + edgar_fts.query_fulltext",
+      "M_value": "FP confirmed as 22-granted-patent assignee; Northrop Grumman 10-K does not mention Freedom Photonics anywhere (0 hits)",
+      "interpretation": "Patent jointly-developed claim is plausible at the inventor level (Freedom Photonics is a real photonics R&D house with 22 patents). However, the 'partnership with Northrop Grumman' framing in QUBT's 10-K-via-LSI patent table is one-sided disclosure: counterparty does not reciprocally acknowledge the partnership in any SEC filing. Score as MODERATE_UNDERDELIVERY — claim is technically true but partnership-narrative load is asymmetric. Useful Mode-B finding (per entity-resolution-before-verifier-dispatch heuristic: verifier is NOC's CIK, not QUBT's)."
+    },
+    {
+      "claim_id": "c8",
+      "claim_text": "QCi targets $30 million in revenue (referenced in the executive comp PSU framework).",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "Forward target embedded in PSU performance criteria; not a representation of current or contracted revenue.",
+        "Current revenue is $682K (FY25); the gap to $30M target is ~44x.",
+        "USAspending shows no booked contracts at QUBT Inc that would close the gap."
+      ],
+      "M_check": "usaspending.query_recipient_contracts + usaspending.query_recipient_grants",
+      "M_value": "Quantum Computing Inc: 2 awards totalling $95,663; 0 grants. No DoD obligations.",
+      "interpretation": "Comp-plan target, not an SEC-rule revenue guidance representation. Marking UNVERIFIABLE rather than SEVERE because the predicate is 'targets', not 'expects' or 'projects'."
+    },
+    {
+      "claim_id": "c9",
+      "claim_text": "QCi FY2025 revenue was $682K (up 83% from $373K in FY2024), primarily derived from professional-services contracts provided to multiple commercial and government customers.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": [
+        "USAspending: Quantum Computing Inc. as recipient → 2 federal awards through 2026-05-20 — Department of Commerce $69,500 + NASA $26,163.",
+        "Zero DoD-awarded contracts at Quantum Computing Inc.",
+        "$95K federal total versus $682K reported revenue implies ~14% of total revenue is federal IF every dollar of those 2 awards landed in FY25 (the awards are FY25-vintage); the remaining 86% is commercial/non-federal, contradicting the 'multiple commercial and government customers' implication of substantive government revenue."
+      ],
+      "M_check": "usaspending.query_recipient_contracts + usaspending.query_dod_contracts",
+      "M_value": "$95K total federal contracts; 0 DoD",
+      "interpretation": "The 'multiple commercial and government customers' framing inflates the federal-customer scale: only 2 federal awards exist, both sub-$70K, with zero DoD presence. This is the Mode-B form of customer-concentration misrepresentation. Heuristic #6: USAspending shows zero DoD obligations against claimed-program forward narrative → SEVERE_UNDERDELIVERY at minimum."
+    },
+    {
+      "claim_id": "c10",
+      "claim_text": "QCi targets reservoir computing as a focus area to gain significant share in the AI/ML hardware market, launching 'Neurawave' (November 2025) as a photonics-based reservoir computer.",
+      "severity": "PASS",
+      "supports": [
+        "uspto_odp.query_assignee('Quantum Computing', cutoff 2026-05-20) → 116 applications, 42 granted patents — substantive IP portfolio.",
+        "Product-launch claim is a discrete factual assertion, not a J-Book-grounded program claim."
+      ],
+      "M_check": "uspto_odp.query_assignee",
+      "M_value": "42 granted patents at Quantum Computing assignee",
+      "interpretation": "Patent footprint corroborates the technology-portfolio claim. Product launch is verifiable in principle but out of scope of the J-Book divergence rubric. PASS."
+    }
+  ]
+}

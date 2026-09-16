@@ -1,0 +1,115 @@
+{
+  "ticker": "PRK",
+  "company": "Park National Corporation",
+  "cutoff": "2025-05-15",
+  "filing": "0000805676-25-000014_10K.txt",
+  "filing_date": "2025-02-24",
+  "cik": "0000805676",
+  "sector": "Financial Services",
+  "industry": "Banks - Regional",
+  "group": "boring_middle",
+  "rfm_tuples": [
+    {
+      "claim_id": "C1",
+      "R": "Park's 2024 10-K contains no 'going concern' or 'substantial doubt' language; auditor (Crowe LLP per prior filings) issued a clean opinion on FY2024 financials.",
+      "f": "going_concern_detector + auditor_change_tracker scan of all PRK 10-K/10-Q filings up to cutoff",
+      "M_source": "going_concern_detector / auditor_change_tracker",
+      "M_value": "going_concern signal=NO_GOING_CONCERN, n_matches=0; auditor_change_tracker signal=CLEAN_AUDITOR_TENURE, n_8k_item_401=0, n_big4_resignations=0, n_disagreements=0 over 6-year lookback",
+      "severity": "PASS",
+      "interpretation": "Mode A verified: no going-concern flag and no auditor change/disagreement events. Long auditor tenure with clean opinions is consistent with a healthy operating bank."
+    },
+    {
+      "claim_id": "C2",
+      "R": "10-K: 'Total Risk-Based Capital (to risk-weighted assets) Park 16.63% ... Tier 1 Risk-Based Capital Park 13.46% ... Common Equity Tier 1 Park 13.28%' at Dec 31, 2024 — all well above 'Well-Capitalized' thresholds (10%/8%/6.5%).",
+      "f": "Direct cross-check vs FDIC call reports for The Park National Bank (CERT 6653, Newark OH) — confirm subsidiary bank capital and earnings stability.",
+      "M_source": "fdic_call_reports (cert=6653)",
+      "M_value": "Pre-cutoff Mar-2025 call: ASSET=$9.84B, DEPDOM=$8.49B, NETINC quarterly $44.3M, ROAQ=1.81%, ROEQ=16.12%; Dec-2024 ROAQ=1.66%, ROEQ=15.07%. NCLNLS (nonaccrual loans) $63.2M on Mar-2025 = ~0.81% of total loans. Capital ratios strengthened YoY (Tier-1 12.97%→13.46% at PRK consolidated).",
+      "severity": "PASS",
+      "interpretation": "FDIC data corroborates 10-K capital and earnings claims; bank is well above regulatory minima with rising ROA/ROE and stable deposits. No 'window-dressing' discrepancy between holdco and bank-level reporting."
+    },
+    {
+      "claim_id": "C3",
+      "R": "10-K: 'At December 31, 2024, Park's debt security portfolio consisted of $1.0 billion of securities, $786.5 million of which were in an unrealized loss position with unrealized losses of $80.1 million.' Management says it does not intend to sell.",
+      "f": "Mode B — derive: AOCI hit vs Tier 1 capital, HTM-vs-AFS classification, whether unrealized losses materially impair capital adequacy if held-to-recovery thesis fails.",
+      "M_source": "self_text (10-K) + capital ratio cross-check",
+      "M_value": "Unrealized losses $80.1M = ~7% of Park's $1.14B Tier-1 capital; $61.7M of the $80.1M is in agency MBS (low credit risk, mark-to-yield). AOCI deferred-tax-asset of $16.7M is consistent with disclosed $80.1M (×21%). Park does NOT use HTM (zero balance both years), so all paper losses already flow through AOCI/book equity. Tier-1 capital still 13.46% well-capitalized AFTER full AOCI flow-through.",
+      "severity": "PASS",
+      "interpretation": "Mode B counter-check: SVB-style HTM-hiding risk is absent here because Park elected AFS-only and already absorbed the marks. Disclosure is honest and capital still ample. Modest concern only if forced-sale scenario emerges, but liquidity (cash $277M holdco + deposits stable) makes that unlikely."
+    },
+    {
+      "claim_id": "C4",
+      "R": "10-K: 'Total nonaccrual $68,178' (thousand) vs prior year and stable allowance for credit losses of $87,966 (1.13% of loans). 'Net charge-offs $10,322' (thousand) for FY2024, of which consumer accounted for $7.4M (charge-offs $12.75M / recoveries $5.3M).",
+      "f": "Claim-evolution: compare Q1 2025 10-Q nonaccrual trend and ACL trajectory.",
+      "M_source": "claim_evolution (Q1 2025 10-Q vs FY2024 10-K)",
+      "M_value": "Q1 2025: total nonaccrual loans $61.9M (vs $68.2M Dec24 and $70.2M YoY), nonaccrual loans current $44.2M, current nonaccrual ratio 0.79%. ACL roll-forward consistent with stated methodology. Consumer charge-offs were the only meaningful pocket of stress (FY24 $12.75M gross), but trend is improving Q1 2025.",
+      "severity": "PASS",
+      "interpretation": "Claim evolution is consistent and slightly improving — no claim drift, no surprise upward revision of ACL methodology, and no segment 'creeping' between reports."
+    },
+    {
+      "claim_id": "C5",
+      "R": "10-K: NIM expanded with strong NII; FY24 segment net income $151.4M (vs $126.7M FY23) reflects 'Banking Segment' health and 'Income from fiduciary activities' rising YoY (trust/advisory $42.5M vs $35.5M).",
+      "f": "Mode B — derive: 1Q25 NIM trajectory + efficiency ratio reported in 10-Q against the implied annualization in 10-K.",
+      "M_source": "self_text (Q1 2025 10-Q)",
+      "M_value": "1Q25 NIM 4.62% (up from 4.28% in 1Q24), efficiency ratio 59.79% (vs 63.07% 1Q24), annualized ROA 1.70% (vs 1.44%), annualized ROE/ROTE 15.44%. NIM expansion is consistent with rising loan yields (6.21%) and modest deposit cost compression (1.86% vs 2.08%) — a real, not paper, improvement.",
+      "severity": "PASS",
+      "interpretation": "Earnings power trend post-10-K is corroborative, not weakening. No reason to expect FY24 metrics were peak-of-cycle 'one-time' juice."
+    },
+    {
+      "claim_id": "C6",
+      "R": "10-K disclosure of $176.5 million brokered + BID Ohio CDs (within $911.8M time deposits), $90.4M repo borrowings, $189.7M subordinated notes — i.e., ~$456.6M of wholesale + sub-debt funding against $8.14B total deposits.",
+      "f": "Mode B — derive: uninsured deposit ratio + brokered reliance + sub-debt cost; check 10-Q for any expansion of reliance.",
+      "M_source": "self_text + Q1 2025 10-Q",
+      "M_value": "Uninsured deposits: ~$1.5B at Mar-2025 = 18.2% of total deposits; of that, $400M is over $250K but fully collateralized by investment securities. Brokered/BID CDs essentially flat. Repo borrowings stable. No new sub-debt issuance. No FHLB advance ballooning (no incremental advances disclosed).",
+      "severity": "PASS",
+      "interpretation": "Funding mix is conservative for the asset base; uninsured ratio of 18% (with $400M of that collateralized) is well below the SVB/FRC/SBNY 80%+ red-zone. No funding stress signal."
+    },
+    {
+      "claim_id": "C7",
+      "R": "10-K cash flow: 'Cash dividends paid $77.5M' (FY24), 'Repurchase of common shares $0' (FY24, vs $23.0M FY23). Quarterly $1.05 dividend implied. Holdco cash $277.8M end-of-year.",
+      "f": "Mode B — derive: Did Park PAUSE its share buyback in FY2024? If yes, why — is this a defensive capital-preservation signal hidden in plain sight?",
+      "M_source": "self_text — cash flow + capital",
+      "M_value": "Yes — Park executed $23.0M of buybacks in FY23 but ZERO buybacks in FY24, while still paying $77.5M of dividends. Holdco cash dropped only $4.3M (still $277.8M). This is a deliberate capital-preservation choice while maintaining the dividend — consistent with the disclosed ~$80M of unrealized AFS losses and management's stated intent to recover par value at maturity.",
+      "severity": "UNVERIFIABLE",
+      "interpretation": "Mode B catch: buyback pause IS a defensive capital signal but it is honestly disclosed in the cash-flow statement. Not a lie, but worth flagging — management is treating the rate-driven AOCI hole more seriously than the narrative MD&A admits. Slightly less bullish than 'business as usual' framing but not a red flag."
+    },
+    {
+      "claim_id": "C8",
+      "R": "Implied claim — by virtue of being an SP600 'boring-middle' bank with -16.4% drawdown into May-2025, the market is pricing some incremental risk not captured by the headline metrics.",
+      "f": "Mode B — insider behavior near capital events: insider_vs_calendar + Form 4 sweep over 540-day lookback through cutoff.",
+      "M_source": "insider_vs_calendar / form4",
+      "M_value": "n_form4_filings=34 pre-cutoff, n_total_sales=37, n_total_sale_value=$4.45M, n_proximate_sales=0 (no insider sales within 14-day windows of capital/budget events); signal=NO_PROXIMATE_SALES. Manual check of 4 April-2-2025 Form 4s (CFO Burt Brady, CEO Trautman, CAO Herreman, President Miller): all are tax-withholding (code F) and exercise (M) tied to PSU vesting on 3/31/2025 — NO discretionary open-market sales pre-earnings (Apr 25). The Feb 12 Form 5 covers routine gifts.",
+      "severity": "PASS",
+      "interpretation": "Mode B is the strongest honesty signal here: insiders are NOT lightening up into the print or before the share-price drawdown. Modest aggregate selling ($4.5M over 540 days at a $1.5B+ market cap) and all proximate transactions are tax-withholding. If management saw distress coming, the CFO/CEO would not be only-tax-withholding."
+    },
+    {
+      "claim_id": "C9",
+      "R": "10-K: 'Park's commercial loan portfolio includes loans to a wide variety of corporations and businesses across many industrial classifications' — claim of diversification across Ohio/NC/SC/KY plus 'nationwide aircraft loans and nationwide asset-based lending to consumer finance companies'.",
+      "f": "Mode B — derive concentration: aircraft loans + ABL-to-consumer-finance are higher-risk nationwide niches not typical for a community bank.",
+      "M_source": "self_text (10-K) — concentration disclosures",
+      "M_value": "10-K confirms the niches but does NOT quantify aircraft or consumer-finance-ABL exposure. Largest single nonaccrual is commercial real estate ($23.2M, all collateral-evaluated with $0 ACL — fully covered by collateral). Commercial financial & agricultural nonaccrual $24.2M with $1.26M ACL = 5.2% reserve rate. Total individually-evaluated nonaccrual $53.1M against $87.9M total ACL.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Mode B flag: aircraft and nationwide consumer-finance ABL are NOT broken out in the loan-mix table. Investors get sector-by-NAICS only. Coverage on CRE nonaccrual is collateral-dependent — if appraisals are stale the $23.2M could need more reserve. Not a lie, but the boring-middle drawdown likely reflects CRE-office concern that isn't fully addressed; disclosure is technically compliant but light."
+    },
+    {
+      "claim_id": "C10",
+      "R": "10-K: dividend-restriction note explains regulatory limits; bank-level capital is well above 'Well-Capitalized' but the holdco depends on $93M FY24 of dividends FROM PNB (vs $110M FY23, $120M FY22). Holdco interest expense on sub-debt is $9.4M annually.",
+      "f": "Mode B — derive holdco coverage trend: dividend cover (holdco income vs dividend paid) and trajectory.",
+      "M_source": "self_text (10-K parent-only condensed financials)",
+      "M_value": "Parent-only FY24: dividends FROM subsidiaries $93M (down 15% YoY and down 22% from FY22). Parent-only net income $83.1M (excl. equity in undistributed sub-income) covers $77.5M of dividends paid by ~$5.6M. Trend is tightening: $123.7M income FY22 → $111.8M FY23 → $97.6M FY24 vs roughly steady $77M dividend. Holdco cash unchanged at ~$278M provides 3+ years of dividend buffer.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Mode B catch: the holdco dividend coverage at the standalone level is THINNER than the consolidated story suggests — $5.6M of cushion over the FY24 dividend. Still positive, and holdco cash buffer is large, but the 3-year decline in upstreamed dividends from PNB is a quietly disclosed trend that bears watching. Not a red flag for distress, but a meaningful 'lukewarm' signal in an otherwise clean book."
+    }
+  ],
+  "supplemental_signals": {
+    "going_concern": "NO_GOING_CONCERN",
+    "auditor_change_tracker": "CLEAN_AUDITOR_TENURE (no 8-K 4.01, no disagreements, 6-year lookback)",
+    "insider_vs_calendar": "NO_PROXIMATE_SALES (n_form4_filings=34, n_total_sales=37 over 540d, all proximate Apr-2 Form 4s are tax-withholding on PSU vest)",
+    "fdic_pre_cutoff": "CERT 6653 The Park National Bank Newark OH — Mar-2025 ROAQ 1.81%, ROEQ 16.12%, NCLNLS 0.81% of loans, deposits stable",
+    "edgar_fts_merger": "30 hits for 'Park National merger' but all are own-filings (10-K exhibits, DEF 14A) — no external counterparty disclosure",
+    "buyback_status": "Buybacks paused FY24 ($0 vs $23M FY23) — defensive capital-preservation; honestly disclosed",
+    "nim_trend_q1_2025": "NIM expanded 4.28%→4.62% YoY; efficiency 63.07%→59.79%; ROA 1.44%→1.70% (annualized)",
+    "uninsured_deposit_ratio": "18.2% (Mar-2025), $400M of that collateralized — very low for a regional bank"
+  },
+  "summary": "PRK is a well-capitalized, honestly-disclosed Ohio community bank holding company. Disclosure passes both Mode A (going concern, auditor, capital) and Mode B (insider behavior, claim evolution, holdco dividend coverage) cross-checks. The -16.4% pre-cutoff drawdown appears to reflect macro/CRE sector pressure rather than firm-specific distress: NIM is expanding, nonaccruals are declining, the FDIC subsidiary-level data corroborates the 10-K, and insiders are not selling ahead of the print. Two Mode-B amber flags exist (silent buyback pause in FY24 and a 3-year decline in PNB upstream dividends to the holdco) but both are honestly disclosed in the cash-flow and parent-only statements. There is no concealment, no auditor change, no HTM-hiding (Park is AFS-only and capital already absorbs the AOCI mark), and no proximate-event insider selling. Boring-middle 'lying detector' verdict: not lying.",
+  "composite": 0.85
+}

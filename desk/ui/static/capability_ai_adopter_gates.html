@@ -1,0 +1,244 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ai_adopter_gates</title><style>
+body{margin:0;background:#0b0e12;color:#e8ebee;font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:26px 24px 90px}
+a{color:#8b7cf6} h1{font-size:23px;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:#7d858e;margin:0 0 20px;font-size:13px}
+h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:#7d858e;margin:24px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 10px;border-bottom:1px solid #242a31;text-align:left;vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#7d858e}
+.k{font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:20px}
+.k-generator{color:#c3b8fb;background:rgba(139,124,246,.15)}
+.k-detector{color:#eccb8a;background:rgba(217,164,65,.15)}
+.k-watcher{color:#8ee5c1;background:rgba(53,201,143,.15)}
+.k-evidence{color:#b3bcc6;background:rgba(138,147,158,.15)}
+.h-OK{color:#35c98f} .h-STALE{color:#d9a441} .h-ERROR{color:#e0736a} .h-NEVER_RUN{color:#8a939e}
+pre{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px;overflow-x:auto;font-size:12px;line-height:1.5}
+.panel{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px 18px;margin-bottom:12px}
+ul{margin:4px 0;padding-left:20px} li{margin-bottom:4px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+</style></head><body><div class="wrap"><h1>ai_adopter_gates</h1><p class="sub">registered capability · ai_adopter_gates</p><a href="signals.html">&larr; all signals</a><div class="panel" style="margin-top:10px"><span class="k k-generator">GENERATOR</span> &nbsp;<span class="h-NEVER_RUN"><b>NEVER_RUN</b></span> · last run <span class="mono">never</span></div><p>the four disqualifying tests the courts extracted from the</p><form method="POST" action="/signals/run" style="margin:10px 0"><input type="hidden" name="name" value="ai_adopter_gates"><input name="symbol" placeholder="symbol (if applicable)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px"><input name="symbols" placeholder="universe, comma-sep (generators)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px;margin-left:6px"><button type="submit" style="background:#8b7cf6;color:#0b0e12;border:0;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;margin-left:6px">Run now</button></form><h2>Datasources</h2><ul><li>reference implementation: verticals/generators/ai_adopter_gates.py (see the code section for the feeds it touches)</li></ul><h2>Applies to</h2><ul><li><b>strategies:</b> core_equity, quality_value</li></ul><h2>The code</h2><pre>&quot;&quot;&quot;ai_adopter_gates — the four disqualifying tests the courts extracted from the
+AI-adopter screen, applied as a re-scoring pass over AI_ADOPTER_SMALLCAP.json.
+
+The screen itself was produced as a data store with no module, so the gates live here
+and run over the store. Each gate is a name the screen ranked highly that a court then
+had to reject for a reason the score could not see:
+
+  G1 MIX REGRESSION (from the CRVL court, PASS 3/10)
+     A falling personnel/revenue ratio in a MULTI-LINE business is usually service-line
+     mix, not automation. Fit labour = sum(beta_i x revenue_line_i) with NO productivity
+     term; if that explains most of the decline, the &quot;AI margin story&quot; is arithmetic.
+     CRVL: network solutions went 33.4% -&gt; 37.7% of revenue at ~9% labour intensity vs
+     ~72% for the TPA line; constant-intensity mix explained 89% of a 3.05pp fall, and
+     headcount actually ROSE 3.2%.
+
+  G2 BANK/HOLDCO DENOMINATOR (from the CASS court, 2/10)
+     Never fire a cost-out detector on X/Revenue for a registrant with an ALCO table
+     (SIC 6022 and friends): spread revenue inflates the denominator so the ratio
+     improves while the operating business does not. CASS&#x27;s Labour/Revenue improved
+     while Labour/FEE-revenue worsened on the same audited inputs.
+
+  G3 ONE-TIME BASE EFFECT (from the CASS court)
+     Screen the PRIOR four quarters for discrete items before computing any delta-margin.
+     77% of the CASS &quot;inflection&quot; was a base rolling off, not a new trend.
+
+  G4 DISCLOSURE RECENCY (from the CASS court)
+     An &quot;absence of disclosure&quot; archetype is only as good as its cutoff. CASS&#x27;s &quot;zero AI
+     disclosure&quot; was refuted by an 8-K eleven days before intake — and the signal-to-price
+     latency in that archetype is ~7 sessions, so the edge had already elapsed.
+
+    python3 verticals/generators/ai_adopter_gates.py [--apply]
+
+Without --apply it reports; with --apply it writes the gate results and adjusted scores
+back into the store. PROPOSES ONLY — nothing here stages an order.
+&quot;&quot;&quot;
+from __future__ import annotations
+
+import argparse
+import json
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+STORE = ROOT / &quot;verticals&quot; / &quot;generators&quot; / &quot;data&quot; / &quot;AI_ADOPTER_SMALLCAP.json&quot;
+
+# G2: registrants whose revenue line carries net interest income. A cost ratio measured
+# against total revenue is meaningless here — the denominator is a rate bet.
+ALCO_SIC = {&quot;6022&quot;, &quot;6021&quot;, &quot;6020&quot;, &quot;6035&quot;, &quot;6036&quot;, &quot;6199&quot;, &quot;6111&quot;}
+ALCO_HINTS = (&quot;bank&quot;, &quot;bancorp&quot;, &quot;bancshares&quot;, &quot;savings&quot;, &quot;trust company&quot;,
+              &quot;financial corp&quot;, &quot;holdings inc&quot; )   # last one is weak, used only with a SIC hit
+
+MIX_R2_BLOCK = 0.80        # G1: mix explains &gt;=80% of the ratio move -&gt; not automation
+BASE_EFFECT_BLOCK = 0.50   # G3: &gt;=50% of the delta from a prior-period discrete item
+
+
+def _f(x, d=None):
+    try:
+        v = float(x)
+        return d if v != v else v
+    except Exception:
+        return d
+
+
+def g1_mix_regression(rec) -&gt; dict:
+    &quot;&quot;&quot;Constant-intensity mix test. Needs per-line revenue; when the store does not carry
+    segment data we return UNKNOWN rather than a pass — an untested gate is not a clear one.&quot;&quot;&quot;
+    lines = rec.get(&quot;revenue_lines&quot;) or rec.get(&quot;segments&quot;)
+    labour = rec.get(&quot;personnel_expense_series&quot;) or rec.get(&quot;labour_series&quot;)
+    if not lines or not labour:
+        multi = rec.get(&quot;multi_line&quot;) if rec.get(&quot;multi_line&quot;) is not None else True
+        return {&quot;gate&quot;: &quot;G1_mix&quot;, &quot;status&quot;: &quot;UNKNOWN&quot; if multi else &quot;N/A&quot;,
+                &quot;note&quot;: &quot;segment revenue x labour series absent from the store — the CRVL &quot;
+                        &quot;failure mode (mix explaining 89% of a personnel-ratio fall) CANNOT &quot;
+                        &quot;be excluded. Pull the 10-K segment table before promoting.&quot;}
+    # fit labour_t = sum_i beta_i * rev_i,t with beta &gt;= 0, no productivity term
+    try:
+        import numpy as np
+        X = np.array([[_f(v, 0.0) for v in row] for row in lines], dtype=float)
+        y = np.array([_f(v, 0.0) for v in labour], dtype=float)
+        beta, *_ = np.linalg.lstsq(X, y, rcond=None)
+        pred = X @ beta
+        ss_res = float(((y - pred) ** 2).sum())
+        ss_tot = float(((y - y.mean()) ** 2).sum()) or 1e-9
+        r2 = 1 - ss_res / ss_tot
+        return {&quot;gate&quot;: &quot;G1_mix&quot;, &quot;status&quot;: &quot;BLOCK&quot; if r2 &gt;= MIX_R2_BLOCK else &quot;PASS&quot;,
+                &quot;r2&quot;: round(r2, 3), &quot;betas&quot;: [round(float(b), 4) for b in beta],
+                &quot;note&quot;: (&quot;constant-intensity mix explains %.0f%% of the labour path — &quot;
+                         &quot;this is service-line mix, not automation&quot; % (r2 * 100))
+                        if r2 &gt;= MIX_R2_BLOCK else
+                        &quot;mix alone does not explain the labour path; a productivity term survives&quot;}
+    except Exception as e:
+        return {&quot;gate&quot;: &quot;G1_mix&quot;, &quot;status&quot;: &quot;UNKNOWN&quot;, &quot;note&quot;: f&quot;regression failed: {type(e).__name__}&quot;}
+
+
+# XBRL tags only a spread lender files. Presence of ANY of these means the revenue line
+# contains net interest income and a cost/revenue ratio is not measuring operations.
+# Deliberately NARROW. &quot;Deposits&quot; alone was a false positive — any company holding
+# customer funds files it (PHR processes patient payments). These four are filed only by
+# a registrant earning a SPREAD.
+ALCO_TAGS = (&quot;InterestAndDividendIncomeOperating&quot;, &quot;InterestExpenseDeposits&quot;,
+             &quot;InterestIncomeExpenseAfterProvisionForLoanLoss&quot;,
+             &quot;LoansAndLeasesReceivableNetReportedAmount&quot;)
+
+
+def g2_alco_denominator(rec, probe=True) -&gt; dict:
+    &quot;&quot;&quot;Cost ratios measured against a revenue line containing net interest income.
+    Resolved from the registrant&#x27;s OWN XBRL facts — a bank cannot hide an ALCO.&quot;&quot;&quot;
+    name = (rec.get(&quot;name&quot;) or rec.get(&quot;company&quot;) or &quot;&quot;).lower()
+    bucket = (rec.get(&quot;sector_bucket&quot;) or &quot;&quot;).lower()
+    hint = any(h in name for h in ALCO_HINTS[:5]) or bucket in (&quot;bank&quot;, &quot;lender&quot;, &quot;consumer_lender&quot;)
+    cik = str(rec.get(&quot;cik&quot;) or &quot;&quot;).lstrip(&quot;0&quot;)
+    if not probe or not cik:
+        return {&quot;gate&quot;: &quot;G2_alco&quot;, &quot;status&quot;: &quot;BLOCK&quot; if hint else &quot;UNKNOWN&quot;,
+                &quot;note&quot;: &quot;no CIK to probe; name/bucket heuristic only&quot;}
+    try:
+        import urllib.request, json as _j
+        req = urllib.request.Request(
+            f&quot;https://data.sec.gov/api/xbrl/companyfacts/CIK{int(cik):010d}.json&quot;,
+            headers={&quot;User-Agent&quot;: &quot;ajay research 4tripathy@gmail.com&quot;})
+        facts = _j.loads(urllib.request.urlopen(req, timeout=25).read()).get(&quot;facts&quot;, {}).get(&quot;us-gaap&quot;, {})
+        hits = [t for t in ALCO_TAGS if t in facts]
+    except Exception as e:
+        return {&quot;gate&quot;: &quot;G2_alco&quot;, &quot;status&quot;: &quot;UNKNOWN&quot;, &quot;note&quot;: f&quot;probe failed: {type(e).__name__}&quot;}
+    if not hits:
+        return {&quot;gate&quot;: &quot;G2_alco&quot;, &quot;status&quot;: &quot;PASS&quot;}
+    has_fee = &quot;FeesAndCommissions&quot; in facts or &quot;NoninterestIncome&quot; in facts
+    return {&quot;gate&quot;: &quot;G2_alco&quot;,
+            &quot;status&quot;: &quot;PASS_WITH_FEE_BASIS&quot; if has_fee else &quot;BLOCK&quot;,
+            &quot;alco_tags_found&quot;: hits[:3],
+            &quot;note&quot;: (&quot;registrant files spread-lender tags — the cost ratio MUST be recomputed &quot;
+                     &quot;against FEE revenue and absolute dollars, never total revenue &quot;
+                     &quot;(the CASS mechanism: Labour/Rev improved while Labour/FeeRev worsened &quot;
+                     &quot;on the same audited inputs)&quot;)}
+
+
+def g3_base_effect(rec) -&gt; dict:
+    &quot;&quot;&quot;Was the margin &#x27;inflection&#x27; a prior-period discrete item rolling off?
+    Uses the store&#x27;s own 8-quarter operating-margin series: if the PRIOR-4 window contains
+    an outlier quarter, the last4-vs-prior4 delta is measuring that quarter leaving, not a
+    new trend. (CASS: 77% of the &#x27;inflection&#x27; was base rolloff.)&quot;&quot;&quot;
+    x = (rec.get(&quot;audited_xbrl&quot;) or {})
+    ser = x.get(&quot;op_margin_8q_pct&quot;)
+    delta = _f(x.get(&quot;op_margin_delta_pp&quot;))
+    if not ser or len(ser) &lt; 8 or delta in (None, 0):
+        return {&quot;gate&quot;: &quot;G3_base_effect&quot;, &quot;status&quot;: &quot;UNKNOWN&quot;,
+                &quot;note&quot;: &quot;no 8-quarter margin series — base-effect cannot be excluded&quot;}
+    vals = [_f(v[1]) for v in ser if _f(v[1]) is not None]
+    if len(vals) &lt; 8:
+        return {&quot;gate&quot;: &quot;G3_base_effect&quot;, &quot;status&quot;: &quot;UNKNOWN&quot;}
+    prior, last = vals[:4], vals[4:]
+    med_p = sorted(prior)[len(prior)//2]
+    # how much of the delta disappears if the prior window&#x27;s WORST quarter is replaced by its median?
+    worst = min(prior)
+    adj_prior_avg = (sum(prior) - worst + med_p) / 4
+    adj_delta = (sum(last)/4) - adj_prior_avg
+    share_from_base = 1 - (adj_delta / delta) if delta else 0
+    if share_from_base &gt; 1.0:
+        return {&quot;gate&quot;: &quot;G3_base_effect&quot;, &quot;status&quot;: &quot;BLOCK&quot;,
+                &quot;base_effect_share&quot;: &quot;&gt;1.0&quot;, &quot;raw_delta_pp&quot;: round(delta, 2),
+                &quot;delta_ex_outlier_pp&quot;: round(adj_delta, 2),
+                &quot;note&quot;: (&quot;the delta REVERSES sign once the prior window&#x27;s outlier quarter is &quot;
+                         &quot;normalised (%.2fpp -&gt; %.2fpp) — there is no inflection, only a weak &quot;
+                         &quot;base&quot; % (delta, adj_delta))}
+    return {&quot;gate&quot;: &quot;G3_base_effect&quot;,
+            &quot;status&quot;: &quot;BLOCK&quot; if share_from_base &gt;= BASE_EFFECT_BLOCK else &quot;PASS&quot;,
+            &quot;base_effect_share&quot;: round(share_from_base, 2),
+            &quot;raw_delta_pp&quot;: round(delta, 2), &quot;delta_ex_outlier_pp&quot;: round(adj_delta, 2),
+            &quot;note&quot;: (&quot;%.0f%% of the margin delta comes from one weak prior quarter rolling off&quot;
+                     % (share_from_base * 100))}
+
+
+def g4_disclosure_recency(rec, cutoff_days: int = 7) -&gt; dict:
+    &quot;&quot;&quot;The absence-of-disclosure archetype decays fast and must be re-checked to the cutoff.&quot;&quot;&quot;
+    prog = (rec.get(&quot;named_ai_cost_program&quot;) or &quot;&quot;)
+    absence = rec.get(&quot;thesis_is_absence_of_disclosure&quot;) or prog.strip().upper().startswith(&quot;NO&quot;)
+    if not absence:
+        return {&quot;gate&quot;: &quot;G4_recency&quot;, &quot;status&quot;: &quot;N/A&quot;}
+    last = rec.get(&quot;days_since_last_8k&quot;)
+    if last is None:
+        return {&quot;gate&quot;: &quot;G4_recency&quot;, &quot;status&quot;: &quot;UNKNOWN&quot;,
+                &quot;note&quot;: &quot;8-K venue not re-checked to the cutoff — the CASS refutation came &quot;
+                        &quot;from an 8-K 11 days before intake&quot;}
+    return {&quot;gate&quot;: &quot;G4_recency&quot;,
+            &quot;status&quot;: &quot;BLOCK&quot; if last &lt;= cutoff_days else &quot;PASS&quot;,
+            &quot;note&quot;: &quot;signal-to-price latency in this archetype is ~7 sessions; a fresh &quot;
+                    &quot;disclosure means the edge has already elapsed&quot;}
+
+
+def run(apply: bool = False):
+    store = json.loads(STORE.read_text())
+    names = store.get(&quot;universe&quot;) or store.get(&quot;names&quot;) or store.get(&quot;top_8&quot;) or []
+    if isinstance(names, dict):
+        names = list(names.values())
+    out, blocked, unknown = [], 0, 0
+    for rec in names:
+        if not isinstance(rec, dict):
+            continue
+        gates = [g1_mix_regression(rec), g2_alco_denominator(rec),
+                 g3_base_effect(rec), g4_disclosure_recency(rec)]
+        statuses = [g[&quot;status&quot;] for g in gates]
+        verdict = (&quot;BLOCKED&quot; if &quot;BLOCK&quot; in statuses
+                   else &quot;UNRESOLVED&quot; if &quot;UNKNOWN&quot; in statuses else &quot;CLEAR&quot;)
+        blocked += verdict == &quot;BLOCKED&quot;
+        unknown += verdict == &quot;UNRESOLVED&quot;
+        rec[&quot;court_gates_20260804&quot;] = {&quot;verdict&quot;: verdict, &quot;gates&quot;: gates}
+        out.append((rec.get(&quot;ticker&quot;) or rec.get(&quot;symbol&quot;) or &quot;?&quot;, verdict, statuses))
+
+    print(f&quot;[ai_adopter_gates] {len(out)} names | BLOCKED {blocked} | &quot;
+          f&quot;UNRESOLVED {unknown} | CLEAR {len(out)-blocked-unknown}\n&quot;)
+    for t, v, s in sorted(out, key=lambda r: (r[1] != &quot;BLOCKED&quot;, r[0]))[:40]:
+        print(f&quot;  {t:8s} {v:11s} {&#x27; &#x27;.join(s)}&quot;)
+    if unknown:
+        print(f&quot;\n  NOTE: {unknown} names are UNRESOLVED — the store lacks segment revenue, &quot;
+              f&quot;labour series, prior-period discrete items or 8-K recency.\n&quot;
+              f&quot;  An untested gate is NOT a passed gate: these cannot be promoted to court &quot;
+              f&quot;until the missing fields are pulled from the filings.&quot;)
+    if apply:
+        STORE.write_text(json.dumps(store, indent=1))
+        print(f&quot;\n  written back to {STORE}&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    ap = argparse.ArgumentParser()
+    ap.add_argument(&quot;--apply&quot;, action=&quot;store_true&quot;)
+    run(ap.parse_args().apply)
+</pre></div></body></html>

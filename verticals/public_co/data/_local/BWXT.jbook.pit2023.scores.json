@@ -1,0 +1,130 @@
+{
+  "ticker": "BWXT",
+  "cutoff": "2023-01-15",
+  "filing": "0001486957-22-000005_10-K.txt",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "BWXT Nuclear Operations Group supplies sole-source naval nuclear reactors / fuel to U.S. Navy via DOE/NNSA Naval Nuclear Propulsion Program ($1,622.6M FY2021 NOG revenue, 76% of consolidated revenue from U.S. Government).",
+      "severity": "PASS",
+      "supports": [
+        "usaspending shows BWXT-family entities received ~$23.4B in DOE awards (37 awards), including BWXT Y-12 LLC ($10.99B), BWXT Pantex LLC ($6.57B), Fluor-BWXT Portsmouth LLC ($4.47B), BWXT Nuclear Operations Group HALEU processing $79.8M, NFS $280.9M.",
+        "BWXT NOG ranked as sole-source supplier of naval nuclear reactors is consistent with $80M+ direct DOE award stream and historical industrial structure (DOE/NNSA's Naval Reactors program funded under separate appropriation, not in J-Book DoD corpus)."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(Naval Nuclear Propulsion Program) + doe_budget.query_program_funding(Naval Reactors) + usaspending.query_recipient_contracts(BWXT)",
+      "M_value": "pentagon_jbook=NOT_FOUND; doe_budget=NOT_FOUND; usaspending: 37 awards, $23.38B total, top recipients BWXT Y-12 / BWXT Pantex / Fluor-BWXT Portsmouth / BWXT NOG",
+      "interpretation": "Naval Nuclear Propulsion is funded by NNSA/DOE under the Naval Reactors program (NOT a J-Book DoD PE) and is outside both corpora. Per Heuristic 7, NOT_FOUND is UNVERIFIABLE not red flag; but the orthogonal USAspending crosscheck strongly CONFIRMS the claim ($23B+ in DOE awards across BWXT entities). The forward narrative is supported by real, sticky DOE/NNSA contract base. PASS."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "BWXT performs fabrication of missile launch tubes for U.S. Navy submarines (Columbia SSBN / Virginia SSN Common Missile Compartment exposure).",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "J-Book corpus does not contain Columbia/Virginia/Common Missile Compartment/Trident entries (these are Navy SCN — Shipbuilding & Conversion Navy — and Trident II is OPN/WPN, generally not in our RDT&E-heavy 410-PE corpus).",
+        "USAspending DoD search did not surface submarine launch tube subcontracts to BWXT directly — typical industry structure has GD-EB / HII-NNS as prime, BWXT as deep-tier supplier (subcontract obligations not visible at prime-recipient level)."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(Columbia class / Virginia class / Common Missile Compartment / Trident / Trident II)",
+      "M_value": "All NOT_FOUND in J-Book corpus",
+      "interpretation": "Corpus gap (Heuristic 7). The Columbia and Virginia programs are well-known POR; absence from this corpus reflects corpus scope (RDT&E PEs), not program health. Cannot verify divergence from public sources; flag as UNVERIFIABLE with note that publicly Columbia and Virginia are full-rate procurement priorities."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "BWXT's forward growth narrative is tied to U.S. Navy's FY2022 long-range shipbuilding plan (increase fleet of submarines and aircraft carriers); BWXT made capex/personnel investments to meet this growth.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "Shipbuilding plans / Ford-class CVN / general shipbuilding line items are not in this J-Book corpus (corpus is RDT&E + select Procurement PEs).",
+        "FY22 long-range shipbuilding plan is a Navy planning document, not a single PE that can be looked up; structurally outside the framework's coverage."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(shipbuilding / Ford class aircraft carrier / aircraft carrier / CVN-80)",
+      "M_value": "All NOT_FOUND in J-Book corpus",
+      "interpretation": "Narrative is forward-looking and tied to a planning document, not a single PE. Outside corpus scope. UNVERIFIABLE. No basis to mark as underdelivery; large segment backlog ($4.5B) confirms forward bookings exist."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "BWXT received $2.2B combined contract awards from U.S. Government in March 2021; ~$0.4B of unexercised options expected through 2024.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending.query_recipient_contracts(BWXT) returns 37 awards / $23.38B total with the major awards (Y-12 M&O, Pantex M&O, Portsmouth D&D, HALEU) clearly multi-billion / multi-year and consistent with the disclosed cadence.",
+        "BWXT NOG specifically holds DOE awards including HALEU processing $79.8M and NFS uranium purification/conversion $210M+ — these are exactly the types of multi-year awards the company described."
+      ],
+      "M_check": "usaspending.query_recipient_contracts(BWXT) + usaspending.query_dod_contracts(BWXT)",
+      "M_value": "37 contracts totaling $23.38B; DoD direct contracts $36.9M (BWXT Ordnance Tennessee depleted uranium penetrators for M829A4)",
+      "interpretation": "USAspending strongly confirms BWXT's claimed contract base. Naval Reactors funding flows through NNSA/DOE rather than DoD J-Book, which explains low DoD direct totals; the BWXT Ordnance Tennessee DoD contracts (DU penetrators) are a small ancillary line. The disclosed contract narrative is corroborated. PASS."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Nuclear Fuel Services (NFS) at Erwin, TN is the sole provider of nuclear fuel for the U.S. Navy.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending.query_recipient_contracts(NUCLEAR FUEL SERVICES INC) returns 3 DOE awards totaling $280.9M, including 'ENRICHED URANIUM CONVERSION AND PURIFICATION SERVICES' ($210M, 2023) and 'URANIUM PURIFICATION AND CONVERSION SERVICES' ($67.5M, 2021).",
+        "EPA FRS confirms NFS facility at 1205 Banner Hill Rd, Erwin, TN — operational nuclear material processing site."
+      ],
+      "M_check": "usaspending.query_recipient_contracts(NUCLEAR FUEL SERVICES INC) + epa_frs.query_facilities(Nuclear Fuel Services, TN)",
+      "M_value": "NFS: 3 awards $280.9M from DOE; EPA shows operational facility",
+      "interpretation": "Independent USAspending evidence confirms NFS as a uranium conversion/purification contractor with consistent multi-year DOE awards. Consistent with sole-provider narrative for naval fuel. PASS."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "BWXT Nuclear Services Group operates DOE/NNSA sites (Los Alamos, Lawrence Livermore, Savannah River, Pantex/Y-12) via JVs; Savannah River Mission Completion awarded October 2021.",
+      "severity": "PASS",
+      "supports": [
+        "USAspending shows BWXT Y-12 LLC at $10.99B (Y-12 M&O contract DE-AC0500OR22800), BWXT Pantex LLC at $6.57B (Pantex M&O DE-AC5400AL66620), Fluor-BWXT Portsmouth $4.47B, plus other JVs — all named in 10-K and all visible in usaspending."
+      ],
+      "M_check": "usaspending.query_recipient_contracts(BWXT) — surfaces Y-12, Pantex, Portsmouth, NFS, NOG, others",
+      "M_value": "Y-12 $10.99B + Pantex $6.57B + Portsmouth $4.47B all confirmed; DOE-funded; Savannah River JV present in BWXT family",
+      "interpretation": "DOE Environmental Management / NNSA M&O programs are not in the J-Book DoD corpus (these are DOE-funded), but USAspending strongly confirms each named JV holds the contracts described. PASS."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "BWXT plans to launch Molybdenum-99 product line and future radiopharmaceutical products (forward narrative, no booked revenue).",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "clinical_trials registry: 0 studies with BWX Technologies as lead sponsor at cutoff (no Phase 1/2/3 publicly registered).",
+        "openFDA: 0 approved drug applications under BWX Technologies as manufacturer.",
+        "Both negatives are consistent with the disclosure (pre-revenue, pre-launch) — does not contradict the company's framing of 'plan to launch'."
+      ],
+      "M_check": "clinical_trials.query_by_lead_sponsor(BWX Technologies) + openfda.query_approved_drugs(BWX Technologies)",
+      "M_value": "clinical_trials: 0 studies, openFDA: 0 approved applications",
+      "interpretation": "Mo-99 launch is a forward narrative; absence of clinical trials / FDA filings is consistent with the company's own positioning (the platform is described as 'will be the platform from which we plan to launch'). UNVERIFIABLE — neither confirms nor refutes; consistent with timeline."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "BWXT Nuclear Power Group depends on Canadian CANDU plant refurbishment cycle; future business depends on continued operation and refurbishment of Ontario nuclear plants.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "Canadian nuclear plant operations are not visible to U.S. M-sources (EPA FRS state filter for 'Ontario' returned no facilities — Ontario is not a U.S. state, expected).",
+        "Segment backlog of $644M and FY2021 revenue $407.1M independently disclosed."
+      ],
+      "M_check": "epa_frs.query_facilities(BWXT, Ontario) — out of scope",
+      "M_value": "No U.S. M-source covers Canadian utility refurbishment cycle",
+      "interpretation": "Out of corpus scope (Canadian utility customer). UNVERIFIABLE. No basis to mark adverse."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "BWXT operates principal manufacturing facilities at Lynchburg VA (largest U.S. commercial HEU processing, IAEA-certified), Barberton OH, Euclid OH, Mount Vernon IN, and Erwin TN.",
+      "severity": "PASS",
+      "supports": [
+        "EPA FRS confirms BWXT Nuclear Operations Group Inc at 1570 Mount Athos Rd, Lynchburg VA (37.40853, -79.0518).",
+        "EPA FRS confirms BWX Technologies East Expansion at same Lynchburg address — independent confirmation of footprint expansion.",
+        "EPA FRS confirms Nuclear Fuel Services Inc at 1205 Banner Hill Rd, Erwin TN (36.1308, -82.43172) — exactly as disclosed."
+      ],
+      "M_check": "epa_frs.query_facilities(BWXT, VA) + epa_frs.query_facilities(Nuclear Fuel Services, TN)",
+      "M_value": "VA: 3 BWXT facilities + 1 BWXT NOG; TN: 3 NFS facilities at Erwin",
+      "interpretation": "Disclosed facility footprint is fully corroborated by EPA Facility Registry Service. PASS."
+    }
+  ],
+  "summary": {
+    "n_claims": 9,
+    "n_queries_attempted": 32,
+    "n_jbook_grounded_claims": 4,
+    "n_jbook_hits": 0,
+    "severity_counts": {
+      "PASS": 5,
+      "MODERATE_UNDERDELIVERY": 0,
+      "SEVERE_UNDERDELIVERY": 0,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 4
+    },
+    "thesis_note": "BWXT's revenue model is structurally outside the J-Book DoD divergence framework: ~76% of revenue flows from NNSA/DOE Naval Reactors program (Naval Nuclear Propulsion) and DOE Environmental Management M&O contracts (Y-12, Pantex, Portsmouth), not from named DoD Pentagon Program Elements. The J-Book divergence pattern (defense contractors riding named DoD PEs that the Pentagon is zeroing) does not fit this issuer. Orthogonal USAspending evidence STRONGLY corroborates the disclosed contract base ($23.4B across 37 BWXT-family awards). EPA FRS independently corroborates the disclosed manufacturing footprint. Per Heuristic 7, the J-Book NOT_FOUND signals are corpus-scope artifacts, not red flags. No SEVERE/RED triggers."
+  }
+}

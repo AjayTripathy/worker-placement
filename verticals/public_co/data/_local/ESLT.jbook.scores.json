@@ -1,0 +1,154 @@
+{
+  "ticker": "ESLT",
+  "cutoff": "2026-05-20",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Elbit named a $228M follow-on contract to provide Iron Fist Active Protection System (APS) for U.S. Army Bradley IFV upgrades.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook NOT_FOUND for 'Bradley', 'Iron Fist Active Protection System', and contractor 'Elbit Systems of America' — APS/Bradley M2A4 upgrade lines fall under Army Procurement (Bradley Modifications) which is outside the 410-program R-2/P-40 corpus seeded so far (heuristic 7: coverage gap, NOT_FOUND alone is not a red flag).",
+        "usaspending.query_federal_presence resolves 2 ESA UEIs (ELBIT SYSTEMS OF AMERICA LLC and ELBIT SYSTEMS OF AMERICA - NIGHT VISION LLC) with 810 contracts totaling $886M; alternate DoD recipient_name='Elbit Systems' query returns 2,298 awards totaling $1.57B — i.e., the company genuinely has a deep, recurring DoD recipient footprint. Signal: RECURRING_FEDERAL. The $228M Bradley APS award is consistent with this pattern."
+      ],
+      "M_check": "pentagon_jbook + usaspending",
+      "M_value": "J-Book: NOT_FOUND (coverage gap, not absence). USAspending: RECURRING_FEDERAL, $886M ESA contracts.",
+      "interpretation": "Past contracts well-supported by usaspending; forward J-Book read is BLIND for this PE because the Bradley APS line is not in the seeded corpus. No divergence detected — past obligations exist. Score PASS but flag low-confidence (usaspending top hits for ESA are Night Vision, not Iron Fist directly; no smoking-gun separate Iron Fist award visible in top awards, though the parent's $228M claim may be billed via Israel or a non-top-N contract)."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Elbit's Israeli air-defense narrative (Arrow, David's Sling, Iron Beam) and its ITB sub-project are tied to MDA's Israeli Cooperative Programs PE 0603913C; Elbit is named in the FY2026 MDA J-Book as a primary contractor.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook.query_program_funding(pe_number='0603913C') → FUNDED_STEADY: $300M/yr in FY2024, FY2025, FY2026. Latest funded FY 2026, $300M. n_consecutive_unfunded=0.",
+        "pentagon_jbook.query_program_funding(contractor_name='Elbit Systems') → same Israeli Cooperative Programs match; Elbit is explicitly listed under primary_contractors.",
+        "PE narrative confirms MDA contracts directly with Elbit Systems, Ltd. for the Israeli Test Bed (~$3.5M/yr); the $500M/yr MoU (US contribution) runs through FY2028.",
+        "Per heuristic 1: FUNDED_STEADY → PASS."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "FUNDED_STEADY (PE 0603913C, $300M FY26).",
+      "interpretation": "PASS. The cooperative-program forward funding is intact through FY28 per the existing MoU. The filing's narrative aligns with J-Book."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "U.S. government = 15% of FY2025 revenue (~$1.19B); ESA's U.S. business is the conduit.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending.query_federal_presence resolves 2 ESA UEIs and 810 contracts totaling $886M; agencies map shows 29 DoD-coded contracts plus 1 DoT. The alternate broader query (recipient_name='Elbit Systems' as DoD contracts) returns $1.57B across 2,298 awards. Both are consistent in scale with a 15%-of-$7.94B ($1.19B) annual run-rate when accounting for multi-year recipient activity.",
+        "Signal: RECURRING_FEDERAL — sustained, multi-year footprint."
+      ],
+      "M_check": "usaspending.query_federal_presence + query_dod_contracts",
+      "M_value": "RECURRING_FEDERAL; 810 contracts/$886M (UEI-anchored).",
+      "interpretation": "PASS. Concentration claim corroborated by recipient-level federal spending data."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "ESA 50% JV with Collins/RTX for helmet-mounted displays — implicitly F-35 Gen III HMDS — and ~$155M of related-party sales include helmet-mounted cueing systems.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook.query_program_funding(program_name='F-35') → FUNDED_STEADY: F-35 C2D2 (PE 0604840F) funded FY24 $1.24B, FY25 $1.13B, FY26 $1.18B.",
+        "F-35 program-of-record is intact; HMDS Gen III is the only fielded helmet display on F-35 and is supplied by the Collins/Elbit RCEVS JV, so HMD-related revenue is supported by ongoing F-35 funding.",
+        "F-35 helmet-specific PE NOT_FOUND but parent program is steady → heuristic 1 PASS."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "F-35 program FUNDED_STEADY (~$1.18B FY26 RDT&E; procurement separate and not directly checked but parent program is healthy).",
+      "interpretation": "PASS. F-35 program forward-funded; HMDS Gen III revenue stream supported."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Backlog $28.1B with 54% expected to convert in 2026-2027 (~$15.2B).",
+      "severity": "PASS",
+      "supports": [
+        "No specific PE conversion to test — this is a rollup forward-pipeline assertion.",
+        "Underlying U.S. portion is consistent with usaspending recurring-federal signal (above)."
+      ],
+      "M_check": "pentagon_jbook (contractor lookup) + usaspending (federal presence)",
+      "M_value": "No J-Book contradiction; usaspending RECURRING_FEDERAL.",
+      "interpretation": "PASS. Rollup assertion; not directly verifiable PE-by-PE but no observed contradiction."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "$275M aggregate contracts for airborne self-protection EW including DIRCM to an Asia-Pacific country (FMS-type, not direct Pentagon program).",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook NOT_FOUND for 'DIRCM' and 'Large Aircraft Infrared Countermeasures'; the LAIRCM PE attempt returned a coincidental Compass Call match which we discard.",
+        "This is a foreign-customer FMS/direct-sale contract — by construction not in U.S. J-Book; the J-Book lens is the wrong test for this claim (foreign-issuer caveat 2).",
+        "Per heuristic 7: NOT_FOUND alone is not a red flag."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "NOT_FOUND (foreign FMS-type customer is out-of-scope for J-Book).",
+      "interpretation": "UNVERIFIABLE via the J-Book framework. The claim is plausible given Elbit's known DIRCM/J-MUSIC product line but cannot be tested against U.S. forward budget."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "ESA segment external revenue $1.68B FY2025; North America end-customer revenue $1.66B; ESA serves U.S. military, FMS/FMF, HLS, medical, commercial aviation.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending.query_federal_presence: 2 UEIs (parent + Night Vision subsidiary), 810 contracts, $886M total; signal RECURRING_FEDERAL.",
+        "Top awards include ENVG-B production ($139M W91CRB25F0071), SBNVG ($127M, $116M, $89M on M67854 contract family) — i.e., ESA is genuinely a prime/sub on multiple U.S. Army and USMC production lines.",
+        "ESA Night Vision LLC UEI MYE5L662RU13 shows fy_amount_snapshot $112.7M — i.e., currently-active federal recipient."
+      ],
+      "M_check": "usaspending.query_federal_presence",
+      "M_value": "RECURRING_FEDERAL; UEI-anchored confirmation.",
+      "interpretation": "PASS. ESA segment claims are quantitatively consistent with federal spending data."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "ESA operates 9 named U.S. facilities (Fort Worth TX, Merrimack NH, Charleston SC, Talladega AL, Roanoke VA, Fairfax VA, Birdsboro PA, Boca Raton FL, DeLeon Springs FL).",
+      "severity": "PASS",
+      "supports": [
+        "Control claim (not J-Book-grounded). usaspending top awards show recipient locations consistent with multi-state operations and an active ENVG/SBNVG production footprint.",
+        "ESA goodwill of $414M on balance sheet supports a multi-facility scale."
+      ],
+      "M_check": "n/a (control claim)",
+      "M_value": "n/a",
+      "interpretation": "PASS. Control / non-J-Book claim, no contradiction."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "~$210M of IMOD contracts for tank upgrades (Merkava class, implicit). Not a direct Pentagon PE; sponsored by IMOD.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook NOT_FOUND for 'Merkava' and 'tank upgrade' — by construction Israeli tank upgrades are funded via IMOD and FMF, not direct US RDT&E PE.",
+        "Foreign-issuer caveat: J-Book is the wrong instrument for IMOD-side revenue claims (heuristic 2 of the cohort framing)."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "NOT_FOUND (Israeli/IMOD program out-of-scope).",
+      "interpretation": "UNVERIFIABLE. The current Iran/Hezbollah re-escalation cited in the filing (Operation Roaring Lion, Feb 28 2026; Hezbollah attack Mar 2 2026) is consistent with sustained IMOD demand, but this is outside the J-Book lens."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "ESA positions for U.S. Army next-generation warfighter / advanced night vision (ENVG-class) programs.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook NOT_FOUND for ENVG, ENVG-B, IVAS (corpus gap — Soldier/Army Procurement P-40 lines for ENVG-B and SBNVG are not in seeded 410 programs; heuristic 7).",
+        "usaspending OVERRIDES the J-Book blind spot: ESA Night Vision LLC has $139M ENVG-B Production Delivery Order 02 in 2025 (W91CRB25F0071) plus $126.9M, $116.4M, and $89.5M Squad Binocular Night Vision Goggle awards on contract family M67854 (USMC) — i.e., ESA is the actual fielded supplier of both Army ENVG-B and USMC SBNVG.",
+        "This is the strongest positive verification in the sweep: the claim about 'advanced night vision' is not just narrative — it is anchored to live, FY2025 production awards >$450M cumulative."
+      ],
+      "M_check": "pentagon_jbook (NOT_FOUND, coverage gap) + usaspending.query_federal_presence (CONFIRMS)",
+      "M_value": "J-Book: corpus gap. USAspending: confirmed active ENVG-B and SBNVG production orders >$450M in last ~24 months.",
+      "interpretation": "PASS. Forward-positioning claim independently corroborated by USAspending production awards. No J-Book divergence."
+    }
+  ],
+  "_summary": {
+    "n_claims": 10,
+    "n_queries_run": 19,
+    "severity_counts": {
+      "PASS": 8,
+      "MODERATE_UNDERDELIVERY": 0,
+      "SEVERE_UNDERDELIVERY": 0,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 2
+    },
+    "jbook_grounded_claims": ["C1", "C2", "C4", "C5", "C6", "C9", "C10"],
+    "jbook_fired_on": ["C2", "C4"],
+    "jbook_fired_count": 2,
+    "jbook_grounded_count": 7,
+    "notes": [
+      "Foreign-issuer caveat 2 applies: J-Book mostly informs C2 (Israeli Cooperative Programs PE 0603913C — Elbit named primary contractor; FUNDED_STEADY $300M/yr through FY2026; MoU runs to FY2028) and C4 (F-35 C2D2 FUNDED_STEADY).",
+      "USAspending was the workhorse for ESA-side claims (C1/C3/C7/C10): RECURRING_FEDERAL with $886M across 810 ESA UEI contracts. Top awards confirm ENVG-B and SBNVG production lines (Army W91CRB / USMC M67854).",
+      "No J-BOOK EXPOSURE DIVERGENCE detected at the 2026-05-20 cutoff for this filing. The forward DoD lines Elbit names (Iron Fist for Bradley, F-35 HMDS, ENVG-B, Israeli Cooperative Programs) are either FUNDED_STEADY in the J-Book corpus or corroborated by recurring usaspending obligations.",
+      "Heuristic 3 (reorganization) and 5 (earmark sunset) did not trigger.",
+      "Coverage limitation: 410-program J-Book corpus does NOT cover Army Procurement Bradley APS line, ENVG-B Soldier system procurement line, or DIRCM/LAIRCM PEs — so the test is anchored on the one PE where Elbit is explicitly listed (0603913C) plus the F-35 parent program. usaspending is the primary verifier for the ESA-side concentration."
+    ]
+  }
+}

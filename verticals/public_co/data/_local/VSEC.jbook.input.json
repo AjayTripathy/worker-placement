@@ -1,0 +1,112 @@
+{
+  "ticker": "VSEC",
+  "cutoff": "2026-05-20",
+  "filing": "0000102752-26-000015_10-K.txt",
+  "filing_form": "10-K",
+  "filing_filed": "2026-02-27",
+  "cohort": "jbook_exposure_divergence",
+  "cohort_note": "VSE has DIVESTED its Federal & Defense segment (FDS Sale, 2024) and Fleet segment (April 2025). It now operates as a single Aviation segment focused on commercial / business & general aviation / cargo / rotorcraft / military aftermarket MRO and parts distribution. The 10-K names NO specific Pentagon Program Elements (PE numbers), NO specific named DoD programs (Skyborg, CCA, SDA Tracking Layer, etc.), and no DoD-customer revenue-concentration disclosures. Defense-aviation exposure that remains is generic O&M sustainment-type work (rotorcraft, military aftermarket parts distribution), which sits in O&M budgets and IDIQ vehicles — outside the J-Book corpus (which is RDT&E + Procurement PEs). High UNVERIFIABLE rate is expected by design.",
+  "claims": [
+    {
+      "claim_id": "C1",
+      "claim_text": "VSE's business operations are managed as a single reportable operating segment: Aviation, following the sales of the Federal and Defense (FDS Sale, Feb 2024) and Fleet (April 2025) segments. The Aviation segment is a leading provider of aftermarket parts distribution and MRO for components and engine accessories supporting commercial, B&GA operators, with military and defense as one of several customer verticals.",
+      "subject": "VSE Corporation",
+      "predicate": "operates_single_segment",
+      "object_value": "Aviation only; F&D and Fleet divested",
+      "source_quote": "The Company's business operations are managed as a single reportable operating segment: Aviation. Prior to the sales of the Federal and Defense and Fleet segments... The Company operated under three reportable operating segments.",
+      "category": "rollup_thesis",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "args": {"contractor_name": "VSE Corporation", "cutoff_date": "2026-05-20"}, "purpose": "Test whether any forward J-Book PE lists VSE as a contractor — divestiture should mean no go-forward exposure"},
+        {"source": "usaspending.query_dod_contracts", "args": {"recipient_name": "VSE Corporation", "cutoff_date": "2026-05-20"}, "purpose": "Confirm scale and nature of historical DoD obligations to corroborate that pre-divestiture DoD revenue was substantial"}
+      ]
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "A group of affiliated customers under common ownership (the 'Customer Group') collectively accounted for approximately 20% of VSE's revenue for the year ended December 31, 2025 (21% in 2024, 14% in 2023). The filing identifies the Customer Group as 'multiple operating entities that are commonly controlled' but does NOT identify whether this is a DoD customer or commercial.",
+      "subject": "Customer Group",
+      "predicate": "revenue_concentration_pct",
+      "object_value": "20% of FY2025 revenue",
+      "source_quote": "A group of affiliated customers under common ownership (the Customer Group) collectively accounted for approximately 20% of the Company s revenue for the year ended December 31, 2025... Revenues from a group of affiliated customers under common ownership represented 20 %, 21 %, and 14 % of consolidated revenues for the years ended December 31, 2025, 2024 and 2023, respectively.",
+      "category": "dod_customer_concentration",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "args": {"contractor_name": "VSE Corporation", "cutoff_date": "2026-05-20"}, "purpose": "Test whether J-Book identifies any program with VSE as a named participant — if not, the Customer Group is unlikely to be a J-Book-tracked program element"}
+      ]
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "VSE entered into a stock purchase agreement on January 29, 2026 to acquire Precision Aviation Group (PAG) for ~$2.025 billion in cash and equity (plus up to $125M earn-out). PAG is described as supporting B&GA, rotorcraft, and defense markets. The acquisition is funded by February 2026 offerings (~$1.3B net proceeds) and new senior secured financing.",
+      "subject": "VSE",
+      "predicate": "acquires_for_value",
+      "object_value": "PAG for $2.025B + $125M earn-out",
+      "source_quote": "On January 29, 2026, the Company entered into a stock purchase agreement... to acquire Precision Aviation Group (\"PAG\")... for total upfront consideration of approximately $2.025 billion in cash and equity... PAG is a leading global provider of aviation aftermarket MRO, distribution, and supply chain services supporting B&GA, rotorcraft, and defense markets.",
+      "category": "rollup_thesis",
+      "queries": [
+        {"source": "acq_coherence.score_acquisition_coherence", "args": {"acquirer": "VSE Corporation", "target": "Precision Aviation Group", "cutoff_date": "2026-05-20"}, "purpose": "Score whether PAG acquisition is coherent rollup vs incoherent pivot. VSE pre-divest was DoD logistics; post-divest is pure aviation aftermarket — PAG fits the coherent rollup thesis, NOT a J-Book-driven incoherent pivot"},
+        {"source": "usaspending.query_dod_contracts", "args": {"recipient_name": "Precision Aviation Group", "cutoff_date": "2026-05-20"}, "purpose": "Quantify PAG's DoD exposure (target says 'defense markets')"}
+      ]
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "VSE's Aviation segment provides aftermarket MRO and distribution services to commercial, business and general aviation, cargo, military and defense, and rotorcraft customers globally. The filing does NOT quantify military/defense revenue split, name any specific DoD program of record, or cite any Program Element number.",
+      "subject": "VSE Aviation segment",
+      "predicate": "customer_mix",
+      "object_value": "commercial + B&GA + cargo + military + rotorcraft; military share unquantified; no PE cited",
+      "source_quote": "The Company's single operating segment provides aftermarket MRO and distribution services to commercial, business and general aviation, cargo, military and defense, and rotorcraft customers globally. Core services include parts distribution, MRO services including engine components and accessories, fuel controls, avionics, pneumatics, hydraulics, wheel and brake, as well as rotable exchange and supply chain services.",
+      "category": "jbook_program_revenue",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "args": {"program_name": "Aviation Sustainment", "cutoff_date": "2026-05-20"}, "purpose": "Test whether any aviation sustainment PE exists in corpus (most O&M-funded sustainment is outside RDT&E/Procurement J-Book scope)"},
+        {"source": "pentagon_jbook.query_program_funding", "args": {"program_name": "depot maintenance", "cutoff_date": "2026-05-20"}, "purpose": "Test whether 'depot maintenance' programs appear in corpus (they typically live in O&M, not RDT&E/Procurement)"}
+      ]
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "In December 2025, VSE entered into an Asset Purchase and License Agreement with an unnamed OEM to exclusively manufacture, sell, market, distribute, and repair certain fuel pumps for the Pratt & Whitney PT6 engine series, for $10.8M purchase price.",
+      "subject": "VSE",
+      "predicate": "exclusive_license_for",
+      "object_value": "Pratt & Whitney PT6 fuel pumps, $10.8M",
+      "source_quote": "In December 2025, the Company entered into an Asset Purchase and License Agreement with an original equipment manufacturer to exclusively manufacture, sell, market, and distribute certain fuel pumps for use on the Pratt & Whitney PT6 engine series.",
+      "category": "counterparty_disclosure",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "args": {"program_name": "PT6", "cutoff_date": "2026-05-20"}, "purpose": "Test whether PT6 engine appears in any J-Book PE (it powers some military trainers/UAVs but is overwhelmingly civil)"},
+        {"source": "pentagon_jbook.query_program_funding", "args": {"contractor_name": "Pratt & Whitney", "cutoff_date": "2026-05-20"}, "purpose": "Test whether Pratt & Whitney appears in J-Book corpus as a counterparty"}
+      ]
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "VSE completed the acquisitions of Turbine Controls Inc (TCI, 2024), Kellstrom Aerospace (2024), Turbine Weld Industries (May 2025), and Aero 3 (December 2025 for $346.4M). These are commercial/B&GA-focused MRO and parts distribution businesses, indicating VSE's strategic pivot AWAY from defense and TOWARD commercial aviation aftermarket.",
+      "subject": "VSE",
+      "predicate": "rollup_acquisitions_commercial_aftermarket",
+      "object_value": "TCI + Kellstrom + Turbine Weld + Aero 3 (~$396M+ deals)",
+      "source_quote": "In May 2025, the Company completed the acquisition of Turbine Weld Industries... In December 2025, the Company completed the acquisition of GenNx/AeroRepair IntermediateCo Inc., the parent company of Aero 3, Inc. (Aero 3), a diversified global MRO service provider and distributor supporting the wheel and brake aftermarket.",
+      "category": "rollup_thesis",
+      "queries": [
+        {"source": "usaspending.query_dod_contracts", "args": {"recipient_name": "Turbine Controls", "cutoff_date": "2026-05-20"}, "purpose": "Cross-check whether the rollup targets had DoD obligations — if not, rollup is genuinely commercial-aftermarket-focused"},
+        {"source": "usaspending.query_dod_contracts", "args": {"recipient_name": "Kellstrom Aerospace", "cutoff_date": "2026-05-20"}, "purpose": "Confirm Kellstrom is commercial-focused"}
+      ]
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "VSE occupied approximately 1.3 million square feet of building space at more than 30 locations across the U.S. and internationally as of December 31, 2025. Corporate HQ is Miramar, Florida.",
+      "subject": "VSE",
+      "predicate": "facility_footprint",
+      "object_value": "1.3M sqft, 30+ locations, HQ Miramar FL",
+      "source_quote": "As of December 31, 2025, the Company occupied approximately 1.3 million square feet of building space (including offices, warehouses, shops, and other facilities), substantially all of which is leased, at more than 30 locations throughout the U.S. and internationally. The Company's corporate headquarters is located in Miramar, Florida.",
+      "category": "facility",
+      "queries": [
+        {"source": "epa_frs.query_facilities", "args": {"company_name": "VSE Corporation", "cutoff_date": "2026-05-20"}, "purpose": "Cross-check facility footprint with EPA FRS (control claim, non-J-Book)"}
+      ]
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "VSE has paid cash dividends each year since 1973; quarterly dividend $0.10/share in 2025 and 2024. October 2025 underwritten public offering yielded $441.6M (2.7M shares at ~$170). February 2026 offerings yielded ~$1.3B (4.6M common shares at $188 + 9.2M tangible equity units at $50). Total debt $293M as of Dec 31, 2025.",
+      "subject": "VSE",
+      "predicate": "capital_structure",
+      "object_value": "$293M debt; ~$1.74B equity raised Oct'25+Feb'26 for Aero 3 + PAG",
+      "source_quote": "In October 2025, the Company initiated a public offering of its common stock that resulted in net proceeds of $441.6 million... In February 2026, the Company initiated concurrent public offerings of (i) 4,587,766 shares of its common stock at a public offering price of $188.00 per share... The net proceeds of approximately $1.3 billion received by the Company are expected to be used to finance a portion of the cash consideration for the PAG Acquisition.",
+      "category": "other",
+      "queries": [
+        {"source": "insider_vs_calendar.query_insider_sales_near_budget_events", "args": {"ticker": "VSEC", "cutoff_date": "2026-05-20"}, "purpose": "Test the secondary M-source — were insiders selling around budget-vote dates? (Likely null here given divested F&D segment; this is a control)"}
+      ]
+    }
+  ]
+}

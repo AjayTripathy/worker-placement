@@ -1,0 +1,146 @@
+{
+  "ticker": "AXON",
+  "cutoff": "2026-05-20",
+  "cohort": "jbook_exposure_divergence",
+  "scores": [
+    {
+      "claim_id": "c1",
+      "claim_text": "Axon's primary customer vertical is U.S. federal, state and local law enforcement agencies.",
+      "severity": "PASS",
+      "supports": ["usaspending.query_recipient_contracts: 477 federal awards totaling $185.5M (DOJ, DHS, DOI dominate; only ~8 DoD agency awards by count)"],
+      "M_check": "usaspending.query_recipient_contracts",
+      "M_value": {"n_awards": 477, "total_amount_M": 185.49, "top_agencies": ["DOJ", "DHS", "DOI", "DoD"]},
+      "interpretation": "Cross-check confirms law-enforcement vertical: DOJ and DHS are the dominant federal customers, with DoD a small minority. Claim accurately characterizes the customer mix."
+    },
+    {
+      "claim_id": "c2",
+      "claim_text": "Major defense acquisition program review could materially affect Axon if programs it supports are cancelled.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook.query_program_funding(contractor_name='Axon Enterprise', cutoff_date='2026-05-20') → NOT_FOUND",
+        "pentagon_jbook.query_program_funding(contractor_name='Axon') → NOT_FOUND",
+        "usaspending.query_dod_contracts(recipient_name='Axon Enterprise') → 15 awards, $3.4M total (BWC, vehicle trackers, Evidence.com licenses) — no Major Defense Acquisition Program exposure"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding + usaspending.query_dod_contracts",
+      "M_value": {"jbook_signal": "NOT_FOUND", "dod_n_awards": 15, "dod_total_amount": 3405544.19},
+      "interpretation": "Axon does not appear in the J-Book corpus as a named contractor on any Pentagon Program Element. USAspending confirms total DoD obligations to Axon are only ~$3.4M (BWCs, vehicle trackers, Evidence.com licenses) — none of which are Major Defense Acquisition Programs (MDAPs). The risk-factor language about MDAP review is generic boilerplate (likely inherited from FAR compliance template) rather than a substantive MDAP exposure. Claim is technically true (any future DoD sale to Axon could be affected by FAR/MDAP rules), but the J-Book divergence pattern is not load-bearing here — no specific PE to verify against. UNVERIFIABLE due to claim's genericness, not due to J-Book corpus gap."
+    },
+    {
+      "claim_id": "c3",
+      "claim_text": "TASER revenue was $913.9M in FY2025 (32.9% of net sales).",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook.query_program_funding(program_name='TASER') → NOT_FOUND",
+        "pentagon_jbook.query_program_funding(program_name='conducted energy weapon') → NOT_FOUND",
+        "usaspending.query_dod_contracts shows TASER 10 cyclical replacement is purchased via DOJ (not DoD); DoD TASER procurement minimal"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding (control: not a DoD program)",
+      "M_value": {"jbook_signal": "NOT_FOUND", "note": "TASER is a commercial law-enforcement product, not a Pentagon Program Element"},
+      "interpretation": "TASER CEDs are a commercial product sold via state/local law-enforcement budgets and federal civilian agency procurement (DOJ predominantly). The J-Book corpus is RDT&E/Procurement-focused on DoD weapons systems and does not — and should not — cover TASERs. NOT_FOUND is expected. Revenue accuracy is an accounting question; the J-Book divergence pattern is N/A. This is a control claim showing the framework correctly flags non-J-Book revenue as UNVERIFIABLE rather than miscategorizing as RED."
+    },
+    {
+      "claim_id": "c4",
+      "claim_text": "Personal Sensors (body cameras) generated $397.0M in FY2025 revenue (14.2%).",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook.query_program_funding(program_name='body camera') → NOT_FOUND",
+        "pentagon_jbook.query_program_funding(program_name='body worn camera') → NOT_FOUND",
+        "usaspending: DoD HQ003423P0206 'Body Worn Cameras and Software' $2.1M and DHS 70B03C20C00000167 IDV $20.6M — confirms commercial-type BWC procurement, not a DoD program of record"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding (control: BWCs not a DoD program-of-record)",
+      "M_value": {"jbook_signal": "NOT_FOUND"},
+      "interpretation": "Body-worn cameras are a commercial product. DoD purchases via small commercial procurement actions, not via a J-Book line item. NOT_FOUND is expected and not a red flag. Control claim."
+    },
+    {
+      "claim_id": "c5",
+      "claim_text": "Axon acquired Dedrone in October 2024 (~$391.1M) for airspace security / counter-UAS market exposure.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook.query_program_funding(contractor_name='Dedrone') → NOT_FOUND",
+        "pentagon_jbook.query_program_funding(program_name='counter-UAS') → NOT_FOUND",
+        "pentagon_jbook.query_program_funding(program_name='counter unmanned aerial systems') → NOT_FOUND",
+        "usaspending.query_dod_contracts(recipient_name='Dedrone') → 5 awards, $270,748 total (Dedrone Defender V3, license renewals, small T&E PO at NAVY); JCO Demo 6 prize money award W50RAJ25C0004 $250K to Axon",
+        "acq_coherence: Dedrone scored 0.35 (LOW COHERENCE, flagged as revenue_synthetic) — the only acquisition flagged as incoherent vs Axon's law-enforcement thesis"
+      ],
+      "M_check": "pentagon_jbook + usaspending + acq_coherence",
+      "M_value": {"jbook_signal": "NOT_FOUND", "dedrone_dod_total": 270748, "axon_jco_award": 250000, "coherence_score": 0.35, "coherence_signal": "low_coherence_revenue_synthetic"},
+      "interpretation": "J-Book does not list a stand-alone counter-UAS PE matching the corpus's hand-curated set; the JCO (Joint C-UAS Office) work is funded through service-specific PEs not present in this corpus slice. USAspending confirms Dedrone's DoD revenue is de minimis (~$271K all-time across all subsidiaries pre-acquisition) — well below the ~$391M purchase price, suggesting the acquisition thesis is commercial/state-and-local counter-UAS rather than a J-Book pipeline. Acq_coherence flags this as the only LOW-coherence Axon acquisition (0.35) and is_revenue_synthetic=True. Yellow flag on the rollup-thesis side but not a J-Book divergence — UNVERIFIABLE on the J-Book lens; the acq_coherence finding is captured on c6."
+    },
+    {
+      "claim_id": "c6",
+      "claim_text": "Axon acquired Carbyne in Feb 2026 for $625M base price (cloud-native emergency communications / NG-911).",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "acq_coherence: 3 acquisitions scored, mean coherence 0.61, signal = MIXED_COHERENCE; Carbyne itself scored 0.72 (high coherence) but Dedrone (0.35) drags the rollup",
+        "pentagon_jbook.query_program_funding(contractor_name='Carbyne') → NOT_FOUND (expected: Carbyne is 911/civilian, not DoD)"
+      ],
+      "M_check": "acq_coherence.score_acquisition_coherence",
+      "M_value": {"signal": "MIXED_COHERENCE", "mean_coherence": 0.607, "n_low_coherence": 1, "carbyne_coherence": 0.72, "total_low_coherence_value": 391100000},
+      "interpretation": "Carbyne itself is a coherent extension of Axon's public-safety platform (NG-911 → CAD → BWC → Evidence.com). However the broader 2024-2026 acquisition program shows MIXED coherence driven by Dedrone (counter-UAS, low fit). Total ~$1.26B of acquisition spend in 18 months with one $391M deal flagged as revenue_synthetic. This is a rollup-quality finding, not a J-Book divergence. Severity MODERATE: not existential, but the rollup pattern + ICFR material weakness (c10) compound the integration-risk story."
+    },
+    {
+      "claim_id": "c7",
+      "claim_text": "Axon maintains FedRAMP, CJIS, SOC 2, ISO, NIST cloud security certifications enabling sales to U.S. federal government.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending.query_federal_presence: 4 UEIs resolved (parent Axon Enterprise + 3 Dedrone subsidiaries); 498 contracts, $187.6M aggregate; signal RECURRING_FEDERAL; federal customers include DHS, DOJ, DOI, Treasury, VA, Agriculture, DoD, State",
+        "Axon UEI TBW7MGPYURM7 with $74M fy_amount_snapshot"
+      ],
+      "M_check": "usaspending.query_federal_presence",
+      "M_value": {"n_ueis_resolved": 4, "n_contracts": 498, "contracts_amount_M": 187.61, "agencies_count": 8},
+      "interpretation": "Federal-presence signal RECURRING_FEDERAL with substantial breadth across 8 cabinet departments validates that the FedRAMP/CJIS certifications are operationally meaningful — Axon actively sells to federal civilian agencies. Claim verified."
+    },
+    {
+      "claim_id": "c8",
+      "claim_text": "Axon HQ is ~900,000 sq ft across seven facilities in the Phoenix, AZ metro.",
+      "severity": "PASS",
+      "supports": [
+        "epa_frs.query_facilities(facility_name='Axon', state_abbr='AZ') → 1 facility registered in Pima County, AZ (registry 110072133021)"
+      ],
+      "M_check": "epa_frs.query_facilities",
+      "M_value": {"n_facilities": 1, "state": "AZ", "county": "Pima"},
+      "interpretation": "EPA FRS confirms an Axon AZ facility (Pima County — Tucson area, where the manufacturing/TASER assembly was historically located). The 10-K describes the corporate HQ as 'Phoenix metro' (Scottsdale/Maricopa) but historical TASER manufacturing was in Tucson/Pima — both consistent. Sq-footage figure is not independently verifiable via EPA FRS but the AZ presence is confirmed."
+    },
+    {
+      "claim_id": "c9",
+      "claim_text": "Dedrone+Axon co-defendants in Airspace Systems patent suit; PTAB IPR instituted Oct 8, 2025 with decision due by Oct 8, 2026.",
+      "severity": "PASS",
+      "supports": [
+        "uspto_odp.query_assignee(Dedrone) → 39 total apps, 26 granted (active IP portfolio, recent filings on counter-UAS detection/disruption)",
+        "uspto_odp.query_assignee(Airspace Systems) → 31 apps, only 6 granted; many abandoned (e.g., '16684003 SECURITY EVENT DETECTION AND THREAT ASSESSMENT — Abandoned --  Failure to Respond to an Office Action')"
+      ],
+      "M_check": "uspto_odp.query_assignee",
+      "M_value": {"dedrone_granted": 26, "airspace_granted": 6, "airspace_n_abandoned_visible": ">=1"},
+      "interpretation": "Airspace Systems' patent portfolio is significantly weaker than Dedrone's (6 grants vs 26) with multiple abandoned applications visible. This is consistent with Axon's stated position that they will challenge the patents at PTAB and contest them in EDVA. PTAB IPR institution in Oct 2025 is a procedural plus for Axon's defense. PASS — claim's procedural status is plausible and the underlying IP analysis favors Axon."
+    },
+    {
+      "claim_id": "c10",
+      "claim_text": "PwC identified a material weakness in Axon's internal controls over revenue recognition as of Dec 31, 2025.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": [
+        "edgar_fts: no fulltext hits found via this M-source (likely due to query phrasing or index lag for the Feb 2026 10-K)",
+        "filing direct quote: 'a material weakness in internal control over financial reporting existed as of that date as the Company did not design and maintain effective controls related to revenue recognition for its customer contracts'",
+        "filing context: Axon previously filed a 10-K/A on May 7, 2025 (per MD&A reference to amended 2024 Annual Report) — this is the SECOND consecutive year of restatement/control issue language",
+        "ICFR material weakness over revenue (the core of a $2.78B revenue company's accounting) flagged by Big-4 auditor is a serious signal"
+      ],
+      "M_check": "filing self-disclosure (PCAOB-audited)",
+      "M_value": {"material_weakness": "revenue recognition customer contracts", "auditor": "PwC", "fiscal_year": 2025, "prior_restatement_2024_10-K/A_filed": "2025-05-07"},
+      "interpretation": "This is the strongest red signal in the filing and is OUTSIDE the J-Book pattern. A Big-4 auditor declaring ICFR ineffective specifically on revenue recognition — for a company that just realigned segments mid-year, grew revenue 33.5% to $2.78B, and posted operating loss vs prior-year operating income — should be treated as SEVERE. Combined with the prior 10-K/A restatement (May 2025), this is a multi-year accounting-quality issue. While not part of the J-Book divergence cohort, the framework correctly surfaces it. EDGAR FTS lookup returned 0 hits but the disclosure is directly verified in the audited financials."
+    }
+  ],
+  "_summary": {
+    "n_claims": 10,
+    "n_queries_run": 17,
+    "severity_counts": {
+      "PASS": 3,
+      "MODERATE_UNDERDELIVERY": 1,
+      "SEVERE_UNDERDELIVERY": 1,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 5
+    },
+    "jbook_grounded_claims": ["c2", "c3", "c4", "c5"],
+    "jbook_hits": 0,
+    "jbook_not_found": 4,
+    "cohort_verdict": "AXON does not exhibit the J-Book exposure divergence pattern. The filing names no Pentagon Program Element, no PE number, no DoD program-of-record. Total DoD revenue is ~$3.4M against $2.78B total revenue (0.12%). pentagon_jbook fired NOT_FOUND on every J-Book-grounded claim. The strongest negative signal is OUTSIDE this cohort: a PwC-identified ICFR material weakness on revenue recognition (c10), the second consecutive year of accounting issues. The acq_coherence MIXED signal on the Dedrone acquisition (c5/c6) is a secondary integration-risk flag. ITA inclusion in this cohort appears miscalibrated for AXON — it is a commercial public-safety company with negligible DoD exposure."
+  }
+}

@@ -1,0 +1,94 @@
+{
+  "ticker": "BA",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Boeing's KC-46A Tanker is a named ongoing fixed-price development/production program contributing to BDS revenue.",
+      "severity": "PASS",
+      "supports": ["pentagon_jbook: KC-46A Tanker Squadrons PE 0401221F = FUNDED_GROWING; FY24 $78.7M -> FY25 $77.8M -> FY26 $145.4M (R-2 Air Force RDTE Vol II PB 2026)"],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='KC-46')",
+      "M_value": {"signal": "FUNDED_GROWING", "pe_number": "0401221F", "latest_funded_M": 145.434, "history": [{"fy": 2024, "M": 78.704}, {"fy": 2025, "M": 77.804}, {"fy": 2026, "M": 145.434}]},
+      "interpretation": "KC-46A development funding is GROWING into FY26 (nearly 2x prior year). Procurement of KC-46 tankers is an established program of record. No J-Book divergence; Boeing's KC-46 narrative is corroborated by the Pentagon's FY26 J-Book."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "T-7A Red Hawk advanced pilot trainer is a named fixed-price development program with reach-forward losses; forward deliveries anticipated.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["pentagon_jbook returned NOT_FOUND for 'T-7A', 'T-7', 'T-7A Red Hawk', 'Red Hawk'"],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='T-7A')",
+      "M_value": {"signal": "NOT_FOUND"},
+      "interpretation": "T-7A is a known USAF trainer program (PE typically in Air Force RDTE Aircraft Engineering Development), but our 410-PE corpus does not currently index it under these synonyms. Coverage gap per rubric #7 — score UNVERIFIABLE rather than RED."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "MQ-25 Stingray unmanned carrier-based tanker is a named DoD development program with reach-forward losses.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["pentagon_jbook returned NOT_FOUND for 'MQ-25', 'MQ-25 Stingray', 'Stingray'"],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='MQ-25')",
+      "M_value": {"signal": "NOT_FOUND"},
+      "interpretation": "MQ-25 is a Navy RDTE/Procurement program; corpus does not index it under these synonyms. Per rubric #7, NOT_FOUND in a non-exhaustive 410-PE corpus is a coverage gap, not a red flag. UNVERIFIABLE."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "VC-25B Presidential Aircraft (Air Force One) is a ~$4B EMD program to modify two 747-8 aircraft.",
+      "severity": "PASS",
+      "supports": ["pentagon_jbook: VC-25B PE 0401319F = FUNDED_GROWING; FY24 $94.75M -> FY25 $433.9M -> FY26 $602.3M"],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='VC-25B')",
+      "M_value": {"signal": "FUNDED_GROWING", "pe_number": "0401319F", "latest_funded_M": 602.318, "history": [{"fy": 2024, "M": 94.75}, {"fy": 2025, "M": 433.943}, {"fy": 2026, "M": 602.318}]},
+      "interpretation": "VC-25B is FUNDED_GROWING with a ~6.4x funding ramp FY24->FY26, consistent with Boeing's $4B EMD narrative and a program approaching delivery. No J-Book divergence."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "P-8A Poseidon is an ongoing BDS production program (commercial-derivative anti-submarine aircraft).",
+      "severity": "UNVERIFIABLE",
+      "supports": ["pentagon_jbook returned NOT_FOUND for 'P-8A Poseidon', 'P-8', 'Poseidon', 'Multi-Mission Maritime', 'Poseidon Aircraft'"],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='P-8A Poseidon')",
+      "M_value": {"signal": "NOT_FOUND"},
+      "interpretation": "P-8A is a long-running Navy program. Our 410-PE corpus does not currently index it under these synonyms. Coverage gap per rubric #7. UNVERIFIABLE."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "F/A-18 Super Hornet and F-15 (F-15EX Eagle II) production lines in St. Louis are named ongoing DoD programs (disrupted by 2025 IAM 837 strike).",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "pentagon_jbook F-15EX (line F01500) = UNFUNDED_THIS_YEAR; history FY25 $5.1M -> FY26 $0",
+        "pentagon_jbook F-15 EPAWSS (PE 0207171F) = UNFUNDED_TWO_PLUS_YEARS; FY25 $0, FY26 $0",
+        "pentagon_jbook F/A-18 = NOT_FOUND (coverage gap)"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='F-15EX'); ...F/A-18",
+      "M_value": {
+        "F-15EX": {"signal": "UNFUNDED_THIS_YEAR", "pe_number": "F01500", "history": [{"fy": 2024, "M": 0.0}, {"fy": 2025, "M": 5.112}, {"fy": 2026, "M": 0.0}]},
+        "F-15_EPAWSS": {"signal": "UNFUNDED_TWO_PLUS_YEARS", "pe_number": "0207171F", "history": [{"fy": 2024, "M": 12.975}, {"fy": 2025, "M": 0.0}, {"fy": 2026, "M": 0.0}]},
+        "FA-18": {"signal": "NOT_FOUND"}
+      },
+      "interpretation": "F-15 procurement and the F-15 EPAWSS upgrade PE both show ZERO FY26 funding in the corpus indices Boeing's filing flags F-15 as a strike-impacted St. Louis line. The filing does not quantify F-15 forward revenue, so this is a narrative-load divergence rather than an existential one. Per materiality rubric #2 (mentioned as production line, not quantified % of revenue) — downgrade from SEVERE to MODERATE. F/A-18 corpus coverage is a gap (UNVERIFIABLE component)."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "CST-100 Starliner is contracted to NASA Commercial Crew Program; included with fixed-price development programs carrying reach-forward losses.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["pentagon_jbook NOT_FOUND for 'Commercial Crew' — NASA program, outside DoD J-Book corpus scope"],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Commercial Crew')",
+      "M_value": {"signal": "NOT_FOUND"},
+      "interpretation": "Commercial Crew is a NASA (not DoD) program; the J-Book corpus covers DoD RDT&E and Procurement PEs. Out of scope per rubric #7 — UNVERIFIABLE on this M-source. (A nasa_jbook or pentagon-analog source would be needed.)"
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Boeing operates BDS as one of three reportable segments, supplying strategic missile/defense, satellites, and space exploration to DoD.",
+      "severity": "PASS",
+      "supports": ["usaspending.query_dod_contracts(recipient='BOEING COMPANY, THE') returned 796 DoD awards totaling $248.9M in the visible page (top award $214M USSOCOM)"],
+      "M_check": "usaspending.query_dod_contracts(recipient_name='BOEING COMPANY, THE')",
+      "M_value": {"n_awards": 796, "total_amount_visible": 248877352.28},
+      "interpretation": "USAspending confirms Boeing's DoD-prime status — the broad BDS narrative is corroborated by extensive DoD obligations history. PASS."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "Boeing files 10-K with SEC under CIK 0000012927.",
+      "severity": "PASS",
+      "supports": ["Filing path itself: /verticals/public_co/data/ba/filings/0001628280-26-004357_10-K.txt; CIK was pre-validated in cohort"],
+      "M_check": "edgar_fts.query_fulltext (signature mismatch on positional args; identity established by cohort pre-validation)",
+      "M_value": {"cik": "0000012927", "filer": "The Boeing Company"},
+      "interpretation": "Identity control claim — passes by cohort pre-validation. (M-source call had a positional-arg signature mismatch; falls through to PASS on the trivial control.)"
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "ticker": "TRIP",
+  "company": "TripAdvisor, Inc.",
+  "cutoff": "2026-05-20",
+  "filing": "0001193125-26-051281_10-K.txt",
+  "filing_date": "2026-02-13",
+  "cik": "0001526520",
+  "sector": "Consumer Cyclical / Travel review marketplace (Experiences-led OTA + hotel meta + dining)",
+  "drawdown_context": "-47.3% from 52w high, +9% above 52w low. Q1 2026 print (filed 5/7/26, pre-cutoff) materially worsens the YE-2025 trajectory: revenue -4% YoY, GAAP net loss -$32.4M (vs -$11M y/y), Adj EBITDA halved to $22.1M (-50%), Hotels & Other revenue -22% constant-currency.",
+  "rfm_tuples": [
+    {
+      "claim_id": "C1",
+      "R": "Going-concern / audit-quality integrity \u2014 KPMG LLP issued an unqualified opinion (Auditor Firm ID 185, Boston MA) and no Item 4.01 disclosures or auditor disagreements over a 5-year lookback.",
+      "f": "If true: (a) no ASC 205-40 'substantial doubt' language in the 10-K, (b) no Big-4 resignation, (c) no Item 4.01 disagreements.",
+      "M_source": "going_concern_detector.query_going_concern(cik='0001526520', cutoff='2026-05-20') + auditor_change_tracker.query_auditor_changes(cik='0001526520', cutoff='2026-05-20').",
+      "M_value": "going_concern: NO_GOING_CONCERN (n_matches=0 on FY25 10-K accession 0001193125-26-051281). auditor_change_tracker: CLEAN_AUDITOR_TENURE \u2014 0 Item 4.01 disclosures, 0 Big-4 resignations, 0 disagreements in 5-year lookback. KPMG tenure undisturbed.",
+      "severity": "PASS",
+      "interpretation": "Clean universal-quality screen; auditor side throws no signal. Literal claim verified."
+    },
+    {
+      "claim_id": "C2",
+      "R": "Liquidity is comfortable \u2014 $1.0B cash + $496M revolver capacity at 12/31/25, more than enough to retire the $345M 0.25% Convertible 2026 Senior Notes when they mature in 2026.",
+      "f": "If true: cash should grow or hold flat into Q1 2026, the notes should be reclassified as current and the company should disclose visible refi/redemption activity ahead of maturity.",
+      "M_source": "Filing-internal (Note 6: Debt) + claim_evolution.query_claim_evolution(cik='0001526520', search_term='Amended Credit Agreement', base_filing_date='2026-02-13', cutoff='2026-05-20') + Q1 2026 10-Q (filed 5/7/26, pre-cutoff) cash/debt review.",
+      "M_value": "12/31/25: $1,034.9M cash + $496M revolver = ~$1.53B liquid. Convertible notes ($345M) correctly reclassified to short-term. Q1 2026 (filed 5/7/26): cash UP to $1,120.4M (+$86M QoQ from $117.8M operating cash flow); $345M convertible still outstanding at 3/31/26, no tender/refi consummated yet but credit-agreement amended; AFFIRMED status in post-cutoff disclosure (claim_evolution). Coverage is ~3.2x against the August 2026 convertible note maturity.",
+      "severity": "PASS",
+      "interpretation": "Liquidity claim is verified with comfortable margin. Notes mature later in 2026 but cash on hand is ~3x maturity, operating cash flow is positive ($117.8M in Q1 alone), and refi/redemption optionality is intact."
+    },
+    {
+      "claim_id": "C3",
+      "R": "Tripadvisor is an 'experiences-led' marketplace; the Experiences + TheFork marketplaces 'accounted for approximately 60% of consolidated revenue mix and 35% of consolidated adjusted EBITDA' in FY25, up from 50%/6% in FY23 \u2014 framed as the long-term value-creation engine.",
+      "f": "If true and accelerating, post-cutoff Q1 2026 disclosure should reaffirm Experiences segment growth AND show improving segment-level profitability (or at least not deterioration).",
+      "M_source": "claim_evolution.query_claim_evolution(cik='0001526520', search_term='Experiences segment', base_filing_date='2026-02-13', cutoff='2026-05-20') + Q1 2026 8-K earnings release (5/7/26) segment table.",
+      "M_value": "claim_evolution: REAFFIRMED_IN_STRUCTURED_DISCLOSURE (10-Q + 8-K mentions, no termination). Q1 2026 segment data: Experiences revenue $167.9M (+8% YoY) BUT Experiences Adjusted EBITDA WORSENED to -$19.2M from -$14.1M (loss grew 36%). TheFork revenue $57.3M (+23%), TheFork EBITDA flipped positive to $4.6M from -$3.5M. Hotels & Other Adjusted EBITDA fell 40% to $36.7M from $61.4M. The 'Experiences-led' segment is growing topline but its absolute EBITDA loss is widening \u2014 the segment that's supposed to fund the re-rate is consuming more cash, not less.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Mix-shift narrative is technically reaffirmed (Experiences + TheFork are growing share of revenue) but the EBITDA economics of the lead segment are deteriorating intra-year, and the high-margin Hotels & Other segment that subsidizes the mix shift is contracting -22% constant currency. The transition is real but the unit-economic bridge to profitability is widening, not closing."
+    },
+    {
+      "claim_id": "C4",
+      "R": "Customer concentration with Booking Holdings and Expedia is a known and disclosed risk: 'Booking accounted for 10% or more of our consolidated revenue, and together with Expedia, our two most significant travel partners, accounted for approximately 21% and 22%, respectively, of our consolidated revenue' for FY25 and FY24.",
+      "f": "If genuinely partnership-based and material, the megacap counterparty (Booking Holdings) should reciprocally disclose Tripadvisor in its own SEC filings at a meaningful cadence.",
+      "M_source": "megacap_namecheck.query_megacap_mentions(small_cap_name='Tripadvisor') + direct edgar_fts.query_fulltext(cik='0001075531' [Booking Holdings], 'Tripadvisor') + edgar_fts.query_fulltext(cik='0001324424' [Expedia], 'Tripadvisor'). Note: Booking Holdings and Expedia are NOT in the default MEGACAP_CIKS dict, so megacap_namecheck returned 0 hits / INFLATION_SUSPECT \u2014 direct CIK lookups bypass that limitation.",
+      "M_value": "Direct edgar_fts: Booking Holdings (CIK 0001075531) = 8 filings mention Tripadvisor (2020-cutoff, 10-K/10-Q/8-K). Expedia (CIK 0001324424) = 42 filings mention Tripadvisor \u2014 meaningful presence in Expedia's quarterly disclosures. Tripadvisor's own concentration disclosure shows combined Booking+Expedia share DECLINING from 25% (2023) -> 22% (2024) -> 21% (2025) \u2014 concentration is shrinking as marketplace mix shifts toward Experiences/TheFork (commission-based) and away from Hotels meta (CPC partner-paid).",
+      "severity": "PASS",
+      "interpretation": "Concentration is real, fully disclosed, and TRENDING DOWN (25% -> 21%) \u2014 the more revenue moves to Experiences/TheFork commission take-rate, the less TRIP depends on Booking/Expedia. Booking and Expedia BOTH reciprocally namecheck TRIP in their own filings (8 + 42 hits), confirming the partnership is genuine, not fabricated. No INFLATED_RELATIONSHIP signal."
+    },
+    {
+      "claim_id": "C5",
+      "R": "Capital-return discipline \u2014 $250M share-repurchase authorization (Sep 2023), with $110M still remaining at 12/31/25; in 2025 the Company repurchased 6.1M shares at $14.72 avg ($90M total) AND retired 26.8M LTRIP shares at $16.28 ($437M).",
+      "f": "If true and counter-cyclically deployed, with TRIP at -47% drawdown and stock near 52w low through Q1 2026, the Company should be actively using the remaining $110M authorization at trough prices.",
+      "M_source": "Filing-internal (Item 5 + Note 11) + Q1 2026 10-Q (filed 5/7/26).",
+      "M_value": "Q1 2026 10-Q explicitly: 'During the three months ended March 31, 2026 and 2025, the Company did NOT repurchase any shares of outstanding common stock under the share repurchase program.' Buyback program is FROZEN both periods despite $110M still available and stock trading near 52-week low (closing Q1 around $11). The $437M LTRIP-share retirement (Apr 2025) was a one-off Merger-related transaction at $16.28, not an open-market trough buy. Open-market authorization is sitting on the sidelines through one of the deepest drawdowns in TRIP's history.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "interpretation": "The 'capital-return discipline' framing is technically true (authorization exists, dollars deployed in 2024) but in 2025 only $90M was spent at $14.72 avg, and in Q1 2026 \u2014 at the literal trough \u2014 ZERO buybacks were executed despite $110M of unused authorization. Management is preserving cash for the August 2026 convertible-notes redemption rather than supporting the stock at $11. That's prudent treasury behavior, but it directly contradicts the implied counter-cyclical buyback thesis that small-cap rebound investors rely on. The signal is: management is preparing for the maturity wall, not supporting the equity floor."
+    },
+    {
+      "claim_id": "C6",
+      "R": "Q4 2025 restructuring (~$33M severance, ~$4M expected in Q1 2026) realigned operations from Viator/Brand Tripadvisor segments into the new Experiences/Hotels-Other/TheFork structure \u2014 framed as positioning for AI-led growth and operating leverage. Cost savings 'expected to begin to be realized in 2026 and fully realized by 2027.'",
+      "f": "If genuinely productive, post-cutoff Q1 2026 results should show some early opex leverage and improving segment margins.",
+      "M_source": "claim_evolution.query_claim_evolution + Q1 2026 8-K (5/7/26) Adj EBITDA reconciliation.",
+      "M_value": "Q1 2026 Total Adjusted EBITDA $22.1M vs Q1 2025 $43.8M \u2014 DOWN 50% YoY. Adj EBITDA margin compressed to 5.8% from 11.0% YoY. Hotels & Other Adj EBITDA -40% YoY ($36.7M from $61.4M). Experiences Adj EBITDA LOSS WIDENED from -$14.1M to -$19.2M (-36%). TheFork is the only positive surprise (flipped from -$3.5M to +$4.6M). The restructuring savings have NOT yet shown up in segment economics \u2014 the high-margin legacy segment is shrinking faster than the new-segment unit economics are improving.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "interpretation": "The 'cost savings + AI-led repositioning' narrative is contradicted by the first post-restructuring quarter: Adj EBITDA is HALVED, not improved. Either the restructuring savings are back-end-loaded (consistent with 'fully realized by 2027' language) or the legacy-segment erosion is outpacing them. Investors paying the multiple for the rebound have to underwrite a savings curve that the first quarter post-restructuring did not validate."
+    },
+    {
+      "claim_id": "C7",
+      "R": "Insider behavior \u2014 no MNPI-suggestive proximate selling. Note the CEO is Matt Goldberg (came from BlackRock 2022), CFO Michael Noonan.",
+      "f": "If true: minimal discretionary insider selling near fiscal-period events; mostly 10b5-1 / tax-withholding routine activity.",
+      "M_source": "insider_vs_calendar.query_insider_sales_near_budget_events(cik='0001526520', contractor_name='TripAdvisor').",
+      "M_value": "74 Form 4 filings over 365d; 94 sales totaling $4.41M. Proximate to events: 8 sales / $683K / 5 unique owners. 0 discretionary proximate sales \u2014 all proximate transactions were either 10b5-1 plans or Code F tax-withholding on vest. Top proximate sales: CEO Matt Goldberg sold $127K (10/1/2025, code F, tax withholding); other proximate were Kalvert (CAO/Controller), Noonan (CFO), Dalton, Rijvers \u2014 all tax-withhold or 10b5-1. Note: this M-source's events calendar is defense-tech oriented (FY26 budget, J-Book release) which is not TRIP-relevant; the literal proximity test is therefore weakly informative for a consumer-cyclical issuer, but the absolute dollar magnitude ($4.4M/yr across all owners) is very low.",
+      "severity": "PASS",
+      "interpretation": "Insider selling is small in dollar terms (~$4.4M / yr across 74 filings) and entirely 10b5-1 or tax-withholding \u2014 no discretionary clustering. No information-asymmetry red flag. (Caveat: the event-overlay calendar is defense-budget-oriented, so the 'proximate' classification is mechanically misaligned with consumer-cyclical news cycles; the volume + 10b5-1 dominance still passes the underlying integrity check.)"
+    },
+    {
+      "claim_id": "C8",
+      "R": "Post-LTRIP-merger, TripAdvisor 'no longer has a controlling stockholder' and operates with a 'simplified capital structure with a single class of common stock' and Nevada domicile (effective Apr 29, 2025).",
+      "f": "If true, the public float should expand, voting structure should be 1-share-1-vote, and the structural overhang from Liberty's 56% voting block should be eliminated cleanly.",
+      "M_source": "Filing-internal (Item 5, Note 1) + sec_filings.list_filings_by_form(cik='0001526520', forms=['10-K','10-Q','8-K'], cutoff='2026-05-20').",
+      "M_value": "Filing verifies: April 29, 2025 \u2014 repurchased 26.8M shares previously held by LTRIP at $16.28 avg ($437M aggregate); retired 53.1M treasury shares (carrying value $1.3B); Class B common stock fully eliminated; redomiciled DE -> NV effective Apr 29, 2025; new risk factor added: 'we are more vulnerable to shareholder activism, proxy contests, and pressure for strategic alternatives' as direct consequence of losing controlling-stockholder structure. Subsequent filings (8-K cadence around the merger close, 4/29/25 8-K filing accession 0001104659-25-041251) corroborate the transaction execution.",
+      "severity": "PASS",
+      "interpretation": "Structural simplification verified. The corollary risk (activism vulnerability) is honestly disclosed by the Company itself. Net effect: cleaner cap structure, but adds incremental activist/strategic-alternatives risk that is acknowledged. PASS on the literal claim of simplification."
+    }
+  ],
+  "supplemental_signals": {
+    "borrow_rate_pct": 0.3722,
+    "borrow_trend": "stable",
+    "shares_available_short": 1800000,
+    "borrow_30d_avg_pct": 0.4068,
+    "borrow_30d_max_pct": 0.4227,
+    "borrow_interpretation": "Cheap and available to borrow (37bps; 1.8M shares) \u2014 no short squeeze risk; bear thesis is not crowded."
+  },
+  "queries_run": [
+    "going_concern_detector.query_going_concern(cik=0001526520, cutoff=2026-05-20)",
+    "auditor_change_tracker.query_auditor_changes(cik=0001526520, cutoff=2026-05-20)",
+    "sec_filings.list_filings_by_form(cik=0001526520, forms=['10-K','10-Q','8-K'], cutoff=2026-05-20)",
+    "edgar_fts.query_fulltext(search_term='2026 Senior Notes', cik=0001526520, cutoff=2026-05-20)",
+    "edgar_fts.query_fulltext(search_term='Tripadvisor', cik=0001075531 [Booking Holdings], cutoff=2026-05-20)",
+    "edgar_fts.query_fulltext(search_term='Tripadvisor', cik=0001324424 [Expedia], cutoff=2026-05-20)",
+    "megacap_namecheck.query_megacap_mentions(small_cap_name='Tripadvisor', cutoff=2026-05-20) [returned 0 hits \u2014 Booking/Expedia not in default MEGACAP_CIKS dict, see direct edgar_fts above]",
+    "insider_vs_calendar.query_insider_sales_near_budget_events(cik=0001526520, contractor_name='TripAdvisor', cutoff=2026-05-20)",
+    "claim_evolution.query_claim_evolution(cik=0001526520, search_term='Amended Credit Agreement', base_filing_date=2026-02-13, cutoff=2026-05-20)",
+    "claim_evolution.query_claim_evolution(cik=0001526520, search_term='Experiences segment', base_filing_date=2026-02-13, cutoff=2026-05-20)",
+    "revenue_concentration.query_revenue_concentration(top_customer_pct=22.0) [returned UNVERIFIABLE \u2014 tool requires federal-contractor vehicle/task-order axes; commercial customer concentration adjudicated filing-internally instead]",
+    "iborrow.get_borrow_rate('TRIP')",
+    "Q1 2026 10-Q (0001193125-26-210297, filed 5/7/26) and Q1 2026 8-K earnings release (0001193125-26-210278) direct fetch from EDGAR"
+  ],
+  "score_counts": {
+    "PASS": 4,
+    "MODERATE_UNDERDELIVERY": 1,
+    "SEVERE_UNDERDELIVERY": 2,
+    "RED_FLAG_NEGATIVE": 0,
+    "UNVERIFIABLE": 0
+  },
+  "composite": 0.625,
+  "composite_calc": "(0+0+1+0+2+2+0+0) / 8 non-UNVERIFIABLE claims = 8/8 = 1.000",
+  "summary": "TripAdvisor passes the universal-quality screens cleanly: KPMG-clean audit, no going-concern language, $1.12B cash vs $345M August-2026 convertible (3.2x coverage), simplified post-LTRIP cap structure, customer-concentration trending DOWN (Booking+Expedia 25% -> 21% over three years), insider activity routine and small ($4.4M/yr, all 10b5-1 or tax-withhold), and Booking/Expedia both reciprocally namecheck TRIP in their own filings (8 + 42 hits respectively) \u2014 the partnership claim is genuine. The two SEVERE markdowns are: (1) BUYBACK FREEZE \u2014 zero open-market repurchases in Q1 2025 OR Q1 2026 despite $110M remaining authorization and stock at 52w low, signaling management is preserving cash for the August convertible-notes redemption rather than supporting the floor; and (2) RESTRUCTURING SAVINGS NOT YET VISIBLE \u2014 Q1 2026 Adj EBITDA halved YoY ($22.1M vs $43.8M, -50%), Experiences segment EBITDA loss widened ($-19.2M vs $-14.1M), Hotels & Other EBITDA -40%. The MODERATE markdown is the Experiences-led mix-shift narrative being topline-real (Q1 Experiences +8% revenue, TheFork +23%) but unit-economic-deteriorating (lead segment burns more cash, not less). Net: TRIP is solvent, transparent, and structurally cleaning up \u2014 but the post-cutoff Q1 print materially weakens the rebound thesis. Composite 1.000 on the small-cap honesty-alpha rubric = honest disclosure of a softening operator, not a fraud setup. LONG-able only if you can underwrite the 2027 restructuring-savings curve and tolerate flat-to-down Hotels & Other through 2026.",
+  "scoring": {
+    "PASS": 5,
+    "UNVERIFIABLE": 0,
+    "MODERATE_UNDERDELIVERY": 1,
+    "SEVERE_UNDERDELIVERY": 2,
+    "RED_FLAG_NEGATIVE": 0,
+    "verifiable_claims": 8,
+    "weighted_sum": "(0*5 + 1*1 + 2*2 + 3*0) / 8 = 5 / 8",
+    "composite": 0.625
+  }
+}

@@ -1,0 +1,152 @@
+{
+  "ticker": "NNE",
+  "cutoff": "2026-05-16",
+  "filing": "0001493152-25-028285_10-K.txt",
+  "filing_form": "10-K",
+  "filing_date": "2025-12-18",
+  "scores": [
+    {
+      "claim_id": "NNE-1",
+      "claim_text": "Nano Nuclear signed a strategic collaboration with UIUC in early April 2025 to construct the first KRONOS MMR research reactor on the university campus; expects to submit NRC construction permit application in early 2026 and receive the permit in 2027.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "edgar_fts.query_fulltext('KRONOS MMR') -> 28 hits, all NNE self-filings — no third-party corroboration in EDGAR (UIUC is not an SEC filer)",
+        "edgar_fts.query_fulltext('Nano Nuclear') -> 121 hits, top results NNE 8-Ks",
+        "NRC ADAMS docket system not yet in M-source catalog (Heuristic 5/10 gap)"
+      ],
+      "M_check": "EDGAR FTS hits confirm the company has been making this claim in its own filings but the only external party (UIUC) is a university (no SEC filings). The NRC CPA submission claim is for early 2026 — the company is at pre-submission stage and the application docket number is not specified in the slice we have. Per Heuristic 10, NRC stage claims need a docket number to verify; without one the claim is unverifiable on the registry side.",
+      "M_value": {
+        "edgar_kronos_total_hits": 28,
+        "edgar_kronos_nne_self_filings_share": ">90%",
+        "nrc_docket_specified": false,
+        "uiuc_sec_filer": false
+      },
+      "interpretation": "Claim is properly staged as a planned CPA submission with a planned future permit. Heuristic 3 (planned vs operational, extra weight): the CPA-to-permit pathway is 3-5+ years; receiving the permit in 2027 from a 'submission in early 2026' is at the optimistic end of the realistic NRC timeline, especially for an MMR design with no NRC operating-license precedent. Without an ADAMS docket and without UIUC's institutional filings as cross-checks, the claim cannot be independently verified or contradicted on M — score UNVERIFIABLE rather than PASS/MODE. Note as gap: NRC ADAMS connector needed for the catalog."
+    },
+    {
+      "claim_id": "NNE-2",
+      "claim_text": "In late April 2025 the NRC issued its final Safety Evaluation (SE) approving the Fuel Qualification Methodology Topical Report (FQM TR) for the advanced fuel design to be used in KRONOS MMR.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "edgar_fts.query_fulltext('Fuel Qualification') -> 23 hits — top hits are NNE 10-Qs from 2026, with one Centrus (LEU) 8-K from 2022-11-14 mentioning a different FQM TR (Centrus has its own)",
+        "NRC ADAMS topical-report registry not in M-source catalog (Heuristic 5)"
+      ],
+      "M_check": "EDGAR FTS shows NNE consistently discusses FQM TR in its own subsequent filings. The pre-existing Centrus FQM TR result confirms that FQM TR is a standard NRC topical-report category. Original FQM TR was filed by USNC (Ultra Safe Nuclear Corporation) prior to USNC's bankruptcy; per claim NNE-4, NNE acquired USNC assets, so a transferred topical report being approved is plausible. But without an ADAMS docket connector we cannot pull the actual SE document or the date stamp.",
+      "M_value": {
+        "edgar_fuel_qualification_hits": 23,
+        "centrus_FQM_TR_reference_exists": true,
+        "adams_connector_available": false
+      },
+      "interpretation": "Genuinely UNVERIFIABLE in current M-source catalog — NRC issuance of an SE for a topical report would appear in ADAMS, not in EDGAR or USAspending. The claim is internally consistent (transferred USNC TR → NRC review → SE approval is a normal sequence). Recommend treating as UNVERIFIABLE rather than UNDERDELIVERY because the catalog gap is the binding constraint, not adverse evidence."
+    },
+    {
+      "claim_id": "NNE-3",
+      "claim_text": "Nano Nuclear has a Strategic Partnership Project Agreement No. 23SP817 (and amendments) with Battelle Energy Alliance, LLC (DOE Idaho National Laboratory contractor) and an Exclusive Patent License Agreement dated April 3, 2024 with Battelle Energy Alliance.",
+      "severity": "PASS",
+      "supports": [
+        "edgar_fts.query_fulltext('Nano Nuclear') -> 121 hits, agreements appear in NNE 10-Ks as exhibits 10.14 / 10.17 — internally consistent",
+        "usaspending.query_recipient_contracts('Nano Nuclear') -> 1 DoD contract FA864925P0407 ($1.25M, 'SECURE POWER FOR AIR FORCE INSTALLATION ENERGY RESILIENCE') confirms NNE has real federal-contracting relationships (distinct from the Battelle claim but corroborates the broader federal-relationship narrative)",
+        "usaspending.query_recipient_grants('Nano Nuclear') -> 0 grants (consistent: SPP agreements are payment FROM NNE TO INL, not federal awards to NNE)"
+      ],
+      "M_check": "SPP agreements are commercial agreements where the private party PAYS the national lab for services — they would not appear as federal awards in USAspending (the flow is private→federal). Heuristic 5 source-jurisdiction note: USAspending coverage of intra-DOE-lab work is partial. The presence of an actual DoD-NNE contract (FA864925P0407) confirms a real US-Government relationship.",
+      "M_value": {
+        "edgar_nano_nuclear_hits": 121,
+        "usaspending_contracts_n": 1,
+        "usaspending_contracts_total": 1248598,
+        "usaspending_grants_n": 0,
+        "doc_id_in_filing": "exhibits 10.14 / 10.17 / SPP 23SP817 / 2024-04-03 ExclusivePatentLicense"
+      },
+      "interpretation": "Specific agreement numbers and amendment dates are exactly the kind of disclosure that is verifiable in principle from DOE-OSTI / INL records (not in catalog, but a reasonable due-diligence trail exists). The DoD contract result is independent corroboration of NNE's federal-contracting footprint. PASS — stage and specificity discipline preserved."
+    },
+    {
+      "claim_id": "NNE-4",
+      "claim_text": "Acquired USNC assets (KRONOS Business and LOKI/Pylon Business) for $8.5M cash at closing on January 10, 2025, recorded as $9,075,045 IPR&D; subsequently acquired Global First Power Ltd. (renamed True North Nuclear Ltd.) from USNC bankruptcy estate in October 2025 for the Canadian Chalk River Project.",
+      "severity": "PASS",
+      "supports": [
+        "edgar_fts.query_fulltext('Ultra Safe Nuclear') -> 28 hits, all NNE filings (USNC was private; no SEC filings post-bankruptcy)",
+        "edgar_fts.query_fulltext('Global First Power') -> 12 hits, all NNE filings (consistent — GFP was a Canadian private subsidiary of USNC)"
+      ],
+      "M_check": "USNC was a privately-held company — it is not in SEC EDGAR as a filer, so 'no hits outside NNE filings' is expected, not contradictory (Heuristic 5 source-jurisdiction caveat). USNC's bankruptcy is a public US bankruptcy-court matter, verifiable via PACER (not in M-source catalog). NNE's own subsequent filings consistently reference the acquired assets, the $8.5M figure, and the subsequent GFP acquisition.",
+      "M_value": {
+        "edgar_usnc_total_hits": 28,
+        "edgar_gfp_total_hits": 12,
+        "usnc_was_sec_filer": false
+      },
+      "interpretation": "Verifiable in principle via PACER and Canadian corporate registry; internally consistent across NNE filings. No counterparty for SEC-disclosure check exists. PASS — claim is mechanical (price paid, date closed, asset categories) and self-consistent."
+    },
+    {
+      "claim_id": "NNE-5",
+      "claim_text": "HALEU Energy Fuel Inc. (NNE subsidiary) has a Memorandum of Understanding dated March 30, 2023 with Centrus Energy Corp for HALEU fuel supply collaboration.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "edgar_fts.query_fulltext('Nano Nuclear', cik=Centrus 0001065059) -> 0 hits",
+        "edgar_fts.query_fulltext('HALEU Energy Fuel', cik=Centrus 0001065059) -> 0 hits",
+        "edgar_fts.query_fulltext('HALEU Energy Fuel') -> 27 hits, ALL NNE self-filings"
+      ],
+      "M_check": "Centrus (LEU CIK 0001065059) is a public US filer (10-K, 10-Q, 8-K). A March 2023 MoU with NNE is now 3+ years old. Centrus filings make ZERO references to either 'Nano Nuclear' or 'HALEU Energy Fuel'. Per Heuristic 7 (counterparty-disclosure threshold), a real ongoing HALEU supply arrangement with a Tier-1 enricher would typically appear at least in customer/partner narrative — but Heuristic 4 also applies: an MoU is non-binding, below the materiality threshold for Centrus 10-K disclosure of a small counterparty.",
+      "M_value": {
+        "centrus_mentions_NNE": 0,
+        "centrus_mentions_HALEU_Energy_Fuel": 0,
+        "moU_age_years": 3.1,
+        "is_binding_supply_agreement": false
+      },
+      "interpretation": "Counterparty silence on a 3-year-old MoU with a small pre-revenue counterparty is consistent with Heuristic 4 (non-binding strategic understanding, not material to the larger party). However, the asymmetry — NNE keeps citing 'HALEU Energy Fuel' in 27 filings, Centrus in 0 — suggests the MoU has not progressed to operating substance. Stage gap (planned/intent vs operating supply contract): MODE. Not RED, because the claim itself is staged as an 'MOU', not as a binding supply contract."
+    },
+    {
+      "claim_id": "NNE-6",
+      "claim_text": "Following a December 2024 collaboration announcement with Digihost, NNE provided consulting services from April to June 2025 ($250,000 in consulting revenue) including regulatory advice, site assessment, roadmap development, and stakeholder engagement.",
+      "severity": "PASS",
+      "supports": [
+        "edgar_fts.query_fulltext('Digihost') -> 107 hits, top hits are 'Digi Power X Inc.' and 'Digihost Technology Inc.' (consistent with Digihost rebranding to Digi Power X) — Digihost IS a 40-F / 20-F filer",
+        "edgar_fts.query_fulltext('Nano Nuclear') -> 121 hits (NNE-side disclosure consistent)"
+      ],
+      "M_check": "Digihost (now Digi Power X) is a Canadian filer (40-F / 20-F). $250K of consulting revenue is below materiality threshold for Digihost (Bitcoin miner with ~$30-50M annual revenue range typical for the segment). Heuristic 7 (counterparty-disclosure threshold) does not require disclosure at this magnitude.",
+      "M_value": {
+        "digihost_is_sec_filer": true,
+        "digihost_filings_total_hits": 107,
+        "consulting_revenue_USD": 250000,
+        "counterparty_materiality_threshold_met": false
+      },
+      "interpretation": "Small consulting engagement — staged honestly as 'consulting services' yielding $250K. Below counterparty-disclosure materiality threshold. Internally consistent. PASS — disciplined disclosure."
+    },
+    {
+      "claim_id": "NNE-7",
+      "claim_text": "Nano Nuclear has a Partnership Agreement dated November 4, 2024 with LIS Technologies Inc. (related party) and has made a $2.0 million strategic equity investment in LIS Technologies for HALEU enrichment collaboration.",
+      "severity": "PASS",
+      "supports": [
+        "edgar_fts.query_fulltext('LIS Technologies') -> 12 hits, ALL in NNE filings (LIS is private)",
+        "Filing self-discloses LIS as 'related party' — full transparency on conflict-of-interest"
+      ],
+      "M_check": "LIS Technologies is private — no SEC filings for counterparty check (Heuristic 5). The $2.0M strategic equity is small — Heuristic 4 (strategic investment vs operating supply, usually not material). The 'related party' label is candidly disclosed, which is itself a stage-discipline marker.",
+      "M_value": {
+        "lis_technologies_is_sec_filer": false,
+        "edgar_lis_hits_all_in_nne_filings": 12,
+        "investment_USD": 2000000,
+        "related_party_flagged_in_filing": true
+      },
+      "interpretation": "Small related-party strategic equity stake disclosed transparently. Not a counterparty-disclosure failure because LIS is private. PASS — appropriate disclosure with explicit related-party flag."
+    },
+    {
+      "claim_id": "NNE-8",
+      "claim_text": "Nano Nuclear owns/operates physical facilities: Oak Ridge TN (1.64 acres, 14,000 sq ft Nuclear Technology Branch, Aug 2024 purchase for $1.7M); Westchester County NY (6,800 sq ft demonstration facility, leased Jan 2025); Oak Brook IL (2.75 acres, 23,537 sq ft regional demonstration/office, July 2025 purchase for $3.5M).",
+      "severity": "PASS",
+      "supports": [
+        "epa_frs.query_facilities('Nano Nuclear', 'TN') -> 0 facilities",
+        "epa_frs.query_facilities('Nano Nuclear', 'IL') -> 0 facilities"
+      ],
+      "M_check": "Per Calibration Heuristic 1, EPA FRS covers EPA-regulated industrial facilities (air-permit, RCRA, NPDES, etc.). Pure office / R&D / demonstration spaces that do not handle regulated quantities of radiological or chemical materials are NOT in FRS. The claim itself describes 'Nuclear Technology Branch', 'demonstration facility', 'regional demonstration / office' — pre-construction / pre-operating R&D spaces, not licensed nuclear facilities.",
+      "M_value": {
+        "epa_frs_TN_facilities": 0,
+        "epa_frs_IL_facilities": 0,
+        "claim_describes_operating_reactor_site": false,
+        "calibration_heuristic_1_applies": true
+      },
+      "interpretation": "EPA FRS absence is the EXPECTED outcome for office / pre-operating R&D facilities (Heuristic 1). No contradiction. PASS — claim is stage-accurate; verification would require county property records (deeds for $1.7M and $3.5M purchases), which are not in the M-source catalog."
+    }
+  ],
+  "summary": "NNE: 8 claims, 15 M-source queries (deduped). Severity counts: PASS=5 MODE=1 SEVE=0 RED=0 UNVE=2.",
+  "process_rules_discovered": [
+    "NRC ADAMS connector is the single most impactful gap for nuclear-vertical scoring. Both NNE-1 (CPA timeline) and NNE-2 (FQM TR SE issuance) are UNVERIFIABLE in the current catalog despite being highly verifiable in principle. Adding an ADAMS connector (docket lookup + topical-report status) would convert several claims from UNVERIFIABLE to PASS / MODE / SEVE.",
+    "SPP agreements with national labs (Battelle/INL) flow private->federal, so absence in USAspending is expected, not contradiction. The framework's existing rule says 'absence of DOE contracts despite a named DOE program is hard contradiction' — needs a sub-rule for SPP / CRADA which are private-to-federal payment relationships (DOE-OSTI / INL agreement registries needed)."
+  ]
+}

@@ -1,0 +1,154 @@
+{
+  "ticker": "XNCR",
+  "company": "Xencor, Inc.",
+  "cutoff": "2024-05-15",
+  "filing": "0001326732-24-000006_10K.txt",
+  "filing_date": "2024-02-29",
+  "cik": "0001326732",
+  "sector": "Healthcare",
+  "industry": "Biotechnology",
+  "group": "walk_forward_2024",
+  "rfm_tuples": [
+    {
+      "claim_id": "C1",
+      "R": "'We believe our existing cash, cash equivalents and marketable securities, together with interest thereon and expected milestones and royalty payments will be sufficient to fund our operations into 2027.' / 'As of December 31, 2023, we had $697.4 million in cash, cash equivalents, and marketable debt securities.' (10-K Item 1A and MD&A)",
+      "f": "Mode A — Verify cash balance against balance sheet and re-verify the runway claim in the most recent pre-cutoff 10-Q (Q1 2024) for consistency. Mode B — derive implied burn rate vs. stated runway: (cash) / (years to 2027) must be >= TTM operating cash burn.",
+      "M_source": "10-K balance sheet + Q1 2024 10-Q (accession 0001326732-24-000029) MD&A + going_concern_local.going_concern_from_text",
+      "M_value": "10-K: $697.4M, runway 'into 2027'. Q1 2024 10-Q: $646.7M (one-quarter drop of $50.7M) — runway claim re-affirmed as 'into 2027' unchanged. going_concern_local on both 10-K and 10-Q returns NO_GOING_CONCERN (n_matches=0). 2023 net loss $126.1M; Q1'24 loss from operations $57.9M. Implied annualized burn ~$200-230M. $647M / $215M ≈ 3.0 years → consistent with mid-2027 cliff. Claim is internally consistent and not refuted by the m-source.",
+      "severity": "PASS",
+      "interpretation": "Capital adequacy is genuine. Cash is multiples of TTM burn, runway is reaffirmed in the very next quarter, and there is no auditor going-concern modifier. Balance sheet is the dominant single fact about XNCR — this drives the LONG-tier bias."
+    },
+    {
+      "claim_id": "C2",
+      "R": "'/s/ RSM US LLP — We have served as the Company's auditor since 2015. Los Angeles, California February 28, 2024' (Report of Independent Registered Public Accounting Firm)",
+      "f": "Mode A — Verify auditor identity, tenure, and absence of resignation/disagreement language via going_concern_local.auditor_change_from_text. Mode B — derive: if a tier-2 auditor stayed 9+ years with no Item 4.01 8-K, no PCAOB-level concerns are inferable from the registry.",
+      "M_source": "going_concern_local.auditor_change_from_text(10-K) + edgar.list_filings (no 8-K Item 4.01 in lookback)",
+      "M_value": "Signal=CLEAN_TIER_2_TENURE, firms_mentioned=['RSM US'], is_big4=False, n_resignation_lang=0, n_disagreement_lang=0. List of 8-K Items in pre-cutoff window confirms zero Item 4.01 auditor-change filings. RSM is mid-tier (not Big 4) but is the largest non-Big-4 PCAOB firm and is a standard auditor for clinical-stage biotech — not a downgrade pattern.",
+      "severity": "PASS",
+      "interpretation": "Auditor profile is clean. Tier-2 firm by category, but tenure (9+ yrs), no disagreements, no resignation language, no Item 4.01 — no negative inferences available."
+    },
+    {
+      "claim_id": "C3",
+      "R": "'On November 14, 2023, the Company entered into an Amended and Restated Collaboration and License Agreement (the New Collaboration Agreement) with Genentech ... will replace the current Collaboration and License Agreement ... The Company will also be entitled to receive up to $600 million in milestones, including $115 million in development milestones, $185 in regulatory milestones and $300 million in sale-based milestones.' (8-K 2023-11-15, accession 0001326732-23-000044)",
+      "f": "Mode A — Verify the agreement existed and the financial structure (tiered royalty + $600M milestone potential + Genentech assumes development costs from Effective Date). Mode B — derive: a major-pharma counterparty re-papered (not exited) the agreement, which is a counter-distress signal that should be cross-checked against the 10-K's continuing co-development disclosure.",
+      "M_source": "8-K 0001326732-23-000044 + 10-K Item 1 description of XmAb306/RG6323 partnership status + edgar_fts.query_fulltext for 'Xencor' counterparty mirror (Roche/Genentech filings outside cutoff scope)",
+      "M_value": "8-K text confirms: Royalty Conversion replaces cost/profit-share with tiered low-double-digit-to-mid-teens royalty + $600M milestone ladder ($115M dev / $185M reg / $300M sales). Effective June 1, 2024 — Genentech assumes sole responsibility for clinical/regulatory/commercial. 10-K describes XmAb306 (efbalropendekin alfa, RG6323) as actively in Phase 1 by Genentech — consistent. This is non-dilutive, transfers cash-burn obligation to Genentech, and the major-pharma counterparty just chose to expand commitment.",
+      "severity": "PASS",
+      "interpretation": "Strongly positive partner signal. Mode-B inference: had Roche-Genentech lost interest in XmAb306, the rational structure would be a termination or right-of-first-refusal release — not a $600M milestone ladder with broader rights. This is the opposite of distressed partner behavior."
+    },
+    {
+      "claim_id": "C4",
+      "R": "'In 2023, we sold a portion of the rights to received royalties under our MorphoSys and Alexion arrangements for $215.0 million.' / 'OMERS acquired the rights ... in exchange for an upfront payment of $192.5 million.' (10-K MD&A + 8-K 2023-11-07 accession 0001326732-23-000038)",
+      "f": "Mode A — Verify the existence and structure of both royalty purchase agreements (Ultomiris $192.5M + Monjuvi $22.5M with OMERS / OCM Life Sciences Portfolio). Mode B — derive: would a distressed issuer have been able to sell to a Tier-1 pension-plan royalty buyer at a 130%-cap floor? Mode B also — was this dilutive (equity issuance) or non-dilutive? If non-dilutive, that is the bull case.",
+      "M_source": "10-K Note disclosures + 8-K 0001326732-23-000038 + 8-K 0001326732-23-000044",
+      "M_value": "Confirmed: $192.5M (Ultomiris/Alexion) + $22.5M (Monjuvi/MorphoSys) = $215M non-dilutive cash in Nov 2023 from OMERS (OCM Life Sciences Portfolio LP — Canadian DB pension plan, sophisticated royalty buyer). Royalties revert to XNCR once OMERS hits 130% of purchase price. No share issuance, no debt. Accounted for as deferred-revenue liability under ASC 470. This is the only capital event in the pre-cutoff window and it added 1+ year of runway without dilution.",
+      "severity": "PASS",
+      "interpretation": "Capital structure positive. Royalty monetization to a Tier-1 pension royalty buyer at a 130% cap floor implies underwriters validated the existing Ultomiris/Monjuvi commercial trajectory. No equity dilution at a depressed share price — management actively avoided the worst capital-raise option a small-cap biotech can take."
+    },
+    {
+      "claim_id": "C5",
+      "R": "'Janssen $77.8 [million] ... Alexion $58.6 ... Total $168.3' (2023 revenue by partner) vs 2022 'Vir $115.4 ... Alexion $29.4 ... Total $164.6'. 'We have receivables with three customers and service providers that represent 76% of our total receivables ... four customers ... 91%.' (10-K MD&A revenue table + Note on concentrations)",
+      "f": "Mode A — Verify partner-mix table by re-summing. Mode B — derive: customer concentration claim should be cross-checked against XBRL tags (us-gaap:CustomerConcentrationRiskMember) — and the 2022→2023 shift from Vir-dominant to Janssen+Alexion-dominant is a partner-rotation signal: is this lumpy milestone recognition or structural customer loss?",
+      "M_source": "10-K body table (lines around 'Alexion $58.6 Astellas 5.0 Gilead 6.0 Janssen 77.8 MorphoSys 8.7 Omeros 5.0 Vir 2.2') + XBRL CustomerConcentrationRiskMember tags",
+      "M_value": "2023 partner mix: Janssen $77.8M (46%) + Alexion $58.6M (35%) = 81% of $168.3M total revenue from two partners. 2022 mix was dominated by Vir at $115.4M (70%) — collapsed to $2.2M in 2023 as sotrovimab COVID royalties fell to almost zero. 10-K Risk Factor explicitly identifies the COVID-mutation-driven royalty collapse. Revenue is concentrated AND lumpy AND milestone-driven (Janssen $77.8M includes upfront/option-fee structure tied to the J&J plamotamab/CD28 deal). Concentration claim is honestly disclosed but the volatility from year-to-year is the framework concern.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Mode-B finding: the 2022→2023 revenue 'stability' ($164.6M → $168.3M, +2%) is misleading — it hides a Vir collapse offset by a Janssen one-time deal upfront. Underlying ratable revenue is far lumpier than headline. Not dishonest (the table is in the filing), but the smoothness of the topline is artificial. Mid-severity — material to model-driven readers, transparent to careful ones."
+    },
+    {
+      "claim_id": "C6",
+      "R": "'Research and development expenses include wind down costs of programs that terminated in prior periods including the vibecotamab, tidutamab, and XmAb841 programs.' (10-K MD&A R&D analysis + Q1 2024 10-Q same note)",
+      "f": "Mode A — Verify that the discontinued programs are explicitly named and quantified. Mode B — derive: how were these three terminations originally announced (8-K? buried in 10-Q?) and what fraction of the prior pipeline did they represent?",
+      "M_source": "10-K + Q1 2024 10-Q wind-down disclosures + edgar.list_filings cross-check for 8-K announcements",
+      "M_value": "Three programs named (vibecotamab CD123xCD3, tidutamab SSTR2xCD3, XmAb841) with quantified wind-down costs ($10.7M in 2023 vs $23.7M in 2022; $0.6M in Q1'24 vs $3.1M in Q1'23). No 8-K Item 8.01 announcements found for these terminations in pre-cutoff window — they appear to have been disclosed only inside 10-Q/10-K MD&A text, not via separate material event filings. Mode-B finding: three failed clinical programs disclosed only through wind-down accounting rather than affirmative scientific update.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Mode-B catch: clinical program failures are disclosed by accounting residue, not by clear scientific narrative. Common biotech behavior, not unique to XNCR, but the framework should ding it. Wind-down dollars are also dropping ($23.7M→$10.7M→$0.6M in Q1) suggesting these are truly tail expenses, not new failures."
+    },
+    {
+      "claim_id": "C7",
+      "R": "Insider trading pattern in 24 months pre-cutoff: 49 Form 4 filings, including 28 sale transactions but also an open-market PURCHASE by Director Kevin Gorman (53 shares @ $19.12 on 2024-02-13) and small same-day exercise-and-sell transactions (Desjarlais, others) at strike $11.05 vs sale price $19.38 (typical tax-coverage RSU/option mechanics, not distress signaling).",
+      "f": "Mode A — Verify Form 4 transaction codes, dates, and amounts via form4.fetch_form4_xml. Mode B — derive: in a -25.9% drawdown stock, what fraction of insider trades are voluntary opportunistic sales vs RSU/option-tax sells vs open-market buys?",
+      "M_source": "insider_vs_calendar.query_insider_sales_near_budget_events + form4.fetch_form4_xml sampled across 24-month window",
+      "M_value": "n_form4_filings=50 (24mo), n_total_sales=28, n_proximate_sales=0 (no budget calendar applicable for biotech), n_discretionary_proximate=0. Sample inspection of 2024 Form 4s: codes overwhelmingly M (option exercise) + S (same-day-cover sale at modest size, e.g. 849 sh, 4745 sh, 11943 sh) with strike $11.05 vs prevailing ~$19-23 — i.e. standard cashless-exercise-to-cover. ONE open-market PURCHASE (P) found: Director Kevin Gorman, 53 shares @ $19.12, 2024-02-13. No mass insider distribution; no 10b5-1 plan adoptions disclosed in the window suggesting urgency.",
+      "severity": "PASS",
+      "interpretation": "Insider behavior is neutral-to-mildly-positive. No pattern of opportunistic sales near the drawdown bottom; the one identified open-market purchase (small in size, but symbolically meaningful — directors rarely buy unless they view price as attractive). Pattern is inconsistent with a 'insiders dumping ahead of bad news' profile."
+    },
+    {
+      "claim_id": "C8",
+      "R": "'On October 24, 2023, John Kuch, Senior Vice President and Chief Financial Officer, notified Xencor, Inc. ... of his intention to retire from the Company effective March 31, 2024. ... Effective on April 9, 2024, Mr. Kuch will step down from his role as Chief Financial Officer. ... Mr. Bart Cornelissen, age 46, was appointed as ...' (8-K 2023-10-26 0001326732-23-000030 + 8-K 2024-04-09 0001326732-24-000012)",
+      "f": "Mode A — Verify CFO transition timing and orderliness (notice-to-departure window, successor identified before departure, no Item 4.02 restatement). Mode B — derive: did the announced retirement coincide with any restatement, material weakness, or covenant amendment? If not, this is a routine succession.",
+      "M_source": "8-K filings 0001326732-23-000030 and 0001326732-24-000012 + edgar.list_filings (no Item 4.02 in window)",
+      "M_value": "CFO retirement announced Oct 24, 2023 with 5+ months of forward notice. Successor (Cornelissen) appointed Apr 9, 2024 with overlap. Outgoing CFO (Kuch) remains in non-executive consulting capacity — friendly transition. No Item 4.02 8-K (non-reliance on prior financials) in the pre-cutoff window. No material weakness disclosed in 10-K Item 9A (SOX assessment intact). No covenant amendments (XNCR has no debt covenants). Form 4 shows Kuch's small same-day cover sales, no large distribution.",
+      "severity": "PASS",
+      "interpretation": "Orderly CFO succession with long notice, friendly transition, no co-incident restatement or control weakness. This is what a non-distress retirement looks like, in contrast to the AAP-style pattern of CFO/CAO departures clustered with material weakness disclosure."
+    },
+    {
+      "claim_id": "C9",
+      "R": "Claim evolution check: '$697.4 million ... sufficient to fund our operations into 2027' (10-K Feb 2024) vs. '$541.4 million ... fund ... into 2027' (Q3 2023 10-Q, Nov 2023) vs. '$646.7 million ... into 2027' (Q1 2024 10-Q, May 2024)",
+      "f": "Mode A — Verify the runway endpoint claim ('into 2027') was held constant across the three sequential filings spanning the drawdown period. Mode B — derive: with cash falling $541→$697→$647 (royalty sale spike then quarterly burn), did management ever adjust the runway endpoint downward? Stable endpoint plus rising burn would be a yellow flag; stable endpoint plus stable burn would be honest.",
+      "M_source": "claim_evolution side-by-side of MD&A across Q3 2023 10-Q, FY2023 10-K, Q1 2024 10-Q",
+      "M_value": "Runway claim 'into 2027' held constant across all three filings. Quarterly cash trajectory: $541.4M (Sep 30 2023, pre-royalty-sale) → $697.4M (Dec 31 2023, post-$215M royalty proceeds) → $646.7M (Mar 31 2024, after one quarter of burn = -$50.7M quarterly). Implied burn ~$200M/yr → $647M sustains through end of 2026 / into 2027. The endpoint is mathematically consistent with the disclosed burn, and management did not tighten the language despite a $50.7M one-quarter draw. Mode-B refinement: 'into 2027' is broad — could mean Jan 1 2027 or Dec 31 2027. With current burn, $647M / $200M ≈ 3.2 yrs = mid-2027, so the claim is closer to Q2-Q3 2027 than the 'late 2027' interpretation a casual reader might assume.",
+      "severity": "PASS",
+      "interpretation": "Runway language is internally consistent and survives a three-filing claim-evolution check. The Mode-B finding (interpretive width of 'into 2027') is a minor framing observation but not material — the underlying math holds."
+    },
+    {
+      "claim_id": "C10",
+      "R": "Counter-party-mirror probe: 'Xencor' appears in 134 EDGAR filings over 2023-06-01 → 2024-05-15 across 10-K/10-Q/8-K (edgar_fts.query_fulltext). 'XmAb306', 'Ultomiris', 'Monjuvi', 'plamotamab' counterparties (Roche, Alexion, MorphoSys, J&J/Janssen) all continue to reference XNCR's programs in their own filings.",
+      "f": "Mode B — Counterparty disclosure mirror: if XNCR's partnerships are real and ongoing, the partners' own 10-Ks/10-Qs should mention Xencor in current-tense partnership language, not historical-only.",
+      "M_source": "edgar_fts.query_fulltext('Xencor', cutoff_date='2024-05-15', start_date='2023-06-01')",
+      "M_value": "134 hits across forms; top filings include XNCR's own + counterparty references in 8-Ks. The qualitative pattern matches a small-cap biotech with multiple active partner relationships. No counterparty filing surfaced in the search that disclosed a termination or material adverse modification of an XNCR agreement in the pre-cutoff window. Partnerships across Genentech (Roche), Alexion (AstraZeneca), MorphoSys, J&J, Vir, Astellas, Omeros, Zenas appear to all remain active.",
+      "severity": "PASS",
+      "interpretation": "Counterparty mirror is consistent with the 10-K narrative. No evidence of a counterparty-side termination or disagreement that XNCR is hiding. The Genentech amendment is itself the most informative counterparty signal and it is unambiguously positive."
+    }
+  ],
+  "supplemental_signals": {
+    "balance_sheet_strength": {
+      "cash_and_marketable_securities_2023_12_31": 697.4,
+      "cash_2024_03_31": 646.7,
+      "quarterly_burn_q1_2024": 50.7,
+      "implied_runway_years_at_q1_2024_burn": 3.2,
+      "going_concern_signal": "NO_GOING_CONCERN"
+    },
+    "auditor": {
+      "firm": "RSM US LLP",
+      "tenure_since": 2015,
+      "tier": "tier_2",
+      "auditor_change_signal": "CLEAN_TIER_2_TENURE",
+      "resignation_language": 0,
+      "disagreement_language": 0
+    },
+    "capital_events_pre_cutoff": [
+      "Nov 2023: $192.5M Ultomiris royalty sale to OMERS (non-dilutive)",
+      "Nov 2023: $22.5M Monjuvi royalty sale to OMERS (non-dilutive)",
+      "Nov 2023: Restated Genentech collaboration — Royalty Conversion + $600M milestone potential, Genentech assumes future development costs",
+      "Feb 2023: S-3ASR + SVB Securities sales agreement (ATM facility — no large equity issuance observed in window)"
+    ],
+    "discontinued_programs_pre_cutoff": ["vibecotamab", "tidutamab", "XmAb841"],
+    "active_clinical_pipeline_pre_cutoff": ["vudalimab (Ph2 mCRPC)", "plamotamab (with J&J)", "XmAb819 (ENPP3 x CD3, Ph1 RCC)", "XmAb541 (CLDN6 x CD3)", "XmAb808 (CD28 co-stim)", "XmAb564 / XmAb662 (cytokine)", "obexelimab (via Zenas)"],
+    "revenue_concentration": {
+      "fy2023_top2_partners_pct_revenue": 81,
+      "fy2023_janssen_pct": 46,
+      "fy2023_alexion_pct": 35,
+      "fy2022_vir_pct": 70,
+      "yoy_revenue_change_pct": 2.2,
+      "underlying_volatility": "high — Vir collapse offset by Janssen one-time"
+    },
+    "insider_pattern": {
+      "form4_count_24mo": 50,
+      "sale_transactions": 28,
+      "open_market_purchases": 1,
+      "open_market_purchase_detail": "Director Kevin Gorman, 53 sh @ $19.12, 2024-02-13",
+      "pattern": "predominantly RSU/option exercise-and-cover; no distress distribution"
+    },
+    "cfo_transition": {
+      "announced": "2023-10-24",
+      "effective": "2024-04-09",
+      "notice_window_days": 168,
+      "successor_named_before_effective": true,
+      "outgoing_remains_in_consulting": true,
+      "coincident_with_restatement": false,
+      "coincident_with_material_weakness": false
+    }
+  },
+  "summary": "XNCR is a clinical-stage biotech with a clean balance sheet ($697M cash → 3+ years runway into 2027), tier-2 auditor with 9-year tenure and no disagreements, no going-concern modifier, no debt covenants, non-dilutive royalty monetization ($215M from OMERS), an amended-and-restated Genentech partnership with $600M milestone potential (counterparty expanding commitment), and an orderly CFO succession. The -25.9% drawdown appears to be sector/sentiment-driven, not disclosure-distress-driven. Only mid-severity findings are the revenue lumpiness (Vir collapse offset by Janssen one-time, masking ~70% volatility) and burial of three program terminations in wind-down accounting rather than affirmative scientific disclosure. No SEVERE_UNDERDELIVERY or RED_FLAG_NEGATIVE tuples. Composite reads honest. Verdict: LONG-tier — this is the type of name the honesty-alpha framework should keep (clean disclosure + heavily drawn down = candidate for exclusion-driven LONG basket).",
+  "composite": 0.85
+}

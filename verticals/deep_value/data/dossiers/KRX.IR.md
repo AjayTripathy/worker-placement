@@ -1,0 +1,12 @@
+# KRX.IR — Kingspan (insulation/building envelope; Dublin)
+**Sleeve:** ukraine_reconstruction_b · **Verdict:** WATCH · DD-verified 2026-06-29
+
+**Conviction:** QUALITY-at-FULL-price leaning EXPENSIVE — DD DOWNGRADE STARTER->WATCH (no margin of safety)
+
+## Thesis
+
+CO-CORE Option-B. GATE: founder Murtagh 14.88% (far below any control/squeeze-out threshold) = PASS. EXPOSURE: the single most CONCRETE sized Ukraine mechanism — EUR280m Lviv Construction Technology Campus (panels/mineral wool/district heating, 700 jobs, FIRST foreign firm to win Ukraine state investment support, majority complete ~2030). Core product (building envelope) is reconstruction-central + EU efficient-rebuild funding tailwind. VALUATION: ~EUR74.60 (TRIANGULATED Euronext Dublin close, NOT a live IBKR print — verify), FY25 rev EUR9.2bn/EBITDA EUR1.22bn/NP EUR671m, P/E ~17-19x EV/EBITDA ~11x = premium quality not cheap. War-beta MEDIUM (moves the narrative more than near-term P&L). Euronext Dublin contract 29281825. || DD VERIFIED 2026-06-29 (FY2025 primary): DOWNGRADED STARTER->WATCH. NOT a value name. Rev EUR9.2bn, EBITDA EUR1.22bn, PAT EUR716m, net debt EUR1,884m (1.65x rising). EV/EBITDA 12.1x / P/E 19.3x / FCF yield 3.3% / ROCE 14.1% = quality-compounder PREMIUM on near-PEAK earnings. TRAP-TELL (GARP acq-step-up): of +7% rev, acquisitions +8% -> ORGANIC ~-1%, EPS +1.3% (flat); premium rests on the data-centre/Advnsys option (backlog +24%, 2026 intake 2x). RISKS: single-theme data-centre dependence; M&A-manufactured record + rising leverage from the EUR650m buyback; Grenfell/cladding legacy tail. Honesty CLEAN (record/robust framing vs flat-organic = review-flag not ELEVATE). Ukraine EUR280m Lviv = CAPEX not revenue, immaterial. WATCH for a cyclical/data-centre-capex drawdown. || EDGE-BATCH 2026-06-30 (base lens): thesis_type=DILIGENCE. Quality-at-full-price WATCH (no margin of safety). SignalOS role = value-trap hygiene: the FY25 record is M&A-manufactured (organic ~-1%, EPS flat, FCF FELL 509->429m). No masking fired; data-centre option fully disclosed + in the multiple.
+
+
+---
+*Research card auto-generated from the SignalOS research ledger (2026-06-29). Where a full deep-dive exists (DD_* / SLEEVE_* docs), that document carries the worked valuation, Mode-B pass, and primary sources.*

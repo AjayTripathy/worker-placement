@@ -1,0 +1,573 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>quality_drawdown</title><style>
+body{margin:0;background:#0b0e12;color:#e8ebee;font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:26px 24px 90px}
+a{color:#8b7cf6} h1{font-size:23px;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:#7d858e;margin:0 0 20px;font-size:13px}
+h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:#7d858e;margin:24px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 10px;border-bottom:1px solid #242a31;text-align:left;vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#7d858e}
+.k{font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:20px}
+.k-generator{color:#c3b8fb;background:rgba(139,124,246,.15)}
+.k-detector{color:#eccb8a;background:rgba(217,164,65,.15)}
+.k-watcher{color:#8ee5c1;background:rgba(53,201,143,.15)}
+.k-evidence{color:#b3bcc6;background:rgba(138,147,158,.15)}
+.h-OK{color:#35c98f} .h-STALE{color:#d9a441} .h-ERROR{color:#e0736a} .h-NEVER_RUN{color:#8a939e}
+pre{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px;overflow-x:auto;font-size:12px;line-height:1.5}
+.panel{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px 18px;margin-bottom:12px}
+ul{margin:4px 0;padding-left:20px} li{margin-bottom:4px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+</style></head><body><div class="wrap"><h1>quality_drawdown</h1><p class="sub">registered capability · quality_drawdown</p><a href="signals.html">&larr; all signals</a><div class="panel" style="margin-top:10px"><span class="k k-generator">GENERATOR</span> &nbsp;<span class="h-NEVER_RUN"><b>NEVER_RUN</b></span> · last run <span class="mono">never</span></div><p>the generator pointed at where the money actually came from.</p><form method="POST" action="/signals/run" style="margin:10px 0"><input type="hidden" name="name" value="quality_drawdown"><input name="symbol" placeholder="symbol (if applicable)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px"><input name="symbols" placeholder="universe, comma-sep (generators)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px;margin-left:6px"><button type="submit" style="background:#8b7cf6;color:#0b0e12;border:0;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;margin-left:6px">Run now</button></form><h2>Datasources</h2><ul><li>reference implementation: verticals/generators/quality_drawdown.py (see the code section for the feeds it touches)</li></ul><h2>Applies to</h2><ul><li><b>strategies:</b> concentrated, core_equity, quality_drawdown, quality_value</li></ul><h2>The code</h2><pre>&quot;&quot;&quot;quality_drawdown — the generator pointed at where the money actually came from.
+
+Built 2026-08-03 after a P&amp;L attribution showed the uncomfortable thing: 94% of the
+book&#x27;s gains came from software, services, insurance and brands — HUBS, GCT, DFIN,
+CTSH, SAP, BRBY, MNDY, KNSL, G, HRTG — while every generator we owned screened for
+cheap-on-assets industrials, distributors and banks. We had industrialised the search
+for a kind of name that produced none of our returns.
+
+Calibrating on those nine winners at their entry prices gave one shared signature:
+
+    entry vs the name&#x27;s OWN 3-year high
+    HUBS -77%  MNDY -77%  CTSH -53%  SAP -48%  G -47%
+    DFIN -41%  KNSL -41%  GCT -38%   (HRTG -13%, the outlier)
+
+Median −46%. Not cheap on book — cheap against ITS OWN history, while still being a
+good business. That is the pattern this screens for: high-quality economics, a deep
+drawdown from its own multiple, and revenue that is still growing (the guard that
+separates a fallen compounder from a melting ice cube).
+
+Deliberately NOT a value screen. Book value is not consulted anywhere. A name can
+trade at 6x sales and pass if the economics and the drawdown qualify — that is the
+point, and it is why the existing deep_value / EDINET / Euronext stack cannot find
+these.
+
+    python3 verticals/generators/quality_drawdown.py [--min-dd 0.35] [--max-dd 0.75]
+
+Writes verticals/generators/data/QUALITY_DRAWDOWN.json (MERGE by ticker — history is
+the point; a name&#x27;s drawdown depth over time is itself the signal).
+PROPOSES ONLY: every hit routes cause-check -&gt; discovery_state -&gt; court before staging.
+
+DEFECTS FIXED 2026-08-03 from the ten-court back-test (each one is a name this screen ranked
+highly and a court then had to reject for a reason the score could not see):
+  P1-1 PATH BLINDNESS  - the premise is buying capitulation, but it fired on GWRE at +54% off
+                         a 42-day low and PINS at +57% off any low. Added pct_off_52w_low /
+                         days_since_52w_low and two exhaustion modes.
+  P1-2 FX/ADR BASIS    - marketCap is in the QUOTE currency, revenue in the FILING currency;
+                         TCOM&#x27;s 0.46 P/S was pure artifact. Ratios now recomputed in one
+                         currency, or SUPPRESSED and flagged when the rate is unavailable.
+  P1-3 FORWARD GUIDE   - BSX showed trailing revenue +8% while guiding +3-5%. Trailing growth
+                         is the wrong tense for a de-rate thesis; now scored on forward/trailing.
+  P1-4 FACTOR COSTUME  - AEM&#x27;s drawdown WAS the gold price. Returns are regressed on the
+                         sector&#x27;s factor proxy and the drawdown re-run on the residual; if
+                         under 60% of the fall survives, it is beta in costume.
+  P2-5 GAAP MIXING     - GWRE&#x27;s -65% &quot;earnings growth&quot; was FX. Earnings growth is suppressed
+                         when it diverges from revenue by more than 45pp.
+  P2-7 STALENESS       - read QUARTERLY financials (annual is ~1y stale by construction) and
+                         flag a quarter-end older than ~4.5 months.
+Back-test after the fixes: rank correlation vs the courts&#x27; own scores went from NEGATIVE to
++0.61. AEM 96.5-&gt;18.8, GWRE 91.5-&gt;26.8, PINS 99.2-&gt;44.7, while both 6/10 STARTERs (ISRG, DSGX)
+held at 92.9. P2-6 (recurring-revenue multiple gate) NOT built - it needs segment-level data
+this rail does not carry; left as an honest gap rather than a fake proxy.
+
+DO NOT port the earnings-durability guard from euronext_shelf into this screen - the back-test
+showed it BLOCKS HUBS, our single best position.
+
+DEFECTS FOUND 2026-08-17 by the FIRST SIX COURTS this lane ever produced (2 trap-verify kills,
+3 adjudicated, 1 validator-stuck). Every one is an admission ticket the score could not see was
+counterfeit — i.e. the QUALITY inputs, which are this lane&#x27;s whole differentiator, are the weak rail:
+  Q1 EXTRACTIVE METRICS ARE NOT COMMENSURABLE (AGI, killed) - a miner&#x27;s &quot;gross margin&quot; 70.8% is a
+      CASH-COST construction excluding D&amp;A and all capital, and its ROE 27.4% is struck on a
+      cycle-peak realised price ($4,504/oz). Percentile-ranking those against a software cohort is
+      a category error. Worse, fwd_rev_growth 27.6% was 100% PRICE DECK while guided VOLUME was cut
+      -12%. FIX: exclude extractives, or carry all-in-sustaining-cost margins and VOLUME-based
+      forward growth for them. NOT YET BUILT.
+  Q2 ONE-TIME GAINS INFLATE ROE (GRAB, killed) - ROE 7.7% sat on $19M of operating profit against
+      $235M of reported profit: a $307M consolidation remeasurement gain plus $66M of DTA
+      recognition. Corrected ROE ~0.5-2%. The existing earnings_growth suppression (45pp vs revenue)
+      does not catch this because it never compares NET income to OPERATING income. FIX: suppress or
+      flag roe_pct when net income diverges from operating income beyond a threshold. NOT YET BUILT.
+  Q3 FX-INFLATED GROWTH (AVPT, adjudicated) - 61% non-USD revenue and 3pts of FX in headline growth;
+      constant-currency growth is ~19-20% vs the ~22-27% the screen scored. That single correction
+      moved the name from &quot;cheap-ish&quot; to &quot;fairly priced&quot;. FIX: prefer the issuer&#x27;s FX-adjusted growth
+      where disclosed. NOT YET BUILT.
+  Q4 THE FACTOR-COSTUME CHECK DISAGREED WITH THE BENCH AND THE BENCH WAS RIGHT (AGI) - the screen
+      computed residual_share 0.83 (i.e. &quot;not costume&quot;) while the court measured AGI -38.0% against
+      gold -21.1% = 1.80x beta and called it ordinary senior-producer beta. A high-beta name leaves a
+      large residual against a beta-naive regression, so the current test cannot distinguish
+      &quot;idiosyncratic&quot; from &quot;amplified factor&quot;. FIX: judge the residual against the name&#x27;s FITTED beta,
+      not against the raw factor move. THIS IS A BUG, not a tuning question. NOT YET BUILT.
+Recorded rather than silently patched: each fix changes what the lane admits, so they belong in a
+dated back-test against the winners (the HUBS guard precedent — a plausible-sounding quality filter
+already proved capable of blocking our single best position).
+&quot;&quot;&quot;
+from __future__ import annotations
+
+import argparse
+import datetime as dt
+import json
+import math
+import time
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+OUT = ROOT / &quot;verticals&quot; / &quot;generators&quot; / &quot;data&quot; / &quot;QUALITY_DRAWDOWN.json&quot;
+
+# Calibrated on the nine winners. The band matters: shallower than ~30% is noise,
+# deeper than ~80% usually means the business broke rather than the multiple.
+MIN_DD, MAX_DD = 0.35, 0.78
+MIN_GROSS_MARGIN = 0.35          # the quality gate that book value cannot see
+MIN_REV_CAGR_3Y = -0.02          # still growing, or at worst flat — the ice-cube guard
+MAX_NET_DEBT_EBITDA = 3.5
+MIN_MKTCAP = 400e6
+MAX_OFF_LOW = 0.35               # P1-1 path: &gt;35% off a fresh low = the entry is exhausted
+FRESH_LOW_DAYS = 90              # ...and &quot;fresh&quot; means the low is younger than this
+HARD_OFF_LOW = 0.50              # &gt;50% off ANY low = the capitulation trade is over regardless of date
+# P1-3: forward growth &lt; 60% of trailing = decelerating. DO NOT RAISE THIS TO CATCH BSX.
+# Cohort ratios center at 0.74 (p25 0.50, p75 1.16) — mild deceleration is the norm, not a tell.
+# BSX (court 4/10 PASS) sits at 0.61 and ISRG (court 6/10 ENTER) at 0.68: four percentile points
+# apart, so no aggregate threshold separates them. At 0.60 the gate fires only in the tail and is
+# 3-for-3 on court rejections (AEM 0.08, ALNY 0.43, GWRE 0.57) with no false positive on a pass.
+# The BSX miss is a RECALL HOLE THAT CANNOT BE CLOSED HERE: its break was segment-level
+# (electrophysiology decelerating) and the consolidated ratio averages it away. Fixing it needs
+# segment revenue, not a tighter cliff — see the segment-level-flooring rule.
+FWD_TRAIL_FLOOR = 0.60
+STALE_DAYS = 135                 # P2-7: a quarter-end older than ~4.5 months means the print is overdue/missing
+
+
+def _f(x, d=None):
+    try:
+        v = float(x)
+        return d if (v != v or math.isinf(v)) else v
+    except Exception:
+        return d
+
+
+def universe():
+    &quot;&quot;&quot;Yahoo&#x27;s server-side screener — the same rail broken_print_radar uses. Pulls US
+    names above the cap floor with a gross-margin quality prefilter, so the expensive
+    per-name work only runs on plausible candidates. FAILS LOUD: a silent empty
+    universe is indistinguishable from &#x27;no candidates found&#x27;.&quot;&quot;&quot;
+    import yfinance as yf
+    from yfinance import EquityQuery
+    syms, seen = [], set()
+    # paginate the cap ladder — one query cannot return the whole mid/large universe
+    bands = [(4e11, 1e13), (1e11, 4e11), (4e10, 1e11), (1.5e10, 4e10),
+             (7e9, 1.5e10), (3e9, 7e9), (1.2e9, 3e9), (MIN_MKTCAP, 1.2e9)]
+    for lo, hi in bands:
+        q = EquityQuery(&quot;and&quot;, [
+            EquityQuery(&quot;gte&quot;, [&quot;intradaymarketcap&quot;, lo]),
+            EquityQuery(&quot;lt&quot;, [&quot;intradaymarketcap&quot;, hi]),
+            EquityQuery(&quot;eq&quot;, [&quot;region&quot;, &quot;us&quot;]),
+        ])
+        try:
+            res = yf.screen(q, size=250, sortField=&quot;intradaymarketcap&quot;, sortAsc=False)
+            for r in (res.get(&quot;quotes&quot;) or []):
+                t = r.get(&quot;symbol&quot;)
+                ex = r.get(&quot;fullExchangeName&quot;) or &quot;&quot;
+                if t and t not in seen and &quot;OTC&quot; not in ex.upper() and &quot;PINK&quot; not in ex.upper():
+                    seen.add(t); syms.append(t)
+        except Exception as e:
+            print(f&quot;[warn] screener band {lo:.0e}-{hi:.0e} failed: {type(e).__name__}&quot;)
+        time.sleep(0.4)
+    if len(syms) &lt; 300:
+        raise SystemExit(f&quot;universe only {len(syms)} names — refusing to run a screen &quot;
+                         f&quot;that would report &#x27;no candidates&#x27; for the wrong reason&quot;)
+    return syms
+
+
+# Factor proxies for defect P1-4 (AEM: &quot;beta in costume&quot;). A drawdown that is just the
+# dominant sector factor is not a quality de-rate, however good the economics look.
+FACTOR_PROXY = {
+    &quot;Basic Materials&quot;: &quot;GLD&quot;, &quot;Energy&quot;: &quot;XLE&quot;, &quot;Real Estate&quot;: &quot;VNQ&quot;,
+    &quot;Utilities&quot;: &quot;XLU&quot;, &quot;Financial Services&quot;: &quot;XLF&quot;,
+}
+RESIDUAL_DD_RATIO = 0.60      # residual DD must be &gt;=60% of the raw DD, else the factor owns it
+
+
+def _fx_to_usd(cur: str) -&gt; float | None:
+    &quot;&quot;&quot;Defect P1-2: yfinance reports marketCap in the QUOTE currency and revenue in the
+    FILING currency. For ADRs those differ (TCOM: USD cap over CNY revenue -&gt; a 0.46 P/S
+    that is pure artifact). Convert rather than compare across units.&quot;&quot;&quot;
+    if not cur or cur.upper() == &quot;USD&quot;:
+        return 1.0
+    import yfinance as yf
+    for sym in (f&quot;{cur.upper()}USD=X&quot;, f&quot;USD{cur.upper()}=X&quot;):
+        try:
+            h = yf.Ticker(sym).history(period=&quot;5d&quot;)[&quot;Close&quot;].dropna()
+            if len(h):
+                r = float(h.iloc[-1])
+                return r if sym.startswith(cur.upper()) else 1.0 / r
+        except Exception:
+            pass
+    return None
+
+
+def _residual_drawdown(tk: str, sector: str, hist):
+    &quot;&quot;&quot;Regress daily returns on the sector&#x27;s factor proxy and re-run the drawdown on the
+    residual. Returns (residual_dd, beta, proxy) or (None, None, None) when not applicable.&quot;&quot;&quot;
+    proxy = FACTOR_PROXY.get(sector or &quot;&quot;)
+    if not proxy:
+        return None, None, None
+    import yfinance as yf
+    try:
+        f = yf.Ticker(proxy).history(period=&quot;3y&quot;)[&quot;Close&quot;].dropna()
+        j = hist.to_frame(&quot;x&quot;).join(f.to_frame(&quot;f&quot;), how=&quot;inner&quot;).dropna()
+        if len(j) &lt; 250:
+            return None, None, proxy
+        rx = j[&quot;x&quot;].pct_change().dropna(); rf = j[&quot;f&quot;].pct_change().dropna()
+        n = min(len(rx), len(rf)); rx, rf = rx[-n:], rf[-n:]
+        vf = float((rf * rf).mean() - rf.mean() ** 2)
+        if vf &lt;= 0:
+            return None, None, proxy
+        beta = float((rx * rf).mean() - rx.mean() * rf.mean()) / vf
+        resid = rx - beta * rf                       # factor-neutral return stream
+        curve, lvl, peak, mdd = [], 1.0, 1.0, 0.0
+        for r in resid:
+            lvl *= (1 + r); peak = max(peak, lvl)
+            mdd = min(mdd, lvl / peak - 1)
+        return abs(mdd), beta, proxy
+    except Exception:
+        return None, None, proxy
+
+
+def assess(tk: str):
+    import yfinance as yf
+    t = yf.Ticker(tk)
+    h = t.history(period=&quot;3y&quot;)[&quot;Close&quot;].dropna()
+    if len(h) &lt; 400:
+        return None
+    px, hi, lo = float(h.iloc[-1]), float(h.max()), float(h.min())
+    dd = 1 - px / hi
+    if not (MIN_DD &lt;= dd &lt;= MAX_DD):
+        return None                      # cheap screen first — info costs a call
+
+    # ---- defect P1-1: PATH. The screen&#x27;s premise is buying capitulation; without these
+    # it fired on GWRE at +54% off a 42-day low. A deep drawdown you are late to is a
+    # different trade from a deep drawdown you are early to.
+    h52 = h.tail(252)
+    lo52 = float(h52.min()); lo52_date = h52.idxmin()
+    off_low52 = px / lo52 - 1
+    days_since_low = int((h.index[-1] - lo52_date).days)
+    # Two exhaustion modes, both &quot;you are late&quot;: a big bounce off a FRESH low (GWRE,
+    # +54% off 42 days) or a very big bounce off any low (PINS, +57% off 170 days).
+    exhausted = (off_low52 &gt; MAX_OFF_LOW and days_since_low &lt; FRESH_LOW_DAYS) or \
+                (off_low52 &gt; HARD_OFF_LOW)
+
+    info = t.info or {}
+    cap = _f(info.get(&quot;marketCap&quot;), 0)
+    if cap &lt; MIN_MKTCAP:
+        return None
+    gm = _f(info.get(&quot;grossMargins&quot;))
+    if gm is None or gm &lt; MIN_GROSS_MARGIN:
+        return None
+
+    # ---- defect P1-2: FX/ADR basis. Put cap and revenue in the SAME currency before
+    # any ratio. Flag rather than silently emit a corrupt multiple.
+    fin_cur = (info.get(&quot;financialCurrency&quot;) or &quot;USD&quot;).upper()
+    quote_cur = (info.get(&quot;currency&quot;) or &quot;USD&quot;).upper()
+    fx_note, ps_clean = None, _f(info.get(&quot;priceToSalesTrailing12Months&quot;))
+    if fin_cur != quote_cur:
+        rate = _fx_to_usd(fin_cur)
+        rev_local = _f(info.get(&quot;totalRevenue&quot;))
+        if rate and rev_local:
+            ps_clean = cap / (rev_local * rate)
+            fx_note = f&quot;P/S recomputed: cap {quote_cur} vs revenue {fin_cur} (raw {_f(info.get(&#x27;priceToSalesTrailing12Months&#x27;))} -&gt; {ps_clean:.2f})&quot;
+        else:
+            ps_clean, fx_note = None, f&quot;CURRENCY MISMATCH {quote_cur}/{fin_cur} — ratios SUPPRESSED, unverifiable&quot;
+
+    # the ice-cube guard: is revenue still growing?
+    rev_cagr = None
+    try:
+        fin = t.financials
+        if fin is not None and &quot;Total Revenue&quot; in fin.index and fin.shape[1] &gt;= 3:
+            r = [_f(v) for v in fin.loc[&quot;Total Revenue&quot;].values if _f(v)]
+            if len(r) &gt;= 3 and r[-1] &gt; 0:
+                rev_cagr = (r[0] / r[-1]) ** (1 / (len(r) - 1)) - 1
+    except Exception:
+        pass
+    if rev_cagr is not None and rev_cagr &lt; MIN_REV_CAGR_3Y:
+        return None
+
+    # ---- defect P1-3: FORWARD-GUIDE gate. BSX showed trailing revenue +8% while the
+    # company guided +3-5%. Trailing growth is the wrong tense for a de-rate thesis.
+    fwd_rev_growth, guide_ratio = None, None
+    try:
+        re_ = t.revenue_estimate
+        if re_ is not None and &quot;+1y&quot; in re_.index:
+            fwd_rev_growth = _f(re_.loc[&quot;+1y&quot;, &quot;growth&quot;])
+    except Exception:
+        pass
+    trail_rev_growth = _f(info.get(&quot;revenueGrowth&quot;))
+    if fwd_rev_growth is not None and trail_rev_growth and trail_rev_growth &gt; 0:
+        guide_ratio = fwd_rev_growth / trail_rev_growth
+    guide_flag = (guide_ratio is not None and guide_ratio &lt; FWD_TRAIL_FLOOR)
+
+    # ---- defect P2-5: GAAP/non-GAAP mixing. Suppress earnings-growth when the move is
+    # not coming from operations (GWRE&#x27;s -65% was FX; PINS&#x27;s -3% op margin is seasonality).
+    earn_growth = _f(info.get(&quot;earningsGrowth&quot;))
+    earn_note = None
+    if earn_growth is not None and trail_rev_growth is not None:
+        if abs(earn_growth) &gt; 0.40 and abs(earn_growth - trail_rev_growth) &gt; 0.45:
+            earn_note = (&quot;earnings growth SUPPRESSED — diverges from revenue by &quot;
+                         f&quot;{abs(earn_growth - trail_rev_growth)*100:.0f}pp; likely non-operating &quot;
+                         &quot;(FX/one-offs). Verify in the filing before using.&quot;)
+            earn_growth = None
+
+    ebitda = _f(info.get(&quot;ebitda&quot;))
+    nd = _f(info.get(&quot;totalDebt&quot;), 0) - _f(info.get(&quot;totalCash&quot;), 0)
+    lev = (nd / ebitda) if (ebitda and ebitda &gt; 0) else None
+    if lev is not None and lev &gt; MAX_NET_DEBT_EBITDA:
+        return None
+
+    # ---- defect P1-4: FACTOR-BETA gate. Is the drawdown just the sector factor?
+    sector = info.get(&quot;sector&quot;)
+    resid_dd, fbeta, proxy = _residual_drawdown(tk, sector, h)
+    # ratio, not level: what fraction of the fall survives removing the sector factor?
+    factor_costume = (resid_dd is not None and dd &gt; 0 and (resid_dd / dd) &lt; RESIDUAL_DD_RATIO)
+    resid_share = round(resid_dd / dd, 2) if (resid_dd is not None and dd &gt; 0) else None
+
+    # ---- defect P2-7: STALENESS. DXCM cited 7-month-old customer counts; a screen that
+    # reads stale fundamentals as current is reading fiction.
+    stale_days = None
+    try:
+        qf = t.quarterly_financials              # QUARTERLY, not annual — annual is always ~1y stale
+        if qf is not None and qf.shape[1]:
+            import pandas as pd
+            stale_days = int((pd.Timestamp.today(tz=None) - pd.Timestamp(qf.columns[0])).days)
+    except Exception:
+        pass
+
+    last60 = h.tail(60)
+    basing = float(last60.iloc[-1]) &gt; float(last60.min()) * 1.05
+
+    return {
+        &quot;ticker&quot;: tk, &quot;price&quot;: round(px, 2),
+        &quot;drawdown_from_3y_high_pct&quot;: round(dd * 100, 1),
+        &quot;off_3y_low_pct&quot;: round((px / lo - 1) * 100, 1),
+        &quot;pct_off_52w_low&quot;: round(off_low52 * 100, 1),
+        &quot;days_since_52w_low&quot;: days_since_low,
+        &quot;entry_exhausted&quot;: exhausted,
+        &quot;basing&quot;: basing,
+        &quot;market_cap_musd&quot;: round(cap / 1e6),
+        &quot;gross_margin_pct&quot;: round(gm * 100, 1),
+        &quot;roe_pct&quot;: round(_f(info.get(&quot;returnOnEquity&quot;), 0) * 100, 1),
+        &quot;rev_cagr_3y_pct&quot;: round(rev_cagr * 100, 1) if rev_cagr is not None else None,
+        &quot;fwd_rev_growth_pct&quot;: round(fwd_rev_growth * 100, 1) if fwd_rev_growth is not None else None,
+        &quot;guide_vs_trailing_ratio&quot;: round(guide_ratio, 2) if guide_ratio is not None else None,
+        &quot;guide_decel_flag&quot;: guide_flag,
+        &quot;earnings_growth_pct&quot;: round(earn_growth * 100, 1) if earn_growth is not None else None,
+        &quot;earnings_note&quot;: earn_note,
+        &quot;price_to_sales&quot;: round(ps_clean, 2) if ps_clean is not None else None,
+        &quot;fx_note&quot;: fx_note,
+        &quot;residual_drawdown_pct&quot;: round(resid_dd * 100, 1) if resid_dd is not None else None,
+        &quot;residual_share_of_drawdown&quot;: resid_share,
+        &quot;factor_beta&quot;: round(fbeta, 2) if fbeta is not None else None,
+        &quot;factor_proxy&quot;: proxy,
+        &quot;factor_costume&quot;: factor_costume,
+        &quot;financials_age_days&quot;: stale_days,
+        &quot;stale_flag&quot;: (stale_days is not None and stale_days &gt; STALE_DAYS),
+        &quot;net_debt_ebitda&quot;: round(lev, 2) if lev is not None else None,
+        &quot;fcf_musd&quot;: round(_f(info.get(&quot;freeCashflow&quot;), 0) / 1e6),
+        &quot;sector&quot;: sector, &quot;industry&quot;: info.get(&quot;industry&quot;),
+        &quot;name&quot;: (info.get(&quot;shortName&quot;) or &quot;&quot;)[:40],
+    }
+
+
+def score(r):
+    &quot;&quot;&quot;Rank by how closely a name matches the winners&#x27; signature, not by cheapness.
+    Depth near the winners&#x27; −46% median, quality economics, still growing, and
+    basing rather than falling.&quot;&quot;&quot;
+    depth = 1 - abs(r[&quot;drawdown_from_3y_high_pct&quot;] / 100 - 0.46) / 0.46
+    qual = min(r[&quot;gross_margin_pct&quot;] / 70, 1.0)
+    grow = min(max((r[&quot;rev_cagr_3y_pct&quot;] or 0) / 15, 0), 1.0)
+    base = 1.0 if r[&quot;basing&quot;] else 0.45
+    raw = 100 * (0.35 * max(depth, 0) + 0.30 * qual + 0.20 * grow + 0.15 * base)
+    # HARD DEMOTES from the 2026-08-03 court back-test — each one is a name the screen
+    # surfaced and a court then had to reject for a reason the score could not see.
+    if r.get(&quot;entry_exhausted&quot;):    raw *= 0.45      # GWRE: +54% off a 42-day low
+    if r.get(&quot;factor_costume&quot;):     raw *= 0.30      # AEM: the drawdown was the gold price
+    if r.get(&quot;guide_decel_flag&quot;):   raw *= 0.65      # BSX: trailing +8% vs guided +3-5%
+    if r.get(&quot;stale_flag&quot;):         raw *= 0.85      # DXCM: 7-month-old metrics
+    return round(raw, 1)
+
+
+COURT_FRAME = (
+ &quot;QUALITY-DRAWDOWN LANE — the pond the P&amp;L actually came from (attribution 2026-08-03: 94% of the &quot;
+ &quot;book&#x27;s gains came from software/services/insurance/brands bought at a median -46% against each &quot;
+ &quot;name&#x27;s OWN 3-year high, while every generator we owned hunted cheap-on-assets industrials that &quot;
+ &quot;produced NONE of our returns). This row is NOT a dislocation candidate and must not be courted as &quot;
+ &quot;one — book value is not consulted anywhere in this screen and a 6x-sales name can qualify.\n\n&quot;
+ &quot;THE COURT QUESTION IS FALLEN COMPOUNDER vs MELTING ICE CUBE, and nothing else:\n&quot;
+ &quot;  (1) Are the ECONOMICS intact? Gross margin, ROE and revenue growth are the screen&#x27;s premise — &quot;
+ &quot;re-derive them from PRIMARY filings, and say so if the screen&#x27;s vendor figures do not survive.\n&quot;
+ &quot;  (2) Is the de-rate MULTIPLE COMPRESSION on a working business, or the market correctly pricing &quot;
+ &quot;deterioration? The winners were good businesses at a discount to their own valuation HISTORY; the &quot;
+ &quot;kill is a business whose fundamentals are following the multiple down.\n&quot;
+ &quot;  (3) VALUE-LADDER FLOW GATE (binding): if the de-rate is rational AND ongoing, do not bid into &quot;
+ &quot;our own predicted flow. Entry needs exhaustion evidence — the downgrade cycle landed, volume decay, &quot;
+ &quot;or a dated catalyst — not merely a deep number.\n&quot;
+ &quot;  (4) FORWARD TENSE: trailing growth is the wrong tense for a de-rate thesis (the BSX defect). &quot;
+ &quot;Grade guided/forward revenue against trailing, and treat a guide-deceleration as disqualifying &quot;
+ &quot;unless the court can name why.\n&quot;
+ &quot;  (5) FACTOR COSTUME: if the drawdown is the sector&#x27;s factor (the AEM lesson — the fall WAS the &quot;
+ &quot;gold price), this is beta wearing an idiosyncratic costume. Regress it or say the check did not run.\n\n&quot;
+ &quot;SIZE IS NOT A DISQUALIFIER HERE and the queue-hygiene large-cap eviction DOES NOT APPLY to this &quot;
+ &quot;source: the attribution&#x27;s winners include SAP, CTSH, KNSL and HUBS. A covered mega-cap at a 46% &quot;
+ &quot;discount to its own history is exactly the shape being hunted — the CROWDED conditioning kills the &quot;
+ &quot;EDGE classification, not the position (RP_FAIR remains available on verified fairness).\n&quot;
+ &quot;PROPOSES ONLY: cause-check -&gt; discovery_state -&gt; court before anything stages.&quot;
+)
+
+
+def enqueue_top(store: dict, n: int = 6, dry_run: bool = False) -&gt; dict:
+    &quot;&quot;&quot;Wire the screen INTO the conveyor. Built 2026-08-17 after finding the gap that made this
+    generator inert: it had run weekly since 2026-08-03, ranked 99 names, and enqueued ZERO — while
+    100% of the live court queue came from drawdown/dislocation sweeps, i.e. the exact pond the
+    attribution said produced none of our returns. The screen was right and unwired.&quot;&quot;&quot;
+    import sys as _sys
+    from pathlib import Path as _P
+    _root = _P(__file__).resolve().parents[2]
+    if str(_root) not in _sys.path:
+        _sys.path.insert(0, str(_root))
+    from desk.court_queue import enqueue_candidates, QUEUE
+
+    rows = [r for r in store[&quot;names&quot;].values() if isinstance(r, dict) and r.get(&quot;score&quot;)]
+    # Only CLEAN hits are courted — every flag below is a defect a court already had to reject for.
+    clean = [r for r in rows if not (r.get(&quot;factor_costume&quot;) or r.get(&quot;stale_flag&quot;)
+                                     or r.get(&quot;guide_decel_flag&quot;) or r.get(&quot;entry_exhausted&quot;))]
+    clean.sort(key=lambda r: -r[&quot;score&quot;])
+
+    # Rank first, THEN drop names we already track — and pick the top N of what remains.
+    # Taking a naive top-N instead yields a silent zero: on the 2026-08-17 run, 35 of the 44
+    # clean hits were already in the ledger, so &quot;top 6&quot; was entirely absorbed by the enqueue&#x27;s
+    # ledger filter and courted nothing while reporting success. Same silent-zero family as a
+    # stale cache reading as all-clear. The already-known names are NOT waste — they are a
+    # ranking of our own watchlist by the winners&#x27; signature, returned separately.
+    import re as _re
+    try:
+        _led = {_re.split(r&quot;[.\s]&quot;, n[&quot;ticker&quot;])[0].upper()
+                for n in json.loads((_root / &quot;desk/data/research_ledger.json&quot;).read_text())[&quot;names&quot;]}
+    except Exception:
+        _led = set()
+    try:
+        _queued = {r[&quot;ticker&quot;].upper() for r in QUEUE.rows()}
+    except Exception:
+        _queued = set()
+    fresh = [r for r in clean if r[&quot;ticker&quot;].upper() not in _led and r[&quot;ticker&quot;].upper() not in _queued]
+    known = [r for r in clean if r[&quot;ticker&quot;].upper() in _led]
+    top = fresh[:n]
+    if dry_run:
+        return {&quot;would_enqueue&quot;: [r[&quot;ticker&quot;] for r in top],
+                &quot;fresh_pool&quot;: len(fresh), &quot;already_tracked&quot;: len(known),
+                &quot;watchlist_ranking_top10&quot;: [(r[&quot;ticker&quot;], r[&quot;score&quot;]) for r in known[:10]],
+                &quot;clean_pool&quot;: len(clean), &quot;total_ranked&quot;: len(rows)}
+    res = enqueue_candidates(
+        [{&quot;ticker&quot;: r[&quot;ticker&quot;], &quot;name&quot;: r.get(&quot;name&quot;), &quot;px&quot;: r.get(&quot;price&quot;),
+          &quot;mcap&quot;: (r.get(&quot;market_cap_musd&quot;) or 0) * 1e6,
+          &quot;dd3y&quot;: r.get(&quot;drawdown_from_3y_high_pct&quot;), &quot;score&quot;: r.get(&quot;score&quot;),
+          &quot;gross_margin_pct&quot;: r.get(&quot;gross_margin_pct&quot;), &quot;roe_pct&quot;: r.get(&quot;roe_pct&quot;),
+          &quot;fwd_rev_growth_pct&quot;: r.get(&quot;fwd_rev_growth_pct&quot;)} for r in top],
+        source=f&quot;quality_drawdown/{dt.date.today().isoformat()}&quot;)
+    # per-name context: the signature that got it here, then the shared court frame
+    if res.get(&quot;added&quot;):
+        qrows = QUEUE.rows()
+        by = {r[&quot;ticker&quot;]: r for r in top}
+        touched = []
+        for item in qrows:
+            r = by.get(item[&quot;ticker&quot;])
+            if r is None or item.get(&quot;context&quot;):
+                continue
+            item[&quot;context&quot;] = (
+                f&quot;SIGNATURE: -{r[&#x27;drawdown_from_3y_high_pct&#x27;]:.0f}% vs its OWN 3-year high &quot;
+                f&quot;(winners&#x27; median -46%), gross margin {r.get(&#x27;gross_margin_pct&#x27;) or 0:.0f}%, &quot;
+                f&quot;ROE {r.get(&#x27;roe_pct&#x27;)}, 3y revenue CAGR {r.get(&#x27;rev_cagr_3y_pct&#x27;)}%, forward &quot;
+                f&quot;revenue {r.get(&#x27;fwd_rev_growth_pct&#x27;)}%, {&#x27;BASING&#x27; if r.get(&#x27;basing&#x27;) else &#x27;still falling&#x27;}, &quot;
+                f&quot;+{r.get(&#x27;pct_off_52w_low&#x27;) or 0:.0f}% off the 52-wk low, score {r[&#x27;score&#x27;]}.\n\n&quot;
+                + COURT_FRAME)
+            touched.append(item)
+        if touched:
+            QUEUE.upsert(touched, generated_by=&quot;quality_drawdown:context&quot;)
+    res[&quot;already_tracked_skipped&quot;] = len(known)
+    res[&quot;watchlist_ranking&quot;] = [{&quot;ticker&quot;: r[&quot;ticker&quot;], &quot;score&quot;: r[&quot;score&quot;],
+                                 &quot;dd3y_pct&quot;: r[&quot;drawdown_from_3y_high_pct&quot;]} for r in known[:20]]
+    # The watchlist ranking is a first-class output, not a byproduct: it says which names we
+    # ALREADY track best match the signature that produced 94% of realised gains.
+    store[&quot;watchlist_ranking_asof&quot;] = dt.date.today().isoformat()
+    store[&quot;watchlist_ranking&quot;] = res[&quot;watchlist_ranking&quot;]
+    OUT.write_text(json.dumps(store, indent=1))
+    return res
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument(&quot;--min-dd&quot;, type=float, default=MIN_DD)
+    ap.add_argument(&quot;--max-dd&quot;, type=float, default=MAX_DD)
+    ap.add_argument(&quot;--limit&quot;, type=int, default=0, help=&quot;cap universe for a fast pass&quot;)
+    ap.add_argument(&quot;--enqueue&quot;, type=int, default=0,
+                    help=&quot;court the top N CLEAN hits (0 = propose only, the pre-2026-08-17 behaviour)&quot;)
+    ap.add_argument(&quot;--enqueue-only&quot;, action=&quot;store_true&quot;,
+                    help=&quot;skip the scan; enqueue from the stored ranking&quot;)
+    a = ap.parse_args()
+    if a.enqueue_only:
+        store = json.loads(OUT.read_text())
+        print(&quot;[quality_drawdown]&quot;, enqueue_top(store, a.enqueue or 6))
+        return
+    globals()[&quot;MIN_DD&quot;], globals()[&quot;MAX_DD&quot;] = a.min_dd, a.max_dd
+
+    u = universe()
+    if a.limit:
+        u = u[: a.limit]
+    print(f&quot;[quality_drawdown] universe {len(u)} names, drawdown band &quot;
+          f&quot;{a.min_dd:.0%}-{a.max_dd:.0%}&quot;)
+    hits, errs = [], 0
+    for i, tk in enumerate(u, 1):
+        try:
+            r = assess(tk)
+            if r:
+                r[&quot;score&quot;] = score(r)
+                hits.append(r)
+                print(f&quot;  HIT {tk:6s} dd -{r[&#x27;drawdown_from_3y_high_pct&#x27;]:.0f}% &quot;
+                      f&quot;gm {r[&#x27;gross_margin_pct&#x27;]:.0f}% score {r[&#x27;score&#x27;]}&quot;)
+        except Exception:
+            errs += 1
+        if i % 100 == 0:
+            print(f&quot;  ...{i}/{len(u)} scanned, {len(hits)} hits, {errs} errors&quot;)
+        time.sleep(0.12)
+
+    hits.sort(key=lambda r: -r[&quot;score&quot;])
+    store = json.loads(OUT.read_text()) if OUT.exists() else {&quot;runs&quot;: [], &quot;names&quot;: {}}
+    store[&quot;runs&quot;].append({&quot;date&quot;: dt.date.today().isoformat(), &quot;universe&quot;: len(u),
+                          &quot;hits&quot;: len(hits), &quot;errors&quot;: errs,
+                          &quot;band&quot;: [a.min_dd, a.max_dd]})
+    for r in hits:                       # MERGE by ticker — drawdown history is signal
+        prev = store[&quot;names&quot;].get(r[&quot;ticker&quot;], {})
+        r[&quot;first_seen&quot;] = prev.get(&quot;first_seen&quot;, dt.date.today().isoformat())
+        r[&quot;last_seen&quot;] = dt.date.today().isoformat()
+        r[&quot;seen_count&quot;] = prev.get(&quot;seen_count&quot;, 0) + 1
+        store[&quot;names&quot;][r[&quot;ticker&quot;]] = r
+    OUT.parent.mkdir(parents=True, exist_ok=True)
+    OUT.write_text(json.dumps(store, indent=1))
+
+    print(f&quot;\n[quality_drawdown] {len(hits)} candidates ({errs} errors) -&gt; {OUT}&quot;)
+    if a.enqueue:
+        print(f&quot;[quality_drawdown] enqueue -&gt;&quot;, enqueue_top(store, a.enqueue))
+    print(f&quot;\n{&#x27;rank&#x27;:&gt;4s} {&#x27;tkr&#x27;:7s} {&#x27;dd%&#x27;:&gt;6s} {&#x27;offLo&#x27;:&gt;6s} {&#x27;gm%&#x27;:&gt;5s} {&#x27;fwd/tr&#x27;:&gt;7s} &quot;
+          f&quot;{&#x27;resid&#x27;:&gt;6s} {&#x27;cap$m&#x27;:&gt;8s} {&#x27;sc&#x27;:&gt;5s}  flags · name&quot;)
+    for i, r in enumerate(hits[:25], 1):
+        fl = []
+        if r.get(&quot;entry_exhausted&quot;): fl.append(&quot;EXHAUSTED&quot;)
+        if r.get(&quot;factor_costume&quot;):  fl.append(f&quot;FACTOR({r.get(&#x27;factor_proxy&#x27;)})&quot;)
+        if r.get(&quot;guide_decel_flag&quot;):fl.append(&quot;GUIDE-DECEL&quot;)
+        if r.get(&quot;stale_flag&quot;):      fl.append(&quot;STALE&quot;)
+        if r.get(&quot;fx_note&quot;):         fl.append(&quot;FX-FIXED&quot;)
+        if not r[&quot;basing&quot;]:          fl.append(&quot;falling&quot;)
+        print(f&quot;{i:&gt;4d} {r[&#x27;ticker&#x27;]:7s} {-r[&#x27;drawdown_from_3y_high_pct&#x27;]:&gt;5.0f}% &quot;
+              f&quot;{r[&#x27;pct_off_52w_low&#x27;]:&gt;5.0f}% {r[&#x27;gross_margin_pct&#x27;]:&gt;4.0f}% &quot;
+              f&quot;{(str(r[&#x27;guide_vs_trailing_ratio&#x27;]) if r[&#x27;guide_vs_trailing_ratio&#x27;] is not None else &#x27;—&#x27;):&gt;7s} &quot;
+              f&quot;{(str(r[&#x27;residual_drawdown_pct&#x27;])+&#x27;%&#x27; if r[&#x27;residual_drawdown_pct&#x27;] is not None else &#x27;—&#x27;):&gt;6s} &quot;
+              f&quot;{r[&#x27;market_cap_musd&#x27;]:&gt;8,} {r[&#x27;score&#x27;]:&gt;5}  {&#x27; &#x27;.join(fl)}{&#x27; · &#x27; if fl else &#x27;&#x27;}{r[&#x27;name&#x27;]}&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</pre></div></body></html>

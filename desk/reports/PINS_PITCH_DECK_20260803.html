@@ -1,0 +1,475 @@
+<title>PINS — Quality-Drawdown Court Deck</title>
+<style>
+  :root {
+    --paper: #F7F8F6; --card: #FFFFFF; --ink: #1A2530; --ink-2: #4C5A66; --ink-3: #7C8893;
+    --rail: #23425F; --rail-ink: #E9EEF3; --hair: #DDE3E0;
+    --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a;
+    --warn-bg: #FBF3E4; --warn-bd: #D9A54A; --ok-bg: #E8F5EF; --bad-bg: #FBEAE7;
+    --pill-v: #0E6E45; --pill-c: #23425F; --pill-r: #A93226; --pill-u: #8A6D1D;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:where(:not([data-theme="light"])) {
+      --paper: #10161C; --card: #171F27; --ink: #E7ECF0; --ink-2: #A9B4BD; --ink-3: #77828C;
+      --rail: #1B2F44; --rail-ink: #D7E1EA; --hair: #2A353F;
+      --s1: #3987e5; --s2: #d95926; --s3: #199e70;
+      --warn-bg: #2A2415; --warn-bd: #C98500; --ok-bg: #14261E; --bad-bg: #2C1B18;
+      --pill-v: #2FA97A; --pill-c: #7FA6CC; --pill-r: #E66767; --pill-u: #C9A94E;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #10161C; --card: #171F27; --ink: #E7ECF0; --ink-2: #A9B4BD; --ink-3: #77828C;
+    --rail: #1B2F44; --rail-ink: #D7E1EA; --hair: #2A353F;
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70;
+    --warn-bg: #2A2415; --warn-bd: #C98500; --ok-bg: #14261E; --bad-bg: #2C1B18;
+    --pill-v: #2FA97A; --pill-c: #7FA6CC; --pill-r: #E66767; --pill-u: #C9A94E;
+  }
+  :root[data-theme="light"] {
+    --paper: #F7F8F6; --card: #FFFFFF; --ink: #1A2530; --ink-2: #4C5A66; --ink-3: #7C8893;
+    --rail: #23425F; --rail-ink: #E9EEF3; --hair: #DDE3E0;
+    --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a;
+    --warn-bg: #FBF3E4; --warn-bd: #D9A54A; --ok-bg: #E8F5EF; --bad-bg: #FBEAE7;
+    --pill-v: #0E6E45; --pill-c: #23425F; --pill-r: #A93226; --pill-u: #8A6D1D;
+  }
+  body { background: var(--paper); color: var(--ink); margin: 0;
+         font-family: Charter, Georgia, 'Times New Roman', serif; line-height: 1.55; }
+  .deck { max-width: 960px; margin: 0 auto; padding: 0 20px 80px; }
+  .slide { background: var(--card); border: 1px solid var(--hair); border-radius: 6px;
+           margin: 28px 0; overflow: hidden; }
+  .rail { background: var(--rail); color: var(--rail-ink); display: flex; align-items: baseline;
+          gap: 14px; padding: 8px 18px; font-family: 'Avenir Next Condensed','Arial Narrow','Helvetica Neue',sans-serif; }
+  .rail .no { font-size: 13px; letter-spacing: .18em; opacity: .75; font-variant-numeric: tabular-nums; }
+  .rail .lab { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; }
+  .body { padding: 22px 26px 26px; }
+  h1 { font-family: 'Avenir Next Condensed','Arial Narrow','Helvetica Neue',sans-serif;
+       font-weight: 700; font-size: 40px; line-height: 1.08; margin: 6px 0 10px; text-wrap: balance; }
+  h2 { font-family: 'Avenir Next Condensed','Arial Narrow','Helvetica Neue',sans-serif;
+       font-weight: 600; font-size: 25px; margin: 0 0 12px; text-wrap: balance; }
+  h3 { font-size: 17px; margin: 18px 0 6px; }
+  p, li { font-size: 15.5px; color: var(--ink); max-width: 70ch; }
+  .sub { color: var(--ink-2); }
+  .small { font-size: 13px; color: var(--ink-2); }
+  .mono, td.num, .num { font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+        font-variant-numeric: tabular-nums; }
+  table { border-collapse: collapse; width: 100%; font-size: 13.5px; margin: 10px 0; }
+  .tw { overflow-x: auto; }
+  th { text-align: left; font-family: 'Avenir Next Condensed','Arial Narrow',sans-serif;
+       font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--ink-2);
+       border-bottom: 2px solid var(--rail); padding: 6px 10px 4px; white-space: nowrap; }
+  td { border-bottom: 1px solid var(--hair); padding: 7px 10px; vertical-align: top; }
+  td.num { text-align: right; white-space: nowrap; }
+  .pill { display: inline-block; border-radius: 3px; padding: 1px 7px; font-size: 11px;
+          font-family: 'Avenir Next Condensed','Arial Narrow',sans-serif; letter-spacing: .08em;
+          text-transform: uppercase; color: #fff; }
+  .pv { background: var(--pill-v); } .pc { background: var(--pill-c); }
+  .pr { background: var(--pill-r); } .pu { background: var(--pill-u); }
+  .verdict { display: flex; flex-wrap: wrap; gap: 12px; margin: 16px 0; }
+  .vcard { flex: 1 1 150px; border: 1px solid var(--hair); border-radius: 5px; padding: 10px 14px; }
+  .vcard .k { font-size: 11.5px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3);
+              font-family: 'Avenir Next Condensed','Arial Narrow',sans-serif; }
+  .vcard .v { font-size: 21px; font-weight: 700; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .callout { border-left: 3px solid var(--warn-bd); background: var(--warn-bg);
+             padding: 10px 16px; margin: 14px 0; border-radius: 0 4px 4px 0; }
+  .callout p { margin: 4px 0; }
+  figure { margin: 18px 0; }
+  figcaption { font-size: 12.5px; color: var(--ink-2); margin-top: 6px; max-width: 78ch; }
+  svg text { font-family: ui-monospace,'SF Mono',Menlo,monospace; fill: var(--ink-2); }
+  svg .axl { font-size: 10.5px; }
+  svg .dl  { font-size: 11px; fill: var(--ink); }
+  svg .grid { stroke: var(--hair); stroke-width: 1; }
+  .legend { display: flex; gap: 18px; font-size: 12.5px; color: var(--ink-2); margin: 4px 0 0; }
+  .sw { display:inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+  .fine { font-size: 12.5px; color: var(--ink-3); }
+  #tip { position: fixed; pointer-events: none; background: var(--ink); color: var(--paper);
+         font: 12px ui-monospace, Menlo, monospace; padding: 4px 8px; border-radius: 3px;
+         opacity: 0; transition: opacity .12s; z-index: 10; max-width: 260px; }
+  @media (prefers-reduced-motion: reduce) { #tip { transition: none; } }
+</style>
+
+<div id="tip" role="status"></div>
+<div class="deck">
+
+<!-- ══════════ SLIDE 1 — COVER ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">01 / 12</span><span class="lab">Cover · Verdict</span></div>
+  <div class="body">
+    <p class="small mono">DESK RESEARCH · QUALITY-DRAWDOWN COHORT · 2026-08-03 · PINS (NYSE)</p>
+    <h1>Pinterest: the crash the screen couldn't see</h1>
+    <p class="sub">The screen row shows a sleepy stock: −46% from a two-year-old high, +9.8% over six months.
+    The actual object crashed 65% and rebounded 77% inside that same six-month window — and while it traded
+    at the lows, the company retired 17% of its own share count. This is a recapitalized platform priced as
+    a permanent ~10x-EBITDA business, with an earnings print days away.</p>
+    <div class="verdict">
+      <div class="vcard"><div class="k">Court verdict</div><div class="v">5 / 10</div>
+        <div class="small">small tranched starter — NOT a dislocation</div></div>
+      <div class="vcard"><div class="k">Class</div><div class="v" style="font-size:16px">RP_FAIR<br>+ thin EDGE overlay</div></div>
+      <div class="vcard"><div class="k">Live (2026-08-03)</div><div class="v">$24.50</div>
+        <div class="small">52w $13.84–$40.60 · vol 13.1M</div></div>
+      <div class="vcard"><div class="k">Prob-weighted FV</div><div class="v">$33.38</div>
+        <div class="small">+36% — dispersion is enormous</div></div>
+      <div class="vcard"><div class="k">Target size</div><div class="v">1.0%</div>
+        <div class="small">three tranches; T1 is deliberately tiny</div></div>
+    </div>
+    <p class="fine"><b>Position disclosure (at publication):</b> no PINS position is held as of 2026-08-03
+    (positions polled same-session). This document is the v1.4 thesis gate for the tranche plan on slide 10;
+    orders may be staged and submitted after publication, and the author may trade at any time without notice.</p>
+  </div>
+</section>
+
+<!-- ══════════ SLIDE 2 — SCREEN BLINDNESS ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">02 / 12</span><span class="lab">Screen audit — three of eight fields wrong or misleading</span></div>
+  <div class="body">
+    <h2>Every screen field was technically defensible. The picture they drew was false.</h2>
+    <div class="tw"><table>
+      <tr><th>Screen field</th><th>What verification found</th><th>Grade</th></tr>
+      <tr><td class="mono">+9.8% over 6 months</td>
+          <td>the window straddles a <b>−65% crash</b> ($39.93 → $13.84) and a <b>+77% rip</b> — the defining
+          volatility of the name is invisible in the field</td>
+          <td><span class="pill pr">Misleading</span></td></tr>
+      <tr><td class="mono">op margin −3%</td>
+          <td>TTM GAAP operating margin is <b>+7.3%</b> ($320M of operating income); Q4 carries 31% of revenue
+          and nearly all profit — any single-quarter margin read on PINS is a seasonality artifact</td>
+          <td><span class="pill pr">Refuted</span></td></tr>
+      <tr><td class="mono">fwd P/E 10.8 vs EV/EBITDA 38.3</td>
+          <td>both right, measuring different things: the P/E excludes stock comp, the EV/EBITDA effectively
+          includes it. <b>SBC is 20.9% of revenue</b> — the gap between the multiples <i>is</i> the stock comp</td>
+          <td><span class="pill pc">Resolved</span></td></tr>
+      <tr><td class="mono">−46.3% from 2024-06 high</td><td>confirmed (−45.8% vs the $45.19 June-2024 high) —
+          but the operative de-rate is six months old, not two years</td>
+          <td><span class="pill pv">Verified</span></td></tr>
+      <tr><td class="mono">P/S 3.1 · rev +18% · cap $13.5B</td><td>all tie (3.09x · +17.8% · $13.72B on
+          560.2M shares)</td><td><span class="pill pv">Verified</span></td></tr>
+    </table></div>
+    <div class="callout"><p><b>The honest earnings power:</b> headline non-GAAP EPS runs ~$2.02. Charge the
+    buyback needed just to offset dilution and owner earnings are ~<b>$1.55/share — 24% below headline</b>.
+    Every valuation figure in this deck uses the honest basis or says which one it is using.</p></div>
+  </div>
+</section>
+
+<!-- ══════════ SLIDE 3 — CAUSE ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">03 / 12</span><span class="lab">Cause check — two de-rates, one operative</span></div>
+  <div class="body">
+    <h2>The fall was disclosed, dated, and rational. The capitulation was not.</h2>
+    <figure>
+      <svg viewBox="0 0 880 250" width="100%" role="img" aria-label="PINS price path June 2024 to August 2026, schematic through verified closes">
+        <line class="grid" x1="60" y1="30" x2="60" y2="210"/><line class="grid" x1="60" y1="210" x2="860" y2="210"/>
+        <text class="axl" x="22" y="44">$45</text><text class="axl" x="22" y="95">$35</text>
+        <text class="axl" x="22" y="146">$25</text><text class="axl" x="22" y="197">$15</text>
+        <polyline fill="none" stroke="var(--s1)" stroke-width="2" points="
+          60,42 140,108 240,97 330,82 420,67 470,120 520,150 560,196 610,169 680,152 760,141 840,146"/>
+        <g fill="var(--s1)">
+          <circle cx="60" cy="42" r="4"><title>2024-06: $45.19 high (the screen's anchor)</title></circle>
+          <circle cx="140" cy="108" r="4"><title>2024-07: −29% on the Q2'24 print — de-rate #1, long digested</title></circle>
+          <circle cx="420" cy="67" r="4"><title>2025-11-04: $39.93 — Q3'25 BEAT, but the Q4 guide read as deceleration; −18.2% week</title></circle>
+          <circle cx="520" cy="150" r="4"><title>2026-01-26: restructuring 8-K — RIF affecting &lt;15% of workforce</title></circle>
+          <circle cx="560" cy="196" r="4"><title>2026-02-12: Q4 miss (only one in 6 quarters) + weakest guide in years; −21.3% week; low $13.84</title></circle>
+          <circle cx="610" cy="169" r="4"><title>2026-02-17 tvScientific closed ($465M) + 2026-03-03 Elliott $1B convert; +15%/+17% weeks</title></circle>
+          <circle cx="760" cy="141" r="4"><title>2026-05-04: Q1'26 beat guide HIGH END by 3.0% — largest beat in the series; MAU record 631M</title></circle>
+          <circle cx="840" cy="146" r="5" stroke="var(--card)" stroke-width="2"><title>2026-08-03: $24.50 live</title></circle>
+        </g>
+        <text class="dl" x="66" y="34">$45.19</text>
+        <text class="dl" x="350" y="58">$39.93 · Nov-25</text>
+        <text class="dl" x="470" y="230">−65% in 3 months</text>
+        <text class="dl" x="700" y="128">+77% off the low</text>
+      </svg>
+      <figcaption>Schematic path through verified closes (IBKR bars; hover the anchor points). De-rate #2 —
+      the operative one — ran Nov-2025 → Feb-2026 on a guide read, a 15% workforce reduction, and the only
+      guide-miss in six quarters. Management told the market growth was slowing and cut costs; the market
+      repriced from ~20x to 4.8x EV/EBITDA. Rational de-rate, irrational terminus.</figcaption>
+    </figure>
+    <div class="tw"><table>
+      <tr><th>Date</th><th>Event</th><th class="num">Tape</th></tr>
+      <tr><td class="mono">2025-11-04</td><td>Q3'25: rev +17%, EBITDA +24% — a beat; Q4 guide +14–16% read as deceleration</td><td class="num">−18.2% wk</td></tr>
+      <tr><td class="mono">2026-01-26</td><td>Board-approved restructuring: RIF &lt;15% of workforce + office reductions (8-K 2.05)</td><td class="num">−14.6% wk</td></tr>
+      <tr><td class="mono">2026-02-12</td><td>Q4'25 rev $1,319.3M — below its own guide midpoint; Q1 guided ~8–11% cc</td><td class="num">−21.3% wk</td></tr>
+      <tr><td class="mono">2026-02-17</td><td>tvScientific (CTV ads) closed, $465.1M; Q1 guide <i>raised</i></td><td class="num">+15.2% wk</td></tr>
+      <tr><td class="mono">2026-03-03</td><td>Elliott invests $1.0B — 1.75% converts due 2031, conversion $22.72</td><td class="num">+16.8% wk</td></tr>
+      <tr><td class="mono">2026-05-04</td><td>Q1'26 beat the guide high end by 3.0% — largest beat in the series; Q2 guide re-accelerates +14–16%</td><td class="num">+5.2% wk</td></tr>
+    </table></div>
+  </div>
+</section>
+
+<!-- ══════════ SLIDE 4 — THE FINDING ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">04 / 12</span><span class="lab">The finding — a 17% share-count collapse at the lows</span></div>
+  <div class="body">
+    <h2>While the tape panicked, the company retired a sixth of itself at $17–18</h2>
+    <div class="tw"><table>
+      <tr><th>Action (Q1'26, from 10-Q Notes 7/13)</th><th class="num">Shares</th><th class="num">Avg price</th><th class="num">Outlay</th></tr>
+      <tr><td>Open-market repurchases</td><td class="num">27,664,663</td><td class="num">$17.09</td><td class="num">$472.9M</td></tr>
+      <tr><td>$1.0B accelerated share repurchase (incl. April settlement)</td><td class="num">54,796,613</td><td class="num">~$18.25</td><td class="num">$1,000M</td></tr>
+      <tr><td><b>Total Q1'26</b></td><td class="num"><b>82.5M</b></td><td class="num">—</td><td class="num"><b>$1,946.3M</b></td></tr>
+      <tr><td>Shares outstanding: YE-2025 → Apr-28-2026</td><td class="num" colspan="3">~677M → <b>560.2M = −17.3% in four months</b></td></tr>
+      <tr><td>Remaining authorization (of the $3.5B March-2026 program)</td><td class="num" colspan="3"><b>~$2.03B</b></td></tr>
+    </table></div>
+    <h3>Two honest corrections the bull version omits</h3>
+    <ul>
+      <li><b>Elliott is a bondholder with a board seat, not an equity buyer.</b> The $1.0B came as 1.75%
+      converts due 2031, conversion price $22.72, with a board seat (10-Q Note 12, related party). Downside
+      protected by the note; participation only above $22.72. <b>Asymmetric capital, not aligned capital</b> —
+      do not score it as an endorsement.</li>
+      <li><b>The balance-sheet floor is gone.</b> Net cash fell ~$2.5B → ~$0.3B funding the buyback. The
+      February crash to $13.84 happened <i>with</i> a $2.5B cushion; a repeat happens without one. Add the
+      new $4.0B AWS commitment (~$800M/yr fixed through 2031) and the April grant of 48.5M RSUs ($881.5M)
+      struck at the lows.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ══════════ SLIDE 5 — DE-RATE vs DERAILMENT ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">05 / 12</span><span class="lab">De-rate vs derailment — 75 / 25</span></div>
+  <div class="body">
+    <h2>Estimates rose into the crash. The margin line is the honest wobble.</h2>
+    <p>Guidance-versus-actual, six consecutive quarters, all from the company's own releases:</p>
+    <div class="tw"><table>
+      <tr><th>Quarter</th><th class="num">Guide ($M)</th><th class="num">Mid</th><th class="num">Actual</th><th class="num">vs mid</th></tr>
+      <tr><td>Q4'24</td><td class="num">1,125–1,145</td><td class="num">1,135.0</td><td class="num">1,154.1</td><td class="num">+1.69%</td></tr>
+      <tr><td>Q1'25</td><td class="num">837–852</td><td class="num">844.5</td><td class="num">855.0</td><td class="num">+1.24%</td></tr>
+      <tr><td>Q2'25</td><td class="num">960–980</td><td class="num">970.0</td><td class="num">998.2</td><td class="num">+2.91%</td></tr>
+      <tr><td>Q3'25</td><td class="num">1,033–1,053</td><td class="num">1,043.0</td><td class="num">1,049.2</td><td class="num">+0.59%</td></tr>
+      <tr><td><b>Q4'25</b></td><td class="num">1,313–1,338</td><td class="num">1,325.5</td><td class="num">1,319.3</td><td class="num"><b>−0.46%</b> ← the trigger</td></tr>
+      <tr><td><b>Q1'26</b></td><td class="num">958–978</td><td class="num">968.0</td><td class="num">1,007.5</td><td class="num"><b>+4.08%</b> ← largest in series</td></tr>
+    </table></div>
+    <p>Mean beat +1.68%, median +1.46%. Revenue growth re-accelerated +14.3% (Q4'25) → <b>+17.8%</b> (Q1'26),
+    with the acquisition contributing only ~$7M of the raise. <b>Estimates rose into the de-rate — the top
+    line shows the winner signature.</b></p>
+    <p><b>Why only 75/25 and not a clean de-rate:</b> the margin line and the 15% RIF are management's own
+    admission that the cost base outran the business, and the Q2'26 margin guide (next slide) is going
+    backward. Call it three-quarters multiple compression, one-quarter genuine operating wobble.</p>
+  </div>
+</section>
+
+<!-- ══════════ SLIDE 6 — THE BEAR ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">06 / 12</span><span class="lab">The bear case — stated at full strength</span></div>
+  <div class="body">
+    <h2>Saturated core, margin going backward, and a fifth of revenue paid in stock</h2>
+    <ul>
+      <li><b>The Q2 guide has margins going backward — the strongest bear datum, absent from the bull
+      narrative.</b> Q2'26 guided adj EBITDA $256–276M (mid $266M) vs $250.8M a year ago: <b>+6.1% EBITDA on
+      +14.5% revenue, margin 23.3% vs 25.1%</b> (−180bps). If tvScientific media-resale mix, the AWS
+      commitment, and the April RSU grant are the cause, the operating-leverage leg of the bull case is dead.
+      <i>Counter: Q1 beat its EBITDA guide mid by +19% and held margin flat — the company guides low.</i></li>
+      <li><b>The core market is saturated.</b> US&amp;Canada MAU: 99→101→102→103→105→106M — <b>+4% for five
+      straight quarters</b> — while producing 74% of revenue at $7.12 ARPU. All user growth is Rest-of-World
+      at <b>$0.20 ARPU, 36x lower</b>. The bull case requires ARPU to carry everything.
+      <i>Counter: US&amp;Ca ARPU accelerated +4%→+9%; Europe +27%, RoW +59%.</i></li>
+      <li><b>Stock comp is permanent and the buyback is partly a treadmill.</b> SBC 21% of revenue;
+      ~$1.86B of future expense already granted (including 48.5M RSUs struck at the lows). Owner earnings
+      ~$1.55/share, 24% below headline.</li>
+      <li><b>tvScientific is 91% goodwill and intangibles</b> ($375.1M goodwill on $465.1M) — bought growth,
+      not assets.</li>
+      <li><b>UNVERIFIABLE is not clean:</b> consensus positioning, the exact Q2 date, Elliott's equity stake
+      (if any), and the AI/LLM-disintermediation bear all went unverified (web budget exhausted at run time).
+      Priced into the 5/10, and into the tiny T1.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ══════════ SLIDE 7 — ARE WE LATE ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">07 / 12</span><span class="lab">Are we late? — the multiple ladder</span></div>
+  <div class="body">
+    <h2>Yes to the fat pitch. No to the trade.</h2>
+    <div class="tw"><table>
+      <tr><th>Reference point</th><th class="num">EV / adj EBITDA</th><th>Reading</th></tr>
+      <tr><td>Feb-2026 trough ($13.84)</td><td class="num"><b>~4.8x</b></td><td>the fat pitch — gone; somebody else bought the capitulation</td></tr>
+      <tr><td><b>Today ($24.50)</b></td><td class="num"><b>9.3x FY26E</b> (10.3x TTM)</td><td>less than half the 2025 average, nearly double the panic low</td></tr>
+      <tr><td>2025 trading range ($33–40)</td><td class="num">~19–20x</td><td>the old regime — not coming back while the margin question is open</td></tr>
+      <tr><td>Jun-2024 peak ($45.19)</td><td class="num">~28x</td><td>irrelevant anchor</td></tr>
+    </table></div>
+    <p>The remaining move is <b>normalization from 9.3x toward 11–13x over two to four prints</b> — not a
+    re-rate to 20x, because the saturation and margin questions are legitimate and were not present in 2024.
+    That is why this is a 5/10 tranched starter and not a table-pounder: the asymmetric entry was $13.84–18,
+    and the company itself took most of that liquidity.</p>
+  </div>
+</section>
+
+<!-- ══════════ SLIDE 8 — VALUATION ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">08 / 12</span><span class="lab">Valuation — mostly cheap-ish, only partly mispriced</span></div>
+  <div class="body">
+    <h2>PWFV $33.38 against $24.50 — with honest labels on the gap</h2>
+    <figure>
+      <svg viewBox="0 0 880 190" width="100%" role="img" aria-label="Fair-value scenarios versus live price">
+        <line class="grid" x1="60" y1="95" x2="860" y2="95"/>
+        <g>
+          <circle cx="184" cy="95" r="8" fill="var(--s2)"><title>BEAR $19.2 · 25% — US MAU rolls, AI eats discovery, no operating leverage; 7.5x</title></circle>
+          <circle cx="466" cy="95" r="8" fill="var(--s1)"><title>BASE $33.3 · 45% — good business, structurally lower multiple; 10.5x FY27E</title></circle>
+          <circle cx="706" cy="95" r="8" fill="var(--s3)"><title>BULL $45.3 · 30% — go-to-market rebuild works, intl ARPU compounds, CTV adds; 13x</title></circle>
+          <line x1="290" y1="45" x2="290" y2="145" stroke="var(--ink)" stroke-width="2" stroke-dasharray="5 4"><title>Live $24.50</title></line>
+          <line x1="468" y1="55" x2="468" y2="135" stroke="var(--ink-3)" stroke-width="2" stroke-dasharray="2 3"><title>Probability-weighted FV $33.38 (sits at the base case)</title></line>
+        </g>
+        <text class="dl" x="162" y="140">$19.2</text><text class="dl" x="446" y="140">$33.3</text>
+        <text class="dl" x="688" y="140">$45.3</text>
+        <text class="dl" x="252" y="36">live $24.50</text><text class="dl" x="480" y="50">PWFV $33.38</text>
+        <text class="axl" x="156" y="162">BEAR · 25%</text><text class="axl" x="438" y="162">BASE · 45%</text>
+        <text class="axl" x="678" y="162">BULL · 30%</text>
+      </svg>
+      <figcaption>FY27E builds: bear $5,050M rev / 27% margin / 7.5x · base $5,480M / 31% / 10.5x · bull
+      $5,700M / 33% / 13x. Owner-earnings cross-check on the base: $1.98/sh × 17x = $33.7 — consistent.</figcaption>
+    </figure>
+    <p><b>Market-implied honesty:</b> solving bull-vs-bear at spot gives p(bull) ≈ 20% against our 30%. The
+    edge is ~10pp of bull probability worth ~$2.60 of the $8.88 gap — <b>the rest is the base case simply
+    sitting above spot</b>. This is mostly "cheap-ish," only partly "mispriced," and the dispersion
+    ($19–$45) is enormous. Sizing follows from that sentence, not from the +36%.</p>
+  </div>
+</section>
+
+<!-- ══════════ SLIDE 9 — FOUR-IDEA FRAME ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">09 / 12</span><span class="lab">The four-idea frame (v1.6)</span></div>
+  <div class="body">
+    <h2>Market belief · our belief · the edge claim · the priced-in risk</h2>
+    <div class="tw"><table>
+      <tr><th style="width:20%">Leg</th><th>Statement</th></tr>
+      <tr><td><b>Market believes</b></td><td>Pinterest is a permanently ~10x-EBITDA business: the core market is
+        saturated, the margin guide is going backward, and the AI-discovery threat hangs over the whole
+        category. The February capitulation set the regime.</td></tr>
+      <tr><td><b>We believe</b></td><td>The revenue engine never broke — estimates rose through the crash, the
+        largest guide-beat in the series just printed, and 17% of the share count is permanently gone at
+        $17–18. Normalization to 11–13x over 2–4 prints is the trade; 20x is not.</td></tr>
+      <tr><td><b>Why we might have edge</b></td><td>The screen-blindness itself: the +9.8%/6mo field and the
+        seasonal margin artifact render the name invisible to both value and momentum screens, and the
+        share-count collapse lives only on a 10-Q cover page. Modest, and partly spent — the re-rate is
+        already underway.</td></tr>
+      <tr><td><b>Why it may be priced in</b></td><td>+77% off the low; the residual latency is 2–4 prints of
+        multiple normalization, not a discovery gap. Elliott's presence is known. If the margin guide is mix
+        rather than conservatism, 9.3x is fair and we own dead money with a 21%-of-revenue SBC drain.</td></tr>
+      <tr><td><b>Mechanism falsifier</b></td><td>A sequential decline in US&amp;Canada MAU — the cleanest test of
+        the AI-disintermediation bear. It fires → exit, regardless of every other line.</td></tr>
+      <tr><td><b>Edge label</b></td><td><b>RP_FAIR + thin EDGE overlay (DILIGENCE class, timing component
+        largely elapsed).</b> Carry labeled as carry.</td></tr>
+    </table></div>
+  </div>
+</section>
+
+<!-- ══════════ SLIDE 10 — THE PRINT + STRUCTURE ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">10 / 12</span><span class="lab">Structure — 1.0% target across a live binary</span></div>
+  <div class="body">
+    <h2>The print is days away. T1 is sized so being wrong costs 7 basis points.</h2>
+    <div class="callout"><p><b>Q2'26 print expected 2026-08-04 → 08-11 — exact date UNVERIFIED</b> (no
+    scheduling 8-K on file at publication; window from four years of filing cadence). Implied move
+    <b>~±13–16%</b> — derived analytically from the IV surface (annual IV 72.5%, 92nd percentile; option-chain
+    endpoint errored, so this is not a quoted straddle). Realized print weeks: −21.3%, −18.2%, +5.2%, +8.7%,
+    −7.0%. Treat the event with respect.</p></div>
+    <div class="tw"><table>
+      <tr><th>Tranche</th><th class="num">Size</th><th>Trigger</th><th>Rationale</th></tr>
+      <tr><td><b>T1 — now</b></td><td class="num">0.35% · ~$3,500</td><td class="mono">limit ≤ $24.75</td>
+          <td>timing→tranche, deliberately tiny: a −21% print repeat costs ~$735 ≈ 7bps of book; valuation is
+          fair here and a good print means we own something</td></tr>
+      <tr><td><b>T2 — post-print</b></td><td class="num">0.40% · ~$4,000</td><td>conditional</td>
+          <td>(a) rev ≥ $1,155M <b>and</b> Q3 guide ≥ $1,190M → add on any pullback ≤ $27.50; or
+          (b) guide soft but revenue fine → add ≤ $20.00</td></tr>
+      <tr><td><b>T3 — reserve</b></td><td class="num">0.25% · ~$2,500</td><td class="mono">≤ $17.50</td>
+          <td>second-flush only, and only if US&amp;Ca ARPU growth still ≥ +6%</td></tr>
+    </table></div>
+    <p><b>Never chase above $28 before the Q3 print.</b> No options — taxable-book doctrine (premium =
+    non-deferrable short-term ordinary income), and buying premium at the 92nd IV percentile is paying top
+    dollar for the event.</p>
+    <h3>Kill triggers (dated at entry)</h3>
+    <ul>
+      <li><b>#1 · US&amp;Canada MAU declines sequentially</b> (by Q3'26, ~2026-11-15) → <b>EXIT</b> — the falsifier</li>
+      <li>Q3'26 adj EBITDA margin &lt; 29.2% (vs Q3'25) → compression structural → cut to 0.35%</li>
+      <li>FY27 guide implies &lt;11% growth (by ~2027-02-28) → EXIT</li>
+      <li>Buyback dormant (&lt;$150M/qtr) with the stock &lt;$28 → cut to 0.35%</li>
+      <li>SBC &gt; 24% of revenue in any quarter → EXIT — owner earnings destroyed</li>
+      <li>No price stop: a move &lt;$15 <i>without</i> triggers 1/3/5 firing is a re-entry, not an exit</li>
+    </ul>
+    <p class="fine"><b>Escalation owed before T2 stages</b> (the court's own flag): re-verify consensus adj-EBITDA
+    for Q2'26 and the exact earnings date. The 0.35 frozen probability was set without knowing where the
+    Street sits.</p>
+  </div>
+</section>
+
+<!-- ══════════ SLIDE 11 — VERIFICATION TABLE ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">11 / 12</span><span class="lab">SignalOS validation — every load-bearing claim, graded</span></div>
+  <div class="body">
+    <h2>Verification table (v1.6): courts generate facts, this pass audits them</h2>
+    <div class="tw"><table>
+      <tr><th>Claim</th><th>Authority</th><th>Grade</th></tr>
+      <tr><td>Crash-and-rebound path; −65% Nov-25→Feb-26; +77% off $13.84; live $24.50</td>
+          <td>IBKR bars, hover-labeled anchors; live snapshot at run time</td><td><span class="pill pv">Verified</span></td></tr>
+      <tr><td>Share count ~677M → 560.2M (−17.3%); $1,946.3M Q1'26 outlay; avg $17.09 / ~$18.25</td>
+          <td>10-Q cover + Notes 7/13</td><td><span class="pill pv">Verified</span></td></tr>
+      <tr><td>Elliott $1.0B = 1.75% converts due 2031 @ $22.72 + board seat (not equity)</td>
+          <td>8-K Item 1.01 + 10-Q Note 12 related-party</td><td><span class="pill pv">Verified</span></td></tr>
+      <tr><td>Six-quarter guide-vs-actual series; mean beat +1.68%; Q1'26 beat high end +3.0%</td>
+          <td>company press releases, each quarter</td><td><span class="pill pv">Verified</span></td></tr>
+      <tr><td>Q2'26 margin guide 23.3% vs 25.1% LY (the wobble)</td>
+          <td>Q1'26 release outlook vs Q2'25 actual</td><td><span class="pill pv">Verified</span></td></tr>
+      <tr><td>US&amp;Ca MAU +4% five straight quarters; RoW ARPU $0.20; SBC 20.9% of revenue; $4.0B AWS commitment; 48.5M RSU grant</td>
+          <td>quarterly MAU/ARPU tables; FY25 10-K; 10-Q subsequent events</td><td><span class="pill pv">Verified</span></td></tr>
+      <tr><td>Screen row: op margin −3%</td><td>XBRL OperatingIncomeLoss — TTM +7.3%</td><td><span class="pill pr">Refuted</span></td></tr>
+      <tr><td>Screen row: +9.8% six-month return as a stability signal</td><td>the window straddles ±65/77% legs</td><td><span class="pill pr">Misleading</span></td></tr>
+      <tr><td>Consensus estimates; whether the Q2 guide sits above or below Street</td><td>web budget exhausted at run</td><td><span class="pill pu">Unverifiable</span></td></tr>
+      <tr><td>Exact Q2'26 earnings date</td><td>no scheduling 8-K on file</td><td><span class="pill pu">Unverifiable</span></td></tr>
+      <tr><td>Elliott equity stake beyond the converts; AI-disintermediation bear</td><td>not retrievable at run</td><td><span class="pill pu">Unverifiable</span></td></tr>
+    </table></div>
+    <p class="fine">UNVERIFIABLE ≠ clean. The four open items are carried as live risks; the first two are the
+    pre-T2 escalation, owed before any add.</p>
+  </div>
+</section>
+
+<!-- ══════════ SLIDE 12 — BRIER ENTRY · CATALYSTS ══════════ -->
+<section class="slide">
+  <div class="rail"><span class="no">12 / 12</span><span class="lab">The graded call · catalysts · disclaimer</span></div>
+  <div class="body">
+    <h2>This thesis grades on a date, against a bar that leans against our own bull</h2>
+    <div class="callout">
+      <p class="mono"><b>FROZEN CALL · PINS | 2026-08-11</b> (calibration ledger, frozen 2026-08-03 at $24.50;
+      WINDOW date — re-dates on the scheduling 8-K)</p>
+      <p>Q2'26 adjusted-EBITDA margin ≥ 25.1% (no year-over-year compression). <b>our_p = 0.35.</b>
+      Chosen over the easy revenue-beat call because it discriminates the actual thesis: the company guided
+      23.3%, and whether that is conservatism or mix decides bull versus bear. <b>The call deliberately leans
+      against our own long</b> — if it grades FAVORABLE, the operating-leverage bull is alive and T2's upper
+      branch applies. Resolution pack armed; frozen numbers never revise.</p>
+    </div>
+    <div class="tw"><table>
+      <tr><th>Catalyst</th><th>Date</th><th class="num">Prob</th><th>Read</th></tr>
+      <tr><td><b>Q2'26 print</b></td><td class="mono">2026-08-04 → 08-11</td><td class="num">certain</td>
+          <td>±13–16% implied; the 5-point adjudication spec grades the court (rev / margin / MAU / Q3 guide / buyback pace)</td></tr>
+      <tr><td>Buyback continuation (~$2.03B authorized)</td><td>ongoing</td><td class="num">0.80</td>
+          <td>+3–5% of count per quarter at recent pace</td></tr>
+      <tr><td>US&amp;Ca MAU sequential decline</td><td>Q3–Q4'26</td><td class="num">0.20</td>
+          <td>the falsifier — exit on it</td></tr>
+      <tr><td>Margin compression proves structural</td><td>Q3'26, ~Nov</td><td class="num">0.40</td>
+          <td>cut-to-0.35% trigger</td></tr>
+      <tr><td>Multiple normalization to ~12x</td><td>2–4 quarters</td><td class="num">0.45</td>
+          <td>the trade thesis; needs consecutive clean prints</td></tr>
+    </table></div>
+    <hr style="border:none;border-top:1px solid var(--hair);margin:18px 0">
+    <p class="fine"><b>Disclaimer.</b> This document is personal research, published for informational and
+    educational purposes only. It is not financial, investment, tax, or legal advice, and it is not an offer
+    or a solicitation to buy or sell any security. The author is not a financial advisor, registered
+    investment adviser, or broker-dealer. <b>Position disclosure:</b> at the time of writing the author holds
+    no position in PINS (positions polled 2026-08-03); orders consistent with this document may be placed
+    after publication, and the author may buy or sell at any time without notice. Every figure reflects a
+    good-faith effort at verification against primary sources (SEC filings, XBRL, live IBKR quotes), but
+    errors are possible and numbers go stale; nothing here is a guarantee of accuracy or of future results.
+    Do your own research and consult a licensed professional before making any investment decision.</p>
+  </div>
+</section>
+
+</div>
+<script>
+  (function () {
+    var tip = document.getElementById('tip');
+    var marks = document.querySelectorAll('svg circle, svg rect[fill^="var(--s"], svg line[stroke-dasharray]');
+    marks.forEach(function (m) {
+      var t = m.querySelector('title');
+      if (!t) return;
+      m.addEventListener('mousemove', function (e) {
+        tip.textContent = t.textContent;
+        tip.style.left = Math.min(e.clientX + 14, window.innerWidth - 270) + 'px';
+        tip.style.top = (e.clientY + 14) + 'px';
+        tip.style.opacity = 1;
+      });
+      m.addEventListener('mouseleave', function () { tip.style.opacity = 0; });
+    });
+  })();
+</script>

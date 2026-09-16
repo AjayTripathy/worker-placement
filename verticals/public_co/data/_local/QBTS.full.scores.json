@@ -1,0 +1,92 @@
+{
+  "ticker": "QBTS",
+  "cik": "0001907982",
+  "company_name": "D-Wave Quantum Inc.",
+  "cutoff": "2026-05-20",
+  "filing": "0001907982-26-000026_10-K.txt",
+  "filing_date": "2026-02-26",
+  "filing_age_days": 83,
+  "scores": [
+    {
+      "claim_id": "C1_qcirc_acq",
+      "claim_text": "D-Wave acquired Quantum Circuits, Inc. on 2026-01-20 for $250M cash + 10.43M shares to become 'dual-platform' annealing + gate-model company.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": "MIXED",
+      "M_check": "edgar_fts.query_fulltext('Quantum Circuits', cik=QBTS) + acq_coherence.score_acquisition_coherence (Mode B aggregate)",
+      "M_value": "Mode A: QBTS EDGAR full-text returns multiple 8-K, 10-Q, 10-K hits referencing 'Quantum Circuits' (2026-01-07 press-conf, 2026-01-20 closing 8-K, 2026-02-26 10-K, 2026-05-12 10-Q) — disclosure confirms transaction. Mode B: acq_coherence returned coherence_score=0.0 with signal MIXED_COHERENCE; LLM cited insufficient deal context — coherence inconclusive but USPTO confirms Quantum Circuits has only 2 granted patents (12,417,398 cryo I/O; one earlier), tiny IP footprint relative to D-Wave's 197.",
+      "interpretation": "Acquisition itself is verified (Mode A PASS). Mode B coherence is inconclusive. The 'instant pivot from annealing to error-corrected gate-model' narrative is supported by only 2 issued patents on the target side, raising a roll-up substance question — MOD-SEVE on the strength of the gate-model claim being underwritten by minimal Quantum Circuits IP."
+    },
+    {
+      "claim_id": "C2_atm_dilution_2025",
+      "claim_text": "FY2025: ATM/warrant raises ~$779M of financing inflows ($146.1M + $390.6M ATMs, $202.9M warrant exercise, $37.8M Lincoln Park).",
+      "severity": "RED_FLAG_NEGATIVE",
+      "supports": "CONTRADICTS_INSIDER_BEHAVIOR",
+      "M_check": "Mode A: sec_filings.list_filings_by_form(form='S-3') confirms 6 S-3s on file (2024-04-02 x3, 2024-12-23, 2025-03-21, 2025-06-03). Mode B: insider_vs_calendar.query_insider_sales_near_budget_events(cik='0001907982', window_days=14, start_date='2024-01-01', end_date='2026-05-20')",
+      "M_value": "Mode A PASS — multiple S-3 shelves filed in concert with the ATM raises. Mode B: signal=CLUSTERED_DISCRETIONARY. Examples of insider Form-4 sales within ±14 days of calendar events: Markovich (CFO) S-code 2025-10-14 at $43.74, $349,684 (FY-end), Markovich 2026-01-14 S-code $257,583, Baratz (CEO) F-code 2026-05-13 at $22.35 ($414K), Ames F-code 2026-05-13 ($533K). Multiple non-10b5-1 (discretionary) sales cluster to fiscal-year-end and press-followup events. CEO Baratz disposed shares discretionarily 14 days after a press-followup at $22.35 — well off the Q1 ATM print of ~$15/sh average → leadership monetizing into post-supremacy hype.",
+      "interpretation": "Per prompt: 'If insider_vs_calendar returns CLUSTERED_DISCRETIONARY: that is the highest-signal flag → SEVE or RED.' Combined with $779M cash extraction from public-market issuance and CEO/CFO/CFO-direct discretionary sales tied to news events — RED_FLAG_NEGATIVE."
+    },
+    {
+      "claim_id": "C3_government_revenue",
+      "claim_text": "D-Wave generates federal revenue through D-Wave Government Inc. subsidiary; 'government assistance' cited as a primary source of capital.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": "REGISTRY_SILENT",
+      "M_check": "Mode A: usaspending.query_recipient_contracts(recipient_name='D-Wave Government'). Mode B: usaspending.query_recipient_contracts variants ('D-Wave Systems', 'D-Wave', 'D-Wave Quantum') + usaspending.query_dod_contracts.",
+      "M_value": "ALL variants return n_awards=0, total_amount=$0.00 across the full search window (2020-01-01 to 2026-12-31). Specifically: 'D-Wave Government' n=0, 'D-Wave Systems' n=0, 'D-Wave' n=0, 'D-Wave Quantum' n=0, DoD-filtered 'D-Wave' n=0. usaspending.query_recipient_grants 'D-Wave' n=0.",
+      "interpretation": "10-K names a dedicated federal-channel subsidiary (D-Wave Government Inc.) and lists 'government assistance' as a capital source. USAspending shows zero prime-recipient awards under any name variant in 5+ years. This is absence-where-expected for a company whose narrative leans on federal/research-lab on-prem sales. Per heuristic 9, absence of contracts when a federal channel is claimed is hard contradiction; allowing for sub-prime / pass-through possibility (Davidson reseller path), still SEVERE_UNDERDELIVERY because the claimed direct subsidiary leaves no federal-prime trail."
+    },
+    {
+      "claim_id": "C4_davidson_partnership",
+      "claim_text": "Davidson Technologies, Inc. is a D-Wave customer (defense/aerospace integrator).",
+      "severity": "PASS",
+      "supports": "REGISTRY_CONFIRMS",
+      "M_check": "Mode A: usaspending.query_recipient_contracts(recipient_name='Davidson Technologies'). Mode B: edgar_fts.query_fulltext for QBTS+Davidson cross-mentions.",
+      "M_value": "Mode A: Davidson Technologies Inc shows real DoD contracts (Award IDs HQ014719F0127 $2.28M, HQ085926FE049, FA865625FB128, N0017825F7257 etc.). Davidson is a bona-fide DoD integrator. Mode B: EDGAR FTS shows 87 hits of 'Davidson Technologies' across QBTS's own filings — substantive disclosure, not a one-off mention.",
+      "interpretation": "Counterparty is real and disclosure is internally consistent. PASS."
+    },
+    {
+      "claim_id": "C5_patent_ip_leadership",
+      "claim_text": "25+ years of IP/innovation in annealing quantum computing; with Quantum Circuits acquisition, adds gate-model dual-rail qubit IP.",
+      "severity": "PASS",
+      "supports": "REGISTRY_CONFIRMS",
+      "M_check": "Mode A: uspto_odp.query_assignee('D-Wave Systems', cutoff=2026-05-20). Mode B: uspto_odp.query_assignee('Quantum Circuits', cutoff=2026-05-20).",
+      "M_value": "Mode A: D-Wave Systems = 197 granted patents, 483 total applications, including recent grants on quantum-annealing debugging (12,248,849) and active applications on processor topology / hybrid solvers. Mode B: Quantum Circuits = 2 granted patents, 8 total applications (key grant 12,417,398 'Interface between Cryogenic Computational Hardware and Room Temperature Computational Hardware', 2025-09-16).",
+      "interpretation": "D-Wave's parent-co patent portfolio is large and on-thesis (annealing, qubits, hybrid solvers). PASS on parent IP. Quantum Circuits's IP is thin (2 grants) — this is a soft caveat for C1 (acquisition substance) but C5's parent-IP claim itself holds."
+    },
+    {
+      "claim_id": "C6_advantage2_facilities",
+      "claim_text": "Four leased facilities: Burnaby BC (42K sqft), Richmond BC (7K sqft fab), Palo Alto CA (6K sqft fab), New Haven CT (18K sqft) + planned Boca Raton FL HQ.",
+      "severity": "UNVERIFIABLE",
+      "supports": "OUT_OF_SCOPE",
+      "M_check": "Mode A: epa_frs.query_facilities(facility_name='D-Wave', state='CA'). Mode B: osha_establishments.query_establishments(company_name='D-Wave').",
+      "M_value": "Mode A: EPA FRS returned 0 matches on facility_name='D-Wave' in CA (only unrelated 'White Wave Foods', 'Micro Wave' artefacts of substring noise; no D-Wave hit). Mode B: OSHA Form 300A query returns NO_OSHA_FOOTPRINT under company_name='D-Wave'.",
+      "interpretation": "Per calibration heuristic 1, light-electronics / superconducting-fab operations are typically not EPA-FRS regulated; per OSHA, sub-20 employee Burnaby/Richmond/Palo Alto/New Haven sites would be exempt and Canadian sites would not file 300A. Coverage gap, NOT a registry contradiction → UNVERIFIABLE."
+    },
+    {
+      "claim_id": "C7_advantage2_production",
+      "claim_text": "Sixth-gen Advantage2 4,400+ qubit annealing system with on-prem and Leap-cloud delivery in 42 countries; March 2025 'quantum supremacy' result published in Science.",
+      "severity": "UNVERIFIABLE",
+      "supports": "OUT_OF_SCOPE_FOR_REGISTRY",
+      "M_check": "Mode A: usaspending federal-buyer trail of an Advantage2 sale. Mode B: nasa_ntrs research-cite trail.",
+      "M_value": "Mode A: usaspending zero hits across all D-Wave variants (see C3). Mode B: NASA NTRS for 'D-Wave annealing quantum' returned 12 total publications, 0 after filter — NASA_NO_FOOTPRINT.",
+      "interpretation": "Production/system-shipment claims are not directly verifiable in USAspending without a federal buyer; the absence is also not informative for non-federal commercial sales (e.g., academic on-prem buyers internationally). Product claim itself remains commercially plausible (peer-reviewed Science result is on the record) but registry-blind → UNVERIFIABLE."
+    },
+    {
+      "claim_id": "C8_revenue_growth",
+      "claim_text": "FY25 revenue $24.6M (+180% YoY), opLoss $100.4M, netLoss $355.1M ($270.5M warrant MTM), accumulated deficit $982.0M.",
+      "severity": "RED_FLAG_NEGATIVE",
+      "supports": "MATERIAL_WEAKNESS_REAFFIRMED",
+      "M_check": "Mode A: claim_evolution.query_claim_evolution(search_term='material weakness'). Mode B: sec_filings.list_filings_by_form (10-K trail).",
+      "M_value": "Mode A: claim_evolution shows evolution_status=REAFFIRMED_IN_STRUCTURED_DISCLOSURE, classification AFFIRMED 4x: 2024-05-13 10-Q, 2024-08-08 10-Q, 2024-11-14 10-Q, 2025-03-14 10-K (the FY2024 10-K). LLM reasoning notes 'the company has identified a material weakness in internal controls over financial reporting and may identify additional ones... persists.' Mode B: 'going concern' theme returns 5 subsequent mentions across QBTS 10-Q/10-K filings.",
+      "interpretation": "Recurring (4 consecutive periods) AFFIRMED material weakness in ICFR is RED per heuristic — and this is on top of $982M accumulated deficit, $72M FY25 operating cash burn, and net loss inflated $270M by warrant MTM. The combination of recurring ICFR weakness + heavy 2025 dilution into a 'supremacy'/M&A narrative + CLUSTERED_DISCRETIONARY insider selling (C2) constitutes the framework's strongest signal cluster → RED_FLAG_NEGATIVE."
+    },
+    {
+      "claim_id": "C9_doe_olcf_quantum",
+      "claim_text": "On-prem Advantage2 systems sold to research/academic/government customers — implies DOE QIS / Office of Science program coverage.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": "PROGRAM_FUNDED_BUT_NOT_LISTED",
+      "M_check": "Mode A: doe_budget.query_program_funding(program_name='Quantum Information Science'). Mode B: usaspending.query_dod_contracts(recipient_name='D-Wave').",
+      "M_value": "Mode A: DOE primary match 'Advanced Computing Technologies' (ASCR office) FY2025=$105.1M, FY2026=$112.6M, status FUNDED_STEADY. QIS subprogram (HEP office) FY2025=$50.6M. Critically, primary_contractors=[] (empty) — D-Wave is not listed in DOE program documentation as a primary contractor. Mode B: zero DoD contracts to D-Wave under any name variant.",
+      "interpretation": "DOE QIS/ASCR programs ARE funded, so the on-prem-research market exists, but D-Wave is not a named primary in DOE program documentation and has zero federal-prime contract trail. The claim of meaningful government/research revenue via direct on-prem sales is partially undermined by the absence of D-Wave from DOE primary-contractor rosters. MODERATE_UNDERDELIVERY (federal-research-buyer claim is plausible via sub-tier path but not directly evidenced)."
+    }
+  ]
+}

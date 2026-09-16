@@ -1,0 +1,95 @@
+{
+  "ticker": "RGTI",
+  "cik": "0001838359",
+  "cutoff": "2023-01-15",
+  "filing": "0001564590-22-006345_10-K.txt",
+  "filing_form": "10-K",
+  "filing_date": "2022-02-23",
+  "filing_note": "This 10-K was filed by Supernova Partners Acquisition Company II, Ltd. (SPAC, CIK 0001838359) for fiscal year ended Dec 31, 2021. At the filing date the de-SPAC merger with Rigetti Holdings, Inc. had not yet closed (it closed March 2022). The 10-K therefore covers the SPAC shell and contains NO Rigetti operational disclosure: no DoD programs, no AFRL/DARPA contracts, no Program Elements, no qubit/quantum business narrative, no revenue, no customers. Confirmed by zero-hit grep across full 1.55MB filing for AFRL/DARPA/quantum/qubit/superconducting. The CIK 0001838359 is the SPAC's CIK (later assumed by the post-merger Rigetti Computing, Inc.), but this particular 10-K predates merger consummation. As a result, the J-Book Exposure Divergence pattern cannot be tested against this filing — there are no J-Book-grounded claims to extract. The framework's correct behavior is to flag STRUCTURAL_NO_OPERATING_CONTENT and emit only the SPAC-shell claims that DO appear (merger closing conditions, trust-account cash, going-concern).",
+  "extraction_summary": {
+    "jbook_grounded_claims": 0,
+    "spac_structural_claims": 4,
+    "control_claims": 1,
+    "rationale": "Pre-validated filing is a SPAC shell 10-K filed five days before the de-SPAC closed. No operating-company content exists to score against pentagon_jbook. Per cohort framing (blinded, do-not-pick-own-filing), this is the result the framework must surface honestly."
+  },
+  "claims": [
+    {
+      "claim_id": "c1",
+      "claim_text": "Supernova entered into a Merger Agreement with Rigetti Holdings, Inc. on October 6, 2021 and the de-SPAC business combination is conditioned on Supernova having at least $165,000,000 of available cash at closing.",
+      "subject": "Supernova Partners Acquisition Company II, Ltd.",
+      "predicate": "merger_closing_condition",
+      "object_value": "$165,000,000 minimum available cash for Rigetti to be obligated to close",
+      "source_quote": "(x) solely as relates to Rigetti s obligation to consummate the Transaction, Supernova having at least $165,000,000 of available cash at the Closing.",
+      "category": "rollup_thesis",
+      "queries": [
+        {
+          "m_source": "edgar_fts.query_fulltext",
+          "kwargs": {"cik": "0001838359", "phrase": "available cash at the Closing"},
+          "purpose": "Confirm minimum-cash closing condition is the disclosed threshold; cross-check whether redemptions threatened the threshold"
+        }
+      ]
+    },
+    {
+      "claim_id": "c2",
+      "claim_text": "Supernova held approximately $345 million in its trust account from the March 2021 IPO, intended to fund the Rigetti business combination subject to public-shareholder redemptions.",
+      "subject": "Supernova Partners Acquisition Company II, Ltd.",
+      "predicate": "trust_account_balance",
+      "object_value": "$345 million in trust + $147.5 million in committed PIPE",
+      "source_quote": "Approximately $345 million of the net proceeds from the IPO and the sale of the per private placement warrants to the Sponsor have been deposited in a trust account... PIPE Investors have committed to purchase... an aggregate purchase price of $102.51 million... aggregate gross proceeds of $45,000,000 (the Subsequent PIPE Financing).",
+      "category": "rollup_thesis",
+      "queries": [
+        {
+          "m_source": "edgar_fts.query_fulltext",
+          "kwargs": {"cik": "0001838359", "phrase": "trust account"},
+          "purpose": "Verify SPAC trust-account narrative; cross-check that redemptions before close did not breach the $165M minimum"
+        }
+      ]
+    },
+    {
+      "claim_id": "c3",
+      "claim_text": "Supernova disclosed substantial doubt about its ability to continue as a going concern absent consummation of the business combination, with a working capital deficit of approximately $3.4 million as of December 31, 2021.",
+      "subject": "Supernova Partners Acquisition Company II, Ltd.",
+      "predicate": "going_concern_status",
+      "object_value": "$3.4M working capital deficit, going-concern doubt raised",
+      "source_quote": "management has determined that the Company s cash flow deficit raises substantial doubt about the Company s ability to continue as a going concern within one year after the date that the consolidated financial statements are issued.",
+      "category": "other",
+      "queries": []
+    },
+    {
+      "claim_id": "c4",
+      "claim_text": "Supernova must complete its initial business combination by March 4, 2023 or be required to liquidate the trust account and dissolve.",
+      "subject": "Supernova Partners Acquisition Company II, Ltd.",
+      "predicate": "completion_deadline",
+      "object_value": "deadline 2023-03-04 (~13 months after filing, ~7 weeks after PIT cutoff 2023-01-15)",
+      "source_quote": "If we are unable to complete a business combination within 24 months from the closing of the Initial Public Offering, or March 4, 2023, we will (i) cease all operations except for the purpose of winding up...",
+      "category": "other",
+      "queries": []
+    },
+    {
+      "claim_id": "c5_control_jbook_check",
+      "claim_text": "CONTROL CLAIM (negative): the filing does not name any DoD Program Element, AFRL or DARPA program, qubit/quantum-networking line item, or DoD customer that would feed pentagon_jbook. We test this by running the J-Book lookups that WOULD apply if Rigetti's own 10-K had been the pre-validated filing, to document the J-Book status of the operating entity's adjacent programs as of cutoff 2023-01-15.",
+      "subject": "Rigetti Computing, Inc. (operating entity, NOT subject of this filing)",
+      "predicate": "jbook_adjacency_check",
+      "object_value": "No Rigetti-named PEs in this filing; nearest analogs in J-Book corpus are AFRL Quantum Networking programs (IONQ/Qubitekk)",
+      "source_quote": "(absence — no DoD program text in 1.55MB filing)",
+      "category": "counterparty_disclosure",
+      "queries": [
+        {
+          "m_source": "pentagon_jbook.query_program_funding",
+          "kwargs": {"contractor_name": "Rigetti", "cutoff_date": "2023-01-15"},
+          "purpose": "Establish whether Rigetti appears as a named contractor on any J-Book program in the corpus at cutoff"
+        },
+        {
+          "m_source": "pentagon_jbook.query_program_funding",
+          "kwargs": {"program_name": "AFRL Quantum Networking", "cutoff_date": "2023-01-15"},
+          "purpose": "Adjacent program status — the AFRL quantum-networking line items are the closest J-Book analog to Rigetti's claimed DoD adjacency in subject-notes (corpus has IONQ + Qubitekk variants)"
+        },
+        {
+          "m_source": "usaspending.query_dod_contracts",
+          "kwargs": {"recipient_name": "Rigetti Computing"},
+          "purpose": "Confirm whether Rigetti was actually receiving DoD obligations by the cutoff, independent of the SPAC filing"
+        }
+      ]
+    }
+  ]
+}

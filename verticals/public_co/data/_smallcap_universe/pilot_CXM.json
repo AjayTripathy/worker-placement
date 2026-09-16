@@ -1,0 +1,107 @@
+{
+  "ticker": "CXM",
+  "company": "Sprinklr, Inc.",
+  "cik": "0001569345",
+  "sector": "Technology (Unified-CXM SaaS)",
+  "cutoff": "2026-05-20",
+  "filing": "0001569345-26-000015_10-K.txt",
+  "filing_date": "2026-03-19",
+  "fiscal_year_end": "2026-01-31",
+  "drawdown_pct": -0.436,
+  "above_52w_low_pct": 0.09,
+  "rfm_tuples": [
+    {
+      "claim_id": "C1",
+      "R": "Going-concern / audit-quality integrity \u2014 clean KPMG audit opinion, no substantial-doubt language, internal controls effective.",
+      "f": "If true: no ASC 205-40 'substantial doubt' phrasing in 10-K; no Item 4.01 auditor-change 8-Ks; no Big 4 resignation; no disagreements.",
+      "M_source": "going_concern_detector.query_going_concern(cik='0001569345', cutoff_date='2026-05-20') + auditor_change_tracker.query_auditor_changes(cik='0001569345', cutoff_date='2026-05-20').",
+      "M_value": "going_concern: NO_GOING_CONCERN (0 matches in latest 10-K filed 2026-03-19). auditor_change_tracker: CLEAN_AUDITOR_TENURE (0 Item 4.01 filings in 5y, 0 Big4 resignations, 0 disagreements). KPMG continues as registered public accounting firm (PCAOB ID 185).",
+      "severity": "PASS",
+      "interpretation": "Universal audit-quality screen clean; KPMG tenure undisturbed; no going-concern signal at the audit layer."
+    },
+    {
+      "claim_id": "C2",
+      "R": "Liquidity claim \u2014 $502.5M total liquid resources ($163M cash + $339.5M marketable securities) management states is 'sufficient to meet working capital needs, capital expenditures and financing obligations for at least the next 12 months and over the long-term.'",
+      "f": "If true, post-cutoff capital actions (notably the $125M ASR announced March 13, 2026) should not materially impair liquidity, and there should be no debt-maturity wall or contingent claim that consumes the cushion. No long-term debt should be disclosed.",
+      "M_source": "Filing-internal balance sheet + Liquidity section + Subsequent Events.",
+      "M_value": "$502.5M liquid resources at 1/31/26. NO long-term debt disclosed. Contractual purchase commitments only $117.2M ($70.9M within 12 mo). HOWEVER: $125M ASR consummated March 13, 2026 (post-balance-sheet, pre-cutoff) drains ~25% of liquidity in a single transaction; remaining $75M of 2026 authorization still available at company discretion. Pro-forma liquid resources fall to ~$377.5M before considering Q1 FY27 OCF. OCF FY26 $159.2M (2.1x FY25 $77.6M) so internal generation is real.",
+      "severity": "PASS",
+      "interpretation": "Liquidity comfortable; no debt wall; ASR is meaningful drawdown but management retained ~$378M cushion + $159M annual OCF generation. Sufficiency-of-funds claim survives quantitative test."
+    },
+    {
+      "claim_id": "C3",
+      "R": "Customer base claim \u2014 '1,677 customers' and '59% of the Fortune 100 companies' as customers; positioned as proof of enterprise traction.",
+      "f": "If Fortune-100 customer relationships are material, they should leave evidence in counterparty filings (megacap 10-Ks/10-Qs/8-Ks should reference Sprinklr at least occasionally as a vendor/technology partner). Customer count itself should not be eroding.",
+      "M_source": "megacap_namecheck.query_megacap_mentions(small_cap_name='Sprinklr', cutoff_date='2026-05-20') + filing-internal customer-count YoY.",
+      "M_value": "megacap_namecheck: signal=INFLATION_SUSPECT. ZERO Sprinklr mentions across 17 megacap CIKs (Apple, Microsoft, Google, Amazon, Meta, Nvidia, Tesla, Walmart, Berkshire, JPMorgan, ExxonMobil, GM, Ford, Boeing, Lockheed, Honeywell, Caterpillar, Pfizer, JNJ) in 10y of 10-K/10-Q/8-K. ALSO: total customers DROPPED from 1,930 (1/31/25) to 1,677 (1/31/26) = -13.1% YoY net loss. Large customers (>=$1M ARR) DROPPED from 149 to 141 = -5.4%. Filing self-discloses 'strategic refinement of our customer profile' as the reason but does not break out gross-churn vs deliberate-exit.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Two independent obscuring signals: (1) Fortune-100 logos are real but no megacap discloses Sprinklr as a material vendor in SEC filings (consistent with small-line-item subscription buys, but undermines 'enterprise-grade-platform-of-choice' narrative weight); (2) absolute customer count down 253 net YoY is repackaged as a strategy choice. Neither is fatal; combined they point to a maturing/contracting commercial footprint."
+    },
+    {
+      "claim_id": "C4",
+      "R": "Net income $22.9M FY26 \u2014 sustained GAAP profitability framed as core thesis underpinning $200M new buyback authorization.",
+      "f": "If profitability is structurally improving, GAAP NI should be flat-to-growing YoY and operating cash flow should corroborate.",
+      "M_source": "Filing-internal income statement (FY26 vs FY25 vs FY24) + cash-flow statement.",
+      "M_value": "GAAP NI: FY26 $22.9M vs FY25 $121.6M vs FY24 $51.4M = -81% YoY and -55% vs FY24. PRIMARY driver: FY25 included a $73.3M income-tax BENEFIT (valuation-allowance release) that flipped to a $43.9M PROVISION in FY26 \u2014 a $117M swing entirely in the tax line. Pre-tax income actually GREW: $66.8M FY26 vs $48.3M FY25 = +38%. Operating income $40.2M vs $24.0M = +68%. Operating cash flow $159.2M vs $77.6M = +105%.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "GAAP NI collapse is mostly a tax-line normalization (FY25 was inflated by one-time VA release); operating metrics genuinely improved. BUT the filing presents the $22.9M NI without leading with the tax-normalization context in summary, which is technically truthful but obscurative. Quality of disclosure is mixed \u2014 not a fraud signal, but the headline number is much weaker than the underlying business."
+    },
+    {
+      "claim_id": "C5",
+      "R": "Capital-return discipline \u2014 $150M of 2025 Share Repurchase Program FULLY COMPLETED in Q3 FY26; new $200M 2026 Program authorized March 11, 2026; $125M ASR executed March 13, 2026 \u2014 framed as confident counter-cyclical deployment at depressed prices.",
+      "f": "If true, share repurchases should be executed at consistently low prices and reflect a coherent capital-allocation framework, not panic-buying after stock collapse.",
+      "M_source": "Filing-internal Item 5 + Note 10 + Subsequent Events. Cross-checked against insider-sales price data from insider_vs_calendar.",
+      "M_value": "FY26 actual: 17,616,548 shares retired at $8.54 avg for $150.4M (fully consumed 2025 auth). Insider sales (per insider_vs_calendar) executed at $7.12-$7.78 in Sep'25-Jan'26 \u2014 meaning company was buying at ~$8.54 avg while insiders were selling at $7.12-$7.78 (BELOW the company's buyback price). 2026 program $200M authorized 3/11/26; $125M ASR same week (3/13/26) = 62.5% of 2026 authorization burned in a single trade just 2 days post-announcement. Aggressive front-loading at trough, but reduces optionality.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Buyback execution is real and counter-cyclical at the corporate level, BUT insiders sold at LOWER prices than the company paid (negative price information asymmetry against shareholders). The 62%-in-2-days 2026 ASR exhausts most of the new authorization immediately, leaving little dry powder if stock falls further. Capital-return claim is procedurally honored but economically suboptimal vs insider behavior."
+    },
+    {
+      "claim_id": "C6",
+      "R": "Insider trading discipline \u2014 Insider Trading Policy disclosed, sales described as ordinary-course; Founder/Chairman Ragy Thomas + executive team align with shareholders.",
+      "f": "If true, insider sales should be 10b5-1-governed, modest in scale, and not abnormally clustered around adverse events or at trough prices.",
+      "M_source": "insider_vs_calendar.query_insider_sales_near_budget_events(cik='0001569345', cutoff_date='2026-05-20', contractor_name='Sprinklr').",
+      "M_value": "Last 365d (5/20/25-5/20/26): 61 Form 4 filings, 56 sales totaling $97.4M. 14 proximate to events, $4.76M. CRITICAL DETAIL: Director Neeraj Agrawal sold 370,734 shares for ~$2.8M on Oct 6-8, 2025 (3 transactions at $7.51-$7.78) \u2014 NOT 10b5-1 (discretionary). Founder/Chairman Ragy Thomas sold 28,916 shares for $224K on Sep 16, 2025 at $7.75 \u2014 also NOT 10b5-1. CEO Rory Read sold 138,505 shares for $988K on Jan 14, 2026 at $7.13 \u2014 IS 10b5-1. Of 14 proximate sales, only 2 (14%) were 10b5-1; 12 (86%) were discretionary. Signal: CLUSTERED_DISCRETIONARY (downgraded to UNCONFIRMED only because validators require contractor-program-exposure linkage which doesn't apply to a pure-SaaS issuer).",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "interpretation": "Founder, a director, and multiple senior executives executed DISCRETIONARY (non-10b5-1) open-market sales at $7.13-$7.78 \u2014 i.e., at or below the company's own ~$8.54 buyback average. Discretionary sales by a founder/chairman near trough prices, while the company is simultaneously deploying $150M+ of corporate cash on buybacks at HIGHER prices, is a material misalignment signal. Total $97.4M of insider distribution over 12 months is large relative to a ~$1.5B market cap. This is the strongest mode-B finding."
+    },
+    {
+      "claim_id": "C7",
+      "R": "Sprinklr Service product suite is positioned as a strategic growth pillar (one of four product suites: Social, Insights, Marketing, Service) \u2014 heavily invested R&D and sales effort.",
+      "f": "If genuinely strategic and well-disclosed, Sprinklr Service should not be the subject of an active securities-fraud class action alleging the Company FAILED TO DISCLOSE material risks associated with it.",
+      "M_source": "claim_evolution.query_claim_evolution(cik='0001569345', search_term='Sprinklr Service', base_filing_date='2025-03-21', cutoff_date='2026-05-20') + filing-internal Note 9 Legal Matters.",
+      "M_value": "4 subsequent mentions: 1 AFFIRMED (10-K product description, self-referential), 3 UNRELATED (all litigation-context only). REAFFIRMED_IN_STRUCTURED_DISCLOSURE label is misleading here \u2014 the only structured affirmation IS the 10-K product blurb; every other mention is the Boshart v. Sprinklr Securities Class Action (filed 8/13/24, S.D.N.Y. case 1:24-cv-06132), alleging defendants 'misled investors... by failing to disclose risks associated with Sprinklr Service... and that the Company was focusing resources on Sprinklr Service rather than other product suites.' Motion to dismiss fully briefed 6/2/25, PENDING as of filing date. Three derivative actions (Coffey, Figurella, Newman) consolidated and stayed. Securities Action claim_evolution.query (search_term='Securities Action') confirms 4 AFFIRMED reaffirmations across 10-Q/10-K \u2014 i.e., the action is ALIVE, not dismissed.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Active securities-fraud litigation specifically targeting Sprinklr Service product strategy is unresolved as of cutoff. Motion to dismiss has been pending 11+ months \u2014 longer than typical. If denied, materializes class-period damages exposure. Filing's tone around Sprinklr Service in growth narrative does not reconcile cleanly with the litigation context. Moderate (not severe) because (a) provision is $0 and management has 'no opinion on outcome', (b) class period closed 6/5/24 well before cutoff, (c) the company has continued to publicly emphasize Sprinklr Service \u2014 either confident or doubling-down."
+    },
+    {
+      "claim_id": "C8",
+      "R": "Operational restructuring \u2014 12% workforce reduction implemented Feb 2025 (third reduction in three years: 4% Feb 2023, 3% May 2024, 12% Feb 2025) framed as cost-discipline to 'position the Company for long-term success.'",
+      "f": "If genuinely a one-time realignment, restructuring should be complete with no further reductions announced; sales productivity should rebound; subscription gross margin should hold.",
+      "M_source": "claim_evolution.query_claim_evolution(cik='0001569345', search_term='workforce reduction', base_filing_date='2025-03-21', cutoff_date='2026-05-20') + filing-internal Note 14 + MD&A gross-margin disclosure.",
+      "M_value": "claim_evolution: 2 subsequent mentions, REAFFIRMED. Filing states 'we do not expect to incur any further restructuring expense' for the 2026/2025 plans. BUT: (a) THIRD consecutive annual restructuring (4% -> 3% -> 12% \u2014 accelerating, not declining), (b) Subscription gross margin DECLINED from 80% to 76% in FY26 \u2014 wrong direction for a 'realignment for long-term success', (c) Sales & marketing -10% YoY ($319.6M -> $287.6M) is consistent with the 12% RIF but management also notes 'we paused certain' sales/onboarding activities \u2014 same admission pattern as UPWK's Lifted disclosure, (d) Customer count -13% YoY tracks the sales-headcount cut.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Restructuring is real and disclosed but the three-year cadence (accelerating from 4% to 12%) and the simultaneous gross-margin compression + customer-count loss suggest the cuts are reactive to demand weakness rather than proactive realignment. Management's 'no further restructuring expected' is the same language used before each prior round."
+    }
+  ],
+  "queries_run": [
+    "going_concern_detector.query_going_concern",
+    "auditor_change_tracker.query_auditor_changes",
+    "sec_filings.list_filings_by_form",
+    "edgar_fts.query_fulltext",
+    "insider_vs_calendar.query_insider_sales_near_budget_events",
+    "megacap_namecheck.query_megacap_mentions",
+    "claim_evolution.query_claim_evolution (x4: Sprinklr Service, Sprinklr AI, restructuring, Securities Action, workforce reduction)"
+  ],
+  "scoring": {
+    "PASS": 2,
+    "UNVERIFIABLE": 0,
+    "MODERATE_UNDERDELIVERY": 5,
+    "SEVERE_UNDERDELIVERY": 1,
+    "RED_FLAG_NEGATIVE": 0,
+    "verifiable_claims": 8,
+    "weighted_sum": "(0*2 + 1*5 + 2*1 + 3*0) / 8 = 7 / 8",
+    "composite": 0.875
+  },
+  "composite": 0.875,
+  "summary": "Sprinklr is structurally solvent (KPMG-clean audit, no going concern, $502.5M liquid resources, no LT debt, +105% OCF growth) but operationally contracting (-13% customers, -5% large customers, third consecutive accelerating RIF at 4%->3%->12%, -400bps subscription gross margin) with two notable honesty-alpha catches: (1) Mode-B SEVERE \u2014 Founder/Chairman Ragy Thomas + Director Neeraj Agrawal + other execs executed $97.4M of insider DISTRIBUTION in trailing 12mo, mostly discretionary (non-10b5-1) at $7.13-$7.78 trough prices while the company simultaneously bought back stock at $8.54 avg, creating a documented price-information asymmetry against shareholders; (2) Mode-A MODERATE \u2014 active securities class action (Boshart, S.D.N.Y.) specifically alleging undisclosed risks in Sprinklr Service product suite remains unresolved 21+ months post-filing, motion to dismiss fully briefed and pending. The $200M new buyback authorization with 62% deployed in 48 hours via ASR signals defensive (not opportunistic) capital allocation. Megacap namecheck returned ZERO hits across 17 large enterprise customers despite '59% of the Fortune 100' claim \u2014 consistent with small per-customer footprint but undermines enterprise-platform narrative weight. Composite 0.875 (2 PASS, 5 MOD, 1 SEV) \u2014 quality SaaS that has stopped growing and is being quietly distributed by insiders into a buyback-supported price."
+}

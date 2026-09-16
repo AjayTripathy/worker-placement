@@ -1,0 +1,67 @@
+PACK: acknowledged. Superseded: red's px $28.03 retained (no live IBKR — `get_price_snapshot` permission denied, coverage gap); red's ruling that the empty XBRL block is not a defect is correct (FPI, 6-K/IFRS) and I adopt it.
+
+## BLUE BENCH — ETOR — RED CASE: PARTIALLY OVERTURNED
+
+I fetched the filed EX-99.1 PROXY-FETCHED ([sec.gov/Archives/…/ea030151001ex99-1.htm](https://www.sec.gov/Archives/edgar/data/1493318/000121390026087525/ea030151001ex99-1.htm)) and the Q1'26 release ([globenewswire 2026-05-12](https://www.globenewswire.com/news-release/2026/05/12/3292651/0/en/eToro-Reports-First-Quarter-2026-Results.html)). Red's two "independent passes" of the exhibit missed the line directly beneath the one it built its kill on.
+
+**1. Crypto ceiling "absent from the filing" — OVERTURNED.** | Filed EX-99.1 income statement | The exhibit reports **both** legs: *Revenue from cryptoassets* **$1,346,405K** and ***Cost of revenue from cryptoassets*** **$1,353,601K**. Net crypto spot contribution = **−$7,196K**. Q2'25: $1,914,792K − $1,877,089K = **+$37,703K**. | **REFUTED — the ceiling is computable from the filed document.** Red quoted the gross numerator and omitted the gross denominator sitting on the next line, then called the resulting 84.5% a venue divergence. Backing it out: non-crypto net contribution = $229M − (−$7.2M) = **$236.2M vs $172.3M** in Q2'25, **+37% YoY**, i.e. ETOR absorbed a **−$44.9M** YoY crypto swing and still grew net contribution +9%. That is a *stronger* bounded-damage case than the brief made, from filed data. Red's sub-claim that a shrinking loss-making line "converges to a larger loss" is **REFUTED**: Q1'26 was $2,153M rev / $2,171M cost = **−$18M**, so the spot loss **narrowed 60% QoQ** as volume fell — the cost line is variable, not fixed. Residual valid nit: the spot/derivative split ($19.7M) remains transcript-only. REDUCED to provenance, not fatal.
+
+**2. TradeZero co-cause — SUSTAINED, severity REDUCED.** | Pack 6-K excerpt | $231M "up to," incl. up to 2.5M shares (~$70–95M) ⇒ cash leg ~$136–161M ≈ **~20%** of net own liquidity, not 30%; 2.9x revenue on **81% gross margins**, accretive to adj EPS year 1. | **CONFIRMED that the brief omitted it; REFUTED as "FATAL."** A cheap accretive tuck-in is a monitor item, not a −14% cause; 08-12's second leg was Cantor's PT cut on the NC/EBITDA miss.
+
+**3. TradeZero/Pipitone SEC sanction — SUSTAINED IN FULL.** | [SEC PR 2022-88, PROXY-FETCHED](https://www.sec.gov/newsroom/press-releases/2022-88) | TradeZero America **and Pipitone individually**, §17(a)(2)&(3), $100k/$25k, C&D + independent compliance consultant, May 24 2022. | **CONFIRMED.** Red's best finding. RP_TAINTED input on the acquired franchise; keep.
+
+**4. "April printed $197 −48%" — OVERTURNED (red made the same error it alleged).** | Q1'26 release KPI table | April 2026: **Capital Markets/ECC $197 (−48%)**; **Crypto $207 (−22%)**. Red matched the CapMkts line against the brief's crypto line. The brief's error was symmetric (July CapMkts $207 vs April *crypto* $207). | **REFUTED.** Like-for-like CapMkts: **April $197 (−48%) → July $207 (−23%)** — up 5% sequentially with the YoY decline *halving*. Both benches missed an inflection that runs to blue.
+
+**5. GAAP NI −35% QoQ — REDUCED (seasonality run, per doctrine).** | Q1/Q2 releases | Q1'26 NC $258M / EBITDA $109M / NI $82M → Q2 $229M/$78M/$53M = −11%/−28%/−35%. Back-solved Q1'25 ($217M/$80.7M/$59.9M) → Q2'25: **−3%/−11%/−50%.** | **REFUTED on the metric red chose:** the GAAP-NI QoQ fade is *shallower* than last year's. **SUSTAINED on adj EBITDA** (−28% vs −11% seasonal) and the below-consensus NC/EBITDA. Red headlined the one line the seasonal comp exonerates.
+
+**6. Buyback $189.1M — SUSTAINED on fact, REFUTED on magnitude.** | Filed cash flow: "Purchase of treasury shares" **$189,108K** 1H26 | 1H GAAP NI = $82M + $53M = **$135M** ⇒ **1.4x**, not red's "3x." | Mark ~−26% on the Q2 tranche ≈ $23M unrealized. Real, modest, not "realised value destruction."
+
+**7. AUA/account "proves the crypto funnel" — OVERTURNED as a hard-comp artifact (the III precedent).** | Both KPI tables | AUA/funded account: **Apr'26 $4,594 vs Apr'25 $4,361 = +5.3%** → Jul'26 $4,282 vs Jul'25 $5,328 = −19.6%. A **25-point swing in one quarter.** Q2 added ~250k accounts on 4.07M (6%) — even at *zero* dollars each that dilutes ~6%, not 25. Cause: **AUA rose +24% Apr→Jul 2025 ($15.7→$19.5B) and −1% in 2026 ($18.7→$18.5B)** — the prior-year base ripped. IEA/account identical shape (+12.6% → −22%; IEA +35% Apr→Jul'25 vs −3% in '26). | **REFUTED.** Red's arithmetic is right and its inference is a base effect. Funnel dependency remains **untested**, not confirmed.
+
+**8. Insider distribution / "off-cycle" 13G/As — REDUCED.** | Amended Rule 13d-2 (eff. 2024-09-30): QII Schedule 13G amendments due **45 days after quarter-end = Aug 14** | The 08-14 ×2 cluster is the statutory deadline, not restructuring. **REFUTED as "off-cycle."** 144s: filings exist (pack confirms 08-12, 06-01×2), but red fetched **zero** share counts — materiality unquantified, and per the LIND lesson Form 4s here are unexamined for grant-vs-sale. **PLAUSIBLE, not CONFIRMED.**
+
+**9. Concession — SUSTAINED and verified.** Payable to users $147,773K; cash $945,916K + ST $267,315K; equity $1,363,447K. Net own liquidity ~$775M; EV ~$1.80B ⇒ **~5.8x EV/adj-EBITDA**, ~9.4–10.8x adj EPS.
+
+**10. Detector UNRESOLVED×3 — SUSTAINED.** Infra-masquerading doctrine; the funnel test never ran.
+
+**Selection judgment:** red attacked the *citation* of the strongest leg rather than the leg. Its three highest-severity tags (1, 2, 7) are all artifacts — a missing offsetting cost line, an all-cash assumption, and a base effect — while the two genuine findings (3, and adj-EBITDA deceleration) were tagged SIZING and buried.
+
+**NEW FINDINGS RED MISSED:**
+- **(A) Filed-data proof of the thesis, both benches missed:** crypto spot went +$37.7M → −$7.2M (−$44.9M) and net contribution still grew +9% because non-crypto NC grew **+37%**. Bounded damage is *demonstrated*, not asserted.
+- **(B) Crypto spot has been contribution-negative since at least Q1'26 (−$18M)** — so the −$7.2M print is an *improvement*, and there is less left to break than either bench priced.
+- **(C) CapMkts invested/trade inflected** (−48% → −23% YoY, +5% sequential) — the KPI table the tape sold contains a positive turn nobody read.
+- **(D) Against blue: Q2 adj EBITDA margin fell** — NC +9% while EBITDA +8.3% and −28% QoQ vs −11% seasonal; opex is growing into a decelerating top line. This is the real bear leg and neither bench prosecuted it.
+- **(E) Coverage gap, unresolved by anyone:** the **$339.8M "Counterparties"** asset (clearing/counterparty concentration) is undisclosed in EX-99.1; the 20-F note is the resolver.
+
+**NET POSITION AFTER BOTH BENCHES:** Red's REJECT does not survive — its strongest kill inverted on the filed statement. What survives is: TradeZero integrity overhang (RP_TAINTED, SIZING), adj-EBITDA deceleration (real), unquantified 144 supply, and a ~3-month information vacuum with **no dated catalyst**. Against that, an issuer at **~5.8x EV/EBITDA with $775M net own liquidity** that grew non-crypto contribution +37% through a −$44.9M crypto swing. Per response taxonomy this is a **SIZE-and-TIMING** case, not a valuation kill: RP_TAINTED caps at 0.85×E[fv], and `discovery_state = CROWDED` is a size instrument — I note red did *not* kill on coverage, correctly. Ruling: **STARTER, half-size, gated** — (i) 20-F/6-K supplement with issuer-filed segment NC or counterparty note, (ii) TradeZero cash/stock split, (iii) tranche only into the ~Nov print, no pre-positioning; NOT FLAT, NOT REJECT.
+
+**PRINT PROXIMITY: ~2026-11-09 — UNCONFIRMED (yfinance-derived; consistent with Feb 17 → May 12 → Aug 11; no issuer PR names it). ~59 trading days out; no print within 5 trading days — print-decisive reconstruction not triggered.** Monthly KPIs publish only inside quarterly releases: no interim carrier, which argues against paying for optionality now and for tranching at the print.
+
+## DETECTORS CONSULTED
+- **app_review_velocity** — NOT-FIRED / UNCHECKABLE (×3 ETOR/COIN/HOOD all `UNRESOLVED`). Missing evidence: a resolving app_id for the three storefronts. This is the one connector that could settle finding 7's funnel question — now the *only* live route, since red's arithmetic proof is overturned.
+- **finra_brokercheck** — **FIRED.** TradeZero America Inc. + Pipitone individually sanctioned, [SEC PR 2022-88](https://www.sec.gov/newsroom/press-releases/2022-88). CRD status not independently pulled (no BrokerCheck tool bound here).
+- **lockup_expiration_calendar** — **FIRED (partial), severity reduced.** No follow-on on file; 13G/A cluster is the statutory 45-day window, not a signal. Missing: IPO lockup expiry date + per-144 share counts.
+- **chinese_smallcap_ramp_dump_archetype** — NOT-FIRED (matched `asia_operating_jurisdiction`; ETOR is Israel/Cyprus/UK-regulated, Nasdaq-listed with audited IFRS statements — archetype absent).
+- **jobs_act_disclosure_exemption_audit** — UNCHECKABLE. ETOR is an FPI, not an EGC-domestic filer; the analogous check is FPI exemption from quarterly 10-Q/XBRL — which *is* live and is exactly why the pack's XBRL block was empty. Resolver: the 20-F.
+- **common_control_merger_accounting** — NOT-FIRED (TradeZero is third-party, arm's-length, J.P. Morgan-advised).
+- **upc_tra_structure** — NOT-FIRED (no Up-C/TRA; single Class A/B Cayman structure).
+- **clinical_trial_referral_quality** — NOT-APPLICABLE (dispatch false positive; no diagnostics business).
+- **albuquerque_permits / austin_permits / bozeman_permits** — NOT-APPLICABLE (matched `real_estate_development`; PP&E $9.4M, no pipeline).
+- **carbon_mapper** — NOT-APPLICABLE (matched `physical_plant_operations`; no physical plant).
+- **census_acs** — NOT-APPLICABLE (matched `residential_rental_business`; none).
+- **crop_yield_ndvi** — NOT-APPLICABLE (matched `agricultural_exposure`; none).
+- **fema_nri_hazard** — NOT-APPLICABLE (matched `real_estate_collateral`; assets are financial).
+
+I confirm red's dispatch finding: 9 of 14 entries matched real-asset features a fintech does not possess. SIC 6211 needs a `physical_asset_base` negative guard.
+
+**COVERAGE GAPS (reported):** no live IBKR quote (permission denied) — tape is the pack's $28.03/dd52 −0.419; period-end shares and Class A/B split not in EX-99.1 (diluted WA 91.71M used, cap-structure pull incomplete); `cohorts.json` unread; 20-F counterparty note unfetched.
+
+**CONVICTION THAT MY NET POSITION IS RIGHT: 7/10.** The overturns of findings 1, 4 and 7 rest on filed primary values I read directly and on arithmetic I show, so they are hard. The discount is for (D): the adj-EBITDA deceleration is real, unprosecuted by either bench, and could justify FLAT over STARTER if Q3 opex confirms it — plus the earnings-dislocation template's 0-for-7 record argues for the half-size gate rather than a full position.
+
+```kg_candidate
+{"name": "gross_principal_pair_split_across_readers", "kind": "detector", "one_line": "On principal/gross-booked segments, a reader who quotes the revenue line without its paired cost-of-revenue line on the SAME filed statement manufactures a 17x 'venue divergence' out of a number the issuer fully disclosed.", "fires_on": "A bench cites segment revenue as % of total to refute a net-basis claim, AND the filed statement contains a matching 'Cost of revenue from <segment>' line that was not netted; test = does revenue minus paired cost reproduce the disputed net metric?", "evidence_here": "ETOR Q2'26 EX-99.1: Revenue from cryptoassets $1,346.405M and Cost of revenue from cryptoassets $1,353.601M sit adjacent; netting gives -$7.2M (-3.1% of the $229M net contribution), CORROBORATING the disputed ~5% ceiling from the filed document. Red ran two full-text passes, quoted 84.5% of revenue, and declared the ceiling uncitable.", "applies_to_guess": {"issuer_features": ["principal_gross_revenue_recognition", "crypto_trading_business", "paired_cost_of_revenue_line", "ifrs_foreign_private_issuer"], "sic_prefixes": ["6211", "6199", "6221", "5961"]}}
+```
+
+```kg_candidate
+{"name": "prior_year_ramp_fakes_cohort_decay", "kind": "detector", "one_line": "A per-account balance metric (AUA/account, deposits/account) can swing 25 points YoY in a single quarter purely because the prior-year comparison period ramped — read as new-cohort quality decay, it is a hard-comp artifact.", "fires_on": "Per-account balance YoY flips sign between two consecutive monthly KPI tables by more than the quarter's account growth rate can arithmetically explain; check the PRIOR-year sequential path of the numerator.", "evidence_here": "ETOR AUA/funded account +5.3% YoY in April 2026 -> -19.6% in July 2026. Q2 added ~250k accounts on 4.07M (6%): even at zero balance each, max dilution ~6%, not 25. Cause: AUA rose +24% Apr->Jul 2025 ($15.7B->$19.5B) vs -1% in 2026 ($18.7B->$18.5B). Red graded this CONFIRMED proof of a crypto-funnelled account cohort.", "applies_to_guess": {"issuer_features": ["monthly_kpi_table", "funded_accounts_metric", "mark_to_market_client_assets", "retail_brokerage_platform"], "sic_prefixes": ["6211", "6199", "6022"]}}
+```

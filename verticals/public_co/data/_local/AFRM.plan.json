@@ -1,0 +1,164 @@
+{
+  "ticker": "AFRM",
+  "cutoff": "2026-05-16",
+  "filing": "0001820953-25-000080_10-K.txt",
+  "plan_version": 1,
+  "claims": [
+    {
+      "claim_id": "AFRM-1",
+      "claim_text": "Celtic Bank and Lead Bank originate substantially all loans facilitated through Affirm's platform; Cross River Bank is also an originating bank partner and provides the FDIC-insured high-yield Affirm Money Account.",
+      "source_quote": "We currently rely on Celtic Bank and Lead Bank to originate substantially all of the loans facilitated through our platform. ... our originating bank partners, which include Cross River Bank, an FDIC-insured New Jersey state-chartered bank, Celtic Bank, an FDIC-insured Utah state-chartered industrial bank, and Lead Bank, an FDIC-insured Missouri state-chartered bank.",
+      "subject": "Celtic Bank / Lead Bank / Cross River Bank",
+      "predicate": "originate_loans_for",
+      "object_value": "Affirm Holdings",
+      "category": "partnership",
+      "referent_type": "entity",
+      "m_source_status": "MAPPED",
+      "source_id": "fdic_call_reports.query_bank_credit_history",
+      "source_params": {
+        "bank_names": ["Celtic Bank", "Lead Bank", "Cross River Bank"],
+        "fields": ["NAMEFULL", "STNAME", "ASSET", "LNCONOTH", "LNATRESJ", "NTLNLS", "REPDTE"],
+        "cutoff_date": "2026-05-16",
+        "lookback_quarters": 8
+      },
+      "proposed_connector": null,
+      "extraction_notes": "FDIC Call Reports adjudicate that the three named bank partners exist and have consumer-loan portfolios consistent with hosting AFRM-originated balances. Apply Calibration Heuristic 3: AFRM's share within Cross River / Celtic / Lead is not directly separable from Call Report aggregates; the verification bar is existence and order-of-magnitude consistency, not exact attribution."
+    },
+    {
+      "claim_id": "AFRM-2",
+      "claim_text": "Affirm has a material installment-financing services agreement with Amazon.com Services LLC and Amazon Payments, Inc., supported by issued warrants to Amazon (most recently the Second Replacement Warrant dated February 14, 2025).",
+      "source_quote": "Amended and Restated Installment Financing Services Agreement, dated as of November 10, 2021, by and among Affirm Holdings, Inc., Amazon.com Services LLC and Amazon Payments, Inc. ... Second Replacement Warrant to Purchase Class A Common Stock of Affirm Holdings, Inc., by and between Affirm Holdings, Inc. and Amazon.com Services LLC, dated as of February 14, 2025",
+      "subject": "Amazon.com Services LLC",
+      "predicate": "is_named_BNPL_partner_of",
+      "object_value": "Affirm Holdings",
+      "category": "partnership",
+      "referent_type": "entity",
+      "m_source_status": "MAPPED",
+      "source_id": "edgar_fts.query_fulltext",
+      "source_params": {
+        "search_term": "Affirm",
+        "cik": "0001018724",
+        "forms": ["10-K", "10-Q"],
+        "cutoff_date": "2026-05-16"
+      },
+      "proposed_connector": null,
+      "extraction_notes": "Layer 3 Rule 7: a material BNPL counterparty relationship should be mentioned by the counterparty. Look for AMZN 10-K/10-Q mentions of 'Affirm'. Warrants issued to AMZN create a securities-disclosure breadcrumb on both sides."
+    },
+    {
+      "claim_id": "AFRM-3",
+      "claim_text": "Affirm has a Global Customer Installment Program Agreement with Shopify Inc. dated February 14, 2025.",
+      "source_quote": "Global Customer Installment Program Agreement, dated February 14, 2025, by and between Shopify Inc. and Affirm, Inc.",
+      "subject": "Shopify Inc.",
+      "predicate": "is_named_BNPL_partner_of",
+      "object_value": "Affirm Holdings",
+      "category": "partnership",
+      "referent_type": "entity",
+      "m_source_status": "MAPPED",
+      "source_id": "edgar_fts.query_fulltext",
+      "source_params": {
+        "search_term": "Affirm",
+        "cik": "0001594805",
+        "forms": ["20-F", "40-F", "6-K"],
+        "cutoff_date": "2026-05-16"
+      },
+      "proposed_connector": null,
+      "extraction_notes": "Shopify files 40-F/6-K as a foreign private issuer. The Shop Pay Installments / Shopify installment program with Affirm is materially mentioned in Shopify disclosures. EDGAR fulltext over Shopify CIK is the cleanest adjudicator."
+    },
+    {
+      "claim_id": "AFRM-4",
+      "claim_text": "Affirm facilitated $36.7 billion of GMV during fiscal year ended June 30, 2025 across approximately 377 thousand active merchants.",
+      "source_quote": "For the fiscal year ended June 30, 2025 we have facilitated consumer purchases of $36.7 billion in GMV. ... As of June 30, 2025, we had approximately 377 thousand active merchants",
+      "subject": "Affirm Holdings",
+      "predicate": "facilitated_GMV_of",
+      "object_value": "$36.7B FY2025, 377K active merchants",
+      "category": "production_volume",
+      "referent_type": "amount",
+      "m_source_status": "NONE",
+      "source_id": null,
+      "source_params": {},
+      "proposed_connector": null,
+      "extraction_notes": "Calibration Heuristic 3 (planned vs operational): GMV is gross merchandise volume facilitated, NOT Affirm revenue and NOT balance-sheet loans. There is no external registry that adjudicates a BNPL company's self-reported GMV figure. Audited financials anchor revenue ($3.22B FY2025) but GMV is unaudited disclosure. Mark UNVERIFIABLE structurally."
+    },
+    {
+      "claim_id": "AFRM-5",
+      "claim_text": "On July 1, 2025, Affirm Holdings, Inc. effected a change in its jurisdiction of incorporation from Delaware to Nevada (the 'Reincorporation') pursuant to a certificate of conversion filed June 26, 2025.",
+      "source_quote": "On June 26, 2025, the Company filed a certificate of conversion with the Secretary of State of the State of Delaware and filed articles of conversion and articles of incorporation with the Secretary of State of the State of Nevada, which as of July 1, 2025, effected a change in our jurisdiction of incorporation from Delaware to Nevada (the Reincorporation ).",
+      "subject": "Affirm Holdings, Inc.",
+      "predicate": "reincorporated_in",
+      "object_value": "Nevada (effective 2025-07-01)",
+      "category": "regulatory_milestone",
+      "referent_type": "entity",
+      "m_source_status": "PROPOSED",
+      "source_id": null,
+      "source_params": {},
+      "proposed_connector": {
+        "name": "nv_sos.query_entity",
+        "description": "Nevada Secretary of State business entity search (SilverFlume) — returns entity status, formation date, entity type, and registered agent for a corporate name.",
+        "endpoint": "https://www.nvsilverflume.gov/businessSearch",
+        "access_pattern": "scrape",
+        "auth_required": false,
+        "sample_invocation": "POST businessSearch with {entityName: 'Affirm Holdings, Inc.'} ; parse status, NV file number, formation/conversion date.",
+        "rationale": "Reincorporation is a state-registry event; the only authoritative adjudicator is the destination state's Secretary-of-State business registry. EDGAR shows the filing but not the actual state record that the conversion took legal effect.",
+        "estimated_cost": "free",
+        "completeness": "All Nevada-domiciled entities",
+        "referent_type": "entity",
+        "attribute": "incorporation_status"
+      },
+      "extraction_notes": "Could partially confirm via edgar_fts on AFRM's own 8-K (June 26, 2025), but the registry-anchor adjudicator is Nevada SOS. Listed as PROPOSED because the catalog has no SOS connector and adjudication requires the destination-state registry."
+    },
+    {
+      "claim_id": "AFRM-6",
+      "claim_text": "As of June 30, 2025, the aggregate outstanding principal balance of loans held by third-party investors or unconsolidated VIEs (i.e., sold/securitized off-balance-sheet) was $7.8 billion, and total securitization-trust notes outstanding totaled $4.85 billion in borrowing capacity drawn.",
+      "source_quote": "As of June 30, 2025, the aggregate outstanding balance of loans held by third-party investors or unconsolidated VIEs was $ 7.8 billion, of which we have recorded a repurchase liability of $ 8.7 million ... Notes issued by securitization trusts 5.75 % 2029 - 2034 4,850,000 4,850,000",
+      "subject": "Affirm Holdings",
+      "predicate": "has_off_balance_sheet_loans_of",
+      "object_value": "$7.8B; $4.85B securitization notes drawn",
+      "category": "financial_distress",
+      "referent_type": "amount",
+      "m_source_status": "MAPPED",
+      "source_id": "edgar_fts.query_fulltext",
+      "source_params": {
+        "search_term": "AFFIRM ASSET SECURITIZATION TRUST",
+        "forms": ["ABS-EE", "ABS-15G", "10-D", "424B"],
+        "cutoff_date": "2026-05-16"
+      },
+      "proposed_connector": null,
+      "extraction_notes": "Affirm sponsors a programmatic ABS shelf (Affirm Asset Securitization Trust); ABS-EE/10-D filings on EDGAR provide registry-level adjudication of trust issuance volume and loan-level performance. EDGAR fulltext on the issuing-trust filer names is adequate; could also propose an ABS-EE structured-data connector if higher precision needed."
+    },
+    {
+      "claim_id": "AFRM-7",
+      "claim_text": "Affirm's proprietary machine-learning risk model has been calibrated and validated on data from approximately 343 million loans.",
+      "source_quote": "Our machine learning-based risk models are calibrated and validated on an extensive amount of data from over 343 million loans",
+      "subject": "Affirm Holdings",
+      "predicate": "has_trained_models_on",
+      "object_value": "~343 million loans",
+      "category": "technology",
+      "referent_type": "quantity",
+      "m_source_status": "NONE",
+      "source_id": null,
+      "source_params": {},
+      "proposed_connector": null,
+      "extraction_notes": "No external registry observes a private company's training-corpus size. Patent / USPTO filings could partially corroborate AI-underwriting IP claims but cannot adjudicate the 343M figure. Genuinely UNVERIFIABLE — internal to Affirm's data lake."
+    },
+    {
+      "claim_id": "AFRM-8",
+      "claim_text": "Affirm has approximately $5.2 billion in available undrawn funding debt capacity and $11.66 billion total committed borrowing capacity across warehouse facilities, variable funding notes, sale/repurchase agreements, and securitization trusts as of June 30, 2025.",
+      "source_quote": "we had $2.2 billion in cash and cash equivalents and available for sale securities, $5.2 billion in available funding debt capacity ... Total $ 11,657,692 $ 6,490,514",
+      "subject": "Affirm Holdings",
+      "predicate": "has_funding_capacity_of",
+      "object_value": "$11.66B committed, $5.2B undrawn",
+      "category": "financial_distress",
+      "referent_type": "amount",
+      "m_source_status": "MAPPED",
+      "source_id": "edgar_fts.query_fulltext",
+      "source_params": {
+        "search_term": "Affirm warehouse credit facility",
+        "cik": "0001820953",
+        "forms": ["8-K", "10-Q", "10-K"],
+        "cutoff_date": "2026-05-16"
+      },
+      "proposed_connector": null,
+      "extraction_notes": "Material amendments to warehouse / revolving facilities require 8-K disclosure. EDGAR fulltext over AFRM's own CIK plus the post-FY-end 10-Qs (Q1-Q3 FY26 filed 2025-11-06 / 2026-02-05 / 2026-05-07) can verify capacity figures are consistent forward of the 10-K. This is a self-corroboration trail rather than external adjudication; emit only on material divergence."
+    }
+  ]
+}

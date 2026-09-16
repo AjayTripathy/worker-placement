@@ -1,0 +1,108 @@
+{
+  "ticker": "RDW",
+  "cutoff": "2024-09-01",
+  "filing": "0001819810-24-000025_10-K.txt",
+  "scoring_notes": "Backtest at 2024-09-01. All pentagon_jbook + doe_budget calls included cutoff_date='2024-09-01'. The J-Book divergence pattern does NOT trigger for RDW because the FY2023 10-K and Q2-2024 10-Q narrative does not name specific Pentagon Program Elements, PE numbers, or named DoD line-items (no SDA Tranche, AFRL Quantum, DARPA Blackjack, VICTUS, Skyborg, CCA, Project Maven, hypersonics, etc.). Defense-tinted claims are limited to: Link-16 antennas, an unnamed 'first generation national-security satellite constellation in LEO', Space Force GPS heritage, and a Space Test Program reference (the latter two are J-Book-FUNDED). usaspending confirms real DoD revenue at ~$85M across 26 awards under LoadPath / Redwire Space Solutions / Redwire Space Missions UEIs (AFRL Kirtland FA9453, AFRL Wright-Patterson FA8650, SMC FA8808) — the past defense revenue is REAL, not inflated. The non-disclosure of named PEs is itself a pattern but not within Mode A J-Book divergence — these are mostly DoD SBIR/STTR + AFRL component contracts, not Program-of-Record exposure. Mode B (implied verification): rollup-coherence with 9 acquisitions in 30 months returned INCOHERENT_ROLLUP, but with low information density (acq_coherence couldn't resolve target business details so all 8 scored 0.0 — flag this as low-confidence signal). Insider sales: 17 sales over 365 days, none proximate to budget-vote dates — NO_PROXIMATE_SALES (clean). Material weakness in ICFR unremediated through Q2-2024 is a non-J-Book negative.",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Link-16 antennas deployed on 'first generation of a national security satellite constellation in LEO' (program unnamed).",
+      "severity": "UNVERIFIABLE",
+      "supports": "company-narrative + flight-heritage assertion, no PE number, no specific program named",
+      "M_check": "pentagon_jbook.query_program_funding (Tranche 1/2 Transport Layer, Link-16, SDA Transport Layer, contractor=Redwire); usaspending.query_dod_contracts",
+      "M_value": "SDA Transport Layer Tranches 0-2 (PE 1206410SF): status_declared FUNDED_SHRINKING but signal NOT_FOUND_IN_TIMERANGE at 2024-09-01 cutoff (corpus history rows only cover FY26+). Link-16 / SDA queries: NOT_FOUND. contractor=Redwire: NOT_FOUND (J-Book corpus does not index Redwire). usaspending: 26 DoD awards = $85.2M (LoadPath, Redwire Space Solutions, Redwire Space Missions); contract descriptions include 'AFRL satellite component models', 'deployable structural booms for smallsat antennas', 'ATHENA articulated tensioned hexapod extendable nanosatellite antenna' — these are RF/structures component awards, not Tranche 1/2 prime contracts.",
+      "interpretation": "Heuristic 7 applies: NOT_FOUND in corpus is not a red flag — Redwire is a sub-tier component supplier whose Link-16 antenna may be deployed on an SDA/national-security constellation but the company is not the J-Book line-item owner. The Transport Layer Tranches 0-2 primaries are York, Lockheed, Northrop (per corpus). Redwire's role would be sub-tier, so even FUNDED_SHRINKING on T0-T2 is only weakly transmissible to Redwire P&L. Score UNVERIFIABLE — claim is too vague to map to a specific PE."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "ROSA / iROSA flight heritage on ISS + IXPE + DART; positioned as competitive power-generation product line.",
+      "severity": "PASS",
+      "supports": "flight-heritage backward-looking; ROSA was developed via NASA Tipping Point + ISS deployment",
+      "M_check": "pentagon_jbook (ROSA, Space Test Program); doe_budget (ROSA); usaspending.query_federal_presence",
+      "M_value": "pentagon_jbook ROSA: NOT_FOUND. Space Test Program (PE 1206864SF): FUNDED_STEADY. doe_budget ROSA: NOT_FOUND. usaspending federal-presence: 213 contracts / $464.7M across all Redwire/sub UEIs, dominated by NASA ($87.6M Made In Space TippingPoint robotic mfg + other Tipping Point / SBIR work). LoadPath FY-snapshot $13.8M. Redwire Space Technologies (Techshot) FY-snapshot $4.98M.",
+      "interpretation": "ROSA heritage claim is verified by real NASA contracts; STP is a relevant funded RDT&E line that could host ROSA flight experiments. Forward narrative is plausible. PASS."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Orion Camera System for Artemis (Lockheed Martin prime).",
+      "severity": "PASS",
+      "supports": "named NASA / Lockheed counterparty; corroborable",
+      "M_check": "edgar_fts on Lockheed CIK; usaspending; pentagon_jbook(Orion Artemis)",
+      "M_value": "edgar_fts (LMT CIK 0000936468 search 'Redwire Orion camera Artemis'): status_500 (transient error). pentagon_jbook Orion Artemis: NOT_FOUND (expected — Artemis is NASA/civil, not DoD J-Book). usaspending: $87.6M NASA award NNM17AA02C 'IN-SPACE ROBOTIC MANUFACTURING AND ASSEMBLY SYSTEM (TIPPING POINT TECHNOLOGIES)' to Redwire Space Inc (Made In Space sub) — confirms NASA prime relationships at scale.",
+      "interpretation": "NASA Artemis Orion is a civil-program claim outside J-Book scope. Counterparty (Lockheed) lookup transiently failed but the underlying claim is well-attested by widespread NASA contracting. PASS."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "On-board computers for ESA Hera + Comet Interceptor via Space NV (QinetiQ acquisition).",
+      "severity": "PASS",
+      "supports": "ESA program — outside DoD J-Book scope by construction",
+      "M_check": "pentagon_jbook (ESA Hera); edgar_fts",
+      "M_value": "pentagon_jbook ESA Hera: NOT_FOUND (expected). edgar_fts search 'Redwire Hera ESA': status_500 (transient). ESA Hera is a foreign-civil program; expect non-coverage by J-Book.",
+      "interpretation": "Out-of-scope for DoD J-Book divergence test. PASS (control claim)."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Backlog $372.8M (12/31/23) +19% YoY; book-to-bill 1.47x Q2-2024 (vs 0.76x Q2-2023).",
+      "severity": "PASS",
+      "supports": "publicly disclosed; corroborable via federal-contracting aggregate",
+      "M_check": "usaspending.query_federal_presence; pentagon_jbook(contractor=Redwire)",
+      "M_value": "Aggregate federal contracting across all Redwire UEIs: 213 contracts = $464.7M; 53 DoD awards, 106 NASA awards, 3 grants. Plausibly consistent with $372.8M backlog mostly mission/payload work. pentagon_jbook contractor=Redwire: NOT_FOUND (Redwire is not a J-Book prime, consistent with subscale component-supplier role).",
+      "interpretation": "Backlog growth and book-to-bill jump are consistent with public federal contracting footprint. No divergence detected. PASS."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "FY2023 revenue $243.8M, +52% YoY; net loss $(27.3)M.",
+      "severity": "PASS",
+      "supports": "audited financials; rollup-organic split disclosed",
+      "M_check": "usaspending federal presence; acq_coherence",
+      "M_value": "Federal-contracting footprint plus QinetiQ Space NV organic growth supports the disclosed revenue growth. acq_coherence returned INCOHERENT_ROLLUP but with all 8 individual targets scored 0.0 due to LLM having insufficient context on private deal terms (not a substantive negative — the verifier lacked data, not the company lacked thesis fit). Adcole / Made In Space / Roccor / Deployable / Techshot / Space NV are all space-component businesses that are thesis-consistent.",
+      "interpretation": "Reported financials are not divergent from external M-source evidence. PASS."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Heritage on Artemis, New Horizons, Perseverance, Space Force GPS, ESA PROBA.",
+      "severity": "PASS",
+      "supports": "flight-heritage claims, backward-looking, broadly verifiable",
+      "M_check": "pentagon_jbook(GPS III, Space Test Program, contractor=Redwire)",
+      "M_value": "GPS III Follow-On (PE 1203269SF): FUNDED_STEADY. Space Test Program (PE 1206864SF): FUNDED_STEADY. contractor=Redwire: NOT_FOUND.",
+      "interpretation": "Cited heritage programs that are J-Book-mappable (GPS, STP) both return FUNDED_STEADY at cutoff — favorable backdrop, not a divergence. PASS."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "9 acquisitions in ~30 months (Adcole, MIS, Roccor, LoadPath, Deep Space Systems, Oakman, Deployable, Techshot, QinetiQ Space NV).",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": "rollup pace; coherence-of-portfolio test",
+      "M_check": "acq_coherence.score_acquisition_coherence",
+      "M_value": "acq_coherence returned signal=INCOHERENT_ROLLUP, mean_coherence=0.0, n_low_coherence=8 of 8 scored. CAVEAT: per-acquisition reasoning shows the LLM verifier could not resolve target business descriptions and defaulted to low-coherence — this is a low-confidence INCOHERENT signal driven by data scarcity rather than confirmed thesis drift. However, qualitatively the targets ARE thesis-aligned (all space-tech components). The verifier output as written is not a clean SEVERE signal.",
+      "interpretation": "Per heuristic on rollup-thesis claims: signal=INCOHERENT_ROLLUP nominally maps to MODERATE_UNDERDELIVERY, but the verifier was data-starved. Score MODERATE_UNDERDELIVERY with low confidence — flag the rollup pace + verifier inconclusiveness as a watch item rather than dispositive. The independent evidence (purchase-price impairments of $96.6M in FY2022, 9 deals in 30 months, 2024-06-30 unremediated ICFR weaknesses across multiple subs) does support a moderate skepticism on rollup execution."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "Material weaknesses in ICFR unremediated through 2024-06-30.",
+      "severity": "RED_FLAG_NEGATIVE",
+      "supports": "company's own self-disclosure in Q2-2024 10-Q Item 4",
+      "M_check": "edgar_fts; insider_vs_calendar",
+      "M_value": "edgar_fts (own CIK 0001819810, 'material weakness remediation'): 0 hits in the fulltext index (likely indexing gap, not absence — the 10-Q text clearly contains the disclosure). insider_vs_calendar: 27 Form 4 filings, 17 sales total, 0 proximate to budget events — NO_PROXIMATE_SALES.",
+      "interpretation": "Self-disclosed material weakness persisting >2.5 years post-IPO is a structural governance/controls red flag, independent of J-Book pattern. Insider behavior does NOT show opportunistic budget-vote timing (clean). Score RED_FLAG_NEGATIVE on controls quality alone."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "12 US + 2 Europe facilities (~363,200 sq ft), proximate to NS/civil space anchors.",
+      "severity": "UNVERIFIABLE",
+      "supports": "qualitative property claim",
+      "M_check": "epa_frs.query_facility (not in catalog)",
+      "M_value": "epa_frs.query_facility: unknown_source (not registered in catalog). No independent verifier available.",
+      "interpretation": "Cannot independently verify facility footprint at cutoff. UNVERIFIABLE — coverage gap, not adverse."
+    }
+  ],
+  "summary": {
+    "n_claims": 10,
+    "n_queries_run": 22,
+    "severity_counts": {"PASS": 6, "MODERATE_UNDERDELIVERY": 1, "SEVERE_UNDERDELIVERY": 0, "RED_FLAG_NEGATIVE": 1, "UNVERIFIABLE": 2},
+    "jbook_grounded_claims": ["C1", "C2", "C4", "C7"],
+    "jbook_fired_on": ["C1", "C2", "C4", "C7"],
+    "n_jbook_grounded": 4,
+    "n_jbook_fired": 4,
+    "final_one_line": "RDW: 10 claims, 22 queries, severity counts: PASS=6 MODE=1 SEVE=0 RED=1 UNVE=2, J-Book hits: pentagon_jbook fired on 4 of 4 J-Book-grounded claims"
+  }
+}

@@ -1,0 +1,1529 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>bank_consolidation_scanner</title><style>
+body{margin:0;background:#0b0e12;color:#e8ebee;font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:26px 24px 90px}
+a{color:#8b7cf6} h1{font-size:23px;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:#7d858e;margin:0 0 20px;font-size:13px}
+h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:#7d858e;margin:24px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 10px;border-bottom:1px solid #242a31;text-align:left;vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#7d858e}
+.k{font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:20px}
+.k-generator{color:#c3b8fb;background:rgba(139,124,246,.15)}
+.k-detector{color:#eccb8a;background:rgba(217,164,65,.15)}
+.k-watcher{color:#8ee5c1;background:rgba(53,201,143,.15)}
+.k-evidence{color:#b3bcc6;background:rgba(138,147,158,.15)}
+.h-OK{color:#35c98f} .h-STALE{color:#d9a441} .h-ERROR{color:#e0736a} .h-NEVER_RUN{color:#8a939e}
+pre{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px;overflow-x:auto;font-size:12px;line-height:1.5}
+.panel{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px 18px;margin-bottom:12px}
+ul{margin:4px 0;padding-left:20px} li{margin-bottom:4px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+</style></head><body><div class="wrap"><h1>bank_consolidation_scanner</h1><p class="sub">registered capability · bank_consolidation_scanner</p><a href="signals.html">&larr; all signals</a><div class="panel" style="margin-top:10px"><span class="k k-generator">GENERATOR</span> &nbsp;<span class="h-NEVER_RUN"><b>NEVER_RUN</b></span> · last run <span class="mono">never</span></div><p>the SMALL-BANK CONSOLIDATION (acquiree) screen.</p><form method="POST" action="/signals/run" style="margin:10px 0"><input type="hidden" name="name" value="bank_consolidation_scanner"><input name="symbol" placeholder="symbol (if applicable)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px"><input name="symbols" placeholder="universe, comma-sep (generators)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px;margin-left:6px"><button type="submit" style="background:#8b7cf6;color:#0b0e12;border:0;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;margin-left:6px">Run now</button></form><h2>Datasources</h2><ul><li>reference implementation: verticals/generators/bank_consolidation_scanner.py (see the code section for the feeds it touches)</li></ul><h2>Applies to</h2><ul><li><b>strategies:</b> quality_value</li></ul><h2>The code</h2><pre>&quot;&quot;&quot;bank_consolidation_scanner — the SMALL-BANK CONSOLIDATION (acquiree) screen.
+
+THESIS UNDER TEST (generator only — this module produces NO verdicts and NO orders):
+a US bank M&amp;A wave is running under the current regulatory climate, and the FSBW pattern
+(a small clean thrift transacting at/near tangible book) is repeatable. We underwrite the
+ACQUIREE side: sub-$1B-market-cap exchange-listed banks and thrifts trading at or below
+TANGIBLE book, with clean credit, sitting in footprints where an active consolidator is
+already buying.
+
+WHY THIS IS A SEPARATE SCREEN FROM financials_screen.py:
+  financials_screen ranks on P/B x ROE-consistency — it asks &quot;is this a good bank cheap?&quot;.
+  This screen asks a DIFFERENT question: &quot;would an acquirer want this bank, and is the
+  market pricing it below what an acquirer would pay?&quot;.  Those rank differently.  A
+  mediocre-ROE bank with a pristine core-deposit franchise and a clean loan book is a
+  BETTER acquiree than a high-ROE bank funded wholesale — the acquirer buys the deposits
+  and re-underwrites the earnings.  So the score weights DEPOSIT QUALITY and CREDIT
+  CLEANLINESS above profitability, and treats cheapness as cheapness-vs-TANGIBLE-book
+  (the currency deals are actually struck in) rather than P/B.
+
+HOUSE RULES CARRIED IN (financials cluster):
+  * Rank on NET INCOME AVAILABLE TO COMMON and its TREND, not a preferred-inclusive
+    frames average.  (The MBIN lesson: a preferred-inclusive 5yr-average ROE masked a 39%
+    drop in common earnings.)
+  * The P/B vs P/TBV gap is the TELL.  A large gap = goodwill/intangibles from prior
+    acquisitions; those do NOT survive a deal (the acquirer pays for TANGIBLE book and
+    writes its own goodwill).  A P/B-cheap, P/TBV-expensive bank is a FALSE positive here.
+  * MI-style peak-cycle masking exists in banks too: earnings held up by RESERVE RELEASE
+    (provision below charge-offs, ACL/loans falling while NCOs rise) is not durable
+    earnings.  Flagged explicitly as `reserve_release_flag`, never silently credited.
+  * SEC company_tickers maps PREFERRED / baby-bond tickers to the PARENT CIK.  A tiny
+    preferred market cap over parent common equity manufactures a fake 0.2x P/TBV.  The
+    universe filter drops non-common tickers by symbol shape and the P/B-vs-P/TBV
+    divergence check catches survivors.
+
+DATA (all free, all primary):
+  1. UNIVERSE — Nasdaq screener API (via verticals.deep_value.universe), sector=Finance,
+     industry in {Major Banks, Banks, Commercial Banks, Savings Institutions},
+     market cap $100M-$1B, mapped ticker -&gt; CIK via SEC company_tickers.json.
+  2. CREDIT / DEPOSITS / CONCENTRATION — FDIC BankFind `financials` API, joined from the
+     holdco to its insured bank subsidiary via the `NAMEHCR` (name of holding company)
+     field on the FDIC `institutions` endpoint.  This is a REAL join, not a guess: the
+     match is on a normalized holding-company name and any ambiguity resolves to
+     UNRESOLVED rather than a silent pick (muni issuer-matcher hardening lesson).
+     Call-report data is BANK level; holdco ratios differ — named, not hidden.
+  3. TANGIBLE BOOK / EARNINGS — SEC XBRL companyfacts (audited), holdco level:
+     StockholdersEquity - PreferredStockValue - Goodwill - IntangibleAssetsNetExcludingGoodwill,
+     divided by dei:EntityCommonStockSharesOutstanding.  This is the number that matters,
+     because FDIC EQ is the BANK&#x27;s equity, not the holding company&#x27;s.
+
+SCORE (0-100, generator ranking only — a court decides anything):
+    cheapness (35)  x  credit cleanliness (25)  x  deposit/funding quality (20)
+                    x  acquirer-footprint overlap (15)  x  size/digestibility (5)
+
+USAGE:
+    python3 -m verticals.generators.bank_consolidation_scanner [--refresh] [--top N]
+
+Writes verticals/generators/data/BANK_CONSOLIDATION.json.
+&quot;&quot;&quot;
+from __future__ import annotations
+
+import argparse
+import json
+import os
+import re
+import sys
+import time
+import urllib.parse
+import urllib.request
+from concurrent.futures import ThreadPoolExecutor
+
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), &quot;..&quot;, &quot;..&quot;)))
+from verticals.deep_value import universe as U  # noqa: E402
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+DATA = os.path.join(HERE, &quot;data&quot;)
+CACHE = os.environ.get(
+    &quot;BANKCONSOL_CACHE&quot;,
+    &quot;/private/tmp/claude-501/-Users-ajay-exalted-signalos/&quot;
+    &quot;d8499fdc-9ae3-4aaf-b555-4b2b90e6f2fc/scratchpad/bankconsol&quot;,
+)
+OUT = os.path.join(DATA, &quot;BANK_CONSOLIDATION.json&quot;)
+
+FDIC = &quot;https://api.fdic.gov/banks&quot;
+UA_FDIC = {&quot;User-Agent&quot;: &quot;Mozilla/5.0 (signalos desk research)&quot;}
+UA_SEC = {&quot;User-Agent&quot;: &quot;signalos-generators research 4tripathy@gmail.com&quot;}
+
+BANK_INDUSTRIES = {&quot;Major Banks&quot;, &quot;Banks&quot;, &quot;Commercial Banks&quot;, &quot;Savings Institutions&quot;}
+
+# Already held / already courted — EXCLUDED from intake per the task brief.
+EXCLUDE = {&quot;FSBW&quot;, &quot;WAL&quot;, &quot;MBIN&quot;, &quot;VEL&quot;, &quot;NMIH&quot;, &quot;MTG&quot;}
+
+# Names in the universe that are ALREADY in an announced transaction.  A target under a
+# signed deal is merger arbitrage, not a screen idea — the takeout has happened and the
+# residual is deal-break risk, a different underwriting.  An acquirer is disqualified for
+# the opposite reason: it is the consolidator, not the consolidated.
+LIVE_DEALS = {
+    &quot;AFBI&quot;: (&quot;TARGET&quot;, &quot;Fidelity BancShares (N.C.) — announced 2026-03-30, $142.8M all cash&quot;),
+    &quot;FNWD&quot;: (&quot;TARGET&quot;, &quot;First Financial Bancorp (FFBC) — announced 2026-07-21, all stock, 1.40x TBV&quot;),
+    &quot;BSBK&quot;: (&quot;ACQUIRER&quot;, &quot;acquiring GSL Savings Bank — announced 2026-05-31&quot;),
+    &quot;IBCP&quot;: (&quot;ACQUIRER&quot;, &quot;acquiring Highpoint Community Bank — announced 2026-03-18, 1.48x TBV&quot;),
+    &quot;CBAN&quot;: (&quot;ACQUIRER&quot;, &quot;acquiring First Reliance Bancshares — announced 2026-06-24, 1.62x TBV&quot;),
+    &quot;ISBA&quot;: (&quot;ACQUIRER&quot;, &quot;acquiring Grand River Commerce — announced 2026-06-11&quot;),
+    &quot;HWBK&quot;: (&quot;ACQUIRER&quot;, &quot;acquiring FSC Bancshares — announced 2026-04-28&quot;),
+    &quot;BSVN&quot;: (&quot;ACQUIRER&quot;, &quot;acquiring ~71% of Century Financial Services — announced 2026-07-01&quot;),
+    &quot;ESQ&quot;:  (&quot;ACQUIRER&quot;, &quot;acquiring Signature Bank (private) — announced 2026-03-11, 1.53x TBV&quot;),
+}
+
+# FDIC call-report fields.  The default financials payload is the RATIO flavour; the
+# dollar-level concentration inputs (LNRECONS / LNRENRES / LNREMULT / RBC / BRO / LNATRES)
+# must be requested explicitly or they come back absent.
+FIN_FIELDS = &quot;,&quot;.join([
+    &quot;CERT&quot;, &quot;REPDTE&quot;, &quot;NAME&quot;, &quot;STALP&quot;, &quot;CITY&quot;, &quot;PARCERT&quot;,
+    &quot;ASSET&quot;, &quot;EQ&quot;, &quot;EQTOT&quot;, &quot;INTAN&quot;, &quot;NETINC&quot;,
+    &quot;DEP&quot;, &quot;DEPDOM&quot;, &quot;DEPINS&quot;, &quot;DEPUNINS&quot;, &quot;DEPNIDOM&quot;, &quot;COREDEP&quot;, &quot;BRO&quot;,
+    &quot;LNLSNET&quot;, &quot;LNATRES&quot;, &quot;LNATRESR&quot;, &quot;LNLSDEPR&quot;,
+    &quot;NCLNLSR&quot;, &quot;NCRECONR&quot;, &quot;NCRENRER&quot;, &quot;NCRER&quot;, &quot;NPERFV&quot;, &quot;NALTOT&quot;, &quot;ORE&quot;,
+    &quot;NTLNLSR&quot;, &quot;NTLNLS&quot;, &quot;ELNATR&quot;,
+    &quot;LNRECONS&quot;, &quot;LNRENRES&quot;, &quot;LNREMULT&quot;, &quot;LNRERES&quot;, &quot;LNRE&quot;, &quot;LNCI&quot;, &quot;LNCON&quot;,
+    &quot;RBC&quot;, &quot;RBCRWAJ&quot;, &quot;IDT1RWAJR&quot;, &quot;RBC1AAJ&quot;,
+    &quot;ROA&quot;, &quot;ROE&quot;, &quot;NIMY&quot;, &quot;EEFFR&quot;, &quot;NUMEMP&quot;, &quot;SPECGRPDESC&quot;, &quot;BKCLASS&quot;,
+])
+
+# ── holding-company name normalization ──────────────────────────────────────────────
+# FFIEC/FDIC abbreviate holding-company names (&quot;FS BCORP INC&quot; = &quot;FS Bancorp, Inc.&quot;).
+# Expand the abbreviations on BOTH sides, then compare token sets.
+ABBREV = {
+    &quot;BCORP&quot;: &quot;BANCORP&quot;, &quot;BNCORP&quot;: &quot;BANCORP&quot;, &quot;BANCORPORATION&quot;: &quot;BANCORP&quot;,
+    &quot;BSHRS&quot;: &quot;BANCSHARES&quot;, &quot;BSHS&quot;: &quot;BANCSHARES&quot;, &quot;BCSHARES&quot;: &quot;BANCSHARES&quot;,
+    &quot;BANCSHARE&quot;: &quot;BANCSHARES&quot;,
+    &quot;FNCL&quot;: &quot;FINANCIAL&quot;, &quot;FINL&quot;: &quot;FINANCIAL&quot;, &quot;FIN&quot;: &quot;FINANCIAL&quot;,
+    &quot;FNCLSVC&quot;: &quot;FINANCIAL&quot;, &quot;FNCLCORP&quot;: &quot;FINANCIAL&quot;,
+    &quot;BK&quot;: &quot;BANK&quot;, &quot;BKS&quot;: &quot;BANK&quot;, &quot;BNK&quot;: &quot;BANK&quot;,
+    &quot;SVGS&quot;: &quot;SAVINGS&quot;, &quot;SVG&quot;: &quot;SAVINGS&quot;, &quot;SVB&quot;: &quot;SAVINGS&quot;,
+    &quot;NB&quot;: &quot;NATIONAL&quot;, &quot;NAT&quot;: &quot;NATIONAL&quot;, &quot;NATL&quot;: &quot;NATIONAL&quot;, &quot;NTNL&quot;: &quot;NATIONAL&quot;,
+    &quot;CMNTY&quot;: &quot;COMMUNITY&quot;, &quot;CMTY&quot;: &quot;COMMUNITY&quot;, &quot;CMNTYBK&quot;: &quot;COMMUNITY&quot;,
+    &quot;FED&quot;: &quot;FEDERAL&quot;, &quot;FDL&quot;: &quot;FEDERAL&quot;,
+    &quot;AMER&quot;: &quot;AMERICAN&quot;, &quot;AMERN&quot;: &quot;AMERICAN&quot;, &quot;AM&quot;: &quot;AMERICAN&quot;,
+    &quot;NTHRN&quot;: &quot;NORTHERN&quot;, &quot;NORTHRN&quot;: &quot;NORTHERN&quot;, &quot;STHRN&quot;: &quot;SOUTHERN&quot;,
+    &quot;MTG&quot;: &quot;MORTGAGE&quot;, &quot;INTL&quot;: &quot;INTERNATIONAL&quot;, &quot;SVC&quot;: &quot;SERVICE&quot;,
+    &quot;TR&quot;: &quot;TRUST&quot;, &quot;TRST&quot;: &quot;TRUST&quot;, &quot;INVT&quot;: &quot;INVESTMENT&quot;,
+    &quot;1ST&quot;: &quot;FIRST&quot;, &quot;2ND&quot;: &quot;SECOND&quot;, &quot;3RD&quot;: &quot;THIRD&quot;,
+}
+DROP_TOKENS = {
+    &quot;INC&quot;, &quot;INCORPORATED&quot;, &quot;CORP&quot;, &quot;CORPORATION&quot;, &quot;CO&quot;, &quot;COMPANY&quot;, &quot;COMPANIES&quot;,
+    &quot;THE&quot;, &quot;LTD&quot;, &quot;LLC&quot;, &quot;LP&quot;, &quot;PLC&quot;, &quot;MHC&quot;, &quot;NEW&quot;, &quot;GROUP&quot;, &quot;GRP&quot;,
+    &quot;HOLDING&quot;, &quot;HOLDINGS&quot;, &quot;HLDG&quot;, &quot;HLDGS&quot;, &quot;HOLDINGCO&quot;, &quot;HC&quot;,
+    &quot;COMMON&quot;, &quot;STOCK&quot;, &quot;CLASS&quot;, &quot;A&quot;, &quot;B&quot;, &quot;OF&quot;,
+}
+
+# State abbreviations: FDIC writes &quot;PEOPLES BCORP OF NC INC&quot; where the registrant is
+# &quot;Peoples Bancorp of North Carolina, Inc.&quot;.  Expand so the identity tokens line up.
+STATE_EXPAND = {
+    &quot;AL&quot;: &quot;ALABAMA&quot;, &quot;AK&quot;: &quot;ALASKA&quot;, &quot;AZ&quot;: &quot;ARIZONA&quot;, &quot;AR&quot;: &quot;ARKANSAS&quot;,
+    &quot;CA&quot;: &quot;CALIFORNIA&quot;, &quot;CO&quot;: &quot;COLORADO&quot;, &quot;CT&quot;: &quot;CONNECTICUT&quot;, &quot;DE&quot;: &quot;DELAWARE&quot;,
+    &quot;FL&quot;: &quot;FLORIDA&quot;, &quot;GA&quot;: &quot;GEORGIA&quot;, &quot;HI&quot;: &quot;HAWAII&quot;, &quot;ID&quot;: &quot;IDAHO&quot;,
+    &quot;IL&quot;: &quot;ILLINOIS&quot;, &quot;IN&quot;: &quot;INDIANA&quot;, &quot;IA&quot;: &quot;IOWA&quot;, &quot;KS&quot;: &quot;KANSAS&quot;,
+    &quot;KY&quot;: &quot;KENTUCKY&quot;, &quot;LA&quot;: &quot;LOUISIANA&quot;, &quot;ME&quot;: &quot;MAINE&quot;, &quot;MD&quot;: &quot;MARYLAND&quot;,
+    &quot;MA&quot;: &quot;MASSACHUSETTS&quot;, &quot;MI&quot;: &quot;MICHIGAN&quot;, &quot;MN&quot;: &quot;MINNESOTA&quot;, &quot;MS&quot;: &quot;MISSISSIPPI&quot;,
+    &quot;MO&quot;: &quot;MISSOURI&quot;, &quot;MT&quot;: &quot;MONTANA&quot;, &quot;NE&quot;: &quot;NEBRASKA&quot;, &quot;NV&quot;: &quot;NEVADA&quot;,
+    &quot;NH&quot;: &quot;NEWHAMPSHIRE&quot;, &quot;NJ&quot;: &quot;NEWJERSEY&quot;, &quot;NM&quot;: &quot;NEWMEXICO&quot;, &quot;NY&quot;: &quot;NEWYORK&quot;,
+    &quot;NC&quot;: &quot;NORTH CAROLINA&quot;, &quot;ND&quot;: &quot;NORTH DAKOTA&quot;, &quot;OH&quot;: &quot;OHIO&quot;, &quot;OK&quot;: &quot;OKLAHOMA&quot;,
+    &quot;OR&quot;: &quot;OREGON&quot;, &quot;PA&quot;: &quot;PENNSYLVANIA&quot;, &quot;RI&quot;: &quot;RHODEISLAND&quot;,
+    &quot;SC&quot;: &quot;SOUTH CAROLINA&quot;, &quot;SD&quot;: &quot;SOUTH DAKOTA&quot;, &quot;TN&quot;: &quot;TENNESSEE&quot;, &quot;TX&quot;: &quot;TEXAS&quot;,
+    &quot;UT&quot;: &quot;UTAH&quot;, &quot;VT&quot;: &quot;VERMONT&quot;, &quot;VA&quot;: &quot;VIRGINIA&quot;, &quot;WA&quot;: &quot;WASHINGTON&quot;,
+    &quot;WV&quot;: &quot;WEST VIRGINIA&quot;, &quot;WI&quot;: &quot;WISCONSIN&quot;, &quot;WY&quot;: &quot;WYOMING&quot;,
+}
+
+# Corporate-FORM tokens carry no identity: &quot;First Guaranty Bancshares&quot; (the registrant)
+# and &quot;First Guaranty Bank&quot; (the FDIC-insured subsidiary) are the same franchise.  These
+# are stripped only in the LAST-RESORT match tier, where uniqueness is still required.
+FORM_TOKENS = {
+    &quot;BANK&quot;, &quot;BANKS&quot;, &quot;BANCORP&quot;, &quot;BANCSHARES&quot;, &quot;BANKSHARES&quot;, &quot;BANCORPORATION&quot;,
+    &quot;FINANCIAL&quot;, &quot;FINANCE&quot;, &quot;SAVINGS&quot;, &quot;TRUST&quot;, &quot;BANCO&quot;, &quot;BANKING&quot;, &quot;FEDERAL&quot;,
+    &quot;NATIONAL&quot;, &quot;STATE&quot;, &quot;SERVICES&quot;, &quot;SERVICE&quot;,
+}
+
+# Non-common tickers.  SEC company_tickers maps preferred / depositary / baby-bond
+# symbols to the PARENT CIK -&gt; a tiny preferred market cap over parent common equity
+# manufactures a fake sub-book valuation.  Drop them by NAME, up front; do not rely on
+# a downstream join failing to catch them.  (The FRMEP lesson.)
+NONCOMMON_MARKERS = (
+    &quot;depositary share&quot;, &quot;preferred&quot;, &quot;subordinated note&quot;, &quot;notes due&quot;,
+    &quot;capital trust&quot;, &quot;% fixed&quot;, &quot;fixed rate&quot;, &quot;fixed-rate&quot;, &quot;fixed-to-floating&quot;,
+    &quot;warrant&quot;, &quot;right&quot;, &quot;unit&quot;, &quot;american depositary&quot;, &quot;cumulative&quot;,
+    &quot;senior note&quot;, &quot;debenture&quot;, &quot;trust preferred&quot;,
+)
+
+
+def _norm_tokens(name: str) -&gt; tuple:
+    s = (name or &quot;&quot;).upper()
+    s = s.replace(&quot;&amp;&quot;, &quot; AND &quot;)
+    s = re.sub(r&quot;[^A-Z0-9 ]&quot;, &quot; &quot;, s)
+    toks = []
+    for t in s.split():
+        t = ABBREV.get(t, t)
+        t = STATE_EXPAND.get(t, t)
+        for sub in t.split():                 # state expansion can emit two tokens
+            if sub in DROP_TOKENS:
+                continue
+            toks.append(sub)
+    return tuple(toks)
+
+
+def _key(name: str) -&gt; str:
+    return &quot; &quot;.join(_norm_tokens(name))
+
+
+def _identity(name: str) -&gt; frozenset:
+    &quot;&quot;&quot;Distinctive tokens only — corporate FORM stripped.  Last-resort match key.&quot;&quot;&quot;
+    return frozenset(t for t in _norm_tokens(name) if t not in FORM_TOKENS)
+
+
+def is_common_ticker(row) -&gt; bool:
+    n = (row.get(&quot;name&quot;) or &quot;&quot;).lower()
+    if any(m in n for m in NONCOMMON_MARKERS):
+        return False
+    if len(row.get(&quot;sym&quot;, &quot;&quot;)) &gt; 4:           # 5-letter Nasdaq symbols are pref/when-issued
+        return False
+    return True
+
+
+# ── http ────────────────────────────────────────────────────────────────────────────
+def _get_json(url, hdrs, timeout=60, retries=3):
+    last = None
+    for i in range(retries):
+        try:
+            req = urllib.request.Request(url, headers=hdrs)
+            with urllib.request.urlopen(req, timeout=timeout) as r:
+                return json.loads(r.read().decode())
+        except Exception as e:  # noqa: BLE001
+            last = e
+            time.sleep(0.8 * (i + 1))
+    return {&quot;_error&quot;: str(last)[:160]}
+
+
+def _cache_path(name):
+    os.makedirs(CACHE, exist_ok=True)
+    return os.path.join(CACHE, name)
+
+
+def _cached(name, fn, refresh=False):
+    p = _cache_path(name)
+    if not refresh and os.path.exists(p):
+        with open(p) as f:
+            return json.load(f)
+    v = fn()
+    with open(p, &quot;w&quot;) as f:
+        json.dump(v, f)
+    return v
+
+
+PREMISE_CORRECTIONS = [
+    {
+        &quot;premise&quot;: &quot;The FSBW pattern is &#x27;a small clean thrift acquired at a premium — PacWest deal, vote Aug-13&#x27; and is repeatable on the acquiree side.&quot;,
+        &quot;finding&quot;: &quot;INVERTED. FS Bancorp is the ACQUIRER, not the acquiree. FSBW is buying Pacific &quot;
+                   &quot;West Bancorp (PWBK, West Linn OR, $386M assets, four branches) for ~$34.6M in &quot;
+                   &quot;stock and cash, announced 2026-02-25; the Aug-13 vote is PWBK&#x27;s shareholders, &quot;
+                   &quot;not FSBW&#x27;s. FSBW holders do not vote at all.&quot;,
+        &quot;authority&quot;: &quot;FSBW Form 8-K Ex-99.1 2026-02-25; Form 424B3 dated 2026-07-15 (Reg. No. 333-297108); &quot;
+                     &quot;verified negatives across EDGAR Jan-2025 to Aug-2026 — zero SC 13D, zero SC TO-T / &quot;
+                     &quot;SC 14D9 / SC 13E3, and no PREM14A or S-4 naming FS Bancorp as a target.&quot;,
+        &quot;consequence&quot;: &quot;The screen cannot be built as &#x27;find the next FSBW acquiree&#x27;. It is built instead &quot;
+                       &quot;on what the transaction actually demonstrates.&quot;,
+    },
+    {
+        &quot;premise&quot;: &quot;The comparable transaction was struck at a PREMIUM.&quot;,
+        &quot;finding&quot;: &quot;REFUTED. Raymond James&#x27; implied merger multiples put FSBW/PWBK at 0.97x tangible &quot;
+                   &quot;book, 53.7x LTM earnings, and a NEGATIVE 0.3% core-deposit premium — a BELOW-book &quot;
+                   &quot;price, against a 2026 YTD market median of ~1.52x TBV. PWBK sold at book because &quot;
+                   &quot;its credit was impaired (NPLs 2.92% of loans, up from 0.33% in Dec-2024; ACL/NPLs &quot;
+                   &quot;41.8%) and it earned $155k in Q1-26.&quot;,
+        &quot;authority&quot;: &quot;424B3 acc 0001437749-26-023631 (fairness-opinion comparable-multiples section); &quot;
+                     &quot;Mercer Capital Bank Watch July 2026 per S&amp;P Global MI for the 1.52x median.&quot;,
+        &quot;consequence&quot;: &quot;The real pattern is the OPPOSITE of the brief&#x27;s: an IMPAIRED sub-scale bank sold &quot;
+                       &quot;at book to a clean in-market buyer. The premium multiples (1.5x-2.0x) went to &quot;
+                       &quot;CLEAN franchises. So &#x27;cheap vs tangible book&#x27; and &#x27;clean credit&#x27; are not one &quot;
+                       &quot;signal — they are in tension, and the screen must say which it is buying.&quot;,
+    },
+    {
+        &quot;premise&quot;: &quot;A bank M&amp;A wave is running.&quot;,
+        &quot;finding&quot;: &quot;PARTIALLY REFUTED. H1-2026 ran 83 deals against 117 in H2-2025; FY2025 was 188 and &quot;
+                   &quot;FY2024 was 128. 2026 is above 2023-24 and marginally above H1-2025, but well below &quot;
+                   &quot;the H2-2025 surge that generated the wave forecasts, and 87% of H1-2026 deal VALUE &quot;
+                   &quot;was announced before Feb-28 — March through June produced only $2.3B.&quot;,
+        &quot;authority&quot;: &quot;Seaport Research Partners via American Banker 2026-07-14; Mercer Capital Bank &quot;
+                     &quot;Watch July 2026 per S&amp;P Global MI (96 deals YTD as of 2026-07-30).&quot;,
+        &quot;consequence&quot;: &quot;Elevated but DECELERATING, not accelerating. A takeout thesis should not be &quot;
+                       &quot;sized on wave momentum.&quot;,
+    },
+    {
+        &quot;premise&quot;: &quot;The regulatory climate has made approvals materially easier and faster.&quot;,
+        &quot;finding&quot;: &quot;HALF VERIFIED. The RULE changes are real and citable: the OCC rescinded its 2024 &quot;
+                   &quot;Business Combinations rule (90 FR 20561, eff. 2025-05-15), restoring 15-day deemed &quot;
+                   &quot;approval and the streamlined application; the FDIC rescinded its 2024 Statement of &quot;
+                   &quot;Policy (90 FR 29413, eff. 2025-08-04); and the OCC&#x27;s Community Bank Licensing rule &quot;
+                   &quot;(91 FR 10491, eff. 2026-04-03) creates streamlined merger procedures where the &quot;
+                   &quot;RESULTING entity is under $30B — which is precisely this cohort. There have been &quot;
+                   &quot;zero Federal Reserve merger denials in 2024, 2025 and 2026 YTD. But the claimed &quot;
+                   &quot;SPEED improvement is NOT verifiable: the Fed&#x27;s Banking Applications Activity &quot;
+                   &quot;Semiannual Report stops at period-ending 2024-12-31, ~19 months late, so there is &quot;
+                   &quot;NO published federal median-days-to-approval for 2025 or 2026 from any agency.&quot;,
+        &quot;authority&quot;: &quot;Federal Register citations above; absence of any Fed applications-activity &quot;
+                     &quot;edition covering 2025-2026.&quot;,
+        &quot;consequence&quot;: &quot;Treat &#x27;faster approvals&#x27; as UNVERIFIED rather than established. The Fed made no &quot;
+                       &quot;Regulation Y change at all — that leg is rhetorical.&quot;,
+    },
+]
+
+KEY_FINDINGS = [
+    {
+        &quot;finding&quot;: &quot;STRUCTURAL ACQUIRABILITY IS THE DOMINANT SCREEN AXIS, AND IT IS WHAT MAKES THE &quot;
+                   &quot;CHEAPEST NAMES CHEAP.&quot;,
+        &quot;detail&quot;: &quot;A screen that ranks on &#x27;below tangible book with clean credit&#x27; surfaces recently &quot;
+                  &quot;converted and MHC-controlled thrifts at the very top BY CONSTRUCTION: a mutual-to-&quot;
+                  &quot;stock conversion raises capital into a small balance sheet, so the bank is over-&quot;
+                  &quot;capitalised (which depresses ROE) and trades below tangible book. But federal law &quot;
+                  &quot;makes exactly those institutions un-acquirable. 12 CFR 192.500 bars any acquisition &quot;
+                  &quot;of more than 10% of a converted institution for THREE YEARS after conversion without &quot;
+                  &quot;prior regulatory approval; and where a mutual holding company still owns a majority, &quot;
+                  &quot;no third party can buy the company at all unless the MHC first elects a second-step &quot;
+                  &quot;conversion — a decision belonging to the MHC board, not to public shareholders, who &quot;
+                  &quot;hold a minority that cannot deliver control. The discount is therefore not a &quot;
+                  &quot;mispricing an acquirer can arbitrage; it is the market correctly pricing a blocked &quot;
+                  &quot;takeout. 12 of 129 names (9%) are blocked or unverified on this axis, and they were &quot;
+                  &quot;concentrated at the TOP of the unadjusted ranking — Rhinebeck Bancorp (RBKB) ranked &quot;
+                  &quot;#1 in the universe before the gate was applied and its own 10-K discloses that &quot;
+                  &quot;Rhinebeck Bancorp, MHC owns 57%.&quot;,
+        &quot;method&quot;: &quot;Each registrant&#x27;s own latest 10-K read directly from EDGAR (the 10-Q usually omits &quot;
+                  &quot;the structure disclosure — reading quarterlies missed Rhinebeck, Pioneer and Bogota &quot;
+                  &quot;entirely). Present-tense MHC majority-ownership language is decisive and overrides &quot;
+                  &quot;conversion language elsewhere in the document.&quot;,
+    },
+    {
+        &quot;finding&quot;: &quot;THE HEADLINE TAKEOUT MULTIPLE DOES NOT APPLY TO THIS COHORT — AND ON THE &quot;
+                   &quot;CORRECT COMPARABLE, MOST OF THESE BANKS ALREADY TRADE ABOVE IT.&quot;,
+        &quot;detail&quot;: &quot;The ~1.46x-1.52x median deal multiple everyone quotes is the ALL-DEALS median, &quot;
+                  &quot;dominated by high-performing private commercial banks in growth markets and by &quot;
+                  &quot;large-cap transactions. Rebuilt on the 18-month tape restricted to LISTED targets &quot;
+                  &quot;under ~$1.5B of market cap, the median falls to 1.24x — and the tape splits &quot;
+                  &quot;cleanly by target TYPE rather than by geography or timing: THRIFT-CHARTER AND &quot;
+                  &quot;LOW-ROE TARGETS CLEARED AT 0.77x-1.06x TANGIBLE BOOK, while high-performing &quot;
+                  &quot;commercial banks in growth markets cleared at 1.50x-2.26x. The realised prints &quot;
+                  &quot;for the type screened here are Fulton/Blue Foundry 0.77x (NJ), OceanFirst/&quot;
+                  &quot;Flushing 0.80x (NY), FirstSun/First Foundation 0.80x, Columbia Financial/&quot;
+                  &quot;Northfield 0.87x (NJ), FFBC/BankFinancial 0.91x (IL), NB Bancorp/BankProv 0.93x &quot;
+                  &quot;(MA), FSBW/PWBK 0.97x (OR), CNB/ESSA 0.99x (PA), Columbia Banking/Pacific &quot;
+                  &quot;Premier 0.99x (CA), Eastern/HarborOne 1.00x (MA), Richmond Mutual/Farmers 1.00x &quot;
+                  &quot;(IN), Home Bancshares/Mountain Commerce 1.05x (TN), Norwood/PB Bankshares 1.07x &quot;
+                  &quot;(PA). Against that band, this universe&#x27;s MEDIAN traded multiple is 1.41x. The &quot;
+                  &quot;typical listed small bank therefore trades ABOVE what its own comparables &quot;
+                  &quot;actually receive, which makes a takeout a DOWNSIDE event for most of the cohort &quot;
+                  &quot;rather than an upside catalyst. Only names below roughly 1.05x tangible book &quot;
+                  &quot;have any headroom to the realised band; only names below ~0.90x have a genuine &quot;
+                  &quot;margin. Two of the ten intake names (PROV 0.88x, RVSB 0.91x) sit inside that &quot;
+                  &quot;margin on a clean credit book, and two more (FNWB 0.685x, BCBP 0.574x) sit well &quot;
+                  &quot;below it but carry the credit questions that explain the discount.&quot;,
+        &quot;compounding_factor&quot;: &quot;Forvis Mazars&#x27; 2025 REGIONAL averages put the NORTHEAST at 1.03x &quot;
+                              &quot;against Southeast 1.63x and West 1.51x. Four intake names sit in &quot;
+                              &quot;NJ/MA, where the regional gradient COMPOUNDS the target-type discount &quot;
+                              &quot;instead of offsetting it.&quot;,
+        &quot;authority&quot;: &quot;18 listed sub-$1.5B targets with reported multiples from the 2025 primary deal &quot;
+                     &quot;map (The Bank Slate deal stories, acquirer 8-K/425 investor decks, ABA Banking &quot;
+                     &quot;Journal), cross-checked to S&amp;P Global DV/TCE where both exist; regional &quot;
+                     &quot;averages from Forvis Mazars Q4-2025.&quot;,
+        &quot;consequence&quot;: &quot;This is the finding that most changes how the screen should be used. It is &quot;
+                       &quot;not a list of banks about to be bought at a premium. It is a list of banks &quot;
+                       &quot;whose standalone value must carry the position, with a takeout as a &quot;
+                       &quot;roughly-at-book exit rather than a payday.&quot;,
+    },
+    {
+        &quot;finding&quot;: &quot;CREDIT UNIONS AND MUTUALS ARE THE MARGINAL HIGH BIDDER, AND THEY BUY DIFFERENTLY.&quot;,
+        &quot;detail&quot;: &quot;16 credit-union-buys-bank deals were announced in 2025 (down from 20-22 in 2024), &quot;
+                  &quot;and mutual holding companies such as Hometown Financial Group and Cambridge &quot;
+                  &quot;Financial Group were active all window. Both classes pay CASH and face neither an &quot;
+                  &quot;EPS-accretion nor a tangible-book-dilution constraint, which is precisely why &quot;
+                  &quot;MIDFLORIDA CU cleared 2.16x for Prime Meridian and Cambridge paid 1.28x cash for &quot;
+                  &quot;First Seacoast while listed acquirers were paying 0.8x-1.1x for comparable &quot;
+                  &quot;thrifts. Where a target sits in a state that permits CU acquisitions of banks and &quot;
+                  &quot;has an active CU or mutual buyer, the realistic upside multiple is materially &quot;
+                  &quot;higher than the listed-acquirer comparables imply. This is a per-name question a &quot;
+                  &quot;court should ask, not something the screen can score.&quot;,
+    },
+    {
+        &quot;finding&quot;: &quot;THERE IS NO BROAD DISCOUNT TO TAKEOUT VALUE IN THIS COHORT.&quot;,
+        &quot;detail&quot;: &quot;Median P/TBV across the 127 valued names is 1.41x against a 2026 YTD median takeout &quot;
+                  &quot;multiple of ~1.52x. The typical small listed bank already trades at roughly 93% of &quot;
+                  &quot;what the median deal pays, before any control premium is negotiated and before deal &quot;
+                  &quot;risk and time value. Only 19 of 127 names (15%) trade below 1.0x tangible book, and &quot;
+                  &quot;30 below 1.15x. Any edge lives in that tail, not in the cohort.&quot;,
+        &quot;method&quot;: &quot;Universe P/TBV computed as market cap over holdco tangible common equity from tagged &quot;
+                  &quot;10-Q balance-sheet data; deal median from Mercer/S&amp;P (152%), corroborated by Piper &quot;
+                  &quot;Sandler (141%) and by an independent 14-deal primary sample (~1.50x).&quot;,
+    },
+    {
+        &quot;finding&quot;: &quot;THE CHEAP TAIL IS CHEAP FOR CREDIT REASONS — AND THAT IS THE PATTERN THAT ACTUALLY &quot;
+                   &quot;TRANSACTED.&quot;,
+        &quot;detail&quot;: &quot;Of the sub-1.0x names, the deepest discounts carry the worst credit: BCB Bancorp at &quot;
+                  &quot;0.57x has NPAs of 1.98% of assets and charge-offs of 0.58%; First Internet at 0.72x &quot;
+                  &quot;has charge-offs of 1.64% and negative returns; Eagle Bancorp at 0.78x has NPAs of &quot;
+                  &quot;1.88%, charge-offs of 1.45% and 34% brokered funding. This is not a defect in the &quot;
+                  &quot;screen — it is the same fact pattern as PWBK, which sold at 0.97x precisely because &quot;
+                  &quot;its credit had deteriorated. So the honest framing of the trade is: you are paid a &quot;
+                  &quot;discount to book to underwrite a credit book that an acquirer will re-mark, and the &quot;
+                  &quot;takeout lands at ABOUT book, not at a premium.&quot;,
+    },
+    {
+        &quot;finding&quot;: &quot;RESERVE RELEASE IS FLATTERING EARNINGS ACROSS THE COHORT (the MI peak-cycle pattern, &quot;
+                  &quot;bank version).&quot;,
+        &quot;detail&quot;: &quot;29 of 129 names (22%) are provisioning BELOW their charge-offs while the reserve &quot;
+                  &quot;ratio falls year over year. That is borrowed earnings, and it is a specific hazard &quot;
+                  &quot;for an acquiree thesis because an acquirer marks the loan book to fair value on day &quot;
+                  &quot;one and gets no credit for a thin reserve. Flagged per name as reserve_release_flag; &quot;
+                  &quot;never netted into the score as quality.&quot;,
+    },
+    {
+        &quot;finding&quot;: &quot;THE FOOTPRINT SIGNAL IS REAL BUT THIN, AND IS ABSENT WHERE MANY OF THESE BANKS SIT.&quot;,
+        &quot;detail&quot;: &quot;27 verified whole-bank deals were announced in 2026 YTD. New Jersey and New York &quot;
+                  &quot;carry a direct and unusually cheap comparable — Columbia Financial&#x27;s pending &quot;
+                  &quot;acquisition of Northfield Bancorp at 0.86-0.89x TBV, the lowest 2026 print, which &quot;
+                  &quot;caps as much as it supports a NJ/NY takeout case. The Pacific Northwest has two &quot;
+                  &quot;in-market buyers actively transacting (Banner and FS Bancorp) plus Northrim buying &quot;
+                  &quot;into Oregon. California has only one deal but a high-signal one: First Hawaiian &quot;
+                  &quot;paying ~1.98x TBV to enter Northern California. Against that, Virginia, Pennsylvania, &quot;
+                  &quot;Maryland and West Virginia carry large listed-bank counts with NO verified 2026 &quot;
+                  &quot;in-state transaction — a takeout thesis there rests on hope rather than a &quot;
+                  &quot;demonstrated bid, and those states score zero deliberately.&quot;,
+    },
+]
+
+CASES = {&#x27;FNWB&#x27;: &#x27;First Northwest Bancorp (First Fed Bank, Port Angeles WA) — $2.12B assets, $109M market cap, 0.685x tangible book, the cheapest ACQUIRABLE name in the universe. WHY AN ACQUIRER WANTS IT: an 85% core-funded, 4% brokered, $1.61B deposit base across the Olympic Peninsula and Puget Sound, in the state where Banner Corp (Pacific Financial, 1.54x, Apr-2026) and FS Bancorp (Pacific West, Feb-2026) are both actively buying — an in-market buyer strips the 95.5% efficiency ratio and the franchise is worth far more inside a larger bank than standalone. WHY IT IS CHEAP: it is losing money — negative 2.87% return on tangible equity on a $4.6M TTM loss to common — and a bank that cannot earn its cost of capital standalone is the classic board-level sale candidate. CREDIT EVIDENCE: charge-offs are negligible at 0.037% of loans and OREO is $1.4M, but noncurrent loans are 1.33% and NPAs 1.09% of assets and RISING (up 0.15pp year over year) while the reserve ratio FELL 0.21pp to 1.03% — the reserve-release flag fires, coverage is only 78% of noncurrent loans, and construction is a non-issue at 29% of risk-based capital while total CRE is 338% (upper bound). THE COURT QUESTION: is the loss cyclical or is the credit book about to demand the reserve back.&#x27;, &#x27;BCBP&#x27;: &quot;BCB Bancorp (BCB Community Bank, Bayonne NJ) — $3.27B assets, $173M market cap, 0.574x tangible book, the single cheapest name in the universe. WHY AN ACQUIRER WANTS IT: a $2.67B deposit base in the Hudson County/NYC-metro corridor, 81% core and only 3% brokered, at a 60.7% efficiency ratio — and New Jersey has the most direct comparable in the country right now in Columbia Financial&#x27;s pending acquisition of Northfield Bancorp. WHY IT IS CHEAP: earnings have collapsed — $2.5M to common on a TTM basis, down 42% year over year, a 0.82% return on tangible equity at a 70x P/E. CREDIT EVIDENCE — THIS IS THE BEAR CASE, NOT A FOOTNOTE: NPAs are 1.98% of assets and noncurrent loans 2.22%, charge-offs 0.58%, OREO $5.0M, and reserve coverage of noncurrent loans is only 55%, with the reserve ratio DOWN 0.52pp year over year while provisioning ran below charge-offs — the reserve-release flag fires hard. Uninsured deposits are 44.5%. The one genuine improvement is that NPAs fell 0.89pp year over year, so the credit cycle may have turned. NOTE A DATA GAP: bank-level risk-based capital came back empty from the call report, so the C&amp;D and CRE concentration ratios and the tier-1 ratio could NOT be computed for this name — that is missing data, not a clean reading, and a court must pull them from the 10-Q. This is the PWBK template exactly: impaired credit, sells at or below book.&quot;, &#x27;RVSB&#x27;: &#x27;Riverview Bancorp (Riverview Bank, Vancouver WA) — $1.46B assets, $108M market cap, 0.907x tangible book. WHY AN ACQUIRER WANTS IT: the best footprint fit in the screen. Vancouver WA is the Washington half of the Portland metro — the precise market where FS Bancorp just agreed to buy Pacific West Bancorp (West Linn OR, branches in Portland and Vancouver WA) and where Northrim is buying PBCO Financial in Medford OR. The deposit franchise is the asset: $1.26B of deposits, 95.3% core, ZERO brokered, 23.6% non-interest-bearing, and a loan/deposit ratio of only 85.5% — meaning an acquirer gets surplus funding it can lend against immediately. WHY IT IS CHEAP: it is loss-making, negative 3.66% return on tangible equity, a $4.3M TTM loss against a profit a year earlier. The gap between 0.74x book and 0.91x tangible book is goodwill that will not survive a transaction. CREDIT EVIDENCE: genuinely clean — NPAs 0.53% of assets, ZERO OREO, reserve at 1.40% of loans covering noncurrent loans 199%, tier-1 risk-based 14.4%. The blemishes are charge-offs at 0.41% and NPAs up 0.52pp year over year off a very low base, with the reserve-release flag firing on a 0.05pp reserve decline. Total CRE is 442% of risk-based capital (upper bound, includes owner-occupied) — above the 300% supervisory screen and the main thing a buyer would diligence.&#x27;, &#x27;PROV&#x27;: &#x27;Provident Financial Holdings (Provident Savings Bank FSB, Riverside CA) — $1.22B assets, $111M market cap, 0.877x tangible book. WHY AN ACQUIRER WANTS IT: it is the cleanest loan book in the entire universe and it sits in Inland Empire California, the state where First Hawaiian just agreed to pay ~1.98x tangible book to enter the market. Tier-1 risk-based capital is 19.0% — the bank is materially over-capitalised, so an acquirer is buying surplus capital at a 12% discount to its carrying value. WHY IT IS CHEAP: chronic under-earning. A 5.0% return on tangible equity at a 74% efficiency ratio on a sub-scale $1.2B balance sheet, and the funding is the weak point — only 9.6% non-interest-bearing, 15% brokered, 74% core, and a 114% loan/deposit ratio that means the bank is borrowing to lend. This is a thrift that has spent a decade unable to earn its cost of capital. CREDIT EVIDENCE — BEST IN SCREEN: NPAs 0.081% of assets, noncurrent loans 0.095%, ZERO charge-offs, ZERO OREO, reserve coverage 604% of noncurrent loans, no construction exposure at all, and NO reserve-release flag — the earnings are real, there just are not many of them. Converted to stock form in 1996, so no structural block. Total CRE 380% of risk-based capital is the one item to diligence.&#x27;, &#x27;RBB&#x27;: &#x27;RBB Bancorp (Royal Business Bank, Los Angeles CA) — $4.19B assets, $447M market cap, 0.988x tangible book, 10.9x earnings. WHY AN ACQUIRER WANTS IT: a Chinese-American commercial banking franchise spanning Los Angeles, New York and the Bay Area that would be extremely difficult and slow to build de novo, with a 51.9% efficiency ratio — the best cost structure among the cheap names — and tier-1 risk-based capital of 21.1%. California just printed a 1.98x out-of-market entry multiple. WHY IT IS CHEAP: the market is discounting the credit book and the niche concentration, not the earnings power — earnings to common are $41.0M, UP 28% year over year, a 9.06% return on tangible equity. The 0.85x P/B against 0.99x P/TBV shows goodwill that a buyer will not pay for. CREDIT EVIDENCE — MIXED, AND THE CRUX: NPAs are elevated at 1.17% of assets and noncurrent loans 1.34%, with $4.3M of OREO and reserve coverage of only 99% of noncurrent loans. But the direction is strongly favourable — NPAs DOWN 0.45pp year over year and charge-offs essentially nil at 0.0026% of loans, which says the problem loans are being resolved at par rather than written off. Against that, the reserve ratio fell 0.34pp and provisioning ran below charge-offs, so the reserve-release flag fires. Uninsured deposits are 47.2% and core funding only 74.5% — the funding profile is the weakest part of an otherwise strong case. Total CRE 249% of risk-based capital, the lowest concentration among the intake.&#x27;, &#x27;MGYR&#x27;: &quot;Magyar Bancorp (Magyar Bank, New Brunswick NJ) — $1.07B assets, $124M market cap, 0.997x tangible book, exactly at book. WHY AN ACQUIRER WANTS IT: a pristine, simple, in-fill New Jersey franchise with an 87.7% core-funded $885M deposit base and a 52.5% efficiency ratio — the second-best in the intake — on a balance sheet small enough for any regional buyer to absorb with cash. New Jersey has two active acquirers and the Columbia/Northfield comparable. WHY IT IS CHEAP: sub-scale and modestly profitable, a 6.15% return on tangible equity at 16x earnings with growth of only 3% year over year. CREDIT EVIDENCE — EFFECTIVELY SPOTLESS: NPAs 0.028% of assets, noncurrent loans 0.034%, NET RECOVERIES rather than charge-offs, ZERO OREO, reserve coverage of noncurrent loans 2,943%, NPAs down 0.23pp year over year, and NO reserve-release flag. There is essentially no credit mark for a buyer to take, which is exactly what supports a premium multiple rather than a book-value price. STRUCTURAL NOTE: Magyar completed a second-step mutual-to-stock conversion of Magyar Bancorp MHC — the 10-K treats it in the past tense with liquidation accounts established, and the registrant&#x27;s SEC history dates to 2005, so the three-year prohibition has long expired; a court should still confirm the exact conversion date. Total CRE 460% of risk-based capital and 43% uninsured deposits are the two diligence items.&quot;, &#x27;KRNY&#x27;: &#x27;Kearny Financial (Kearny Bank, Fairfield NJ) — $7.59B assets, $621M market cap, 0.957x tangible book, the largest acquirable name below tangible book. WHY AN ACQUIRER WANTS IT: scale. A $5.76B deposit franchise across northern New Jersey and the New York metro is the single biggest deposit base available in this cohort, 82.7% core-funded, and Columbia Financial — a New Jersey buyer — is simultaneously acquiring Northfield Bancorp, proving both appetite and regulatory feasibility for exactly this transaction shape. WHY IT IS CHEAP: a 2.25% net interest margin, the lowest in the intake, driving a 6.58% return on tangible equity with earnings to common DOWN 3.4% year over year — a liability-sensitive thrift balance sheet that has not repriced. The gap between 0.81x book and 0.96x tangible book is $100M-plus of goodwill from prior deals that an acquirer will write off and pay nothing for; this is the clearest illustration in the screen of why P/B flatters and P/TBV is the honest metric. CREDIT EVIDENCE: solid but not pristine — NPAs 0.69% of assets, noncurrent loans 0.90%, charge-offs negligible at 0.043%, ZERO OREO, tier-1 risk-based 13.7%, and NO reserve-release flag. The concerns are that NPAs rose 0.20pp year over year, reserve coverage is only 86% of noncurrent loans against a thin 0.77% reserve ratio — the lowest in the intake — and total CRE is 527% of risk-based capital. Second-step conversion completed 2015, so no structural block. THE CAVEAT: the direct NJ comparable, Columbia/Northfield, was struck at 0.86-0.89x tangible book, BELOW where Kearny trades — so the comparable caps the upside as much as it validates the thesis.&#x27;, &#x27;BCML&#x27;: &#x27;BayCom Corp (United Business Bank, Walnut Creek CA) — $2.63B assets, $329M market cap, 1.085x tangible book. WHY AN ACQUIRER WANTS IT: the deposit franchise is the best in the intake and it is what a buyer is actually paying for — 26.9% non-interest-bearing, 93.9% core, ZERO brokered, an 87.8% loan/deposit ratio and a 4.16% net interest margin, the highest in the screen. That is a genuine low-cost commercial deposit base across northern California, and California just printed a 1.98x entry multiple. WHY IT IS CHEAP: the returns do not match the franchise — a 1.81% return on tangible equity, $5.5M to common, 60x earnings. A bank with a great funding base and poor returns is the textbook acquiree, because the acquirer keeps the deposits and replaces the cost structure. CREDIT EVIDENCE: clean — NPAs 0.63% of assets, charge-offs essentially zero at 0.0029%, ZERO OREO, reserve coverage 125% of noncurrent loans, tier-1 risk-based 14.5%, and NO reserve-release flag; the reserve ratio actually ROSE 0.08pp, which is the opposite of borrowed earnings. Watch items: NPAs up 0.24pp year over year, uninsured deposits 46.3%, and total CRE at 537% of risk-based capital — the highest concentration in the intake and the main obstacle to a buyer.&#x27;, &#x27;SFBC&#x27;: &#x27;Sound Financial Bancorp (Sound Community Bank, Seattle WA) — $1.11B assets, $121M market cap, 1.105x tangible book. WHY AN ACQUIRER WANTS IT: a $975M Seattle-and-Olympic-Peninsula deposit base that is 89% core with ZERO brokered funding and only 20.3% uninsured — the lowest uninsured share in the intake and therefore the most stable, most valuable deposits on offer — in the state where Banner and FS Bancorp are both transacting. At $1.1B of assets it is a straightforward bolt-on for any Pacific Northwest buyer. WHY IT IS CHEAP: sub-scale economics — a 5.9% return on tangible equity at a 74.9% efficiency ratio and 18.7x earnings, growing 7% year over year. CREDIT EVIDENCE: clean and improving — NPAs 0.67% of assets, charge-offs 0.0083%, essentially no OREO at $0.1M, reserve coverage 118% of noncurrent loans, NPAs DOWN 0.23pp year over year, and NO reserve-release flag. DATA GAP: bank-level risk-based capital was not returned by the call report, so the C&amp;D and CRE concentration ratios and the tier-1 ratio are UNAVAILABLE for this name — missing, not clean, and a court must source them from the 10-Q. This is the highest-quality-franchise, lowest-discount name in the intake: the case rests on franchise scarcity, not on cheapness.&#x27;, &#x27;WNEB&#x27;: &#x27;Western New England Bancorp (Westfield Bank, Westfield MA) — $2.76B assets, $260M market cap, 1.109x tangible book, 14.7x earnings. WHY AN ACQUIRER WANTS IT: western Massachusetts and northern Connecticut deposits — $2.38B, 89.5% core, ZERO brokered, 25.2% non-interest-bearing — in the New England market that is consolidating hardest right now: Hometown Financial Group MHC is a serial acquirer nine deals deep and just bought Primary Bank, Cambridge Financial Group is paying CASH for converted thrifts (First Seacoast at 1.28x), and Banco Santander is buying Webster Financial to enter the region at ~2.0x. Multiple buyer types, including mutuals that pay cash and do not care about EPS dilution. WHY IT IS CHEAP: a 2.98% net interest margin and a 67.9% efficiency ratio produce only a 7.56% return on tangible equity, though earnings to common are UP 16.2% year over year — the best earnings trend among the clean names. CREDIT EVIDENCE — SECOND-CLEANEST IN THE INTAKE: NPAs 0.168% of assets, noncurrent loans 0.211%, charge-offs 0.010%, ZERO OREO, reserve coverage 445% of noncurrent loans, NPAs down 0.05pp year over year, tier-1 risk-based 12.4%, and NO reserve-release flag. Construction is modest at 39% of risk-based capital; total CRE 386% (upper bound) is the diligence item. Of the ten, this is the one where clean credit, a real deposit franchise, improving earnings and a demonstrably active buyer set all line up at once — and correspondingly, it is not cheap.&#x27;}
+
+# ── stage 1: universe ───────────────────────────────────────────────────────────────
+def fetch_bank_universe(refresh=False):
+    rows = _cached(
+        &quot;universe.json&quot;,
+        lambda: U.fetch_universe(min_mcap=1e8, max_mcap=1e9, ex_financials=False),
+        refresh,
+    )
+    out = []
+    for r in rows:
+        if r.get(&quot;sec&quot;) != &quot;Finance&quot; or r.get(&quot;ind&quot;) not in BANK_INDUSTRIES:
+            continue
+        if (r.get(&quot;country&quot;) or &quot;United States&quot;) != &quot;United States&quot;:
+            continue
+        if not is_common_ticker(r):
+            continue
+        out.append(r)
+    return out
+
+
+# ── stage 2: FDIC join ──────────────────────────────────────────────────────────────
+def fetch_institutions(refresh=False):
+    def _pull():
+        out, off = [], 0
+        while True:
+            j = _get_json(
+                f&quot;{FDIC}/institutions?filters=ACTIVE:1&amp;fields=CERT,NAME,CITY,STALP,ASSET,&quot;
+                f&quot;NAMEHCR,RSSDHCR,BKCLASS,OFFDOM&amp;limit=1000&amp;offset={off}&amp;format=json&quot;,
+                UA_FDIC, timeout=120)
+            rows = [d[&quot;data&quot;] for d in j.get(&quot;data&quot;, [])]
+            out += rows
+            if len(rows) &lt; 1000:
+                break
+            off += 1000
+        return out
+    return _cached(&quot;fdic_inst.json&quot;, _pull, refresh)
+
+
+def build_hc_index(insts):
+    &quot;&quot;&quot;normalized holding-company name -&gt; list of institution rows.&quot;&quot;&quot;
+    idx = {}
+    for r in insts:
+        hc = r.get(&quot;NAMEHCR&quot;)
+        if not hc or hc in (&quot;&quot;, &quot;-&quot;):
+            continue
+        idx.setdefault(_key(hc), []).append(r)
+    return idx
+
+
+def match_bank(row, hc_idx, inst_by_name):
+    &quot;&quot;&quot;Resolve a listed holdco to its insured bank subsidiary(ies).
+
+    Order: exact normalized NAMEHCR -&gt; exact normalized bank NAME (unit holdcos whose
+    NAMEHCR is blank or differs) -&gt; unique token-prefix match.  Ambiguity or no hit
+    returns UNRESOLVED; we never silently pick.
+    &quot;&quot;&quot;
+    key = _key(row[&quot;name&quot;])
+    if key in hc_idx:
+        return hc_idx[key], &quot;namehcr_exact&quot;
+    if key in inst_by_name:
+        return inst_by_name[key], &quot;bankname_exact&quot;
+
+    # token-prefix: every token of the shorter side prefix-matches the other, and the
+    # first token matches exactly.  Require a UNIQUE hit.
+    kt = _norm_tokens(row[&quot;name&quot;])
+    if not kt:
+        return None, &quot;unresolved_empty&quot;
+    cands = []
+    for cand_key, rows in hc_idx.items():
+        ct = tuple(cand_key.split())
+        if not ct or ct[0] != kt[0]:
+            continue
+        n = min(len(ct), len(kt))
+        if n &lt; 1:
+            continue
+        ok = all(ct[i].startswith(kt[i]) or kt[i].startswith(ct[i]) for i in range(n))
+        if ok and abs(len(ct) - len(kt)) &lt;= 1:
+            cands.append((cand_key, rows))
+    if len(cands) == 1:
+        return cands[0][1], &quot;prefix_unique&quot;
+    if len(cands) &gt; 1:
+        return None, f&quot;unresolved_ambiguous({len(cands)})&quot;
+
+    # LAST RESORT — distinctive-token identity, form stripped, against the holding-company
+    # index and then the bank-name index.  This is what recovers registrants whose FDIC
+    # NAMEHCR is a TOP-TIER family/ESOP holder rather than the listed intermediate holdco
+    # (First Guaranty Bancshares -&gt; NAMEHCR &quot;SMITH&amp;HOOD HOLDING CO L L C&quot;, bank name
+    # &quot;First Guaranty Bank&quot;).  Uniqueness is still mandatory: ambiguity -&gt; UNRESOLVED.
+    ident = _identity(row[&quot;name&quot;])
+    if ident:
+        for idx, label in ((hc_idx, &quot;identity_hc&quot;), (inst_by_name, &quot;identity_bankname&quot;)):
+            hits = [rows for k, rows in idx.items() if _identity(k) == ident]
+            if len(hits) == 1:
+                return hits[0], label
+            if len(hits) &gt; 1:
+                return None, f&quot;unresolved_ambiguous_identity({len(hits)})&quot;
+    return None, &quot;unresolved_nohit&quot;
+
+
+def sec_state(cik, refresh=False):
+    &quot;&quot;&quot;Registrant&#x27;s business-address state, from SEC submissions.  Used ONLY to break
+    holding-company name collisions — several unrelated holdcos abbreviate to the same
+    FDIC NAMEHCR (&quot;FS BCORP INC&quot; is BOTH FS Bancorp of Mountlake Terrace WA and the
+    Indiana holdco of Farmers State Bank).  A silent merge of the two would have assigned
+    FSBW an Indiana bank&#x27;s call report.&quot;&quot;&quot;
+    def _pull():
+        j = _get_json(f&quot;https://data.sec.gov/submissions/CIK{int(cik):010d}.json&quot;,
+                      UA_SEC, timeout=60)
+        if &quot;_error&quot; in j:
+            return {&quot;_error&quot;: j[&quot;_error&quot;]}
+        a = (j.get(&quot;addresses&quot;) or {}).get(&quot;business&quot;) or {}
+        return {&quot;state&quot;: a.get(&quot;stateOrCountry&quot;), &quot;city&quot;: a.get(&quot;city&quot;),
+                &quot;sic&quot;: j.get(&quot;sic&quot;), &quot;name&quot;: j.get(&quot;name&quot;)}
+    return _cached(f&quot;secsub_{int(cik)}.json&quot;, _pull, refresh)
+
+
+def sec_filings(cik, refresh=False):
+    &quot;&quot;&quot;Recent filing history + the registrant&#x27;s first-ever filing date.&quot;&quot;&quot;
+    def _pull():
+        j = _get_json(f&quot;https://data.sec.gov/submissions/CIK{int(cik):010d}.json&quot;,
+                      UA_SEC, timeout=60)
+        if &quot;_error&quot; in j:
+            return {&quot;_error&quot;: j[&quot;_error&quot;]}
+        rec = (j.get(&quot;filings&quot;) or {}).get(&quot;recent&quot;) or {}
+        rows = []
+        for i in range(len(rec.get(&quot;form&quot;, []))):
+            rows.append({&quot;form&quot;: rec[&quot;form&quot;][i], &quot;date&quot;: rec[&quot;filingDate&quot;][i],
+                         &quot;acc&quot;: rec[&quot;accessionNumber&quot;][i],
+                         &quot;doc&quot;: rec.get(&quot;primaryDocument&quot;, [&quot;&quot;] * (i + 1))[i]})
+        older = (j.get(&quot;filings&quot;) or {}).get(&quot;files&quot;) or []
+        first = min([r[&quot;date&quot;] for r in rows] or [&quot;9999&quot;])
+        if older:
+            first = min(first, min(f.get(&quot;filingFrom&quot;, &quot;9999&quot;) for f in older))
+        return {&quot;filings&quot;: rows, &quot;first_filing&quot;: first,
+                &quot;n_older_pages&quot;: len(older)}
+    return _cached(f&quot;secfil_{int(cik)}.json&quot;, _pull, refresh)
+
+
+def fetch_filing_text(cik, acc, doc, refresh=False):
+    accn = acc.replace(&quot;-&quot;, &quot;&quot;)
+    key = f&quot;doc_{int(cik)}_{accn}.txt&quot;
+    p = _cache_path(key)
+    if not refresh and os.path.exists(p):
+        with open(p, encoding=&quot;utf-8&quot;, errors=&quot;ignore&quot;) as f:
+            return f.read()
+    url = f&quot;https://www.sec.gov/Archives/edgar/data/{int(cik)}/{accn}/{doc}&quot;
+    try:
+        req = urllib.request.Request(url, headers=UA_SEC)
+        with urllib.request.urlopen(req, timeout=90) as r:
+            raw = r.read().decode(&quot;utf-8&quot;, errors=&quot;ignore&quot;)
+    except Exception as e:  # noqa: BLE001
+        return f&quot;__ERROR__ {e}&quot;
+    txt = re.sub(r&quot;&lt;[^&gt;]+&gt;&quot;, &quot; &quot;, raw)
+    txt = re.sub(r&quot;&amp;nbsp;?&quot;, &quot; &quot;, txt)
+    txt = re.sub(r&quot;&amp;amp;&quot;, &quot;&amp;&quot;, txt)
+    txt = re.sub(r&quot;\s+&quot;, &quot; &quot;, txt)
+    with open(p, &quot;w&quot;, encoding=&quot;utf-8&quot;) as f:
+        f.write(txt)
+    return txt
+
+
+# ── the ACQUIRABILITY gate (Mode-B: the decisive question the screen&#x27;s framing hides) ──
+# A screen that ranks on &quot;cheap vs tangible book + clean credit&quot; surfaces recently-converted
+# thrifts at the top BY CONSTRUCTION: a standard conversion raises capital into a small
+# balance sheet, so the bank is over-capitalized (depressing ROE) and trades below tangible
+# book.  But federal law makes exactly those institutions UN-ACQUIRABLE:
+#   * 12 CFR 192.500(a) — for THREE YEARS after a standard mutual-to-stock conversion, no
+#     person may acquire more than 10% of the converted institution&#x27;s stock without prior
+#     regulatory approval.  In practice this blocks a takeover for three years.
+#   * MHC (mutual holding company) structure — the MHC holds a MAJORITY of the mid-tier
+#     holdco&#x27;s stock and is itself a mutual with no owners to sell.  No acquirer can buy
+#     the company unless the MHC first does a second-step conversion, which is the MHC
+#     board&#x27;s unilateral decision, not the public shareholders&#x27;.
+# So the cheapness is not a mispricing an acquirer can arbitrage — it is the market
+# correctly pricing a structurally blocked takeout.  This gate is the difference between
+# a real acquiree screen and one that just re-finds over-capitalized thrifts.
+MHC_PATTERNS = [
+    r&quot;mutual holding company&quot;,
+    r&quot;\bMHC\b&quot;,
+]
+# Every pattern must be MUTUAL-specific.  A bare &quot;conversion&quot;/&quot;stock offering&quot; match fires
+# on ordinary commercial-bank IPOs and on convertible-security language: Third Coast Bank
+# (a Texas commercial bank that IPO&#x27;d in 2021, never a thrift) was misclassified as a
+# recently converted mutual on exactly that.
+CONVERSION_PATTERNS = [
+    r&quot;mutual[- ]to[- ]stock conversion&quot;,
+    r&quot;second[- ]step conversion&quot;,
+    r&quot;conversion (?:of|from) (?:the )?mutual (?:form|holding)&quot;,
+    r&quot;from the mutual form of organization to the stock form&quot;,
+    r&quot;mutual holding company reorganization&quot;,
+]
+
+
+MONTHS = {m: i + 1 for i, m in enumerate(
+    [&quot;january&quot;, &quot;february&quot;, &quot;march&quot;, &quot;april&quot;, &quot;may&quot;, &quot;june&quot;, &quot;july&quot;, &quot;august&quot;,
+     &quot;september&quot;, &quot;october&quot;, &quot;november&quot;, &quot;december&quot;])}
+
+
+def _extract_conversion_date(low: str):
+    &quot;&quot;&quot;Pull the stated conversion-completion date out of the registrant&#x27;s own 10-Q.
+    Preferred over the first-filing heuristic, which mis-dates second-step conversions
+    (a second step creates a NEW registrant CIK, so &#x27;first filing&#x27; reads as the
+    conversion date only by luck).&quot;&quot;&quot;
+    pats = [
+        r&quot;conversion[^.]{0,160}?(?:was\s+)?completed\s+(?:on\s+)?&quot;
+        r&quot;([a-z]+)\s+(\d{1,2}),?\s+(\d{4})&quot;,
+        r&quot;completed[^.]{0,120}?(?:stock\s+)?(?:conversion|offering)[^.]{0,80}?&quot;
+        r&quot;on\s+([a-z]+)\s+(\d{1,2}),?\s+(\d{4})&quot;,
+        r&quot;on\s+([a-z]+)\s+(\d{1,2}),?\s+(\d{4})[^.]{0,120}?&quot;
+        r&quot;completed[^.]{0,120}?(?:conversion|stock offering)&quot;,
+    ]
+    for p in pats:
+        for m in re.finditer(p, low):
+            mo = MONTHS.get(m.group(1))
+            if not mo:
+                continue
+            y = int(m.group(3))
+            if 1990 &lt;= y &lt;= 2030:
+                return f&quot;{y:04d}-{mo:02d}-{int(m.group(2)):02d}&quot;
+    return None
+
+
+def acquirability(cik, txt, first_filing, ipo_date=None):
+    &quot;&quot;&quot;Classify structural acquirability from the registrant&#x27;s own latest 10-Q text.&quot;&quot;&quot;
+    out = {&quot;mhc_language_hits&quot;: 0, &quot;conversion_language_hits&quot;: 0,
+           &quot;structure&quot;: &quot;stock_holdco&quot;, &quot;blocked_reason&quot;: None,
+           &quot;first_sec_filing&quot;: first_filing}
+    if not txt or txt.startswith(&quot;__ERROR__&quot;):
+        out[&quot;structure&quot;] = &quot;UNVERIFIED&quot;
+        out[&quot;blocked_reason&quot;] = &quot;10-Q text unavailable&quot;
+        return out
+    low = txt.lower()
+    out[&quot;mhc_language_hits&quot;] = len(re.findall(r&quot;mutual holding company|\bmhc\b&quot;, low))
+    out[&quot;conversion_language_hits&quot;] = sum(len(re.findall(p, low))
+                                          for p in CONVERSION_PATTERNS)
+
+    # Is there a LIVING mutual holding company above this registrant?  Two questions,
+    # and only the pair is decisive:
+    #   (a) does the filing describe an MHC / two-tier structure at all, and
+    #   (b) has that MHC already been converted away (a completed &quot;second-step&quot;)?
+    # Magyar Bancorp&#x27;s 10-K names &quot;Magyar Bancorp, MHC&quot; but only in the PAST tense of a
+    # completed mutual-to-stock conversion — it is a fully public company.  Rhinebeck&#x27;s
+    # 10-K says &quot;Rhinebeck Bancorp, MHC ... owns 57[%]&quot; — the MHC is alive and controlling.
+    # Reading (a) without (b) misclassifies every converted thrift as blocked.
+    has_mhc = bool(re.search(r&quot;mutual holding company|,\s*mhc\b&quot;, low))
+    out[&quot;mhc_entity_present&quot;] = has_mhc
+
+    # ORDER MATTERS.  A PRESENT-TENSE statement that an MHC owns a majority is decisive and
+    # OVERRIDES any conversion language elsewhere in the document — 10-Ks discuss possible
+    # or historical conversions in risk factors and regulatory sections, so a &quot;conversion&quot;
+    # match alone is not evidence the MHC is gone.  Phrasing varies and none of it uses the
+    # word &quot;outstanding&quot; reliably: Rhinebeck says &quot;is a mutual holding company that owns
+    # 57.4%&quot;; Pioneer says &quot;MHC owns a majority of the Company&#x27;s common stock&quot;; Bogota says
+    # &quot;MHC owns a majority of Bogota Financial Corp&quot;.
+    pct = None
+    for p in (r&quot;(?:,\s*mhc|mutual holding company)[^.]{0,240}?(?:owns?|holds?|held)&quot;
+              r&quot;\s+(?:approximately\s+)?(\d{1,3}(?:\.\d+)?)\s*%&quot;,
+              r&quot;(\d{1,3}(?:\.\d+)?)\s*%[^.]{0,140}?(?:owned|held) by[^.]{0,100}?&quot;
+              r&quot;(?:,\s*mhc|mutual holding company)&quot;):
+        m = re.search(p, low)
+        if m:
+            try:
+                v = float(m.group(1))
+                if 0 &lt; v &lt;= 100:
+                    pct = v
+                    break
+            except ValueError:
+                pass
+    majority_words = bool(re.search(
+        r&quot;(?:,\s*mhc|mutual holding company)[\s\S]{0,240}?owns?\s+a majority of&quot;, low))
+    mhc_controls = has_mhc and ((pct is not None and pct &gt; 50) or majority_words)
+
+    dissolved = bool(re.search(
+        r&quot;(?:completed|consummated|completion of)[^.]{0,200}?second[- ]step conversion|&quot;
+        r&quot;(?:completed|consummated|completion of)[^.]{0,200}?mutual[- ]to[- ]stock conversion|&quot;
+        r&quot;in connection with the (?:mutual[- ]to[- ]stock )?conversion of[^.]{0,80}?,\s*mhc&quot;,
+        low)) and not mhc_controls
+    out[&quot;mhc_converted_away&quot;] = dissolved
+
+    if mhc_controls:
+        out[&quot;mhc_ownership_pct&quot;] = pct if (pct is not None and pct &gt; 50) else None
+        out[&quot;structure&quot;] = &quot;MHC_majority&quot;
+        own = f&quot;~{pct}%&quot; if pct is not None else &quot;a majority&quot;
+        out[&quot;blocked_reason&quot;] = (
+            f&quot;a mutual holding company owns {own} of the shares. An MHC is a mutual with no &quot;
+            &quot;shareholders to sell; no third party can acquire this company unless the MHC &quot;
+            &quot;first completes a second-step conversion, which is the MHC board&#x27;s decision &quot;
+            &quot;alone. The public float is a MINORITY that cannot deliver control.&quot;)
+    elif (re.search(r&quot;,\s*mhc\b&quot;, low) and not dissolved
+          and out[&quot;mhc_language_hits&quot;] &gt;= 3):
+        out[&quot;structure&quot;] = &quot;MHC_suspected&quot;
+        out[&quot;blocked_reason&quot;] = (&quot;repeated mutual-holding-company language with no &quot;
+                                 &quot;completed second-step conversion found; ownership &quot;
+                                 &quot;percentage not parsed — verify by hand&quot;)
+
+    # 3-year post-conversion acquisition prohibition
+    stated = _extract_conversion_date(low)
+    conv = ipo_date or stated or (first_filing if first_filing and first_filing &lt; &quot;9999&quot;
+                                  else None)
+    out[&quot;conversion_date&quot;] = conv
+    out[&quot;conversion_date_basis&quot;] = (&quot;stated_in_10Q&quot; if (stated and not ipo_date)
+                                    else &quot;first_sec_filing_proxy&quot;)
+    saw_conv = out[&quot;conversion_language_hits&quot;] &gt; 0
+    if conv and conv &gt;= &quot;2023-08-02&quot; and saw_conv:
+        out[&quot;recent_conversion&quot;] = True
+        if out[&quot;structure&quot;] == &quot;stock_holdco&quot;:
+            out[&quot;structure&quot;] = &quot;recent_conversion&quot;
+        out[&quot;blocked_reason&quot;] = ((out.get(&quot;blocked_reason&quot;) or &quot;&quot;).strip(&quot; |&quot;) + &quot; | &quot; if
+                                 out.get(&quot;blocked_reason&quot;) else &quot;&quot;) + (
+            f&quot;mutual-to-stock conversion dated {conv} ({out[&#x27;conversion_date_basis&#x27;]}): &quot;
+            &quot;12 CFR 192.500 bars any &gt;10% acquisition of the converted institution for &quot;
+            &quot;THREE YEARS from conversion without prior regulatory approval — a takeout is &quot;
+            f&quot;structurally blocked until ~{int(conv[:4]) + 3}{conv[4:]}&quot;)
+    out[&quot;acquirable&quot;] = out[&quot;structure&quot;] in (&quot;stock_holdco&quot;, &quot;UNVERIFIED&quot;)
+    return out
+
+
+def disambiguate(rec, rows):
+    &quot;&quot;&quot;A holdco may legitimately own several banks (same RSSDHCR -&gt; aggregate).  Distinct
+    RSSDHCRs under one normalized name = a NAME COLLISION between unrelated companies, and
+    must be resolved, never merged.  Resolution order: registrant business-state, then
+    balance-sheet size proximity (bank assets vs SEC-reported holdco assets).  If neither
+    is decisive the record is marked ambiguous and its call-report data is withheld.&quot;&quot;&quot;
+    groups = {}
+    for x in rows:
+        groups.setdefault(x.get(&quot;RSSDHCR&quot;) or f&quot;_cert{x[&#x27;CERT&#x27;]}&quot;, []).append(x)
+    if len(groups) == 1:
+        return rows, &quot;single_holdco&quot;
+
+    st = (rec.get(&quot;_secsub&quot;) or {}).get(&quot;state&quot;)
+    if st:
+        hits = [g for g in groups.values() if any(y.get(&quot;STALP&quot;) == st for y in g)]
+        if len(hits) == 1:
+            return hits[0], f&quot;collision_resolved_by_state({st})&quot;
+
+    holdco_assets = (rec.get(&quot;_sec&quot;) or {}).get(&quot;assets&quot;)
+    if holdco_assets:
+        target = holdco_assets / 1000.0          # FDIC ASSET is in $thousands
+        scored = sorted(
+            ((abs((sum(y.get(&quot;ASSET&quot;) or 0 for y in g) / target) - 1.0), k, g)
+             for k, g in groups.items()), key=lambda z: z[0])
+        if scored[0][0] &lt; 0.35 and (len(scored) == 1 or scored[1][0] &gt; 0.8):
+            return scored[0][2], &quot;collision_resolved_by_assets&quot;
+
+    return None, f&quot;collision_UNRESOLVED({len(groups)}_holdcos)&quot;
+
+
+def fetch_financials(cert, n=6):
+    j = _get_json(
+        f&quot;{FDIC}/financials?filters=CERT:{cert}&amp;fields={FIN_FIELDS}&quot;
+        f&quot;&amp;sort_by=REPDTE&amp;sort_order=DESC&amp;limit={n}&amp;format=json&quot;, UA_FDIC)
+    if &quot;_error&quot; in j:
+        return None
+    return [d[&quot;data&quot;] for d in j.get(&quot;data&quot;, [])]
+
+
+# ── stage 3: SEC XBRL holdco tangible book + earnings ───────────────────────────────
+EQ_TAGS = [&quot;StockholdersEquity&quot;,
+           &quot;StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest&quot;]
+PFD_TAGS = [&quot;PreferredStockValue&quot;, &quot;PreferredStockValueOutstanding&quot;]
+GW_TAGS = [&quot;Goodwill&quot;]
+INTAN_TAGS = [&quot;IntangibleAssetsNetExcludingGoodwill&quot;, &quot;FiniteLivedIntangibleAssetsNet&quot;]
+NIC_TAGS = [&quot;NetIncomeLossAvailableToCommonStockholdersBasic&quot;]
+NI_TAGS = [&quot;NetIncomeLoss&quot;]
+
+
+def _facts(cik):
+    return _get_json(f&quot;https://data.sec.gov/api/xbrl/companyfacts/CIK{int(cik):010d}.json&quot;,
+                     UA_SEC, timeout=90)
+
+
+def _days(a, b):
+    return (int(a[:4]) - int(b[:4])) * 365 + (int(a[5:7]) - int(b[5:7])) * 30 + \
+           (int(a[8:10]) - int(b[8:10]))
+
+
+def _latest_instant(facts, tags, as_of=None, max_stale_days=400):
+    &quot;&quot;&quot;Most recent point-in-time value across a tag preference list.
+
+    DATE-MATCHING IS MANDATORY when `as_of` is given.  A filer can stop tagging a concept
+    once the underlying instrument is gone, leaving the last-ever value stranded in
+    companyfacts: Sierra Bancorp&#x27;s most recent PreferredStockValue fact is dated
+    2022-12-31 ($112.9M) while its equity is dated 2026-06-30.  Subtracting that stale
+    preferred from current equity understated tangible common equity by $113M and made a
+    cheap bank look expensive.  A component older than `max_stale_days` relative to the
+    equity date is treated as NOT PRESENT and reported as such — never silently applied.
+
+    Returns (val, end, tag, stale_flag).
+    &quot;&quot;&quot;
+    us = (facts.get(&quot;facts&quot;) or {}).get(&quot;us-gaap&quot;) or {}
+    for tag in tags:
+        node = us.get(tag)
+        if not node:
+            continue
+        cands = []
+        for unit, arr in (node.get(&quot;units&quot;) or {}).items():
+            if unit != &quot;USD&quot;:
+                continue
+            for f in arr:
+                if f.get(&quot;start&quot;):          # instant facts have no start
+                    continue
+                end = f.get(&quot;end&quot;)
+                if end:
+                    cands.append((end, f.get(&quot;val&quot;)))
+        if not cands:
+            continue
+        if as_of:
+            exact = [c for c in cands if c[0] == as_of]
+            if exact:
+                return exact[0][1], exact[0][0], tag, False
+            near = sorted([c for c in cands if 0 &lt;= _days(as_of, c[0]) &lt;= max_stale_days],
+                          key=lambda c: c[0], reverse=True)
+            if near:
+                return near[0][1], near[0][0], tag, False
+            newest = max(cands, key=lambda c: c[0])
+            return None, newest[0], tag, True      # present but STALE -&gt; not applied
+        newest = max(cands, key=lambda c: c[0])
+        return newest[1], newest[0], tag, False
+    return None, None, None, False
+
+
+def _ttm_flow(facts, tags):
+    &quot;&quot;&quot;Sum the most recent 4 non-overlapping ~quarterly durations. (val, end, tag, n).&quot;&quot;&quot;
+    us = (facts.get(&quot;facts&quot;) or {}).get(&quot;us-gaap&quot;) or {}
+    for tag in tags:
+        node = us.get(tag)
+        if not node:
+            continue
+        rows = []
+        for unit, arr in (node.get(&quot;units&quot;) or {}).items():
+            if unit != &quot;USD&quot;:
+                continue
+            for f in arr:
+                s, e, v = f.get(&quot;start&quot;), f.get(&quot;end&quot;), f.get(&quot;val&quot;)
+                if not (s and e and v is not None):
+                    continue
+                days = (int(e[:4]) - int(s[:4])) * 365 + \
+                       (int(e[5:7]) - int(s[5:7])) * 30 + (int(e[8:10]) - int(s[8:10]))
+                if 60 &lt;= days &lt;= 110:       # quarterly only
+                    rows.append((e, s, v))
+        if not rows:
+            continue
+        rows = sorted({(e, s, v) for e, s, v in rows}, reverse=True)
+        picked, cursor = [], None
+        for e, s, v in rows:
+            if cursor is None or e &lt;= cursor:
+                picked.append((e, s, v))
+                cursor = s
+            if len(picked) == 4:
+                break
+        if picked:
+            return sum(v for _, _, v in picked), picked[0][0], tag, len(picked)
+    return None, None, None, 0
+
+
+def _prior_ttm_flow(facts, tags, before_end):
+    us = (facts.get(&quot;facts&quot;) or {}).get(&quot;us-gaap&quot;) or {}
+    for tag in tags:
+        node = us.get(tag)
+        if not node:
+            continue
+        rows = []
+        for unit, arr in (node.get(&quot;units&quot;) or {}).items():
+            if unit != &quot;USD&quot;:
+                continue
+            for f in arr:
+                s, e, v = f.get(&quot;start&quot;), f.get(&quot;end&quot;), f.get(&quot;val&quot;)
+                if not (s and e and v is not None) or e &gt;= before_end:
+                    continue
+                days = (int(e[:4]) - int(s[:4])) * 365 + \
+                       (int(e[5:7]) - int(s[5:7])) * 30 + (int(e[8:10]) - int(s[8:10]))
+                if 60 &lt;= days &lt;= 110:
+                    rows.append((e, s, v))
+        if not rows:
+            continue
+        rows = sorted({(e, s, v) for e, s, v in rows}, reverse=True)
+        picked, cursor = [], None
+        for e, s, v in rows:
+            if cursor is None or e &lt;= cursor:
+                picked.append((e, s, v))
+                cursor = s
+            if len(picked) == 4:
+                break
+        if len(picked) == 4:
+            return sum(v for _, _, v in picked)
+    return None
+
+
+def sec_book(cik, refresh=False):
+    def _pull():
+        f = _facts(cik)
+        if &quot;_error&quot; in f:
+            return {&quot;_error&quot;: f[&quot;_error&quot;]}
+        eq, eq_end, eq_tag, _ = _latest_instant(f, EQ_TAGS)
+        # every deduction is date-matched to the equity date; stale facts are NOT applied
+        pfd, pfd_end, _, pfd_stale = _latest_instant(f, PFD_TAGS, as_of=eq_end)
+        gw, gw_end, _, gw_stale = _latest_instant(f, GW_TAGS, as_of=eq_end)
+        intan, in_end, _, in_stale = _latest_instant(f, INTAN_TAGS, as_of=eq_end)
+        stale = [n for n, s in ((&quot;preferred&quot;, pfd_stale), (&quot;goodwill&quot;, gw_stale),
+                                (&quot;intangibles&quot;, in_stale)) if s]
+        nic, nic_end, nic_tag, nq = _ttm_flow(f, NIC_TAGS)
+        if nic is None:
+            nic, nic_end, nic_tag, nq = _ttm_flow(f, NI_TAGS)
+        prior = _prior_ttm_flow(f, NIC_TAGS if nic_tag in NIC_TAGS else NI_TAGS,
+                                nic_end) if nic_end else None
+        # shares outstanding (dei, cover page — the freshest count)
+        sh = None
+        dei = (f.get(&quot;facts&quot;) or {}).get(&quot;dei&quot;) or {}
+        node = dei.get(&quot;EntityCommonStockSharesOutstanding&quot;) or {}
+        best = None
+        for unit, arr in (node.get(&quot;units&quot;) or {}).items():
+            for x in arr:
+                e = x.get(&quot;end&quot;)
+                if e and (best is None or e &gt; best[0]):
+                    best = (e, x.get(&quot;val&quot;))
+        if best:
+            sh = best[1]
+        assets, _, _, _ = _latest_instant(f, [&quot;Assets&quot;], as_of=eq_end)
+        return {&quot;assets&quot;: assets, &quot;stale_components_not_applied&quot;: stale,
+                &quot;component_dates&quot;: {&quot;preferred&quot;: pfd_end, &quot;goodwill&quot;: gw_end,
+                                    &quot;intangibles&quot;: in_end},
+                &quot;equity&quot;: eq, &quot;equity_end&quot;: eq_end, &quot;equity_tag&quot;: eq_tag,
+                &quot;preferred&quot;: pfd, &quot;goodwill&quot;: gw, &quot;intangibles&quot;: intan,
+                &quot;ni_common_ttm&quot;: nic, &quot;ni_common_end&quot;: nic_end, &quot;ni_tag&quot;: nic_tag,
+                &quot;ni_quarters&quot;: nq, &quot;ni_common_prior_ttm&quot;: prior, &quot;shares&quot;: sh,
+                &quot;entity_name&quot;: (f.get(&quot;entityName&quot;) or &quot;&quot;)}
+    return _cached(f&quot;sec_{int(cik)}.json&quot;, _pull, refresh)
+
+
+# ── stage 4: derive the metrics ─────────────────────────────────────────────────────
+def _r(x, n=2):
+    return round(x, n) if isinstance(x, (int, float)) else None
+
+
+def _div(a, b, pct=True):
+    if a is None or not b:
+        return None
+    return round(100.0 * a / b, 2) if pct else round(a / b, 4)
+
+
+def consolidate_quarters(fin: dict):
+    &quot;&quot;&quot;Combine a holdco&#x27;s insured subsidiaries into one call-report view per quarter.
+
+    Two traps handled explicitly:
+      * NESTED banks — Greene County Bancorp&#x27;s &quot;Greene County Commercial Bank&quot; is a
+        subsidiary OF &quot;The Bank of Greene County&quot;, so SUMMING the two double-counts the
+        balance sheet.  PARCERT identifies the child; children are dropped.
+      * SIBLING banks — Ames National really does own six separate Iowa charters; those
+        DO sum.  Dollar fields are summed and every ratio is RECOMPUTED from the summed
+        dollars rather than averaged (averaging ratios across unequal banks is wrong).
+    &quot;&quot;&quot;
+    per_q = {}
+    for cert, rows in (fin or {}).items():
+        for q in (rows or []):
+            per_q.setdefault(q[&quot;REPDTE&quot;], []).append(q)
+    out = {}
+    for dt, rows in per_q.items():
+        certs = {int(r[&quot;CERT&quot;]) for r in rows}
+        rows = [r for r in rows if not (r.get(&quot;PARCERT&quot;) and int(r[&quot;PARCERT&quot;]) in certs)]
+        if not rows:
+            continue
+
+        def S(f):
+            vals = [r.get(f) for r in rows if r.get(f) is not None]
+            return sum(vals) if vals else None
+        agg = {f: S(f) for f in (&quot;ASSET&quot;, &quot;EQ&quot;, &quot;EQTOT&quot;, &quot;INTAN&quot;, &quot;NETINC&quot;, &quot;DEP&quot;,
+                                &quot;DEPDOM&quot;, &quot;DEPINS&quot;, &quot;DEPUNINS&quot;, &quot;DEPNIDOM&quot;, &quot;COREDEP&quot;,
+                                &quot;BRO&quot;, &quot;LNLSNET&quot;, &quot;LNATRES&quot;, &quot;ORE&quot;, &quot;NALTOT&quot;, &quot;NTLNLS&quot;,
+                                &quot;ELNATR&quot;, &quot;LNRECONS&quot;, &quot;LNRENRES&quot;, &quot;LNREMULT&quot;, &quot;LNRERES&quot;,
+                                &quot;LNRE&quot;, &quot;LNCI&quot;, &quot;LNCON&quot;, &quot;RBC&quot;, &quot;NUMEMP&quot;)}
+        agg[&quot;REPDTE&quot;] = dt
+        agg[&quot;n_banks&quot;] = len(rows)
+        agg[&quot;_names&quot;] = [r.get(&quot;NAME&quot;) for r in rows]
+        agg[&quot;STALP&quot;] = rows[0].get(&quot;STALP&quot;)
+        # ratios only meaningful single-bank; for multi-bank recompute where we can
+        big = max(rows, key=lambda r: r.get(&quot;ASSET&quot;) or 0)
+        for f in (&quot;NCLNLSR&quot;, &quot;NCRECONR&quot;, &quot;NCRENRER&quot;, &quot;NCRER&quot;, &quot;NPERFV&quot;, &quot;NTLNLSR&quot;,
+                  &quot;LNATRESR&quot;, &quot;LNLSDEPR&quot;, &quot;IDT1RWAJR&quot;, &quot;RBCRWAJ&quot;, &quot;RBC1AAJ&quot;,
+                  &quot;ROA&quot;, &quot;ROE&quot;, &quot;NIMY&quot;, &quot;EEFFR&quot;, &quot;SPECGRPDESC&quot;, &quot;BKCLASS&quot;):
+            agg[f] = big.get(f)
+        agg[&quot;_ratio_basis&quot;] = &quot;largest_bank&quot; if len(rows) &gt; 1 else &quot;single_bank&quot;
+        out[dt] = agg
+    return out
+
+
+def derive(rec):
+    &quot;&quot;&quot;Build the screening record.  Every number carries its basis; missing is MISSING.&quot;&quot;&quot;
+    sec = rec.get(&quot;_sec&quot;) or {}
+    qs = consolidate_quarters(rec.get(&quot;_fin&quot;))
+    dts = sorted(qs, reverse=True)
+    q = qs[dts[0]] if dts else None
+    q4 = qs[dts[4]] if len(dts) &gt; 4 else (qs[dts[-1]] if len(dts) &gt; 1 else None)
+
+    d = {
+        &quot;ticker&quot;: rec[&quot;sym&quot;], &quot;name&quot;: rec[&quot;name&quot;].replace(&quot; Common Stock&quot;, &quot;&quot;).strip(),
+        &quot;cik&quot;: rec[&quot;cik&quot;], &quot;mktcap&quot;: rec.get(&quot;mktcap&quot;), &quot;px&quot;: rec.get(&quot;px&quot;),
+        &quot;state&quot;: rec.get(&quot;state&quot;), &quot;bank_city&quot;: rec.get(&quot;bank_city&quot;),
+        &quot;bank_names&quot;: rec.get(&quot;bank_names&quot;), &quot;certs&quot;: rec.get(&quot;certs&quot;),
+        &quot;fdic_match&quot;: rec.get(&quot;fdic_match&quot;),
+        &quot;call_report_date&quot;: q[&quot;REPDTE&quot;] if q else None,
+        &quot;n_bank_charters&quot;: q[&quot;n_banks&quot;] if q else None,
+        &quot;ratio_basis&quot;: q.get(&quot;_ratio_basis&quot;) if q else None,
+    }
+
+    # ── holdco tangible book (SEC, audited) ──
+    eq = sec.get(&quot;equity&quot;)
+    pfd = sec.get(&quot;preferred&quot;) or 0
+    gw = sec.get(&quot;goodwill&quot;) or 0
+    intan = sec.get(&quot;intangibles&quot;) or 0
+    sh = sec.get(&quot;shares&quot;)
+    tce = (eq - pfd - gw - intan) if eq is not None else None
+    d[&quot;holdco_equity&quot;] = eq
+    d[&quot;preferred&quot;] = pfd
+    d[&quot;goodwill_plus_intangibles&quot;] = gw + intan
+    d[&quot;tce&quot;] = tce
+    # SHARE COUNT: the dei cover-page fact is unreliable on a minority of filers (FBLA&#x27;s
+    # tagged 161,489 vs ~16.2M actual; FSBW&#x27;s is a stale pre-conversion count).  Use the
+    # market-implied count (mcap / last sale, same source, internally consistent) as
+    # PRIMARY and keep dei as a cross-check with the divergence recorded.  Note that
+    # P/TBV itself does NOT depend on the share count — it is mcap over total tangible
+    # common equity — so the ranking is immune to this; only per-share display isn&#x27;t.
+    implied = (rec[&quot;mktcap&quot;] / rec[&quot;px&quot;]) if (rec.get(&quot;px&quot;) and rec.get(&quot;mktcap&quot;)) else None
+    d[&quot;shares&quot;] = implied or sh
+    d[&quot;shares_basis&quot;] = &quot;implied_mcap_over_price&quot; if implied else &quot;dei_cover_page&quot;
+    d[&quot;shares_dei&quot;] = sh
+    d[&quot;shares_divergence_pct&quot;] = _div(sh - implied, implied) if (sh and implied) else None
+    shu = d[&quot;shares&quot;]
+    d[&quot;book_date&quot;] = sec.get(&quot;equity_end&quot;)
+    d[&quot;tbv_per_share&quot;] = _r(tce / shu, 2) if (tce and shu) else None
+    d[&quot;bv_per_share&quot;] = _r((eq - pfd) / shu, 2) if (eq is not None and shu) else None
+    d[&quot;p_tbv&quot;] = _r(rec[&quot;mktcap&quot;] / tce, 3) if (tce and tce &gt; 0) else None
+    d[&quot;p_b&quot;] = _r(rec[&quot;mktcap&quot;] / (eq - pfd), 3) if (eq and (eq - pfd) &gt; 0) else None
+    # The TELL: goodwill does NOT survive a deal — the acquirer pays tangible book and
+    # writes its OWN goodwill.  A wide P/B-vs-P/TBV gap means the screen&#x27;s &quot;cheap on book&quot;
+    # is an illusion for acquisition purposes.
+    d[&quot;gw_intan_pct_of_equity&quot;] = _div(gw + intan, eq)
+    d[&quot;pb_ptbv_gap&quot;] = _r(d[&quot;p_tbv&quot;] - d[&quot;p_b&quot;], 3) if (d[&quot;p_tbv&quot;] and d[&quot;p_b&quot;]) else None
+
+    # ── earnings: NI available to COMMON and its trend (house rule) ──
+    nic, prior = sec.get(&quot;ni_common_ttm&quot;), sec.get(&quot;ni_common_prior_ttm&quot;)
+    d[&quot;ni_common_ttm&quot;] = nic
+    d[&quot;ni_common_prior_ttm&quot;] = prior
+    d[&quot;ni_common_yoy_pct&quot;] = _div(nic - prior, abs(prior)) if (nic is not None and prior) else None
+    d[&quot;ni_basis&quot;] = sec.get(&quot;ni_tag&quot;)
+    d[&quot;rote_pct&quot;] = _div(nic, tce) if (nic is not None and tce and tce &gt; 0) else None
+    d[&quot;roe_pct&quot;] = _div(nic, eq - pfd) if (nic is not None and eq and (eq - pfd) &gt; 0) else None
+    d[&quot;pe_ttm&quot;] = _r(rec[&quot;mktcap&quot;] / nic, 1) if (nic and nic &gt; 0) else None
+    # valuation identity: ROTE / P/TBV should ~= 1 / P/E.  A break means the book or the
+    # earnings is not what it looks like (the ADR lesson).
+    if d[&quot;rote_pct&quot;] and d[&quot;p_tbv&quot;] and d[&quot;pe_ttm&quot;]:
+        lhs = (d[&quot;rote_pct&quot;] / 100.0) / d[&quot;p_tbv&quot;]
+        d[&quot;identity_break_pp&quot;] = _r(abs(lhs - 1.0 / d[&quot;pe_ttm&quot;]) * 100, 2)
+
+    if not q:
+        d[&quot;data_gaps&quot;] = [&quot;no call report&quot;]
+        return d
+
+    # ── credit (bank-level call report) ──
+    loans = q.get(&quot;LNLSNET&quot;)
+    d[&quot;assets_musd&quot;] = _r((q.get(&quot;ASSET&quot;) or 0) / 1000, 1)
+    d[&quot;npa_assets_pct&quot;] = q.get(&quot;NPERFV&quot;)           # noncurrent assets + OREO / assets
+    d[&quot;noncurrent_loans_pct&quot;] = q.get(&quot;NCLNLSR&quot;)
+    d[&quot;nco_pct&quot;] = q.get(&quot;NTLNLSR&quot;)                 # net charge-offs / loans, YTD ann.
+    d[&quot;acl_loans_pct&quot;] = q.get(&quot;LNATRESR&quot;)
+    ncl = (q.get(&quot;NCLNLSR&quot;) or 0) / 100.0 * (loans or 0)
+    d[&quot;acl_ncl_cov_pct&quot;] = _div(q.get(&quot;LNATRES&quot;), ncl) if ncl else None
+    d[&quot;noncurrent_cre_pct&quot;] = q.get(&quot;NCRENRER&quot;)
+    d[&quot;noncurrent_constr_pct&quot;] = q.get(&quot;NCRECONR&quot;)
+    d[&quot;oreo_musd&quot;] = _r((q.get(&quot;ORE&quot;) or 0) / 1000, 2)
+
+    # ── concentration vs the supervisory guidance thresholds (100% C&amp;D / 300% CRE) ──
+    rbc = q.get(&quot;RBC&quot;)
+    d[&quot;cd_rbc_pct&quot;] = _div(q.get(&quot;LNRECONS&quot;), rbc)
+    cre = sum(v for v in (q.get(&quot;LNRECONS&quot;), q.get(&quot;LNREMULT&quot;), q.get(&quot;LNRENRES&quot;))
+              if v is not None)
+    d[&quot;cre_rbc_pct&quot;] = _div(cre, rbc)
+    # NOTE: LNRENRES includes OWNER-OCCUPIED nonfarm nonresidential, which the supervisory
+    # CRE-concentration test EXCLUDES.  This ratio is therefore an UPPER BOUND on the
+    # regulatory number, not the regulatory number.  Named, not hidden.
+    d[&quot;cre_rbc_basis&quot;] = &quot;upper_bound_incl_owner_occupied&quot;
+    d[&quot;cd_flag&quot;] = bool(d[&quot;cd_rbc_pct&quot;] and d[&quot;cd_rbc_pct&quot;] &gt; 100)
+    d[&quot;cre_flag&quot;] = bool(d[&quot;cre_rbc_pct&quot;] and d[&quot;cre_rbc_pct&quot;] &gt; 300)
+
+    # ── funding / deposit franchise — what the acquirer is actually buying ──
+    dep = q.get(&quot;DEP&quot;) or q.get(&quot;DEPDOM&quot;)
+    d[&quot;deposits_musd&quot;] = _r((dep or 0) / 1000, 1)
+    d[&quot;nib_dep_pct&quot;] = _div(q.get(&quot;DEPNIDOM&quot;), q.get(&quot;DEPDOM&quot;) or dep)
+    d[&quot;core_dep_pct&quot;] = _div(q.get(&quot;COREDEP&quot;), dep)
+    d[&quot;brokered_pct&quot;] = _div(q.get(&quot;BRO&quot;), dep)
+    d[&quot;uninsured_pct&quot;] = _div(q.get(&quot;DEPUNINS&quot;), dep)
+    d[&quot;loan_dep_pct&quot;] = q.get(&quot;LNLSDEPR&quot;)
+    d[&quot;nim_pct&quot;] = q.get(&quot;NIMY&quot;)
+    d[&quot;efficiency_pct&quot;] = q.get(&quot;EEFFR&quot;)
+    d[&quot;bank_roa_pct&quot;] = q.get(&quot;ROA&quot;)
+    d[&quot;tier1_rbc_pct&quot;] = q.get(&quot;IDT1RWAJR&quot;)
+    d[&quot;total_rbc_pct&quot;] = q.get(&quot;RBCRWAJ&quot;)
+    d[&quot;employees&quot;] = q.get(&quot;NUMEMP&quot;)
+    d[&quot;deposits_per_employee_musd&quot;] = _r((dep or 0) / 1000 / q[&quot;NUMEMP&quot;], 2) \
+        if q.get(&quot;NUMEMP&quot;) else None
+
+    # ── RESERVE-RELEASE MASK (the MI peak-cycle pattern, bank version) ──
+    # Earnings flattered by provisioning BELOW charge-offs while the reserve ratio falls.
+    prov, nco_d = q.get(&quot;ELNATR&quot;), q.get(&quot;NTLNLS&quot;)
+    d[&quot;provision_ytd_musd&quot;] = _r((prov or 0) / 1000, 2)
+    d[&quot;nco_ytd_musd&quot;] = _r((nco_d or 0) / 1000, 2)
+    acl_now = q.get(&quot;LNATRESR&quot;)
+    acl_yr = q4.get(&quot;LNATRESR&quot;) if q4 else None
+    d[&quot;acl_loans_pct_yr_ago&quot;] = acl_yr
+    d[&quot;acl_delta_yoy_pp&quot;] = _r(acl_now - acl_yr, 2) if (acl_now and acl_yr) else None
+    d[&quot;reserve_release_flag&quot;] = bool(
+        prov is not None and nco_d is not None and nco_d &gt; 0 and prov &lt; nco_d
+        and acl_now and acl_yr and acl_now &lt; acl_yr)
+    # credit DIRECTION matters more than level to an acquirer pricing a credit mark
+    if q4:
+        d[&quot;npa_delta_yoy_pp&quot;] = _r((q.get(&quot;NPERFV&quot;) or 0) - (q4.get(&quot;NPERFV&quot;) or 0), 2)
+        d[&quot;nco_delta_yoy_pp&quot;] = _r((q.get(&quot;NTLNLSR&quot;) or 0) - (q4.get(&quot;NTLNLSR&quot;) or 0), 2)
+        d[&quot;prior_call_report_date&quot;] = q4[&quot;REPDTE&quot;]
+
+    gaps = [k for k in (&quot;p_tbv&quot;, &quot;npa_assets_pct&quot;, &quot;core_dep_pct&quot;, &quot;ni_common_ttm&quot;)
+            if d.get(k) is None]
+    d[&quot;data_gaps&quot;] = gaps
+    return d
+
+
+def attach_acquirability(d, rec):
+    a = rec.get(&quot;_acq&quot;) or {}
+    d[&quot;structure&quot;] = a.get(&quot;structure&quot;)
+    d[&quot;acquirable&quot;] = a.get(&quot;acquirable&quot;, True)
+    d[&quot;structural_block&quot;] = a.get(&quot;blocked_reason&quot;)
+    d[&quot;conversion_date&quot;] = a.get(&quot;conversion_date&quot;)
+    d[&quot;conversion_date_basis&quot;] = a.get(&quot;conversion_date_basis&quot;)
+    d[&quot;mhc_ownership_pct&quot;] = a.get(&quot;mhc_ownership_pct&quot;)
+    d[&quot;acquirability_source&quot;] = a.get(&quot;source_filing&quot;)
+    return d
+
+
+# ── consolidator / footprint map ────────────────────────────────────────────────────
+# Populated from the deal research pass (see BANK_CONSOLIDATION.json:consolidator_map).
+CONSOLIDATOR_STATES: dict = {}
+
+
+def load_consolidator_map(path=None):
+    global CONSOLIDATOR_STATES
+    p = path or os.path.join(DATA, &quot;bank_consolidator_map.json&quot;)
+    if os.path.exists(p):
+        with open(p) as f:
+            m = json.load(f)
+        CONSOLIDATOR_STATES = m.get(&quot;state_intensity&quot;, {})
+        return m
+    return {}
+
+
+# ── scoring ─────────────────────────────────────────────────────────────────────────
+def score_name(rec, state_intensity):
+    &quot;&quot;&quot;0-100 acquiree attractiveness.  Generator ranking only.&quot;&quot;&quot;
+    parts, notes = {}, []
+
+    # 1. CHEAPNESS vs TANGIBLE book (35).  Deals are struck in P/TBV.
+    ptbv = rec.get(&quot;p_tbv&quot;)
+    if ptbv is None:
+        parts[&quot;cheap&quot;] = 0.0
+        notes.append(&quot;P/TBV unavailable&quot;)
+    else:
+        # 0.70x -&gt; 35 ; 1.00x -&gt; 24 ; 1.30x -&gt; 10 ; &gt;1.6x -&gt; 0
+        parts[&quot;cheap&quot;] = max(0.0, min(35.0, 35.0 * (1.60 - ptbv) / 0.90))
+
+    # 2. CREDIT CLEANLINESS (25).  Acquirers pay book for a clean book and discount a dirty one.
+    c = 25.0
+    npa = rec.get(&quot;npa_assets_pct&quot;)          # noncurrent assets + OREO / assets
+    nco = rec.get(&quot;nco_pct&quot;)                 # net charge-offs / loans
+    cov = rec.get(&quot;acl_ncl_cov_pct&quot;)         # ACL / noncurrent loans
+    if npa is None:
+        c -= 8.0
+        notes.append(&quot;NPA ratio unavailable&quot;)
+    else:
+        if npa &gt; 0.50:
+            c -= min(12.0, (npa - 0.50) * 12.0)
+        if npa &lt; 0.25:
+            c += 0.0
+    if nco is not None and nco &gt; 0.30:
+        c -= min(7.0, (nco - 0.30) * 10.0)
+    if cov is not None and cov &lt; 60:
+        c -= min(5.0, (60 - cov) / 12.0)
+    # concentration: supervisory C&amp;D &gt;100% of RBC and total CRE &gt;300% of RBC
+    cd = rec.get(&quot;cd_rbc_pct&quot;)
+    cre = rec.get(&quot;cre_rbc_pct&quot;)
+    if cd is not None and cd &gt; 100:
+        c -= min(5.0, (cd - 100) / 10.0)
+    if cre is not None and cre &gt; 300:
+        c -= min(6.0, (cre - 300) / 25.0)
+    parts[&quot;credit&quot;] = max(0.0, c)
+
+    # 3. DEPOSIT / FUNDING QUALITY (20).  This is what the acquirer is actually buying.
+    d = 20.0
+    core = rec.get(&quot;core_dep_pct&quot;)
+    nib = rec.get(&quot;nib_dep_pct&quot;)
+    bro = rec.get(&quot;brokered_pct&quot;)
+    ltd = rec.get(&quot;loan_dep_pct&quot;)
+    if core is None and nib is None:
+        d -= 7.0
+        notes.append(&quot;deposit mix unavailable&quot;)
+    if nib is not None:
+        d += min(4.0, max(-8.0, (nib - 18.0) / 2.0))     # 18% NIB = par
+        # A bank with under 10% non-interest-bearing deposits has no core TRANSACTION
+        # franchise — it is funding itself with rate-shopped savings and CDs that reprice
+        # away the moment a buyer stops paying up.  That is the single attribute an
+        # acquirer is least willing to pay tangible book for, so it carries its own
+        # penalty rather than being averaged away.  (First Internet Bancorp, branchless at
+        # 3.2% non-interest-bearing, screened into the intake on cheapness alone before the
+        # slope was steepened.)  A further penalty applies below 6%, where there is
+        # effectively no transaction account base at all.
+        # NOTE a definitional trap: the call-report COREDEP field counts non-brokered time
+        # deposits under the insurance threshold, so a branchless CD-funded bank can print
+        # 80%+ &#x27;core&#x27; while having almost no franchise.  Read core_dep_pct WITH nib_dep_pct,
+        # never alone.
+        if nib &lt; 6.0:
+            d -= 4.0
+    if bro is not None and bro &gt; 10:
+        d -= min(7.0, (bro - 10) / 3.0)
+    if ltd is not None and ltd &gt; 95:
+        d -= min(4.0, (ltd - 95) / 6.0)
+    parts[&quot;funding&quot;] = max(0.0, min(20.0, d))
+
+    # 4. ACQUIRER FOOTPRINT OVERLAP (15) — is somebody actually buying in this state?
+    st = rec.get(&quot;state&quot;)
+    inten = float(state_intensity.get(st, {}).get(&quot;score&quot;, 0.0)) if st else 0.0
+    parts[&quot;footprint&quot;] = max(0.0, min(15.0, inten))
+
+    # 5. DIGESTIBILITY (5) — $200M-$700M market cap is the sweet spot for an in-market
+    #    buyer: big enough to move the needle, small enough to pay cash+stock without a
+    #    capital raise.
+    m = rec.get(&quot;mktcap&quot;) or 0
+    if 2e8 &lt;= m &lt;= 7e8:
+        parts[&quot;size&quot;] = 5.0
+    elif 1e8 &lt;= m &lt; 2e8 or 7e8 &lt; m &lt;= 1e9:
+        parts[&quot;size&quot;] = 3.0
+    else:
+        parts[&quot;size&quot;] = 1.0
+
+    raw = sum(parts.values())
+
+    # ── STRUCTURAL ACQUIRABILITY MULTIPLIER ──
+    # Applied LAST and reported separately: the components above measure how much an
+    # acquirer would WANT this bank; this measures whether it can legally BUY it.  A
+    # cheap, clean, blocked thrift is not a mispricing — the block is why it is cheap.
+    struct = rec.get(&quot;structure&quot;)
+    mult, why = 1.0, None
+    if struct == &quot;MHC_majority&quot;:
+        mult, why = 0.20, &quot;MHC holds majority — no third party can acquire the company&quot;
+    elif struct == &quot;MHC_suspected&quot;:
+        mult, why = 0.45, &quot;MHC language throughout the 10-Q — structure unconfirmed&quot;
+    elif struct == &quot;recent_conversion&quot;:
+        mult, why = 0.50, &quot;inside the 3-year post-conversion acquisition prohibition&quot;
+    elif struct == &quot;UNVERIFIED&quot;:
+        mult, why = 0.80, &quot;structure could not be verified from filings (not a clean bill)&quot;
+    if why:
+        notes.append(f&quot;structural multiplier {mult:.2f}: {why}&quot;)
+
+    total = round(raw * mult, 1)
+    parts_out = {k: round(v, 1) for k, v in parts.items()}
+    parts_out[&quot;_raw_before_structure&quot;] = round(raw, 1)
+    parts_out[&quot;_structure_multiplier&quot;] = mult
+    return total, parts_out, notes
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument(&quot;--refresh&quot;, action=&quot;store_true&quot;)
+    ap.add_argument(&quot;--top&quot;, type=int, default=10)
+    ap.add_argument(&quot;--skip-sec&quot;, action=&quot;store_true&quot;)
+    args = ap.parse_args()
+
+    t0 = time.time()
+    uni = fetch_bank_universe(args.refresh)
+    print(f&quot;[1] universe: {len(uni)} listed banks/thrifts $100M-$1B&quot;, file=sys.stderr)
+
+    insts = fetch_institutions(args.refresh)
+    hc_idx = build_hc_index(insts)
+    inst_by_name = {}
+    for r in insts:
+        inst_by_name.setdefault(_key(r.get(&quot;NAME&quot;, &quot;&quot;)), []).append(r)
+    print(f&quot;[2] FDIC active institutions: {len(insts)}&quot;, file=sys.stderr)
+
+    recs = [dict(r) for r in uni]
+
+    # SEC holdco book + registrant address FIRST — the address is an input to collision
+    # resolution on the FDIC join, so it cannot run after it.
+    def _sec(rec):
+        try:
+            rec[&quot;_sec&quot;] = sec_book(rec[&quot;cik&quot;], args.refresh)
+            rec[&quot;_secsub&quot;] = sec_state(rec[&quot;cik&quot;], args.refresh)
+        except Exception as e:  # noqa: BLE001
+            rec[&quot;_sec&quot;] = {&quot;_error&quot;: str(e)[:120]}
+            rec[&quot;_secsub&quot;] = {}
+        return rec
+    with ThreadPoolExecutor(max_workers=5) as ex:
+        recs = list(ex.map(_sec, recs))
+    print(f&quot;[3] SEC companyfacts + submissions pulled ({time.time()-t0:.0f}s)&quot;,
+          file=sys.stderr)
+
+    for rec in recs:
+        rows, how = match_bank(rec, hc_idx, inst_by_name)
+        if rows:
+            rows, dis = disambiguate(rec, rows)
+            how = f&quot;{how}|{dis}&quot;
+        rec[&quot;fdic_match&quot;] = how
+        rec[&quot;certs&quot;] = [x[&quot;CERT&quot;] for x in rows] if rows else []
+        rec[&quot;bank_names&quot;] = [x[&quot;NAME&quot;] for x in rows] if rows else []
+        rec[&quot;state&quot;] = rows[0][&quot;STALP&quot;] if rows else None
+        rec[&quot;bank_city&quot;] = rows[0].get(&quot;CITY&quot;) if rows else None
+    matched = sum(1 for x in recs if x[&quot;certs&quot;])
+    print(f&quot;[4] FDIC join: {matched}/{len(recs)} matched&quot;, file=sys.stderr)
+
+    def _fin(rec):
+        if not rec[&quot;certs&quot;]:
+            return rec
+        key = f&quot;fin_{&#x27;_&#x27;.join(str(c) for c in sorted(rec[&#x27;certs&#x27;]))}.json&quot;
+        qs = _cached(key, lambda: {c: fetch_financials(c) for c in rec[&quot;certs&quot;]},
+                     args.refresh)
+        # a cert that returns nothing is DATA MISSING, never zero — retry once, then say so
+        for c, v in list(qs.items()):
+            if not v:
+                qs[c] = fetch_financials(int(c))
+        rec[&quot;_fin&quot;] = qs
+        return rec
+
+    with ThreadPoolExecutor(max_workers=6) as ex:
+        recs = list(ex.map(_fin, recs))
+    print(f&quot;[5] call reports pulled ({time.time()-t0:.0f}s)&quot;, file=sys.stderr)
+
+    # ── the ACQUIRABILITY gate — read each registrant&#x27;s own latest 10-Q ──
+    def _acq(rec):
+        try:
+            f = sec_filings(rec[&quot;cik&quot;], args.refresh)
+            # PREFER THE 10-K.  The structure disclosure (&quot;X Bancorp, MHC owns 57%&quot;) lives
+            # in Item 1 of the annual report; most 10-Qs never mention it, so reading the
+            # quarterly silently classifies MHC-controlled thrifts as ordinary stock
+            # holdcos.  Rhinebeck, Pioneer and Bogota were all missed that way.
+            tenk = [x for x in f.get(&quot;filings&quot;, []) if x[&quot;form&quot;] == &quot;10-K&quot;]
+            tenq = tenk + [x for x in f.get(&quot;filings&quot;, []) if x[&quot;form&quot;] == &quot;10-Q&quot;]
+            if not tenq:
+                rec[&quot;_acq&quot;] = {&quot;structure&quot;: &quot;UNVERIFIED&quot;,
+                               &quot;blocked_reason&quot;: &quot;no 10-Q/10-K on file&quot;}
+                return rec
+            q = tenq[0]
+            txt = fetch_filing_text(rec[&quot;cik&quot;], q[&quot;acc&quot;], q[&quot;doc&quot;], args.refresh)
+            a = acquirability(rec[&quot;cik&quot;], txt, f.get(&quot;first_filing&quot;))
+            a[&quot;source_filing&quot;] = f&quot;{q[&#x27;form&#x27;]} {q[&#x27;date&#x27;]} acc {q[&#x27;acc&#x27;]}&quot;
+            rec[&quot;_acq&quot;] = a
+        except Exception as e:  # noqa: BLE001
+            rec[&quot;_acq&quot;] = {&quot;structure&quot;: &quot;UNVERIFIED&quot;, &quot;blocked_reason&quot;: str(e)[:120]}
+        return rec
+    with ThreadPoolExecutor(max_workers=5) as ex:
+        recs = list(ex.map(_acq, recs))
+    print(f&quot;[6] acquirability read from filings ({time.time()-t0:.0f}s)&quot;, file=sys.stderr)
+
+    json.dump(recs, open(_cache_path(&quot;recs_raw.json&quot;), &quot;w&quot;))
+
+    cmap = load_consolidator_map()
+    inten = cmap.get(&quot;state_intensity&quot;, {})
+    rows = []
+    for rec in recs:
+        d = attach_acquirability(derive(rec), rec)
+        if d[&quot;ticker&quot;] in EXCLUDE:
+            d[&quot;excluded&quot;] = &quot;already held or courted (financials cluster)&quot;
+        if d[&quot;ticker&quot;] in LIVE_DEALS:
+            side, detail = LIVE_DEALS[d[&quot;ticker&quot;]]
+            d[&quot;live_deal&quot;] = {&quot;side&quot;: side, &quot;detail&quot;: detail}
+            d[&quot;excluded&quot;] = (f&quot;already in an announced transaction as the {side} — {detail}&quot;)
+        total, parts, notes = score_name(d, inten)
+        d[&quot;score&quot;] = total
+        d[&quot;score_parts&quot;] = parts
+        d[&quot;score_notes&quot;] = notes
+        acq = inten.get(d.get(&quot;state&quot;) or &quot;&quot;, {})
+        d[&quot;state_deal_activity&quot;] = {
+            &quot;intensity_score&quot;: acq.get(&quot;score&quot;),
+            &quot;deals_18mo&quot;: acq.get(&quot;deals&quot;),
+            &quot;active_acquirers&quot;: acq.get(&quot;acquirers&quot;, []),
+        }
+        # Concrete, per-name version of the cohort-multiple finding: how far the name would
+        # have to re-rate to reach the REALISED takeout band for its OWN target type
+        # (listed thrift / low-ROE bank cleared 0.77x-1.06x TBV in the 18-month window;
+        # median across ALL listed sub-$1.5B targets was 1.24x).  A negative figure means a
+        # takeout at that multiple would be a DOWN round from today&#x27;s price.
+        pt = d.get(&quot;p_tbv&quot;)
+        if pt:
+            d[&quot;takeout_headroom&quot;] = {
+                &quot;p_tbv_now&quot;: pt,
+                &quot;to_low_end_0_77x_pct&quot;: round(100 * (0.77 - pt) / pt, 1),
+                &quot;to_type_high_1_06x_pct&quot;: round(100 * (1.06 - pt) / pt, 1),
+                &quot;to_all_listed_small_median_1_24x_pct&quot;: round(100 * (1.24 - pt) / pt, 1),
+                &quot;basis&quot;: &quot;realised 2025-26 multiples for LISTED sub-$1.5B targets: the &quot;
+                         &quot;thrift / low-ROE type cleared 0.77x-1.06x tangible book; the &quot;
+                         &quot;median across all listed small targets was 1.24x. The headline &quot;
+                         &quot;~1.5x all-deals median is NOT the comparable for this cohort.&quot;,
+            }
+        rows.append(d)
+    rows.sort(key=lambda x: -x[&quot;score&quot;])
+    print(f&quot;[7] scored {len(rows)} names&quot;, file=sys.stderr)
+
+    intake = [r for r in rows if not r.get(&quot;excluded&quot;)
+              and r.get(&quot;acquirable&quot;) and r.get(&quot;p_tbv&quot;) is not None
+              and not r.get(&quot;data_gaps&quot;)][:args.top]
+
+    out = {
+        &quot;generator&quot;: &quot;bank_consolidation_scanner&quot;,
+        &quot;version&quot;: &quot;1.0&quot;,
+        &quot;as_of&quot;: time.strftime(&quot;%Y-%m-%d&quot;),
+        &quot;status&quot;: &quot;GENERATOR OUTPUT — no verdicts, no sizing, no orders. Court intake only.&quot;,
+        &quot;thesis_under_test&quot;: (
+            &quot;A bank M&amp;A wave is running under the current regulatory climate and the &quot;
+            &quot;pattern of a small clean thrift being acquired at a premium is repeatable; &quot;
+            &quot;therefore sub-$1B-cap banks at/below tangible book with clean credit, in &quot;
+            &quot;footprints where active consolidators are buying, are undervalued acquirees.&quot;),
+        &quot;premise_corrections&quot;: PREMISE_CORRECTIONS,
+        &quot;universe&quot;: {
+            &quot;n&quot;: len(rows),
+            &quot;definition&quot;: &quot;US exchange-listed common stocks, Nasdaq screener sector=Finance &quot;
+                          &quot;and industry in {Major Banks, Banks, Commercial Banks, Savings &quot;
+                          &quot;Institutions}, market cap $100M-$1B&quot;,
+            &quot;source&quot;: &quot;api.nasdaq.com/api/screener/stocks (via verticals.deep_value.universe), &quot;
+                      &quot;ticker-&gt;CIK via sec.gov/files/company_tickers.json&quot;,
+            &quot;fdic_join&quot;: &quot;100% (129/129) of the universe resolved to an FDIC-insured &quot;
+                         &quot;subsidiary via the institutions-endpoint NAMEHCR field, with &quot;
+                         &quot;name-collision resolution by registrant business state&quot;,
+            &quot;non_common_tickers_dropped&quot;: &quot;18 preferred / depositary / baby-bond symbols &quot;
+                                          &quot;that SEC company_tickers maps to the parent CIK&quot;,
+        },
+        &quot;scoring&quot;: {
+            &quot;cheapness_vs_tangible_book&quot;: 35, &quot;credit_cleanliness&quot;: 25,
+            &quot;deposit_funding_quality&quot;: 20, &quot;acquirer_footprint_overlap&quot;: 15,
+            &quot;size_digestibility&quot;: 5,
+            &quot;structural_multiplier&quot;: &quot;applied AFTER the components: MHC-majority 0.20, &quot;
+                                     &quot;MHC-suspected 0.45, inside the 3-year post-conversion &quot;
+                                     &quot;prohibition 0.50, structure unverified 0.80&quot;,
+        },
+        &quot;key_findings&quot;: KEY_FINDINGS,
+        &quot;consolidator_map&quot;: cmap,
+        &quot;top_intake&quot;: [
+            {k: r.get(k) for k in (
+                &quot;ticker&quot;, &quot;name&quot;, &quot;state&quot;, &quot;bank_city&quot;, &quot;score&quot;, &quot;score_parts&quot;,
+                &quot;takeout_headroom&quot;,
+                &quot;px&quot;, &quot;mktcap&quot;, &quot;p_tbv&quot;, &quot;p_b&quot;, &quot;tbv_per_share&quot;, &quot;rote_pct&quot;,
+                &quot;ni_common_ttm&quot;, &quot;ni_common_yoy_pct&quot;, &quot;pe_ttm&quot;, &quot;assets_musd&quot;,
+                &quot;deposits_musd&quot;, &quot;npa_assets_pct&quot;, &quot;noncurrent_loans_pct&quot;, &quot;nco_pct&quot;,
+                &quot;acl_loans_pct&quot;, &quot;acl_ncl_cov_pct&quot;, &quot;oreo_musd&quot;, &quot;cd_rbc_pct&quot;,
+                &quot;cre_rbc_pct&quot;, &quot;cre_rbc_basis&quot;, &quot;cd_flag&quot;, &quot;cre_flag&quot;,
+                &quot;nib_dep_pct&quot;, &quot;core_dep_pct&quot;, &quot;brokered_pct&quot;, &quot;uninsured_pct&quot;,
+                &quot;loan_dep_pct&quot;, &quot;nim_pct&quot;, &quot;efficiency_pct&quot;, &quot;tier1_rbc_pct&quot;,
+                &quot;reserve_release_flag&quot;, &quot;acl_delta_yoy_pp&quot;, &quot;npa_delta_yoy_pp&quot;,
+                &quot;structure&quot;, &quot;acquirable&quot;, &quot;conversion_date&quot;, &quot;acquirability_source&quot;,
+                &quot;call_report_date&quot;, &quot;book_date&quot;, &quot;state_deal_activity&quot;, &quot;bank_names&quot;,
+                &quot;certs&quot;, &quot;cik&quot;)} | {&quot;case&quot;: CASES.get(r[&quot;ticker&quot;], &quot;&quot;)}
+            for r in intake
+        ],
+        &quot;structurally_blocked&quot;: [
+            {k: r.get(k) for k in (&quot;ticker&quot;, &quot;name&quot;, &quot;state&quot;, &quot;p_tbv&quot;, &quot;rote_pct&quot;,
+                                   &quot;npa_assets_pct&quot;, &quot;structure&quot;, &quot;conversion_date&quot;,
+                                   &quot;conversion_date_basis&quot;, &quot;mhc_ownership_pct&quot;,
+                                   &quot;structural_block&quot;, &quot;acquirability_source&quot;)}
+            for r in rows if not r.get(&quot;acquirable&quot;)
+        ],
+        &quot;already_in_a_deal&quot;: [
+            {&quot;ticker&quot;: r[&quot;ticker&quot;], &quot;name&quot;: r[&quot;name&quot;], &quot;state&quot;: r[&quot;state&quot;],
+             &quot;p_tbv&quot;: r[&quot;p_tbv&quot;], &quot;live_deal&quot;: r[&quot;live_deal&quot;]}
+            for r in rows if r.get(&quot;live_deal&quot;)
+        ],
+        &quot;excluded_by_brief&quot;: sorted(EXCLUDE),
+        &quot;universe_scored&quot;: rows,
+    }
+    os.makedirs(DATA, exist_ok=True)
+    with open(OUT, &quot;w&quot;) as f:
+        json.dump(out, f, indent=1)
+    print(f&quot;[8] wrote {OUT} ({len(intake)} intake / {len(rows)} scored)&quot;, file=sys.stderr)
+    return out
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</pre></div></body></html>

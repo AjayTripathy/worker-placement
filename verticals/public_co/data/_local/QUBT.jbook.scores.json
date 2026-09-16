@@ -1,0 +1,122 @@
+{
+  "ticker": "QUBT",
+  "cutoff": "2026-05-20",
+  "filing": "0001213900-26-022417_10-K.txt",
+  "cohort": "jbook_exposure_divergence",
+  "_overall_note": "The QUBT 10-K is conspicuously LIGHT on specific Pentagon Program Elements / named DoD programs of record - the company never names a PE number, never names a flagship DoD program, never claims X% of revenue from program Y. The defense narrative rides entirely on the LSI acquisition's marketing language ('aerospace and defense applications') and forward-looking LIDAR pipeline language ('from aircraft, drones, and even satellites'). The J-Book divergence pattern here is INVERSE: rather than naming a PE that the J-Book has zeroed, QUBT names NO PE at all while raising $1.475B in 2025 equity and spending $110M to buy a bankrupt LiDAR-supplier-derived chip business out of Chapter 11. Cross-check: USAspending shows QCi total federal contracts = $95,663 across only TWO awards (Dept of Commerce TFLN grant $69.5K, NASA $26.2K consulting). ZERO DoD awards. LSI has ZERO USAspending UEI resolved. QPhoton has ZERO. Plus a Securities Class Action alleging misleading statements re: customers, contracts and business operations (Mar 2020 - Jan 2025 class period) and 4 derivative suits stayed pending its resolution. Insider sale on 2026-01-07 (13 days before FY26 bipartisan budget signed Jan 20 2026, which the J-Book corpus notes zeroed the IONQ AFRL contract for the second consecutive year - same political event would inform any defense-tech insider).",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "LSI (acquired Feb 2026 for $110M) serves aerospace and defense customers; acquisition framed 'in particular for Aerospace and Defense applications'",
+      "severity": "RED_FLAG_NEGATIVE",
+      "supports": [
+        "pentagon_jbook.query_program_funding(contractor_name='Luminar Semiconductor') -> NOT_FOUND",
+        "pentagon_jbook.query_program_funding(contractor_name='LSI') -> NOT_FOUND",
+        "usaspending.query_dod_contracts(recipient_name='Luminar Semiconductor, Inc.') -> n_awards=0, total_amount=$0 (2020-01-01 to 2026-12-31)",
+        "usaspending.query_dod_contracts(recipient_name='Luminar Semiconductor') -> n_awards=0, total_amount=$0",
+        "usaspending.query_federal_presence(name_variants=['Luminar Semiconductor','Luminar Semiconductor Inc']) -> n_ueis_resolved=0, signal='INFLATION_SUSPECT'"
+      ],
+      "M_check": "pentagon_jbook + usaspending.query_dod_contracts + usaspending.query_federal_presence",
+      "M_value": "pentagon_jbook=NOT_FOUND; usaspending DoD=$0/0 awards; federal_presence=INFLATION_SUSPECT (no UEI resolves)",
+      "interpretation": "Per heuristic #6 ('if usaspending shows ZERO obligations under the claimed program, the original claim itself was inflated -> RED_FLAG_NEGATIVE'): QCi paid $110M (out of bankruptcy) for LSI on the rationale that LSI is positioned 'in particular for Aerospace and Defense applications,' yet LSI does not even have a resolvable UEI in the USAspending recipient registry and has zero DoD awards in 2020-2026. The A&D framing of the LSI acquisition is unsupported by any federal-spending footprint. This is the canonical 'narrative inflation' signal - load-bearing strategic language with no underlying revenue."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "QCi's LIDAR is positioned 'from aircraft, drones, and even satellites' - forward DoD/space pipeline narrative without naming any specific PE or program of record",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook.query_program_funding(program_name='SDA Tracking Layer',cutoff_date='2026-05-20') -> NOT_FOUND (corpus does not cover SDA T3)",
+        "pentagon_jbook.query_program_funding(program_name='AFRL Quantum Networking',cutoff_date='2026-05-20') -> UNFUNDED_TWO_PLUS_YEARS but primary_contractor='IonQ Inc' NOT QUBT (FY25=$0, FY26=$0)",
+        "pentagon_jbook.query_program_funding(contractor_name='Quantum Computing') -> NOT_FOUND",
+        "pentagon_jbook.query_program_funding(contractor_name='QPhoton') -> NOT_FOUND"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "NOT_FOUND for QUBT-anchored queries; AFRL Quantum Networking exists in corpus but is bound to IonQ as contractor (not QUBT)",
+      "interpretation": "Per heuristic #7 ('NOT_FOUND in J-Book != red flag') and #1 (NOT_FOUND -> UNVERIFIABLE). QUBT's filing makes generic forward-looking LIDAR statements without anchoring them to any specific DoD program of record, IDIQ, or PE number. Because the company NAMES no PE, the framework cannot fire the J-Book-divergence signal directly. NOTE: This is itself a soft signal - in the cohort's archetype the divergence catch occurs when the company names a PE that the J-Book has zeroed; QUBT's omission of any specific program means the defense-revenue narrative is unfalsifiable (and unverifiable). The corpus DOES show AFRL Quantum Networking unfunded 2+ years tied to IonQ - confirming the FY26 budget zeroed multiple DoD quantum line items, which is structurally bearish for QUBT's pipeline expectations even though QUBT itself names no specific program."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "QCi expects to finance operations through 'U.S. government grant and loan programs' (generic, unspecified)",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": [
+        "usaspending.query_dod_contracts(recipient_name='Quantum Computing Inc.') -> n_awards=0, total_amount=$0",
+        "usaspending.query_federal_presence(name_variants=['Quantum Computing Inc.','Quantum Computing','QCi']) -> 1 UEI resolved (DMTDV6GZCQZ3), 2 contracts totaling $95,663.20 - Dept of Commerce TFLN photonic chips ($69,500) + NASA consulting ($26,163.20). Zero DoD. Signal='SUB_MATERIAL_FEDERAL'",
+        "usaspending.query_federal_presence(name_variants=['QPhoton','QPhoton Inc','QPhoton LLC']) -> n_ueis_resolved=0, signal='INFLATION_SUSPECT'"
+      ],
+      "M_check": "usaspending.query_dod_contracts + usaspending.query_federal_presence",
+      "M_value": "Total federal footprint = $95,663 across 2 non-DoD awards (Commerce + NASA); QPhoton/LSI = no UEI resolved",
+      "interpretation": "QCi's narrative of 'U.S. government grant and loan programs' as a planned financing source is not supported by past federal-spending presence. Total federal contracts to QCi (including subsidiaries with discoverable UEIs) are $95,663 in 2020-2026 - less than the cost of a single engineer. Zero of these are DoD. For a $1.5B cash-balance, $0.68M-revenue 'aerospace and defense' positioned company, the federal-funding pipeline is essentially imaginary. Per heuristic #6 (zero usaspending obligations under claimed funding source -> RED_FLAG-adjacent). Downgraded one notch to SEVERE because the company's claim is generic ('government programs') not a specific PE-anchored line."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Total FY2025 revenue $682K (Services $368K, Products $314K); FY2024 $373K; FY2023 $358K",
+      "severity": "PASS",
+      "supports": [
+        "10-K text confirms revenue figures; control claim verified within document",
+        "usaspending data: QCi total federal contracts $95.7K - consistent with the order-of-magnitude of disclosed revenue (services/products contracts at small-cap scale)"
+      ],
+      "M_check": "usaspending.query_federal_presence",
+      "M_value": "Confirmed via $95K-scale federal contracts that disclosed revenue is at consistent micro-scale",
+      "interpretation": "Revenue disclosure itself appears accurate - it's $0.68M and the company says so. The signal is in the GAP between this revenue and the $1.5B+ cash hoard, the $110M LSI acquisition, and the A&D positioning. PASS on the literal disclosure; the divergence is captured in C1/C3."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "QCi acquired Luminar Semiconductor (LSI) for $110M cash via Section 363 stalking-horse bid out of Luminar Technologies' Chapter 11; closed Feb 2 2026",
+      "severity": "PASS",
+      "supports": [
+        "acq_coherence.score_acquisition_coherence -> coherence_score=0.85 ('high_coherence'), signal='COHERENT_ROLLUP', is_revenue_synthetic=false. Reasoning per LLM scorer: 'Target's III-V photonic integrated circuits, photodetectors, and semiconductor optical components directly extend parent's TFLN photonic-integration thesis into complementary material platforms and subsystems; vertical integration of photonic fab assets strengthens parent's supply chain and enables heterogeneous integration required for quantum and sensing applications.'"
+      ],
+      "M_check": "acq_coherence.score_acquisition_coherence",
+      "M_value": "0.85 high_coherence; COHERENT_ROLLUP",
+      "interpretation": "On the narrow strategic-fit dimension, the LSI acquisition is coherent with QUBT's TFLN photonic-integration roadmap - III-V photonic devices and PIC manufacturing are complementary inputs to a vertically integrated photonics platform. The acq_coherence module does not flag it. The concerns flagged elsewhere (LSI = bankruptcy seller, LSI = $0 DoD revenue) are coverage gaps in this M-source, not contradictions. PASS on coherence; bearish signals concentrate in C1."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "QCi holds 3 granted US patents; LSI added 23 granted US patents + 16 pending + 9 foreign publications via acquisition",
+      "severity": "PASS",
+      "supports": [
+        "uspto_odp.query_assignee(assignee_name='Quantum Computing Inc.') -> n_granted=3, total_granted_patents_pre_cutoff=3 (matches 10-K exactly)",
+        "uspto_odp.query_assignee(assignee_name='Luminar Semiconductor') -> n_granted=0 (LSI patents likely assigned under predecessor 'Freedom Photonics' or prior corporate names - entity-resolution gap, not a contradiction; the 10-K patent table lists 2010-2024 filings consistent with the heritage business)"
+      ],
+      "M_check": "uspto_odp.query_assignee",
+      "M_value": "QCi patents fully verified (3/3 match); LSI patent count unverified at the 'Luminar Semiconductor' assignee string due to predecessor-name issue",
+      "interpretation": "QCi's own patent claim is exactly verified. LSI patent count is technically unverified at the literal 'Luminar Semiconductor' assignee string but the underlying patents listed in the 10-K table (filings circa 2010-2024 for tunable lasers, modulators, photodetectors) are consistent with the description of LSI's heritage business. PASS."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "QCi operates facilities in Hoboken NJ (HQ), Tempe AZ (TFLN AZ Chips Facility, 9,261 sf), Tysons VA (coworking), plus Santa Barbara CA / Wilmington MA / Cranbury NJ / Bedford MA (via LSI acquisition)",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "epa_frs.query_facilities(facility_name='Luminar Semiconductor',state_abbr='CA') -> n_facilities=0",
+        "epa_frs.query_facilities(facility_name='Quantum Computing',state_abbr='AZ') -> n_facilities=0"
+      ],
+      "M_check": "epa_frs.query_facilities",
+      "M_value": "0 EPA FRS hits; sub-material EPA registration footprint expected for office/lab-scale leases",
+      "interpretation": "Photonic chip prototyping at the 9,261 sf scale generally does not require EPA FRS registration (no Title V air, no major NPDES discharge, no RCRA TSDF). Absence from EPA FRS is consistent with the disclosed scale of operations and is not a contradiction. UNVERIFIABLE at this M-source granularity; a county property-records check would be the appropriate verifier."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "QCi raised $1,475.1M net in 2025 via 86.3M-share equity issuance; year-end cash+investments = $1,520.4M",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "insider_vs_calendar.query_insider_sales_near_budget_events(cik='0001758009') -> signal='PROXIMATE_DISCRETIONARY'. n_form4_filings=20, n_total_sales=19, n_total_sale_value_usd=$32,144,354 over the past year. ONE proximate discretionary sale (Begliarbekov Milan, 2,860 shares @ $11.85 = $33,891) on 2026-01-07, 13 days before the 2026-01-20 FY26 bipartisan budget signing (the same political event the J-Book corpus identifies as zeroing IonQ's AFRL Quantum Networking for the 2nd consecutive year)"
+      ],
+      "M_check": "insider_vs_calendar.query_insider_sales_near_budget_events",
+      "M_value": "PROXIMATE_DISCRETIONARY: 1 sale 13 days pre-budget-signing; aggregate $32.1M of insider sales in trailing year (vs $1.475B equity raise)",
+      "interpretation": "Aggregate insider sales of $32M against $1,475M of public equity issuance is dilutive but not extreme. The PROXIMATE_DISCRETIONARY flag is small ($33,891) but sits exactly at the boundary of a politically salient event - the FY26 bipartisan budget that the J-Book corpus identifies as the inflection point for IonQ's AFRL contract being zeroed. The same political event is structurally bearish for the entire defense-quantum cohort's forward narrative. Moderate signal - the dollar size is small but the timing aligns with a budget-zero event for adjacent (peer-cohort) DoD quantum programs."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "Securities Class Action filed Feb 25 2025 alleging false/misleading statements about 'customers, contracts and business operations' (class period Mar 30 2020 - Jan 15 2025); 4 stayed derivative actions",
+      "severity": "RED_FLAG_NEGATIVE",
+      "supports": [
+        "10-K self-disclosure of Securities Class Action and 4 derivative actions",
+        "edgar_fts.query_fulltext(search_term='Quantum Computing Inc securities class action') -> total_hits=0 (EDGAR full-text index lag for class-action paperwork; class action is verifiable via the 10-K disclosure itself)",
+        "Second amended complaint filed 2026-02-13; QUBT's motion-to-dismiss due 2026-03-13"
+      ],
+      "M_check": "edgar_fts.query_fulltext + self-disclosed litigation in 10-K",
+      "M_value": "Active class action with second amended complaint (Feb 13 2026), four stayed derivative actions, all naming officers/directors",
+      "interpretation": "The very subject of the class action ('false and/or misleading statements... about the Company's customers, contracts and business operations') is the same claim space the J-Book cohort tests. The plaintiff has already advanced through an initial motion-to-dismiss to a second amended complaint stage, and the company has acknowledged the case as material. The presence of FOUR overlapping derivative actions stayed pending the securities class motion-to-dismiss outcome amplifies legal exposure. Combined with C1 (LSI A&D narrative not supported by DoD spending) and C3 (zero DoD revenue despite a 'U.S. government grant and loan programs' financing-plan narrative), this elevates to RED_FLAG_NEGATIVE - multiple structurally aligned signals pointing to the same divergence pattern this cohort exists to detect."
+    }
+  ]
+}

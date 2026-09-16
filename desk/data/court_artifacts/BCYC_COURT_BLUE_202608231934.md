@@ -1,0 +1,55 @@
+PACK: acknowledged — tape ($4.24, dd52 −53.7%), filing inventory, CIK, XBRL, BOOK=NO POSITION taken as given. Superseded: none. Added (PROXY-FETCHED via r.jina.ai, SEC 403'd direct): 10-Q 6/30/26 cover, liquidity note, cash-flow, restructuring note, equity note; plus the 8/14/26 13G/A filer identity. COVERAGE GAP: IBKR `search_contracts` permission denied again this session — no independent tape rail; pack `ibkr_gw` used.
+
+## BLUE BENCH — BCYC — RED CASE: PARTIALLY OVERTURNED
+
+**1. "Funded prize doesn't clear the tape." | Re-ran red's own table against red's own base rate | REFUTED (internal contradiction) | REDUCED from FATAL to SIZING.** Red states "today's $296M cap sits **above** the POS-weighted funded value at any honest base rate," then prints a table where POS 5% = **$4.42** and 10% = **$4.92** against a $4.24 tape. At red's own cited pancreatic base rate (5–7%) the funded prize is **$4.42–$4.62, i.e. 4–9% ABOVE spot, not below.** The sentence is arithmetically false against the table beneath it. What survives: no +50% upside at honest POS — a return-hurdle finding, not a kill. Separately the $10.0/sh rNPV is **PLAUSIBLE only** (no derivation, no study cited) and assigns zelenectide **zero** while a randomized Ph2 readout on it is live in 2H26.
+
+**2. "The discount is too small." | Consistency check vs red #1 | REFUTED | OVERTURNED.** If the market rationally prices ~$470M of announced destruction, price should approach the ~$40M residual, not $296M. Red cannot simultaneously hold "$296M is too high" (#2) and a funded value of $4.42–$4.92 (#1). One of the two is wrong; #1 is the sourced one.
+
+**3. "'2030' is PR-only; 10-Q says twelve months." | 10-Q liquidity note, PROXY-FETCHED | CONFIRMED (fact) / REFUTED (inference) | REDUCED to review_flag.** Verbatim confirmed: *"sufficient…through at least twelve months from the issuance date."* But ASC 205-40 scopes the assessment **to** twelve months; a 5-year-runway issuer writes the identical sentence. Absence of a longer number where none is required is not a venue divergence — this is the hierarchical-disclosure false positive (§secondary-endpoint rule). `multi_venue_disclosure_consistency` firing (a) is a **detector false positive**; I overturn it.
+
+**4. "Burn arithmetic doesn't support the guide." | 10-Q cash-flow + restructuring note | REFUTED as a run-rate | REDUCED.** Red's $57.8M/qtr averages a pre-cut Q1 with a post-cut Q2 **and** carries one-time restructuring cash: $6.5M severance + **$3.9M contract-termination costs** disclosed. Red also omitted the comp red's own source contains: **1H25 opcf = $(159.156)M vs 1H26 $(115.531)M — burn down 27% y/y.** Presenting the level without the comp is the III artifact. Honest forward range from $510.052M: Q2 actual $49.4M → Q4 2028; ex-restructuring ~$42M → mid-2029; street's own implied ~$32M → **mid-2030**. Red cites that $32M itself in #4 — so red's #4 refutes red's #3. `runway_calculator` FIRED on a contaminated input; **REDUCED: runway is 2029±, not "mid-2028."**
+
+**5. "We are the street." | Consensus numbers vs our FV | REFUTED | OVERTURNED per DIVERGENCE-NOT-COVERAGE.** Street low PT **$5.00**, avg $9.50. Our net cash is $5.92 and red's own funded value $4.42–$4.92 — we are **below the most bearish published target**. That is divergence, not agreement, and it runs bearish-of-street. Coverage count is not a kill; the anchor is what makes this gradeable. Surviving content: the anchor has had 5 months and no traction — a TIMING instrument.
+
+**6. "27.8% cannot vote." | 10-Q cover, PROXY-FETCHED | REFUTED | OVERTURNED.** Confirmed counts (50,554,927 + 19,437,944), but the mechanism is wrong: the non-voting shares **automatically re-designate as ordinary on transfer to a non-affiliate**, and re-designate manually subject to a 9.99% ownership cap. This is a standard beneficial-ownership blocker for funds, not a control class — **an acquirer receives 100% voting.** Red listed this exact conversion question as its own change-my-mind (d); the answer is on the cover page it cited. The `kg_candidate` is built on the refuted reading and should be rejected or rewritten with a "non-convertible" precondition.
+
+**7. ADV/exit. | Arithmetic check | CONFIRMED | SUSTAINED as SIZING, OVERTURNED as kill.** $1.4M ADV, 7.64% SI, DISCOVERING — size instrument.
+
+**8. Option overhang. | 10-Q equity note | REDUCED.** Confirmed 13,413,173 awards — but **10,745,868 options at WAEP $18.85**, 4.4× spot: worthless, non-dilutive to cash/share, and cash-accretive if ever exercised. The harm requires a *future* repricing/refresh — **PLAUSIBLE, not CONFIRMED**. The zero-open-market-buying half is CONFIRMED and I **strengthen** it: no insider bought at 0.58× cash in five months.
+
+**9. "62% ORR is PR-venue." | Logic check | REDUCED.** ASCO is a reviewed scientific venue, and "design not acceptable as an approval path" is a *regulatory-design* statement, not an efficacy contradiction. No divergence established; the unsupported leg is the *partnering* inference, which has no counterparty. Detector fire (b) downgraded to review_flag.
+
+**10. Tape. | Pack | CONFIRMED | SUSTAINED as TIMING, OVERTURNED as FATAL.** Five months, no closure — real, but momentum is not a valuation verdict, and red supplies no supply mechanism.
+
+**NEW FINDINGS RED MISSED:**
+- **(bull, CONFIRMED) The 8/14/26 13G/A in the pack's own inventory is Armistice Capital: 3,398,000 ADS = 6.72% as of 6/30/26** — essentially unchanged from its prior 6.75%. An event-driven fund holding **6.7% of the voting class** did not sell into the collapse. Neither bench opened it. ([13G/A](https://www.sec.gov/Archives/edgar/data/0001761612/000117266126003554/primary_doc.xml))
+- **(bear, red's type-II miss) Red never addressed the Swanton resignation** — the single strongest unexplained negative, three days pre-sweep, from the Clinical Advisory Board *and* the Board ([8-K 8/20/26](https://www.sec.gov/Archives/edgar/data/1761612/000110465926099221/)). Red prosecuted arithmetic and skipped the governance tell.
+- **(open) UK Takeover Code applicability — UNVERIFIED.** UK-registered + UK central management suggests the residency test is met, which would import Rule 21 (no frustrating action) and *help* a bid. Neither bench checked; settle via the Articles/Panel, not inference.
+- **(open) Form 144 2026-07-02 unread by both benches.**
+
+**Red's selection:** it attacked the easy legs (venue boilerplate, ADV, OTM options) and its two FATAL tags — the prize table and the non-voting class — are the two that broke under audit. It never attacked the genuinely soft leg: the unsourced $10/sh rNPV and the zero on zelenectide are *red's own* construction.
+
+**DETECTORS CONSULTED**
+- clinicaltrials_lookup — NOT-FIRED (helper; upheld).
+- competitor_trial_omission — UNCHECKABLE: no current Competition section to diff; missing = CT.gov pull of enrolling 2L pancreatic ADC trials. Red's ruling upheld.
+- carbon_mapper — NOT-FIRED; leased multi-tenant lab suites, no emitting parcel. Planner upheld.
+- consumer_product_heat — NOT-FIRED; SIC-only match, no consumer product.
+- consumer_product_reviews — NOT-FIRED; SIC-only match.
+- osha_establishment — NOT-FIRED; no claimed factory to falsify.
+- plant_thermal — NOT-FIRED; Landsat LST resolves Granta Park campus, not tenant. Planner upheld.
+- clinical_trials — NOT-FIRED as fraud signal; registry footprint matches disclosure.
+- multi_venue_disclosure_consistency — **CONTESTED: both red fires OVERTURNED.** (a) ASC 205-40 twelve-month language is scope-mandated boilerplate, not a declined repetition; (b) ASCO abstract vs regulatory-path statement are non-contradictory claims. Both downgrade to review_flag.
+- openfda — FIRED as negative (zero approvals, no revenue floor). Upheld; strengthens the "cash + option" framing both benches share.
+- orange_book — NOT-FIRED; no approved drug, no LOE vector.
+- runway_calculator — **FIRED but REDUCED.** Input contaminated by pre-cut Q1 + $10.4M one-time restructuring cash; corrected range Q4 2028 (Q2 rate) to mid-2030 (street rate), not "mid-2028."
+- chinese_smallcap_ramp_dump_archetype — NOT-FIRED; spurious feature match. Upheld.
+- clinical_trial_referral_quality — NOT-FIRED; out of contract by its own note. Upheld.
+
+**PRINT PROXIMITY: 2026-10-29 (Q3'26) — yfinance-derived, UNCONFIRMED; no earnings-date 8-K in the inventory. NOT within 5 trading days (~46 sessions), so no print-decisive reconstruction.** The live exposure remains the **undated** 2H26 randomized Ph2 Duravelo-2 readout — a data-8-K tripwire, not an earnings tripwire, and no resting order may sit under it (§resting-order-into-a-print).
+
+**NET POSITION AFTER BOTH BENCHES:** Red's REJECT does not survive on its stated grounds — its two FATAL findings are a table that contradicts its own conclusion and a share class that converts on transfer. But blue's original bull case does not survive either: what remains after both audits is an unlevered, zero-debt issuer at 0.72× net-of-everything cash whose *funded, POS-weighted* value at honest base rates is $4.42–$4.92 against a $4.24 tape — roughly **fair to +10%**, not the 50%+ a court-cleared new position requires. Runway is 2029±, not 2030 and not 2028. There is no named kill left standing (§clean-court minimum-starter), but there is also no divergence worth the illiquidity: $1.4M ADV, an undated binary, no insider buying, and a management team publicly committed to spending ~$470M. This is **RP_FAIR carry at best — priced, therefore not an edge.** Disposition: **NO POSITION, WATCH, not REJECT.** Route to the watchlist with three tripwires: (i) a capital-return / strategic-alternatives 8-K, (ii) Armistice converting 13G→13D, (iii) Q3'26 cash ≥$470M *with* opex confirming ≤$40M/qtr. Any of (i)–(ii) is a recourt trigger at full size; (iii) alone is a starter of ≤0.3% only if the tape is still below $5.92 net cash. Kills after audit: **2 novel / 1 consensus** (surviving: #7 sizing-novel, #8-partial insider-abstention novel; #10 timing-consensus) — down from red's claimed 6 novel / 3 consensus.
+
+**Conviction that this net position (WATCH, no position, tripwired) is right: 8/10.** The load-bearing corrections — non-voting conversion, the 1H25 burn comp, and red's own table — are CONFIRMED from the 10-Q. Unverified and non-load-bearing: Takeover Code applicability, the rNPV magnitude, intraday tape.
+
+Primary citations: [10-Q 6/30/26 (PROXY-FETCHED)](https://www.sec.gov/Archives/edgar/data/0001761612/000110465926088457/bcyc-20260630x10q.htm) · [8-K 2026-08-20](https://www.sec.gov/Archives/edgar/data/1761612/000110465926099221/) · [8-K ex99-1 2026-03-17](https://www.sec.gov/Archives/edgar/data/0001761612/000110465926028954/tm268887d1_ex99-1.htm) · [SC 13G/A 2026-08-14 (Armistice)](https://www.sec.gov/Archives/edgar/data/0001761612/000117266126003554/primary_doc.xml)

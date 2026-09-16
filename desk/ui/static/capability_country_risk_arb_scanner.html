@@ -1,0 +1,146 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>country_risk_arb_scanner</title><style>
+body{margin:0;background:#0b0e12;color:#e8ebee;font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:26px 24px 90px}
+a{color:#8b7cf6} h1{font-size:23px;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:#7d858e;margin:0 0 20px;font-size:13px}
+h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:#7d858e;margin:24px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 10px;border-bottom:1px solid #242a31;text-align:left;vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#7d858e}
+.k{font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:20px}
+.k-generator{color:#c3b8fb;background:rgba(139,124,246,.15)}
+.k-detector{color:#eccb8a;background:rgba(217,164,65,.15)}
+.k-watcher{color:#8ee5c1;background:rgba(53,201,143,.15)}
+.k-evidence{color:#b3bcc6;background:rgba(138,147,158,.15)}
+.h-OK{color:#35c98f} .h-STALE{color:#d9a441} .h-ERROR{color:#e0736a} .h-NEVER_RUN{color:#8a939e}
+pre{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px;overflow-x:auto;font-size:12px;line-height:1.5}
+.panel{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px 18px;margin-bottom:12px}
+ul{margin:4px 0;padding-left:20px} li{margin-bottom:4px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+</style></head><body><div class="wrap"><h1>country_risk_arb_scanner</h1><p class="sub">registered capability · country_risk_arb_scanner</p><a href="signals.html">&larr; all signals</a><div class="panel" style="margin-top:10px"><span class="k k-generator">GENERATOR</span> &nbsp;<span class="h-NEVER_RUN"><b>NEVER_RUN</b></span> · last run <span class="mono">never</span></div><p>Stage 0b generator: companies trading at a WIDER discount than their</p><form method="POST" action="/signals/run" style="margin:10px 0"><input type="hidden" name="name" value="country_risk_arb_scanner"><input name="symbol" placeholder="symbol (if applicable)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px"><input name="symbols" placeholder="universe, comma-sep (generators)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px;margin-left:6px"><button type="submit" style="background:#8b7cf6;color:#0b0e12;border:0;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;margin-left:6px">Run now</button></form><h2>Datasources</h2><ul><li>reference implementation: verticals/generators/country_risk_arb_scanner.py (see the code section for the feeds it touches)</li></ul><h2>Applies to</h2><ul><li><b>strategies:</b> value_band_entry</li></ul><h2>The code</h2><pre>&quot;&quot;&quot;country_risk_arb_scanner — Stage 0b generator: companies trading at a WIDER discount than their
+country risk justifies (Damodaran CRP vs market-implied premium).
+
+Method: implied country premium = earnings-yield gap vs the US sector median (banks use COE = ROE/(P/B),
+more robust than 1/PE for financials); EXCESS = implied - Damodaran CRP. FIVE HARD GUARDS (each a
+demonstrated false-positive source from the 2026-07-02 build run):
+  1. low-rating-CRP structural exclusion (China/VIE names — the sovereign rating misses delisting risk)
+  2. hyperinflation gate (TRY/ARS/EGP nominal-EPS denominators are fake — excluded)
+  3. bond-dominance 2x floor as a HARD GATE (TBC lesson: clearing 1x != edge; those go to a risk-premium tier)
+  4. state-control flag (Petrobras pattern — appropriation discounts are correctly priced)
+  5. sector-cheapness check (autos/cement cheap GLOBALLY != country dislocation; per-sector US medians)
+Scanner proposes; the pipeline disposes. Quarterly relevance (Damodaran updates Jan/Jul) — the run
+no-ops unless &gt;75 days old or forced.
+
+  python3 verticals/generators/country_risk_arb_scanner.py [--force]
+Writes data/COUNTRY_RISK_ARB.json. READ-ONLY.
+&quot;&quot;&quot;
+from __future__ import annotations
+import json, sys, math, datetime
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+OUT = HERE / &quot;data&quot; / &quot;COUNTRY_RISK_ARB.json&quot;
+
+# Damodaran vintage 2026-01-05 (embedded; refresh embedded table when he posts Jan/Jul updates)
+VINTAGE = &quot;2026-01-05&quot;
+CRP = {&quot;Korea&quot;: 0.64, &quot;Poland&quot;: 1.10, &quot;Brazil&quot;: 3.24, &quot;Colombia&quot;: 2.85, &quot;Mexico&quot;: 2.07, &quot;Chile&quot;: 1.10,
+       &quot;Peru&quot;: 2.07, &quot;Greece&quot;: 2.85, &quot;Kazakhstan&quot;: 2.07, &quot;Georgia&quot;: 3.24, &quot;Indonesia&quot;: 2.46,
+       &quot;Philippines&quot;: 2.46, &quot;India&quot;: 2.07, &quot;SouthAfrica&quot;: 3.24, &quot;Japan&quot;: 0.91, &quot;Israel&quot;: 1.31,
+       &quot;Italy&quot;: 2.46, &quot;Spain&quot;: 1.55, &quot;UK&quot;: 0.91}
+DEFSPREAD = {&quot;Korea&quot;: 0.42, &quot;Poland&quot;: 0.72, &quot;Brazil&quot;: 2.13, &quot;Colombia&quot;: 1.87, &quot;Mexico&quot;: 1.36,
+             &quot;Chile&quot;: 0.72, &quot;Peru&quot;: 1.36, &quot;Greece&quot;: 1.87, &quot;Kazakhstan&quot;: 1.36, &quot;Georgia&quot;: 2.13,
+             &quot;Indonesia&quot;: 1.61, &quot;Philippines&quot;: 1.61, &quot;India&quot;: 1.36, &quot;SouthAfrica&quot;: 2.13,
+             &quot;Japan&quot;: 0.60, &quot;Israel&quot;: 0.86, &quot;Italy&quot;: 1.61, &quot;Spain&quot;: 1.02, &quot;UK&quot;: 0.60}
+EXCLUDED_STRUCTURAL = {&quot;China&quot;, &quot;HongKong&quot;}          # guard 1
+EXCLUDED_INFLATION = {&quot;Turkey&quot;, &quot;Argentina&quot;, &quot;Egypt&quot;, &quot;Nigeria&quot;}   # guard 2
+STATE_CONTROL_FLAGS = {&quot;PBR&quot;, &quot;PEO.WA&quot;, &quot;VALE&quot;}      # guard 4 (flag, not auto-kill for banks)
+
+# universe: (yf ticker, country, sector, name) — liquid ADRs/foreign lines
+UNIVERSE = [
+ (&quot;316140.KS&quot;,&quot;Korea&quot;,&quot;bank&quot;,&quot;Woori Financial&quot;),(&quot;055550.KS&quot;,&quot;Korea&quot;,&quot;bank&quot;,&quot;Shinhan&quot;),
+ (&quot;086790.KS&quot;,&quot;Korea&quot;,&quot;bank&quot;,&quot;Hana Financial&quot;),(&quot;PEO.WA&quot;,&quot;Poland&quot;,&quot;bank&quot;,&quot;Pekao&quot;),
+ (&quot;SPL.WA&quot;,&quot;Poland&quot;,&quot;bank&quot;,&quot;Santander Polska&quot;),(&quot;PKO.WA&quot;,&quot;Poland&quot;,&quot;bank&quot;,&quot;PKO BP&quot;),
+ (&quot;BBD&quot;,&quot;Brazil&quot;,&quot;bank&quot;,&quot;Bradesco&quot;),(&quot;ITUB&quot;,&quot;Brazil&quot;,&quot;bank&quot;,&quot;Itau&quot;),(&quot;BSBR&quot;,&quot;Brazil&quot;,&quot;bank&quot;,&quot;Santander Brasil&quot;),
+ (&quot;CIB&quot;,&quot;Colombia&quot;,&quot;bank&quot;,&quot;Bancolombia&quot;),(&quot;BCH&quot;,&quot;Chile&quot;,&quot;bank&quot;,&quot;Banco de Chile&quot;),(&quot;BAP&quot;,&quot;Peru&quot;,&quot;bank&quot;,&quot;Credicorp&quot;),
+ (&quot;SBS&quot;,&quot;Brazil&quot;,&quot;utility&quot;,&quot;Sabesp&quot;),(&quot;EBR&quot;,&quot;Brazil&quot;,&quot;utility&quot;,&quot;Eletrobras&quot;),
+ (&quot;KOF&quot;,&quot;Mexico&quot;,&quot;staples&quot;,&quot;Coca-Cola Femsa&quot;),(&quot;FMX&quot;,&quot;Mexico&quot;,&quot;staples&quot;,&quot;FEMSA&quot;),
+ (&quot;TLK&quot;,&quot;Indonesia&quot;,&quot;telecom&quot;,&quot;Telkom Indonesia&quot;),(&quot;PHI&quot;,&quot;Philippines&quot;,&quot;telecom&quot;,&quot;PLDT&quot;),
+ (&quot;HDB&quot;,&quot;India&quot;,&quot;bank&quot;,&quot;HDFC Bank&quot;),(&quot;IBN&quot;,&quot;India&quot;,&quot;bank&quot;,&quot;ICICI&quot;),
+ (&quot;ETE.AT&quot;,&quot;Greece&quot;,&quot;bank&quot;,&quot;National Bank of Greece&quot;),(&quot;EUROB.AT&quot;,&quot;Greece&quot;,&quot;bank&quot;,&quot;Eurobank&quot;),
+]
+US_MEDIAN = {&quot;bank&quot;: {&quot;pe&quot;: 14.3, &quot;coe&quot;: 0.098}, &quot;utility&quot;: {&quot;pe&quot;: 18.0}, &quot;staples&quot;: {&quot;pe&quot;: 20.0},
+             &quot;telecom&quot;: {&quot;pe&quot;: 12.0}, &quot;energy&quot;: {&quot;pe&quot;: 18.0}, &quot;auto&quot;: {&quot;pe&quot;: 6.5}}
+
+
+def main():
+    force = &quot;--force&quot; in sys.argv
+    if OUT.exists() and not force:
+        prev = json.loads(OUT.read_text())
+        age = (datetime.date.today() - datetime.date.fromisoformat(prev.get(&quot;asof&quot;, &quot;2000-01-01&quot;))).days
+        if age &lt; 75:
+            print(f&quot;country_risk_arb: last run {age}d ago (&lt;75d quarterly cadence) — no-op. --force to override.&quot;)
+            return
+    import yfinance as yf
+    rows, rejects = [], []
+    for sym, ctry, sector, name in UNIVERSE:
+        if ctry in EXCLUDED_STRUCTURAL:
+            rejects.append({&quot;name&quot;: name, &quot;guard&quot;: &quot;structural-CRP-understatement&quot;}); continue
+        if ctry in EXCLUDED_INFLATION:
+            rejects.append({&quot;name&quot;: name, &quot;guard&quot;: &quot;hyperinflation nominal-EPS&quot;}); continue
+        try:
+            t = yf.Ticker(sym); info = t.info
+            pe = info.get(&quot;trailingPE&quot;); pb = info.get(&quot;priceToBook&quot;); roe = info.get(&quot;returnOnEquity&quot;)
+            px = info.get(&quot;currentPrice&quot;) or info.get(&quot;regularMarketPrice&quot;)
+        except Exception:
+            continue
+        implied = None
+        if sector == &quot;bank&quot; and pb and roe and 0.2 &lt; pb &lt; 5 and 0 &lt; roe &lt; 0.5:
+            # GUARD 6 (PHI mislabel 2026-07-03): the ROE/PB=CoE shortcut is ONLY valid for actual
+            # depositories — verify from the feed&#x27;s industry, never the input list&#x27;s tag
+            ind = (info.get(&quot;industry&quot;) or &quot;&quot;) + &quot; &quot; + (info.get(&quot;sector&quot;) or &quot;&quot;)
+            if &quot;bank&quot; not in ind.lower():
+                rejects.append({&quot;name&quot;: name, &quot;guard&quot;: f&quot;sector-tag says bank but feed industry says &#x27;{ind.strip()[:40]}&#x27; — mislabel&quot;})
+                continue
+            coe = roe / pb                       # bank COE track (guard: sane pb/roe only)
+            # GUARD 7 (BCH ADR-book artifact 2026-07-03: implied 20% vs truth 6.3%): for a bank,
+            # ROE/PB must ~equal the earnings yield 1/PE (same equity denominator). Divergence &gt;40%
+            # means the book value is on the wrong ADR-share/currency basis — yfinance priceToBook
+            # is UNRELIABLE for ADRs; reject rather than report a fabricated edge.
+            if pe and pe &gt; 1:
+                ey = 1.0 / pe
+                if coe &gt; 0 and abs(coe - ey) / max(coe, ey) &gt; 0.4:
+                    rejects.append({&quot;name&quot;: name, &quot;guard&quot;: f&quot;CoE {coe:.1%} vs earnings-yield {ey:.1%} diverge — ADR book-basis artifact (BCH lesson)&quot;})
+                    continue
+            implied = (coe - US_MEDIAN[&quot;bank&quot;][&quot;coe&quot;]) * 100
+        elif pe and 1 &lt; pe &lt; 60:
+            implied = (1/pe - 1/US_MEDIAN.get(sector, {&quot;pe&quot;: 17.0})[&quot;pe&quot;]) * 100
+        if implied is None:
+            continue
+        if abs(implied) &gt; 25:                      # ADR/currency artifact trap (CIB COP-book lesson)
+            rejects.append({&quot;name&quot;: name, &quot;guard&quot;: f&quot;data-artifact implied {implied:.0f}pp — currency-mismatched book/EPS&quot;})
+            continue
+        excess = implied - CRP[ctry]
+        floor2 = DEFSPREAD[ctry] * 2
+        gate = &quot;EDGE_2x&quot; if implied &gt; floor2 and excess &gt; 0.5 else \
+               (&quot;RISK_PREMIUM_1x&quot; if implied &gt; DEFSPREAD[ctry] else &quot;FAILS_FLOOR&quot;)
+        rows.append({&quot;ticker&quot;: sym, &quot;name&quot;: name, &quot;country&quot;: ctry, &quot;px&quot;: px, &quot;sector&quot;: sector,
+                     &quot;implied_pp&quot;: round(implied, 1), &quot;crp_pp&quot;: CRP[ctry], &quot;excess_pp&quot;: round(excess, 1),
+                     &quot;floor_2x_pp&quot;: round(floor2, 2), &quot;gate&quot;: gate,
+                     &quot;state_flag&quot;: sym in STATE_CONTROL_FLAGS})
+    rows.sort(key=lambda r: -r[&quot;excess_pp&quot;])
+    res = {&quot;asof&quot;: datetime.date.today().isoformat(), &quot;crp_vintage&quot;: VINTAGE,
+           &quot;note&quot;: &quot;scanner PROPOSES; guards 1-5 hard-coded; EDGE_2x tier only = candidates; refresh embedded CRP each Jan/Jul&quot;,
+           &quot;edge_tier&quot;: [r for r in rows if r[&quot;gate&quot;] == &quot;EDGE_2x&quot;],
+           &quot;risk_premium_tier&quot;: [r for r in rows if r[&quot;gate&quot;] == &quot;RISK_PREMIUM_1x&quot;],
+           &quot;fails&quot;: [r for r in rows if r[&quot;gate&quot;] == &quot;FAILS_FLOOR&quot;], &quot;guard_rejects&quot;: rejects}
+    OUT.write_text(json.dumps(res, indent=1))
+    print(f&quot;=== COUNTRY-RISK ARB SCANNER  {res[&#x27;asof&#x27;]}  (CRP vintage {VINTAGE}; {len(rows)} scored) ===&quot;)
+    for r in res[&quot;edge_tier&quot;][:10]:
+        print(f&quot;   {r[&#x27;ticker&#x27;]:&lt;11} {r[&#x27;name&#x27;]:&lt;22} {r[&#x27;country&#x27;]:&lt;10} implied {r[&#x27;implied_pp&#x27;]:&gt;5}pp  CRP {r[&#x27;crp_pp&#x27;]:&gt;4}  EXCESS {r[&#x27;excess_pp&#x27;]:+5}pp  {&#x27;STATE-FLAG&#x27; if r[&#x27;state_flag&#x27;] else &#x27;&#x27;}&quot;)
+    print(f&quot;  risk-premium tier: {[r[&#x27;ticker&#x27;] for r in res[&#x27;risk_premium_tier&#x27;]]}&quot;)
+    print(f&quot;[-&gt; {OUT.name}]&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</pre></div></body></html>

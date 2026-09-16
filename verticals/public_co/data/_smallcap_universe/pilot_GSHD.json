@@ -1,0 +1,93 @@
+{
+  "ticker": "GSHD",
+  "company": "Goosehead Insurance, Inc.",
+  "cutoff": "2026-05-20",
+  "filing": "0001726978-26-000010_10-K.txt",
+  "filing_date": "2026-02-19",
+  "rfm_tuples": [
+    {
+      "claim_id": "C1",
+      "R": "Solvency/liquidity narrative: 10-K presents Goosehead as an operating franchised insurance agency with a January 8, 2025 Credit Agreement; no explicit going-concern language and no auditor change disclosed. Implicit claim is that the company remains a going concern with a stable audit relationship through the cutoff.",
+      "f": "If the going-concern narrative is truthful, going_concern_detector should return NO_GOING_CONCERN and auditor_change_tracker should return CLEAN_AUDITOR_TENURE across the 5-year lookback window.",
+      "M_source": "going_concern_detector.query_going_concern + auditor_change_tracker.query_auditor_changes",
+      "M_value": "going_concern: 0 phrase matches in the 2026-02-19 10-K, signal=NO_GOING_CONCERN. auditor: 0 Item 4.01 8-Ks in 2021-05-21 to 2026-05-20 lookback, signal=CLEAN_AUDITOR_TENURE.",
+      "severity": "PASS",
+      "interpretation": "Baseline solvency posture verifies cleanly. No substantial-doubt language and an uninterrupted 5-year auditor tenure. The -62.9% drawdown is therefore NOT a going-concern or auditor-walk story."
+    },
+    {
+      "claim_id": "C2",
+      "R": "Carrier-concentration disclosure: 'In 2025, two Carriers represented more than 10% of total revenue at 19% and 13%. In 2024, three Carriers represented more than 10% of total revenue at 19%, 15%, and 10%. In 2023, two Carriers represented more than 10% of total revenue at 16% and 12%.' Implicit honesty test: is this concentration framed as it is (significant top-carrier risk in an insurance distribution business) or buried/softened?",
+      "f": "If concentration is honestly disclosed (not buried, not minimized), the M-source adjudication of these numbers should align with the disclosed levels and the filing should explicitly call out the risk language.",
+      "M_source": "revenue_concentration.query_revenue_concentration (recipient_name='Goosehead Insurance', top_customer_pct=19.0, fiscal_year=2025) + 10-K cross-read",
+      "M_value": "revenue_concentration M-source is calibrated for federal-services primes and returned UNVERIFIABLE for an insurance-franchise distributor (no industry peer set). Manual cross-read confirms the 10-K discloses both the 19% top carrier and 13% #2 carrier explicitly in the Carriers section AND adds an explicit risk factor: 'Should any of these Carriers seek to terminate its arrangements with us, we could be forced to move our business to other Carriers on less favorable terms.' Top-2 carrier share is 32% in 2025 vs 28% in 2023 (16%+12%) and 44% in 2024 (19%+15%+10%). The concentration trend is actually IMPROVING off the 2024 peak.",
+      "severity": "PASS",
+      "interpretation": "Carrier concentration is genuinely material (top carrier = 19% of revenue, top 2 = 32%) but it is disclosed in the main Carriers paragraph AND explicitly framed as a risk in the same sentence. The 3-year history is given so an investor can see the trajectory (down from 2024 peak). No obscuring. M-source tool produced UNVERIFIABLE because its peer set is federal-services primes, not insurance-distribution. The honest disclosure scores PASS under the HONESTY-ALPHA framework even though the underlying business risk is real."
+    },
+    {
+      "claim_id": "C3",
+      "R": "Franchise-network momentum: 'Total operating franchises decreased by 9% to 1,009 in 2025 from 1,103 in 2024, an improvement in franchise turnover compared to the 10% decrease in 2024 from 1,226 in 2023.' Management frames the 2025 result as an 'improvement' relative to the 2024 decline. Implicit claim: the franchise base is stabilizing.",
+      "f": "If the franchise base is genuinely stabilizing, the next 10-Q (Q1 2026) should show flat-to-modest franchise count change. If it is still contracting at a comparable or faster pace, the 'improvement' framing is misleading.",
+      "M_source": "claim_evolution.query_claim_evolution (cik=0001726978, search_term='operating franchises', base_filing_date=2026-02-19, cutoff=2026-05-20)",
+      "M_value": "2 subsequent mentions classified AFFIRMED. Q1 2026 8-K (2026-04-22) shows operating franchises = 956 (<1 year tenure: 77; >1 year: 879). Q1 2026 10-Q (2026-04-23) explicitly states 956 operating franchises at March 31, 2026, 'down 13% from prior year'. Status=REAFFIRMED_IN_STRUCTURED_DISCLOSURE.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "The 10-K's 'improvement in franchise turnover' framing does not survive 60 days. Operating franchises fell from 1,009 (12/31/2025) to 956 (3/31/2026) \u2014 a 5.3% sequential decline in ONE quarter, annualizing to ~21%. The YoY decline reported in the Q1 10-Q (-13%) is WORSE than the 10-K's reported -9% FY decline. So the 'improvement' narrative inverted within one quarter of the 10-K filing. This is exactly the pattern HONESTY-ALPHA targets: a 10-K spin word ('improvement') that the next 10-Q quietly contradicts via the structured KPI table. Not fraud \u2014 the numbers ARE disclosed in the 10-Q \u2014 but the 10-K's optimistic framing is no longer supportable as of the cutoff. MODERATE because the bad news is disclosed in the very next filing (not hidden), but the 10-K reader is misled if they stopped at the annual report."
+    },
+    {
+      "claim_id": "C4",
+      "R": "Service-quality narrative: 'highly differentiated level of service as indicated by our NPS score of 77, leading to an 85% Client Retention rate and 90% premium retention rate in 2025... 3.5x the 2024 industry average.' Implicit claim: service differentiation remains best-in-class.",
+      "f": "If service differentiation is genuinely durable, the NPS trend should be stable or improving and the framing should not bury a decline. If NPS is materially declining and the filing soft-pedals it, that is obscuring.",
+      "M_source": "Filing cross-read (Item 1 Business Overview NPS narrative + footnote)",
+      "M_value": "10-K body text: 'NPS of 77 in 2025, a decrease from 89 in 2024.' This is a 12-point NPS drop (-13.5%) in a single year. The decline is technically disclosed but is immediately followed by '3.5x the 2024 industry average' framing \u2014 an apples-to-oranges comparison (current-year score vs prior-year industry benchmark) that softens the message. The retention-rate disclosure (85% Client Retention, 90% premium retention) is not accompanied by a YoY comparison in the slice reviewed.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "NPS dropped from 89 to 77 (12 points, -13.5%) \u2014 a meaningful deterioration in management's headline service-quality KPI in the SAME year the franchise base contracted 9% and the stock dropped 62.9%. The 10-K discloses the absolute numbers (so it is not lying outright) but reframes the decline against a stale industry benchmark and embeds the YoY comparison inside paragraphs that lead with 'differentiated level of service.' The 10-K MD&A does not narratively address why NPS fell or what management is doing about it. This is textbook 'disclosed-but-overstated' framing \u2014 the kind of soft obscuring the HONESTY-ALPHA framework is designed to flag. MODERATE not SEVERE because the comparable number IS in the body text."
+    },
+    {
+      "claim_id": "C5",
+      "R": "Change-of-control / founder-control risk: 'The failure by Mark Jones and Robyn Jones to maintain either a minimum voting interest in us or the ability to elect or designate for election at least a majority of our board of directors could trigger a change of control default under our Credit Agreement... default will be triggered when any person or group other than Mark Jones and Robyn Jones becomes the beneficial owner of more than 50% of the voting power.' Implicit claim: insider behavior around this covenant is routine, not signaling distress.",
+      "f": "If insider activity is routine, insider_vs_calendar should return NO_PROXIMATE_SALES or ROUTINE_10B5_1. Discretionary clustering by named-insider trusts proximate to material events would be a flag, particularly given the change-of-control covenant.",
+      "M_source": "insider_vs_calendar.query_insider_sales_near_budget_events (cik=0001726978, lookback_days=365, contractor_name='Goosehead')",
+      "M_value": "365-day: 36 Form 4s, 29 sales, $28.85M total sale value; 3 proximate discretionary sales totaling $494.6K all from 'Mark & Robyn Jones Descendants Trust 2014' clustered around 2026-04-28 to 2026-05-01. Baseline signal PROXIMATE_DISCRETIONARY, validator-downgraded to PROXIMATE_DISCRETIONARY_UNCONFIRMED because GSHD has zero federal program exposure (validators 1+2 require contractor-link, which is N/A for an insurance broker). 24-month lookback: 80 Form 4s, 83 sales, $116.24M aggregate sale value, 27 proximate sales, baseline CLUSTERED_DISCRETIONARY_UNCONFIRMED.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "The M-source validators correctly downgrade the budget-event match (GSHD has no DoD exposure, so the FY27 J-book release on 4/28/2026 is a spurious coincidence). HOWEVER the raw insider-selling magnitude is material in its own right: $116M aggregate Form-4 sales over 24 months at a sub-$2B market cap company that has a CHANGE-OF-CONTROL CREDIT DEFAULT tied to founder voting power. The Mark & Robyn Jones Descendants Trust 2014 is named directly in the proximate cluster ($494K in 3 days late April 2026) \u2014 i.e. selling by a vehicle directly tied to the covenant the 10-K identifies as a material default trigger. The 10-K describes the covenant abstractly but does not foreground that insider entities ARE actively reducing position. MODERATE under HONESTY-ALPHA: the data is on EDGAR, but the 10-K's risk-factor framing creates the impression of a stable founder voting bloc when the founder-aligned trust is in fact a net seller of $116M over 24 months."
+    },
+    {
+      "claim_id": "C6",
+      "R": "Credit-facility disclosure: 'The Credit Agreement dated January 8, 2025 (as amended, \"the Credit Agreement\") governing our debt contains covenants... variable rate debt... SOFR.' Filing acknowledges the credit facility exists and has been amended but the slice does not narratively walk through covenant amendments. Implicit claim: no unusual debt-restructuring activity post-original-facility.",
+      "f": "If there is no recent material credit amendment activity, sec_filings should not show 8-K Item 1.01 or Item 2.03 spikes proximate to the cutoff, and ucc_proxy lien exposure should be LOW or MODERATE.",
+      "M_source": "ucc_proxy.query_ucc_exposure (cik=0001726978, cutoff=2026-05-20, window_months=24) + sec_filings.list_filings_by_form",
+      "M_value": "ucc_proxy: signal=ELEVATED_LIEN_EXPOSURE. 0 8-K Item 2.03 events in 24-month window; 0 8-Ks with secured-debt terms; 10 secured-term hits across 10-K/10-Q with 6 distress-term matches. Top terms: 'lien' (2), 'all assets' (2), 'first-priority lien' (2), 'subordination agreement' (2), 'intercreditor agreement' (2). cluster_in_6mo=False. sec_filings: 31 filings 2024-01-01 to 2026-05-20 including 18 8-Ks; no 8-K filed proximate to a credit-event date in 6-month pre-cutoff window per 2.03 search.",
+      "severity": "PASS",
+      "interpretation": "The ELEVATED_LIEN_EXPOSURE signal is driven entirely by 10-K/10-Q boilerplate around the January 2025 Credit Agreement (lien on all assets, subordination/intercreditor language is standard for a secured credit facility) \u2014 not by any new 8-K Item 2.03 event in the lookback. The 0 Item 2.03 8-Ks in 24 months means no fresh material debt-creation event since the original January 2025 facility. No covenant-amendment cascade like FMC. The credit-disclosure posture passes HONESTY-ALPHA: secured-debt terms are flagged because the company has secured debt, and that secured debt is disclosed in the right places."
+    },
+    {
+      "claim_id": "C7",
+      "R": "Regulatory/AML standing: Goosehead is a P&C insurance distributor. While it is NOT a FINRA broker-dealer (different regulatory regime), insurance distribution itself is highly regulated at the state level. Implicit claim: no material AML/regulatory disciplinary overhang that would be searchable in adjacent regulatory databases.",
+      "f": "If there is no material broker-dealer or securities-adjacent disciplinary record, finra_brokercheck.query_firm('Goosehead') should return 0 matches (confirming the company is correctly outside FINRA's jurisdiction and not flagged in adjacent broker registries).",
+      "M_source": "finra_brokercheck.query_firm(firm_name='Goosehead')",
+      "M_value": "n_total=0 matches in FINRA broker-dealer registry. Signal: NO_BD_REGISTRATION (expected \u2014 Goosehead is an insurance distributor, not a broker-dealer).",
+      "severity": "PASS",
+      "interpretation": "Adjacency check passes cleanly. Goosehead is correctly outside the FINRA jurisdiction (it is an insurance agency, not a securities broker-dealer), and there is no shadow-registration or FINRA-disciplinary footprint that would suggest the company is operating beyond its disclosed regulatory perimeter. This is a confirming PASS rather than a discovery \u2014 useful as a negative control."
+    },
+    {
+      "claim_id": "C8",
+      "R": "Filing recency / latest 10-Q rule: per the strategy methodology document (latest_filing_not_just_10K rule), the most-recent 10-Q within cutoff should be reviewed for narrative drift from the 10-K. The 10-K was filed 2026-02-19; Q1 2026 10-Q filed 2026-04-23 is within cutoff.",
+      "f": "If the 10-K narrative holds, the Q1 10-Q's KPI panel should be consistent with the 10-K's framing. If the Q1 10-Q reveals a quietly worse trajectory than the 10-K spin, that is a drift-detection catch.",
+      "M_source": "claim_evolution.query_claim_evolution (cik=0001726978, search_term='operating franchises', base_filing_date=2026-02-19, cutoff=2026-05-20) \u2014 same query as C3 + Q1 2026 8-K snippet",
+      "M_value": "Q1 2026 financial headlines from the 2026-04-22 8-K (within cutoff): Total revenue $93.1M (+23% YoY), Core Revenue $79.5M (+15%), Total Written Premium $1.1B (+13%). Operating franchises 956 (-13% YoY). Headline revenue growth remains strong while the franchise-network KPI continues to deteriorate.",
+      "severity": "PASS",
+      "interpretation": "The Q1 2026 10-Q and earnings 8-K show a coherent and consistent disclosure pattern: revenue growth is being driven by per-franchise and corporate productivity (and premium increases at the carriers), while the absolute franchise count continues to decline. Management is not hiding either side of this \u2014 revenue growth is reported, franchise count is reported. The narrative tension is real, but the disclosure is honest. PASS under HONESTY-ALPHA; the underlying business question (can per-agency productivity offset network contraction indefinitely?) is for fundamental analysts, not the lying detector."
+    }
+  ],
+  "composite": 0.375,
+  "summary": "GSHD is a CLEAN-AUDITOR (CLEAN_AUDITOR_TENURE), NO-GOING-CONCERN insurance-franchise distributor with consistent revenue growth (Q1'26 +23% YoY) but a structurally contracting franchise base (1,226 in 2023 -> 1,103 in 2024 -> 1,009 in 2025 -> 956 in Q1'26). The -62.9% drawdown is NOT a fraud/solvency story. Three HONESTY-ALPHA catches: (1) the 10-K describes the 2025 franchise decline as an 'improvement in franchise turnover' but the Q1 2026 10-Q (filed 60 days later) shows the YoY decline ACCELERATED to -13% \u2014 the 'improvement' framing inverted within one quarter; (2) NPS dropped 12 points YoY (89 -> 77) in management's headline service-quality KPI, disclosed in body text but reframed against a stale industry benchmark to soften the message; (3) the change-of-control credit-default covenant is tied to founder voting power, yet the founder-aligned Mark & Robyn Jones Descendants Trust 2014 sold $494K in late April 2026 as part of $116M of cumulative insider sales over 24 months \u2014 the covenant is described abstractly without foregrounding the active insider distribution. Carrier concentration (top 2 = 32% of revenue), credit-facility disclosure, FINRA-adjacency, and Q1 10-Q financial consistency all PASS. Composite 0.375 across 8 verifiable claims (5 PASS / 3 MODERATE / 0 SEVERE / 0 RED FLAG / 0 UNVERIFIABLE).",
+  "scoring": {
+    "PASS": 5,
+    "UNVERIFIABLE": 0,
+    "MODERATE_UNDERDELIVERY": 3,
+    "SEVERE_UNDERDELIVERY": 0,
+    "RED_FLAG_NEGATIVE": 0,
+    "verifiable_claims": 8,
+    "weighted_sum": "(0*5 + 1*3 + 2*0 + 3*0) / 8 = 3 / 8",
+    "composite": 0.375
+  }
+}

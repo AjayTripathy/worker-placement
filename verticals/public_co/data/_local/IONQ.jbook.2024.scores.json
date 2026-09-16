@@ -1,0 +1,107 @@
+{
+  "ticker": "IONQ",
+  "cutoff": "2024-09-01",
+  "filing": "0000950170-24-022072_10-K.txt",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Our customers include government agencies such as the United States Air Force Research Lab.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": "VERIFIED_BUT_TRAJECTORY_SHRINKING",
+      "M_check": "pentagon_jbook.query_program_funding(program_name='AFRL Quantum Networking', cutoff_date='2024-09-01') + usaspending.query_dod_contracts(recipient_name='IonQ', end_date='2024-09-01')",
+      "M_value": "pentagon_jbook signal=FUNDED_SHRINKING at cutoff; history_rows visible at cutoff: FY2022=$13M, FY2023=$26M, FY2024=$12M (already declining ~54% from FY23 peak). usaspending confirms PIID FA875022C1022 awarded by AFRL Rome (FA8750 prefix) to IONQ, INC. for $13.4M total obligated as of cutoff — matches one earmark cycle, not the full $51M revenue IonQ claims to have recognized.",
+      "interpretation": "AFRL relationship is real (verified by USAspending) — but the trajectory at cutoff is already FUNDED_SHRINKING (FY24 $12M vs FY23 $26M peak). The 10-K names AFRL prominently with no quantification, no PE number, no forward commitment. The shrinking trajectory at cutoff is materially adverse to the forward narrative ('our future growth depends in part on our ability to sell to government entities'). Per J-Book heuristic 1: FUNDED_SHRINKING → MODERATE_UNDERDELIVERY. Per heuristic 2 (materiality): IonQ does not quantify AFRL share but Q2-2024 10-Q discloses 79% revenue from 2 customers; AFRL is plausibly one. Reorganization caveat does not apply (no replacement_program at cutoff)."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Co-development agreement with DARPA on quantum benchmarking.",
+      "severity": "UNVERIFIABLE",
+      "supports": "NOT_IN_CORPUS",
+      "M_check": "pentagon_jbook.query_program_funding(program_name='DARPA Quantum Benchmarking', cutoff_date='2024-09-01')",
+      "M_value": "NOT_FOUND in J-Book corpus. usaspending check on IonQ shows zero DARPA-direct DOD awards at cutoff (only AFRL Rome FA8750).",
+      "interpretation": "Per heuristic 7: NOT_FOUND in J-Book is treated as UNVERIFIABLE, not a red flag. DARPA quantum benchmarking work could be a small SBIR or subaward not visible in either J-Book (corpus is 410 PEs, doesn't cover every DARPA benchmarking line) or usaspending (small-dollar SBIRs filtered). The 10-K language ('co-development agreement') is non-revenue-load-bearing — it's positioning, not a forward-revenue commitment. Coverage gap noted."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Two significant customers accounted for 58% (FY2023) / 79% (Q2-2024) / 75% (H1-2024) of revenue.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": "VERIFIED_CONCENTRATION_WITH_SHRINKING_PRIMARY",
+      "M_check": "pentagon_jbook.query_program_funding(contractor_name='IonQ', cutoff_date='2024-09-01') + usaspending.query_federal_presence(name_variants=['IonQ', 'IonQ Federal, LLC', ...], end_date='2024-09-01')",
+      "M_value": "pentagon_jbook returns 3 matched IonQ-touching programs at cutoff: (1) AFRL Quantum Networking — primary contractor IonQ Inc — FUNDED_SHRINKING ($13M→$26M→$12M); (2) AFRL Qubitekk Quantum Networking — primary contractor Qubitekk (not yet acquired by IonQ at cutoff; acquisition is post-cutoff Dec-2024 per entity-resolution corpus); (3) UMD Quantum (IonQ subcontractor) — FUNDED_STEADY at cutoff (FY22 $6M, no FY23/24 data visible). usaspending pre-cutoff: ONE DoD contract = $13.4M = AFRL Rome FA875022C1022. No other DoD contracts pre-cutoff above SBIR threshold.",
+      "interpretation": "Customer concentration (79% Q2-2024) ramping while the primary J-Book program (AFRL Quantum Networking) is already FUNDED_SHRINKING is the classic divergence pattern. The 'revenue concentration' jumped from 58% FY23 → 79% Q2-24 — i.e., the small customer base is getting MORE concentrated even as the underlying federal program funding is declining. Per heuristic 6 (USAspending cross-check): usaspending confirms past contract was real ($13.4M IDIQ at AFRL Rome) but the forward J-Book funding is shrinking — this is precisely the SEVERE_UNDERDELIVERY pattern. Per heuristic 2 materiality test, this is approaching 'existential' if AFRL is one of the two 79% customers. The 10-K/10-Q does not name which customers comprise the 79% — disclosure-gap itself."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Q2-2024 revenue +106% YoY to $11.4M driven by 'arrangements to build specialized quantum computing hardware'.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": "REVENUE_GROWTH_BUT_FORWARD_FUNDING_SHRINKING",
+      "M_check": "pentagon_jbook.query_program_funding(contractor_name='IonQ', cutoff_date='2024-09-01')",
+      "M_value": "primary_match = AFRL Quantum Networking, status=FUNDED_SHRINKING; FY2024 enacted $12M (vs FY2023 $26M peak). usaspending shows IonQ's only material DoD contract at cutoff is FA875022C1022, $13.4M obligated against a contract for 'TRAPPED ION QUANTUM COMPUTER' — i.e., the 'specialized quantum computing hardware' phrase in the 10-Q.",
+      "interpretation": "The 10-Q attributes ~half its 106% Q2 revenue jump to 'arrangements to build specialized quantum computing hardware'. The single matching DoD vehicle in the pre-cutoff record is exactly the AFRL FA875022C1022 trapped-ion hardware contract — which is on an already-declining FY funding trajectory and is congressionally-earmark-funded (Pentagon never requested it; see C6). This means the headline revenue-growth narrative is being driven by a contract whose forward FY funding has already been cut roughly in half FY23→FY24 and which is structurally vulnerable. Heuristic 6 SEVERE_UNDERDELIVERY applies: past revenue real, forward pipeline shrinking. Note: the management discussion does not disclose this declining-FY-funding context."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "IP licensed from University of Maryland / Duke is subject to march-in rights from federally-funded research origin.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": "PARTIAL_VERIFICATION",
+      "M_check": "pentagon_jbook.query_program_funding(program_name='University of Maryland Quantum', cutoff_date='2024-09-01') + doe_budget.query_program_funding(contractor_name='IonQ', qis_only=True, cutoff_date='2024-09-01')",
+      "M_value": "pentagon_jbook: UMD Quantum (IonQ subcontractor) — at cutoff shows FY2022 $6M; no FY2023/2024 rows visible — signal=FUNDED_STEADY (algorithmic) but only 1 datapoint. doe_budget: NOT_FOUND (DOE Office of Science corpus does not match an IonQ-direct subaward; UMD has multiple QIS programs not yet ingested).",
+      "interpretation": "The federal-IP march-in disclosure is boilerplate / contingent — not load-bearing on forward revenue. But the UMD subaward channel exists as a separate sub-flow distinct from the AFRL direct contract. With only FY2022 data visible at cutoff (the corpus seeded for this entry is sparse), it is hard to call this an actively shrinking line — but the absence of any cutoff-visible FY23 or FY24 row in the seeded UMD-subaward entry suggests the subaward channel may not be recurring. Marking MODERATE because the broader earmark cluster (AFRL+UMD) is the same earmark cluster that already shows FUNDED_SHRINKING on the AFRL leg (C1)."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Future growth depends on selling effectively to government entities and large enterprises.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": "STRUCTURAL_FUNDING_RISK_AT_CUTOFF",
+      "M_check": "pentagon_jbook.query_program_funding(contractor_name='IonQ', cutoff_date='2024-09-01') + earmark_detector.query_earmark_status(program_name='AFRL Quantum Networking')",
+      "M_value": "pentagon_jbook: FUNDED_SHRINKING. earmark_detector (using only cutoff-knowable facts): The AFRL Quantum Networking line was a NON-DISCLOSED-ADD — Pentagon requested $0 in every FY (FY22, FY23, FY24); the entire funding ($13M, $26M, $12M) is a congressional add. Sponsors identifiable from pre-cutoff committee reports: Sen. Cardin (MD, retiring after 118th Congress; announced May 2023 — pre-cutoff and public), Sen. Van Hollen (MD), Rep. Hoyer (MD-05, lost House Majority Leader gavel in Jan-2023 — pre-cutoff fact), Sen. Tester (MT, Senate Approps Defense Chair 2021-2023, in a notoriously tight 2024 re-election fight — known competitive race as of Sept 2024). [Excluded from this scoring: any specific knowledge of the Nov-2024 election outcome or subsequent FY25/FY26 funding zeros, which are post-cutoff.] Three of the four sponsors had documented diminution of approps influence before 2024-09-01.",
+      "interpretation": "Even using only cutoff-knowable facts, the structural risk is severe: the program funding the company's primary DoD revenue line is (a) FUNDED_SHRINKING in trajectory (FY24 $12M vs FY23 $26M, a >50% cut), (b) entirely non-requested by Pentagon (purely congressional add), (c) sponsored by a coalition of MD/MT Democrats whose collective approps power had already shrunk between FY23 and FY24 (Hoyer demoted, Cardin retiring, Tester defending a tough seat). Per heuristic 5 sub-signal, FUNDED_SHRINKING + politically-fragile earmark + bumps to SEVERE. The forward-revenue narrative is load-bearing on a structurally fragile funding base — disclosure of this fragility is absent from the 10-K."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Patents (intangible): gross $5.78M, 15.9 yr WARUL.",
+      "severity": "PASS",
+      "supports": "VERIFIED",
+      "M_check": "uspto_odp.query_assignee(assignee_name='IonQ, Inc.', cutoff_date='2024-09-01')",
+      "M_value": "347 applications, 123 granted pre-cutoff; portfolio active and growing.",
+      "interpretation": "Patent disclosure verified. Active IP portfolio. Control claim — no concerns. PASS."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "IonQ Federal, LLC and IonQ Quantum, Inc. are the primary federal contracting / operating subsidiaries.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": "NAME_RESOLVES_BUT_CONTRACTING_THROUGH_PARENT",
+      "M_check": "usaspending.query_dod_contracts(recipient_name='IonQ Federal, LLC', end_date='2024-09-01') + usaspending.query_federal_presence(name_variants=[...], end_date='2024-09-01')",
+      "M_value": "usaspending: ZERO contracts under 'IonQ Federal, LLC' at cutoff. UEI resolution returns single UEI EH32NDF7YPM7 = 'IONQ, INC.' (parent). All pre-cutoff DoD obligations ($13.4M) are under the parent name, not the federal subsidiary.",
+      "interpretation": "Entity-resolution structure (IonQ Federal, LLC as 'primary DoD contracting vehicle') is asserted in subsidiaries-list but contradicted by USAspending: as of 2024-09-01, IonQ Federal, LLC has no contracts in the federal record. The DoD pipeline runs through the parent. This is a minor disclosure imperfection (the federal-subsidiary vehicle may be newly formed for future business development) — MODERATE because it conflicts with the claimed business architecture and signals limited federal pipeline maturity."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "Forward narrative on selling full quantum computing systems to customers either over the cloud or for local access.",
+      "severity": "UNVERIFIABLE",
+      "supports": "NARRATIVE_NOT_PROGRAM_GROUNDED",
+      "M_check": "pentagon_jbook.query_program_funding(contractor_name='IonQ', cutoff_date='2024-09-01')",
+      "M_value": "No specific Pentagon program-of-record cited; the only matching contractor-keyed program is AFRL Quantum Networking (already scored C1). usaspending: no production-line procurement (P-40) line item present.",
+      "interpretation": "This is a generic forward-looking system-sale narrative without a named DoD program or PE. Per heuristic 7, NOT_FOUND-equivalent is treated as UNVERIFIABLE — the framework cannot reject the narrative but also cannot confirm a funded production pipeline at cutoff. No procurement-side P-40 evidence supports a system-sale ramp from DoD customers."
+    }
+  ],
+  "summary": {
+    "n_claims": 9,
+    "n_jbook_grounded": 7,
+    "n_queries_run": 11,
+    "severity_counts": {
+      "PASS": 1,
+      "MODERATE_UNDERDELIVERY": 3,
+      "SEVERE_UNDERDELIVERY": 3,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 2
+    },
+    "jbook_hits": {
+      "pentagon_jbook_fired_on": 6,
+      "of_jbook_grounded_claims": 7,
+      "primary_signal": "FUNDED_SHRINKING (AFRL Quantum Networking, IonQ direct)",
+      "structural_risk": "Earmark-funded, Pentagon-never-requested line; FY24 already cut ~54% vs FY23 peak; earmark sponsors' approps power diminishing pre-cutoff."
+    },
+    "framework_verdict_at_cutoff_2024_09_01": "DIVERGENCE PATTERN DETECTED. IonQ's forward growth narrative ('future growth depends on selling to government entities'; 79% of Q2-2024 revenue from two customers; revenue growth attributed to 'specialized quantum computing hardware') leans on a single matched J-Book program (AFRL Quantum Networking) whose funding trajectory at cutoff is already FUNDED_SHRINKING (FY22 $13M → FY23 $26M → FY24 $12M) and whose entire funding base is congressional add language (Pentagon $0 request every year). At cutoff, the sponsor coalition has visibly weakened (Hoyer lost majority-leader role Jan 2023; Cardin announced 2023 retirement; Tester defending tight seat). The framework can detect this divergence using only cutoff-knowable evidence; the post-cutoff outcomes (FY25/26 zeros, Tester loss) are consistent with but not required for the severity assignment."
+  }
+}

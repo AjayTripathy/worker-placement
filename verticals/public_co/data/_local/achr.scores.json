@@ -1,0 +1,77 @@
+{
+  "ticker": "achr",
+  "scores": [
+    {
+      "claim_id": "achr_united_purchase_agreement",
+      "claim_text": "Archer has entered into a purchase agreement with United Airlines, Inc. for the conditional purchase of up to $1.0 billion worth of aircraft, with an option for another $500.0 million. United paid $10.0 million in pre-delivery payments in August 2022 for 100 aircraft.",
+      "severity": "PASS",
+      "supports": "United Airlines (CIK 0000100517) discloses 'Archer Aviation' across 18 of its own SEC filings (8-K, 10-Q, 10-K) spanning 2021-04 through 2024-04, including periodic disclosure in 10-Qs through 2024-Q1.",
+      "M_check": "edgar_fts.query_fulltext(search_term='Archer Aviation', cik='0000100517')",
+      "M_value": "total_hits=18; forms include 8-K (2021 announcement), 10-Q (multiple), 10-K",
+      "interpretation": "Counterparty independently corroborates the relationship at multiple reporting periods. The pre-delivery payment ($10M for 100 aircraft) implies a tiny $100k/aircraft commitment relative to a $1.5B headline — small but real, and the disclosure cadence at UAL is consistent with a real (if conditional) commitment. PASS."
+    },
+    {
+      "claim_id": "achr_stellantis_partnership",
+      "claim_text": "Archer has a strategic manufacturing partnership with Stellantis N.V. as contract manufacturer for its Midnight aircraft, and Stellantis has invested via a Forward Purchase Agreement, including drawdowns of $95.0 million in 2023.",
+      "severity": "PASS",
+      "supports": "Stellantis (CIK 0001605484) is a foreign private issuer that reports on Form 20-F annually rather than US periodic forms; one 20-F mentions 'Archer Aviation'. Per heuristic 2, 0-2 mentions for a foreign-issuer ADR is NORMAL. Separately, the financial-statement disclosures within ACHR's 10-K (drawdowns of $95M cash from Stellantis Forward Purchase Agreement, 18.6M ACHR shares issued to Stellantis in 2023 at $3.94 and $5.68/share) are concrete cash-and-share evidence that the partnership economically exists.",
+      "M_check": "edgar_fts.query_fulltext(search_term='Archer Aviation', cik='0001605484')",
+      "M_value": "total_hits=1, single 20-F filing (foreign-issuer disclosure cadence is annual, not quarterly)",
+      "interpretation": "Foreign-issuer reporting cadence + concrete share-issuance and cash-drawdown evidence within ACHR's own filings make this PASS. Note: Stellantis equity stake increases through 2023 ($95M drawn down) is a real cash flow — not just an MOU."
+    },
+    {
+      "claim_id": "achr_boeing_wisk_settlement",
+      "claim_text": "On August 10, 2023, Archer, Boeing and Wisk entered into Technology and Dispute Resolution Agreements providing for Boeing investment in Archer Class A common stock and an autonomous-flight-tech collaboration with Wisk; Archer issued Wisk a warrant for up to 13,176,895 shares.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": "EDGAR full-text search for 'Archer Aviation' inside Boeing (CIK 0000012927) filings post-2023 returns 0 hits. 'Wisk Aero' search inside Boeing filings also returns 0 hits.",
+      "M_check": "edgar_fts.query_fulltext(search_term='Archer Aviation', cik='0000012927', start_date='2023-01-01')",
+      "M_value": "total_hits=0; Wisk Aero variant also 0",
+      "interpretation": "An equity investment that resolved patent litigation between Boeing's subsidiary (Wisk) and Archer would normally appear in Boeing's MD&A or Notes. 0 hits is materially weaker than expected. However, per heuristic 4 (investment partners often don't disclose) and given the settlement was structured as a private placement plus warrant — and the dollar amount may be immaterial to Boeing's balance sheet — this is MODERATE not SEVERE. The economic facts (Wisk Warrant for 13.18M shares, $70.3M non-cash charge) are recorded inside Archer's own financial statements, so the legal/economic event is documented; the gap is on the counterparty disclosure side."
+    },
+    {
+      "claim_id": "achr_covington_factory_ga",
+      "claim_text": "Archer has begun build-out of a 350,000 sq-ft high-volume manufacturing facility in Covington, Georgia, designed to produce up to 650 aircraft per year.",
+      "severity": "PASS",
+      "supports": "EPA FRS lists ARCHER AVIATION INC at 249 WILLIAMS ROAD, COVINGTON, NEWTON COUNTY, GA, ZIP 30014 (registry_id 110071399679).",
+      "M_check": "epa_frs.query_facilities(facility_name='Archer', state_abbr='GA', city_filter='Covington')",
+      "M_value": "n_facilities=1; lat/long resolves to Covington GA",
+      "interpretation": "EPA registration confirms physical site existence. Per heuristic 1 and 3, EPA registration of a planned factory under construction is more than typically expected — the filing's claim of a build-out underway is corroborated. PASS."
+    },
+    {
+      "claim_id": "achr_san_jose_production",
+      "claim_text": "Archer completed the build out of a production facility in San Jose, California, which will be used to produce the initial Midnight aircraft for the FAA certification program.",
+      "severity": "PASS",
+      "supports": "EPA FRS shows 4 ARCHER AVIATION facilities in San Jose CA: 77 Rio Robles, 15400 Graham St, 10 W Tasman Dr, and HQ at 190 W Tasman Dr (all 95134).",
+      "M_check": "epa_frs.query_facilities(facility_name='Archer', state_abbr='CA', city_filter='San Jose')",
+      "M_value": "n_facilities=4; multiple distinct addresses including HQ designation",
+      "interpretation": "Multi-site footprint in San Jose corroborates HQ + production claim. Note none of the facility names contain 'PLANT', 'FACTORY', or 'MANUFACTURING' tokens — but a small-scale eVTOL pilot/conformity build-out for FAA cert is unlikely to register as a heavy-emission industrial site. PASS."
+    },
+    {
+      "claim_id": "achr_proprietary_propulsion_ip",
+      "claim_text": "Archer asserts proprietary IP in its 12-tilt-6 eVTOL aircraft configuration, electric propulsion system (electric motors, batteries) and flight control software.",
+      "severity": "PASS",
+      "supports": "USPTO ODP shows 96 granted patents (182 total applications) assigned to Archer Aviation pre-cutoff, with category coverage in EVERY claimed bucket: airframe=67, propulsion=46, flight_control=33, battery=20, other=16 (categories overlap by keyword).",
+      "M_check": "uspto_odp.query_assignee(assignee_name='Archer Aviation', cutoff_date='2024-06-30')",
+      "M_value": "n_granted=96; category_counts: propulsion=46, battery=20, flight_control=33, airframe=67",
+      "interpretation": "Strong portfolio breadth across every claimed technology area — opposite of the Nikola pattern. Per heuristic 8, n_granted >= 5 with hits in claimed categories = PASS. Decisive PASS."
+    },
+    {
+      "claim_id": "achr_external_brand_footprint",
+      "claim_text": "Archer's Midnight eVTOL aircraft and Archer Aviation as a brand are discussed by external US-listed counterparties in their SEC filings.",
+      "severity": "PASS",
+      "supports": "EDGAR full-text returns 315 filings mentioning 'Archer Aviation' (plus 6 mentions of 'Midnight eVTOL' specifically).",
+      "M_check": "edgar_fts.query_fulltext(search_term='Archer Aviation', cutoff_date='2024-06-30')",
+      "M_value": "total_hits=315 across 10-K/10-Q/8-K/DEF 14A; 6 hits for 'Midnight eVTOL'",
+      "interpretation": "Substantial external footprint in US filings — counterparty / partner / competitor mentions exceed the PASS threshold (>=10) by 30x. Real public-company presence."
+    },
+    {
+      "claim_id": "achr_going_concern_liquidity",
+      "claim_text": "As of December 31, 2023, Archer had cash of $464.6M, accumulated deficit of $1,148.8M, and used $271.6M in 2023 operations; FAA certification not expected until late 2025 or later.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": "Self-disclosed math: $464.6M cash / $271.6M annual burn = ~20 months of runway absent further financing; pre-revenue with no FAA Type Certification expected before late 2025; liquidity buffer relies on equity issuances (PIPE $139M, Stellantis $70M, Cantor ATM $49.3M remaining) and a $65M Synovus credit facility (only available for Covington capex).",
+      "M_check": "Filing-internal arithmetic + Cantor ATM (Sales Agreement) + Stellantis Forward Purchase Agreement remaining $55M tranche subject to milestone",
+      "M_value": "Cash $464.6M; ops burn $271.6M/yr; ATM $49.3M remaining; Stellantis $55M conditional; Synovus $65M restricted to Covington capex",
+      "interpretation": "Going-concern math is tight: 18-22 months runway, but FAA Type Cert (the revenue-enabling milestone) is gated to late-2025 or LATER. Material burn is increasing not decreasing as Covington construction ramps. The fact that ACHR drew on the Stellantis Forward Purchase Agreement at $3.94 and $5.68/share (well below market) shows strong dilution pressure. Risk is real but financing access has been demonstrated — MODERATE rather than SEVERE. Watch for further dilutive issuances and Covington capex slippage."
+    }
+  ]
+}

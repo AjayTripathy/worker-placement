@@ -1,0 +1,98 @@
+{
+  "ticker": "ssys",
+  "scores": [
+    {
+      "claim_id": "ssys-1",
+      "claim_text": "General Motors is a strategic customer; GM's new multi-million-dollar additive manufacturing facility in Michigan features Stratasys systems from low to high end.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": false,
+      "M_check": "edgar_fts.query_fulltext(search_term='Stratasys', cik=0001467858 [General Motors], 2018-01-01 to 2024-03-31)",
+      "M_value": {
+        "total_hits": 0
+      },
+      "interpretation": "GM's own SEC filings (10-K/10-Q/8-K/DEF 14A from 2018 onward) do not mention 'Stratasys' even once. A 'multi-million-dollar' AM facility purchase is immaterial relative to GM's ~$170B revenue base, so absence of disclosure is not a red flag \u2014 it is consistent with a real but immaterial commercial relationship. Held to MODERATE because the claim explicitly quantifies ('multi-million-dollar') and identifies a specific facility, yet leaves zero counterparty trace; cannot be falsified or confirmed via M."
+    },
+    {
+      "claim_id": "ssys-2",
+      "claim_text": "Boeing is among the prominent diverse customers of Stratasys.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "edgar_fts.query_fulltext(search_term='Stratasys', cik=0000012927 [Boeing], 2018-01-01 to 2024-03-31)",
+      "M_value": {
+        "total_hits": 0,
+        "interpretation_note": "Boeing supplier-list mentions of named small-vendors are not standard in 10-K disclosures; Boeing's revenue is ~$77B and a 3D-printer supply relationship is well below materiality threshold. Per foreign-issuer / immaterial-counterparty calibration, 0 hits = NORMAL."
+      },
+      "interpretation": "Stratasys-Boeing relationship is widely-publicized and Boeing is named here as one of many customers (no order size given, no exclusive). 0 hits in Boeing's own filings is the expected pattern for an immaterial commercial supplier relationship and does not contradict the claim. Holding PASS."
+    },
+    {
+      "claim_id": "ssys-3",
+      "claim_text": "The U.S. Army signed an approximate $8 million contract with Stratasys in 2023 for a purchase that included systems from all five Stratasys platforms.",
+      "severity": "UNVERIFIABLE",
+      "supports": null,
+      "M_check": "edgar_fts.query_fulltext(search_term='Stratasys', start_date=2023-01-01, cutoff=2024-03-31)",
+      "M_value": {
+        "total_hits_2023plus": "subset of 213 total"
+      },
+      "interpretation": "The U.S. Army does not file SEC disclosures (federal-government counterparty, not a corporation). The natural M-source would be SAM.gov / FPDS contract awards, which is not in our catalog. EDGAR full-text returns plenty of Stratasys mentions but these reflect competitor/M&A activity, not Army contract corroboration. Per heuristic 7 (single-variant queries \u2192 UNVERIFIABLE if alternates lacking)."
+    },
+    {
+      "claim_id": "ssys-4",
+      "claim_text": "Stratasys operates FDM manufacturing and assembly operations from owned buildings in Eden Prairie, Minnesota (308,646 sq ft total).",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "epa_frs.query_facilities(facility_name='Stratasys', state_abbr='MN', city_filter='Eden Prairie')",
+      "M_value": {
+        "n_facilities": 12,
+        "factory_named": [
+          "STRATASYS - MATERIALS MFG",
+          "STRATASYS DIRECT MANUFACTURING",
+          "STRATASYS (SMACS)"
+        ],
+        "addresses_match_filing": "7665 Commerce Way Eden Prairie MN 55344 \u2014 same address disclosed in 20-F"
+      },
+      "interpretation": "EPA FRS authoritatively confirms 12 Stratasys-named facilities clustered around Eden Prairie at multiple owned/leased sites including a dedicated 'MATERIALS MFG' facility and a 'DIRECT MANUFACTURING' facility. Filing's principal address (7665 Commerce Way) matches FRS. Strongest possible PASS."
+    },
+    {
+      "claim_id": "ssys-5",
+      "claim_text": "Stratasys acquired the Covestro AM materials business in April 2023, including a manufacturing site in Elgin, Illinois (27,384 sq ft) used for consumable materials production.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "epa_frs.query_facilities(facility_name='Stratasys', state_abbr='IL', city_filter='Elgin') AND (Covestro Elgin)",
+      "M_value": {
+        "stratasys_elgin_facilities": 2,
+        "covestro_elgin_facilities": 0,
+        "addresses": [
+          "1100 ST CHARLES ST",
+          "1122 ST CHARLES ST UNIT B"
+        ]
+      },
+      "interpretation": "EPA FRS shows two Stratasys-rebranded facilities at the Elgin, IL St. Charles St. address \u2014 consistent with the 2023 Covestro AM business acquisition having transferred the site to Stratasys. The fact that Covestro itself no longer registers an Elgin AM facility while Stratasys now does is exactly the structural footprint expected of a real asset transfer. Strong PASS."
+    },
+    {
+      "claim_id": "ssys-6",
+      "claim_text": "Stratasys holds approximately 2,600 granted and pending patents internationally across FDM, PolyJet, SAF, P3, and stereolithography technologies.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "USPTO ODP query_assignee('Stratasys', cutoff=2024-03-31)",
+      "M_value": "n_total=779, n_granted=448, category_counts={'fdm_extrusion': 38, 'polyjet_inkjet': 16, 'powder_saf': 18, 'stereolithography': 1}",
+      "interpretation": "USPTO ODP shows 448 granted patents pre-cutoff with at least one match in claimed categories ({'fdm_extrusion': 38, 'polyjet_inkjet': 16, 'powder_saf': 18, 'stereolithography': 1}). Real portfolio exists."
+    },
+    {
+      "claim_id": "ssys-7",
+      "claim_text": "Over 500,000 Stratasys parts are flying in aerospace applications worldwide.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "edgar_fts.query_fulltext(search_term='Stratasys', forms=10-K/10-Q/8-K/DEF 14A/20-F/40-F, 2018-01-01 to 2024-03-31)",
+      "M_value": {
+        "total_hits": 213,
+        "co_filers_observed": [
+          "3D SYSTEMS CORP",
+          "Desktop Metal Inc",
+          "STRATASYS LTD itself"
+        ],
+        "interpretation_note": "Substantial external footprint in US-listed 3D-printing peers' filings, primarily in M&A / hostile-bid context (3D Systems-Stratasys 2023 attempted combination, Nano Dimension tender)."
+      },
+      "interpretation": "213 EDGAR full-text hits across US-listed filers is well above the recipe's PASS threshold (>=10) for distinctive-product brand validation. The mentions are real-world traces of an operating company with a meaningful industry footprint. The aerospace 'parts flying' subclaim is qualitative and not directly counted by EDGAR, but the broader external-validation signal supports the company's claimed industrial scale. PASS."
+    }
+  ]
+}

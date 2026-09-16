@@ -1,0 +1,111 @@
+{
+  "ticker": "J",
+  "cutoff": "2026-05-20",
+  "filing": "0001628280-25-053316_10-K.txt",
+  "scoring_notes": [
+    "Framework-level finding: the cohort metadata for J names defense programs (hypersonic test infrastructure, NNSA Nuclear Security Enterprise sustainment, AF Test Range modernization) that BELONG TO AMENTUM (AMTM), not Jacobs Solutions (J), post the September 2024 Reverse Morris Trust spin. The FY2025 10-K of continuing-operations Jacobs makes NO claims about any Pentagon Program Element. Therefore the J-Book DIVERGENCE pattern has no narrative load to test for J; the framework's correct read is that J has minimal residual DoD/J-Book exposure and the named programs migrated to AMTM.",
+    "pentagon_jbook contractor-name lookup for 'Jacobs Technology', 'Jacobs Solutions', and even 'Amentum' all return NOT_FOUND because the corpus's contractor index is sparse (only primary_contractors[] populated for a handful of PEs). However, the by_entity.json side-channel index DOES show JACOBS TECHNOLOGY INC. as performer on PE 0604879C and JACOBS TECHNOLOGY IRES INC. as contractor on PE 0604102C. Both PEs are FUNDED_SHRINKING in FY26 but they ride to Amentum, not J.",
+    "USAspending corroborates the entity migration: 'Jacobs Engineering Group' / 'Jacobs Technology' historical DoD awards (1,249 awards, $2.8B) are now showing Recipient Name = 'AMENTUM TECHNOLOGY, INC.' on the top awards including the MDA BMDS RDT&E task order (Award HQ079618F8003, $617M) directly mapping to PE 0604879C. 'Jacobs Solutions' returns 0 DoD awards."
+  ],
+  "scores": [
+    {
+      "claim_id": "J-1",
+      "claim_text": "Jacobs spun off CMS+C&I into Amentum (AMTM) on 2024-09-27 via Reverse Morris Trust.",
+      "severity": "PASS",
+      "supports": ["Filing disclosure is explicit and corroborated by Amentum's existence on NYSE as AMTM; USAspending shows historical Jacobs DoD awards now reattributed to 'AMENTUM TECHNOLOGY, INC.'."],
+      "M_check": "usaspending.query_dod_contracts(recipient_name='Jacobs Engineering Group')",
+      "M_value": "n_awards=954, total=$4.47B, top recipient on retained-name awards = AMENTUM TECHNOLOGY INC.",
+      "interpretation": "Disclosure verified. The defense work has clearly migrated to AMTM. For J-Book divergence testing, this means the named-program exposure in the cohort metadata is mis-attributed to J."
+    },
+    {
+      "claim_id": "J-2",
+      "claim_text": "U.S. federal government is 8% of FY25 continuing-ops revenue, down from 10% (FY24) and 9% (FY23).",
+      "severity": "PASS",
+      "supports": ["Filing self-discloses the trajectory; no Pentagon program is named in the continuing-ops narrative, consistent with the modest 8% share being civil-federal (water, environmental, FAA, NASA, life sciences-type work) rather than DoD."],
+      "M_check": "usaspending.query_dod_contracts(recipient_name='Jacobs Solutions')",
+      "M_value": "n_awards=0, total=$0 -> parent-name DoD pipeline is empty",
+      "interpretation": "Consistent with post-spin reality. Low DoD exposure means J does NOT have material J-Book PE divergence risk. PASS for the disclosure; framework correctly identifies J as a non-target for the J-Book divergence cohort."
+    },
+    {
+      "claim_id": "J-3",
+      "claim_text": "Jacobs Technology Inc. is listed in the J-Book by_entity index as performer on PE 0604879C (MDA Ballistic Missile Defense Sensor Test).",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "J-Book PE 0604879C returns FUNDED_SHRINKING (FY24 $102.1M -> FY25 $96.9M -> FY26 $68.7M, ~33% cut FY25->FY26).",
+        "USAspending shows the relevant task order (HQ079618F8003, $617M MDA enterprise IT including BMDS RDT&E) is now recipient 'AMENTUM TECHNOLOGY, INC.' — i.e., this PE rides to Amentum."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(pe_number='0604879C')",
+      "M_value": "FUNDED_SHRINKING; FY26 funded $68.7M (down from $102.1M in FY24, -33% YoY into FY26)",
+      "interpretation": "The PE itself IS shrinking — a J-Book divergence signal — but the exposure belongs to AMTM, not J. Continuing-ops Jacobs does not claim this program. UNVERIFIABLE for ticker J (entity-resolution mismatch); would be MODERATE_UNDERDELIVERY if scored against AMTM."
+    },
+    {
+      "claim_id": "J-4",
+      "claim_text": "Jacobs Technology IRES Inc. is listed in the J-Book by_entity index as contractor on PE 0604102C (Guam Defense Development, MDA).",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "J-Book PE 0604102C returns FUNDED_SHRINKING with a sharp cut: FY24 $554.5M -> FY25 $415.8M -> FY26 $128.5M (~69% cut FY25->FY26).",
+        "Jacobs IRES (Information Technology and Engineering Services for the MDA) was part of the CMS spin to Amentum."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(pe_number='0604102C')",
+      "M_value": "FUNDED_SHRINKING; FY26 $128.5M (-69% YoY from FY25 $415.8M)",
+      "interpretation": "Large MDA Guam program funding collapse is meaningful — would be SEVERE_UNDERDELIVERY for an entity still booking this work (AMTM). Not attributable to ticker J. UNVERIFIABLE for J."
+    },
+    {
+      "claim_id": "J-5",
+      "claim_text": "Cohort metadata says J is exposed to hypersonic test infrastructure / NNSA Nuclear Security Enterprise sustainment / AF Test Range modernization. The 10-K mentions NONE of these.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "Slice search for 'hypersonic', 'NNSA', 'Nuclear Security Enterprise', 'AF Test Range', 'Air Force Test Range' returned 0 hits in the FY25 10-K.",
+        "pentagon_jbook returns NOT_FOUND for all three program-name queries (hypersonic test / NNSA NSE / AF Test Range) — NNSA is DOE not DoD so absent by design; AEDC/test-range PEs may be outside the 410-PE corpus.",
+        "Public reporting via the Separation Transaction disclosure plus the USAspending entity migration to AMENTUM TECHNOLOGY INC. indicates this work moved to Amentum."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(program_name=hypersonic/NSE/Test Range)",
+      "M_value": "All three NOT_FOUND in J-Book corpus; corpus-coverage gap and entity migration both contribute",
+      "interpretation": "The cohort-metadata premise is OBSOLETE for ticker J after the 2024 spin. Correct framework response: this is an UNVERIFIABLE/entity-mismatch claim, not a divergence catch. The divergence signals (FY26 -33% on MDA Sensor Test, -69% on Guam Defense Development) are real but apply to AMTM."
+    },
+    {
+      "claim_id": "J-6",
+      "claim_text": "FY2025 included ~$26M TSA charges with Amentum and a $227.3M mark-to-market loss on Amentum stock.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "Filing self-discloses the $26M TSA charge and the $227.3M MTM loss on retained AMTM shares.",
+        "$227.3M MTM loss = material drag on FY25 earnings and signals that the AMTM defense business (which holds the J-Book PE exposure) is being repriced downward by the market; this is the indirect channel through which J still 'feels' J-Book risk."
+      ],
+      "M_check": "edgar_fts.query_fulltext(search_term='Transition Services Agreement Jacobs', cik=AMTM)",
+      "M_value": "total_hits=0 in AMTM filings for that exact phrase (TSA usually disclosed under separate exhibit naming); not a corroboration failure given the precise phrase requirement",
+      "interpretation": "Disclosure is internally consistent. The $227.3M AMTM stock writedown is an INDIRECT divergence catch — the market has marked down the defense-program-element exposure that J off-loaded, and J's residual equity stake bore the brunt. MODERATE_UNDERDELIVERY for J because the magnitude is large relative to FY25 segment op profit (~$1.18B) but the underlying defense exposure no longer drives J's forward narrative."
+    },
+    {
+      "claim_id": "J-7",
+      "claim_text": "Continuing-ops end markets: Critical Infrastructure, Water & Environmental, Life Sciences & Advanced Manufacturing, plus PA Consulting.",
+      "severity": "PASS",
+      "supports": ["pentagon_jbook.query_program_funding(contractor_name='Jacobs Solutions') returns NOT_FOUND, consistent with no PE-level DoD program reliance on the parent post-spin."],
+      "M_check": "pentagon_jbook.query_program_funding(contractor_name='Jacobs Solutions')",
+      "M_value": "NOT_FOUND",
+      "interpretation": "Post-spin end-market mix is non-Pentagon-PE-dependent. The J-Book framework correctly returns null exposure for the parent — PASS."
+    },
+    {
+      "claim_id": "J-8",
+      "claim_text": "PA Consulting generated $1.27B revenue and $278.5M op profit in FY25; public-sector clients are predominantly non-US (UK MoD, Norway, Denmark, Sweden agencies).",
+      "severity": "PASS",
+      "supports": ["edgar_fts confirms PA Consulting is a recurring named segment across J's FY2026 8-Ks and 10-Qs (69 hits), consistent with stable disclosure pattern."],
+      "M_check": "edgar_fts.query_fulltext(search_term='PA Consulting', cik='0000052988')",
+      "M_value": "total_hits=69 across recurring J filings 2021-2026",
+      "interpretation": "Control claim verified. PA Consulting is a non-DoD segment; orthogonal to J-Book divergence pattern. PASS."
+    }
+  ],
+  "summary": {
+    "n_claims": 8,
+    "n_queries_run": 12,
+    "severity_counts": {
+      "PASS": 4,
+      "MODERATE_UNDERDELIVERY": 1,
+      "SEVERE_UNDERDELIVERY": 0,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 3
+    },
+    "jbook_grounded_claims": 3,
+    "jbook_fired_on": 2,
+    "framework_verdict": "J is the WRONG TICKER for the J-Book divergence cohort post-2024 spin. The named programs (hypersonic test infrastructure, NNSA Nuclear Security Enterprise sustainment, AF Test Range modernization) and the J-Book PEs tagged to Jacobs Technology (0604879C MDA Sensor Test FUNDED_SHRINKING -33%; 0604102C Guam Defense Development FUNDED_SHRINKING -69%) all migrated to AMENTUM (AMTM) in September 2024. Continuing-ops Jacobs is now a civil infrastructure / water / life-sciences / PA Consulting business with 8% federal-government revenue and no named Pentagon programs in its forward narrative. The divergence pattern, if it exists, applies to AMTM. For J: minimal direct J-Book risk; indirect $227M FY25 MTM loss on retained AMTM stake is the only material defense-driven hit."
+  }
+}

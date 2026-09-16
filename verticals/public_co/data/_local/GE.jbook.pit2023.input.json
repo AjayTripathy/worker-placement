@@ -1,0 +1,132 @@
+{
+  "ticker": "GE",
+  "cutoff": "2023-01-15",
+  "filing": "0000040545-22-000008_10-K.txt",
+  "filing_form": "10-K",
+  "filed": "2022-02-11",
+  "cohort": "jbook_exposure_divergence",
+  "company_note": "Pre-split (GE Aerospace spinoff was April 2024). At this cutoff, Aviation is one of four segments inside the General Electric Company conglomerate. Three-way split announced Nov 2021.",
+  "extract_note": "GE 2021 10-K narrative is notably GENERIC about military programs: no PE numbers, no named Program Elements, no specific named DoD programs (no F-35/B-21/CCA/NGAD/T901/XA100/AETP mentions in narrative). Military is described only as 'fighters, bombers, tankers, helicopters and surveillance aircraft, as well as marine applications.' This is a NEGATIVE EXTRACT for the J-Book cohort: the divergence-detection pattern requires named programs to look up. We extract the few program-attached claims we can (RISE/Catalyst commercial, customer-funded R&D principally USG, Aviation military forecast), plus quantified defense-revenue concentration, plus a few control claims.",
+  "claims": [
+    {
+      "claim_id": "GE-001",
+      "claim_text": "GE Aviation's Military business unit had revenue of $4,136M in FY2021, down from $4,572M in FY2020 and $4,389M in FY2019.",
+      "subject": "GE Aviation Military business unit",
+      "predicate": "reported_revenue_fy",
+      "object_value": {"2021": 4136e6, "2020": 4572e6, "2019": 4389e6},
+      "source_quote": "Commercial Engines & Services $ 14,360 $ 14,479 $ 24,769 Military 4,136 4,572 4,389 Systems & Other 2,814 2,991 3,718 Total segment revenues $ 21,310 $ 22,042 $ 32,875",
+      "category": "dod_customer_concentration",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "General Electric", "cutoff_date": "2023-01-15"}},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "GE Aviation", "cutoff_date": "2023-01-15"}}
+      ]
+    },
+    {
+      "claim_id": "GE-002",
+      "claim_text": "Total U.S. Government sales (across all segments) were 6% of total revenues in 2021 (~$4.45B on $74.2B base); Aviation defense-related sales were 5% of total revenues in 2021 (~$3.7B).",
+      "subject": "General Electric Company",
+      "predicate": "us_government_revenue_concentration",
+      "object_value": {"usg_pct_2021": 0.06, "aviation_defense_pct_2021": 0.05, "implied_usg_dollars_2021": 4.45e9, "implied_aviation_def_2021": 3.71e9},
+      "source_quote": "Total sales of equipment and services to agencies of the U.S. Government were 6 %, 7 % and 5 % of total revenues for the years ended December 31, 2021, 2020 and 2019, respectively. Within our Aviation segment, defense-related sales were 5 %, 6 % and 4 % of total revenues for the years ended December 31, 2021, 2020 and 2019, respectively.",
+      "category": "dod_customer_concentration",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "General Electric", "cutoff_date": "2023-01-15"}}
+      ]
+    },
+    {
+      "claim_id": "GE-003",
+      "claim_text": "Aviation forecasts strong military demand creating future growth opportunities for the Military business unit, citing DoD and foreign-government budget allocations to upgrade and modernize fleets.",
+      "subject": "GE Aviation",
+      "predicate": "forward_military_demand",
+      "object_value": "strong/growing",
+      "source_quote": "As it relates to the military environment, Aviation continues to forecast strong military demand creating future growth opportunities for our Military business unit as the U.S. Department of Defense and foreign governments have continued flight operations, and have allocated budgets to upgrade and modernize their existing fleets.",
+      "category": "jbook_program_pipeline",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "General Electric", "cutoff_date": "2023-01-15"}},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"program_name": "F404", "cutoff_date": "2023-01-15"}},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"program_name": "F414", "cutoff_date": "2023-01-15"}},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"program_name": "F110", "cutoff_date": "2023-01-15"}}
+      ]
+    },
+    {
+      "claim_id": "GE-004",
+      "claim_text": "GE Aviation Military engine deliveries were 553 units in FY2021, down from 683 units in FY2020 and 717 units in FY2019 (a 23% YoY drop and 23% drop from FY2019).",
+      "subject": "GE Aviation Military Engines",
+      "predicate": "unit_deliveries_fy",
+      "object_value": {"2021": 553, "2020": 683, "2019": 717},
+      "source_quote": "Sales in units, except where noted 2021 2020 2019 Commercial Engines(a) 1,487 1,720 3,048 LEAP Engines(b) 845 815 1,736 Military Engines 553 683 717",
+      "category": "jbook_program_revenue",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "General Electric", "cutoff_date": "2023-01-15"}}
+      ]
+    },
+    {
+      "claim_id": "GE-005",
+      "claim_text": "Aviation military engine installed base of approximately 26,200 units (positioned as a long-term services / aftermarket revenue base).",
+      "subject": "GE Aviation Military",
+      "predicate": "installed_base_units",
+      "object_value": 26200,
+      "source_quote": "military engine installed base of approximately 26,200 units represents strong long-term fundamentals",
+      "category": "jbook_program_pipeline",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "General Electric", "cutoff_date": "2023-01-15"}}
+      ]
+    },
+    {
+      "claim_id": "GE-006",
+      "claim_text": "Customer-funded R&D in Aviation was $972M in 2021 (vs $1,090M in 2020, $911M in 2019), 'principally U.S. Government funded' — i.e., DoD RDT&E dollars to GE Aviation flowing through R-2 program elements.",
+      "subject": "GE Aviation",
+      "predicate": "usg_funded_rd_fy",
+      "object_value": {"2021": 972e6, "2020": 1090e6, "2019": 911e6, "note": "principally USG-funded"},
+      "source_quote": "Aviation $ 664 $ 707 $ 906 $ 972 $ 1,090 $ 911 ... (b) Customer funded is principally U.S. Government funded in our Aviation segment.",
+      "category": "jbook_program_revenue",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "General Electric", "cutoff_date": "2023-01-15"}},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"program_name": "XA100", "cutoff_date": "2023-01-15"}},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"program_name": "AETP", "cutoff_date": "2023-01-15"}}
+      ]
+    },
+    {
+      "claim_id": "GE-007",
+      "claim_text": "GE Aviation military engine portfolio is described only generically: 'fighters, bombers, tankers, helicopters and surveillance aircraft, as well as marine applications' — NO specific PE numbers, NO named Program Elements (F-35/B-21/CCA/NGAD/T901/XA100/AETP), and NO program-level revenue attribution disclosed.",
+      "subject": "GE Aviation Military",
+      "predicate": "named_program_disclosure",
+      "object_value": "absent — generic platform-category language only",
+      "source_quote": "Our military engines power a wide variety of military aircraft including fighters, bombers, tankers, helicopters and surveillance aircraft, as well as marine applications.",
+      "category": "jbook_program_pipeline",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "General Electric", "cutoff_date": "2023-01-15"}}
+      ]
+    },
+    {
+      "claim_id": "GE-008",
+      "claim_text": "GE announced in Nov 2021 a strategic plan to spin into three investment-grade public companies (Aviation; Healthcare; combined Renewable Energy + Power + Digital).",
+      "subject": "General Electric Company",
+      "predicate": "structural_split",
+      "object_value": "3-way split (Aviation stays, Healthcare spins, Power/Renewables spin)",
+      "source_quote": "in November 2021 we announced a strategic plan to form three industry-leading, global, investment-grade public companies from our (i) Aviation business, (ii) Healthcare business and (iii) combined Renewable Energy, Power and Digital businesses",
+      "category": "rollup_thesis",
+      "queries": []
+    },
+    {
+      "claim_id": "GE-009",
+      "claim_text": "In June 2021 Aviation and Safran announced Revolutionary Innovation for Sustainable Engines (RISE), a technology development program targeting >20% lower fuel consumption and CO2 emissions vs current engines.",
+      "subject": "GE Aviation + Safran",
+      "predicate": "rd_program_announcement",
+      "object_value": "RISE — >20% fuel/CO2 reduction target, commercial-engine future",
+      "source_quote": "In June 2021, Aviation and Safran announced Revolutionary Innovation for Sustainable Engines (RISE), a technology development program targeting more than 20% lower fuel consumption and CO2 emissions compared to today s engines.",
+      "category": "other",
+      "queries": []
+    },
+    {
+      "claim_id": "GE-010",
+      "claim_text": "GE Aviation Catalyst engine (first clean-sheet turboprop in 50 years for the business/general-aviation market) completed first flight in September 2021.",
+      "subject": "GE Aviation Catalyst engine",
+      "predicate": "product_milestone",
+      "object_value": "first flight achieved Sept 2021 — commercial turboprop",
+      "source_quote": "In September 2021, Aviation s Catalyst engine, the first clean-sheet turboprop design entering the business and general aviation market in 50 years, completed its first flight.",
+      "category": "other",
+      "queries": []
+    }
+  ]
+}

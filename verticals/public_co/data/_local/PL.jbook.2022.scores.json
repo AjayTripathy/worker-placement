@@ -1,0 +1,143 @@
+{
+  "ticker": "PL",
+  "cutoff": "2022-06-01",
+  "filing": "0001836833-22-000018_10-K.txt",
+  "scores": [
+    {
+      "claim_id": "c1",
+      "claim_text": "Planet expects to continue to capture certain high-value government procurement contracts as a forward growth driver.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook(contractor_name='Planet Labs', cutoff_date=2022-06-01) -> NOT_FOUND (0 matches)",
+        "pentagon_jbook(contractor_name='Planet Labs Federal', cutoff_date=2022-06-01) -> NOT_FOUND (0 matches)",
+        "pentagon_jbook(program_name='commercial satellite imagery', cutoff_date=2022-06-01) -> NOT_FOUND",
+        "usaspending.query_dod_contracts(recipient_name='Planet Labs', end_date=2022-06-01) -> 4 awards / $0.65M (FA945321C0033 Hybrid Architecture Demos $282k; W913E521P0017 SkySat flexible tasking $240k; W913E520P0035 SkySat monitoring $100k; N0017320P0339 ~$33k)",
+        "usaspending.query_federal_presence(name_variants=['Planet Labs', 'Planet Labs Federal', 'Planet Labs PBC', 'Planet Labs Inc'], end_date=2022-06-01) -> 4 UEIs resolved; 46 contracts / $44.4M lifetime; top customer NASA ($7M EARTH OBSERVATIONS pilot + $6.7M follow-on); only 7 of 46 awards are DoD"
+      ],
+      "M_check": "pentagon_jbook + usaspending",
+      "M_value": "J-Book NOT_FOUND; pre-cutoff DoD obligations ~$0.65M (vs ~$44M lifetime federal across mostly civilian agencies)",
+      "interpretation": "PL's forward-looking language about 'high-value government procurement contracts' is generic and doesn't name a Pentagon Program Element, so the J-Book test surface returns NOT_FOUND across both contractor-name and program-name queries (calibration heuristic #7: NOT_FOUND alone is not a red flag — it reflects corpus coverage rather than a missing program). At the 2022-06-01 cutoff, PL's actual federal book is dominated by NASA + civilian agencies; DoD obligations are de minimis (<$1M). This is consistent with PL's stated subscription-data business model and does not yet exhibit the J-Book divergence pattern. UNVERIFIABLE at this cutoff: PL has not yet bet narrative weight on a specific DoD PE, and the framework correctly refrains from manufacturing severity."
+    },
+    {
+      "claim_id": "c2",
+      "claim_text": "Planet's Defense & Intelligence vertical is a major growth opportunity, with governments strategically engaging with commercial space and remote sensing companies to leverage sharable, unclassified subscription products to complement traditional defense and security industrial solutions.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook(program_name='commercial GEOINT', cutoff_date=2022-06-01) -> NOT_FOUND",
+        "pentagon_jbook(program_name='EnhancedView', cutoff_date=2022-06-01) -> NOT_FOUND",
+        "pentagon_jbook(program_name='Tactical GEOINT', cutoff_date=2022-06-01) -> NOT_FOUND",
+        "pentagon_jbook(program_name='maritime domain awareness', cutoff_date=2022-06-01) -> NOT_FOUND",
+        "pentagon_jbook(program_name='NGA commercial imagery', cutoff_date=2022-06-01) -> NOT_FOUND",
+        "Filing doesn't name a specific PE/program in this section; the assertion is industry-vertical framing, not a programmatic commitment"
+      ],
+      "M_check": "pentagon_jbook",
+      "M_value": "NOT_FOUND across 5 candidate commercial-GEOINT program-name probes",
+      "interpretation": "Calibration heuristic #7: the corpus (~410 PEs of DARPA/MDA/SOCOM/OSD/Air Force/Space Force RDT&E + AF procurement) does not appear to cover NRO/NGA commercial-imagery procurement vehicles (EnhancedView/EOCL/Luno) as named line items — these sit largely in the NIP, not the DoD J-Book. The framework's coverage gap means we can't disconfirm PL's vertical opportunity narrative via J-Book at this cutoff. Combined with claim c1's findings (cutoff-date DoD obligations are <$1M and civilian-agency-dominated), the Defense & Intelligence vertical is aspirational positioning rather than booked-revenue concentration. UNVERIFIABLE — yellow note: PL's federal book pre-cutoff is overwhelmingly NASA/USDA/DOI, not D&I, which is at odds with the prominence the narrative places on D&I."
+    },
+    {
+      "claim_id": "c3",
+      "claim_text": "Planet Labs Federal, Inc. is the U.S. federal-contracting subsidiary that holds NISPOM facility security clearance, a prerequisite to performing services requiring classified personnel for the U.S. government.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook(contractor_name='Planet Labs Federal', cutoff_date=2022-06-01) -> NOT_FOUND (corpus coverage gap)",
+        "usaspending.query_dod_contracts(recipient_name='Planet Labs Federal', end_date=2022-06-01) -> 1 award / $282,586 (FA945321C0033 HYBRID ARCHITECTURE DEMONSTRATIONS, USAF — i.e., AFRL/AFWERX-style demo)",
+        "usaspending.query_federal_presence resolved 2 UEIs to PLANET LABS FEDERAL, INC. (TFCJCMKNHT74 child; J12LRS548M86 parent) → the federal sub is a real, registered SAM.gov entity",
+        "PL has a Washington, D.C. office serving as Planet Federal corporate HQ (per Item 2 Properties)"
+      ],
+      "M_check": "pentagon_jbook + usaspending",
+      "M_value": "Verified: federal subsidiary exists with active UEIs and >=1 DoD prime contract at cutoff (USAF Hybrid Architecture Demos)",
+      "interpretation": "This is a non-forward-looking capability assertion: Planet Labs Federal Inc. exists, is registered in SAM with active UEIs, has a DC HQ, and at the cutoff date has at least one named USAF prime contract (Hybrid Architecture Demonstrations — F-prefix Air Force vehicle FA945321C0033). The NISPOM facility-clearance assertion is consistent with a federal-sub that has already received USAF contracts. PASS: the structural capability claim is corroborated; this is a control claim, not a J-Book forward-revenue concentration claim."
+    },
+    {
+      "claim_id": "c4",
+      "claim_text": "Planet has $131.2M of FY22 revenue (ended January 31, 2022), a base from which it expects to grow via federal, state, and local government customers alongside commercial verticals.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending.query_federal_presence -> 46 federal contracts totaling $44.4M lifetime across 4 PL UEIs at cutoff",
+        "usaspending.query_dod_contracts(recipient_name='Planet Labs', end_date=2022-06-01) -> 4 awards / $0.65M DoD obligations pre-cutoff",
+        "Federal agency breakdown at cutoff: NASA 10 awards (largest single $7M), USDA 5, Commerce/NOAA 5, DOI 7, DoD 7, others — diversified, civilian-dominant",
+        "Filing-disclosed FY22 revenue $131.2M; federal obligations ($44M lifetime) suggest federal customers are a single-digit-percent share of total revenue when normalized to subscription-year value"
+      ],
+      "M_check": "usaspending",
+      "M_value": "Verified: $44.4M lifetime federal across 4 UEIs; diversified across civilian and DoD agencies",
+      "interpretation": "Revenue base and federal/state/local customer breadth are both verifiable. The federal contracts data shows PL is a real federal vendor across multiple civilian and defense agencies. No J-Book PE divergence pattern applies because PL's federal revenue is not concentrated in a single Pentagon PE. PASS — the claim is corroborated and not narrative-load-bearing on any specific DoD program."
+    },
+    {
+      "claim_id": "c5",
+      "claim_text": "U.S. government customers increasingly procure via IDIQ contracts, GSA schedules, and other government-wide acquisition contracts — a procurement environment Planet operates in.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook(program_name='commercial satellite imagery', cutoff_date=2022-06-01) -> NOT_FOUND",
+        "pentagon_jbook(program_name='NGA commercial imagery', cutoff_date=2022-06-01) -> NOT_FOUND",
+        "PL's pre-cutoff awards (W913E521P0017 SkySat flexible tasking; N0017320P0339) are short-form delivery orders consistent with IDIQ/BPA-style buys"
+      ],
+      "M_check": "pentagon_jbook + usaspending",
+      "M_value": "Procurement-vehicle assertion is structural and not anchored to a specific PE",
+      "interpretation": "This is a procurement-mechanics statement, not a J-Book forward-revenue claim. The J-Book corpus has no IDIQ/GSA-schedule line items per se. The claim is structurally accurate and corroborated by PL's actual delivery-order awards in usaspending. PASS — informational, no divergence to test."
+    },
+    {
+      "claim_id": "c6",
+      "claim_text": "Planet's results could be adversely affected by government spending caps, changes in government budgetary priorities, novation procedures (including those required as a result of the Business Combination), delays in the government budget process, program starts, or contract awards under existing vehicles.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook(contractor_name='Planet Labs', cutoff_date=2022-06-01) -> NOT_FOUND",
+        "earmark_detector(program_name='commercial satellite imagery') -> NOT_EARMARK (signal: 0 matched earmarks)",
+        "Boilerplate forward-looking budget-cycle risk disclosure; not a specific revenue-concentration claim"
+      ],
+      "M_check": "pentagon_jbook + earmark_detector",
+      "M_value": "No earmark exposure; no J-Book PE concentration",
+      "interpretation": "Standard 10-K risk-factor language about government-budget exposure. PL is not an earmark-driven contractor (earmark_detector returns NOT_EARMARK) and is not concentrated in any single J-Book PE, so the disclosed budget-risk is generic rather than specific. PASS — the disclosure is consistent with PL's actual diversified, mostly-civilian federal footprint at cutoff."
+    },
+    {
+      "claim_id": "c7",
+      "claim_text": "Planet is positioned against BlackSky, Maxar, Airbus Defense and Space, ImageSat International, Satellogic and CG Satellite — implying it competes for the same DoD/NGA/NRO commercial-EO procurement budget envelope as these named primes.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook(contractor_name='Maxar', cutoff_date=2022-06-01) -> NOT_FOUND",
+        "pentagon_jbook(contractor_name='BlackSky', cutoff_date=2022-06-01) -> NOT_FOUND",
+        "pentagon_jbook(program_name='EOCL', cutoff_date=2022-06-01) -> NOT_FOUND",
+        "Maxar, BlackSky, Airbus Defense and Space are real competitors; the J-Book corpus simply doesn't carry NRO commercial-imagery PEs (these largely live in the National Intelligence Program rather than the DoD J-Book)"
+      ],
+      "M_check": "pentagon_jbook",
+      "M_value": "NOT_FOUND across all queried commercial-EO peers and EOCL program",
+      "interpretation": "The competitive-set claim is observable on its face (these are real EO competitors) but the J-Book corpus does not cover the NRO/NGA commercial-imagery procurement envelope. Calibration heuristic #7 applies: NOT_FOUND for NRO programs is a coverage gap, not a red flag. UNVERIFIABLE — yellow note: at this cutoff, the NGA's Luno A/B and NRO EOCL successor (which materially affect PL's forward revenue thesis) had not yet been publicly competed/awarded, so the framework cannot meaningfully score the competitive divergence."
+    },
+    {
+      "claim_id": "c8",
+      "claim_text": "Planet has partnered with non-profit Carbon Mapper and NASA's Jet Propulsion Laboratory to build and launch two hyperspectral satellites for methane/CO2 emissions detection — a non-DoD federal-civilian (NASA) revenue anchor.",
+      "severity": "PASS",
+      "supports": [
+        "edgar_fts(search_term='Planet Labs Carbon Mapper', cutoff_date=2022-06-01) -> 0 hits in counterparty filings (Carbon Mapper is a non-profit; not an SEC filer)",
+        "usaspending.query_federal_presence shows NASA as PL's largest single federal counterparty pre-cutoff: $7M (80HQTR20F0088 EARTH OBSERVATIONS PILOT) and $6.7M (80HQTR19F0047) — i.e., the NASA channel is real and material"
+      ],
+      "M_check": "edgar_fts + usaspending",
+      "M_value": "NASA channel verified at $13.7M+ in 2 awards pre-cutoff; Carbon Mapper is a non-SEC-filing non-profit (absence of EDGAR hits expected)",
+      "interpretation": "Control claim (counterparty disclosure). Carbon Mapper / JPL is a NASA-civilian partnership and is corroborated by PL's existing NASA contract base. This is NOT a J-Book / DoD claim; the M-source surface confirms the NASA channel is real and the partnership is plausible. PASS."
+    },
+    {
+      "claim_id": "c9",
+      "claim_text": "Planet operates an approximately 3,000 square foot Washington, D.C. office that serves as the corporate headquarters for Planet Federal (control claim: facility footprint).",
+      "severity": "PASS",
+      "supports": [
+        "epa_frs.query_facilities(facility_name='Planet Federal', state_abbr='DC') -> 0 facilities (expected — DC office is administrative, not an EPA-regulated facility)",
+        "epa_frs.query_facilities(facility_name='Planet Labs', state_abbr='CA') -> 1 EPA-registered facility ('DEAR PLANET LABS, INC.', Placentia CA, but the name match is loose and likely a false positive — PL's actual San Francisco HQ wouldn't necessarily be EPA-FRS-registered)",
+        "usaspending.query_federal_presence confirms PLANET LABS FEDERAL, INC. is a real federal-vendor entity with active UEIs"
+      ],
+      "M_check": "epa_frs + usaspending",
+      "M_value": "No EPA red flag; federal-vendor identity for Planet Federal confirmed via UEI",
+      "interpretation": "Facility footprint is a control claim that doesn't test against EPA's facility registry (DC admin office, not emissions facility). Federal subsidiary's existence and active vendor profile are verified via usaspending UEI resolution. PASS — claim is consistent with the underlying corporate structure."
+    },
+    {
+      "claim_id": "c10",
+      "claim_text": "Planet has approximately 200 Earth-observation satellites in orbit (largest EO fleet in history) plus 21 SkySat agile-tasking satellites, having added 44 SuperDoves in January 2022 (control claim: technical capability).",
+      "severity": "PASS",
+      "supports": [
+        "No M-source queried (technical/orbital-asset claim outside J-Book/usaspending/EPA scope)",
+        "Pre-cutoff press releases (8-K filings 2022-01-13/14 series in PL's filings index, accessions 0001836833-22-000008 et al.) coincide with the January 2022 launch claim"
+      ],
+      "M_check": "n/a (control claim)",
+      "M_value": "n/a",
+      "interpretation": "Technical/orbital-asset capability claim — outside the J-Book test surface. Included as a control claim to confirm PL's underlying business existence. PASS."
+    }
+  ]
+}

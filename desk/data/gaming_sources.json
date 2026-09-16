@@ -1,0 +1,121 @@
+{
+ "_doc": "State-gaming-commission monthly revenue sources for regional-casino microcaps. States publish casino revenue BY PROPERTY (or by market) monthly on a ~2-5 week lag, months before the operators print. This maps each source to the tickers/properties it covers. Verified live 2026-07-08. Property lists cross-checked vs the operators' latest 10-K property sections (FLL CIK 0000891482). Detection-first: alert on a NEW month posting; parse per-property AGR only where the format is machine-readable (IL CSV export, IN XLSX). CO/NV/MS are region/city-level PDFs = detection + link only (pdfminer not installed).",
+ "tickers": {
+  "FLL": {
+   "name": "Full House Resorts",
+   "cap_musd": 150,
+   "growth_asset": "American Place (Waukegan IL)"
+  },
+  "MCRI": {
+   "name": "Monarch Casino & Resort",
+   "cap_musd": 1500
+  },
+  "CNTY": {
+   "name": "Century Casinos",
+   "cap_musd": 100
+  },
+  "GDEN": {
+   "name": "Golden Entertainment",
+   "cap_musd": null
+  }
+ },
+ "sources": {
+  "illinois": {
+   "state": "Illinois",
+   "agency": "Illinois Gaming Board (IGB)",
+   "index": "https://igb.illinois.gov/casino-gambling/casino-reports.html",
+   "app": "https://igbapps.illinois.gov/CasinoReports_AEM.aspx",
+   "referer": "https://igb.illinois.gov/casino-gambling/casino-reports.html",
+   "mode": "parse",
+   "format": "aspnet_csv_export",
+   "notes": "ASP.NET WebForms app. The <option selected> on SearchStartMonth/SearchStartYear is the IGB's own pointer at the latest posted month (detection). ViewType=ViewCSV + ButtonSearch.x/.y postback returns text/csv with a per-casino 'Total AGR' column (parse).",
+   "parse_targets": [
+    {
+     "ticker": "FLL",
+     "property": "American Place",
+     "csv_name": "FHR-Illinois LLC",
+     "agr_column": "Total AGR"
+    }
+   ],
+   "coverage": [
+    "FLL: American Place (Waukegan) \u2014 THE growth asset"
+   ]
+  },
+  "indiana": {
+   "state": "Indiana",
+   "agency": "Indiana Gaming Commission (IGC)",
+   "index": "https://www.in.gov/igc/publications/monthly-revenue/",
+   "file_pattern": "https://www.in.gov/igc/files/reports/{year}/{year}-{mm}-Revenue.xlsx",
+   "mode": "parse",
+   "format": "xlsx",
+   "notes": "Monthly XLSX. Sheet '1 Tax Summary' carries a per-casino 'Win' / 'Taxable AGR' block. Rising Star Casino (Rising Sun) = FLL.",
+   "parse_targets": [
+    {
+     "ticker": "FLL",
+     "property": "Rising Star",
+     "xlsx_name": "Rising Star Casino",
+     "agr_label": "Taxable AGR"
+    }
+   ],
+   "coverage": [
+    "FLL: Rising Star (Rising Sun)"
+   ]
+  },
+  "colorado": {
+   "state": "Colorado",
+   "agency": "Colorado Division of Gaming (DOR / SBG)",
+   "index": "https://sbg.colorado.gov/industry-statistics-gaming",
+   "mode": "detect",
+   "format": "pdf",
+   "filename_regex": "(January|February|March|April|May|June|July|August|September|October|November|December)(20\\d{2})\\.pdf",
+   "basename_match": true,
+   "notes": "Colorado is barred by statute from releasing per-casino figures; it publishes by MARKET (Black Hawk, Central City, Cripple Creek). Monthly calendar PDFs named e.g. May2026.pdf. Detection + link only.",
+   "coverage": [
+    "MCRI: Monarch Black Hawk (Black Hawk market)",
+    "FLL: Bronco Billy's / Chamonix (Cripple Creek market)",
+    "CNTY: Cripple Creek + Central City markets"
+   ]
+  },
+  "nevada": {
+   "state": "Nevada",
+   "agency": "Nevada Gaming Control Board (GCB)",
+   "index": "https://www.gaming.nv.gov/about-us/gaming-revenue-information-gri/",
+   "base": "https://www.gaming.nv.gov",
+   "mode": "detect",
+   "format": "pdf",
+   "filename_regex": "monthly-revenue-report-+(january|february|march|april|may|june|july|august|september|october|november|december)-(20\\d{2})\\.pdf",
+   "basename_match": true,
+   "notes": "Statewide + market-area 'Monthly Revenue Report' PDFs. Nevada reports by area/range, not per-licensee. Detection + link only.",
+   "coverage": [
+    "GDEN: Nevada locals/taverns (state-level exposure)",
+    "MCRI: Atlantis Reno (Reno/Sparks area)",
+    "FLL: Grand Lodge + Stockman's (Lake Tahoe / Carson Valley)"
+   ]
+  },
+  "mississippi": {
+   "state": "Mississippi",
+   "agency": "Mississippi Department of Revenue (DOR)",
+   "index": "https://www.dor.ms.gov/gaming-statistics",
+   "base": "https://www.dor.ms.gov",
+   "mode": "detect",
+   "format": "pdf",
+   "filename_regex": "Gaming Revenue (January|February|March|April|May|June|July|August|September|October|November|December) (20\\d{2})\\.pdf",
+   "basename_match": true,
+   "notes": "DOR posts monthly Gross Revenue by region (North River, Central River, Coastal). Silver Slipper (Hancock County) sits in the COASTAL region. Detection + link only.",
+   "coverage": [
+    "FLL: Silver Slipper (Hancock County) \u2014 Coastal region"
+   ]
+  }
+ },
+ "_court_tripwires": {
+  "FLL": {
+   "property": "American Place",
+   "thesis_on_above": 11.5,
+   "thesis_off_below": 10.5,
+   "note": "court 2026-07-08 frozen 0.45; alert LOUDLY on either cross \u2014 feeds the Sep-15 pack"
+  }
+ },
+ "_role": {
+  "verdict": "NOWCAST/TRIPWIRE tool (FLL price-latency = clean null 2026-07-08); feeds pre-print courts + the AGR tripwires, NOT a standalone daily signal. Signal-class edge UNTESTED on low-idio names (MCRI/CNTY)."
+ }
+}

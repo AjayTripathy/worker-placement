@@ -1,0 +1,95 @@
+{
+  "ticker": "HXL",
+  "scores": [
+    {
+      "claim_id": "HXL-001",
+      "claim_text": "Airbus 39% of 2025 net sales",
+      "severity": "PASS",
+      "supports": "Customer concentration disclosure is verifiable through Airbus's own commercial aerospace footprint; Hexcel discloses the % cleanly in 10-K with 3-year comparable. Airbus is a foreign issuer not in USAspending dataset (heuristic 2), so Mode B federal cross-check is inapplicable.",
+      "M_check": "edgar_fts (Mode A internal disclosure confirmed); usaspending Mode B not expected given Airbus commercial focus",
+      "M_value": "10-K text confirms 39% 2025, 40% 2024, 39% 2023 — stable concentration. No claim of federal funding for Airbus revenue.",
+      "interpretation": "Customer concentration disclosure consistent across years; no underdelivery."
+    },
+    {
+      "claim_id": "HXL-002",
+      "claim_text": "Boeing 13% of 2025 net sales",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": "Mode A: 10-K disclosure of 13% is straightforward. Mode B: edgar_fts of Boeing 10-K (CIK 0000012927) returns ZERO hits for 'Hexcel' — but per heuristic 7, this is below the SEVERE threshold because Boeing is large enough that Hexcel revenue from Boeing (~$246M / 13% of $1.89B) is well below typical sub-tier counterparty-disclosure thresholds. Direct Hexcel revenue is sub-tier (through 787, 777X, 737 MAX engine nacelles via subcontractors).",
+      "M_check": "edgar_fts.query_fulltext(search_term='Hexcel', cik='0000012927') -> 0 hits",
+      "M_value": "0 mentions in Boeing disclosures; Boeing is unlikely to name Tier-2 composite suppliers individually",
+      "interpretation": "Absence-from-counterparty disclosure is expected for sub-tier component supplier. No red flag, but moderate gap because Boeing is the single most-named customer and HXL's biggest US OEM exposure."
+    },
+    {
+      "claim_id": "HXL-003",
+      "claim_text": "F-35 Lightning and CH-53K composite content",
+      "severity": "PASS",
+      "supports": "Mode A: HXL has direct DoD contracts (n_awards=84, total $8.6M, including SP470123 EMERGENT IV BAA awards specifically for composite reinforcing fiber). Hexcel is Tier-2 to F-35 prime (Lockheed), so direct prime contracts are appropriately small. Mode B: pentagon_jbook confirms F-35 C2D2 PE 0604840F is FUNDED_STEADY with latest_funded_M = $1,182M for FY26 (up from $1,134M FY25). CH-53K not in J-Book corpus (NOT_FOUND), but this is corpus coverage gap not contradiction.",
+      "M_check": "usaspending.query_dod_contracts + pentagon_jbook.query_program_funding(F-35)",
+      "M_value": "DoD direct contracts 84, total $8.6M; F-35 C2D2 PE 0604840F FUNDED_STEADY $1.18B FY26",
+      "interpretation": "Both program continuation (Mode B) and Hexcel federal supplier status (Mode A) confirmed. No DoD program zero-funding risk."
+    },
+    {
+      "claim_id": "HXL-004",
+      "claim_text": "US manufacturing facilities (Decatur AL, Salt Lake City UT, etc.)",
+      "severity": "PASS",
+      "supports": "Mode A: EPA FRS confirms HEXCEL CORPORATION at 3300 MALLARD FOX DR, DECATUR AL (single Decatur facility) and multiple HEXCEL CORP facilities at 6700 W 5400 S, SALT LAKE CITY / WEST VALLEY CITY UT (7 total UT registry entries). Mode B: OSHA establishments confirms Hexcel Salt Lake City Carbon Fibers (440 employees, NAICS 325220 acrylonitrile fibers — matches PAN precursor claim exactly), Hexcel Seguin TX, Hexcel Casa Grande AZ, Hexcel Pottsville/Kent, Decatur AL (NAICS 325220 modacrylic fibers).",
+      "M_check": "epa_frs.query_facilities + osha_establishments.query_establishments",
+      "M_value": "EPA: 1 AL + 7 UT facilities; OSHA: 10 establishments across UT/TX/AZ/PA/WA/AL/MA",
+      "interpretation": "Physical footprint fully corroborated; PAN/carbon fiber NAICS codes match disclosed product mix."
+    },
+    {
+      "claim_id": "HXL-005",
+      "claim_text": "$600M share repurchase plan + $350M ASR (Oct 2025) and $454.3M repurchased 2025",
+      "severity": "PASS",
+      "supports": "Mode A: sec_filings 8-K listing confirms 8-K filed 2025-10-22 (accession 0001193125-25-246859) and additional 8-K 2025-10-23 — matches the date the Board approved 2025 plan and the ASR launch. Mode B (high-discrimination): insider_vs_calendar shows 32 total sales, 23 proximate to budget events, BUT all sales are code 'F' (tax-withholding on vest) and 0 discretionary proximate. Signal returned: ROUTINE_10B5_1. No CLUSTERED_DISCRETIONARY flag.",
+      "M_check": "sec_filings.list_filings_by_form (8-K Oct 22-23 2025); insider_vs_calendar.query_insider_sales_near_budget_events(cik='0000717605', window_days=14, start_date='2024-01-01', end_date='2026-05-20')",
+      "M_value": "8-Ks confirmed; n_proximate_sales=23, n_discretionary_proximate=0, signal=ROUTINE_10B5_1",
+      "interpretation": "Capital return mechanically corroborated by Form 8-K; insider behavior shows NO discretionary clustering despite large ASR + budget events — classic routine code-F tax withholding, not a sell-the-news pattern. Clean signal."
+    },
+    {
+      "claim_id": "HXL-006",
+      "claim_text": "$300M 5.875% Senior Notes due 2035 issued Q1 2025; redeemed $300M 4.7% notes",
+      "severity": "PASS",
+      "supports": "Mode A: 10-K text + 8-K trail. Filing list shows 8-K events on 2025-02-26 (date matches Third Supplemental Indenture date referenced in exhibits 4.4/4.6). Indenture and exhibit references in 10-K Exhibits 4.1-4.6 explicitly tie 5.875% 2035 Notes to Feb 26, 2025 8-K. Mode B: edgar_fts shows 1,018 hits for Hexcel including its own 10-K trail and 8-K disclosures — no contradicting filings.",
+      "M_check": "sec_filings.list_filings_by_form + 10-K exhibit cross-reference",
+      "M_value": "Multiple 8-Ks in Feb 2025 around 0000930413-25-000026 + indenture exhibit chain",
+      "interpretation": "Debt issuance mechanically verified through SEC filing trail."
+    },
+    {
+      "claim_id": "HXL-007",
+      "claim_text": "ICFR effective; no material weakness; no changes in Q4 2025",
+      "severity": "PASS",
+      "supports": "Mode A: 10-K narrative explicit. Mode B: claim_evolution.query_claim_evolution(search_term='material weakness') returns evolution_status=REAFFIRMED_IN_8K_ONLY with 1 AFFIRMED classification (Apr 30 2026 8-K language affirms 'no material weakness in internal controls since the most recent audited fiscal year') and ZERO adverse_findings. Restatement query (separate run) returned 5 mentions all classified AFFIRMED/UNRELATED (clawback policy boilerplate), zero adverse.",
+      "M_check": "claim_evolution.query_claim_evolution(cik='0000717605', search_term='material weakness', base_filing_date='2026-02-11', cutoff_date='2026-05-20')",
+      "M_value": "evolution_status=REAFFIRMED_IN_8K_ONLY; AFFIRMED=1, AMENDED=0, TERMINATED=0; 0 adverse_findings",
+      "interpretation": "No restatement / material weakness history. Clean ICFR posture across narrative + subsequent disclosures."
+    },
+    {
+      "claim_id": "HXL-008",
+      "claim_text": "Lower Passaic River CERCLA PRP; $150M settlement (joint with 83 other PRPs)",
+      "severity": "PASS",
+      "supports": "Mode A: EPA FRS NJ query (separate context) — Lodi NJ facility is the closed legacy site, not in current operating footprint. EPA FRS UT/AL confirm current operating sites. Mode B: epa_emissions registry confirms ongoing US operating facilities have no ongoing material emissions adverse signal at scale. CERCLA PRP joint liability is properly disclosed; $0.1M residual environmental accrual at YE2025 (down from $0.3M YE2024) is consistent with the $150M-settlement-pending narrative.",
+      "M_check": "epa_frs + 10-K narrative consistency",
+      "M_value": "Decatur AL + UT facilities confirmed in FRS; aggregate environmental accrual $0.1M; PRP cost-sharing across 83+ parties keeps individual exposure immaterial",
+      "interpretation": "Environmental disclosure proportional to liability; the $150M is joint-and-several across 84 PRPs and pending Consent Decree appeal — properly accrued at de minimis level."
+    },
+    {
+      "claim_id": "HXL-009",
+      "claim_text": "Composite content on Boeing 787 (>50%), Airbus A350 (53%), Boeing 777X (>30%), LEAP engines, GE9X",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": "Mode A: 10-K text explicit; well-known industry facts. Mode B: edgar_fts of Boeing CIK 0000012927 returns 0 hits for 'Hexcel composite' AND 0 hits for 'Hexcel'. Northrop, Lockheed CIKs also return 0 hits. Per heuristic 7, 0 mentions across primes is consistent with sub-tier component supply (Hexcel ships into Spirit AeroSystems, GKN, CTRM, CFM/LEAP — not directly to OEMs in material-counterparty fashion). MOD because the platform-level disclosure is robust at HXL level but no prime-side corroboration is recoverable.",
+      "M_check": "edgar_fts.query_fulltext across Boeing/Lockheed/Northrop CIKs",
+      "M_value": "0 hits across BA/LMT/NOC for 'Hexcel' (sub-tier disclosure threshold)",
+      "interpretation": "Platform claims are industry-known and historically accurate, but counterparty registries don't surface Tier-2 supplier names. No SEVE per heuristic 7 — Hexcel revenue per prime is below typical material-counterparty disclosure threshold."
+    },
+    {
+      "claim_id": "HXL-010",
+      "claim_text": "Hexcel is federally registered contractor / supplier to LM/RTX/Boeing/GD/GE/GKN/Textron",
+      "severity": "PASS",
+      "supports": "Mode A: usaspending.query_federal_presence resolved 9 UEIs across HEXCEL CORPORATION / HEXCEL CORP / HEXCEL REINFORCEMENTS CORP / HEXCEL POTTSVILLE CORP, with active recipient_level P and C registrations. Mode B: 217 federal contracts, $18.7M contracts amount + 10 grants $3.0M; agencies include DoD (53 awards), NASA (15 awards), DOT. Direct DoD presence is small in dollars but mechanically confirms federal-supplier status. Sub-tier supply through primes (LM, RTX, Boeing) is by design not in USAspending recipient data.",
+      "M_check": "usaspending.query_federal_presence(name_variants=['Hexcel Corporation','HEXCEL CORP','Hexcel'])",
+      "M_value": "9 UEIs resolved; 217 contracts $18.7M; 53 DoD awards; NASA prepreg orders",
+      "interpretation": "Federal contractor status fully verified at entity-resolution level; subsidiary structure (HEXCEL POTTSVILLE, HEXCEL REINFORCEMENTS) cleanly resolved."
+    }
+  ]
+}

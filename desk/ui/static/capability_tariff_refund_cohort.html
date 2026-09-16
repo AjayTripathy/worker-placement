@@ -1,0 +1,817 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>tariff_refund_cohort</title><style>
+body{margin:0;background:#0b0e12;color:#e8ebee;font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:26px 24px 90px}
+a{color:#8b7cf6} h1{font-size:23px;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:#7d858e;margin:0 0 20px;font-size:13px}
+h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:#7d858e;margin:24px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 10px;border-bottom:1px solid #242a31;text-align:left;vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#7d858e}
+.k{font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:20px}
+.k-generator{color:#c3b8fb;background:rgba(139,124,246,.15)}
+.k-detector{color:#eccb8a;background:rgba(217,164,65,.15)}
+.k-watcher{color:#8ee5c1;background:rgba(53,201,143,.15)}
+.k-evidence{color:#b3bcc6;background:rgba(138,147,158,.15)}
+.h-OK{color:#35c98f} .h-STALE{color:#d9a441} .h-ERROR{color:#e0736a} .h-NEVER_RUN{color:#8a939e}
+pre{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px;overflow-x:auto;font-size:12px;line-height:1.5}
+.panel{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px 18px;margin-bottom:12px}
+ul{margin:4px 0;padding-left:20px} li{margin-bottom:4px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+</style></head><body><div class="wrap"><h1>tariff_refund_cohort</h1><p class="sub">registered capability · tariff_refund_cohort</p><a href="signals.html">&larr; all signals</a><div class="panel" style="margin-top:10px"><span class="k k-generator">GENERATOR</span> &nbsp;<span class="h-NEVER_RUN"><b>NEVER_RUN</b></span> · last run <span class="mono">never</span></div><p>Stage-0b MECHANISM-FIRST generator: the IEEPA / Section-122 tariff-refund cohort.</p><form method="POST" action="/signals/run" style="margin:10px 0"><input type="hidden" name="name" value="tariff_refund_cohort"><input name="symbol" placeholder="symbol (if applicable)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px"><input name="symbols" placeholder="universe, comma-sep (generators)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px;margin-left:6px"><button type="submit" style="background:#8b7cf6;color:#0b0e12;border:0;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;margin-left:6px">Run now</button></form><h2>Datasources</h2><ul><li>reference implementation: verticals/generators/tariff_refund_cohort.py (see the code section for the feeds it touches)</li></ul><h2>Applies to</h2><ul><li><b>strategies:</b> quality_value</li></ul><h2>The code</h2><pre>&quot;&quot;&quot;tariff_refund_cohort — Stage-0b MECHANISM-FIRST generator: the IEEPA / Section-122 tariff-refund cohort.
+
+THE MECHANISM (house IP, courts 2026-08-03/04 — FND / ISRG / ARHS / DSGX):
+  The Supreme Court struck the IEEPA tariffs on 2026-02-20 (Learning Resources v. Trump). The
+  administration&#x27;s replacement ran under Section 122, which carries a hard statutory sunset —
+  effective 2026-02-24 + 150 days = 2026-07-24 — absent congressional action. Importers who paid
+  IEEPA duties therefore hold REFUND CLAIMS, and importers guiding on a tariff cost hold a cost
+  line with a statutory expiry date printed in their own filings.
+
+  That single legal event splits the tape TWO WAYS, and the split is an accounting choice, not a
+  business one — which is exactly why the sell side misreads it:
+
+  (A) EPS-MIRAGE FADES — the FND pattern. A company RECOGNIZES the refund in the period. GAAP EPS
+      jumps, gross margin &quot;expands&quot;, the print beats, and consensus is marked UP. The improvement
+      is a one-time customs-duty recovery, not operations. FND Q2-2026: GAAP EPS +53.4% while
+      ADJUSTED EPS was FLAT, comps -2.1%, and the $0.31 GAAP-vs-adjusted spread WAS the refund;
+      consensus still moved FY26 $1.903 -&gt; $1.971 with 4 up-revisions in 7 days. Any screen that
+      reads estimate DIRECTION without reading estimate COMPOSITION buys tariff refunds. These are
+      FADE-THE-ESTIMATE candidates for the court — NOT auto-shorts (gate-6).
+
+  (B) POSITIVE-SKEW CONSERVATIVES — the ISRG / ARHS pattern. A company does NOT recognize the
+      refund (a gain contingency it cannot book) and/or guides as though the tariff cost PERSISTS.
+      ISRG&#x27;s July-16 release assumed tariffs &quot;remain in place through the end of the year&quot; (~$122M
+      of embedded cost) while its own 10-Q, filed five days later, printed the Section-122 150-day
+      sunset. ARHS states outright that its outlook &quot;does not include any benefit from potential
+      IEEPA tariff refunds.&quot; If the sunset held, those guides raise near-mechanically.
+
+  MASKING CHANNEL: the non-GAAP reconciliation (A) / the unrecognized gain contingency (B).
+  SIGNAL CHANNEL: EDGAR full text — the verbatim sentence in the 8-K/10-Q/10-K.
+  SIGNAL-TO-PRICE LATENCY: A resolves at the NEXT print (the refund does not repeat, the compare
+  breaks); B resolves at the next guide (weeks-to-a-quarter).
+
+THE B-SIDE CONFOUNDERS ARE MANDATORY, NOT OPTIONAL (the ISRG red-team lesson, which cut that call
+from 0.60 to 0.55 and struck its &quot;verified EDGE&quot; label):
+  1. The Federal Circuit EXTENDED its stay on 2026-06-11, keeping the 10% tariffs in place pending
+     proceedings — the sunset may not have bitten.
+  2. Section 232 / 301 SUBSTITUTION is the administration&#x27;s stated intent — the cost can be
+     re-imposed under a different authority the same week it lapses.
+  3. Therefore a management guiding &quot;tariffs persist&quot; is NOT necessarily being conservative. The
+     parsimonious explanation is INFORMED CAUTION: counsel did not forget the statute in its own
+     10-Q. B is POSITIVE SKEW ON A PUBLIC FACT, not free money, and a statutory date printed in a
+     10-Q covered by fifteen analysts is not an informational moat.
+  Every B row in the output carries these confounders verbatim. There is no un-confounded B name.
+
+GUARDS (each one is a specific past failure):
+  * MAGNITUDE FROM FILINGS ONLY. A dollar or per-share figure is recorded only when it appears in
+    the verbatim filing sentence (or the sentence adjacent to it). We NEVER estimate a refund
+    silently. Unquantified is reported as unquantified — the ARHS refund is real and its amount is
+    genuinely unknown, and that is the honest output.
+  * NO SHORTING ATTENTION NAMES (gate-6). A-fades are labeled FADE_THE_ESTIMATE and carry live
+    short interest / days-to-cover; any name with squeeze fuel is flagged NO_SHORT explicitly.
+    FND itself failed this test in court: 15.7M shares short, 6.05 days-to-cover.
+  * CONSENSUS MOVEMENT IS EVIDENCE, NOT THE CLAIM. Estimate revisions come from a market data
+    feed, not a filing; they are labeled as such and never used to infer a refund&#x27;s existence.
+  * CLASSIFICATION IS EARNED, NOT ASSUMED. A/B requires marker language in the extracted sentence;
+    otherwise the row is &#x27;unclear&#x27; and stays out of both ranked tables.
+
+Usage:
+  python3 verticals/generators/tariff_refund_cohort.py [--since 2026-02-20] [--max-docs 600]
+                                                       [--pages 8] [--no-market]
+Writes verticals/generators/data/TARIFF_REFUND_COHORT.json + desk/data/TARIFF_REFUND_INTAKE_&lt;date&gt;.md
+READ-ONLY. Never places orders. No fabricated tickers — CIK-&gt;ticker via the SEC canonical map only.
+&quot;&quot;&quot;
+from __future__ import annotations
+
+import argparse
+import datetime
+import html
+import json
+import re
+import sys
+import time
+import urllib.parse
+import urllib.request
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+REPO = HERE.parent.parent
+OUT_JSON = HERE / &quot;data&quot; / &quot;TARIFF_REFUND_COHORT.json&quot;
+INTAKE_DIR = REPO / &quot;desk&quot; / &quot;data&quot;
+HDRS = {&quot;User-Agent&quot;: &quot;signalos-research 4tripathy@gmail.com&quot;}
+
+EFTS = &quot;https://efts.sec.gov/LATEST/search-index&quot;
+TICKERS_URL = &quot;https://www.sec.gov/files/company_tickers.json&quot;
+
+SCOTUS_DATE = &quot;2026-02-20&quot;      # Learning Resources v. Trump — IEEPA tariffs struck
+S122_EFFECTIVE = &quot;2026-02-24&quot;   # Section 122 replacement effective
+S122_SUNSET = &quot;2026-07-24&quot;      # +150 days, the statutory maximum without congressional action
+
+CONFOUNDERS = [
+    &quot;Federal Circuit EXTENDED its stay on 2026-06-11 — the 10% tariffs may remain in place pending &quot;
+    &quot;proceedings, so the Section-122 sunset may not have bitten.&quot;,
+    &quot;Section 232 / 301 SUBSTITUTION is the administration&#x27;s stated intent — the same cost can be &quot;
+    &quot;re-imposed under a different authority within days of the lapse.&quot;,
+    &quot;INFORMED CAUTION, not conservatism: a management that guides &#x27;tariffs persist&#x27; while its own &quot;
+    &quot;10-Q prints the sunset date has counsel who read the statute. Positive skew on a public fact &quot;
+    &quot;is not an informational moat.&quot;,
+]
+
+# ---------------------------------------------------------------------------
+# EFTS query set. Conjunctions (&quot;IEEPA&quot; refund) are used where the bare term is too broad —
+# bare &quot;IEEPA&quot; returns 1025 filings, most of them risk-factor boilerplate with no refund claim.
+# &#x27;spec&#x27; = specificity weight, used ONLY to prioritise doc fetches under --max-docs.
+# ---------------------------------------------------------------------------
+QUERIES = [
+    {&quot;q&quot;: &#x27;&quot;tariff refund&quot;&#x27;, &quot;spec&quot;: 5},
+    {&quot;q&quot;: &#x27;&quot;tariff refunds&quot;&#x27;, &quot;spec&quot;: 5},
+    {&quot;q&quot;: &#x27;&quot;refund of tariffs&quot;&#x27;, &quot;spec&quot;: 5},
+    {&quot;q&quot;: &#x27;&quot;duty refund&quot;&#x27;, &quot;spec&quot;: 5},
+    {&quot;q&quot;: &#x27;&quot;refund of duties&quot;&#x27;, &quot;spec&quot;: 5},
+    {&quot;q&quot;: &#x27;&quot;customs duty&quot; refund&#x27;, &quot;spec&quot;: 4},
+    {&quot;q&quot;: &#x27;&quot;IEEPA&quot; refund&#x27;, &quot;spec&quot;: 4},
+    {&quot;q&quot;: &#x27;&quot;gain contingency&quot; tariff&#x27;, &quot;spec&quot;: 4},
+    {&quot;q&quot;: &#x27;&quot;Section 122&quot; tariff&#x27;, &quot;spec&quot;: 3},
+    # B-SIDE RECALL LEG. The persist-assumption often sits in a guidance release that never uses the
+    # word IEEPA or the word refund — ISRG&#x27;s &quot;assumes such tariffs remain in place through the end of
+    # the year&quot; is in the July-16 8-K, and no refund-keyed query reaches it. These queries exist
+    # purely so the B side is not silently under-collected relative to the A side.
+    {&quot;q&quot;: &#x27;&quot;tariffs remain in place&quot;&#x27;, &quot;spec&quot;: 4},
+    {&quot;q&quot;: &#x27;&quot;tariffs remain in effect&quot;&#x27;, &quot;spec&quot;: 4},
+    {&quot;q&quot;: &#x27;&quot;remain in effect for 150 days&quot;&#x27;, &quot;spec&quot;: 5},
+    {&quot;q&quot;: &#x27;&quot;outlook assumes&quot; tariff&#x27;, &quot;spec&quot;: 3},
+    {&quot;q&quot;: &#x27;&quot;guidance assumes&quot; tariff&#x27;, &quot;spec&quot;: 3},
+    {&quot;q&quot;: &#x27;&quot;assumes tariffs&quot;&#x27;, &quot;spec&quot;: 4},
+    {&quot;q&quot;: &#x27;&quot;tariff rates continued&quot;&#x27;, &quot;spec&quot;: 4},
+]
+FORMS = &quot;8-K,10-Q,10-K&quot;
+
+# --- sentence-level trigger: the sentence must be about tariffs/duties AND about recovery ------
+TARIFF_TOK = re.compile(r&quot;\b(IEEPA|Section\s*122|tariff|customs\s+dut|duties|duty)\b&quot;, re.I)
+# The B side lives in sentences that never say &quot;refund&quot;: ISRG&#x27;s decisive 10-Q line is &quot;will remain in
+# effect for 150 days, the maximum period that Section 122 permits without congressional action&quot;, and
+# its guidance line is &quot;assumes such tariffs remain in place through the end of the year&quot;. v1 required
+# &#x27;remain in place&#x27; exactly and lost both — the ground-truth name was absent from its own cohort.
+RECOVER_TOK = re.compile(r&quot;(refund|recover|reimburse|gain\s+conting|&quot;
+                         r&quot;remain\s+in\s+(?:place|effect)|remains?\s+in\s+(?:place|effect)|&quot;
+                         r&quot;150\s+days|sunset|expire|lapse|congressional\s+action|&quot;
+                         r&quot;assum\w+[^.]{0,40}tariff|tariff[^.]{0,40}assum\w+|&quot;
+                         r&quot;continu\w+[^.]{0,30}(?:for the (?:balance|remainder)|through the end))&quot;, re.I)
+
+# --- classification markers ---------------------------------------------------------------
+# A = the refund is IN the reported numbers or IN the guide (the mirage the consensus extrapolates)
+A_MARKERS = [
+    (re.compile(r&quot;(recogni[sz]ed|recorded|received|collected)\s+(?:a\s+|an\s+|the\s+)?&quot;
+                r&quot;(?:\$[\d.,]+\s*(?:million|billion)?\s*)?(?:of\s+)?(?:tariff|customs|duty|duties|IEEPA)?&quot;
+                r&quot;[^.]{0,60}refund&quot;, re.I), 3, &quot;refund RECOGNIZED/RECEIVED in the period&quot;),
+    (re.compile(r&quot;refund[^.]{0,80}\b(was|were|has been|have been)\s+(recogni[sz]ed|recorded|received)&quot;, re.I),
+     3, &quot;refund recorded in results&quot;),
+    (re.compile(r&quot;\bone[- ]?time\b[^.]{0,60}(refund|duty|tariff|benefit)&quot;, re.I), 2,
+     &quot;described as one-time&quot;),
+    (re.compile(r&quot;(reduc\w+|decreas\w+|benefit\w*)\s+(?:to\s+)?cost of (?:sales|goods|revenue)[^.]{0,80}&quot;
+                r&quot;(tariff|duty|duties|refund)&quot;, re.I), 2, &quot;flowed through cost of sales&quot;),
+    (re.compile(r&quot;(favorab\w+|positive\w*)\s+(?:ly\s+)?(impact\w*|affect\w*)[^.]{0,60}(refund|tariff|duty)&quot;, re.I),
+     1, &quot;described as favorably impacting the period&quot;),
+    (re.compile(r&quot;(guidance|outlook|guide)[^.]{0,80}\b(includes?|reflects?|incorporat\w+)\b[^.]{0,60}refund&quot;, re.I),
+     3, &quot;refund INCLUDED in guidance&quot;),
+    (re.compile(r&quot;refund[^.]{0,60}(receivable|asset)\b[^.]{0,40}(recorded|recogni[sz]ed|established)&quot;, re.I),
+     3, &quot;refund receivable booked&quot;),
+]
+# B = the refund is NOT in the numbers, and/or the guide assumes the tariff cost persists
+B_MARKERS = [
+    (re.compile(r&quot;gain\s+conting\w+&quot;, re.I), 3, &quot;unrecognized GAIN CONTINGENCY&quot;),
+    (re.compile(r&quot;(ha(?:ve|s)\s+not|did\s+not|does\s+not|no)\s+[^.]{0,40}&quot;
+                r&quot;(recogni[sz]ed?|record\w*)\s*[^.]{0,40}(refund|gain|receivable)&quot;, re.I), 3,
+     &quot;refund explicitly NOT recognized&quot;),
+    (re.compile(r&quot;(does not include|excludes?|excluded|not included in|no benefit from)[^.]{0,80}&quot;
+                r&quot;(refund|tariff refund)&quot;, re.I), 3, &quot;refund EXCLUDED from guidance/outlook&quot;),
+    (re.compile(r&quot;may be eligible[^.]{0,60}refund&quot;, re.I), 2, &quot;&#x27;may be eligible for a refund&#x27; — unbooked claim&quot;),
+    (re.compile(r&quot;(assum\w+|assumption)[^.]{0,90}tariffs?[^.]{0,90}&quot;
+                r&quot;(remain in place|remain|continue|persist|through the end of the year|for the (?:remainder|balance))&quot;,
+                re.I), 3, &quot;guide ASSUMES tariffs PERSIST&quot;),
+    (re.compile(r&quot;tariffs?[^.]{0,60}(remain in effect|remain in place)[^.]{0,60}&quot;
+                r&quot;(through|for the remainder|for the balance|end of)&quot;, re.I), 2,
+     &quot;tariff cost assumed in effect through the guide period&quot;),
+    (re.compile(r&quot;(uncertain|cannot|unable to)[^.]{0,60}(estimate|determine|quantif\w+)[^.]{0,60}refund&quot;, re.I),
+     1, &quot;refund amount not estimable&quot;),
+]
+# NEGATION GUARD on the A side. &quot;the Company&#x27;s current outlook does not include any benefit from
+# potential IEEPA tariff refunds&quot; is the single cleanest B sentence in the whole cohort, and it fired
+# the A marker (outlook … include … refund) because the marker never looked left for the negator.
+# ARHS tied 3-3 and fell into &#x27;unclear&#x27; — the ground-truth B name buried by its own decisive sentence.
+NEGATOR = re.compile(r&quot;\b(not|no|never|without|exclud\w*|excluding|nor|neither|&quot;
+                     r&quot;unable to|cannot|has yet to|have yet to)\b&quot;, re.I)
+
+
+def _negated(sent: str, span: tuple[int, int]) -&gt; bool:
+    &quot;&quot;&quot;True when a negator sits immediately before the matched A-marker span.&quot;&quot;&quot;
+    lo = max(0, span[0] - 60)
+    return bool(NEGATOR.search(sent[lo:span[0] + 40]))
+
+
+# the Section-122 sunset itself, printed in the filing — the ISRG tell
+SUNSET_MARKER = re.compile(r&quot;(150\s+days|Section\s*122)[^.]{0,160}&quot;
+                           r&quot;(maximum period|without congressional action|expire|sunset|terminat)&quot;, re.I)
+
+# --- magnitude extraction: FILING TEXT ONLY -----------------------------------------------
+MONEY = re.compile(r&quot;\$\s?([\d,]+(?:\.\d+)?)\s*(billion|million|thousand|bn|mm|m\b|k\b)?&quot;, re.I)
+PER_SHARE = re.compile(r&quot;\$\s?(\d+\.\d{2,3})\s*(?:per\s+(?:basic\s+and\s+)?(?:diluted\s+)?share|/\s*share)&quot;, re.I)
+MULT = {&quot;billion&quot;: 1e9, &quot;bn&quot;: 1e9, &quot;million&quot;: 1e6, &quot;mm&quot;: 1e6, &quot;m&quot;: 1e6,
+        &quot;thousand&quot;: 1e3, &quot;k&quot;: 1e3, None: 1.0, &quot;&quot;: 1.0}
+# a dollar figure is a REFUND magnitude only if a refund/tariff token sits this close to it
+PROX = 130
+MAG_ANCHOR = re.compile(r&quot;\b(refund\w*|tariff\w*|IEEPA|dut(?:y|ies)|recover\w+|reimburse\w+)\b&quot;, re.I)
+# flattened financial TABLES: their numbers have no grammar binding them to a subject, so we refuse
+# to read a magnitude out of one (the GIII &#x27;RECONCILIATION OF GAAP GROSS PROFIT&#x27; false $139.5M).
+TABLE_TELLS = re.compile(r&quot;(reconciliation of|in thousands|unaudited\)|three months ended|&quot;
+                         r&quot;six months ended|nine months ended|\(in millions)&quot;, re.I)
+
+
+def _is_table(sent: str) -&gt; bool:
+    &quot;&quot;&quot;True when the &#x27;sentence&#x27; is really a flattened table row/header rather than prose.&quot;&quot;&quot;
+    dollars = sent.count(&quot;$&quot;)
+    if dollars &gt;= 5:
+        return True
+    if dollars &gt;= 2 and TABLE_TELLS.search(sent):
+        return True
+    if sent.count(&quot;​&quot;) &gt;= 3:      # zero-width separators — an EDGAR table tell
+        return True
+    return False
+
+
+def _get(url: str, retries: int = 3, timeout: int = 45) -&gt; bytes | None:
+    &quot;&quot;&quot;Polite GET with backoff — EDGAR 429s aggressively on EFTS and the archives.&quot;&quot;&quot;
+    for i in range(retries + 1):
+        try:
+            req = urllib.request.Request(url, headers=HDRS)
+            with urllib.request.urlopen(req, timeout=timeout) as r:
+                return r.read()
+        except Exception:
+            time.sleep(1.0 + 0.9 * i)
+    return None
+
+
+def _get_json(url: str) -&gt; dict:
+    raw = _get(url)
+    if not raw:
+        return {}
+    try:
+        return json.loads(raw)
+    except Exception:
+        return {}
+
+
+def _ticker_map() -&gt; dict:
+    &quot;&quot;&quot;CIK -&gt; ticker. Multi-class issuers list several symbols per CIK; prefer the plain common
+    (shortest, no class suffix) so Moog resolves MOG-A not MOG-B and Bruker resolves BRKR not BRKRP.&quot;&quot;&quot;
+    d = _get_json(TICKERS_URL)
+    out = {}
+    for _, row in (d or {}).items():
+        try:
+            cik, tk = int(row[&quot;cik_str&quot;]), row[&quot;ticker&quot;].upper()
+        except Exception:
+            continue
+        cur = out.get(cik)
+        if cur is None or (len(tk), tk) &lt; (len(cur[&quot;ticker&quot;]), cur[&quot;ticker&quot;]):
+            out[cik] = {&quot;ticker&quot;: tk, &quot;title&quot;: row[&quot;title&quot;]}
+    return out
+
+
+def _clean_name(display: str) -&gt; str:
+    return re.sub(r&quot;\s*\(.*&quot;, &quot;&quot;, display or &quot;&quot;).strip()[:70]
+
+
+def _efts(query: str, since: str, until: str, pages: int) -&gt; list[dict]:
+    &quot;&quot;&quot;Paginate EFTS (100/page) -&gt; normalized hit rows keyed on the exact matched document.&quot;&quot;&quot;
+    rows, seen = [], set()
+    for page in range(pages):
+        p = {&quot;q&quot;: query, &quot;forms&quot;: FORMS, &quot;startdt&quot;: since, &quot;enddt&quot;: until}
+        if page:
+            p[&quot;from&quot;] = page * 100
+        d = _get_json(EFTS + &quot;?&quot; + urllib.parse.urlencode(p))
+        hits = (((d or {}).get(&quot;hits&quot;) or {}).get(&quot;hits&quot;)) or []
+        if not hits:
+            break
+        for h in hits:
+            _id = h.get(&quot;_id&quot;, &quot;&quot;)
+            if _id in seen:
+                continue
+            seen.add(_id)
+            s = h.get(&quot;_source&quot;) or {}
+            ciks = s.get(&quot;ciks&quot;) or []
+            if not ciks:
+                continue
+            names = s.get(&quot;display_names&quot;) or []
+            adsh, _, fname = _id.partition(&quot;:&quot;)
+            rows.append({
+                &quot;cik&quot;: int(ciks[0]),
+                &quot;name&quot;: _clean_name(names[0] if names else &quot;&quot;),
+                &quot;date&quot;: s.get(&quot;file_date&quot;, &quot;&quot;),
+                &quot;form&quot;: (s.get(&quot;root_forms&quot;) or [s.get(&quot;form&quot;, &quot;&quot;)])[0],
+                &quot;adsh&quot;: s.get(&quot;adsh&quot;, &quot;&quot;) or adsh,
+                &quot;fname&quot;: fname,
+                &quot;file_type&quot;: s.get(&quot;file_type&quot;, &quot;&quot;),
+                &quot;sic&quot;: (s.get(&quot;sics&quot;) or [&quot;&quot;])[0],
+            })
+        if len(hits) &lt; 100:
+            break
+        time.sleep(0.35)
+    return rows
+
+
+def _doc_url(cik: int, adsh: str, fname: str) -&gt; str:
+    return f&quot;https://www.sec.gov/Archives/edgar/data/{cik}/{adsh.replace(&#x27;-&#x27;, &#x27;&#x27;)}/{fname}&quot;
+
+
+def _text(raw: bytes) -&gt; str:
+    &quot;&quot;&quot;HTML -&gt; flat text. Filings are XHTML with inline XBRL; strip tags and normalise whitespace.&quot;&quot;&quot;
+    t = raw.decode(&quot;utf-8&quot;, &quot;ignore&quot;)
+    t = re.sub(r&quot;(?is)&lt;(script|style|ix:header)[^&gt;]*&gt;.*?&lt;/\1&gt;&quot;, &quot; &quot;, t)
+    t = re.sub(r&quot;(?s)&lt;[^&gt;]+&gt;&quot;, &quot; &quot;, t)
+    t = html.unescape(t)
+    t = t.replace(&quot; &quot;, &quot; &quot;).replace(&quot;’&quot;, &quot;&#x27;&quot;).replace(&quot;—&quot;, &quot;-&quot;).replace(&quot;–&quot;, &quot;-&quot;)
+    return re.sub(r&quot;\s+&quot;, &quot; &quot;, t)
+
+
+def _sentences(txt: str) -&gt; list[str]:
+    &quot;&quot;&quot;Cheap sentence split that survives &#x27;$1.2 million.&#x27; and &#x27;U.S.&#x27; — good enough for evidence quoting.&quot;&quot;&quot;
+    # Bullet glyphs MUST be split points. Press releases glue unrelated bullets into one blob, and a
+    # proximity-anchored magnitude then reads across the join: LNN&#x27;s &quot;$12 billion in one-time payments
+    # to farmers&quot; landed within 130 chars of a tariff-refund clause and became a $12bn refund.
+    txt = re.sub(r&quot;[•●▪·]&quot;, &quot;. &quot;, txt)
+    parts = re.split(r&quot;(?&lt;=[.;])\s+(?=[A-Z(\&quot;&#x27;$])&quot;, txt)
+    return [p.strip() for p in parts if 30 &lt;= len(p) &lt;= 1200]
+
+
+def _magnitudes(sent: str) -&gt; dict:
+    &quot;&quot;&quot;Dollar / per-share figures FROM THIS SENTENCE, and ONLY those ATTACHED TO A REFUND TOKEN.
+
+    v1 took the largest dollar figure anywhere in the sentence and produced garbage: BBW&#x27;s
+    &quot;$550M&quot; was a revenue line in a flattened press-release paragraph, GIII&#x27;s &quot;$139.5M&quot; came out
+    of a GAAP-to-non-GAAP reconciliation table, and both blew the refund-vs-quarter-EPS ratio out
+    to four digits. A dollar figure now counts as a refund magnitude only if a refund/tariff token
+    sits within PROX characters of it, and flattened TABLES are refused outright — their numbers
+    have no sentence grammar binding them to anything.
+    &quot;&quot;&quot;
+    if _is_table(sent):
+        return {&quot;usd&quot;: None, &quot;per_share&quot;: None, &quot;refused&quot;: &quot;table-like text — magnitude not attributable&quot;}
+    usd, per_sh = [], []
+    for m in MONEY.finditer(sent):
+        try:
+            v = float(m.group(1).replace(&quot;,&quot;, &quot;&quot;)) * MULT.get((m.group(2) or &quot;&quot;).lower(), 1.0)
+        except Exception:
+            continue
+        if v &lt; 1e4:             # sub-$10k figures are page refs / share prices, not refunds
+            continue
+        lo, hi = max(0, m.start() - PROX), min(len(sent), m.end() + PROX)
+        if MAG_ANCHOR.search(sent[lo:hi]):
+            usd.append(v)
+    for m in PER_SHARE.finditer(sent):
+        lo, hi = max(0, m.start() - PROX), min(len(sent), m.end() + PROX)
+        if not MAG_ANCHOR.search(sent[lo:hi]):
+            continue
+        try:
+            per_sh.append(float(m.group(1)))
+        except Exception:
+            continue
+    return {&quot;usd&quot;: max(usd) if usd else None, &quot;per_share&quot;: max(per_sh) if per_sh else None}
+
+
+def _classify(sents: list[str]) -&gt; dict:
+    &quot;&quot;&quot;Score A vs B from marker language in the tariff-recovery sentences. Earned, never assumed.&quot;&quot;&quot;
+    a_score = b_score = 0
+    a_reasons, b_reasons, evidence = [], [], []
+    # magnitudes are attributed to the SIDE of the sentence that carried them. A recognized $128M of
+    # recoveries with a $2M residual gain contingency is an A name, not a B name — a marker COUNT
+    # would call it B (two B markers beat one A marker) and the money says otherwise. (CRI, v1 bug.)
+    rec_usd = unrec_usd = best_ps = None
+    sunset_cited = False
+    for s in sents:
+        # A markers are asserted claims (&quot;we recognized&quot;), so a negator in front of one flips its
+        # meaning entirely. B markers are already negation-shaped and are matched as written.
+        hit_a = []
+        for rx, w, lab in A_MARKERS:
+            mm = rx.search(s)
+            if mm and not _negated(s, mm.span()):
+                hit_a.append((w, lab))
+        hit_b = [(w, lab) for rx, w, lab in B_MARKERS if rx.search(s)]
+        if SUNSET_MARKER.search(s):
+            sunset_cited = True
+        if not (hit_a or hit_b):
+            continue
+        a_score += sum(w for w, _ in hit_a)
+        b_score += sum(w for w, _ in hit_b)
+        a_reasons += [lab for _, lab in hit_a]
+        b_reasons += [lab for _, lab in hit_b]
+        mag = _magnitudes(s)
+        if mag[&quot;usd&quot;]:
+            if hit_b and not hit_a:
+                unrec_usd = max(unrec_usd or 0.0, mag[&quot;usd&quot;])
+            elif hit_a and not hit_b:
+                rec_usd = max(rec_usd or 0.0, mag[&quot;usd&quot;])
+            else:   # mixed sentence — attribute to the heavier side, never to both
+                side = &quot;a&quot; if sum(w for w, _ in hit_a) &gt;= sum(w for w, _ in hit_b) else &quot;b&quot;
+                if side == &quot;a&quot;:
+                    rec_usd = max(rec_usd or 0.0, mag[&quot;usd&quot;])
+                else:
+                    unrec_usd = max(unrec_usd or 0.0, mag[&quot;usd&quot;])
+        if mag[&quot;per_share&quot;] and (best_ps is None or mag[&quot;per_share&quot;] &gt; best_ps):
+            best_ps = mag[&quot;per_share&quot;]
+        evidence.append({&quot;sentence&quot;: s[:600],
+                         &quot;usd&quot;: mag[&quot;usd&quot;], &quot;per_share&quot;: mag[&quot;per_share&quot;],
+                         &quot;side&quot;: &quot;A&quot; if hit_a and not hit_b else (&quot;B&quot; if hit_b and not hit_a else &quot;mixed&quot;),
+                         &quot;markers&quot;: [lab for _, lab in hit_a + hit_b]})
+    both = a_score &gt; 0 and b_score &gt; 0
+    if a_score == 0 and b_score == 0:
+        cls = &quot;unclear&quot;
+    # MONEY BREAKS THE TIE when both sides fire: whichever pot is ~3x the other decides the name.
+    elif both and rec_usd and unrec_usd and rec_usd &gt;= 3 * unrec_usd:
+        cls = &quot;A&quot;
+    elif both and rec_usd and unrec_usd and unrec_usd &gt;= 3 * rec_usd:
+        cls = &quot;B&quot;
+    elif a_score &gt; b_score:
+        cls = &quot;A&quot;
+    elif b_score &gt; a_score:
+        cls = &quot;B&quot;
+    else:
+        cls = &quot;unclear&quot;     # a genuine tie is not a call — the court can read the sentences
+    return {&quot;classification&quot;: cls, &quot;a_score&quot;: a_score, &quot;b_score&quot;: b_score,
+            &quot;a_reasons&quot;: sorted(set(a_reasons)), &quot;b_reasons&quot;: sorted(set(b_reasons)),
+            &quot;both_sides&quot;: both,
+            &quot;refund_recognized_usd&quot;: rec_usd, &quot;refund_unrecognized_usd&quot;: unrec_usd,
+            &quot;refund_usd&quot;: rec_usd if cls == &quot;A&quot; else (unrec_usd if cls == &quot;B&quot; else (rec_usd or unrec_usd)),
+            &quot;refund_per_share&quot;: best_ps,
+            &quot;sunset_cited_in_filing&quot;: sunset_cited,
+            &quot;evidence&quot;: evidence[:6]}
+
+
+# ---------------------------------------------------------------------------
+# Market overlay — labeled as MARKET DATA, never used to infer a filing fact.
+# ---------------------------------------------------------------------------
+def _market(ticker: str) -&gt; dict:
+    out = {&quot;source&quot;: &quot;yfinance (market data, NOT a filing fact)&quot;}
+    try:
+        import warnings
+        warnings.filterwarnings(&quot;ignore&quot;)
+        import yfinance as yf
+        t = yf.Ticker(ticker)
+        try:
+            tr = t.eps_trend
+            if tr is not None and not tr.empty:
+                for per in (&quot;0y&quot;, &quot;0q&quot;):
+                    if per in tr.index:
+                        cur = float(tr.loc[per, &quot;current&quot;])
+                        d90 = float(tr.loc[per, &quot;90daysAgo&quot;])
+                        out[f&quot;eps_{per}_current&quot;] = round(cur, 4)
+                        out[f&quot;eps_{per}_90d_ago&quot;] = round(d90, 4)
+                        # a percentage revision is meaningless across a sign flip or off a
+                        # near-zero base (BYRN printed -563% because the estimate crossed zero)
+                        if d90 and abs(d90) &gt;= 0.05 and (cur &gt; 0) == (d90 &gt; 0):
+                            out[f&quot;eps_{per}_rev_pct_90d&quot;] = round(100.0 * (cur - d90) / abs(d90), 2)
+                        else:
+                            out[f&quot;eps_{per}_rev_pct_90d&quot;] = None
+                            out[f&quot;eps_{per}_rev_note&quot;] = &quot;not meaningful — sign flip or near-zero base&quot;
+        except Exception:
+            pass
+        try:
+            rv = t.eps_revisions
+            if rv is not None and not rv.empty and &quot;0y&quot; in rv.index:
+                out[&quot;up_revisions_30d_0y&quot;] = int(rv.loc[&quot;0y&quot;, &quot;upLast30days&quot;])
+                out[&quot;down_revisions_30d_0y&quot;] = int(rv.loc[&quot;0y&quot;, &quot;downLast30days&quot;])
+            if rv is not None and not rv.empty and &quot;0q&quot; in rv.index:
+                out[&quot;up_revisions_7d_0q&quot;] = int(rv.loc[&quot;0q&quot;, &quot;upLast7days&quot;])
+        except Exception:
+            pass
+        info = {}
+        try:
+            info = t.info or {}
+        except Exception:
+            pass
+        out[&quot;market_cap&quot;] = info.get(&quot;marketCap&quot;)
+        out[&quot;shares_outstanding&quot;] = info.get(&quot;sharesOutstanding&quot;)
+        out[&quot;short_pct_float&quot;] = info.get(&quot;shortPercentOfFloat&quot;)
+        out[&quot;days_to_cover&quot;] = info.get(&quot;shortRatio&quot;)
+        try:
+            out[&quot;price&quot;] = round(float(t.fast_info.get(&quot;lastPrice&quot;)), 2)
+        except Exception:
+            pass
+    except Exception as e:
+        out[&quot;error&quot;] = str(e)[:120]
+    return out
+
+
+def _squeeze_gate(mkt: dict) -&gt; tuple[bool, str]:
+    &quot;&quot;&quot;gate-6: no shorting attention names. A-fades are estimate fades, not short recommendations.&quot;&quot;&quot;
+    spf = mkt.get(&quot;short_pct_float&quot;)
+    dtc = mkt.get(&quot;days_to_cover&quot;)
+    hot = (spf is not None and spf &gt;= 0.08) or (dtc is not None and dtc &gt;= 4.0)
+    if hot:
+        return True, (f&quot;NO_SHORT — squeeze fuel present (short {100 * spf:.1f}% of float, &quot;
+                      f&quot;{dtc} days-to-cover). Express as FADE-THE-ESTIMATE in court, never a short.&quot;
+                      if spf is not None and dtc is not None else
+                      &quot;NO_SHORT — squeeze fuel present. FADE-THE-ESTIMATE only.&quot;)
+    return False, &quot;FADE-THE-ESTIMATE candidate for court. Not an auto-short (gate-6 applies regardless).&quot;
+
+
+def scan(since: str, until: str, pages: int, max_docs: int, do_market: bool) -&gt; dict:
+    tmap = _ticker_map()
+
+    # ---- 1. harvest EFTS ------------------------------------------------------------
+    by_doc: dict[str, dict] = {}
+    per_query = {}
+    for spec in QUERIES:
+        rows = _efts(spec[&quot;q&quot;], since, until, pages)
+        per_query[spec[&quot;q&quot;]] = len(rows)
+        for r in rows:
+            key = f&quot;{r[&#x27;adsh&#x27;]}:{r[&#x27;fname&#x27;]}&quot;
+            if key in by_doc:
+                by_doc[key][&quot;spec&quot;] = max(by_doc[key][&quot;spec&quot;], spec[&quot;spec&quot;])
+                by_doc[key][&quot;queries&quot;].append(spec[&quot;q&quot;])
+            else:
+                r[&quot;spec&quot;] = spec[&quot;spec&quot;]
+                r[&quot;queries&quot;] = [spec[&quot;q&quot;]]
+                by_doc[key] = r
+        time.sleep(0.3)
+
+    # one document per accession: the highest-specificity matched file (press release beats the wrapper)
+    by_adsh: dict[str, dict] = {}
+    for r in by_doc.values():
+        cur = by_adsh.get(r[&quot;adsh&quot;])
+        if not cur or r[&quot;spec&quot;] &gt; cur[&quot;spec&quot;]:
+            by_adsh[r[&quot;adsh&quot;]] = r
+    docs = sorted(by_adsh.values(), key=lambda r: (-r[&quot;spec&quot;], r[&quot;date&quot;]), reverse=False)
+    docs = sorted(docs, key=lambda r: (-r[&quot;spec&quot;], r[&quot;date&quot;] or &quot;&quot;), reverse=True)
+    docs = sorted(docs, key=lambda r: -r[&quot;spec&quot;])
+    n_total_docs = len(docs)
+    fetch = docs[:max_docs]
+
+    # ---- 2. read the filings, extract verbatim sentences ------------------------------
+    parsed = []
+    for i, r in enumerate(fetch):
+        raw = _get(_doc_url(r[&quot;cik&quot;], r[&quot;adsh&quot;], r[&quot;fname&quot;]))
+        if not raw:
+            continue
+        txt = _text(raw)
+        sents = [s for s in _sentences(txt) if TARIFF_TOK.search(s) and RECOVER_TOK.search(s)]
+        if not sents:
+            continue
+        cl = _classify(sents)
+        if cl[&quot;classification&quot;] == &quot;unclear&quot; and not cl[&quot;evidence&quot;]:
+            continue
+        info = tmap.get(r[&quot;cik&quot;]) or {}
+        parsed.append({**r, **cl, &quot;ticker&quot;: info.get(&quot;ticker&quot;, &quot;&quot;),
+                       &quot;sec_name&quot;: info.get(&quot;title&quot;, r[&quot;name&quot;]),
+                       &quot;filing_url&quot;: _doc_url(r[&quot;cik&quot;], r[&quot;adsh&quot;], r[&quot;fname&quot;]),
+                       &quot;n_trigger_sentences&quot;: len(sents)})
+        if i % 25 == 0:
+            print(f&quot;  ...{i}/{len(fetch)} docs read, {len(parsed)} with tariff-recovery language&quot;,
+                  file=sys.stderr)
+        time.sleep(0.12)
+
+    # ---- 3. roll up to the issuer -----------------------------------------------------
+    by_cik: dict[int, dict] = {}
+    for p in parsed:
+        cur = by_cik.get(p[&quot;cik&quot;])
+        if not cur:
+            by_cik[p[&quot;cik&quot;]] = {**p, &quot;filings&quot;: [{&quot;form&quot;: p[&quot;form&quot;], &quot;date&quot;: p[&quot;date&quot;],
+                                                  &quot;adsh&quot;: p[&quot;adsh&quot;], &quot;url&quot;: p[&quot;filing_url&quot;],
+                                                  &quot;classification&quot;: p[&quot;classification&quot;]}]}
+            continue
+        cur[&quot;filings&quot;].append({&quot;form&quot;: p[&quot;form&quot;], &quot;date&quot;: p[&quot;date&quot;], &quot;adsh&quot;: p[&quot;adsh&quot;],
+                               &quot;url&quot;: p[&quot;filing_url&quot;], &quot;classification&quot;: p[&quot;classification&quot;]})
+        # Keep the strongest-signal filing as the issuer&#x27;s representative row. EVERY derived field
+        # moves together — v1 omitted the magnitude keys from this list, so an issuer could show a
+        # dollar figure read from one filing beside a verbatim sentence quoted from another
+        # (GIII&#x27;s $139.5M and COLM&#x27;s $78M sat next to sentences that contained no such number).
+        # A quoted sentence and the magnitude printed beside it must come from the SAME document.
+        new_rank = (p[&quot;a_score&quot;] + p[&quot;b_score&quot;], p[&quot;date&quot;] or &quot;&quot;)
+        cur_rank = (cur[&quot;a_score&quot;] + cur[&quot;b_score&quot;], cur[&quot;date&quot;] or &quot;&quot;)
+        if new_rank &gt; cur_rank:
+            for k in (&quot;classification&quot;, &quot;a_score&quot;, &quot;b_score&quot;, &quot;a_reasons&quot;, &quot;b_reasons&quot;,
+                      &quot;both_sides&quot;, &quot;refund_usd&quot;, &quot;refund_per_share&quot;,
+                      &quot;refund_recognized_usd&quot;, &quot;refund_unrecognized_usd&quot;,
+                      &quot;evidence&quot;, &quot;date&quot;, &quot;form&quot;, &quot;adsh&quot;, &quot;filing_url&quot;,
+                      &quot;sunset_cited_in_filing&quot;, &quot;n_trigger_sentences&quot;):
+                cur[k] = p[k]
+
+    names = list(by_cik.values())
+
+    # ---- 4. market overlay (A and B only; unclear rows do not earn a data pull) --------
+    if do_market:
+        for n in names:
+            if n[&quot;classification&quot;] == &quot;unclear&quot; or not n[&quot;ticker&quot;]:
+                continue
+            n[&quot;market&quot;] = _market(n[&quot;ticker&quot;])
+            time.sleep(0.25)
+
+    # ---- 5. rank ----------------------------------------------------------------------
+    for n in names:
+        mkt = n.get(&quot;market&quot;) or {}
+        n[&quot;quantified&quot;] = bool(n.get(&quot;refund_usd&quot;) or n.get(&quot;refund_per_share&quot;))
+        rev = mkt.get(&quot;eps_0y_rev_pct_90d&quot;)
+
+        # THE BRIEF&#x27;S A-BAR: refund &gt; 15% of the quarter&#x27;s EPS. The per-share refund comes from the
+        # filing when the filing states one (the FND shape); otherwise it is DERIVED as
+        # filing-dollars / reported shares outstanding. Both inputs are real figures — the division
+        # is ours and is labeled as such. Denominator = the consensus current-quarter EPS.
+        ps, deriv = n.get(&quot;refund_per_share&quot;), &quot;filing states a per-share figure&quot;
+        if ps is None and n.get(&quot;refund_usd&quot;) and mkt.get(&quot;shares_outstanding&quot;):
+            try:
+                ps = float(n[&quot;refund_usd&quot;]) / float(mkt[&quot;shares_outstanding&quot;])
+                deriv = &quot;DERIVED: filing dollars / reported shares outstanding (pre-tax basis unless the filing says otherwise)&quot;
+            except Exception:
+                ps = None
+        q_eps = mkt.get(&quot;eps_0q_current&quot;)
+        if ps and q_eps:
+            n[&quot;refund_per_share_used&quot;] = round(ps, 4)
+            n[&quot;refund_per_share_basis&quot;] = deriv
+            n[&quot;refund_pct_of_quarter_eps&quot;] = round(100.0 * ps / abs(q_eps), 1)
+            n[&quot;over_15pct_of_quarter_eps&quot;] = n[&quot;refund_pct_of_quarter_eps&quot;] &gt; 15.0
+            if n[&quot;refund_pct_of_quarter_eps&quot;] &gt; 300:
+                # legitimate for a micro-cap whose refund dwarfs a thin quarter (AOUT), but it is
+                # also the shape a mis-parsed magnitude takes — never let it pass unchallenged
+                n[&quot;magnitude_verify&quot;] = (&quot;refund exceeds 3x the quarter&#x27;s consensus EPS — plausible for a &quot;
+                                         &quot;thin-earnings small cap, but READ THE VERBATIM SENTENCE before &quot;
+                                         &quot;acting; do not take the ratio on trust&quot;)
+        else:
+            n[&quot;refund_pct_of_quarter_eps&quot;] = None
+            n[&quot;over_15pct_of_quarter_eps&quot;] = None
+            n[&quot;refund_per_share_basis&quot;] = &quot;NOT COMPUTABLE — no per-share figure in the filing and no share count&quot;
+        n[&quot;consensus_marked_up&quot;] = bool(rev is not None and rev &gt; 0.5)
+        # A rank: quantified refund x consensus being marked UP (the mirage is being extrapolated)
+        if n[&quot;classification&quot;] == &quot;A&quot;:
+            hot, note = _squeeze_gate(mkt)
+            n[&quot;squeeze_fuel&quot;] = hot
+            n[&quot;expression&quot;] = note
+            # THE BRIEF&#x27;S A BAR, both legs required: the one-timer is material to the quarter&#x27;s EPS
+            # AND the consensus is being marked UP on it (the mirage is actually being extrapolated).
+            # A big refund at a name whose estimates are being CUT is not a mirage — the market has
+            # already seen through it (BYRN: -563% revision on a widening loss; refund is real,
+            # the fade is not).
+            n[&quot;A_bar_met&quot;] = bool(n.get(&quot;over_15pct_of_quarter_eps&quot;) and n[&quot;consensus_marked_up&quot;])
+            if mkt.get(&quot;eps_0y_current&quot;) is not None and mkt[&quot;eps_0y_current&quot;] &lt; 0:
+                n[&quot;revision_caveat&quot;] = (&quot;consensus FY EPS is a LOSS — the % revision is unstable and &quot;
+                                        &quot;the estimate-fade framing does not apply cleanly&quot;)
+            score = n[&quot;a_score&quot;]
+            if n[&quot;quantified&quot;]:
+                score += 3
+            if n[&quot;refund_per_share&quot;]:
+                score += 2      # a per-share figure is the FND-shaped, directly-comparable tell
+            if n.get(&quot;over_15pct_of_quarter_eps&quot;):
+                score += 4      # the brief&#x27;s bar: the one-timer is material to the quarter&#x27;s EPS
+            if rev is not None:
+                score += max(0.0, min(6.0, rev))          # bigger mark-up = bigger mirage
+            if (mkt.get(&quot;up_revisions_30d_0y&quot;) or 0) &gt; (mkt.get(&quot;down_revisions_30d_0y&quot;) or 0):
+                score += 2
+            n[&quot;rank_score&quot;] = round(score, 2)
+        elif n[&quot;classification&quot;] == &quot;B&quot;:
+            score = n[&quot;b_score&quot;]
+            if n[&quot;quantified&quot;]:
+                score += 3      # the brief&#x27;s B bar: QUANTIFIED embedded cost, not just persist language
+            if any(&quot;PERSIST&quot; in r or &quot;persist&quot; in r for r in n[&quot;b_reasons&quot;]):
+                score += 3      # explicit persist-assumption language
+            if n[&quot;sunset_cited_in_filing&quot;]:
+                score += 2      # the ISRG shape: the company printed the sunset in its own filing
+            n[&quot;rank_score&quot;] = round(score, 2)
+            n[&quot;confounders&quot;] = CONFOUNDERS
+            n[&quot;expression&quot;] = (&quot;POSITIVE SKEW on a public fact — RP_FAIR with a skew overlay, not an &quot;
+                               &quot;edge. Own at a fair price; do not pay an edge premium.&quot;)
+        else:
+            n[&quot;rank_score&quot;] = 0.0
+
+    # names meeting BOTH legs of the A bar lead the table regardless of raw marker score
+    A = sorted([n for n in names if n[&quot;classification&quot;] == &quot;A&quot;],
+               key=lambda x: (not x.get(&quot;A_bar_met&quot;), -x[&quot;rank_score&quot;]))
+    B = sorted([n for n in names if n[&quot;classification&quot;] == &quot;B&quot;], key=lambda x: -x[&quot;rank_score&quot;])
+    U = [n for n in names if n[&quot;classification&quot;] == &quot;unclear&quot;]
+
+    return {
+        &quot;generated&quot;: datetime.datetime.now().isoformat(timespec=&quot;seconds&quot;),
+        &quot;mechanism&quot;: {
+            &quot;scotus_struck_ieepa&quot;: SCOTUS_DATE,
+            &quot;section_122_effective&quot;: S122_EFFECTIVE,
+            &quot;section_122_sunset&quot;: S122_SUNSET,
+            &quot;A_pattern&quot;: &quot;EPS MIRAGE — refund recognized in results/guide; consensus extrapolates a &quot;
+                         &quot;one-timer (the FND pattern). FADE-THE-ESTIMATE for court, never auto-short.&quot;,
+            &quot;B_pattern&quot;: &quot;POSITIVE SKEW — refund unrecognized (gain contingency) and/or guide assumes &quot;
+                         &quot;the tariff cost persists (the ISRG/ARHS pattern). Guide raises mechanically &quot;
+                         &quot;if the sunset held.&quot;,
+            &quot;confounders&quot;: CONFOUNDERS,
+        },
+        &quot;window&quot;: {&quot;since&quot;: since, &quot;until&quot;: until},
+        &quot;counts&quot;: {
+            &quot;efts_docs_matched&quot;: n_total_docs, &quot;docs_fetched&quot;: len(fetch),
+            &quot;docs_with_tariff_recovery_language&quot;: len(parsed),
+            &quot;issuers&quot;: len(names), &quot;A&quot;: len(A), &quot;B&quot;: len(B), &quot;unclear&quot;: len(U),
+            &quot;quantified&quot;: sum(1 for n in names if n.get(&quot;quantified&quot;)),
+            &quot;per_query_hits&quot;: per_query,
+        },
+        &quot;A_fades&quot;: A, &quot;B_skews&quot;: B, &quot;unclear&quot;: U,
+    }
+
+
+def _fmt_usd(v) -&gt; str:
+    if not v:
+        return &quot;—&quot;
+    if v &gt;= 1e9:
+        return f&quot;${v / 1e9:.2f}bn&quot;
+    if v &gt;= 1e6:
+        return f&quot;${v / 1e6:.1f}M&quot;
+    return f&quot;${v / 1e3:.0f}k&quot;
+
+
+def write_intake(res: dict) -&gt; Path:
+    d = datetime.date.today().strftime(&quot;%Y%m%d&quot;)
+    path = INTAKE_DIR / f&quot;TARIFF_REFUND_INTAKE_{d}.md&quot;
+    c = res[&quot;counts&quot;]
+    L = [f&quot;# TARIFF-REFUND COHORT — intake {datetime.date.today()}&quot;,
+         &quot;&quot;,
+         f&quot;**Mechanism.** SCOTUS struck the IEEPA tariffs {SCOTUS_DATE}; the Section-122 replacement took &quot;
+         f&quot;effect {S122_EFFECTIVE} and carried a 150-day statutory sunset at {S122_SUNSET}. Importers hold &quot;
+         &quot;refund claims. The accounting choice splits the tape two ways.&quot;,
+         &quot;&quot;,
+         f&quot;**Coverage.** {c[&#x27;efts_docs_matched&#x27;]} EDGAR filings matched the query set; {c[&#x27;docs_fetched&#x27;]} read; &quot;
+         f&quot;{c[&#x27;docs_with_tariff_recovery_language&#x27;]} carried tariff-recovery sentences; **{c[&#x27;issuers&#x27;]} issuers** &quot;
+         f&quot;→ **{c[&#x27;A&#x27;]} A-fades / {c[&#x27;B&#x27;]} B-skews / {c[&#x27;unclear&#x27;]} unclear**; &quot;
+         f&quot;**{c[&#x27;quantified&#x27;]} quantified from filings**.&quot;,
+         &quot;&quot;,
+         &quot;---&quot;, &quot;&quot;,
+         &quot;## A — EPS-MIRAGE FADES (the FND pattern)&quot;,
+         &quot;*The refund is IN the reported number or the guide. Consensus marks up a one-timer. &quot;
+         &quot;These are FADE-THE-ESTIMATE candidates for the court — not auto-shorts (gate-6).*&quot;, &quot;&quot;,
+         &quot;| # | ticker | issuer | filing | refund recognized (filing) | % of qtr EPS | cons. FY rev 90d | up/dn 30d | **A bar** | squeeze | verbatim fragment |&quot;,
+         &quot;|---|---|---|---|---|---|---|---|---|---|---|&quot;]
+    for i, n in enumerate(res[&quot;A_fades&quot;][:15], 1):
+        m = n.get(&quot;market&quot;) or {}
+        mag = _fmt_usd(n.get(&quot;refund_usd&quot;))
+        if n.get(&quot;refund_per_share&quot;):
+            mag += f&quot; / ${n[&#x27;refund_per_share&#x27;]:.2f}ps&quot;
+        rev = m.get(&quot;eps_0y_rev_pct_90d&quot;)
+        pct = n.get(&quot;refund_pct_of_quarter_eps&quot;)
+        pcts = &quot;—&quot; if pct is None else (f&quot;**{pct:.0f}%**&quot; if n.get(&quot;over_15pct_of_quarter_eps&quot;) else f&quot;{pct:.0f}%&quot;)
+        if pct is not None and &quot;DERIVED&quot; in (n.get(&quot;refund_per_share_basis&quot;) or &quot;&quot;):
+            pcts += &quot;†&quot;
+        frag = (n[&quot;evidence&quot;][0][&quot;sentence&quot;][:170] + &quot;…&quot;) if n.get(&quot;evidence&quot;) else &quot;—&quot;
+        L.append(f&quot;| {i} | **{n[&#x27;ticker&#x27;] or &#x27;—&#x27;}** | {n[&#x27;sec_name&#x27;][:28]} | {n[&#x27;form&#x27;]} {n[&#x27;date&#x27;]} | {mag} | {pcts} | &quot;
+                 f&quot;{f&#x27;{rev:+.1f}%&#x27; if rev is not None else &#x27;—&#x27;} | &quot;
+                 f&quot;{m.get(&#x27;up_revisions_30d_0y&#x27;, &#x27;—&#x27;)}/{m.get(&#x27;down_revisions_30d_0y&#x27;, &#x27;—&#x27;)} | &quot;
+                 f&quot;{&#x27;**MET**&#x27; if n.get(&#x27;A_bar_met&#x27;) else &#x27;no&#x27;} | &quot;
+                 f&quot;{&#x27;**NO_SHORT**&#x27; if n.get(&#x27;squeeze_fuel&#x27;) else &#x27;ok&#x27;} | {frag.replace(&#x27;|&#x27;, &#x27;/&#x27;)} |&quot;)
+    L += [&quot;&quot;, &quot;**A bar** = BOTH legs: refund &gt;15% of the quarter&#x27;s consensus EPS AND consensus marked UP &quot;
+          &quot;over 90d. A big refund at a name whose estimates are being CUT is not a mirage — the market &quot;
+          &quot;already saw through it. Bar-MET rows sort first.&quot;,
+          &quot;&quot;, &quot;† per-share refund DERIVED as filing dollars / reported shares outstanding (pre-tax basis &quot;
+          &quot;unless the filing says otherwise); unmarked = the filing states the per-share figure itself. &quot;
+          &quot;Denominator = consensus current-quarter EPS.&quot;]
+    L += [&quot;&quot;, &quot;## B — POSITIVE-SKEW CONSERVATIVES (the ISRG / ARHS pattern)&quot;,
+          &quot;*Refund unrecognized and/or the guide assumes the tariff cost persists. The guide raises &quot;
+          &quot;mechanically if the sunset held.*&quot;, &quot;&quot;,
+          &quot;**CONFOUNDERS — apply to EVERY B name, no exceptions:**&quot;]
+    L += [f&quot;{i}. {c_}&quot; for i, c_ in enumerate(CONFOUNDERS, 1)]
+    L += [&quot;&quot;, &quot;| # | ticker | issuer | filing | unrecognized / embedded (filing) | sunset in own filing | also recognized | markers | verbatim fragment |&quot;,
+          &quot;|---|---|---|---|---|---|---|---|---|&quot;]
+    for i, n in enumerate(res[&quot;B_skews&quot;][:15], 1):
+        ev = [e for e in n.get(&quot;evidence&quot;, []) if e.get(&quot;side&quot;) in (&quot;B&quot;, &quot;mixed&quot;)] or n.get(&quot;evidence&quot;) or []
+        frag = (ev[0][&quot;sentence&quot;][:170] + &quot;…&quot;) if ev else &quot;—&quot;
+        L.append(f&quot;| {i} | **{n[&#x27;ticker&#x27;] or &#x27;—&#x27;}** | {n[&#x27;sec_name&#x27;][:28]} | {n[&#x27;form&#x27;]} {n[&#x27;date&#x27;]} | &quot;
+                 f&quot;{_fmt_usd(n.get(&#x27;refund_unrecognized_usd&#x27;))} | {&#x27;YES&#x27; if n.get(&#x27;sunset_cited_in_filing&#x27;) else &#x27;no&#x27;} | &quot;
+                 f&quot;{_fmt_usd(n.get(&#x27;refund_recognized_usd&#x27;)) if n.get(&#x27;both_sides&#x27;) else &#x27;—&#x27;} | &quot;
+                 f&quot;{&#x27;; &#x27;.join(n[&#x27;b_reasons&#x27;])[:70]} | {frag.replace(&#x27;|&#x27;, &#x27;/&#x27;)} |&quot;)
+    L += [&quot;&quot;, &quot;---&quot;, &quot;&quot;,
+          &quot;## Guards in force&quot;,
+          &quot;- **Magnitude from filings only.** Every dollar/per-share figure above is read from the verbatim &quot;
+          &quot;sentence quoted beside it. Unquantified is printed as unquantified — never estimated.&quot;,
+          &quot;- **Consensus revisions are MARKET DATA** (yfinance), used as evidence that the mirage is being &quot;
+          &quot;extrapolated — never to infer that a refund exists.&quot;,
+          &quot;- **gate-6:** no shorting attention names. A-rows carry short interest / days-to-cover; squeeze-fuel &quot;
+          &quot;names are marked NO_SHORT. A-fades go to court as estimate fades.&quot;,
+          &quot;- **B is skew, not edge.** A statutory date printed in a widely-covered 10-Q is not an &quot;
+          &quot;informational moat; classify RP_FAIR with a skew overlay.&quot;,
+          &quot;&quot;, f&quot;Machine-readable: `{OUT_JSON}`&quot;]
+    path.write_text(&quot;\n&quot;.join(L))
+    return path
+
+
+def main() -&gt; int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument(&quot;--since&quot;, default=SCOTUS_DATE)
+    ap.add_argument(&quot;--until&quot;, default=datetime.date.today().isoformat())
+    ap.add_argument(&quot;--pages&quot;, type=int, default=8)
+    ap.add_argument(&quot;--max-docs&quot;, type=int, default=600)
+    ap.add_argument(&quot;--no-market&quot;, action=&quot;store_true&quot;)
+    a = ap.parse_args()
+
+    res = scan(a.since, a.until, a.pages, a.max_docs, not a.no_market)
+    OUT_JSON.parent.mkdir(parents=True, exist_ok=True)
+    OUT_JSON.write_text(json.dumps(res, indent=1, default=str))
+    p = write_intake(res)
+    c = res[&quot;counts&quot;]
+    print(f&quot;tariff_refund_cohort: {c[&#x27;efts_docs_matched&#x27;]} filings matched / {c[&#x27;docs_fetched&#x27;]} read / &quot;
+          f&quot;{c[&#x27;issuers&#x27;]} issuers -&gt; A={c[&#x27;A&#x27;]} B={c[&#x27;B&#x27;]} unclear={c[&#x27;unclear&#x27;]} &quot;
+          f&quot;quantified={c[&#x27;quantified&#x27;]}&quot;)
+    print(f&quot;  {OUT_JSON}\n  {p}&quot;)
+    return 0
+
+
+if __name__ == &quot;__main__&quot;:
+    raise SystemExit(main())
+</pre></div></body></html>

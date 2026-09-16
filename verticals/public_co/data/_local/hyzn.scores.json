@@ -1,0 +1,77 @@
+{
+  "ticker": "HYZN",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Going-concern / late-stage distress; bankruptcy contingency language; Form 25 (delisting 2025-03-03) and Form 15-12G (deregistration 2025-03-13/28); cash $30.4M Q3 2024.",
+      "severity": "RED_FLAG_NEGATIVE",
+      "supports": "EDGAR fulltext (cik=0001716583) returns Form 25 (2025-03-03), Form 15-12G (2025-03-13) + Form 15-12G/A and Form 15-12G (2025-03-28), plus NT 10-K (2023-04-03) and 3 NT 10-Q (2022-08, 2022-11, 2023-05). Textbook delisting->deregistration ladder.",
+      "M_check": "edgar_fts.query_fulltext(cik=0001716583, forms='15-12G,25,NT 10-K,NT 10-Q')",
+      "M_value": "8 hits: 1xForm 25, 2xForm 15-12G + 1x15-12G/A, 3xNT 10-Q, 1xNT 10-K",
+      "interpretation": "Calibration Heuristic 10 (delisting / going-concern fingerprints) fully triggered. The going-concern + bankruptcy-contingency language in the Q3-2024 10-Q is self-disclosed; the subsequent Form 25 + Form 15-12G filings confirm Hyzon was delisted from Nasdaq and deregistered with the SEC in March 2025. The forward-revenue / commercialization narrative in the 10-K is materially undercut. RED_FLAG_NEGATIVE."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "De minimis FCEV revenue / deliveries: $0.3M FY2023 (one US vehicle); $134K Q3 2024; $10.4M 9M-2024.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": "NHTSA vPIC confirms HYZON MOTORS INC registered as a manufacturer with vehicle_type='Truck'. So the manufacturer-existence side of the claim is corroborated. But the deliveries / revenue conflation against the company's narrative of 'commercializing heavy-duty FCEVs' is itself a self-disclosed underdelivery: $0.3M of one-vehicle revenue against opex of $188M is a 1:600 revenue:opex ratio, an extreme planned-vs-operational gap that the company markets as 'commercialization'.",
+      "M_check": "nhtsa.query_manufacturer(name='Hyzon')",
+      "M_value": "1 manufacturer, vehicle_types=['Truck']",
+      "interpretation": "Calibration Heuristic 3 (planned vs operational). Hyzon is a real truck manufacturer per NHTSA, but the self-disclosed deliveries are ~1 US FCEV / year. The company's own filings disclose the magnitude gap so this is not a HARD CONTRADICTION; it is a MODERATE_UNDERDELIVERY of the commercialization-stage narrative."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Bolingbrook IL fuel-cell-system manufacturing facility (110K sq ft) + Rochester NY prototype build (78.6K sq ft, sale signed Nov-2023).",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": "EPA FRS shows 0 facilities matching 'Hyzon' in IL and 0 in NY. Per Calibration Heuristic 1 the fuel-cell system assembly footprint should plausibly EPA-register only when stationary-emission processes (electroplating, solvent use, etc.) cross thresholds; pure prototype assembly may not. Absence does not by itself contradict but is materially weaker than what one would see for a true volume H2 production / fuel-cell manufacturing site.",
+      "M_check": "epa_frs.query_facilities(facility_name='Hyzon', state_abbr=IL/NY)",
+      "M_value": "IL n_facilities=0; NY n_facilities=0",
+      "interpretation": "Calibration Heuristic 1: H2 production facilities ARE EPA-regulated, but assembly/prototype sites may not be. Hyzon's site descriptions match assembly/test-lab use, not H2 production, so 0 hits is consistent with a true-but-small footprint. Combined with the Rochester NY sale (already announced) and the July-2024 wind-down of Netherlands/Australia, the manufacturing claim is shrinking, not scaling. MODERATE_UNDERDELIVERY rather than SEVERE."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Proprietary HD hydrogen fuel-cell technology (200kW single-stack) + IP portfolio.",
+      "severity": "PASS",
+      "supports": "USPTO ODP returns n_total_applications=109, n_granted=10 for assignee 'Hyzon'. Titles overwhelmingly fuel-cell / hydrogen / drivetrain: 'ADAPTIVE POWER MANAGEMENT SYSTEM FOR FUEL CELL ELECTRIC VEHICLES', 'VOLTAGE BLEED DOWN DURING HYDROGEN FUEL CELL SHUTDOWN', 'FUEL CELL POWER AND BATTERY STATE-OF-CHARGE MANAGEMENT', 'ELECTRICALLY POWERED VEHICLE AND DRIVETRAIN'. CPC codes include H01M (fuel cells) and B60L (electric propulsion).",
+      "M_check": "uspto_odp.query_assignee(assignee_name='Hyzon', cutoff_date='2026-05-16')",
+      "M_value": "n_total_applications=109; n_granted=10; titles strongly fuel-cell / hydrogen / drivetrain focused",
+      "interpretation": "Calibration Heuristic 8: PASS if n_granted >= 10 with claimed-technology hit. Hyzon meets the bar exactly (10 granted) with directly on-topic fuel-cell / hydrogen titles. No Nikola-style 30+ granted with 0 in-claim pattern. PASS."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Potential FCET customers include shipping/logistics, grocery, food&bev, waste-management, government agencies (Class 8 / refuse-truck back-to-base in North America). No named binding hyperscaler / large logistics customer is disclosed.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": "EDGAR fulltext for 'Hyzon' in WMT (CIK 0000104169) = 0 hits; FDX (CIK 0001048911) = 0; UPS (CIK 0001090727) = 0. So no large public-co retailer / logistics counterparty discloses Hyzon as a vendor / customer. This is consistent with the claim itself: Hyzon describes these as 'potential', not binding offtake. The wording 'potential customers' is not a HARD CONTRADICTION under Layer 3 Rule 7 (the threshold there is a CLAIMED binding offtake, which is absent here).",
+      "M_check": "edgar_fts.query_fulltext(search_term='Hyzon', cik in [0000104169 WMT, 0001048911 FDX, 0001090727 UPS])",
+      "M_value": "WMT=0, FDX=0, UPS=0",
+      "interpretation": "Counterparty-disclosure threshold (Layer 3 Rule 7) is not technically tripped because Hyzon labels these as 'potential' customers, not binding contracts. But the complete absence of any public-co counterparty corroboration despite multi-year marketing of fleet-conversion partnerships, combined with the de minimis revenue, is itself a moderate undercut of the commercialization narrative. MODERATE_UNDERDELIVERY."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Hydrogen supply ecosystem via Raven SR investment and Hyzon Europe / Holthausen JV; Hyzon Europe wound down July 2024.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": "EDGAR fulltext for 'Raven SR' returns 39 hits across filers (Raven SR is a real entity disclosed by other registrants), so the partnership exists. However Hyzon itself disclosed a $14.3M impairment of the Raven SR equity stake in FY2023, and the Hyzon Europe / Holthausen JV was wound down in July 2024. Self-disclosed degradation of the entire 'hydrogen supply ecosystem' narrative.",
+      "M_check": "edgar_fts.query_fulltext(search_term='Raven SR', cutoff_date='2026-05-16')",
+      "M_value": "39 total filings across registrants",
+      "interpretation": "Calibration Heuristic 4 (investment vs operating). Raven SR is a real partner but the equity stake was impaired to a fraction of cost; the Netherlands JV was wound down. Partnership claims are technically true but the underlying operating relationships are collapsing per Hyzon's own filings. MODERATE_UNDERDELIVERY."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "No DOE Hydrogen Hub / DOE LPO / ARPA-E direct federal funding disclosed; no IRA 45V claim.",
+      "severity": "PASS",
+      "supports": "USAspending for recipient 'Hyzon' returns n_awards=0 contracts and n_awards=0 grants (2020-01-01 through 2026-05-16). The 10-K / 10-Q do NOT claim any DOE Hub / LPO / 45V award, so the absence in USAspending is consistent with the disclosure (truthful absence). This is actually a positive signal of disclosure honesty in a sector where peers routinely overstate federal-program eligibility.",
+      "M_check": "usaspending.query_recipient_contracts + query_recipient_grants for recipient_name='Hyzon'",
+      "M_value": "contracts: 0 awards / $0; grants: 0 awards",
+      "interpretation": "Hyzon does not claim DOE Hub / LPO / 45V eligibility, and USAspending shows zero awards. Calibration Heuristic 5 mapping is satisfied: no jurisdiction mismatch and no contradiction. PASS (truthful absence)."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "$25.0M SEC civil-penalty settlement (final judgment Jan-16-2024) for materially false statements about customer contracts, vehicle orders, sales/earnings projections.",
+      "severity": "RED_FLAG_NEGATIVE",
+      "supports": "EDGAR fulltext for 'Hyzon' restricted to 8-K / AAER returns 258 hits across multiple years, including 2023 and 2024 8-Ks (e.g. 0001716583-24-000048 May-2024). The SEC enforcement matter is self-disclosed in the 10-K with the specific payment schedule ($8.5M / $8.5M / $8.0M tranches). This is a confirmed prior-fraud admission, not a forward claim; Calibration Heuristic 11 (revenue-recognition pattern) applies retroactively: the SEC's own complaint says the company misstated customer contracts, vehicle orders, and projections.",
+      "M_check": "edgar_fts.query_fulltext(search_term='Hyzon', forms='AAER,8-K')",
+      "M_value": "258 hits including 2023-09-26 SEC settlement announcement and 2024-01 final-judgment 8-Ks",
+      "interpretation": "A $25M SEC penalty for materially-false statements about customer contracts and vehicle orders is exactly the prior-fraud-pattern Calibration Heuristic 11 warns about for hydrogen distress names. Combined with the going-concern + delisting trajectory (C1), this elevates the credibility of every other forward customer-pipeline claim downward. RED_FLAG_NEGATIVE on the company's overall disclosure quality."
+    }
+  ]
+}

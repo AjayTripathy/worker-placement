@@ -1,0 +1,473 @@
+{
+  "_schema_version": "1.0",
+  "_built": "2026-05-28",
+  "_purpose": "CA affordable / multifamily housing muni sector inventory. Scopes the wrap-cluster catalog prediction that federal-wrap structures (GNMA, FHA 221d4, FHA 542c) mask operator (project owner / property manager) credit signal. Identifies the actual structural cleavage: state-HFA-overcollateralization (CalHFA) and federal-wrap (GNMA / FHA 542c Risk-Share) on one side; uninsured single-asset essential / workforce housing on the other. The wrap-cluster catalog's primary prediction is partially confirmed at the issuer-aggregate (CalHFA) level but the more important finding is the existence of a separate, UNWRAPPED, project-level workforce-housing subsector that has materially defaulted in 2024-2025.",
+  "_session_notes": [
+    "Time-boxed 90 min scoping. Universe inventory + structure classification + bond pricing anchors completed; per-project HUD REAC / LIHTC compliance / Section 8 status not pulled (data-gap).",
+    "Bond price anchors pulled via MunicipalBonds.com (full Chrome fingerprint) — primary source MSRB EMMA trade tape via aggregator.",
+    "Catalog prediction REVISED: the wrap-mask prediction holds for CalHFA (state-HFA overcollateralized) and project-level Freddie-TEL / GNMA-collateralized affordable deals, but the workforce/essential-housing subsector that does NOT use federal wraps shows MAXIMUM information content in bond prices — distressed projects trade 1500-2000+ bps wide vs CalHFA wrap.",
+    "Cross-vertical comparison: AGM rating-conditional finding (0 bps at AA-, 140 bps at BBB-, 360 bps at CCC-) applies analogously here — CalHFA Aa2/AA wrap on a portfolio of FHA-Risk-Share loans trades at +35-65 bps over MMD AAA = consistent with AA-wrap on portfolio-of-A1-underlying. Unwrapped single-asset workforce housing at sub-IG/distressed underlying trades ~1500-2500 bps wide."
+  ],
+  "_structural_taxonomy": {
+    "structure_classes": {
+      "calhfa_overcollateralized_program": {
+        "description": "CalHFA Affordable Multifamily Housing Revenue Bond Indenture (post-2023 reentry). Aa2 Moody's / AA S&P. 1.31x PADR (program-asset-to-debt ratio). Indenture funds a mix of FHA Risk Share, GNMA-collateralized, and uninsured permanent loans. The PROGRAM credit (CalHFA balance sheet) wraps over the underlying loan-level credit. Upgraded to Aa1 by Moody's in Jan 2026.",
+        "structural_wrap": "state HFA balance-sheet overcollateralization + indenture lien on portfolio",
+        "wrap_severity": "STRONG",
+        "current_market_yield_anchor": "+35 to +65 bps over MMD AAA",
+        "predicted_masking": "STRONG — operator-level signal absorbed by program overcollateralization"
+      },
+      "calhfa_conduit_supportive_housing": {
+        "description": "CalHFA acts as conduit for project-level supportive housing deals (e.g., 833 Bryant SF Supportive Housing). Bonds are non-recourse to CalHFA program credit and rely on project-level cash flow + Section 8 / HUD voucher pledge.",
+        "structural_wrap": "Section 8 HAP pledge / project-level revenues",
+        "wrap_severity": "MEDIUM",
+        "current_market_yield_anchor": "+95 to +130 bps over MMD AAA",
+        "predicted_masking": "PARTIAL — federal voucher backstop on rent revenue but not on debt service per se"
+      },
+      "freddie_mac_tel_passthrough": {
+        "description": "CSCDA / CMFA / CalPFA conduit issuance where Freddie Mac purchases the tax-exempt loan (TEL or Flex TEL) and provides credit enhancement via direct purchase. Bonds typically rated Aa2/AA (Freddie Mac credit) and structured as 30y term with 35y amort. Used predominantly on 4% LIHTC + tax-exempt PAB acquisitions / rehabs. Typical 2024 deals: Lexington Green ($42.9M, Ready Capital lender), Prospera at Homestead ($30.75M).",
+        "structural_wrap": "Freddie Mac TEL purchase / unconditional credit substitution",
+        "wrap_severity": "STRONG (federal GSE)",
+        "current_market_yield_anchor": "+30 to +50 bps over MMD AAA (extrapolated from Aaa-rated GSE muni paper)",
+        "predicted_masking": "STRONG"
+      },
+      "gnma_collateralized_passthrough": {
+        "description": "Conduit-issued bonds collateralized by GNMA mortgage-backed securities backing the project mortgage. Full faith and credit of U.S. Government on principal & interest. Rated Aaa. Used on new-construction or acquisition-rehab deals where lender originates an FHA-insured mortgage and securitizes it. Less common in 2023-2025 than Freddie TEL — most California 4% LIHTC deals now go through Freddie.",
+        "structural_wrap": "GNMA timely-pay guarantee = full federal faith & credit",
+        "wrap_severity": "MAXIMUM",
+        "current_market_yield_anchor": "+15 to +30 bps over MMD AAA (UST-equivalent on tax-exempt scale)",
+        "predicted_masking": "MAXIMUM — operator signal entirely absorbed by federal wrap"
+      },
+      "fha_542c_risk_share": {
+        "description": "FHA Section 542(c) Risk-Sharing Insurance. CalHFA underwrites the FHA insurance and shares 50% of any claim with HUD. State HFA bears half the claim risk. Mortgage insured via this program is then funded through the CalHFA Affordable Multifamily indenture. The credit-enhancement layer is HYBRID — partial federal, partial state HFA balance sheet.",
+        "structural_wrap": "FHA insurance with 50% state risk share = federal credit floor + state amortization",
+        "wrap_severity": "STRONG (subordinate to CalHFA program credit)",
+        "current_market_yield_anchor": "Embedded inside CalHFA Affordable Multifamily indenture; no standalone CUSIP",
+        "predicted_masking": "STRONG"
+      },
+      "fha_221d4_new_construction": {
+        "description": "FHA Section 221(d)(4) multifamily mortgage insurance for new construction / substantial rehabilitation. 40-year fully-amortizing fixed-rate insurance. Typically used in conjunction with conduit short-term tax-exempt construction-period bonds + 4% LIHTC + GNMA permanent take-out. Bonds typically have 24-36 month construction period then taken out by GNMA securitization. Lender = Ready Capital / Walker Dunlop / Lument / etc.",
+        "structural_wrap": "FHA insurance on permanent loan + GNMA on bond collateral",
+        "wrap_severity": "MAXIMUM (during permanent phase)",
+        "current_market_yield_anchor": "Same as gnma_collateralized_passthrough during permanent phase; construction-period unrated",
+        "predicted_masking": "MAXIMUM"
+      },
+      "essential_workforce_housing_unwrapped": {
+        "description": "CSCDA Community Improvement Authority / California Community Housing Agency (CalCHA) / CMFA Special Finance Agency I / CalPFA workforce housing deals. Government joint-powers authority acquires market-rate apartment buildings and converts to 80-120% AMI rent caps. 2019-2021 vintage: ~45+ deals issued $8-10B. ZERO credit enhancement — purely project-level cash flow with senior/subordinate lien stack. 'Missing middle' workforce housing NOT eligible for tax credits or PAB allocation.",
+        "structural_wrap": "NONE — bondholder underwrites single-asset apartment cash flow directly",
+        "wrap_severity": "NONE",
+        "current_market_yield_anchor": "+200 to +250 bps over MMD AAA in 2021; now +500-2000 bps on distressed names trading 63-90 cents",
+        "predicted_masking": "NONE — wrap-cluster prediction does NOT apply; project-level signal fully visible in price"
+      },
+      "lihtc_4pct_pab_unwrapped": {
+        "description": "4% LIHTC + tax-exempt private activity bonds with no Freddie/Fannie/FHA/GNMA wrap. Bondholder relies on project NOI + 15-year LIHTC compliance. Less common than wrapped structures because investors demand credit enhancement; usually exists only on small deals or as junior tranches under a Freddie TEL senior.",
+        "structural_wrap": "NONE; LIHTC compliance is operational not credit",
+        "wrap_severity": "NONE",
+        "current_market_yield_anchor": "Limited public-trade data; private placements common",
+        "predicted_masking": "NONE"
+      }
+    }
+  },
+  "_conduit_issuers": {
+    "calhfa": {
+      "full_name": "California Housing Finance Agency",
+      "type": "State Housing Finance Agency",
+      "rating_program_level": "Aa1 Moody's (upgraded Jan 2026 from Aa2) / AA+ S&P (upgraded Aug 2025 from AA)",
+      "role": "Direct issuer of affordable multifamily housing revenue bonds via Affordable Multifamily Housing Revenue Bond Indenture; also conduit for project-level supportive housing; also participant in FHA Risk-Share program"
+    },
+    "cscda": {
+      "full_name": "California Statewide Communities Development Authority",
+      "type": "Joint Powers Authority (sponsored by League of CA Cities + CA State Assoc of Counties)",
+      "rating_program_level": "N/A — issues conduit bonds rated to underlying credit / wrap",
+      "role": "Largest CA conduit for tax-exempt multifamily housing bonds; $25B+ since inception across 900+ projects. Also sponsors CSCDA Community Improvement Authority (CIA) for workforce / essential housing.",
+      "lifetime_volume": "$25B+ across 900+ multifamily / senior projects"
+    },
+    "cscda_cia": {
+      "full_name": "CSCDA Community Improvement Authority",
+      "type": "JPA / Single-purpose entity",
+      "rating_program_level": "N/A — single-asset unrated workforce housing",
+      "role": "2019-2022 issuance vehicle for workforce housing acquisitions. Multiple defaults in 2024-2025."
+    },
+    "calcha": {
+      "full_name": "California Community Housing Agency",
+      "type": "JPA",
+      "rating_program_level": "N/A",
+      "role": "Owns 14 workforce housing projects financed with $2.5B of bonds; 7 of 14 have defaulted / drawn reserves / impaired as of 2024-2025. Catalyst Housing was original administrator; replaced by Waterford Residential 16 in 2024-25."
+    },
+    "cmfa": {
+      "full_name": "California Municipal Finance Authority",
+      "type": "JPA",
+      "rating_program_level": "N/A — conduit",
+      "role": "Conduit for multifamily housing revenue bonds across smaller projects ($5M-$90M typical). Sponsors CMFA Special Finance Agency I for workforce housing analog to CSCDA CIA."
+    },
+    "calpfa": {
+      "full_name": "California Public Finance Authority",
+      "type": "JPA",
+      "role": "Conduit for affordable multifamily and other public benefit issuances; smaller than CSCDA / CMFA in housing volume."
+    },
+    "cdlac": {
+      "full_name": "California Debt Limit Allocation Committee",
+      "type": "State Treasury committee",
+      "role": "Allocates federal tax-exempt private activity bond cap ($4.87B 2024 ceiling, demand >$12B). NOT an issuer — allocates capacity to conduits. 2024 awarded 138 of 354 multifamily applications (39%).",
+      "annual_state_ceiling_2024": "$4.87B"
+    },
+    "san_diego_housing_commission": {
+      "full_name": "Housing Authority of the City of San Diego",
+      "type": "Local Housing Authority",
+      "role": "Conduit for SD-area multifamily housing PABs"
+    },
+    "city_of_la_housing": {
+      "full_name": "Los Angeles Housing Department / Housing Authority of the City of LA",
+      "type": "Local Housing Authority",
+      "role": "Conduit for LA multifamily affordable housing PABs"
+    },
+    "ccrma_calpfa_calmfa": {
+      "_note": "Multiple smaller JPAs and local conduits issue smaller volumes — included in universe by aggregate where they appear in HSG bond trade tape"
+    }
+  },
+  "obligors": [
+    {
+      "obligor_id": "calhfa_affordable_multifamily_indenture",
+      "name": "California Housing Finance Agency — Affordable Multifamily Housing Revenue Bond Indenture",
+      "structure_class": "calhfa_overcollateralized_program",
+      "issuer_program": "CalHFA Affordable Multifamily Housing Revenue Bonds",
+      "vintage": "2023+ (program reentry)",
+      "rating": {
+        "moodys": "Aa1 (Jan 2026 upgrade from Aa2)",
+        "sp": "AA+ (Aug 2025 upgrade from AA)",
+        "factors": "1.31x PADR, asset/debt ratio >7x, margins 63%, indenture flexibility"
+      },
+      "credit_enhancement": "State HFA balance sheet overcollateralization; underlying loans are a mix of FHA Risk Share, GNMA-collateralized, and uninsured",
+      "outstanding_cusip_examples": [
+        {
+          "cusip": "13032WCB8",
+          "description": "CalHFA Affordable Housing Revenue Series A-1 Sustainability Bonds",
+          "coupon": 3.85,
+          "maturity": "2039-08",
+          "recent_trade_2026_05_13": {"yield": 3.871, "price": 99.775},
+          "primary_source": "https://www.municipalbonds.com/bonds/issue/13032WCB8/"
+        },
+        {
+          "cusip": "13032WES9",
+          "description": "CalHFA Affordable Housing Revenue Series B Sustainability Bonds",
+          "coupon": 4.35,
+          "maturity": "2043-02",
+          "recent_trade_2026_05_13": {"yield": 4.261, "price": 100.575},
+          "primary_source": "https://www.municipalbonds.com/bonds/issue/13032WES9/"
+        }
+      ],
+      "_spread_analysis": {
+        "13032WCB8_14y_yield": 3.871,
+        "mmd_aaa_14y_interp_2026_05_26_est": 3.20,
+        "spread_to_mmd_aaa_bps": 67,
+        "13032WES9_17y_yield": 4.261,
+        "mmd_aaa_17y_interp": 3.65,
+        "spread_to_mmd_aaa_bps_17y": 61,
+        "interpretation": "60-67 bps over MMD AAA = consistent with AA-wrap-on-A1-underlying point on AGM compression curve. Confirms wrap-cluster catalog prediction for state-HFA-overcollateralized program credit."
+      }
+    },
+    {
+      "obligor_id": "calhfa_sf_supportive_housing_833_bryant",
+      "name": "CalHFA (Conduit) — San Francisco Supportive Housing / 833 Bryant Apartments",
+      "structure_class": "calhfa_conduit_supportive_housing",
+      "rating": {
+        "implied_underlying": "Project-level + Section 8 HAP backed"
+      },
+      "credit_enhancement": "Section 8 HAP contract pledge; conduit non-recourse to CalHFA program",
+      "outstanding_cusip_examples": [
+        {
+          "cusip": "13034PC96",
+          "description": "CalHFA Revenue San Francisco Supportive Housing",
+          "coupon": 4.00,
+          "maturity": "2045-04",
+          "recent_trade_2026_05_13": {"yield": 3.999, "price": 100.00},
+          "older_trade_2026_03_23": {"yield": 4.287, "price": 96.295},
+          "primary_source": "https://www.municipalbonds.com/bonds/issue/13034PC96/"
+        }
+      ],
+      "_spread_analysis": {
+        "yield_19y_2026_05": 3.999,
+        "mmd_aaa_19y_interp": 3.80,
+        "spread_to_mmd_aaa_bps": 20,
+        "note": "Tight — Section 8 HAP pledge effectively functions as federal-credit on operator credit revenue stream. Earlier March 2026 trade at 4.287 = ~+50 bps."
+      }
+    },
+    {
+      "obligor_id": "cmfa_terracina_at_westpark",
+      "name": "California Municipal Finance Authority — Multifamily Housing Revenue Terracina At Westpark Apts",
+      "structure_class": "freddie_mac_tel_passthrough",
+      "credit_enhancement": "Freddie Mac TEL or LIHTC equivalent (project-level conduit; CMFA non-recourse)",
+      "outstanding_cusip_examples": [
+        {
+          "cusip": "130483GH7",
+          "description": "CMFA Multifamily Housing Revenue Terracina At Westpark Apts",
+          "coupon": 3.20,
+          "maturity": "2045-09",
+          "recent_trade_2026_05_13": {"price": 99.713, "yield_inferred": "~3.22%"},
+          "primary_source": "https://www.municipalbonds.com/bonds/issue/130483GH7/"
+        }
+      ],
+      "_spread_analysis": {
+        "yield_19y": 3.22,
+        "mmd_aaa_19y_est": 3.80,
+        "spread_to_mmd_aaa_bps": -58,
+        "_note": "Negative spread is implausible — yield field on aggregator returned 0.000; price near par suggests the bond is callable shortly or behaves like short-tenor pass-through. This is a Freddie Mac TEL-class deal — should be priced at +30-50 bps over MMD AAA on the actual yield curve. Treat as illustrative not load-bearing data point pending OS verification."
+      }
+    },
+    {
+      "obligor_id": "cscda_cia_1818_platinum",
+      "name": "CSCDA Community Improvement Authority — Essential Housing Senior Lien 1818 Platinum",
+      "structure_class": "essential_workforce_housing_unwrapped",
+      "credit_enhancement": "NONE",
+      "outstanding_cusip_examples": [
+        {
+          "cusip": "126292BG5",
+          "description": "CSCDA CIA Essential Housing Senior Lien 1818 Platinum",
+          "coupon": 3.25,
+          "maturity": "2057-04",
+          "recent_trade_2026_05_05": {"yield": 5.000, "price": 72.604},
+          "secondary_trade": {"yield": 5.020, "price": 72.356},
+          "earlier_trade_2026_04_13": {"yield": 5.753, "price": 64.0},
+          "primary_source": "https://www.municipalbonds.com/bonds/issue/126292BG5/"
+        }
+      ],
+      "_spread_analysis": {
+        "yield_31y_2026_05": 5.00,
+        "mmd_aaa_30y_interp": 4.30,
+        "spread_to_mmd_aaa_bps": 70,
+        "_note": "Tighter than expected for unwrapped — implies market views 1818 Platinum as among the better-performing CSCDA CIA names. But April 2026 trade at 5.753 / 64.0 shows volatility. Sector under stress."
+      }
+    },
+    {
+      "obligor_id": "cscda_cia_millenium_south_bay",
+      "name": "CSCDA Community Improvement Authority — Essential Housing Senior Millenium South Bay",
+      "structure_class": "essential_workforce_housing_unwrapped",
+      "credit_enhancement": "NONE",
+      "outstanding_cusip_examples": [
+        {
+          "cusip": "126292BT7",
+          "coupon": 3.25,
+          "maturity": "2056-07",
+          "recent_trade_2026_04_16": {"yield": 5.318, "price": 69.073},
+          "secondary_trade": {"yield": 5.340, "price": 68.823},
+          "primary_source": "https://www.municipalbonds.com/bonds/issue/126292BT7/"
+        }
+      ],
+      "_spread_analysis": {
+        "yield_30y": 5.318,
+        "mmd_aaa_30y_interp": 4.30,
+        "spread_to_mmd_aaa_bps": 102,
+        "_note": "1 notch wider than 1818 Platinum — market discriminates within CSCDA CIA universe on operator quality (the wrap-absent prediction holds: signals flow to price)."
+      }
+    },
+    {
+      "obligor_id": "cscda_cia_westgate_phase_1",
+      "name": "CSCDA Community Improvement Authority — Essential Housing Senior Lien Westgate Phase 1",
+      "structure_class": "essential_workforce_housing_unwrapped",
+      "credit_enhancement": "NONE",
+      "outstanding_cusip_examples": [
+        {
+          "cusip": "126292CA7",
+          "coupon": 3.00,
+          "maturity": "2047-06",
+          "recent_trade_2025_01_02": {"yield": 5.520, "price": 67.818},
+          "earlier_trade_2024_12_30": {"yield": 5.603, "price": 67.0},
+          "primary_source": "https://www.municipalbonds.com/bonds/issue/126292CA7/"
+        }
+      ],
+      "_spread_analysis": {
+        "yield_22y": 5.520,
+        "mmd_aaa_22y_interp_2025_01_est": 3.80,
+        "spread_to_mmd_aaa_bps": 172,
+        "_note": "Wider than 1818 Platinum and Millenium South Bay — confirmed in Real Deal article as CRF-draw name (Westgate Phase 1 referenced).",
+        "_distress_signal": "Has drawn on coverage reserve fund per Octus / 2024 disclosures"
+      }
+    },
+    {
+      "obligor_id": "cmfa_special_finance_mix_center_city",
+      "name": "CMFA Special Finance Agency I — Essential Housing Mix Center City Series A-2",
+      "structure_class": "essential_workforce_housing_unwrapped",
+      "credit_enhancement": "NONE",
+      "outstanding_cusip_examples": [
+        {
+          "cusip": "12574TAB3",
+          "coupon": 4.00,
+          "maturity": "2056-04",
+          "recent_trade_2025_12_23": {"yield": 5.753, "price": 75.0},
+          "secondary_trade": {"yield": 5.774, "price": 74.752},
+          "earlier_trade_2025_03_05": {"yield": 5.907, "price": 73.0},
+          "primary_source": "https://www.municipalbonds.com/bonds/issue/12574TAB3/"
+        }
+      ],
+      "_spread_analysis": {
+        "yield_30y": 5.753,
+        "mmd_aaa_30y_interp_2025_12_est": 4.20,
+        "spread_to_mmd_aaa_bps": 155,
+        "_note": "CMFA workforce housing analog to CSCDA CIA. Similar wide spread."
+      }
+    },
+    {
+      "obligor_id": "calcha_annadel_apts",
+      "name": "California Community Housing Agency — Workforce Housing Revenue Annadel Apts Series A",
+      "structure_class": "essential_workforce_housing_unwrapped",
+      "credit_enhancement": "NONE",
+      "operator_distress_status": "DEFAULT — failed DSCR covenant fiscal 2024 per Real Deal / Octus reporting",
+      "operator_administrator": "Catalyst Housing Group (original); replaced by Waterford Residential 16 per CalCHA board resolution 2024-25",
+      "outstanding_cusip_examples": [
+        {
+          "cusip": "13013HAA8",
+          "coupon": 5.00,
+          "maturity": "2049-04",
+          "recent_trade_2024_09_05": {"yield": 5.750, "price": 90.191},
+          "secondary_trade": {"yield": 5.771, "price": 89.941},
+          "earlier_trade_2024_06_05": {"yield": 6.040, "price": 86.704},
+          "primary_source": "https://www.municipalbonds.com/bonds/issue/13013HAA8/"
+        }
+      ],
+      "_spread_analysis": {
+        "yield_25y_2024_09": 5.750,
+        "mmd_aaa_25y_interp_2024_09_est": 3.85,
+        "spread_to_mmd_aaa_bps": 190,
+        "_note": "Defaulted name trades wide. ANTI-MASKING: bondholder absorbs operator distress entirely."
+      }
+    },
+    {
+      "obligor_id": "calcha_mira_vista_hills",
+      "name": "California Community Housing Agency — Mira Vista Hills (Antioch) — Catalyst Housing administered",
+      "structure_class": "essential_workforce_housing_unwrapped",
+      "credit_enhancement": "NONE",
+      "deal_size": "$94M issued 2021",
+      "operator_distress_status": "DEFAULT — DSCR failed FY2024; occupancy 98.2% (Jun 2022) -> 88.5% (Jun 2023); going-concern doubts per filings",
+      "secondary_market_price_aug_2024": "63.5 cents on the dollar",
+      "secondary_market_price_mid_2023": ">70 cents on the dollar",
+      "primary_source": "https://therealdeal.com/sanfrancisco/2024/08/21/muni-bonds-for-workforce-housing-face-headwinds-at-bay-area-projects/",
+      "_spread_analysis": {
+        "estimated_yield_at_63_5_price_25y_3pct_coupon": "~7.5-8.5%",
+        "spread_to_mmd_aaa_bps": "375-475",
+        "_note": "Heavy distress pricing; spread comparable to triple-C corporate territory."
+      }
+    },
+    {
+      "obligor_id": "calcha_serenity_at_larkspur",
+      "name": "California Community Housing Agency — Serenity at Larkspur (342 units)",
+      "structure_class": "essential_workforce_housing_unwrapped",
+      "credit_enhancement": "NONE",
+      "operator_distress_status": "DEFAULT — DSCR failed FY2024; recapitalization under challenge by Larkspur City Council per Octus 2024-25 reporting",
+      "primary_source": "https://octus.com/resources/articles/serenity-at-larkspur-recapitalization-challenged-by-city-council/"
+    },
+    {
+      "obligor_id": "calcha_six_other_impaired",
+      "name": "California Community Housing Agency — CTR City Anaheim / Creekwood Hayward / Exchange at Bayfront Hercules / Twin Creeks / Oceanaire Long Beach / Westgate Phase 1",
+      "structure_class": "essential_workforce_housing_unwrapped",
+      "credit_enhancement": "NONE",
+      "operator_distress_status": "IMPAIRED — drew on coverage reserve fund (unscheduled CRF draw) per Octus reporting; 6 names total flagged",
+      "_note": "Specific CUSIPs and project-level CalCHA-vs-CSCDA-CIA conduit classification not enumerated in this scoping pass."
+    },
+    {
+      "obligor_id": "cscda_lexington_green_apartments",
+      "name": "CSCDA — Lexington Green Apartments (El Cajon)",
+      "structure_class": "freddie_mac_tel_passthrough_inferred",
+      "deal_size": "$42.91M tax-exempt 2024",
+      "developer": "Community Preservation Partners (CPP) / WNC & Associates affiliate",
+      "lender": "Ready Capital",
+      "project_type": "Acquisition and rehabilitation of 144 affordable units",
+      "affordability_term": "55 years",
+      "primary_source": "https://cscda.org/2024/07/30/cscda-issues-42910000-in-tax-exempt-bonds-for-lexington-green-apartments/",
+      "_note": "OS not pulled this session — Freddie TEL structure inferred from Ready Capital lender + 4% LIHTC acquisition-rehab deal pattern."
+    },
+    {
+      "obligor_id": "cscda_prospera_at_homestead",
+      "name": "CSCDA — Prospera at Homestead (Dixon)",
+      "structure_class": "freddie_mac_tel_passthrough_inferred",
+      "deal_size": "$30.75M tax-exempt + taxable 2024",
+      "developer": "The Hampstead Group",
+      "lender": "Ready Capital",
+      "project_type": "New construction 108 affordable units (30/50/60% AMI)",
+      "primary_source": "https://cscda.org/2024/02/28/cscda-issues-30750000-in-tax-exempt-and-taxable-bonds-for-prospera-at-homestead-apartments/"
+    },
+    {
+      "obligor_id": "cscda_second_st_andrews",
+      "name": "CSCDA — Second St. Andrews Apartments (LA)",
+      "structure_class": "freddie_mac_tel_passthrough_inferred",
+      "deal_size": "$12.9M tax-exempt 2024",
+      "developer": "The Transcend Group",
+      "primary_source": "https://cscda.org/2024/10/31/cscda-issues-12900000-in-tax-exempt-bonds-for-second-st-andrews-apartments/"
+    },
+    {
+      "obligor_id": "bridge_housing_corp",
+      "name": "BRIDGE Housing Corporation — corporate-rated nonprofit developer",
+      "structure_class": "rated_nonprofit_developer_corporate_credit",
+      "rating": {
+        "sp": "AA- (assigned 2023, reaffirmed 2025)"
+      },
+      "deal_examples": [
+        {"year": 2020, "amount_usd": "$100M", "type": "Sustainability Bonds (first by nonprofit developer)", "underwriter": "Morgan Stanley"},
+        {"year": 2024, "amount_usd": "$71.5M", "type": "tax-exempt bonds for Portland OR project", "_note": "Issued via OR conduit, not CA"},
+        {"year": 2025, "amount_usd": "$175M", "type": "Taxable Social Bonds GO", "underwriter": "Morgan Stanley"}
+      ],
+      "portfolio_size_units": 15000,
+      "portfolio_value_usd": "$4B",
+      "pipeline_units": 10000,
+      "_note": "BRIDGE Housing GO bonds are corporate-credit obligations of the nonprofit, not project-level. Different structure class — corporate AA- rated developer issuance. Useful as control/anchor on what 'clean operator' affordable housing trades like."
+    },
+    {
+      "obligor_id": "mercy_housing_california",
+      "name": "Mercy Housing California (CMFA-issued single-project conduit)",
+      "structure_class": "freddie_mac_tel_passthrough_or_lihtc_pab",
+      "recent_deal_2024": {"amount": "$20.63M", "location": "Orange, CA", "conduit": "CMFA"},
+      "primary_source": "https://www.cmfa-ca.com/",
+      "_note": "Largest US nonprofit affordable housing developer; multiple project-level CMFA-issued deals"
+    },
+    {
+      "obligor_id": "eden_housing",
+      "name": "Eden Housing (CMFA-issued single-project conduit)",
+      "structure_class": "freddie_mac_tel_passthrough_or_lihtc_pab",
+      "recent_deal_2024": {"amount": "$37.0M", "location": "Mountain View, CA", "conduit": "CMFA"},
+      "primary_source": "https://www.cmfa-ca.com/"
+    },
+    {
+      "obligor_id": "cmfa_pleasant_view_apartments",
+      "name": "CMFA — Pleasant View Apartments (Fresno)",
+      "structure_class": "freddie_mac_tel_passthrough_inferred",
+      "deal_size": "Up to $13.9M authorized 2025",
+      "primary_source": "https://www.cmfa-ca.com/wp-content/uploads/2025/03/1-CMFA-Agenda-3-14-2025.pdf"
+    },
+    {
+      "obligor_id": "cmfa_midway_village_phase_ii",
+      "name": "CMFA — Midway Village Phase II Apartments (Daly City)",
+      "structure_class": "freddie_mac_tel_passthrough_inferred",
+      "deal_size": "Up to $90M authorized 2025"
+    },
+    {
+      "obligor_id": "cmfa_madera_vista_phase_3",
+      "name": "CMFA — Madera Vista Phase 3 Apartments",
+      "structure_class": "freddie_mac_tel_passthrough_inferred",
+      "deal_size": "$5.7M completed 2025"
+    },
+    {
+      "obligor_id": "cmfa_bmb_company",
+      "name": "CMFA — BMB Company multifamily",
+      "structure_class": "freddie_mac_tel_passthrough_inferred",
+      "deal_size": "$23.19M completed Jan 2026"
+    }
+  ],
+  "_universe_size_summary": {
+    "calhfa_indenture_program": 1,
+    "calhfa_conduit_supportive_housing_project_level": "~5-10 (833 Bryant + others not fully enumerated)",
+    "freddie_tel_or_pab_project_level_2023_2025": "~100-200 estimated based on CDLAC 138/year multifamily awards + non-CDLAC refinancings",
+    "cscda_lifetime_multifamily": "900+ projects since inception",
+    "essential_workforce_housing_2019_2022_vintage": "45+ deals issued ~$8-10B total state (per Real Deal); 7+ defaulted/impaired per CalCHA disclosure",
+    "rated_nonprofit_developer_corporate_credit": "1 active (BRIDGE Housing AA-) plus Century Housing (CA nonprofit, A- rated, $100M+ bond program)",
+    "total_estimated_obligors_actionable": "30-50 with verifiable bonds + meaningful trade history"
+  },
+  "_actionable_obligors_with_anchors_this_session": 8,
+  "data_gaps_open": [
+    "Per-project HUD REAC inspection scores not pulled — HUD MF Physical Inspection Scores by State CSV would map ~5000+ California HUD-assisted multifamily projects to REAC scores. Requires direct CSV download from huduser.gov/portal/datasets/pis.html.",
+    "LIHTC compliance status (HCD CA records) not pulled.",
+    "Section 8 contract expiration / renewal status not pulled.",
+    "Specific CUSIPs and OS for Lexington Green / Prospera / Second St Andrews / Mercy / Eden 2024 deals not pulled — confirms structure_class only by inference from lender (Ready Capital -> Freddie TEL) and project pattern.",
+    "GNMA pass-through California-specific CUSIPs not pulled — GNMA-collateralized muni paper is rare in current vintage (Freddie TEL dominated 2023-2025).",
+    "BRIDGE Housing corporate-credit GO CUSIPs not pulled — used as structural-class flag only.",
+    "Other 6 CalCHA impaired names (CTR City Anaheim, Creekwood, Exchange at Bayfront, Twin Creeks, Oceanaire) — CUSIPs and bond pricing not pulled this session."
+  ]
+}

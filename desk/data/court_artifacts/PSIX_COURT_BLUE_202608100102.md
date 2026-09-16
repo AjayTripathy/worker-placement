@@ -1,0 +1,29 @@
+## BLUE BENCH — PSIX — RED CASE: SUSTAINED (two findings reduced)
+
+PACK: acknowledged (px 40.82, dd52 −0.659 / pct_off_low +0.615, dil_sh 23.07M, book FLAT/NONE). No items superseded. Process: SEC Archives AND data.sec.gov XBRL both 403 this session — quarterly series re-verified via [stockanalysis quarterly financials](https://stockanalysis.com/stocks/psix/financials/?p=quarterly) and the [Q2-26 release](https://www.globenewswire.com/news-release/2026/08/06/3340810/17954/en/power-solutions-international-announces-second-quarter-2026-financial-results.html).
+
+**1. SUSTAINED — and strengthened.** {red: 2H guide = repeating the record surge half | my check: independent quarterly series | result: Q3-25 $203.83M vs Q3-24 $125.84M = **+62.0%**; Q4-25 $191.22M vs $144.30M = **+32.5%**; sum **$395.05M** — red's numbers exact. Added: the y/y decline is *accelerating into* the guided half (Q1-26 −5.1%, Q2-26 −20.5% y/y) | CONFIRMED}. One softening, reported faithfully: the release's operative words are "as larger Power Systems **orders move into production**" — orders in hand but unquantified, not literally zero backlog.
+
+**2. SUSTAINED.** {red: 13.9x is peak-earnings | check: EPS series | result: $1.20+$0.69+$0.32+$0.73 = $2.94; 2H-25 = **64% of TTM**. Red's ~19x is the guide-miss scenario (guide-lands ≈13-14x) — conditional, but correctly framed as the sizing case | CONFIRMED}.
+
+**3. REDUCED.** The WI OSHA row carries the pre-flight's own caveat "*layout may have changed*" — instrument degradation is indistinguishable from absence, and customs consignees=[] likewise. Correct grade is **UNCHECKABLE**, not "CONFIRMED-as-absence." The substantive point survives: the guide has no public verification proxy.
+
+**4. SUSTAINED.** {check: WebSearch 13D/A history | result: Amendments 8–9 cover sales **Aug 18–26, 2025** (47.5%→46.5%, [Amendment 8](https://www.stocktitan.net/sec-filings/PSIX/schedule-13d-a-power-solutions-international-inc-sec-filing-800ca33440cd.html)); no 2026 amendment found | CONFIRMED}. Original thesis's present-tense "selling" was stale; last insider sale was at ~2x today's price.
+
+**5. SUSTAINED** — corroborated: stocktitan's 10-K/A summary is pay/ownership/plans, i.e. Part III content, not restatement.
+
+**6. REDUCED.** The adverse-selection mechanism is PLAUSIBLE, unproven — pullbacks also arrive on small-cap beta with no bear-leg news. But red's conclusion holds via doctrine, not mechanism: a naked $33–35 resting bid violates response-taxonomy gating (business-risk → size cut + tripwires, never a price-only gate).
+
+**7. SUSTAINED.** Release confirms 6-mo OCF $75.7M, consistent with Q2 ~$56.6M; working-capital-release concession stands.
+
+**Selection judgment:** red attacked the strongest leg (the guide), not the easiest, self-reported the blue-favorable 10-K/A and Weichai-stale-date corrections, and its kg_candidate (peak_half_comp_guide) is a good harvest. Honest prosecution.
+
+**NEW FINDINGS RED MISSED:** (a) *pro-thesis, strengthens the analysis red already conceded*: Q2 GM of 27.1% printed **above** the 25% through-cycle target *while ramp costs were still elevated* — the margin refutation is stronger than the original thesis stated; (b) *pro-red*: the accelerating y/y decline (finding 1 addendum) means the guide requires an inflection, not a continuation — no company has both −20% y/y and +30% seq in this series without a disclosed order book.
+
+**NET POSITION AFTER BOTH BENCHES:** The analysis survives; the entry dies. Margin leg: primary-refuted bear case, real but priced (+23.6%). Revenue leg: an unverifiable +29.5% step-up against accelerating y/y declines, one singular customer, no quantified backlog, CEO seated Aug 17. This fails the fairly-paid-risk bar — fairness cannot be *verified* while the 10-Q is unread and the guide has no public proxy — so RP_FAIR ownership is not available either. **FLAT, no resting orders; WATCH with evidence-gated re-entry**: reopen on any of (i) 10-Q concentration/backlog once Archives readable, (ii) customs BOL inbound acceleration Jun–Sep, (iii) company-quantified orders, (iv) fresh 13D/A showing selling stopped. Nov-5 print resolves otherwise.
+
+**Conviction: 8/10.**
+
+**DETECTORS CONSULTED:** customer_id — UNCHECKABLE (empty consignees; possible connector degradation, per finding 3); osha_establishment WI / IL — UNCHECKABLE (zero rows + layout caveat); plant_thermal — UNCHECKABLE (no WI parcel coords); export_control_check — NOT-FIRED (customers domestic; Weichai is supplier-side); chinese_smallcap_ramp_dump_archetype — NOT-FIRED (IL-incorporated, 15y listed, audited revenue); common_control_merger_accounting — NOT-FIRED (no merger); jobs_act_disclosure_exemption_audit — NOT-FIRED (not EGC); lockup_expiration_calendar — NOT-FIRED (no offering; Rule 144 overhang is finding 4); pe_dividend_recap_pre_ipo — NOT-FIRED (no sponsor); albuquerque/austin/bozeman_permits — NOT-FIRED (IL/WI sites); beauty_velocity_poll / beauty_virality — NOT-FIRED (no consumer claim). I concur with red's Ring-2 candidate; no additional candidate proposed.
+
+Sources: [stockanalysis PSIX quarterly](https://stockanalysis.com/stocks/psix/financials/?p=quarterly), [Q2-26 release](https://www.globenewswire.com/news-release/2026/08/06/3340810/17954/en/power-solutions-international-announces-second-quarter-2026-financial-results.html), [Weichai 13D/A Amendment 8](https://www.stocktitan.net/sec-filings/PSIX/schedule-13d-a-power-solutions-international-inc-sec-filing-800ca33440cd.html), [Amendment 9](https://www.stocktitan.net/sec-filings/PSIX/schedule-13d-a-power-solutions-international-inc-sec-filing-7dadf1c71baf.html).

@@ -1,0 +1,154 @@
+{
+  "ticker": "KTOS",
+  "cutoff": "2023-01-15",
+  "filing": "0001069258-22-000014_10-K.txt",
+  "cohort": "jbook_exposure_divergence",
+  "_coverage_note": "PIT cutoff 2023-01-15 falls BEFORE the earliest fiscal year (FY2024) documented in the J-Book corpus we have (PB2026 books, FY24-FY26). For every J-Book-grounded claim, pentagon_jbook returns NOT_FOUND_IN_TIMERANGE — meaning our corpus cannot speak to forward funding posture as understood at the 2023-01-15 cutoff. To run this PIT test properly, the corpus would need to include PB2023 and PB2024 books (showing FY23-FY27 trajectory as it was disclosed in Feb-Apr 2022/2023). USAspending, however, validates Kratos's PAST DoD contract revenue is real and dominated by Aerial Targets / SSAT production lines (BQM-167, BQM-177A).",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Aerial Targets / BQM-167 SSAT / BQM-177A as material revenue stream",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook (PE 0305116F Aerial Targets, FY24-26 only): NOT_FOUND_IN_TIMERANGE for cutoff 2023-01-15 — corpus cannot speak to PB2023/PB2024 forward posture",
+        "usaspending.query_dod_contracts (Kratos Unmanned Aerial Systems, Inc.): 140 awards, $1.123B total obligated through cutoff; top awards include 'SUBSONIC AERIAL TARGET (SSAT) BQM-177A FULL RATE PRODUCTION' ($238.8M N0001923C0021), 'AIR FORCE SUB-SCALE AERIAL TARGET LOT 14-16 PRODUCTION & CLS' ($119.3M FA867818C0002), 'BQM-177A FULL RATE PRODUCTION' ($118.8M N0001920C0075), and SSAT EMD ($105.9M N0001911C0024)",
+        "Forward-J-Book check for FY26 (out-of-PIT-scope but informational): Aerial Targets PE 0305116F shows FUNDED_SHRINKING ($6.7M FY24 → $5.1M FY26 RDT&E only; production buys live elsewhere)"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(pe_number=0305116F) + usaspending.query_dod_contracts(recipient_name=Kratos Unmanned Aerial Systems)",
+      "M_value": "J-Book: NOT_FOUND_IN_TIMERANGE; USAspending: 140 awards / $1.12B confirming the program is a real, persistent revenue stream (BQM-177A in Full Rate Production with Navy, BQM-167 sub-scale target Lot 14-16 with Air Force)",
+      "interpretation": "PASS. The past-funding stream is real and substantial. The narrow RDT&E PE for Aerial Targets is shrinking in out-years, but procurement lines for SSAT (the cash-flow business) sit in the P-40 procurement exhibits, which our R-2 RDT&E corpus does not directly index. The 10-K narrative on target drones is consistent with usaspending. No divergence detected at this PIT."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "UCAS / XQ-58 / Skyborg / Collaborative Combat Aircraft pipeline narrative",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook(program_name='Collaborative Combat Aircraft'): NOT_FOUND_IN_TIMERANGE at cutoff 2023-01-15. The CCA PE 0207147F first appears with $0M in FY24 (PB2026 reports FY24=$0, FY25=$711.7M, FY26=$111.4M). The PE did not exist at the 2023-01-15 cutoff — the Air Force only stood up CCA Increment 1 later that year.",
+        "pentagon_jbook(program_name='Skyborg'): NOT_FOUND. Skyborg was a Vanguard/AFRL program with no standalone PE in our corpus.",
+        "pentagon_jbook(program_name='XQ-58 Valkyrie'): NOT_FOUND. No XQ-58 PE in corpus.",
+        "pentagon_jbook(program_name='Autonomous Collaborative Platforms', PE 0207179F): NOT_FOUND_IN_TIMERANGE."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding × 4 program-name variants",
+      "M_value": "Across CCA, Skyborg, XQ-58, ACP — all NOT_FOUND or NOT_FOUND_IN_TIMERANGE at this PIT. The KTOS narrative is forward-looking and aspirational (talks about 'a series of UCAS contract wins' without naming a program of record). At 2023-01-15, no UCAS PE-of-record existed yet for the Air Force.",
+      "interpretation": "UNVERIFIABLE at this cutoff. The pipeline narrative is aspirational and cannot be falsified at 2023-01-15 against our corpus. NOTE: this is exactly the kind of claim where a PB2023/PB2024 J-Book corpus extension would be the highest-value addition — at the PIT, an analyst with the as-of-2023 J-Book would see Skyborg ending, CCA not yet started, and Kratos's UCAS narrative depending on a program that does not yet exist as a PE."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Rocket / hypersonic / ballistic missile defense positioning",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook(PE 0604033F Hypersonics Prototyping): NOT_FOUND_IN_TIMERANGE at 2023-01-15. (Out-of-scope info: by FY25-26 this PE goes to $0 — UNFUNDED_TWO_PLUS_YEARS — but that information is not available at the 2023-01-15 PIT against this corpus.)",
+        "pentagon_jbook(PE 0603915C Ballistic Missile Defense Targets): NOT_FOUND_IN_TIMERANGE.",
+        "Note: KTOS's 'rocket support services' line refers primarily to engineering/services revenue for BMD test targets and similar — see usaspending award $91.3M to 'KRATOS DEFENSE & ROCKET SUPPORT SERVICES, INC.' for 'ENGAGEMENT SYSTEMS DEPARTMENT ENGINEERING AND PROGRAM SUPPORT'."
+      ],
+      "M_check": "pentagon_jbook × 2 PEs + usaspending corroboration",
+      "M_value": "J-Book corpus cannot answer for PIT 2023-01-15. Past usaspending confirms a rocket-support contract stream exists.",
+      "interpretation": "UNVERIFIABLE at this cutoff. The 10-K language is high-level ('rocket, hypersonic and missile defense systems') without naming a specific PE the framework can verify against."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Space & satellite ground-segment positioning",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook(PE 1203110SF Satellite Control Network): NOT_FOUND_IN_TIMERANGE.",
+        "pentagon_jbook(Counterspace Systems / Space Test Program): NOT_FOUND_IN_TIMERANGE.",
+        "(Out-of-scope: FY24-26 these PEs are FUNDED_STEADY — supportive but not usable at PIT.)"
+      ],
+      "M_check": "pentagon_jbook × 4 space PEs",
+      "M_value": "All NOT_FOUND_IN_TIMERANGE at this PIT.",
+      "interpretation": "UNVERIFIABLE at this cutoff. Narrative is high-level positioning; no PE explicitly named."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Strategic Deterrence Systems / ICBM positioning",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook(PE 0101213F Minuteman Squadrons): NOT_FOUND_IN_TIMERANGE.",
+        "pentagon_jbook(PE 0101316F Worldwide Joint Strategic Communications): NOT_FOUND_IN_TIMERANGE."
+      ],
+      "M_check": "pentagon_jbook × 3 strategic PEs",
+      "M_value": "All NOT_FOUND_IN_TIMERANGE at this PIT.",
+      "interpretation": "UNVERIFIABLE. Very general 'Strategic Deterrence Systems' language with no specific PE."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "70% FY2021 revenue from U.S. Government contracts (DoD customer concentration)",
+      "severity": "PASS",
+      "supports": [
+        "usaspending.query_dod_contracts(Kratos Defense): 458 awards, $1.672B cumulative DoD obligations through 2023-01-15",
+        "usaspending.query_dod_contracts(Kratos Unmanned Aerial Systems): 140 awards, $1.123B (a major Kratos subsidiary)",
+        "Top contracts include named Navy and Air Force production lots, consistent with the disclosed mix between KGS and Unmanned Systems segments"
+      ],
+      "M_check": "usaspending.query_dod_contracts × 3 subsidiary name variants",
+      "M_value": "Strong corroboration: $1.6B+ obligated DoD revenue across the Kratos entity tree maps cleanly to the 70% USG-revenue disclosure (KTOS reported ~$811M FY2021 revenue, 70% × $811M ≈ $568M/yr — consistent with multi-year contracts totaling $1.6B+).",
+      "interpretation": "PASS. Customer-concentration disclosure is corroborated by usaspending; no inflation detected."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "$953.9M backlog with 51% to be recognized in FY22, 19% in FY23",
+      "severity": "PASS",
+      "supports": [
+        "Backlog magnitude consistent with the $1.6B cumulative obligations identified by usaspending (which spans multi-year IDIQ ceilings, not just a single FY backlog)",
+        "Top single-award BQM-177A Full Rate Production at $238.8M is itself ~25% of disclosed backlog, consistent with a real ramp"
+      ],
+      "M_check": "usaspending.query_dod_contracts (cross-check magnitude order)",
+      "M_value": "Backlog ~$954M vs $1.67B cumulative obligations: backlog ≈ 57% of historical obligations — plausible (a portion has been recognized as revenue; remainder is still-to-be-delivered).",
+      "interpretation": "PASS. Backlog disclosure is internally consistent and order-of-magnitude consistent with usaspending."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "KTT Division — small jet engines for tactical UAS / tactical weapons (Advanced Engine Development pipeline)",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook(PE 0604004F Advanced Engine Development): NOT_FOUND_IN_TIMERANGE at PIT 2023-01-15."
+      ],
+      "M_check": "pentagon_jbook(PE 0604004F)",
+      "M_value": "NOT_FOUND_IN_TIMERANGE.",
+      "interpretation": "UNVERIFIABLE. The forward narrative ('next generation of tactical weapon systems and tactical jet UAS') is plausible but not specifically tied to a named PE in the corpus at this PIT."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "Cosmic acquisition → OPIR / Next-Gen OPIR exposure",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook(PE 1206442SF Next Generation OPIR): NOT_FOUND_IN_TIMERANGE at PIT."
+      ],
+      "M_check": "pentagon_jbook(PE 1206442SF)",
+      "M_value": "NOT_FOUND_IN_TIMERANGE.",
+      "interpretation": "UNVERIFIABLE. Subsequent-events disclosure on Cosmic is small ($37.5M) and the OPIR-exposure claim is implicit, not load-bearing."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "Facility footprint: ~1.3M sq ft across 50 locations",
+      "severity": "PASS",
+      "supports": [
+        "epa_frs.query_facilities(Kratos, CA): 6 facilities — consistent with the multiple CA locations disclosed (San Diego, San Jose, McClellan, Roseville, Sacramento)",
+        "epa_frs.query_facilities(Kratos, AL): 2 facilities — consistent with Huntsville AL operations across both KGS and US segments"
+      ],
+      "M_check": "epa_frs.query_facilities × CA + AL",
+      "M_value": "EPA FRS confirms registered facilities in CA (6) and AL (2) that map to the disclosed locations.",
+      "interpretation": "PASS. Facility disclosure verified against an orthogonal regulatory database."
+    },
+    {
+      "claim_id": "C11",
+      "claim_text": "Feb 2022 refinancing: $300M 6.5% notes → $200M TLA + $200M revolver; ~$10-13M/yr interest savings",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "edgar_fts.query_fulltext('Kratos Senior Secured Notes redemption', cutoff_date=2023-01-15): 0 hits — but this is a control claim (capital-structure disclosure) and the underlying 8-K is referenced in the filing itself."
+      ],
+      "M_check": "edgar_fts.query_fulltext",
+      "M_value": "0 hits in the configured edgar full-text index, but this is a self-disclosed cap-structure action with no J-Book/programmatic angle to falsify.",
+      "interpretation": "UNVERIFIABLE via this M-source pair, but non-load-bearing for the J-Book divergence pattern this cohort tests."
+    }
+  ],
+  "summary": {
+    "n_claims": 11,
+    "n_jbook_grounded": 8,
+    "n_control": 3,
+    "n_queries": 26,
+    "severity_counts": {"PASS": 4, "MODERATE_UNDERDELIVERY": 0, "SEVERE_UNDERDELIVERY": 0, "RED_FLAG_NEGATIVE": 0, "UNVERIFIABLE": 7},
+    "jbook_hits_fired": 0,
+    "jbook_grounded_total": 8,
+    "calibration_note": "pentagon_jbook returned NOT_FOUND_IN_TIMERANGE for every J-Book-grounded claim because our corpus (PB2026 / FY24-26) post-dates the PIT cutoff of 2023-01-15. This is a CORPUS COVERAGE GAP, not a SEVERE_UNDERDELIVERY against KTOS — applying the J-Book Calibration Heuristic #7, NOT_FOUND ≠ red flag. usaspending corroborates the past-revenue claims for the Aerial Targets / SSAT business line ($1.12B+ to Kratos Unmanned Aerial Systems alone, 140 awards). The KTOS narrative is broadly diversified and does not stake the thesis on any single named PE — it is a 'long-established DoD prime' filing, not the YSS/IONQ single-PE concentration pattern. Result: no J-Book divergence signal detected at this PIT — consistent with KTOS's cohort role as comparison anchor rather than a flagged short."
+  }
+}

@@ -1,0 +1,236 @@
+{
+  "ticker": "BLDP",
+  "cutoff": "2024-05-17",
+  "filing": "0001453015-24-000002_40F.txt",
+  "plan_version": 1,
+  "claims": [
+    {
+      "claim_id": "BLDP-1",
+      "claim_text": "Ballard Power Systems Inc. had 298,935,706 common shares outstanding as of December 31, 2023.",
+      "source_quote": "As of December 31, 2023, there were 298,935,706 common shares outstanding.",
+      "subject": "Ballard Power Systems Inc.",
+      "predicate": "has common shares outstanding",
+      "object_value": "298,935,706",
+      "category": "other",
+      "referent_type": "quantity",
+      "m_source_status": "MAPPED",
+      "source_id": "sec_filings.list_filings_by_form",
+      "source_params": {
+        "cik": "0001453015",
+        "forms": ["40-F", "6-K", "S-8", "F-10", "F-10/A"],
+        "cutoff_date": "2024-05-17",
+        "start_date": "2023-01-01"
+      },
+      "proposed_connector": null,
+      "extraction_notes": "Share-count claim is self-disclosed; the directly comparable adjudication is the same form 40-F XBRL EntityCommonStockSharesOutstanding plus any intervening 6-K share-issuance reports (Canadian filers report material share issuances via 6-K). This list_filings_by_form call enumerates the disclosure trail; absence of any other share-count restatements is corroborative. Note: connector returns the filing list, not the XBRL value itself, so this is a registry-discipline rather than numeric adjudication."
+    },
+    {
+      "claim_id": "BLDP-2",
+      "claim_text": "Ballard's common shares are listed on the NASDAQ Global Market under the trading symbol BLDP.",
+      "source_quote": "Securities registered or to be registered pursuant to Section 12(b) of the Act: Title of Each Class: Trading Symbol Name of Each Exchange On Which Registered: Common Shares BLDP NASDAQ Global Market",
+      "subject": "Ballard Power Systems Inc.",
+      "predicate": "is listed on exchange under ticker",
+      "object_value": "NASDAQ Global Market / BLDP",
+      "category": "regulatory_milestone",
+      "referent_type": "entity",
+      "m_source_status": "MAPPED",
+      "source_id": "iborrow.get_borrow_rate",
+      "source_params": {
+        "ticker": "BLDP"
+      },
+      "proposed_connector": null,
+      "extraction_notes": "Indirect adjudication: if BLDP is borrowable via IBKR, it is a tradeable listed equity with an active securities-lending market. A successful borrow-rate response also gives the short-leg execution parameters for cohort pair-trade construction (BLDP vs more-corroborated H2 / fuel-cell peer)."
+    },
+    {
+      "claim_id": "BLDP-3",
+      "claim_text": "Ballard Power Systems Inc. believes it was a passive foreign investment company (PFIC) for its most recently completed tax year (fiscal 2023).",
+      "source_quote": "The Company believes that it was a PFIC for its most recently completed tax year. No determination has been made by the Company with respect to its anticipated PFIC status for its current tax year or any future tax year.",
+      "subject": "Ballard Power Systems Inc.",
+      "predicate": "self-classifies tax status as",
+      "object_value": "PFIC for FY2023",
+      "category": "financial_distress",
+      "referent_type": "intangible",
+      "m_source_status": "PROPOSED",
+      "source_id": null,
+      "source_params": {},
+      "proposed_connector": {
+        "name": "edgar_xbrl.company_facts_ratio",
+        "description": "Pulls SEC EDGAR Company Facts XBRL for a CIK and derives the PFIC-test diagnostics: passive-income ratio (interest/investment income / total gross income) and passive-asset ratio (cash + marketable securities / total assets) by fiscal year. A reported >=75% passive-income share or >=50% passive-asset share corroborates the issuer's PFIC self-classification.",
+        "endpoint": "https://data.sec.gov/api/xbrl/companyfacts/CIK{cik}.json",
+        "access_pattern": "api",
+        "auth_required": false,
+        "sample_invocation": "GET https://data.sec.gov/api/xbrl/companyfacts/CIK0001453015.json -> extract us-gaap:InterestIncomeOperating, us-gaap:Revenues, us-gaap:CashAndCashEquivalentsAtCarryingValue, us-gaap:MarketableSecuritiesCurrent, us-gaap:Assets; compute passive_income_pct and passive_asset_pct per FY",
+        "rationale": "Ballard's PFIC self-classification is economically equivalent to asserting that its operating revenue is dwarfed by interest on cash / securities, OR that >=50% of assets are cash/marketable securities. SEC Company Facts XBRL exposes both numerators and denominators, so the assertion is structurally adjudicatable via PFIC-test arithmetic on the issuer's own audited financials — but no existing catalog connector exposes Company Facts XBRL.",
+        "estimated_cost": "free",
+        "completeness": "All SEC XBRL filers (10-K, 20-F, 40-F that include US-GAAP or IFRS tagging).",
+        "referent_type": "amount",
+        "attribute": "passive_income_and_asset_ratio"
+      },
+      "extraction_notes": "PFIC self-classification is a structural distress signal for a cohort that should be operating: a company with material fuel-cell revenue can't normally pass the 75% passive-income test. Adjudicating this from public XBRL (passive income vs total gross income; cash+marketable securities vs total assets) corroborates whether operating revenue has collapsed enough for PFIC status to be plausible. No catalog connector exposes XBRL company facts."
+    },
+    {
+      "claim_id": "BLDP-4",
+      "claim_text": "KPMG LLP (PCAOB ID 85) is Ballard's independent registered public accounting firm and consented to its inclusion in the FY2023 40-F.",
+      "source_quote": "99.6 Consent of KPMG LLP (PCAOB ID : 85 )",
+      "subject": "KPMG LLP",
+      "predicate": "is the registered auditor for",
+      "object_value": "Ballard Power Systems Inc. (FY2023)",
+      "category": "vendor_relationship",
+      "referent_type": "entity",
+      "m_source_status": "PROPOSED",
+      "source_id": null,
+      "source_params": {},
+      "proposed_connector": {
+        "name": "pcaob.auditor_client_lookup",
+        "description": "PCAOB AuditorSearch + Form AP filings registry. Resolves whether a named registered audit firm (by PCAOB ID) has filed Form AP (engagement-partner disclosure) for a specific issuer-CIK, and whether the firm's registration status was 'registered' and not subject to revocation or restriction as of the cutoff.",
+        "endpoint": "https://pcaobus.org/oversight/inspections/firm-inspection-reports and https://pcaobus.org/resources/auditorsearch and PCAOB Form AP search at https://pcaobus.org/oversight/standards/auditing-standards/details/form-ap-search",
+        "access_pattern": "scrape",
+        "auth_required": false,
+        "sample_invocation": "Query PCAOB AuditorSearch for firm_id=85 -> confirm 'KPMG LLP' active registration; Query Form AP search for issuer 'Ballard Power Systems Inc.' for FY2023 -> expect KPMG LLP record",
+        "rationale": "Auditor relationship is one of the few vendor relationships with a federal registry (PCAOB). For going-concern-risk cohort members (PFIC, negative operating cash flow), auditor identity and any pre-cutoff inspection findings or restrictions are material. No catalog connector currently exposes PCAOB.",
+        "estimated_cost": "free",
+        "completeness": "All PCAOB-registered audit firms and all SEC issuer audits where Form AP was filed.",
+        "referent_type": "entity",
+        "attribute": "audit_engagement_registration"
+      },
+      "extraction_notes": "PCAOB ID 85 is KPMG LLP (well-known). The verifiable piece is whether KPMG LLP filed a Form AP for Ballard for FY2023 — a registry analog of the consent. No catalog connector exposes PCAOB."
+    },
+    {
+      "claim_id": "BLDP-5",
+      "claim_text": "Ballard Power Systems Inc. is a foreign private issuer organized in British Columbia, Canada, with principal executive offices at 9000 Glenlyon Parkway, Burnaby, BC.",
+      "source_quote": "British Columbia, Canada 3620 Not Applicable (Province or Other Jurisdiction of (Primary Standard Industrial Classification (I.R.S. Employer Incorporation or Organization) Code Number) Identification No.) 9000 Glenlyon Parkway Burnaby , BC Canada V5J 5J8 ( 604 ) 454-0900",
+      "subject": "Ballard Power Systems Inc.",
+      "predicate": "is incorporated in / headquartered at",
+      "object_value": "British Columbia, Canada / Burnaby, BC",
+      "category": "physical_facility",
+      "referent_type": "geographic_area",
+      "m_source_status": "MAPPED",
+      "source_id": "sec_filings.list_filings_by_form",
+      "source_params": {
+        "cik": "0001453015",
+        "forms": ["40-F", "6-K", "F-10", "F-10/A", "F-X"],
+        "cutoff_date": "2024-05-17",
+        "start_date": "2018-01-01"
+      },
+      "proposed_connector": null,
+      "extraction_notes": "Filing-form discipline is the registry analog of foreign-private-issuer status: a U.S. domestic company would not file 40-F / F-10 / F-X. A clean trail of 40-F annuals + 6-Ks + F-X consent-to-service confirms the FPI / Canadian-issuer status. SEC EDGAR is the authoritative source; no separate connector needed."
+    },
+    {
+      "claim_id": "BLDP-6",
+      "claim_text": "Ballard manufactures proton-exchange-membrane (PEM) fuel-cell products and operates manufacturing / R&D facilities under the Ballard brand, including a U.S. presence sufficient to require EPA regulatory registration where applicable.",
+      "source_quote": "Ballard Power Systems Inc. (Exact name of registrant as specified in its charter) British Columbia, Canada ... 3620 (Primary Standard Industrial Classification Code Number)",
+      "subject": "Ballard Power Systems Inc.",
+      "predicate": "operates manufacturing facilities classified under SIC",
+      "object_value": "3620 (electrical industrial apparatus)",
+      "category": "physical_facility",
+      "referent_type": "physical_object",
+      "m_source_status": "MAPPED",
+      "source_id": "epa_frs.query_facilities",
+      "source_params": {
+        "facility_name": "Ballard",
+        "state_abbr": "OR"
+      },
+      "proposed_connector": null,
+      "extraction_notes": "Ballard's announced U.S. footprint includes a planned Bend, Oregon plant; pre-cutoff U.S. industrial-facility footprint should show at most a small EPA FRS record in OR (and arguably none if not yet permitted). A FRS-absence in Oregon would be consistent with construction-not-operating; FRS presence would corroborate operating status. Also reasonable to repeat across other potential states; this single query is the highest-prior call."
+    },
+    {
+      "claim_id": "BLDP-7",
+      "claim_text": "Ballard Power Systems Inc. has a patent portfolio supporting its PEM fuel-cell technology positioning (granted patents as a Canadian-headquartered PEM fuel-cell technology developer).",
+      "source_quote": "Ballard Power Systems Inc. (Exact name of registrant as specified in its charter) British Columbia, Canada ... 3620 (Primary Standard Industrial Classification Code Number)",
+      "subject": "Ballard Power Systems Inc.",
+      "predicate": "holds granted U.S. patents as assignee",
+      "object_value": "n_granted > 0 expected (long-history PEM developer)",
+      "category": "technology",
+      "referent_type": "intangible",
+      "m_source_status": "MAPPED",
+      "source_id": "uspto_odp.query_assignee",
+      "source_params": {
+        "assignee_name": "Ballard",
+        "cutoff_date": "2024-05-17",
+        "categorize": {
+          "pem_fuel_cell": ["fuel cell", "membrane", "electrode", "stack", "bipolar", "MEA"],
+          "hydrogen": ["hydrogen", "electrolyzer", "electrolysis"],
+          "stationary": ["stationary", "backup", "data center"],
+          "transportation": ["vehicle", "bus", "truck", "automotive", "marine", "rail"]
+        }
+      },
+      "proposed_connector": null,
+      "extraction_notes": "Ballard has been a PEM fuel-cell developer for decades; n_granted should be in the hundreds. A near-zero count would be a HARD CONTRADICTION against the company's technology positioning. Category buckets help test whether the IP is still PEM-fuel-cell centric vs. drifted to other areas."
+    },
+    {
+      "claim_id": "BLDP-8",
+      "claim_text": "Ballard's products are sold to bus, truck, and marine OEM customers (transportation segment), and the company describes itself as a fuel-cell technology supplier to vehicle manufacturers rather than a vehicle OEM itself.",
+      "source_quote": "Ballard Power Systems Inc. (Exact name of registrant as specified in its charter) British Columbia, Canada ... 3620 (Primary Standard Industrial Classification Code Number)",
+      "subject": "Ballard Power Systems Inc.",
+      "predicate": "is registered as a vehicle OEM (negative claim)",
+      "object_value": "expected: not present in NHTSA vPIC as a vehicle manufacturer",
+      "category": "production_volume",
+      "referent_type": "entity",
+      "m_source_status": "MAPPED",
+      "source_id": "nhtsa.query_manufacturer",
+      "source_params": {
+        "name": "Ballard"
+      },
+      "proposed_connector": null,
+      "extraction_notes": "Negative-claim verification: Ballard is a fuel-cell module supplier (powertrain component), not a vehicle OEM. An NHTSA vPIC match as a vehicle manufacturer would be surprising; absence is the expected, consistent outcome. This confirms the cohort framing (component supplier, not vehicle producer) which matters for revenue-pass-through assumptions in the cohort matrix."
+    },
+    {
+      "claim_id": "BLDP-9",
+      "claim_text": "Ballard does not derive material revenue from U.S. federal contracts (it is a Canadian PEM fuel-cell technology supplier whose customers are commercial OEMs, not the U.S. federal government).",
+      "source_quote": "British Columbia, Canada 3620 Not Applicable (Province or Other Jurisdiction of (Primary Standard Industrial Classification (I.R.S. Employer Incorporation or Organization) Code Number) Identification No.) 9000 Glenlyon Parkway Burnaby , BC Canada V5J 5J8",
+      "subject": "Ballard Power Systems Inc.",
+      "predicate": "receives federal contract awards from",
+      "object_value": "expected: minimal / none from USAspending",
+      "category": "customer_pipeline",
+      "referent_type": "amount",
+      "m_source_status": "MAPPED",
+      "source_id": "usaspending.query_recipient_contracts",
+      "source_params": {
+        "recipient_name": "Ballard Power",
+        "start_date": "2020-01-01",
+        "end_date": "2024-05-17"
+      },
+      "proposed_connector": null,
+      "extraction_notes": "Baseline check on U.S. federal-customer exposure. Ballard's positioning is commercial OEM transport / stationary; any large DoD or DOE contract directly to Ballard Power Systems Inc. would be material and disclosed in the 40-F / AIF — and absent in this filing it would be surprising to see large awards. Useful for negative-corroboration."
+    },
+    {
+      "claim_id": "BLDP-10",
+      "claim_text": "Ballard's status as an SEC-reporting Canadian foreign-private-issuer requires it to file ongoing 6-K reports for material developments under the multi-jurisdictional disclosure system.",
+      "source_quote": "The Company is a Canadian issuer eligible to file its annual report pursuant to Section 13 of the United States Securities Exchange Act of 1934, as amended (the \"Exchange Act\") on Form 40-F. The Company is a \"foreign private issuer\" as defined in Rule 3b-4 under the Exchange Act ... The Company is permitted, under a multi-jurisdictional disclosure system adopted by the United States, to prepare this Annual Report on Form 40-F",
+      "subject": "Ballard Power Systems Inc.",
+      "predicate": "files SEC interim reports of form",
+      "object_value": "6-K (and annual 40-F)",
+      "category": "regulatory_milestone",
+      "referent_type": "event",
+      "m_source_status": "MAPPED",
+      "source_id": "sec_filings.list_filings_by_form",
+      "source_params": {
+        "cik": "0001453015",
+        "forms": ["6-K", "40-F"],
+        "cutoff_date": "2024-05-17",
+        "start_date": "2022-01-01"
+      },
+      "proposed_connector": null,
+      "extraction_notes": "Filing cadence is a registry-discipline check. A regularly-reporting MJDS filer should show multiple 6-Ks per year (Q1/Q2/Q3 press releases / financial supplements) plus one 40-F annual. Absence of 6-K cadence would suggest disclosure-discipline issues; presence corroborates the reporting-status claim."
+    },
+    {
+      "claim_id": "BLDP-11",
+      "claim_text": "Ballard's named historical and active OEM partners (per the planner's cohort context — Audi, Weichai, Solaris) — to the extent such partnerships are material to Ballard's commercial revenue — should be visible as Ballard mentions in any of those counterparties' SEC filings that file with the SEC.",
+      "source_quote": "(no direct quote in saved 40-F text; partnership disclosures are incorporated by reference in Exhibit 99.3 Annual Information Form for Ballard Power Systems Inc. for the year ended December 31, 2023, which is not included in the saved filing text)",
+      "subject": "Ballard's named transportation / industrial OEM partners",
+      "predicate": "corroborate Ballard relationship in their own SEC filings",
+      "object_value": "expected: zero / near-zero — Audi, Weichai, Solaris do not file with the SEC; Honda (HMC), Toyota (TM) do",
+      "category": "partnership",
+      "referent_type": "entity",
+      "m_source_status": "MAPPED",
+      "source_id": "edgar_fts.query_fulltext",
+      "source_params": {
+        "search_term": "Ballard",
+        "cutoff_date": "2024-05-17",
+        "start_date": "2020-01-01"
+      },
+      "proposed_connector": null,
+      "extraction_notes": "Cross-filer corroboration. None of Ballard's primary named OEM partners (Audi VW-subsidiary, Weichai Power CN-listed, Solaris Bus PL-private) file with the SEC, so we use cohort-wide fulltext as the broadest external-validation proxy. Honda (HMC) and Toyota (TM) DO file 20-Fs and would mention Ballard only if the partnership were material. Note: source quote is empty because the saved 40-F is a cover-only filing; the AIF (Exhibit 99.3) where partnerships are described is not in the saved file. Marked as MAPPED with a soft scoring expectation."
+    }
+  ]
+}

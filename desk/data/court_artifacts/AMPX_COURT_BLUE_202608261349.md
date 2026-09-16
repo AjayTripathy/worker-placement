@@ -1,0 +1,59 @@
+## BLUE BENCH — AMPX — RED CASE: PARTIALLY OVERTURNED
+
+PACK: acknowledged. Superseded: pack `px 10.265` and red's `$10.1204` — actual close **2026-08-26 = $10.41** ([stockanalysis](https://stockanalysis.com/stocks/ampx/history/)). Pack XBRL stale (tops out 2025-06-30), as the brief flagged. IBKR `search_contracts` **denied to me as well — same COVERAGE GAP**; tape verified via price-history vendor, not gateway.
+
+**1. "The market re-marked +52%; the brief anchored on dd52." | check: actual daily closes around the print | result: pre-print close 2026-08-03 = $10.12; post-print $10.81 (8/4), $11.72 (8/5), $11.19 (8/6); today $10.41. The entire +52% off-low predates the Q2 print. The print's own re-mark (+15.8% peak) has been fully given back — the stock is +2.9% versus its pre-print level after a quarter that doubled revenue and raised guidance twice. | REFUTED → OVERTURNED.** `pct_off_low` is a whole-year statistic used to answer a question about a 15-session window; it cannot. Red's *strongest single kill* rests on it. Tag `NOVEL` **stripped** — it is not a finding, it is a unit error.
+
+**2. Street $132.1M vs guide ≥$140M; 10.6× EV/S. | check: response-taxonomy classification | result: red's own severity line says "price gate," its header says REJECT. Doctrine: valuation → price gate ONLY. Further, red cites median PT $22 on 10 analysts = 2.2× tape as evidence of *no divergence* — that is the external anchor saying the name is cheap, invoked to argue it is expensive. And red supplies no mechanism for its own −5.6% street haircut while demanding one from blue. | SUSTAINED ON FACT / REDUCED: price gate, not a kill.** Coverage-count component OVERTURNED per divergence-not-coverage.
+
+**3. Brighton abandoned, "~$47M all-in," effectively fabless. | check: 10-Q cash flows + Note 12 + the pack's own 8-K (2026-08-13) | result: three corrections. (a) The $47M is a double-count — the $19.1M FY25 ROU/CIP impairment and the $20M cash payment settle the *same* obligation; H1'26 booked only a **$166k loss on termination**, and the $20.9M ran through *operating lease liabilities*, i.e. liability extinguishment on a 774,155 sq ft/15-yr lease worth ~$90M+ undiscounted. Paying $20M to void that is de-risking, not destruction. (b) "Effectively fabless" is refuted by primary: on 2026-08-07 Amprius **extended the Fremont lease 84 months to 2034** (~$10.5M future payments) — six months *after* the Brighton exit ([8-K, pack excerpt](https://www.sec.gov/Archives/edgar/data/1899287/000189928726000062/)). Red had this document in its own pack and did not use it. (c) What survives: Fremont is a **10 MWh pilot line for "quick turn prototypes"** by the issuer's own words — volume production genuinely sits at Berzelius/Nanjing plus contract manufacturers. | REDUCED: the cost framing is an artifact; the outsourced-production substance is SUSTAINED. Re-tag `NOVEL → CONSENSUS` (the Manatee report is titled "hollow manufacturing").**
+
+**3a. Berzelius = substantially all COGS, unresolved until FY26 10-K. | check: 10-Q Note 12 Related Parties, PROXY-FETCHED | result: the note contains ONLY the $1.3M PIPE warrant exercise. Berzelius is a *former* affiliate and is therefore NOT a related party — meaning the FY26 10-K will never quantify it. | SUSTAINED as risk, but red's re-court trigger (a) is UNFIREABLE — the SLI error: a trigger that cannot fire is not an entry signal.**
+
+**3b. Q1 OCF was a $20M one-timer, not working capital. | check: H1 cash flow lines | result: operating lease liabilities −$20,898k **CONFIRMED**. But the fact inverts red's inference: if $20.9M of Q1's −$37.3M was a disclosed lease exit, the cash gap the short read as fraud confirmation was *mostly a lease payment*. AR build of −$16,843k is H1-total and Q2 OCF was −$2.85M, so AR building stopped in Q2. | FACT SUSTAINED / INFERENCE OVERTURNED — this finding is net-favourable to the bull.**
+
+**4. "No ATM" is materially wrong. | check: red's own text | result: red concedes the ATM was terminated 2025-12-04. The brief's present-tense claim is correct; red converts a dead facility into live overhang. The induced exchange retired **7.1M warrants for 2.7M shares** — that *reduces* the share overhang and removes $11.50 strikes, for a $1.9M deemed dividend. Framed backwards. Cash $74.5M against Q2 burn $2.85M is many years of runway. | REDUCED — the brief overstated "every dollar voluntary"; red overstated the overhang. Tag `NOVEL` stripped.**
+
+**5. AR 54% vs revenue 25% = 2× asymmetry. | check: 10-Q concentration text | result: verbatim — "**three customers … 39% of our revenue**" (H1) vs "two customers … **54%** of total accounts receivable." On a comparable basis that is **1.4×**, below red's own kg_candidate 2× trigger, and mixes a period measure against a point-in-time measure. | REDUCED: concentration risk real and sizing-relevant; the "asymmetry" is largely a basis artifact. Re-tag `NOVEL → CONSENSUS`.**
+
+**6. Insider acquittal overstated. | SUSTAINED-REDUCED.** Red is right that Form 144s indicate broker-executed sales and that "non-discretionary" is unverified; but Kang sold 62,101 of ~1.28M (4.8%) — magnitude is immaterial either way. Form 4 footnote codes UNVERIFIED by both benches.
+
+**7. Crowding. SUSTAINED as red framed it** (size/timing, not kill) — but red's closing "no dispersion left to harvest" reimports it as a rejection. That clause OVERTURNED.
+
+**Selection judgment:** red attacked one strong leg (outsourced production) and spent its headline on the easiest — a whole-year tape statistic that dissolves on daily bars.
+
+## NEW FINDINGS RED MISSED
+
+**A (against the thesis, NOVEL).** The brief's "Fremont NDAA-compliant production start December 2026" is **not corroborated in the 10-Q**, which says only that the DIU contract "includes provisions for us to **research and adapt** our supply chain to meet the new requirements," and describes Fremont as a 10 MWh **pilot** line. The copper lesson exactly: "research and adapt" ≠ "production start." The bull's nearest hard catalyst is softer than stated. CONFIRMED.
+
+**B (for the thesis).** Q2 AR build ≈ flat despite $34.0M revenue — the collection risk is a *stock* problem, not a compounding one.
+
+**C (process).** Red's detector section lists `austin_permits`, `beauty_velocity_poll`, `beauty_virality`, `app_review_velocity` — **none were dispatched** — while omitting four that were: `common_control_merger_accounting`, `jobs_act_disclosure_exemption_audit`, `pe_dividend_recap_pre_ipo`, `upc_tra_value_extraction`. A fabricated-plus-incomplete atlas pass is a validator reject.
+
+## DETECTORS CONSULTED
+
+- **osha_establishment (Fremont CA)** — NOT-FIRED as evidence. `count=0` is now explained: a 10 MWh pilot line is below routine-inspection salience, and the issuer just committed to the site through 2034. Absence proves nothing here.
+- **osha_establishment (Brighton CO)** — NOT-FIRED (moot). Site never opened; lease terminated 2026-01-30.
+- **plant_thermal (Brighton)** — UNCHECKABLE/MOOT. No parcel to read; superseded by primary 8-K.
+- **sentinel2_buildout (Brighton)** — MOOT, conceded by the issuer. Missing evidence that *would* matter: Sentinel-2/permit imagery on **Fremont** (1000–1180 Page Ave), which red never ran and which is the live buildout claim. COVERAGE GAP.
+- **export_control_check** — FIRED (structural), designation UNVERIFIED. PRC production (Berzelius, Nanjing) against an $18.1M DIU contract and FY26 NDAA battery provisions the 10-Q itself flags. No BIS/OFAC query executed — COVERAGE GAP, sustained from red.
+- **chinese_smallcap_ramp_dump_archetype** — NOT-FIRED. Delaware/NYSE, $62.6M H1 revenue, no Cayman holdco.
+- **common_control_merger_accounting** — NOT-FIRED, checked clean. No common-control absorption in the Q2 10-Q. *(Red skipped this entry.)*
+- **jobs_act_disclosure_exemption_audit** — **FIRED (weak-form).** The 8-K carries "Emerging growth company **x**" — AMPX still claims EGC status four years post-deSPAC, which is precisely how customer-concentration and exec-comp disclosure stay thin. Directly relevant to why Berzelius COGS is unquantified. *(Red skipped this — it is the one atlas entry that speaks to red's own load-bearing unknown.)*
+- **pe_dividend_recap_pre_ipo** — NOT-FIRED, checked clean. No PE sponsor control, no pre-IPO special dividend. *(Red skipped.)*
+- **upc_tra_value_extraction** — NOT-FIRED, checked clean. Single-class Delaware C-corp, no Up-C/TRA. *(Red skipped.)*
+- **lockup_expiration_calendar** — NOT-FIRED, checked clean. No follow-on on file; ATM terminated 2025-12-04.
+- **clinical_trial_referral_quality / clinicaltrials_lookup / competitor_trial_omission** — NOT-APPLICABLE, false dispatch on an SIC-3690 issuer. Red's matcher-precision note is correct and I endorse it.
+- **albuquerque_permits** — NOT-APPLICABLE. No Albuquerque site.
+
+**PRIZE-TABLE:** NOT APPLICABLE — $62.6M H1 revenue, not a pre-revenue project developer. Red's reasoning ("it *was* one and paid $20M to stop") is rhetorically sharp but the classification is simply commercial-stage.
+
+**PRINT PROXIMITY: Q3 ~2026-11-05, yfinance-derived, UNCONFIRMED — no company PR names it. Q2 printed 2026-08-04 (results release; 10-Q 8/6), so early-November is consistent, not verified. ~49 sessions out, far outside the 5-day window — no print-decisive reconstruction triggered, no pre-print call required.**
+
+## NET POSITION AFTER BOTH BENCHES
+
+Red's headline kill is void: the market did **not** re-mark AMPX for Q2 — it paid +15.8% for two days and took it all back, leaving the stock +2.9% versus its pre-print close after revenue doubled and guidance was raised twice. The bull's dispersion claim survives on the correct timeframe. But the bull does not get the name: what survives red is (i) 10.6× street FY26 sales — a **price gate**, not a kill, and above any defensible FV here; (ii) volume production genuinely sits on a Nanjing line whose share of COGS is not merely unquantified but **structurally undisclosable**, because Berzelius is a *former* affiliate and Note 12 covers only a $1.3M warrant exercise; (iii) concentrated AR against a 0.7% allowance. Blue adds that the December-2026 NDAA production claim is not what the 10-Q says. **Verdict: not REJECT — WAIT, price-gated, no position at $10.41.** Gate: starter (0.5%) only ≤ **$8.44** — the 2026-07-29 close, a level the tape touched four weeks ago and can fill, unlike red's $7.00 which requires −33% and is effectively an unfillable gate. Add-gate on the Q3 print: revenue ≥$38.7M **and** DSO ≤105d **and** a Fremont capex step-up. Since red's condition (a) can never fire, the only workable margin-quality test is **gross margin holding ≥27% while Fremont volume rises** — if the transfer price were subsidised, insourcing would compress GM, and that is observable in 2027. **Kills after audit: 0 novel / 2 consensus.** That line should size this as a price-gated watch, not a conviction rejection.
+
+**Conviction that this net position is right: 7/10.** Deductions: gateway tape denied to both benches (vendor closes used); the $6.67 low date is outside my fetched window and therefore UNVERIFIED — my finding-1 refutation rests on the *post-print* path, which is verified, not on the low's date; short interest UNVERIFIED; no Fremont satellite/permit run executed.
+
+Sources: [Q2 2026 10-Q, PROXY-FETCHED](https://r.jina.ai/https://www.sec.gov/Archives/edgar/data/1899287/000189928726000059/ampx-20260630.htm) · [AMPX daily price history](https://stockanalysis.com/stocks/ampx/history/) · [EDGAR filing index, PROXY-FETCHED](https://r.jina.ai/https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&CIK=0001899287&type=10-Q) · [8-K 2026-08-13 Fremont lease extension — evidence pack primary excerpt] · [Q2 guidance raise coverage](https://simplywall.st/stocks/us/capital-goods/nyse-ampx/amprius-technologies/news/amprius-technologies-ampx-is-up-234-after-raising-2026-guida/amp)

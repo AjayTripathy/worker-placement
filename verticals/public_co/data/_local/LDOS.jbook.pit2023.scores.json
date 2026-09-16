@@ -1,0 +1,132 @@
+{
+  "ticker": "LDOS",
+  "cutoff": "2023-01-15",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Defense Solutions segment represented 58% of FY2021 total revenues (60% FY2020, 57% FY2019).",
+      "severity": "PASS",
+      "supports": [
+        "usaspending: 2,821 DoD contract awards to 'Leidos' totaling $8.97B obligated 2020-01-01 through 2023-01-15 — confirms Leidos is a massive, real DoD prime, not a fabrication.",
+        "Multiple Leidos UEIs visible at scale via usaspending.query_federal_presence (top entities $1B+ each); Leidos Biomedical Research separately $656M.",
+        "Segment mix is descriptive (rear-view, audited fiscal data), not forward-looking PE-level pipeline; J-Book divergence pattern does not apply."
+      ],
+      "M_check": "usaspending.query_dod_contracts(recipient_name='Leidos', start=2020-01-01, end=2023-01-15)",
+      "M_value": "n_awards=2821, total_amount=$8.97B obligated; ALL on DoD as awarding agency",
+      "interpretation": "Disclosure is consistent with massive realized DoD obligations across the lookback. PASS — rear-view segment mix is verified by USAspending."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Leidos generated ~87% of FY2021 revenues from U.S. government contracts.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending.query_federal_presence resolves 8+ Leidos UEIs as Recipient-level 'C' (corporate) recipients with combined FY-snapshot obligations in the multi-billion range.",
+        "Cross-confirmed by DoD-only result: $8.97B over the 36-month lookback corresponds to a recurring run-rate consistent with $40B+ company-level revenue at ~87% federal mix."
+      ],
+      "M_check": "usaspending.query_federal_presence(name_variants=['Leidos','Leidos Holdings','Leidos, Inc.'], cutoff_date=2023-01-15)",
+      "M_value": "8+ Leidos UEIs resolved; top three each >$1B annual snapshot",
+      "interpretation": "87% federal concentration is corroborated. PASS."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Leidos delivers hypersonic defense systems via Dynetics (forward-looking).",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook returned 3 candidate hypersonic PEs (0604181C Hypersonic Defense, 0604033F Hypersonics Prototyping, 0604183F Hypersonics Prototyping HACM) but ALL with signal=NOT_FOUND_IN_TIMERANGE because the J-Book corpus is extracted from FY 2026 J-Books published in June 2025 — there is no funding history visible at the 2023-01-15 PIT cutoff.",
+        "usaspending: Dynetics has n_awards=96 totaling $940.9M DoD obligated 2020-01-01 through 2023-01-15. Confirms Dynetics is a real DoD-funded operation, but does not directly tag a hypersonic PE.",
+        "Per rubric heuristic 7, NOT_FOUND/NOT_FOUND_IN_TIMERANGE is UNVERIFIABLE, not a red flag."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='hypersonic', cutoff_date=2023-01-15); usaspending.query_dod_contracts(recipient_name='Dynetics')",
+      "M_value": "J-Book: 3 PE matches but NOT_FOUND_IN_TIMERANGE (corpus is FY26 J-Books; no history at 2023 cutoff). USAspending: Dynetics $940.9M DoD obligated.",
+      "interpretation": "Cannot confirm forward J-Book exposure from the corpus at this PIT; Dynetics IS a real DoD-funded sub. UNVERIFIABLE for the divergence pattern (corpus coverage gap at the PIT)."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Leidos delivers directed energy (HEL/HPM), counter-UAS, radar, kinetic weapon launchers.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook returned 2 candidate PEs (0602605F Directed Energy Technology, 0604032F Directed Energy Prototyping) but NOT_FOUND_IN_TIMERANGE at 2023 cutoff (corpus is FY26 J-Books).",
+        "Counter-UAS and 'high energy laser' phrase queries returned NOT_FOUND in corpus.",
+        "USAspending Dynetics $940.9M is consistent with directed-energy / counter-UAS scope."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='directed energy', 'counter-UAS', 'high energy laser'); usaspending Dynetics",
+      "M_value": "Two DE PEs matched but no FY history at PIT; counter-UAS and HEL synonyms NOT_FOUND",
+      "interpretation": "Coverage gap at PIT — UNVERIFIABLE. Heuristic 7 + 3 apply."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Leidos provides multi-spectral airborne, ground and maritime ISR collection and processing.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook returned 8 candidate ISR-related PEs (primary match was Israeli Cooperative Programs 0603913C — wrong subject; LDOS is not an Israeli cooperative prime; this is a name-fuzz hit on the 'IS' bigram).",
+        "All matches NOT_FOUND_IN_TIMERANGE at 2023 cutoff.",
+        "USAspending: Leidos won 2,821 DoD contracts $8.97B — many descriptions reference C4ISR / geospatial / sensor work. Pattern consistent with claim."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='ISR', cutoff_date=2023-01-15); 'airborne ISR' = NOT_FOUND",
+      "M_value": "8 weak matches, all NOT_FOUND_IN_TIMERANGE; primary match (Israeli Cooperative Programs) is a false-subject collision",
+      "interpretation": "Corpus name-resolution is too loose for the generic term 'ISR' and gives a false-positive primary on 0603913C; even after disambiguation, no funding history at PIT. UNVERIFIABLE."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Leidos received 10+ year extensions to FAA ERAM and ATOP contracts (control claim, non-J-Book).",
+      "severity": "PASS",
+      "supports": [
+        "ERAM and ATOP are FAA Air Traffic Control programs — not in the DoD J-Book corpus (correct: J-Book covers DoD only). Out-of-scope for pentagon_jbook by design.",
+        "usaspending.query_federal_presence resolves Leidos as a major federal prime with multiple UEIs and recurring obligation flow; consistent with FAA program continuity.",
+        "Control claim: this is the FAA Civil business segment, materially distinct from J-Book exposure."
+      ],
+      "M_check": "usaspending federal presence (control)",
+      "M_value": "Leidos federal-prime status confirmed; FAA program awards out-of-scope for pentagon_jbook",
+      "interpretation": "Control claim verified at structural level. PASS."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Leidos supports FAA Mode S Beacon Replacement Systems (control claim, FAA).",
+      "severity": "PASS",
+      "supports": [
+        "edgar_fts.query_fulltext('Mode S Beacon', cutoff=2023-01-15) returns Leidos 10-K (2021-02-23) and other Leidos filings as primary disclosers — consistent with the claim being a Leidos-specific narrative element that recurs across filings.",
+        "FAA program; J-Book non-applicable by design."
+      ],
+      "M_check": "edgar_fts.query_fulltext('Mode S Beacon', cutoff_date=2023-01-15)",
+      "M_value": "Leidos filings appear; phrase is Leidos-specific in EDGAR fulltext at PIT",
+      "interpretation": "Control claim verified by self-disclosure recurrence; out-of-scope for J-Book. PASS."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "44% of FY2021 revenues from subcontracted federal work (49% FY2020, 48% FY2019).",
+      "severity": "PASS",
+      "supports": [
+        "USAspending $8.97B DoD obligated to 'Leidos' represents PRIME contracts only — the subcontracted half (~$8-9B annual) is invisible to USAspending direct queries by design.",
+        "Multiple Leidos UEIs at C-level (corporate) are consistent with a prime-plus-sub mix and large IDIQ vehicles."
+      ],
+      "M_check": "usaspending.query_dod_contracts(Leidos)",
+      "M_value": "n_awards=2821, $8.97B prime obligations; sub work not directly visible",
+      "interpretation": "Rear-view fiscal split — accounting fact. Verified via consistency with USAspending prime-only scope. PASS."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "Leidos delivers offensive/defensive cyber C2, exploit toolkits, offensive cyber operations.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook 'cyber operations' and 'offensive cyber' both NOT_FOUND in corpus (corpus is 410 PEs and the SOCOM/CYBERCOM offensive-cyber lines are largely classified PEs not seeded).",
+        "USAspending shows substantial DoD obligations including DISA/intel customers, consistent with cyber scope, but does not tag to a specific PE."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='cyber operations'/'offensive cyber', cutoff_date=2023-01-15)",
+      "M_value": "NOT_FOUND in J-Book corpus (classified PEs not seeded)",
+      "interpretation": "Corpus coverage gap — UNVERIFIABLE per heuristic 7. Not a red flag."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "Leidos/Dynetics provides integrated design / manufacturing / integration of human-rated and exploration spacecraft for NASA.",
+      "severity": "PASS",
+      "supports": [
+        "edgar_fts.query_fulltext('Dynetics', cutoff=2023-01-15) returns multiple Leidos filings including the 2019-12-17 Dynetics acquisition 8-K and presentation — confirming the corporate-narrative origin.",
+        "Dynetics had $940.9M in DoD obligations 2020-01-01 to 2023-01-15, with NASA awards being separate (NASA not in usaspending DoD subset).",
+        "NASA is non-DoD; J-Book divergence pattern non-applicable. Control claim."
+      ],
+      "M_check": "edgar_fts.query_fulltext('Dynetics', cutoff_date=2023-01-15)",
+      "M_value": "Leidos filings dominate EDGAR matches for 'Dynetics' — acquisition + ongoing disclosure trail",
+      "interpretation": "Control claim verified by SEC disclosure trail; J-Book non-applicable. PASS."
+    }
+  ]
+}

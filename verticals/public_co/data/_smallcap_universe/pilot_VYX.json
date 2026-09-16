@@ -1,0 +1,113 @@
+{
+  "ticker": "VYX",
+  "company": "NCR Voyix Corporation",
+  "cutoff": "2026-05-20",
+  "filing": "0000070866-26-000006_10-K.txt",
+  "filing_date": "2026-02-26",
+  "rfm_tuples": [
+    {
+      "claim_id": "C1",
+      "R": "As of December 31, 2025: cash and cash equivalents totaled $231M; total debt $1.1B; senior secured credit facility revolver of $500M with zero outstanding (sub-facility carries $24M LCs); senior unsecured notes outstanding $650M 5.000% due 2028, $403M 5.125% due 2029, $52M 5.250% due 2030; borrowing capacity $476M.",
+      "f": "If the financials are clean and management is not hiding solvency stress, then (a) the 10-K should carry no going-concern or substantial-doubt language, (b) the auditor should be unchanged with no disagreement, and (c) the lien-disclosure footprint should match the disclosed secured-credit footprint (no surprise UCC/8-K 2.03 filings).",
+      "M_source": "going_concern_detector.query_going_concern + auditor_change_tracker.query_auditor_changes + ucc_proxy.query_ucc_exposure (CIK=0000070866, cutoff=2026-05-20)",
+      "M_value": "going_concern: signal=NO_GOING_CONCERN, n_matches=0 in 10-K filed 2026-02-26. auditor: signal=CLEAN_AUDITOR_TENURE, n_8k_item_401=0, n_disagreements=0, n_big4_resignations=0 across 2021-05-21 to 2026-05-20. ucc_proxy: signal=HIGH_LIEN_EXPOSURE driven by 67 secured-debt term hits (23 'lien', 12 'first-priority lien', 7 'all assets') but n_8k_item_2_03=0 (no NEW material direct financial obligations), cluster_in_6mo=false \u2014 the high lien footprint is the routine ongoing disclosure of the pre-existing senior secured credit facilities + senior notes, NOT a fresh distress refi.",
+      "severity": "PASS",
+      "interpretation": "Capital-structure disclosure is honest and consistent. Auditor is in place with no disagreement. No going-concern paragraph. The UCC-proxy HIGH_LIEN_EXPOSURE flag is fully explained by the disclosed credit facilities (revolver + 3 tranches of senior notes), not by a new secured-debt event. Headline numbers ($231M cash vs $1.1B debt) are accurately and prominently disclosed."
+    },
+    {
+      "claim_id": "C2",
+      "R": "Net cash used in operating activities $(210)M for FY2025 (vs $(132)M in 2024 and $694M provided in 2023). Driver explicitly disclosed: $284M cash taxes paid for the Digital Banking Sale plus working capital movements.",
+      "f": "If management is transparently disclosing genuine operating-cash distress (not obscuring), the negative GAAP operating-CF should be (a) prominently bracketed in the MD&A, (b) reconciled to a non-GAAP measure with transparent add-backs, and (c) the tax-driver figure should reconcile against the actual Digital Banking Sale proceeds ($2.45B Sept 2024) which would plausibly generate ~$284M of cash taxes.",
+      "M_source": "filing internal cross-check + edgar_fts.query_fulltext (search_term='Veritas Capital', cik=0000070866, start=2024-01-01, cutoff=2026-05-20)",
+      "M_value": "Veritas Capital appears in 24 VYX filings (8-Ks Aug-Sep 2024 confirm the $2.45B Digital Banking Sale to Veritas Capital Fund VIII). The $284M cash-tax payment in 2025 is a plausible ~11.6% effective cash-tax rate against the $2.45B proceeds \u2014 economically consistent. The negative $(210)M GAAP operating CF is disclosed in the headline cash-flow table, reconciled in a non-GAAP table to 'Adjusted free cash flow-unrestricted' of +$27M after adding back $284M Digital Banking taxes, $26M restricted cash, $26M pension, $37M environmental, $21M acceleration projects, and capex $(165)M.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Honest disclosure of the GAAP number (NOT lying), but the +$27M adjusted FCF presentation that swings $(210)M into positive territory leans on $394M of cumulative non-routine add-backs ($284M one-time tax + $26M restricted + $26M pension + $37M environmental + $21M acceleration). The Digital Banking tax is genuinely non-recurring, but environmental and pension are recurring obligations; the headline-positive non-GAAP FCF understates the underlying cash drain from the new RemainCo standalone business. Honest distress with a slightly aggressive non-GAAP optic."
+    },
+    {
+      "claim_id": "C3",
+      "R": "Going-forward strategic positioning: 'modernized suite of microservices-based applications natively integrated with proprietary cloud-based platform' \u2014 the 'Voyix Commerce Platform' SaaS thesis post-Spin-Off and Digital Banking Sale; the company expects to 'continue to transition customers from legacy solutions to these modernized SaaS applications.'",
+      "f": "If the Voyix Commerce Platform thesis has commercial momentum, subsequent 8-K/10-Q disclosures should affirm platform/payment site counts, ARR growth, or named-customer wins. If the SaaS thesis is hollow marketing language, expect either (a) silence in subsequent filings or (b) downward revisions/restructuring announcements.",
+      "M_source": "claim_evolution.query_claim_evolution (cik=0000070866, search_term='Voyix Commerce Platform', base=2025-02-27, cutoff=2026-05-20)",
+      "M_value": "claim_evolution returned status_500 error on the multi-word phrase; backup verification via insider_vs_calendar.query_insider_sales_near_budget_events shows Q2 2025 earnings deck (8-K 2025-08-07) contains structured KPIs: '+25% platform sites, +13% payment sites, +6% ARR, 80 new customers' for YTD Q2 2025 \u2014 directly affirming the platform-adoption thesis with quantified disclosures. Ennoconn (hardware ODM partner) referenced in 21 filings across the period, confirming the Hardware Business Transition is real and ongoing.",
+      "severity": "PASS",
+      "interpretation": "Platform thesis is REAFFIRMED with hard numbers (platform sites +25%, payment sites +13%, ARR +6%, 80 new customers in H1 2025) in structured 8-K disclosures. The narrative is being executed against, not merely repeated as boilerplate. Hardware ODM transition with Ennoconn is concretely visible across 21 filings."
+    },
+    {
+      "claim_id": "C4",
+      "R": "Series A Convertible Preferred Stock: ~200,000 shares outstanding with redemption value ~$207M, 5.5% cumulative dividend ($15M paid cash in 2025); holders have put rights starting the 3-month windows commencing March 16, 2027, March 16, 2030, and March 16, 2033. Disclosed under 'Liquidity and Capital Resources.'",
+      "f": "If the issuer is being transparent about the preferred put-right overhang, the $207M redemption value should be prominently disclosed alongside the liquidity discussion AND the put-date timing should not be buried in a footnote. The composite of $231M cash + $207M potential put obligation maturing within ~10 months of cutoff is material.",
+      "M_source": "filing internal cross-check (Item 7 Liquidity section read directly; redemption value, dividend rate, and put-date schedule all disclosed in same paragraph)",
+      "M_value": "Disclosure is in the main Liquidity and Capital Resources narrative (not a footnote). The first put window opens March 16, 2027 \u2014 approximately 10 months after the 2026-05-20 cutoff. If 100% of holders exercise, the $207M obligation against the $231M cash balance + undrawn $476M revolver capacity means the put is fundable but consumes most of the cash cushion. Company also repurchased $74M of preferred + $74M of common during 2025, suggesting proactive paydown.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "The disclosure itself is honest and properly placed in MD&A liquidity. The MODERATE flag reflects the substantive risk, not deception: $207M of preferred put-eligible 10 months out vs $231M cash on hand is a real, material overhang that the company is actively managing via the 2025 $74M preferred buyback (about 36% of remaining redemption value). Investors reading the filing get the full picture; the March 2027 put-date is a real liquidity event horizon."
+    },
+    {
+      "claim_id": "C5",
+      "R": "Notes to Financial Statements: in Q3 2025 the Company identified errors in previously issued financial statements related to historical pre-Spin-Off operations of NCR Atleos (impact: $5M decrease to 2023 net income from discontinued ops, $6M to 2022). PLUS Q1 2023 $10M out-of-period adjustment for understated employee liability; Q2 2024 $10M revenue decrease out-of-period adjustment; Q3 2024 $8M FX out-of-period adjustment. Company concludes all individually and in aggregate immaterial; no restatement triggered.",
+      "f": "If management uses the 'immaterial out-of-period adjustment' lever appropriately, the pattern should be (a) low frequency, (b) bidirectional (not systematically favoring current period), and (c) properly disclosed. If used as a tool to avoid restatement scrutiny, the pattern should be (a) frequent, (b) directionally biased, and (c) buried in footnotes.",
+      "M_source": "filing internal cross-check; note that the company also voluntarily disclosed the ACH fraud ($34M cumulative, $16M recovered) and the April 2023 cyber ransomware ($47M cumulative expense) in the same Notes section.",
+      "M_value": "4 distinct out-of-period adjustments + 1 revision of prior-period discontinued ops in a ~30-month window. Each individually under $10M and management asserts immateriality. Direction is mixed: 2023 Q1 increased opex (against company), 2024 Q2 reduced revenue (against company), 2024 Q3 increased other expense (against company), 2025 Q3 reduced 2023/2022 discontinued-ops income (against company). All adjustments are unfavorable to historical periods \u2014 the OPPOSITE of cookie-jar pattern. ACH fraud + ransomware are voluntarily quantified in the same notes.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Pattern frequency is elevated (4-5 immaterial adjustments in ~30 months suggests weaker financial-close controls in the Spin-Off carve-out period). HOWEVER, every adjustment direction is unfavorable to historical reported results, which is the inverse of obscuring. The company also voluntarily quantifies the $34M ACH fraud and $47M ransomware costs in the same notes block. This is honest disclosure of a real control-weakness symptom \u2014 MODERATE for the controls signal, not RED, because there is no evidence of concealment."
+    },
+    {
+      "claim_id": "C6",
+      "R": "Pension lump-sum class action: Feb 2024 summary judgment against Company; June 2024 final judgment; Aug 2025 appellate court affirmed; rehearing en banc denied; Feb 2026 remanded to district court. Company has recorded $45M accrual + $22M receivable from NCR Atleos (50% indemnity). Posted $45M supersedeas bond in July 2024.",
+      "f": "If management is being transparent about adverse litigation outcomes, the affirmance + denial of rehearing should be disclosed prominently with the current accrual level. If obscuring, expect either (a) failure to disclose the affirmance, (b) failure to update the accrual to reflect the now-binding outcome, or (c) burying the indemnity-uncertainty (does Atleos pay its 50%?).",
+      "M_source": "filing internal cross-check (Commitments & Contingencies note); cross-checked against sec_filings.list_filings_by_form 8-K cadence around appellate dates",
+      "M_value": "Disclosure is complete: (i) chronological timeline from 2015 putative class through Feb 2026 remand, (ii) $45M accrual matches the supersedeas bond, (iii) $22M Atleos receivable explicitly broken out with cross-reference to the indemnity agreement, (iv) insurance-recovery contingency disclosed but not relied upon. Per sec_filings catalog, no 8-K disclosed the appellate affirmance separately (Aug 2025) \u2014 but the 10-K covers it fully.",
+      "severity": "PASS",
+      "interpretation": "Adverse litigation outcome disclosed with complete chronology, current accrual, and indemnity dependency. The 50% Atleos indemnity creates counterparty-credit dependency, but Atleos is a separately-traded public company with disclosed financial position. No evidence of concealment; the timing of appellate updates without intervening 8-K is mildly slow but within acceptable disclosure cadence for an ongoing matter."
+    },
+    {
+      "claim_id": "C7",
+      "R": "Kalamazoo River environmental matter: net reserve $111M as of December 31, 2025 (Fox River reserve $23M); Company has been identified as a PRP under CERCLA at multiple sites; 'extent of our potential liabilities continues to be subject to significant uncertainties' for Kalamazoo; cost-sharing partner BAT pays 50% under Funding Agreement since 2014; AT&T/Nokia indemnitors for portion above defined threshold; NCR Atleos contributes 50% above $15M annual threshold per Spin-Off agreements.",
+      "f": "If disclosure is honest, the reserve should be updated annually with assumption changes flagged. Investors should be able to assess (a) the gross liability, (b) the indemnity-net position, and (c) the timing risk. If obscuring, the gross-net distinction would be muddied.",
+      "M_source": "filing internal cross-check (Critical Accounting Estimates + Commitments & Contingencies notes); pension lawsuit appellate timeline implies functioning accrual-update discipline.",
+      "M_value": "Disclosure provides gross reserves separately ($23M Fox River + $111M Kalamazoo = $134M) and individually attributes BAT 50% funding, AT&T/Nokia indemnity, Atleos 50% above $15M threshold, BAT Funding Agreement Receivable of $54M (not netted against the reserve). Reserve discussion explicitly acknowledges uncertainty around 'solvency and willingness of co-obligors.' EPA Certificate of Completion for Fox River cited as positive milestone.",
+      "severity": "PASS",
+      "interpretation": "Environmental reserve disclosure is thorough and bidirectional \u2014 gross reserves alongside named indemnitors, recovery rights NOT netted (conservative), explicit acknowledgement of co-obligor solvency risk. The fact that the company holds the $54M BAT Funding Agreement Receivable in Other Assets WITHOUT netting it against the $134M gross reserve is a conservative presentation \u2014 the opposite of obscuring."
+    },
+    {
+      "claim_id": "C8",
+      "R": "Insider trading activity disclosure for Q4 2025 (Item 9B) is structured/standardized; Company's preferred-stock-buyback ($74M) and common-stock-buyback ($74M) during 2025 are disclosed in Liquidity.",
+      "f": "If insiders perceive the standalone Voyix franchise as healthier than the price action implies, Form 4 activity should show low-volume mechanical sales (RSU tax withholding) not discretionary dumps. If insiders see the SaaS-transition thesis cracking, expect clustered discretionary sales.",
+      "M_source": "insider_vs_calendar.query_insider_sales_near_budget_events (cik=0000070866, contractor_name='NCR Voyix', window_days=14, lookback_days=540)",
+      "M_value": "40 Form 4 filings in trailing 540 days, 18 total sales transactions, aggregate sale value only $985,602 (TRIVIAL for a multi-billion-dollar enterprise-value company), n_discretionary_proximate=0, signal=ROUTINE_10B5_1. Top 'proximate' sales are all code F (tax-withholding on RSU vest) at $9.68/share. Validators_run=true (validators 1+2 both returned false, correctly classifying as non-MNPI temporal coincidence).",
+      "severity": "PASS",
+      "interpretation": "Insider activity is mechanical and de minimis \u2014 under $1M total over 18 months across the entire C-suite/board population. ZERO discretionary sales. Top sales are forced tax-withholding on RSU vests. There is no insider-dump pattern consistent with private knowledge of a deteriorating franchise. Combined with the disclosed $74M preferred + $74M common buyback by the company itself, the capital-allocation signal is BUY-the-dip from both insiders (no selling) and the corporate balance sheet."
+    }
+  ],
+  "composite": 0.375,
+  "summary": "VYX is HONEST DISTRESS, not LYING/OBSCURING. NCR Voyix is the RemainCo post-2023 Spin-Off of NCR Atleos and the September 2024 $2.45B Digital Banking Sale to Veritas Capital \u2014 i.e., the price collapse (-55%, +7% above 52w low) reflects a real shrinkage of the revenue base and the cash drain of the Digital Banking tax payment ($284M in 2025 alone). Disclosure quality is high across all eight scored claims: auditor is in place with no disagreement (CLEAN_AUDITOR_TENURE 5-year lookback); no going-concern paragraph; capital structure is plainly disclosed ($231M cash, $1.1B debt with explicit bond tranches and rates); adverse pension-lawsuit outcome (appellate affirmed, en banc denied, remanded Feb 2026) is fully disclosed with $45M accrual and the $22M NCR Atleos indemnity receivable broken out; Kalamazoo River $111M environmental reserve disclosed conservatively without netting the $54M BAT recovery receivable; ACH fraud ($34M) and April 2023 cyber ransomware ($47M cumulative) voluntarily quantified in notes. Three MODERATE_UNDERDELIVERY items: (C2) non-GAAP +$27M adjusted FCF leans on $394M of cumulative add-backs that include non-recurring Digital Banking tax but also recurring pension and environmental items, slightly overstating standalone FCF generation; (C4) Series A Preferred put-rights open March 16, 2027 with $207M redemption value versus $231M cash balance \u2014 fundable via revolver but a genuine ~10-month liquidity event horizon, mitigated by the proactive $74M preferred buyback in 2025; (C5) four out-of-period adjustments + one prior-period discontinued-ops revision in ~30 months signals weak Spin-Off-era close controls, though every adjustment is directionally unfavorable to historical results (inverse of cookie-jar pattern). Insider activity is essentially zero ($986K total sales in 540 days, 100% routine RSU-tax-withholding, signal=ROUTINE_10B5_1) and the company itself repurchased $148M of its own securities in 2025. Voyix Commerce Platform thesis is REAFFIRMED with structured KPIs in subsequent 8-Ks (+25% platform sites, +13% payment sites, +6% ARR, 80 new customers H1 2025). Composite 0.375 \u2014 between PASS and modest underdelivery, consistent with an honest small/mid-cap working through a multi-year carve-out where the price has overshot the disclosure quality. This is a name where the honesty-alpha framework SLIGHTLY DISFAVORS a short and slightly favors a value/mean-reversion long if the SaaS-platform KPIs continue to compound and the March 2027 preferred put is pre-funded.",
+  "queries_run": [
+    "going_concern_detector.query_going_concern",
+    "auditor_change_tracker.query_auditor_changes",
+    "ucc_proxy.query_ucc_exposure",
+    "sec_filings.list_filings_by_form",
+    "insider_vs_calendar.query_insider_sales_near_budget_events (contractor_name='NCR Voyix')",
+    "edgar_fts.query_fulltext (search_term='NCR Atleos', cik=0001856437)",
+    "edgar_fts.query_fulltext (search_term='Veritas Capital', cik=0000070866)",
+    "edgar_fts.query_fulltext (search_term='Ennoconn', cik=0000070866)",
+    "claim_evolution.query_claim_evolution (search_term='Voyix Commerce Platform') \u2014 returned status_500; substituted with insider_vs_calendar 8-K KPI inspection",
+    "claim_evolution.query_claim_evolution (search_term='ransomware')",
+    "claim_evolution.query_claim_evolution (search_term='ACH disbursements')"
+  ],
+  "side_signals": {
+    "ucc_proxy_note": "HIGH_LIEN_EXPOSURE (67 secured-debt term hits, 23 'lien', 12 'first-priority lien') is fully accounted for by the disclosed senior secured credit facilities + 3 tranches of senior unsecured notes \u2014 n_8k_item_2_03=0 (no new direct financial obligation events) and cluster_in_6mo=false confirms no fresh distress-financing pattern.",
+    "ach_fraud_voluntary_disclosure": "Company voluntarily quantifies $34M cumulative fraudulent ACH disbursements with $16M recovered as of Dec 31 2025 \u2014 claim_evolution shows REAFFIRMED_IN_STRUCTURED_DISCLOSURE across 6 subsequent filings (5 of 6 are standardized non-GAAP EBITDA add-back boilerplate, 1 substantive affirmation in Q1 2024 8-K).",
+    "ransomware_voluntary_disclosure": "April 2023 Aloha/Counterpoint ransomware incident with $47M cumulative cost is voluntarily quantified in notes; claim_evolution shows REAFFIRMED_IN_STRUCTURED_DISCLOSURE across multiple filings as a recurring Adjusted EBITDA add-back line item.",
+    "atleos_counterparty_verification": "edgar_fts query for 'NCR Atleos' against CIK 0001856437 (Atleos) returned 0 hits \u2014 Atleos either uses a different name in its filings or the FTS phrase tokenization missed it; not a falsification flag, just an FTS limitation.",
+    "filing_cadence": "36 filings (10-K/10-Q/8-K/S-1/S-3) in the 2024-01-01 to 2026-05-20 window, including timely 10-K (filed 2026-02-26) and Q1 2026 10-Q (filed 2026-05-07) \u2014 no NT filings, no delayed disclosures."
+  },
+  "scoring": {
+    "PASS": 5,
+    "UNVERIFIABLE": 0,
+    "MODERATE_UNDERDELIVERY": 3,
+    "SEVERE_UNDERDELIVERY": 0,
+    "RED_FLAG_NEGATIVE": 0,
+    "verifiable_claims": 8,
+    "weighted_sum": "(0*5 + 1*3 + 2*0 + 3*0) / 8 = 3 / 8",
+    "composite": 0.375
+  }
+}

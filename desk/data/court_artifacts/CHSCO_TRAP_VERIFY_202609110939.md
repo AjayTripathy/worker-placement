@@ -1,0 +1,17 @@
+### CHSCO (CHS Inc. Class B Cumulative Redeemable Preferred, Series 1 — a callable perpetual preferred of a Minnesota farmer-owned ag/energy cooperative) — screen mcap $241.2M, px $19.655, P/B 0.022, EY 218%, ROE 4.76%, carry spread +2.089 — **SCREEN-MISCLASSIFIED**
+
+**KILL FACTS**
+- Instrument class, not equity: CHSCO is preferred stock, $25 redemption value, 7.875% fixed, quarterly, **redeemable at CHS's option beginning 9/26/2023** — i.e. call-eligible today (FY2024 10-K preferred table: https://www.sec.gov/Archives/edgar/data/823277/000082327724000046/chscp-20240831.htm; terms at issuance: https://www.sec.gov/Archives/edgar/data/0000823277/000082327714000011/chscp10q022814.htm). Dividend confirmed live at $0.492188/qtr, declared 7/8/2026 (https://www.sec.gov/Archives/edgar/data/0000823277/000082327726000022/chscp-20260708.htm). Every ey/pb/roe/carry_spread cell is a category error: preferred holders get $1.96875/yr and $25, not a claim on earnings or on members' equity.
+- **Corrected mcap: ~$421.8M** (21,459,066 CHSCO shares × $19.655), not $241,206,219. The screen's figure = 12,272,003 × $19.655 — that is **CHSCP's** share count (same 10-K table). Defect family (1), cross-class share-count join.
+- **P/B 0.022 is defect family (2)**: $11.06B is total co-op equity, overwhelmingly member capital-equity certificates revolvable to farmer-owners — someone else's money. Corrected "book" for CHSCO = $536.5M redemption value (10-K table); price/redemption ≈ 0.79 at $19.655, ~1.02 at tape's 52w range.
+- **OCF panel is defect family (3)**: all eight prints are Nov-30 (fiscal Q1) seasonal working-capital builds; CHS FY ends Aug 31. Revenue panel stops 2018-05-31 — eight years stale.
+- **Tape self-contradicts**: px 19.655 sits *below* lo52 25.2332 (pct_off_low printed negative). Live price UNVERIFIED — do not act on gateway px.
+
+**LIVE FACTS**
+- Honest, current filer; results cyclical not melting: FY2025 NI $597.9M vs $1.1B FY2024 (https://www.sec.gov/Archives/edgar/data/823277/000082327725000039/a4qfy25earningrelease.htm); Q2 FY26 net **loss** $147.1M (https://www.sec.gov/Archives/edgar/data/823277/000082327726000017/a2qfy26earningrelease.htm); Q3 FY26 NI $267.4M on $11.6B (https://www.sec.gov/Archives/edgar/data/0000823277/000082327726000025/a3qfy26earningrelease.htm). Preferred dividends ~$168.7M/9M → ~2.7x FY25 coverage (https://www.sec.gov/Archives/edgar/data/0000823277/000082327726000023/chscp-20260531.htm).
+- Structural subordination increasing: receivables securitization Omnibus Amdt. No. 16, Cofina Funding/MUFG, 8/26/2026 (https://www.sec.gov/Archives/edgar/data/823277/000082327726000029/0000823277-26-000029-index.htm); Q1 FY26 interest expense +35.1% YoY (https://www.sec.gov/Archives/edgar/data/823277/000082327726000006/chscp-20251130.htm).
+- ni_ttm $526.6M, ADV, qualified-dividend status, and analyst coverage: **UNVERIFIED** (no primary source in pack; no sub-agent numbers imported).
+
+**RESOLVES ON:** (1) FY2026 Q4/full-year release ~early Nov 2026 — cadence from Nov 5, 2025 print; date UNCONFIRMED, not a company-named PR; (2) next dividend declaration ~Oct 2026 8-K; (3) any Item 8.01 redemption notice — call at $25 is the true upside cap.
+
+**Disposition:** AVOID/DECLINE + reopen-condition — reopen only in a fixed-income sleeve at a verified live print ≤$22 (≥9% current yield with the $25 call as upside, not downside), never as a deep-value equity. File defect classes (1),(2),(3) plus new class: instrument-class join (equity fundamentals attached to a preferred ticker).

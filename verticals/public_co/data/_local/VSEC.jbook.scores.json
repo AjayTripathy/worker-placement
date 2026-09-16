@@ -1,0 +1,127 @@
+{
+  "ticker": "VSEC",
+  "cutoff": "2026-05-20",
+  "cohort": "jbook_exposure_divergence",
+  "summary": {
+    "expected_high_unverifiable": true,
+    "reason": "VSE divested both Federal & Defense (2024) and Fleet (2025) segments. The remaining Aviation segment is commercial/B&GA-dominant MRO and parts distribution. The 10-K names NO specific Pentagon Program Elements, NO PE numbers, NO named DoD programs (Skyborg, CCA, SDA Tracking Layer, etc.), and does NOT disclose military/defense revenue as a quantified concentration. DoD-related revenue that remains is generic O&M sustainment (military aftermarket parts distribution, rotorcraft MRO), which sits in DoD O&M budgets — explicitly OUTSIDE the J-Book corpus (which covers 410 RDT&E + Procurement PEs).",
+    "jbook_grounded_claims": 2,
+    "jbook_grounded_claims_with_pe_or_program_name": 0,
+    "pentagon_jbook_hits": 0,
+    "pentagon_jbook_hit_rate_fraction": "0 of 2 J-Book-grounded claims"
+  },
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "VSE operates as single Aviation segment post-divestiture of F&D and Fleet.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending.query_dod_contracts(recipient_name='VSE Corporation') returns 4,739 historical DoD awards totaling $1.2B — top awards (Red River Army Depot mechanic labor, Bahrain ship transfer FOTS engineering, 63rd RSC logistics) are all Federal & Defense segment work types that were divested in the 2024 FDS Sale. This corroborates the divestiture narrative — past DoD exposure was real, but the company narrative accurately reflects that it has been sold.",
+        "pentagon_jbook(contractor_name='VSE Corporation') -> NOT_FOUND. No forward J-Book PE lists VSE as a participating contractor, consistent with the divestiture having removed VSE from forward Pentagon RDT&E/Procurement programs."
+      ],
+      "M_check": "pentagon_jbook + usaspending",
+      "M_value": "NOT_FOUND in J-Book corpus (expected post-divestiture); $1.2B historical DoD obligations confirms pre-divest scale",
+      "interpretation": "Disclosure is consistent with reality. The divestiture removes most go-forward DoD program exposure. PASS."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Customer Group accounts for ~20% of FY2025 revenue; identity not disclosed.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "The 10-K does not name the Customer Group. The framework cannot determine whether the 20% concentration sits with a DoD program, a commercial distribution rollup parent (e.g., a major airline-MRO group), or a B&GA OEM. With Aviation revenue of $1.1B in 2025, ~20% = ~$220M, which is larger than VSE's historical top-3 DoD awards combined and far exceeds typical single-PE J-Book line items VSE might historically have served.",
+        "pentagon_jbook(contractor_name='VSE Corporation') -> NOT_FOUND across all PEs. If Customer Group were DoD-program-specific, we would expect at least one PE in the 410-program corpus to list VSE as a participant; none does. Inferentially, the Customer Group is more likely a commercial counterparty (e.g., a major airline-aftermarket distributor or OEM partner), but this is unconfirmed from filing language.",
+        "Materiality test: 20% concentration is material — if it were a J-Book program, this single relationship would be RED_FLAG-level exposure to budget volatility. But because we cannot identify the counterparty, J-Book verification cannot be applied."
+      ],
+      "M_check": "pentagon_jbook",
+      "M_value": "NOT_FOUND",
+      "interpretation": "Disclosure is vague by design — affiliated-customer-group language is permissible but blocks J-Book verification. Severity = UNVERIFIABLE. Note this would be a critical follow-up in DD mode (entity resolution: identify the Customer Group from supplemental sources like CCR/SAM.gov, 10-K cross-references, or PR releases)."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "VSE acquires PAG for $2.025B + $125M earn-out; supports B&GA, rotorcraft, defense markets.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending(recipient_name='Precision Aviation Group') -> 7 awards totaling only $84K. PAG's 'defense markets' exposure is minimal in raw DoD direct-obligation terms — the 'defense' label more likely refers to military rotorcraft aftermarket parts (T700/T56 engines, sustainment-tier work) sold via primes or via O&M depot channels.",
+        "acq_coherence: tool returned low confidence (internal LLM evaluator did not produce a scored signal), but qualitative read is high-coherence: PAG is an MRO/distribution rollup matching VSE's post-divest thesis exactly.",
+        "No J-Book PE divergence: VSE is not claiming PAG gives it exposure to specific named PE-tracked development programs."
+      ],
+      "M_check": "usaspending + acq_coherence",
+      "M_value": "PAG direct DoD obligations: $84K (negligible); acquisition coherent with stated Aviation aftermarket thesis",
+      "interpretation": "Coherent commercial-MRO rollup. No J-Book exposure to verify. PASS."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Aviation segment serves commercial + B&GA + cargo + military + rotorcraft customers; no specific DoD program named.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook(program_name='Aviation Sustainment') -> NOT_FOUND. pentagon_jbook(program_name='depot maintenance') -> NOT_FOUND. The J-Book corpus is RDT&E + Procurement (R-2 + P-40 exhibits); generic aviation sustainment / depot-level repair work is O&M-budgeted, which sits outside this corpus. This is the COHORT-METADATA-PREDICTED outcome: VSE's residual military exposure is O&M-funded, not PE-tracked.",
+        "Materiality test: the filing does not quantify the military share of Aviation revenue and does not name any specific DoD program of record. Without a program name or PE, J-Book divergence cannot be tested.",
+        "Coverage gap, not red flag: per J-BOOK heuristic #7, NOT_FOUND in O&M-funded sustainment territory is UNVERIFIABLE, not RED_FLAG."
+      ],
+      "M_check": "pentagon_jbook",
+      "M_value": "NOT_FOUND (expected — O&M-funded work outside corpus scope)",
+      "interpretation": "The filing's military/defense exposure is by design un-J-Book-able. This is the cohort baseline case: high UNVERIFIABLE rate driven by O&M-budget dependency. UNVERIFIABLE."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "VSE acquires exclusive PT6 fuel pump license from unnamed OEM for $10.8M.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook(program_name='PT6') -> NOT_FOUND. pentagon_jbook(contractor_name='Pratt & Whitney') -> NOT_FOUND. PT6 is overwhelmingly a civilian turboprop engine (Pilatus PC-12, King Air, Caravan). Its small military application (UC-12, T-6 Texan II trainer variants use PT6A) is O&M-sustained, not PE-tracked.",
+        "The dollar size ($10.8M license) is immaterial to total revenue (~1% of FY2025 Aviation revenue), so even if there were a J-Book linkage, materiality would be too low to flag."
+      ],
+      "M_check": "pentagon_jbook",
+      "M_value": "NOT_FOUND",
+      "interpretation": "Civilian/B&GA-dominant engine, immaterial size. PASS."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Rollup acquisitions (TCI, Kellstrom, Turbine Weld, Aero 3) indicate strategic pivot to commercial aftermarket.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending(recipient_name='Turbine Controls') -> 39 awards totaling only $2.26M, all small TF33 turbine exhaust case remanufacture work (USAF B-52/KC-135 engine sustainment, O&M-funded). De-minimis DoD exposure.",
+        "usaspending(recipient_name='Kellstrom Aerospace') -> 0 awards. Pure commercial.",
+        "Pattern confirms the rollup is genuinely commercial/B&GA aftermarket-focused, not a defense rollup. No J-Book divergence risk from these targets."
+      ],
+      "M_check": "usaspending",
+      "M_value": "TCI: $2.26M; Kellstrom: $0; together <0.5% of FY2025 revenue",
+      "interpretation": "Rollup is coherent commercial pivot. PASS."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "VSE occupies ~1.3M sqft at 30+ locations; HQ Miramar FL.",
+      "severity": "PASS",
+      "supports": [
+        "epa_frs(facility_name='VSE', state_abbr='FL') -> 1 EPA-registered facility (VSE CORP, Miami Gardens FL) found. EPA registry coverage is light for service-business locations (warehouses/MRO shops typically generate fewer EPA registrations than manufacturing). Disclosure consistent with footprint plausibility.",
+        "Non-J-Book control claim — used to baseline that the framework's standard verifiers function on this filing."
+      ],
+      "M_check": "epa_frs",
+      "M_value": "1 EPA-registered facility in FL; HQ matches Miami Gardens (Miramar adjacent metro)",
+      "interpretation": "Disclosure consistent. PASS."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Capital structure: $293M debt; $1.74B equity raised Oct'25 + Feb'26 to fund Aero 3 and PAG.",
+      "severity": "PASS",
+      "supports": [
+        "insider_vs_calendar(cik='0000102752') -> 35 Form 4 filings, 11 total sales worth $7.89M, 0 proximate to DoD budget-vote events (NO_PROXIMATE_SALES signal). No evidence of insider timing around budget events — consistent with the divested-from-DoD posture.",
+        "Equity raises are clearly disclosed and tied to specified uses (Aero 3 and PAG financings). No undisclosed dilution risk."
+      ],
+      "M_check": "insider_vs_calendar",
+      "M_value": "0 proximate-to-budget-event insider sales; signal NO_PROXIMATE_SALES",
+      "interpretation": "Capital actions transparent; no insider-trading-vs-budget red flag. PASS."
+    }
+  ],
+  "severity_counts": {
+    "PASS": 6,
+    "MODERATE_UNDERDELIVERY": 0,
+    "SEVERE_UNDERDELIVERY": 0,
+    "RED_FLAG_NEGATIVE": 0,
+    "UNVERIFIABLE": 2
+  },
+  "framework_notes": {
+    "cohort_pattern_test_outcome": "NULL — VSE does NOT exhibit the J-Book Exposure Divergence Pattern. The filing makes no PE-grounded or named-DoD-program revenue claims to test against the J-Book corpus. This is consistent with cohort metadata which warned that VSE's residual DoD exposure sits in DoD O&M (not RDT&E/Procurement) and is therefore outside the J-Book corpus scope.",
+    "pentagon_jbook_hits": "0 of 2 J-Book-grounded claims (C1, C4) produced a pentagon_jbook match. Both NOT_FOUND results are coverage gaps (heuristic #7: NOT_FOUND != red flag), not divergences.",
+    "key_finding": "VSE's 10-K is a CLEAN POST-DIVESTITURE COMMERCIAL-AFTERMARKET ROLLUP NARRATIVE. The framework's J-Book detector correctly fires zero false positives. The only signals worth follow-up in a non-blinded DD mode would be (a) identifying the Customer Group (20% concentration), (b) PAG diligence on its 'defense markets' exposure, and (c) post-PAG-close balance sheet leverage and goodwill — none of which are J-Book-pattern signals."
+  }
+}

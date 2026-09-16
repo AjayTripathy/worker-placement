@@ -1,0 +1,30 @@
+## Cause-check
+
+BLDR's ‑53.5% dd52 is **not** an indiscriminate-cohort artifact: it is two dated, company-specific guidance cuts (Q1 print 2026‑04‑30, Q2 print 2026‑07‑30) landing on ~4x decremental operating leverage and a 2.3x→3.6x leverage ratchet. The narrative's predicted damage is *in the numbers already*. Note also that the cohort tag is wrong — BLDR is benchmarked here against a **Consumer Discretionary** median, but it is a housing-starts industrial; a meaningful share of the ‑0.335 "excess" is a sector-misclassification artifact rather than dispersion the market ignored.
+
+| ticker | class | refuting metric | current value/trend (cited) | next print date | note |
+|---|---|---|---|---|---|
+| BLDR | **DAMAGE-ARRIVING** | **Gross margin %** (the value-add "structural floor" claim), with core organic growth as the volume control | GM **28.1%**, ‑260bps YoY; Q1 28.3% → Q2 28.1%, FY26 guide **27.5–28.5%** implies ~27.5% in 2H. Core organic **‑7.0%** (SF ‑8.1%, MF ‑9.7%); adj EBITDA **$329.3M, ‑34.9%**, margin 8.5% (‑350bps); net loss $(3.9)M; FCF $32.2M (‑87.4%); net leverage **3.6x** vs 2.3x ([investors.bldr.com Q2 2026 release](https://investors.bldr.com/news/news-details/2026/Builders-FirstSource-Reports-Second-Quarter-2026-Results/default.aspx)) | **2026-10-29** (est.) | Guide cut twice in one quarter: sales $14.6–15.6B → **$14.0–14.8B**; adj EBITDA $1.1–1.5B → **$1.0–1.2B** (ceiling ‑20%); SF starts assumption ‑2.5% → **mid-to-high-single-digit decline** ([Q1 release](https://investors.bldr.com/news/news-details/2026/Builders-FirstSource-Reports-First-Quarter-2026-Results/default.aspx)) |
+
+**Why not DAMAGE-ABSENT:** every metric the narrative predicts would deteriorate has deteriorated, on primary filings. There is no candidate refuting metric currently pointing the other way.
+
+**Why not STRUCTURAL:** the classification turns on one unresolved question, not on a broken model. Management's own normalized anchor is **$2.1–2.4B EBITDA at 30–33% GM on 1.0–1.1M starts**. Against EV ≈ **$12.0B** ($7.42B mcap + $4.6B net debt), that is **5.0–5.7x normalized** vs **10.0–12.0x** on the FY26 guide. The whole sizing decision is the credibility of that 30–33% GM anchor while the company prints 28.1% and falling. Volume is exogenous and forecastable; **margin is the contested variable**, and it is testable on a dated print.
+
+Three confirmatory items worth carrying into any court:
+- **Buyback effectively halted.** $303.5M repurchased YTD but only **$3.5M in Q2**, with $500M still authorized — the ‑50%-since-2021 share-count engine (102.6M shares at $81.26 avg, *above* today's $70.21) switched off exactly as EBITDA fell. Deleveraging now outranks EPS.
+- **Cost headwind into the trough.** ERP/technology implementation expense **$41.0M in Q2** (vs $28.8M), $68.5M YTD.
+- **Leverage tripwire.** At the low guide end ($1.0B EBITDA) on $4.6B net debt, leverage goes to **~4.6x**. Liquidity is $1.6B ($1.5B revolver + $0.1B cash) and no covenant issue is disclosed — I could not verify the ABL springing-FCC threshold from primary (SEC.gov returned 403 to every fetch here, no shell available to set a full fingerprint). **→ unverified_ledger: BLDR ABL covenant trigger, resolver = 10-Q 0001193125-26-325451 debt note.**
+
+## COURT-WORTHY (damage-absent, ranked):
+
+**NONE.** BLDR is the only member and it fails the damage-absent test on primary evidence. Listing it here would be smuggling a guide-cutter into a "narrative-is-false" bucket. Its court value is real but comes from valuation dispersion vs a *stated* normalized anchor, not from absent damage.
+
+**COURT-WORTHINESS BLDR: 7/10** — damage is confirmed so the direction is settled, but 5.0–5.7x management-normalized vs 10–12x trough is a wide enough gap that FLAT/STARTER/OWN genuinely differs by adjudication, and the 30–33% GM anchor has a dated primary resolver.
+
+**PRINT PROXIMITY: 2026-10-29 — UNCONFIRMED.** Estimator-derived (yfinance in the pack; TipRanks concurs); **no company PR naming the date was located**, and BLDR's practice is to announce ~2 weeks prior. ~46 trading days out, so **the ≤5-day print-decisive reconstruction is not triggered**.
+
+Stance anyway, since it is cheap: **FLAT into the interim, revisit as STARTER only on the Q3 GM print.** The bull case is entirely a normalized-margin claim; buying before the metric that tests it prints is paying for an unresolved variable when there is no timing pressure. The trigger is mechanical — **Q3 GM ≥28.0% → the value-add floor survives, escalate to court and size; Q3 GM <27.5% → the discount is correct and BLDR reclassifies to STRUCTURAL.**
+
+One caveat on the cohort comparator: UFPI's 52-week range ($77.89–$118.00, ~‑34% peak-to-trough) suggests BLDR's ‑53.5% is deeper than its true peers — but that gap has a mechanical cause (3.6x leverage vs a far cleaner peer balance sheet), so it is *explained* dispersion, not ignored dispersion. BCC figures returned by search were stale 2025 dates and I did not rely on them. Live IBKR quotes were unavailable (permission not granted), so tape values are the pack's $70.21 — refresh before any sizing.
+
+**Sources:** [BLDR Q2 2026 results](https://investors.bldr.com/news/news-details/2026/Builders-FirstSource-Reports-Second-Quarter-2026-Results/default.aspx) · [BLDR Q1 2026 results](https://investors.bldr.com/news/news-details/2026/Builders-FirstSource-Reports-First-Quarter-2026-Results/default.aspx) · [StockTitan Q2 detail](https://www.stocktitan.net/news/BLDR/builders-first-source-reports-second-quarter-2026-pebde4uw21jv.html) · [Q2 2026 earnings call transcript](https://www.investing.com/news/transcripts/earnings-call-transcript-builders-firstsource-misses-q2-2026-estimates-raises-cost-cuts-93CH-4825115) · [TipRanks earnings calendar](https://www.tipranks.com/stocks/bldr/earnings) · [UFPI quote](https://www.morningstar.com/stocks/xnas/ufpi/quote)

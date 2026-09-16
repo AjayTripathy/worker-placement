@@ -1,0 +1,113 @@
+{
+  "ticker": "ARQQ",
+  "cutoff": "2026-05-20",
+  "filing": "0001104659-25-119500_20-F.txt",
+  "form": "20-F",
+  "filed": "2025-12-09",
+  "company": "Arqit Quantum Inc.",
+  "cik": "0001859690",
+  "cohort": "jbook_exposure_divergence",
+  "extraction_notes": "20-F does NOT name specific DoD Program Elements (PE numbers), specific programs of record, or quantify FY-by-FY DoD revenue tied to a named program. DoD-exposure narrative is partner-mediated and hand-wavy: 'first U.S. Department of War contract is in partnership with a large, leading U.S. IT vendor' and 'government and military markets currently represent its largest potential source of revenue'. This itself is the J-book divergence pattern's flip side: the narrative claims DoD exposure without naming the PE that would let an investor verify. We extract the available J-book-grounded claims and pair with an Arqit-specific usaspending lookup (real DoD obligations) and a peer-quantum J-Book pattern check (AFRL Quantum Networking / IONQ — the canonical post-quantum-comms PE for which a J-Book is available).",
+  "claims": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Arqit's first U.S. Department of War (DoD) contract is delivered in partnership with a large, leading U.S. IT vendor; symmetric key encryption was integrated into the IT vendor's product offering to the U.S. government.",
+      "subject": "Arqit Quantum Inc.",
+      "predicate": "has_dod_contract_via_partner",
+      "object_value": "first U.S. Department of War contract via large U.S. IT vendor partner",
+      "source_quote": "Arqit's first U.S. Department of War contract is in partnership with a large, leading U.S. IT vendor. ... For Arqit's first U.S. Department of War contract, its symmetric key encryption solution was integrated into the product offering of one of the largest IT vendors to the U.S. government.",
+      "category": "dod_customer_concentration",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "Arqit", "cutoff_date": "2026-05-20"}},
+        {"source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "Arqit", "start_date": "2020-01-01", "end_date": "2026-05-20"}}
+      ]
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Government and military markets currently represent Arqit's largest potential source of revenue (applications: battlefield command and control, secure communications, confidential cloud workloads).",
+      "subject": "Arqit Quantum Inc.",
+      "predicate": "expects_revenue_concentration",
+      "object_value": "government and military as largest potential revenue source",
+      "source_quote": "Arqit believes that the government and military markets currently represent its largest potential source of revenue. ... Applications include battlefield command and control, secure communications, and confidential cloud workloads.",
+      "category": "jbook_program_pipeline",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"program_name": "AFRL Quantum Networking", "cutoff_date": "2026-05-20"}},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "IonQ", "cutoff_date": "2026-05-20"}}
+      ]
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Arqit's SKA-Platform and NetworkSecure are aligned with the National Security Agency's Commercial Solutions for Classified (CSfC) Symmetric Key Management Requirements Annex 3.0, positioning Arqit for U.S. defense classified-comms procurement.",
+      "subject": "Arqit Quantum Inc.",
+      "predicate": "claims_nsa_csfc_alignment",
+      "object_value": "NSA CSfC Symmetric Key Management Annex 3.0 alignment",
+      "source_quote": "solution architectures aligned with the National Security Agency's Commercial Solutions for Classified Symmetric Key Management Requirements Annex 3.0",
+      "category": "jbook_program_pipeline",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"program_name": "Commercial Solutions for Classified", "cutoff_date": "2026-05-20"}},
+        {"source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "Arqit Limited", "start_date": "2020-01-01", "end_date": "2026-05-20"}}
+      ]
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Arqit's largest license contract is a multi-year agreement through a major Middle East IT vendor partner with several government agencies of a major Middle Eastern country as the end customer.",
+      "subject": "Arqit Quantum Inc.",
+      "predicate": "has_largest_license_contract",
+      "object_value": "multi-year ME license via IT vendor; end-customers are ME-government agencies",
+      "source_quote": "Arqit's largest license contract, a multi-year agreement, is through a major IT vendor partner in the Middle East with the end customer being several government agencies of a major Middle Eastern country.",
+      "category": "counterparty_disclosure",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "Arqit", "cutoff_date": "2026-05-20"}}
+      ]
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Revenue from one customer represents more than 56% of total revenues for FY2025 (revenue concentration disclosed in financials).",
+      "subject": "Arqit Quantum Inc.",
+      "predicate": "discloses_revenue_concentration",
+      "object_value": "1 customer = 56%+ of FY2025 revenue (total revenue = $0.530M)",
+      "source_quote": "Revenue from one (2024: one, 2023: two) customer represents more than 56% (2024: 10%, 2024: 10%) of total revenues.",
+      "category": "dod_customer_concentration",
+      "queries": [
+        {"source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "Arqit", "start_date": "2020-01-01", "end_date": "2026-05-20"}}
+      ]
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Arqit's symmetric-key narrative implicitly competes for the DoD post-quantum encryption budget pool that has historically funded AFRL quantum networking work (cohort context: this is the same pool where IONQ's AFRL Quantum Networking earmark sits).",
+      "subject": "Arqit Quantum Inc.",
+      "predicate": "competes_for_dod_pqc_pool",
+      "object_value": "implicit competition for AFRL/DoD post-quantum-comms budget pool",
+      "source_quote": "Arqit's protection products can secure sensitive government and defense communications. Applications include battlefield command and control, secure communications, and confidential cloud workloads.",
+      "category": "jbook_program_pipeline",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"program_name": "AFRL Quantum Networking", "cutoff_date": "2026-05-20"}},
+        {"source": "earmark_detector.query_earmark_status", "kwargs": {"program_name": "AFRL Quantum Networking", "cutoff_date": "2026-05-20"}}
+      ]
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Arqit's encryption solution is patented and has been independently validated by GCHQ Accredited Centre of Excellence in Cyber Security at the University of Surrey and PA Consulting.",
+      "subject": "Arqit Quantum Inc.",
+      "predicate": "claims_patent_and_validation",
+      "object_value": "patented; GCHQ-accredited-center validation",
+      "source_quote": "Arqit's encryption solution is patented, its security proof has been independently validated by GCHQ Accredited Centre of Excellence in Cyber Security at the University of Surrey and PA Consulting",
+      "category": "patent",
+      "queries": [
+        {"source": "uspto_odp.query_assignee_patents", "kwargs": {"assignee_name": "Arqit", "cutoff_date": "2026-05-20"}}
+      ]
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Arqit recorded a $7.0 million provision in FY2025 for legal settlement of a putative U.S. securities class action; term sheet executed October 20, 2025.",
+      "subject": "Arqit Quantum Inc.",
+      "predicate": "discloses_legal_settlement_provision",
+      "object_value": "$7.0M provision; term sheet 2025-10-20",
+      "source_quote": "The provision relates to a legal settlement pertaining to the putative class action lawsuit filed against Arqit and certain of Arqit's directors in the United States District Court for the Eastern District of New York. On October 20, 2025, a term sheet was executed that would settle the Federal Action.",
+      "category": "other",
+      "queries": [
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"query": "Arqit Quantum class action", "cutoff_date": "2026-05-20"}}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,372 @@
+{
+  "ticker": "HDSN",
+  "cutoff": "2025-05-15",
+  "filing": "0001410578-25-000323_10K.txt",
+  "plan_version": 2,
+  "naics_domain": "industrial_chemistry",
+  "naics_prefix": "3251",
+  "cohort_context": "Hudson Technologies is the largest US refrigerant reclaimer (NAICS 325120 Industrial Gas Manufacturing). FY24 10-K filed 2025-03-12. AIRO-signature mechanical hit (the strings 'material weakness' and 'stock for services' both appear in the 10-K) is a known FALSE POSITIVE: the 'material weakness' hit is boilerplate from the auditor's standard ICFR-risk paragraph, and 'stock for services' is a generic line item on the equity rollforward (not a distress-financing event). The real bear thesis is fundamental: the HFC phase-down under the AIM Act compresses commodity refrigerant pricing, the DLA prime contract (15% of revenue) expires July 2026, and FY24 inventory was written down (from $154.5M to $96.2M). HDSN's forward 12-month return was -37.6% but for fundamentals, not for disclosure-quality reasons. Plan tests whether multi-source aggregation correctly DE-EMITS this name because operational claims are independently corroborated (real EPA-permitted reclamation facilities, real DLA federal contract, real AHRI-certified lab, real patents), rather than emitting on the false-positive AIRO triggers.",
+  "claims": [
+    {
+      "claim_id": "HDSN-1",
+      "claim_text": "Hudson Technologies is a New York-incorporated public refrigerant services company operating principally through wholly-owned subsidiary Hudson Technologies Company, with headquarters at 300 Tice Boulevard, Suite 290, Woodcliff Lake, New Jersey.",
+      "source_quote": "Hudson Technologies, Inc. ( Hudson or the Company ), incorporated under the laws of New York on January 11, 1991, is a refrigerant services company... The Company operates principally through its wholly-owned subsidiary, Hudson Technologies Company... The Company s executive offices are located at 300 Tice Boulevard, Suite 290, Woodcliff Lake, New Jersey",
+      "subject": "Hudson Technologies, Inc.",
+      "predicate": "is_registered_entity",
+      "object_value": "NY-incorporated 1991; Woodcliff Lake NJ HQ; operates via Hudson Technologies Company subsidiary",
+      "category": "physical_facility",
+      "referent_type": "entity",
+      "m_source_status": "MAPPED",
+      "source_id": "sam_entity.query_entity_by_uei",
+      "source_params": {
+        "uei": "RESOLVE_VIA_USASPENDING_FIRST"
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "New York Department of State Division of Corporations",
+          "endpoint_or_method": "https://apps.dos.ny.gov/publicInquiry/ — search 'Hudson Technologies'",
+          "rationale": "10-K asserts NY-incorporation since 1991; the NY DOS entity search is the canonical state-level registry, independent of federal SAM.",
+          "expected_observable": "active NY domestic-corporation record with 1991 formation date",
+          "signal_direction": "absence or inactive status would contradict the basic existence claim",
+          "severity_if_contradiction": "SEVERE"
+        },
+        {
+          "source_label": "EPA FRS reverse-lookup at Woodcliff Lake NJ HQ",
+          "endpoint_or_method": "epa_emissions.query_facility_emissions with company_name='Hudson Technologies' and claimed_locations including each owned/leased site",
+          "rationale": "Industrial-chemistry domain has CANONICAL EPA coverage; FRS should index Hudson at multiple operational sites even if the HQ itself is administrative-only.",
+          "expected_observable": "FRS records for Hudson Technologies at one or more US sites",
+          "signal_direction": "complete EPA absence would be a SEVERE contradiction for a self-described 'largest US refrigerant reclaimer'",
+          "severity_if_contradiction": "SEVERE"
+        }
+      ],
+      "domain": "industrial_chemistry",
+      "claim_type_taxonomy": "existence",
+      "extraction_notes": "Existence is CANONICAL in industrial_chemistry per taxonomy (primary: epa_emissions + sam_entity). Absence severity = SEVERE. For a refrigerant reclaimer, FRS coverage is the strongest test; SAM corroborates the federal-eligible legal entity."
+    },
+    {
+      "claim_id": "HDSN-2",
+      "claim_text": "Hudson operates key refrigerant reclamation, processing, and cylinder refurbishment facilities at named US sites: Champaign IL (owned + leased), Smyrna GA (owned + leased), Escondido CA (leased), and Ontario CA (leased).",
+      "source_quote": "The Company s key reclamation, processing and cylinder refurbishment facilities are located in Champaign, Illinois, Smyrna, Georgia and Ontario, California. The Company also sells industrial gases out of facilities located in Escondido, California and in Champaign, Illinois.",
+      "subject": "Hudson Technologies facility footprint",
+      "predicate": "operates_at_claimed_locations",
+      "object_value": "Champaign IL, Smyrna GA, Ontario CA, Escondido CA plus 4 service depots + 3 sales offices",
+      "category": "physical_facility",
+      "referent_type": "physical_object",
+      "m_source_status": "MAPPED",
+      "source_id": "epa_emissions.query_facility_emissions",
+      "source_params": {
+        "company_name": "Hudson Technologies",
+        "claimed_locations": [
+          {"city": "Champaign", "state": "IL"},
+          {"city": "Smyrna", "state": "GA"},
+          {"city": "Ontario", "state": "CA"},
+          {"city": "Escondido", "state": "CA"}
+        ]
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "OSHA Form 300A establishment search (corroboration)",
+          "endpoint_or_method": "osha_establishments.query_establishments with company_name='Hudson Technologies', naics_prefix='3251'",
+          "rationale": "OSHA Form 300A fires at 20+ employees in covered NAICS. Reclamation + cylinder refurbishment at multiple named sites should show up; absence at the claimed scale would diverge.",
+          "expected_observable": "OSHA establishment records at one or more of the four named cities",
+          "signal_direction": "presence corroborates; absence at all four is moderate concern given the claimed scale (largest US reclaimer)",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Illinois EPA Bureau of Air construction/operating permits",
+          "endpoint_or_method": "https://epa.illinois.gov/topics/forms/air-permits.html — search permittee 'Hudson Technologies' or address in Champaign IL",
+          "rationale": "Refrigerant reclamation involves volatile fluorocarbons; IL EPA construction/operating air permits are jurisdictional canonical for permitted emissions at the Champaign site.",
+          "expected_observable": "active state air permit(s) at Champaign IL site",
+          "signal_direction": "presence corroborates real reclamation operations; absence would be moderate concern",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Champaign County IL assessor parcel records (owned-facility verification)",
+          "endpoint_or_method": "https://champaignil.devnetwedge.com/ — search parcel owner 'Hudson Technologies'",
+          "rationale": "The 10-K specifically says the primary Champaign IL reclamation site is OWNED; the county assessor is the canonical tax-roll observable for owner-of-record.",
+          "expected_observable": "parcel record(s) with Hudson Technologies or HTC as owner",
+          "signal_direction": "absence or wrong-owner record would contradict the ownership claim",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "industrial_chemistry",
+      "claim_type_taxonomy": "facility_scope",
+      "extraction_notes": "facility_scope is CANONICAL for industrial_chemistry (epa_emissions + osha + sam). Absence severity = SEVERE. The connector's claimed_locations audit is the highest-leverage single test."
+    },
+    {
+      "claim_id": "HDSN-3",
+      "claim_text": "Hudson holds a five-year prime contract (plus an exercised five-year renewal option, expiring July 2026) from the US Defense Logistics Agency (DLA) for the management and supply of refrigerants, compressed gases, cylinders, and related items to US Military commands and installations, Federal civilian agencies, and foreign militaries, with DLA accounting for 15% of FY24 revenue, 18% of FY23 revenue, and 8% of FY22 revenue.",
+      "source_quote": "In July 2016, we were awarded, as prime contractor, a five-year contract, including a five-year renewal option (which has been exercised), by the United States Defense Logistics Agency ( DLA ) for the management and supply of refrigerants, compressed gases, cylinders and related items to US Military commands and installations, Federal civilian agencies and foreign militaries. Our contract with DLA expires in July 2026. For the years ended December 31, 2024, 2023 and 2022, the DLA accounted for 15%, 18% and 8% of our revenues.",
+      "subject": "Hudson Technologies × Defense Logistics Agency",
+      "predicate": "holds_prime_contract",
+      "object_value": "DLA prime contract since July 2016, expires July 2026; 15%/18%/8% of revenue FY24/23/22",
+      "category": "customer_pipeline",
+      "referent_type": "entity",
+      "m_source_status": "MAPPED",
+      "source_id": "usaspending.query_federal_presence",
+      "source_params": {
+        "name_variants": [
+          "Hudson Technologies",
+          "Hudson Technologies Company",
+          "Hudson Technologies, Inc.",
+          "Hudson Holdings"
+        ],
+        "start_date": "2016-01-01",
+        "end_date": "2025-05-15",
+        "include_grants": true
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "DLA Internet Bid Board System (DIBBS) award history",
+          "endpoint_or_method": "https://www.dibbs.bsm.dla.mil/ — search awarded contracts by Hudson Technologies CAGE code",
+          "rationale": "DIBBS is DLA's canonical bid-and-award system. A 10-year prime contract should leave a multi-year audit trail of award modifications, delivery orders, and option exercises.",
+          "expected_observable": "list of DLA delivery orders + contract modifications with values and dates",
+          "signal_direction": "presence corroborates; absence or far-smaller-than-claimed scale would contradict the 15% customer-concentration claim",
+          "severity_if_contradiction": "SEVERE"
+        },
+        {
+          "source_label": "FPDS-NG (Federal Procurement Data System - Next Gen) — contract-detail view",
+          "endpoint_or_method": "https://www.fpds.gov/ — search by recipient name + agency=Defense Logistics Agency",
+          "rationale": "FPDS exposes per-contract obligation/expenditure detail at a deeper granularity than usaspending's aggregate UEI view, including option-exercise events.",
+          "expected_observable": "DLA contract IDs, obligation amounts, period-of-performance dates",
+          "signal_direction": "presence corroborates; explicit option-exercise record + ongoing obligations validates the 'expires July 2026' assertion",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "SAM.gov Contract Opportunities — post-cutoff DLA refrigerant solicitations",
+          "endpoint_or_method": "https://sam.gov/opps/ — search 'refrigerant' AND 'Defense Logistics Agency'",
+          "rationale": "With contract expiry in July 2026, DLA must issue a follow-on solicitation; presence of an open solicitation (or recent re-award) indicates whether Hudson is a likely recompete winner or being displaced.",
+          "expected_observable": "open or closed solicitation for refrigerant management services circa 2025-2026",
+          "signal_direction": "an open recompete with new bidders signals contract-renewal risk; a direct award to Hudson would extend the federal revenue base",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "industrial_chemistry",
+      "claim_type_taxonomy": "federal_customer",
+      "extraction_notes": "federal_customer is CANONICAL for industrial_chemistry (primary: usaspending.query_federal_presence). Absence severity = SEVERE because the claim names a specific federal agency. This is the strongest single registry test — DLA contract activity must show up under UEI-anchored aggregation if the 15%-of-revenue claim is real. Prior cohort work flagged a usaspending UEI spike for HDSN (~$49.5M federal supplier business), suggesting this will CORROBORATE."
+    },
+    {
+      "claim_id": "HDSN-4",
+      "claim_text": "Hudson operates an AHRI-certified laboratory and has been awarded several US patents for its proprietary SmartEnergy OPS energy-monitoring system and its Zugibeast high-speed reclamation system, with RefrigerantSide Services 'covered by process patents'.",
+      "source_quote": "laboratory testing through the Company s laboratory, which has been certified by the Air Conditioning, Heating and Refrigeration Institute ( AHRI )... The Company has also been awarded several US patents for its SmartEnergy OPS... Certain of these RefrigerantSide Services, which encompass system decontamination, and refrigerant recovery and reclamation, are also proprietary and are covered by process patents... its proprietary Zugibeast system",
+      "subject": "Hudson Technologies patent portfolio",
+      "predicate": "owns_granted_patents",
+      "object_value": "Several USPTO patents covering SmartEnergy OPS, Zugibeast, and refrigerant-reclamation process methods",
+      "category": "technology",
+      "referent_type": "intangible",
+      "m_source_status": "MAPPED",
+      "source_id": "uspto_odp.query_assignee",
+      "source_params": {
+        "assignee_name": "Hudson Technologies",
+        "cutoff_date": "2025-05-15",
+        "categorize": {
+          "smart_energy": ["smartenergy", "energy", "monitoring", "efficiency"],
+          "reclamation": ["reclamation", "reclaim", "recovery", "separation"],
+          "zugibeast": ["zugibeast"],
+          "refrigerant": ["refrigerant", "chiller", "fluorocarbon", "HFC", "CFC", "HCFC"]
+        }
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "AHRI Certified Directory (Air Conditioning, Heating and Refrigeration Institute)",
+          "endpoint_or_method": "https://www.ahridirectory.org/ — search certified reclaimers / certified labs by company name 'Hudson Technologies'",
+          "rationale": "AHRI is the canonical industry certifier; AHRI publishes a public directory of certified labs and reclamation programs. Direct test of the 'AHRI-certified laboratory' claim.",
+          "expected_observable": "listing of Hudson Technologies as an AHRI-certified reclaimer/lab with active status",
+          "signal_direction": "presence corroborates the certification claim; absence would directly contradict it",
+          "severity_if_contradiction": "SEVERE"
+        },
+        {
+          "source_label": "EPA Section 608 Certified Refrigerant Reclaimers list",
+          "endpoint_or_method": "https://www.epa.gov/section608/certified-refrigerant-reclaimers",
+          "rationale": "EPA publishes the canonical list of refrigerant reclaimers certified under Section 608 of the Clean Air Act. A self-described 'largest US refrigerant reclaimer' MUST appear on this list.",
+          "expected_observable": "Hudson Technologies on the EPA Section 608 certified reclaimer list",
+          "signal_direction": "absence is a SEVERE contradiction of the core business model",
+          "severity_if_contradiction": "SEVERE"
+        }
+      ],
+      "domain": "industrial_chemistry",
+      "claim_type_taxonomy": "patents_ip",
+      "extraction_notes": "patents_ip is CANONICAL for industrial_chemistry (primary: uspto_odp.query_assignee). USPTO categorize parameter probes the specific claimed tech areas (SmartEnergy OPS, Zugibeast, reclamation). Creative extensions target two CANONICAL certifications (AHRI reclaimer directory, EPA Section 608 certified-reclaimer list) that are domain-specific and would be devastating if absent."
+    },
+    {
+      "claim_id": "HDSN-5",
+      "claim_text": "Hudson received EPA AIM Act HFC allocation allowances for calendar years 2023 and 2024 equal to approximately 1% of total HFC consumption allowances, positioning it within the EPA's HFC phasedown framework.",
+      "source_quote": "Hudson received allocation allowances for calendar years 2023 and 2024 equal to approximately 1% of the total HFC consumption allowances, with allowances for future periods to be determined at a later date.",
+      "subject": "Hudson Technologies × EPA AIM Act",
+      "predicate": "holds_HFC_allocation_allowance",
+      "object_value": "~1% of total US HFC consumption allowances for CY2023 and CY2024",
+      "category": "regulatory_milestone",
+      "referent_type": "intangible",
+      "m_source_status": "PROPOSED",
+      "source_id": null,
+      "source_params": {},
+      "proposed_connector": {
+        "name": "epa_aim_act.query_hfc_allocations",
+        "description": "EPA AIM Act HFC Allocation Notices — annual public list of entities granted HFC consumption / production allowances under the AIM Act phasedown framework",
+        "endpoint": "https://www.epa.gov/climate-hfcs-reduction/final-allocations-rule-frequently-asked-questions and https://www.epa.gov/system/files/documents/2024-10/2025-hfc-allocations.pdf (annual allocation notice PDFs)",
+        "access_pattern": "file_download",
+        "auth_required": false,
+        "sample_invocation": "GET https://www.epa.gov/system/files/documents/2024-10/2025-hfc-allocations.pdf — parse the table of entity name -> allowance MT-CO2e, compute Hudson's share of total",
+        "rationale": "AIM Act HFC consumption allowances are zero-sum and publicly allocated by EPA each year; the canonical adjudicator for any 'we received X% of total HFC allowances' claim is the EPA's published annual allocation notice itself. No other source can adjudicate this.",
+        "estimated_cost": "free",
+        "completeness": "complete — every entity granted any AIM Act allowance is named in the annual notice",
+        "referent_type": "regulatory_allocation",
+        "attribute": "tonnage_share_pct"
+      },
+      "creative_extensions": [
+        {
+          "source_label": "EPA HFC Allocations System (eAllocations)",
+          "endpoint_or_method": "https://www.epa.gov/climate-hfcs-reduction/allocations and the underlying CDX eAllocations module",
+          "rationale": "EPA's eAllocations system is the operational backend for the AIM Act allocation regime; cross-reference Hudson's allocation MT-CO2e against the cap.",
+          "expected_observable": "Hudson Technologies / Hudson Technologies Company allocation in MT-CO2e for CY2023, CY2024, CY2025",
+          "signal_direction": "presence at ~1% of total corroborates; absence or far-smaller share would contradict",
+          "severity_if_contradiction": "SEVERE"
+        },
+        {
+          "source_label": "EPA SNAP (Significant New Alternatives Policy) program acceptable-substitute determinations",
+          "endpoint_or_method": "https://www.epa.gov/snap — search by application + substitute refrigerant",
+          "rationale": "SNAP is the canonical EPA list of acceptable HFC alternatives by use sector. Hudson's reclaimed-HFC business model depends on which substitutes EPA has approved for which end-uses, so SNAP listings drive the addressable market.",
+          "expected_observable": "list of acceptable substitutes by application (retail food refrigeration, motor vehicle AC, residential AC, etc.) with HFC-blend identity",
+          "signal_direction": "this is a market-sizing observable rather than a direct claim test — supplements the AIM Act allocation claim",
+          "severity_if_contradiction": "UNVERIFIABLE"
+        }
+      ],
+      "domain": "industrial_chemistry",
+      "claim_type_taxonomy": "certification_milestone",
+      "extraction_notes": "industrial_chemistry has no taxonomy cell for certification_milestone (regulatory-allocation claims). This is a structural gap — proposing a dedicated EPA AIM Act allocation connector. The allocation notice PDFs are public and tabulated; the connector is high-value because it cleanly adjudicates a class of regulatory-share claims (HFC, CFC, ODS) that no existing connector touches. AIM Act allocations also tie to taxonomy CANONICAL EPA cells but at a finer regulatory grain."
+    },
+    {
+      "claim_id": "HDSN-6",
+      "claim_text": "Hudson Technologies sells industrial gases predominantly to users in or involved with the US Military (Army, Navy, Air Force, Marine Corps, Coast Guard) via the DLA prime contract, indicating substantial DoD-channel federal supplier scope distinct from the DLA contract's headline revenue concentration figure.",
+      "source_quote": "The Company also sells industrial gases to a variety of industry customers, predominantly to users in or involved with the US Military... awarded to it by the United States Defense Logistics Agency ( DLA )... Primary users include the US Army, Navy, Air Force, Marine Corps and Coast Guard.",
+      "subject": "Hudson Technologies × DoD military services",
+      "predicate": "supplies_via_DLA_prime",
+      "object_value": "DoD military services (Army/Navy/AF/USMC/USCG) as primary end-users of industrial-gas channel",
+      "category": "customer_pipeline",
+      "referent_type": "entity",
+      "m_source_status": "MAPPED",
+      "source_id": "usaspending.query_dod_contracts",
+      "source_params": {
+        "recipient_name": "Hudson Technologies",
+        "start_date": "2018-01-01",
+        "end_date": "2025-05-15",
+        "page_size": 50
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "DLA Troop Support / DLA Aviation contract awards public data",
+          "endpoint_or_method": "https://www.dla.mil/Aviation/Offers/Awards/ and https://www.dla.mil/TroopSupport/ — search awarded vendors",
+          "rationale": "DLA's organizational structure (Aviation handles air-fleet refrigerants, Troop Support handles installation HVAC) lets us decompose Hudson's military-service end-user mix beyond the FPDS rollup.",
+          "expected_observable": "per-sub-agency contract awards split across DLA Aviation, DLA Land & Maritime, DLA Troop Support",
+          "signal_direction": "presence across multiple DLA sub-commands corroborates the multi-service end-user claim",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "GSA Advantage / GSA Schedule listings for refrigerants",
+          "endpoint_or_method": "https://www.gsaadvantage.gov/ — search contractor 'Hudson Technologies' and SIN 334512 / 339113 (refrigeration + gas supply)",
+          "rationale": "Federal civilian agencies often procure refrigerants through GSA Schedule rather than the DLA prime; presence on GSA Schedule would corroborate the 'Federal civilian agencies' part of the claim independently of DLA.",
+          "expected_observable": "GSA contract number, product catalog with refrigerant SKUs, ordering activity",
+          "signal_direction": "presence corroborates; absence would mean federal civilian sales are tunneled solely through DLA",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "industrial_chemistry",
+      "claim_type_taxonomy": "federal_customer",
+      "extraction_notes": "Second federal_customer claim — same canonical mapping (CANONICAL via usaspending) but using the DoD-specific wrapper to isolate the military-channel scope vs. the broader federal-aggregate test in HDSN-3."
+    },
+    {
+      "claim_id": "HDSN-7",
+      "claim_text": "On June 6, 2024, Hudson's subsidiary Hudson Technologies Company acquired substantially all the business assets of USA United Suppliers of America, Inc. (d/b/a USA Refrigerants) and B&B Jobber Services, Inc. for approximately $20.7 million cash at closing plus up to $2.0 million contingent earnout, expanding refrigerant distribution and reclamation capacity.",
+      "source_quote": "On June 6, 2024, the Company s subsidiary Hudson Technologies Company completed the acquisition of substantially all the business assets of USA United Suppliers of America, Inc. (d/b/a USA Refrigerants) ( USA Refrigerants ) and B&B Jobber Services, Inc. (collectively, the USA Refrigerants Acquisition ). The consideration for the USA Refrigerants Acquisition was approximately $20.7 million in cash, paid at the closing, and provides for a further contingent payment of up to $2.0 million payable, to the extent earned, approximately 18 months from the closing date.",
+      "subject": "Hudson Technologies Company × USA Refrigerants + B&B Jobber Services",
+      "predicate": "acquired_business_assets",
+      "object_value": "$20.7M cash close + up to $2.0M contingent; closed 2024-06-06",
+      "category": "vendor_relationship",
+      "referent_type": "event",
+      "m_source_status": "MAPPED",
+      "source_id": "edgar_fts.query_fulltext",
+      "source_params": {
+        "search_term": "USA Refrigerants",
+        "cutoff_date": "2025-05-15",
+        "cik": "0000925528",
+        "forms": "10-K,10-Q,8-K,DEF 14A"
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "SEC 8-K material acquisition disclosure (Item 2.01)",
+          "endpoint_or_method": "EDGAR — Hudson Technologies 8-K filings with Items 1.01 (material definitive agreement) and 2.01 (completion of acquisition) circa June 2024",
+          "rationale": "A $20.7M asset acquisition crosses Hudson's materiality threshold and triggers Item 2.01 reporting; a missing 8-K would be a disclosure-quality red flag.",
+          "expected_observable": "8-K filing dated on/around 2024-06-06 with Item 2.01 reporting the USA Refrigerants close",
+          "signal_direction": "presence corroborates; absence would be a SEVERE disclosure-quality concern",
+          "severity_if_contradiction": "SEVERE"
+        },
+        {
+          "source_label": "USA United Suppliers of America Inc + B&B Jobber Services Inc state-level corporate registries",
+          "endpoint_or_method": "state Secretary of State business entity searches in the states of formation",
+          "rationale": "Verify the acquired entities exist as real legal entities (not vehicle structures); confirm any post-acquisition status change (e.g., dissolved or merged into HTC).",
+          "expected_observable": "active or dissolved-via-merger corporate records for both targets",
+          "signal_direction": "presence + post-2024-06 status change corroborates a real consummated acquisition; absence would suggest paper-only assets",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "claim_evolution to track post-close goodwill / impairment trajectory",
+          "endpoint_or_method": "claim_evolution.query_claim_evolution with cik=0000925528, search_term='USA Refrigerants', base_filing_date='2024-06-06'",
+          "rationale": "Goodwill from acquisitions is a leading-indicator distress class — if Hudson takes a goodwill impairment on USA Refrigerants in 2025-2026 10-Qs, that retroactively challenges the value of the acquisition and would show up as silent-or-restating disclosure evolution.",
+          "expected_observable": "ongoing mentions in 10-Qs (REAFFIRMED) vs going silent (SILENT_POST_CLAIM) vs explicit impairment language",
+          "signal_direction": "REAFFIRMED corroborates a productive acquisition; impairment or silence challenges it",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "industrial_chemistry",
+      "claim_type_taxonomy": "supply_chain",
+      "extraction_notes": "Acquisition adjudication maps best to edgar_fts (focal-company-side disclosure evolution) since the target is a private company with no SEC filings of its own. claim_evolution proposed as a creative extension for post-close goodwill tracking. Note: the AIRO-screen false positive 'stock for services' line item is on the equity rollforward — NOT this acquisition (which was 100% cash). I am NOT firing distress heuristics on the boilerplate text matches per the heuristic-fit discipline."
+    },
+    {
+      "claim_id": "HDSN-8",
+      "claim_text": "Hudson has a $75M asset-based revolving credit facility with Wells Fargo Bank expiring March 2027, with FY24 working capital of $147.7M, cash of $70.1M (up from $12.4M YoY), no debt outstanding, $91.8M cash from operations, and an active $20M share repurchase program ($10M/yr in 2024 and 2025) — none of which is consistent with the 'distress + going-concern' fingerprint the AIRO mechanical screen implies.",
+      "source_quote": "At December 31, 2024, the Company had working capital... of $147.7 million... Net cash provided by operating activities for the year ended December 31, 2024 was $91.8 million... At December 31, 2024, cash and cash equivalents were $70.1 million, or approximately $57.7 million higher than the $12.4 million... in 2023... During the year 2024, the Company repurchased 1,244,076 shares of its common stock, at a cost of $8.1 million... [Wells Fargo Facility expires] March 2027",
+      "subject": "Hudson Technologies financial condition",
+      "predicate": "is_not_in_distress",
+      "object_value": "$147.7M working capital, $70.1M cash, no debt, $91.8M OCF, $20M buyback authorization",
+      "category": "financial_distress",
+      "referent_type": "amount",
+      "m_source_status": "MAPPED",
+      "source_id": "sec_filings.list_filings_by_form",
+      "source_params": {
+        "cik": "0000925528",
+        "forms": ["8-K", "10-Q", "S-3", "424B5", "NT 10-Q", "NT 10-K"],
+        "start_date": "2023-01-01",
+        "cutoff_date": "2025-05-15",
+        "limit": 50
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "Wells Fargo asset-based lending public commitment data (8-K Item 1.01 exhibits)",
+          "endpoint_or_method": "EDGAR — pull credit agreement exhibits from 8-Ks dated 2022-03-02 (Amended A&R), 2024-06-06 (First Amendment), 2024-10-23 (Second Amendment)",
+          "rationale": "ABL covenant structure (minimum-liquidity, springing FCCR, repurchase carve-outs) is the canonical lender-side signal for borrower stress. The Second Amendment expanded buyback capacity — that is an UPGRADE not a distress signal.",
+          "expected_observable": "credit-agreement covenants showing maintained liquidity headroom and increasing buyback permissions",
+          "signal_direction": "covenant relaxation in favor of buyback corroborates non-distress; covenant tightening or waivers would signal distress",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Form 4 insider buying/selling around AIRO-screen window",
+          "endpoint_or_method": "EDGAR Form 4 filings for HDSN insiders (CEO, CFO, directors) over 2024-2025",
+          "rationale": "Insider behavior is a cross-check on the management's optimism vs. distress; in a genuine going-concern setup we would expect heavy insider selling, while in this case officers/directors own ~8% per the 10-K.",
+          "expected_observable": "ratio of insider buys vs sells; aggregate shares disposed vs acquired",
+          "signal_direction": "net buying or holding corroborates non-distress; heavy unwinding would re-open the distress thesis",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "industrial_chemistry",
+      "claim_type_taxonomy": "financial_distress",
+      "extraction_notes": "financial_distress is CANONICAL (primary: claim_evolution + sec_filings). This claim is the CONTRADICTION of the AIRO mechanical screen — applying heuristic H10 (distress-cluster fingerprints require >=2-3 markers within 6 months) HDSN does NOT cluster: no reverse split, no ATM, no auditor qualifier, no going-concern, no layoffs, no restatement. Per the H10 discipline, I am DELIBERATELY NOT firing distress heuristics on the AIRO-screen boilerplate keyword hit. sec_filings.list_filings_by_form is mapped to test whether ANY of the canonical distress-marker form types (NT 10-Q/K = late filing; S-3/424B5 = ATM shelf usage) actually appear; absence = corroboration of non-distress."
+    }
+  ]
+}

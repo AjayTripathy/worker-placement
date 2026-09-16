@@ -1,0 +1,68 @@
+{
+  "ticker": "CAI",
+  "scores": [
+    {
+      "claim_id": "CAI-1",
+      "claim_text": "Caris obtained FDA premarket approval (PMA) for MI Cancer Seek as an FDA-approved companion diagnostic in Q4 2024; broadly launched Q1 2025.",
+      "severity": "UNVERIFIABLE",
+      "supports": false,
+      "M_check": "openfda.query_approved_drugs(manufacturer_name='Caris'); edgar_fts('MI Cancer Seek')",
+      "M_value": "openFDA Drugs@FDA: 0 approved applications. EDGAR FTS: 0 external filer mentions of 'MI Cancer Seek'.",
+      "interpretation": "Registry-coverage mismatch, NOT a contradiction. MI Cancer Seek is an FDA PMA-approved IN VITRO DIAGNOSTIC / companion-diagnostic DEVICE, which lives in the FDA device PMA database, not Drugs@FDA (drug NDAs/BLAs only). The exposed catalog only provides openfda.query_approved_drugs (drugs), so the device approval cannot be confirmed via the drug endpoint; absence there is expected and uninformative. EDGAR FTS 0 is also expected for a Caris-proprietary product name. No registry in the available catalog covers this device-PMA claim, so scored UNVERIFIABLE per rubric (do NOT manufacture severity). The correct M (openFDA device PMA endpoint) is not exposed; this is a tooling gap, not a disclosure failure."
+    },
+    {
+      "claim_id": "CAI-2",
+      "claim_text": "Caris holds 200+ granted patents (100+ pending), including acquired aptamer and cell-targeting / hematological-cancer-assay families.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "uspto_odp.query_assignee(assignee_name='Caris', cutoff_date='2025-06-20', categorize=...)",
+      "M_value": "USPTO ODP: 283 total applications, 33 granted (Patented Case) pre-cutoff under firstApplicantName single-token match. Distinct applicants: Caris MPI, Inc. and Caris Science, Inc. Title categorization: genomics/molecular 128, aptamer 102, AI/pathology 13, other 40.",
+      "interpretation": "Real, large, technology-consistent patent portfolio. The ODP single-token applicant match (Caris MPI + Caris Science) returns 283 apps / 33 US-issued; the claimed 200+ granted aggregates additional family members, jurisdictions, and entity names not all reachable via the single-token index. Critically NOT the Nikola pattern: BOTH claimed technology areas are strongly represented (genomics/molecular profiling 128 titles AND the explicitly-disclosed acquired APTAMER families 102 titles). Independent registry corroborates the claim's substance -> PASS."
+    },
+    {
+      "claim_id": "CAI-3",
+      "claim_text": "Caris has 100+ biopharma partners, including named partners Moderna, AbbVie, Xencor, and Merck KGaA.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "edgar_fts.query_fulltext('Caris Life Sciences'); edgar_fts.query_fulltext('Caris')",
+      "M_value": "EDGAR full-text: 'Caris Life Sciences' appears in 255 filings, 'Caris' in 392 filings, across many independent filers (e.g. BriaCell Therapeutics, Elevation Oncology, National Healthcare Corp). Broad ecosystem-wide counterparty disclosure footprint.",
+      "interpretation": "The aggregate '100+ biopharma partners' claim is strongly corroborated by Caris being independently referenced as a partner/vendor across 250+ external SEC filings. Per Heuristic 5, large pharma buyers (Moderna/AbbVie/Xencor/Merck KGaA) rarely separately disclose a diagnostics vendor in their own 10-Ks, so individual-name absence is not penalized; the ecosystem footprint affirmatively supports a real, extensive partner network -> PASS."
+    },
+    {
+      "claim_id": "CAI-4",
+      "claim_text": "Caris collaborates with biopharma on prospective/retrospective clinical testing, patient stratification for trials, and treatment monitoring (clinical-research footprint).",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "clinical_trials.query_by_lead_sponsor('Caris', cutoff_date='2025-06-20')",
+      "M_value": "ClinicalTrials.gov: 5 studies with Caris (Caris Science, Inc.) as lead sponsor pre-cutoff: Caris Molecular Intelligence Registry (TERMINATED), Caris Biorepository Research Protocol (RECRUITING), POA Prospective Repository (UNKNOWN/active), plus 2 others (1 COMPLETED).",
+      "interpretation": "Registry affirmatively confirms Caris's clinical-research footprint, including a named POA Prospective Repository study. These are observational/registry/biorepository studies — exactly fitting a diagnostics/profiling company that stratifies patients and biobanks tissue rather than sponsoring interventional drug trials. The disclosed collaboration/stratification role is corroborated -> PASS. (The broader 'partner-sponsored trials' universe is larger than the 5 Caris-as-lead studies, but the claim is about Caris's collaborative/stratification role, which the registry confirms.)"
+    },
+    {
+      "claim_id": "CAI-5",
+      "claim_text": "Caris Precision Oncology Alliance (POA): 96 members as of 3/31/2025, including 45 NCI-designated comprehensive cancer centers, 145+ manuscripts.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "edgar_fts.query_fulltext('Precision Oncology Alliance'); cross-ref clinical_trials POA Prospective Repository",
+      "M_value": "EDGAR FTS 'Precision Oncology Alliance': 0 hits (POA is an academic network, members are non-SEC-filers, so EDGAR is the wrong registry). ClinicalTrials.gov independently shows 'POA Prospective Repository' (NCT03324841, lead sponsor Caris Science, Inc.), confirming the POA exists and runs a real multi-site prospective study.",
+      "interpretation": "The exact membership count (96 / 45 NCI) is not individually registry-verifiable (academic institutions are not SEC filers), but the existence and operational reality of the Caris POA is independently confirmed by the ClinicalTrials.gov POA Prospective Repository study. No registry contradicts the membership figures. Treated as PASS on the corroborated existence/activity; the precise headcount is not falsifiable but carries no contradiction."
+    },
+    {
+      "claim_id": "CAI-6",
+      "claim_text": "Commercial-stage: $349.1M molecular profiling revenue, Medicare + 90+ payer reimbursement contracts for MI Profile, 6.5M+ tests on 849,000+ cases.",
+      "severity": "UNVERIFIABLE",
+      "supports": false,
+      "M_check": "openfda.query_approved_drugs(manufacturer_name='Caris Life Sciences')",
+      "M_value": "openFDA Drugs@FDA: 0 (drug registry does not cover LDT/IVD lab-test reimbursement or test-volume claims).",
+      "interpretation": "Test volumes, payer-contract counts, and lab-service revenue are not recorded in any federal registry in the exposed catalog (Medicare reimbursement of a CLIA lab test / LDT is not in Drugs@FDA; MolDX/CMS coverage is not an exposed source). These are audited financial-statement figures (Deloitte-audited $349.1M MP revenue is in the filing itself). No independent registry covers the operational claim -> UNVERIFIABLE per rubric. Note: the audited financials provide internal support, but no external M is available."
+    },
+    {
+      "claim_id": "CAI-7",
+      "claim_text": "Substantial doubt about going-concern absent the IPO: $400M 2023 Term Loan, $30M 2025 Convertible Notes, Series C redemption rights, vs ~$31.2M cash at 3/31/2025.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "going_concern_detector(cik='0002019410', cutoff_date='2025-06-20') [rejected as post-cutoff]; primary verification = audited prospectus financials.",
+      "M_value": "Detector returned EXPLICIT_GOING_CONCERN but sourced a POST-cutoff FY2025 10-K (cai-20251231.htm, filed 2026) and matched on a cybersecurity 'ongoing concern' phrase (false positive) — REJECTED for blinding + spurious match. Verified instead from the prospectus's own audited statements: Deloitte & Touche audit opinion explicitly discloses substantial doubt; financial-statement Note 1 details $400.0M Term Loan, $30.0M 2025 Convertible Notes, Series C redemption, ~$31.2M cash at 3/31/2025.",
+      "interpretation": "Honest, prominent self-disclosure of financial distress in the prospectus itself, corroborated by the independent auditor (Deloitte) attaching a going-concern paragraph. This is disclosure-honest, not concealed — the company is candidly telling investors the IPO must clear $100M gross to avoid acceleration. Per the honesty-alpha framework, transparent disclosure of bad-but-true conditions is a PASS (the framework rewards honesty, not business quality). The going_concern detector's signal was discarded to preserve blinding (post-cutoff source)."
+    }
+  ]
+}

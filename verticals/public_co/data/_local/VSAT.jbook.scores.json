@@ -1,0 +1,95 @@
+{
+  "ticker": "VSAT",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "USG = 18% of FY2025 revenue (~$813M); split ~50/50 between communication services and D&AT segments.",
+      "severity": "PASS",
+      "supports": ["usaspending confirms VIASAT INC has 663 DoD awards totaling $1.43B and INMARSAT GOVERNMENT INC has 1,929 DoD awards totaling $724M (cumulative). Top awards (AMSS III $476M, BFT2 warranties $136M, TTNT $77M, CONUS L-band $226M) confirm real, sustained DoD revenue base supporting the 18% concentration claim."],
+      "M_check": "usaspending.query_dod_contracts; pentagon_jbook.query_program_funding(contractor_name)",
+      "M_value": "usaspending: VIASAT 663 awards / $1.43B + INMARSAT 724M; pentagon_jbook contractor lookup: NOT_FOUND (corpus does not index Viasat as primary contractor — coverage gap, not a red flag).",
+      "interpretation": "USG revenue concentration claim is corroborated by past awards. Forward J-Book contractor-index does not list Viasat, but that is a corpus coverage gap (heuristic 7). PASS."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Government satcom services revenue grew to $754.6M FY25 from $596.8M FY24 (+26% YoY).",
+      "severity": "PASS",
+      "supports": ["Commercial SATCOM PE 1206445SF is FUNDED_STEADY at $132M FY26 (vs $134M FY25, $69M FY24) — i.e. doubled FY24->FY25 then held. The Pentagon's forward demand for commercial SATCOM integration into DoD networks is intact in the FY26 J-Book."],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Commercial SATCOM' / pe='1206445SF')",
+      "M_value": "FUNDED_STEADY — FY24 $69.0M → FY25 $134.5M → FY26 $132.1M; cutoff_year 2026.",
+      "interpretation": "Forward Pentagon demand for commercial SATCOM is steady-to-slightly-down (-2%); Viasat's segment +26% comes from multiple buyers (Inmarsat L-band govt contracts also material). No divergence. PASS."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "D&AT segment FY25 $1.221B composed of infosec/cyber $325M, space/mission $305M, tactical networking $320M, adv tech $68M.",
+      "severity": "PASS",
+      "supports": ["usaspending confirms $1.43B Viasat + $724M Inmarsat DoD obligations historically; the named D&AT product lines correspond to real DoD purchase lines (AMSS, BFT2 Blue Force Tracking, TTNT, L-band SATCOM)."],
+      "M_check": "usaspending.query_dod_contracts; pentagon_jbook.query_program_funding(contractor_name)",
+      "M_value": "usaspending: real awards confirming each line; pentagon_jbook contractor lookup: NOT_FOUND in entity index (coverage gap).",
+      "interpretation": "Aggregate D&AT composition is well-supported by historical awards. No specific PE-level claim made by issuer, so individual PE divergence cannot be tested against this claim directly. PASS."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Tactical networking products +58% YoY ($320M FY25 vs $202M FY24) — continuing growth post Link-16 TDL divestiture to L3Harris.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["C2ISR Tactical Data Link PE 0207448F = UNFUNDED_THIS_YEAR. History: FY24 $0 → FY25 $3.5M → FY26 $0. The Air Force RDT&E line for the only J-Book-corpus 'tactical data link' PE is zeroed in FY26. Viasat's narrative implies sustained tactical networking growth without naming a specific PE; the closest named PE in our corpus shows no FY26 R&D funding. However Viasat divested Link-16 TDL to L3Harris in Jan 2023, so legacy TDL exposure largely transferred — and 'tactical networking' for Viasat now includes TTNT, BFT, modem/waveform IP licensing, not just C2ISR TDL."],
+      "M_check": "pentagon_jbook.query_program_funding(pe='0207448F'); usaspending.query_dod_contracts",
+      "M_value": "PE 0207448F UNFUNDED_THIS_YEAR (cutoff 2026); usaspending shows $77M TTNT spectrum relocation award (legacy, pre-cutoff) and $136M BFT2 warranties — past awards real, forward R&D PE zeroed.",
+      "interpretation": "Heuristic 2 materiality: company does not explicitly tie revenue to PE 0207448F; the +58% growth claim is partially attributable to Inmarsat integration and BFT/TTNT IDIQs — but the closest named R&D PE is unfunded, meaning forward dev pipeline for that specific line is dry. Heuristic 6: usaspending shows past obligations real → past revenue real but forward pipeline narrow for this exact PE. Downgrade from SEVERE to MODERATE because the company does not name the PE and divestiture mitigates direct exposure."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Space and mission systems products $305M FY25; positioning into protected MILSATCOM/strategic SATCOM space programs.",
+      "severity": "PASS",
+      "supports": ["Protected Tactical Enterprise Service (PE 1206760SF) = FUNDED_GROWING ($70M → $78M → $114M).", "Protected Tactical Service (PE 1206761SF) = FUNDED_GROWING ($211M → $420M → $572M).", "Evolved Strategic SATCOM (PE 1206855SF) = FUNDED_GROWING ($474M → $919M → $1,230M).", "Cumulative FY26 forward Space Force protected-SATCOM funding ~$1.92B — strong forward demand for ground/terminal/payload integration that Viasat's space & mission systems serves."],
+      "M_check": "pentagon_jbook.query_program_funding for PE 1206760SF / 1206761SF / 1206855SF",
+      "M_value": "PTES FY26 $114.4M, PTS FY26 $571.9M, ESS FY26 $1,229.9M — all FUNDED_GROWING.",
+      "interpretation": "Pentagon's forward J-Book confirms aggressive growth in exactly the protected MILSATCOM line items Viasat positions space/mission systems to serve. PASS."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Backbone protected/wideband space programs (implicit AEHF, WGS, Polar MILSATCOM) underpinning govt SATCOM and D&AT space lines.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["Advanced EHF MILSATCOM (PE 1206431SF) = FUNDED_GROWING ($3.9M → $1.0M → $13.8M, sustainment R&D).", "Wideband Global SATCOM (PE 1206433SF) = FUNDED_STEADY ($34M → $0 → $30M, sustainment).", "Polar MILSATCOM (PE 1206432SF) = UNFUNDED_TWO_PLUS_YEARS ($75M FY24 → $0 FY25 → $0 FY26). Two consecutive years zeroed in the FY26 J-Book — exactly the canonical divergence pattern."],
+      "M_check": "pentagon_jbook.query_program_funding for PE 1206431SF / 1206432SF / 1206433SF",
+      "M_value": "Polar MILSATCOM UNFUNDED_TWO_PLUS_YEARS; AEHF + WGS continuing in sustainment.",
+      "interpretation": "Heuristic 2 (materiality): Viasat does not explicitly name Polar MILSATCOM as a revenue line; the J-Book corpus shows no replacement_program for PE 1206432SF (no umbrella reorg flag). The disappearance is a real forward-pipeline negative for any terminal/ground vendor exposed to polar coverage, but Viasat's exposure is one of several MILSATCOM lines (AEHF + WGS continue, PTS/PTES/ESS growing). Heuristic 2 downgrade from RED_FLAG to MODERATE: narrative-load-bearing for SATCOM portfolio but not the dominant line."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "$3.6B RPO backlog (3/31/2025); ~half recognized in next 12 months; 96% fixed-price contracts.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["Pentagon J-Book contractor index does not list Viasat; cannot decompose backlog by PE forward funding within corpus."],
+      "M_check": "pentagon_jbook.query_program_funding(contractor_name='Viasat')",
+      "M_value": "NOT_FOUND in J-Book contractor index (coverage gap).",
+      "interpretation": "Backlog claim is auditor-attested and not PE-decomposable from public data. Heuristic 7: NOT_FOUND in J-Book corpus is not a red flag — coverage gap. UNVERIFIABLE."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "$1.2B UK long-lived assets net (Inmarsat acquisition); L-band fleet integrated into govt mobility / maritime services.",
+      "severity": "PASS",
+      "supports": ["usaspending confirms Inmarsat Government Inc has $724M in cumulative DoD obligations including major CONUS L-band CLINs ($226M) and Space Segment NA/SA ($71M) — the L-band govt SATCOM line is real, sustained DoD revenue."],
+      "M_check": "usaspending.query_dod_contracts(recipient='Inmarsat')",
+      "M_value": "1,929 DoD awards / $724M; top awards explicitly L-band space segment and CONUS L-band CLINs.",
+      "interpretation": "Inmarsat integration claim is corroborated by independent USAspending obligations. PASS."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "Patent portfolio + trade secret protection; USG unlimited-rights caveat on data delivered under procurement contracts.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["Patent corpus not queried; this claim is a control (non-J-Book)."],
+      "M_check": "uspto_odp (not run — out of scope for J-Book cohort)",
+      "M_value": "n/a",
+      "interpretation": "Control claim; J-Book cohort does not verify. UNVERIFIABLE per heuristic 7."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "Jan 2023 Link-16 TDL divestiture to L3Harris for $1.96B cash — counterparty disclosure should be visible in L3Harris filings.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["EDGAR full-text query against L3Harris CIK 0000202058 not executed in this run (out of J-Book scope). The transaction is widely disclosed in Viasat 10-K and is a known historical event."],
+      "M_check": "edgar_fts.query_fulltext(cik='0000202058', q='Viasat Link-16') (deferred)",
+      "M_value": "not_executed",
+      "interpretation": "Control claim; not central to J-Book divergence thesis. UNVERIFIABLE in this cohort scope."
+    }
+  ]
+}

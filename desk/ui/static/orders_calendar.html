@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Orders Calendar — resting book & expiries</title>
+<style>
+  :root{
+    --ink:#1b1d1f; --muted:#5d6167; --faint:#8d9197; --rule:#e0ded8;
+    --paper:#fffefb; --ground:#f3f1ec;
+    --review:#2b4a6f; --review-bg:#e9eef5;
+    --grade:#2e5e4e; --grade-bg:#e9f2ee;
+    --warn:#8a3324; --warn-bg:#f6ece8;
+    --chip-ink:#fff;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --ink:#e8e6e1; --muted:#a5a9ae; --faint:#7d8187; --rule:#3a3c3e;
+      --paper:#232527; --ground:#1a1c1e; --review:#9db8d8; --review-bg:#263241;
+      --grade:#8fc0ad; --grade-bg:#24332d; --warn:#d08a72; --warn-bg:#3a2b24; --chip-ink:#1a1c1e; }
+  }
+  :root[data-theme="light"]{ --ink:#1b1d1f; --muted:#5d6167; --faint:#8d9197; --rule:#e0ded8;
+      --paper:#fffefb; --ground:#f3f1ec; --review:#2b4a6f; --review-bg:#e9eef5;
+      --grade:#2e5e4e; --grade-bg:#e9f2ee; --warn:#8a3324; --warn-bg:#f6ece8; --chip-ink:#fff; }
+  :root[data-theme="dark"]{ --ink:#e8e6e1; --muted:#a5a9ae; --faint:#7d8187; --rule:#3a3c3e;
+      --paper:#232527; --ground:#1a1c1e; --review:#9db8d8; --review-bg:#263241;
+      --grade:#8fc0ad; --grade-bg:#24332d; --warn:#d08a72; --warn-bg:#3a2b24; --chip-ink:#1a1c1e; }
+  body{font:14px/1.45 system-ui,-apple-system,sans-serif;color:var(--ink);background:var(--ground);margin:0;padding:18px;}
+  .wrap{max-width:1060px;margin:0 auto;}
+  h1{font-size:20px;margin:0 0 2px;}
+  .sub{color:var(--muted);font-size:12.5px;margin:0 0 14px;}
+  .stale{color:var(--warn);font-weight:600;}
+  .cards{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 18px;}
+  .card{background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:10px 16px;min-width:120px;}
+  .card .n{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;}
+  .card .l{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);font-weight:600;}
+  .card.warn .n{color:var(--warn);}
+  h2{font-size:15px;margin:22px 0 8px;}
+  table{border-collapse:collapse;width:100%;background:var(--paper);border:1px solid var(--rule);
+        border-radius:6px;overflow:hidden;font-variant-numeric:tabular-nums;font-size:13px;}
+  th{text-align:left;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--faint);
+     font-weight:600;padding:7px 12px;border-bottom:1px solid var(--rule);background:var(--paper);}
+  td{padding:6px 12px;border-bottom:1px solid var(--rule);vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+  td.n{text-align:right;white-space:nowrap;}
+  .day{background:var(--paper);border:1px solid var(--rule);border-radius:6px;margin:0 0 10px;padding:10px 14px;}
+  .day.today{border-color:var(--review);border-width:2px;}
+  .dh{display:flex;gap:10px;align-items:baseline;margin:0 0 6px;}
+  .dh .d{font-weight:700;font-size:14px;}
+  .dh .rel{color:var(--faint);font-size:12px;}
+  .ev{display:flex;gap:8px;align-items:baseline;margin:4px 0;font-size:13px;}
+  .chip{flex:none;font-size:10px;font-weight:700;letter-spacing:.06em;padding:2px 7px;border-radius:3px;text-transform:uppercase;}
+  .chip.review{background:var(--review);color:var(--chip-ink);}
+  .chip.grade{background:var(--grade);color:var(--chip-ink);}
+  .chip.order{background:var(--warn);color:var(--chip-ink);}
+  .ev .t{font-weight:700;min-width:56px;}
+  .ev .det{color:var(--muted);}
+  .warnbox{border-left:3px solid var(--warn);background:var(--warn-bg);padding:10px 14px;border-radius:0 6px 6px 0;margin:0 0 12px;font-size:13px;}
+  .pill{display:inline-block;padding:1px 7px;border-radius:9px;font-size:11px;font-weight:600;}
+  .pill.rev{background:var(--review-bg);color:var(--review);}
+  .pill.none{background:var(--warn-bg);color:var(--warn);}
+  .foot{color:var(--faint);font-size:11.5px;margin:20px 0 6px;}
+  details summary{cursor:pointer;font-weight:600;font-size:13.5px;margin:8px 0;}
+  @media (max-width:700px){ td,th{padding:5px 7px;} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Orders Calendar</h1>
+  <p class="sub">Every resting order and its expiry/review date, on one clock. Doctrine 2026-08-05: bands rest by default, every order catalyst-dated — <b>undated = violation, shown first</b>. <span id="asof"></span></p>
+  <div class="cards" id="cards"></div>
+  <div id="stacking"></div>
+  <div id="undated"></div>
+  <h2>Next 180 days — reviews, expiries, grades</h2>
+  <div id="agenda"></div>
+  <h2>Dated resting orders</h2>
+  <div id="orders"></div>
+  <details><summary>Staged instructions (created, awaiting submission)</summary><div id="staged"></div></details>
+  <p class="foot">Source: <code>/static/orders_calendar.json</code>, rebuilt hourly by the desk cron and re-fetched by this page every 60s. Read-only.</p>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function rel(d){const t=new Date();t.setHours(0,0,0,0);const x=new Date(d+"T00:00:00");
+  const n=Math.round((x-t)/864e5);return n===0?"today":n===1?"tomorrow":n<0?(-n)+"d ago":"in "+n+"d";}
+function render(j){
+  const genAge=(Date.now()-new Date(j.generated_utc).getTime())/36e5;
+  $("asof").innerHTML=`Data generated ${esc(j.generated_utc)} (${genAge.toFixed(1)}h ago)`+
+    (genAge>2.5?` — <span class="stale">STALE: cron may be down</span>`:"");
+  $("cards").innerHTML=[
+    ["Dated orders",j.counts.live_dated,""],["UNDATED (violation)",j.counts.live_undated,"warn"],
+    ["Staged instr.",j.counts.staged,""],["Events 180d",j.counts.events_180d,""],["EXIT-UNDATED positions",j.counts.exit_undated??"–","warn"]
+  ].map(([l,n,c])=>`<div class="card ${c}"><div class="n">${n}</div><div class="l">${l}</div></div>`).join("");
+
+  const sa=j.stacking_alerts||[], st=j.stacked_tickers||[];
+  $("stacking").innerHTML = (sa.length?`
+    <div class="warnbox"><b>⚠ STACKING ALERTS (${sa.length}) — sibling GTCs need a decision:</b>${
+      sa.map(a=>`<div class="ev"><span class="chip order">${esc(a.event)}</span><span class="t">${esc(a.ticker)}</span><span>${esc(a.action)}</span></div>`).join("")}
+    </div>`:"") + (st.length?`
+    <p class="sub">Stacked tickers under watch (put + stock exposure): ${st.map(esc).join(" · ")} — a fill on either side triggers an alert here and by mail.</p>`:"");
+  const eu=j.exit_undated_positions||[];
+  $("stacking").innerHTML += eu.length?`<p class="sub"><b>Exit-band rule (contract §6):</b> ${eu.length} held positions carry no resting trim / exit pack: ${eu.map(esc).join(" · ")}</p>`:"";
+  $("undated").innerHTML = j.undated_orders.length ? `
+    <div class="warnbox"><b>${j.undated_orders.length} resting orders carry no review date</b> — legacy book pre-dating the rule. Each needs a re-derive-and-date pass or a stated exemption.</div>
+    <table><tr><th>Symbol</th><th>Side</th><th class="n">Qty</th><th class="n">Limit</th><th>Ccy</th><th>Status</th></tr>${
+    j.undated_orders.map(o=>`<tr><td><b>${esc(o.symbol)}</b></td><td>${esc(o.side)}</td><td class="n">${o.qty}</td><td class="n">${o.limit}</td><td>${esc(o.ccy)}</td><td>${esc(o.status)}</td></tr>`).join("")}</table>`:"";
+
+  const byDate={};
+  j.events.forEach(e=>(byDate[e.date]=byDate[e.date]||[]).push(e));
+  j.orders.forEach(o=>{ if(o.review_by)(byDate[o.review_by]=byDate[o.review_by]||[]).push(
+    {type:"order",ticker:o.symbol,label:`${o.side} ${o.qty} @ ${o.limit} ${o.ccy||""}`,detail:`review/pull per ${o.review_src}`});});
+  const todayISO=new Date().toISOString().slice(0,10);
+  $("agenda").innerHTML=Object.keys(byDate).sort().map(d=>`
+    <div class="day ${d===todayISO?"today":""}">
+      <div class="dh"><span class="d">${d}</span><span class="rel">${rel(d)}</span></div>
+      ${byDate[d].map(e=>`<div class="ev"><span class="chip ${e.type}">${e.type}</span><span class="t">${esc(e.ticker)}</span><span>${esc(e.label)}</span><span class="det">${esc(e.detail||"")}</span></div>`).join("")}
+    </div>`).join("");
+
+  $("orders").innerHTML=`<table><tr><th>Review by</th><th>Symbol</th><th>Side</th><th class="n">Qty</th><th class="n">Limit</th><th>Ccy</th><th>Pack</th></tr>${
+    j.orders.map(o=>`<tr><td><span class="pill rev">${esc(o.review_by)}</span> <span class="det" style="color:var(--faint)">${rel(o.review_by)}</span></td><td><b>${esc(o.symbol)}</b></td><td>${esc(o.side)}</td><td class="n">${o.qty}</td><td class="n">${o.limit}</td><td>${esc(o.ccy)}</td><td style="color:var(--muted)">${esc(o.review_src)}</td></tr>`).join("")}</table>`;
+
+  $("staged").innerHTML=`<table><tr><th>Ticker</th><th>Instr</th><th>Detail</th><th>Review by</th></tr>${
+    j.staged_instructions.map(s=>`<tr><td><b>${esc(s.ticker)}</b></td><td>${esc(s.instr)}</td><td>${esc(s.desc)}</td><td>${s.review_by?`<span class="pill rev">${esc(s.review_by)}</span>`:`<span class="pill none">none</span>`}</td></tr>`).join("")}</table>`;
+}
+async function load(){
+  try{
+    const r=await fetch("/static/orders_calendar.json?ts="+Date.now(),{cache:"no-store"});
+    render(await r.json());
+  }catch(e){ $("asof").innerHTML=`<span class="stale">fetch failed: ${esc(e.message)}</span>`; }
+}
+load(); setInterval(load,60000);
+</script>
+</body>
+</html>

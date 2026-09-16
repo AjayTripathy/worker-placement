@@ -1,0 +1,25 @@
+All checks that could run have run. EDGAR remained 403 across both attempts (exhibit index unreadable), and IBKR was permission-blocked for this bench as well. The decisive verification landed: the company's own Aug-5 Q2 release uses executed language ("entered into a seven-year contract extension" / "entered into a five-year extension"), superseding the Jul-28 framework PR that red's fatal finding rests on.
+
+## BLUE BENCH — VRRM — RED CASE: PARTIALLY OVERTURNED
+
+PACK: acknowledged. Pack XBRL rev series is itself an artifact (see ruling 5); tape anchors and filing inventory relied upon.
+
+**1. "Framework, not contract — FATAL"** | WebFetch, Jul-28 PR + Jul-28 8-K + Aug-5 Q2 release (all company primary) | Red's quote is accurate *for Jul-28*. But the Aug-5 Q2 release — 8 days later, the same document red cites elsewhere — says Avis "**entered into** a seven-year contract extension… including an option for the customer to modulate its fleet volume" and Hertz "**entered into** a five-year extension." Executed language from the issuer supersedes the framework PR. Red killed on a stale document — the III precedent exactly. What survives: the framework's **insourcing option** ("selectively perform certain activities internally") is real and the thesis mislabeled it as mere volume modulation; whether it survived into the executed contract is PLAUSIBLE-unverified (exhibit unreadable, EDGAR 403). | **REDUCED: FATAL → SIZING.**
+
+**2. "No exhibit in the filed 10-Q"** | filing logic; EDGAR Archives index 403 both attempts | Premise fails (contract executed ~Aug 1–5), but conclusion survives on corrected reasoning: a contract executed *after* the Jun-30 quarter-end is filed with the **Q3** 10-Q, not this one. The thesis's add-trigger is misdated either way. | **SUSTAINED (corrected basis); exhibit index itself = coverage gap.**
+
+**3. "+44% off low ⇒ substantially priced in"** | pack tape | Tape facts confirmed, inference isn't: $4.90 is still −74% from the 26-week high *with executed renewals in hand*; a bounce off $3.40 is not evidence of efficient pricing, and red pulled no positioning/coverage data (its own finding 6 admits this). VRRM is a covered mid-cap, so the orphan discipline doesn't apply — but "in the price" is PLAUSIBLE, not CONFIRMED. | **REDUCED to TIMING-grade.**
+
+**4. "10-Q filed 2026-08-05; thesis contradicted its pack"** | pack inventory, accession 0001193125-26-335490 | Correct. | **SUSTAINED.**
+
+**5. "No audited corroboration; two drivers in one bridge"** | Q2 release (confirmed: total rev $263.6M, CS $115.1M/$77.2M) vs pack XBRL | The pack XBRL (~$33M/qtr) is the artifact — it cannot be the topline of a company printing $263.6M/quarter (SBC would be ~20% of revenue). PR figures are internally consistent. Red's provenance point stands narrowly (nobody pulled a correct audited series), and the two-driver critique is right: the GS margin cut (−450–500bps) shares the $45M EBITDA cut, so the CS run-rate is **not uniquely identified** — note the error is two-sided; CS repricing could be *smaller* than the thesis models. | **SUSTAINED on provenance, REDUCED on implication.**
+
+**6. Coverage gaps** | IBKR search_contracts permission-denied this bench too | No broker print, no discovery_state, no TRA/cap-structure pull. | **SUSTAINED — court-wide gap.**
+
+**NEW FINDINGS RED MISSED:** (a) VRRM is a 2018 Gores-II SPAC — a **TRA liability** likely sits outside the $993M net debt; neither bench pulled it (TENX rule violated by all parties). (b) Red never tested the balance-sheet leg (2.4x, revolver undrawn) — it attacked provenance/status, not solvency, and the solvency leg supports survivability of a repriced-but-retained book. (c) Red's change-my-mind items (a) and (d) were **already satisfied** by the Aug-5 release it cited.
+
+**NET POSITION AFTER BOTH BENCHES:** The crash narrative ("Avis lost") is refuted by executed extensions per issuer primary text — red's existence-grade kill fails. But the thesis's STARTER also fails its own gates: the add-trigger exhibit lands in Q3, no broker print, TRA unpulled, and the CS-repricing magnitude is not uniquely identified. **FLAT now**, re-entry gated on: (1) IBKR print + discovery_state, (2) executed Avis/Hertz exhibit read (Q3 10-Q or earlier 8-K) scoping the insourcing option, (3) TRA/cap-structure pull. Business-risk finding → size cut, not price gate, once gates clear.
+
+**CONVICTION: 7/10.**
+
+Sources: [Jul-28 Avis framework PR](https://www.prnewswire.com/news-releases/verra-mobility-reaches-framework-agreement-with-avis-budget-group-302837023.html) · [Aug-5 Q2-26 release](https://www.prnewswire.com/news-releases/verra-mobility-announces-second-quarter-2026-financial-results-302843961.html) · Jul-28 8-K via stocktitan · EDGAR 403 (exhibit index UNVERIFIED) · IBKR permission-blocked.

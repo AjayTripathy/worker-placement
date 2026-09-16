@@ -1,0 +1,120 @@
+{
+  "ticker": "IONQ",
+  "cutoff": "2026-05-20",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "IonQ names AFRL as a government customer / partner — IonQ's AFRL trapped-ion / quantum-networking work is the company's flagship DoD program-of-record narrative.",
+      "severity": "RED_FLAG_NEGATIVE",
+      "supports": "DIRECT_J-BOOK_HIT",
+      "M_check": "pentagon_jbook.query_program_funding(program_name=AFRL Quantum Networking, cutoff=2026-05-20)",
+      "M_value": "UNFUNDED_TWO_PLUS_YEARS — primary contractor IonQ Inc; FY22=$13M, FY23=$26M, FY24=$12M (all earmark-funded, never Pentagon-requested), FY25=$0, FY26=$0 (second consecutive unfunded year per FY26 bipartisan budget signed Jan 20 2026). PIID FA8750-22-C-1022 ($13.4M obligated via AFRL Rome FA8750 office).",
+      "interpretation": "CANONICAL J-BOOK DIVERGENCE. IonQ's marquee federal program-of-record (the AFRL Rome quantum-networking trapped-ion contract) has been zero-funded by the Pentagon for two consecutive fiscal years through the cutoff date — the program was a pure congressional add (earmark) from FY22-FY24 that the Pentagon never requested. Earmark sponsors (Tester-MT, Cardin-MD, Van Hollen-MD, Hoyer-MD) lost majority power after the Nov 2024 election; the FY26 budget did not renew the line (earmark_detector.query_earmark_status returns sponsors_currently_in_power=false / active_in_current_fy=false → EARMARK_SUNSET). Per heuristic 5 (Earmark sub-signal), structurally durable defunding bumps severity up one tier. Per heuristic 6 (USAspending cross-check), the historical contracts WERE real ($13.4M obligated on PIID FA875022C1022 — past revenue real, but forward pipeline is zero), confirming SEVERE at minimum. Combined with materiality (this is the company's only flagship DoD program-of-record and a load-bearing element of the federal-customer narrative), final severity is RED_FLAG_NEGATIVE. 10-K narrates AFRL as a current/forward partner; J-Book + earmark detector say the funding has been gone for two years."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "IonQ states $370.0M in remaining performance obligations (mix funded + unfunded) and that 'anticipated future revenues from the U.S. government result from contracts awarded under various U.S. government programs.'",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": "INDIRECT_J-BOOK_HIT",
+      "M_check": "pentagon_jbook.query_program_funding(contractor_name=IonQ); earmark_detector.query_earmark_status(program_name=AFRL Quantum Networking)",
+      "M_value": "Three IonQ-attributed programs in J-Book: (a) AFRL Quantum Networking — UNFUNDED_TWO_PLUS_YEARS, (b) AFRL Qubitekk Quantum Networking — FUNDED_GROWING but small ($12.2M FY26), (c) UMD Quantum (IONQ subcontractor) — UNFUNDED_THIS_YEAR. Earmark detector: AFRL QN earmark sponsors lost majority post-Nov 2024; FY25 and FY26 enacted = $0. The 10-K explicitly admits the $370M RPO 'includes unfunded orders' where funding 'has not been appropriated' — those are the J-Book-zeroed lines.",
+      "interpretation": "The $370M backlog is the most narrative-load-bearing forward number in the filing, but IonQ concedes in plain text that it includes UNFUNDED orders. The two flagship Air Force quantum-networking earmarks (the original IonQ Rome contract and the Qubitekk-acquired ceiling) together total ~$54.5M of bookings where ~$33.5M was unfunded ceiling per the corpus. Pair (b) — the Qubitekk line — is funded and growing modestly ($8.9M→$12.2M); pair (a) — the flagship IonQ AFRL line — is now zero-funded for the second consecutive FY through cutoff. With the ex-CEO and CFO disclosed-discretionary sales clustering on the exact date FY25 appropriations confirmed the zeroing (see C-supplement insider_vs_calendar result), the forward backlog conversion narrative is materially impaired. SEVERE_UNDERDELIVERY: the disclosed forward revenue depends on lines the Pentagon J-Book confirms are zeroed."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Three customers = 53% of FY2025 revenue; IonQ expects increasing concentration. Two customers = 77% in FY24; two = 58% in FY23.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": "CONCENTRATION_OVERLAP_WITH_J-BOOK",
+      "M_check": "usaspending.query_dod_contracts(recipient_name=IonQ Federal LLC) and (recipient_name=IonQ Inc); usaspending.query_federal_presence(name_variants=[IonQ variants])",
+      "M_value": "USAspending: IonQ Federal LLC = 0 DoD awards under that exact legal name. IonQ Inc = 0 DoD awards under that variant. usaspending.query_federal_presence (name_variants=[IonQ Inc, IonQ Federal LLC, IonQ Quantum Inc]) returns n_ueis_resolved=0, n_contracts=0, signal=INFLATION_SUSPECT. However, Qubitekk Inc (acquired Dec 2024, now IonQ subsidiary) has 8 prior DoD awards = $12.7M total, dominated by FA8750-25-CB-001 AFRL Quantum Network ($8.97M). Capella Space (acquired Jul 2025) has 9 DoD awards = $15.7M total. Per the ticker_pe_crosswalk: IonQ legacy = 33 contracts, $196.5M total.",
+      "interpretation": "MIXED SIGNAL: (a) Customer concentration is admittedly high and rising, and (b) the federal-government share of that concentration overlaps the J-Book-zeroed AFRL Quantum Networking line, but (c) USAspending under direct IonQ legal variants returns zero — the company books DoD revenue via subsidiaries (Qubitekk Federal LLC, Capella Space Corp.) rather than 'IonQ Federal, LLC' as such. INFLATION_SUSPECT signal from federal_presence supports the view that the parent's federal-customer narrative is more acquisition-dependent than direct. MODERATE because the concentration claim itself is truthful (and disclosed) but the J-Book divergence on the underlying program puts the customer concentration at structural risk if a top-3 customer is the AFRL/AF Rome line whose program is zero-funded."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Qubitekk Federal LLC (acquired Dec 2024) is a federal-contracting vehicle for AFRL quantum networking.",
+      "severity": "PASS",
+      "supports": "DIRECT_J-BOOK_HIT (positive)",
+      "M_check": "pentagon_jbook.query_program_funding(contractor_name=Qubitekk); usaspending.query_dod_contracts(recipient_name=Qubitekk)",
+      "M_value": "J-Book: AFRL Qubitekk Quantum Networking — status=FUNDED_GROWING (declared FUNDED_STEADY; derived FUNDED_GROWING). FY25=$8.9M, FY26=$12.2M (earmark renewed in FY26 bipartisan budget). Earmark-secured=true but sponsors_currently_in_power not adverse for this specific line; renewed. USAspending: Qubitekk Inc = 8 prior DoD awards = $12.74M total; flagship FA8750-25-CB-001 ($8.97M) labeled 'AFRL QUANTUM NETWORK ... USAF AFRL.'",
+      "interpretation": "This is the J-Book-positive corner of the IonQ DoD portfolio. The Qubitekk-route AFRL contract IS funded and growing, validating part of the federal-customer narrative. PASS. But note materiality: $12.2M FY26 is small (<10% of FY25 revenue of $130M) vs the parent's $370M RPO, so this funded line cannot rescue the de-funded flagship line in claim C1."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Capella Space (IonQ subsidiary) provides SAR data-as-a-service and is pipelined into 'advanced quantum positioning, navigation and timing services.'",
+      "severity": "UNVERIFIABLE",
+      "supports": "PE_COVERAGE_GAP",
+      "M_check": "pentagon_jbook.query_program_funding(program_name=Space Data Network), (pe_number=1203636SF); usaspending.query_dod_contracts(recipient_name=Capella Space)",
+      "M_value": "Pentagon J-Book: 'Space Data Network (SDN)' PE 1203636SF matched but primary contractor is SpaceX (Starshield), not Capella; signal=UNFUNDED_THIS_YEAR (status_declared=FUNDED_GROWING but corpus history shows FY26=$0 ramping). Per heuristic 4 (PE name ambiguity): Capella's SAR contracts don't map cleanly to a single PE. USAspending: Capella has 9 DoD contracts = $15.72M including FA9453-24-CX-020 'SAR for Government Operations (SARGO)' ($10.0M) and HQ085021C0012 (SDA Tranche 0 Transport Layer demo, $2.97M).",
+      "interpretation": "The PE match (SDN PE 1203636SF) is a Starshield line, not a Capella line — wrong contractor — so the corpus does not give a clean read on Capella's actual SAR program funding. USAspending confirms ~$15.7M of legitimate Capella DoD revenue across SARGO + SDA Tranche 0, so this is not inflation. The forward PNT claim is speculative and undisclosed in dollar terms. UNVERIFIABLE (heuristic 7) — corpus coverage gap on commercial SAR PEs."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "IonQ has co-development agreements with DARPA for next-generation quantum benchmarking.",
+      "severity": "UNVERIFIABLE",
+      "supports": "NOT_FOUND",
+      "M_check": "pentagon_jbook.query_program_funding(program_name=DARPA Quantum Benchmarking, cutoff=2026-05-20)",
+      "M_value": "NOT_FOUND. No matching program in the 410-PE corpus. USAspending under IonQ direct legal variants returns 0 DoD awards; under 'IonQ Inc' returns 0; via federal_presence INFLATION_SUSPECT.",
+      "interpretation": "Per heuristic 7, NOT_FOUND is treated as UNVERIFIABLE rather than red — DARPA quantum benchmarking is a research-grade program that may not be in our seed corpus. Note: the claim is positioned as a 'co-development agreement' (not a revenue claim) so it is narrative color rather than revenue-material; the company does not quantify DARPA revenue. UNVERIFIABLE."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Geographic revenue: FY25 US=$87.0M, Switzerland=$16.6M, Other International=$26.4M (total $130.0M); non-US revenue uplift in FY25 = acquisition-driven (ID Quantique).",
+      "severity": "PASS",
+      "supports": "DISCLOSED",
+      "M_check": "edgar_fts.query_fulltext(search_term=id Quantique IonQ)",
+      "M_value": "edgar_fts returned 0 hits (search_term construction likely under-matched; not load-bearing). 10-K narrative confirms ID Quantique SA acquired Apr 30 2025 and the Switzerland revenue line aligns with Q3-Q4 2025 inclusion of ID Quantique's Geneva-headquartered QKD business.",
+      "interpretation": "PASS. The geographic split is internally coherent with disclosed acquisition dates and PCAOB auditor note: 'id Quantique SA, Capella Space Corp., Oxford Ionics Limited, and Vector Atomic Inc. ... constituted 6% of total assets ... and 39% of the Company's total revenue for the year then ended.' Non-J-Book control claim — PASSES the control bar."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "IonQ executed 7 acquisitions in ~12 months (ID Quantique, Lightsynq, Capella Space, Oxford Ionics, Vector Atomic, Skyloom, SkyWater-pending).",
+      "severity": "RED_FLAG_NEGATIVE",
+      "supports": "INCOHERENT_ROLLUP",
+      "M_check": "acq_coherence.score_acquisition_coherence(parent_thesis=quantum platform, acquisitions=[8])",
+      "M_value": "Aggregate signal=INCOHERENT_ROLLUP. 4 of 8 acquisitions scored low_coherence with is_revenue_synthetic=true: Capella Space (SAR Earth observation, score 0.05), Vector Atomic (atomic clocks/PNT, 0.35), Skyloom Global (optical inter-sat links, 0.35), SkyWater Technology (semiconductor foundry, 0.15). 4 scored high_coherence (Qubitekk, ID Quantique, Lightsynq, Oxford Ionics).",
+      "interpretation": "Canonical IonQ-thesis rollup pattern: the parent loses its core federal revenue stream (AFRL Quantum Networking earmark zeroed) and pivots into incoherent acquisitions including a SAR satellite company, a semiconductor foundry, and a laser-comms company — none of which have technology overlap with trapped-ion quantum computing. Per heuristic 'acq_coherence.INCOHERENT_ROLLUP + pentagon_jbook.UNFUNDED' is the highest-precision fraud-pattern combination per the m-source catalog description. RED_FLAG_NEGATIVE: rollup is a textbook revenue-synthetic distraction from a J-Book-zeroed core line."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "610 issued patents + 514 pending as of Jan 31 2026.",
+      "severity": "PASS",
+      "supports": "VERIFIED",
+      "M_check": "uspto_odp.query_assignee(assignee_name=IonQ, cutoff=2026-05-20)",
+      "M_value": "USPTO ODP: n_total_applications=373, n_granted=123, total_granted_patents_pre_cutoff=123. Active recent filings include 'Photonic IC for Multi-Atom Arrays' (Oct 2025), 'Optically Active Diamond Color Centers' (Aug 2025), 'Automated Circuit Optimization for Quantum Chemistry' (Aug 2025).",
+      "interpretation": "Filing claims 610 issued; USPTO ODP search under 'IonQ' assignee returns 123 granted. The order-of-magnitude gap is consistent with patents acquired through Oxford Ionics, Lightsynq, ID Quantique, Vector Atomic, Capella, Qubitekk (none of which list IonQ as the prosecution-applicant). The claim is plausible at the consolidated portfolio level. Non-J-Book control claim — PASSES the control bar; not a red flag for the thesis."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "Leased facilities: 32k sq ft College Park MD (HQ, U Maryland), 101k sq ft Bothell WA, 30k sq ft Oxford UK.",
+      "severity": "UNVERIFIABLE",
+      "supports": "EPA_NULL",
+      "M_check": "epa_frs.query_facilities(facility_name=IonQ, state_abbr=MD)",
+      "M_value": "EPA FRS: 0 facilities matched in MD. Quantum-computing R&D / clean rooms do not require EPA permits for typical operations — EPA-null is expected and not a red flag.",
+      "interpretation": "Non-J-Book control claim. EPA FRS is the wrong corroboration source for a non-emitting quantum lab. UNVERIFIABLE by this M-source but not adverse."
+    },
+    {
+      "claim_id": "C-INSIDER-SUPP",
+      "claim_text": "[SUPPLEMENTARY] Insider sales clustering around budget-vote dates while AFRL Quantum Networking was being zeroed.",
+      "severity": "RED_FLAG_NEGATIVE",
+      "supports": "INSIDER_VS_CALENDAR_CLUSTERED_DISCRETIONARY",
+      "M_check": "insider_vs_calendar.query_insider_sales_near_budget_events(cik=0001824920, lookback_days=730, cutoff=2026-05-20)",
+      "M_value": "99 Form 4 filings; 74 sales = $460.6M total; 14 proximate to budget events = $77.4M; 12 discretionary proximate; 4 unique proximate sellers. Top proximate sale: Peter Hume Chapman (ex-CEO) on 2025-03-11 (same day House passed FY25 full-year CR confirming AFRL earmark zeroing) — 2 lots of 2,000,000 shares each at $18.72 = $74.9M discretionary (not 10b5-1). Concurrent discretionary sales by Rima Alameddine and Thomas G. Kramer on same day. Three named insiders also sold discretionarily on Sept 26 2024 (FY25 CR signed) and Dec 20 2024 (CR extended).",
+      "interpretation": "CLUSTERED_DISCRETIONARY signal is unambiguous: the ex-CEO and two named officers sold discretionarily (non-10b5-1) on the exact dates of three budget actions that quietly zeroed out the AFRL Quantum Networking line. This is the canonical YSS/IONQ pattern explicitly called out in the m-source catalog description for insider_vs_calendar. Treats as RED_FLAG_NEGATIVE supplementary signal that reinforces claims C1 and C2."
+    }
+  ],
+  "_summary": {
+    "n_claims": 10,
+    "n_queries_run": 13,
+    "severity_counts": {
+      "PASS": 3,
+      "MODERATE_UNDERDELIVERY": 1,
+      "SEVERE_UNDERDELIVERY": 1,
+      "RED_FLAG_NEGATIVE": 3,
+      "UNVERIFIABLE": 3
+    },
+    "jbook_grounded_claims": ["C1", "C2", "C3", "C4", "C5", "C6"],
+    "n_jbook_grounded": 6,
+    "n_jbook_fired_with_signal": 5,
+    "jbook_hit_note": "pentagon_jbook fired (returned non-NOT_FOUND signal) on 5 of 6 J-Book-grounded claims (C1, C2, C3, C4, C5 — only C6 was NOT_FOUND for DARPA Quantum Benchmarking)"
+  }
+}

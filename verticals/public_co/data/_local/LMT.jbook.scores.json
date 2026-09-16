@@ -1,0 +1,131 @@
+{
+  "ticker": "LMT",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "The F-35 program generated 27% of Lockheed Martin's total consolidated sales in 2025, and 67% of Aeronautics sales in 2025.",
+      "severity": "PASS",
+      "supports": [
+        {"source": "pentagon_jbook.query_program_funding", "args": {"pe_number": "0604840F"}, "fired": true},
+        {"source": "pentagon_jbook.query_program_funding", "args": {"pe_number": "0207142F"}, "fired": true}
+      ],
+      "M_check": "pentagon_jbook",
+      "M_value": "PE 0604840F (F-35 C2D2 dev): FY24 $1,237M -> FY25 $1,134M -> FY26 $1,182M = FUNDED_STEADY. PE 0207142F (F-35 Squadrons procurement): FUNDED_STEADY through FY26. Both J-Book line items are funded and stable in PB 2026.",
+      "interpretation": "F-35 is LMT's load-bearing program (27% of total sales). Pentagon FY26 J-Book confirms both the development PE (C2D2) and procurement PE (Squadrons) are FUNDED_STEADY. No J-Book divergence. PASS per heuristic 1 (FUNDED_STEADY -> PASS) and consistent with mega-cap prime expectation."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Aircraft production is expected to continue well into the future given the U.S. Government's stated objective of procuring 2,456 F-35 aircraft.",
+      "severity": "PASS",
+      "supports": [
+        {"source": "pentagon_jbook.query_program_funding", "args": {"pe_number": "0207142F"}, "fired": true}
+      ],
+      "M_check": "pentagon_jbook",
+      "M_value": "F-35 Squadrons procurement (0207142F) -> FUNDED_STEADY in FY26 J-Book.",
+      "interpretation": "Forward production narrative ('2,456 aircraft program of record') is corroborated by a steady procurement line in the FY26 J-Book. PASS."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Lockheed Martin participates in the Next Generation Interceptor (NGI) program with the Missile Defense Agency.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        {"source": "pentagon_jbook.query_program_funding", "args": {"program_name": "Next Generation Interceptor"}, "fired": true}
+      ],
+      "M_check": "pentagon_jbook",
+      "M_value": "NOT_FOUND in 410-PE corpus (MDA coverage is partial; NGI PE not extracted).",
+      "interpretation": "Coverage gap rather than a divergence signal. Per heuristic 7 (NOT_FOUND != red flag), mark UNVERIFIABLE. Note: cohort meta says LMT is one of two NGI competitors; absence in corpus does not imply absence in J-Book. Recommend extending the corpus before scoring further."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Next Generation Overhead Persistent Infrared (Next Gen OPIR) provides the U.S. Space Force with enhanced worldwide missile warning capabilities.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        {"source": "pentagon_jbook.query_program_funding", "args": {"program_name": "OPIR"}, "fired": true}
+      ],
+      "M_check": "pentagon_jbook",
+      "M_value": "Four Next-Gen OPIR PEs found: GEO (1206443SF) FUNDED_STEADY ($432M FY26, down from $691M FY24); Polar (1206444SF) UNFUNDED_THIS_YEAR ($769M FY25 -> $0 FY26); Ground (1206440SF) FUNDED_SHRINKING ($500M FY25 -> $358M FY26); generic NextGen OPIR (1206442SF) FUNDED_STEADY at $190M.",
+      "interpretation": "LMT is the prime on Next-Gen OPIR GEO per cohort meta. GEO is FUNDED_STEADY (passes), but the Polar variant is fully zeroed in FY26 (UNFUNDED_THIS_YEAR) and Ground is shrinking. The LMT narrative speaks generically about 'enhanced worldwide missile warning capabilities' without acknowledging the Polar arc is zero. Per heuristic 4 (PE name ambiguity), score the most-likely-matched PE (GEO = PASS) but flag partial divergence: the Polar segment of LMT's OPIR portfolio has been deleted. Net: MODERATE_UNDERDELIVERY — the GEO line is intact but the 'worldwide' language overstates the surviving footprint."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "The Transport and Tracking Layer programs comprise multiple tranches of small satellites supporting the SDA proliferated space architecture.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": [
+        {"source": "pentagon_jbook.query_program_funding", "args": {"program_name": "Tranche 3 Transport Layer"}, "fired": true},
+        {"source": "pentagon_jbook.query_program_funding", "args": {"program_name": "Tracking Layer"}, "fired": true},
+        {"source": "pentagon_jbook.query_program_funding", "args": {"pe_number": "1206410SF"}, "fired": true},
+        {"source": "earmark_detector.query_earmark_status", "args": {"program_name": "Tranche 3 Transport Layer"}, "fired": true}
+      ],
+      "M_check": "pentagon_jbook + earmark_detector",
+      "M_value": "Tranche 3 Transport Layer (PE 1206410SF): status_declared = UNFUNDED_TWO_PLUS_YEARS; FY25 $0 (Congress added $500M but Pentagon rejected), FY26 $0; explicit replacement_program = 'Space Data Network (SDN) Backbone / Space Link'; replacement_sole_source = 'SpaceX (Starshield)'. LMT is one of the named primary contractors on the Transport Layer. Tranche 0-2 (delivery work): status_declared FUNDED_SHRINKING (declining). Tracking Layer T3 (sda-tracking-layer-t3): FUNDED_STEADY. Earmark detector: NOT_EARMARK (regular Pentagon decision, not earmark sunset).",
+      "interpretation": "Concrete J-Book divergence. LMT's 10-K describes 'Transport and Tracking Layer programs' as a forward growth narrative, but the Pentagon's FY26 J-Book shows the Transport Layer Tranche 3 (the next-up tranche) has been UNFUNDED_TWO_PLUS_YEARS with funding redirected to a SpaceX-sole-source replacement (SDN/Starshield). Existing T0-T2 work continues but is shrinking; the Tracking Layer T3 remains funded. Per heuristic 1 (UNFUNDED_TWO_PLUS_YEARS -> RED_FLAG_NEGATIVE for primary-contractor revenue claims), the Tranche 3 Transport is severe — but the program is one piece of a much larger LMT portfolio, so per heuristic 2 (materiality) downgrade to SEVERE_UNDERDELIVERY: the SDA Transport pipeline LMT helped establish is being replaced by a non-LMT sole-source competitor. Heuristic 3 (reorg caveat) does NOT apply — the replacement explicitly names a different prime."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Lockheed Martin produces the Long Range Discrimination Radar (LRDR) for the Missile Defense Agency.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        {"source": "pentagon_jbook.query_program_funding", "args": {"pe_number": "0604873C"}, "fired": true}
+      ],
+      "M_check": "pentagon_jbook",
+      "M_value": "LRDR (PE 0604873C): FY24 $100M -> FY25 $98M -> FY26 $60M (-38% YoY). status = FUNDED_SHRINKING.",
+      "interpretation": "LMT is the sole prime contractor for LRDR. The FY26 J-Book cuts the program 38% YoY. Per heuristic 1 (FUNDED_SHRINKING -> MODERATE_UNDERDELIVERY). The 10-K lists LRDR among MDA programs but does not quantify exposure; cohort meta flags it as a named LMT program. Forward LRDR cash flow will shrink materially."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Aegis Combat System programs (Aegis BMD) serve as an air/missile defense system for the U.S. Navy and as a sea/land-based element of the U.S. missile defense system.",
+      "severity": "PASS",
+      "supports": [
+        {"source": "pentagon_jbook.query_program_funding", "args": {"pe_number": "0604878C"}, "fired": true}
+      ],
+      "M_check": "pentagon_jbook",
+      "M_value": "Aegis BMD Test (PE 0604878C): FY24 $601M -> FY25 $649M -> FY26 $588M. status = FUNDED_STEADY (also Aegis BMD parent search returns FUNDED_GROWING for a related PE).",
+      "interpretation": "Aegis BMD line items are FUNDED_STEADY/FUNDED_GROWING in FY26. No divergence. PASS."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Trident II D5 Fleet Ballistic Missile is the only submarine-launched ICBM currently in production in the U.S.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        {"source": "pentagon_jbook.query_program_funding", "args": {"program_name": "Trident"}, "fired": true},
+        {"source": "pentagon_jbook.query_program_funding", "args": {"program_name": "Fleet Ballistic Missile"}, "fired": true}
+      ],
+      "M_check": "pentagon_jbook",
+      "M_value": "Both queries return NOT_FOUND (Trident / FBM line items not in the 410-PE corpus; Navy strategic systems coverage is partial).",
+      "interpretation": "Per heuristic 7 (NOT_FOUND != red flag), mark UNVERIFIABLE. Trident D5 is publicly known to be a multi-decade Navy program; absence from this corpus is a coverage gap, not a divergence."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "In 2025, 28% of total sales were associated with international customers.",
+      "severity": "PASS",
+      "supports": [
+        {"source": "usaspending.query_dod_contracts", "args": {"recipient_name": "Lockheed Martin Corporation"}, "fired": true}
+      ],
+      "M_check": "usaspending",
+      "M_value": "USAspending shows 128,323 DoD awards to Lockheed Martin Corporation totaling $278.0B cumulative. Largest awards include $35.1B (N0001917C0001, LRIP Lot 12 F-35), $34.2B (N0001902C3002, JSF/JAST), and $30.1B (N0001920C0009, F-35). U.S. DoD is the dominant revenue source, consistent with 72% U.S. + 28% international mix.",
+      "interpretation": "Cross-check confirms the company's USG/international mix is plausible given the volume of DoD obligations. No divergence. PASS."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "Lockheed Martin paid $360M in Q2 2025 to acquire Amentum's Rapid Solutions business to enhance Space radar/payload capabilities (recorded $195M goodwill).",
+      "severity": "PASS",
+      "supports": [
+        {"source": "acq_coherence.score_acquisition_coherence", "args": {"parent_thesis": "Defense prime; Space radar/payload; F-35 prime; integrated AMD"}, "fired": true}
+      ],
+      "M_check": "acq_coherence",
+      "M_value": "Coherence score 0.0 / category 'low_coherence' but with reasoning 'insufficient data to evaluate alignment' — the agent flagged it as un-assessable rather than incoherent. signal=MIXED_COHERENCE. is_revenue_synthetic=false. Acquisition price ($360M) is immaterial vs LMT's $278B cumulative DoD revenue.",
+      "interpretation": "Tuck-in radar/payload acquisition with explicit Space-segment rationale is on-thesis for LMT. Coherence scorer flagged 'insufficient data' rather than incoherence; goodwill ratio ($195M / $360M = 54%) is normal for a tech tuck-in. PASS."
+    },
+    {
+      "claim_id": "C11",
+      "claim_text": "Lockheed Martin owns or leases space at 333 locations primarily in the U.S.; major Aeronautics in Palmdale CA, Marietta GA, Greenville SC, Fort Worth TX; MFC in Troy AL, Camden AR, Ocala/Orlando FL, Lexington KY, Grand Prairie TX.",
+      "severity": "PASS",
+      "supports": [
+        {"source": "epa_frs.query_facilities", "args": {"facility_name": "Lockheed Martin", "state_abbr": "MD"}, "fired": true}
+      ],
+      "M_check": "epa_frs",
+      "M_value": "EPA FRS returns 21 Lockheed Martin facilities in Maryland alone (Bethesda HQ at 6777 Rockledge Dr confirmed, plus Rockville, Lexington Park, Baltimore, Clarksburg). Pattern consistent with a 333-location US footprint.",
+      "interpretation": "Independent regulatory database corroborates the breadth and Maryland HQ footprint. PASS."
+    }
+  ]
+}

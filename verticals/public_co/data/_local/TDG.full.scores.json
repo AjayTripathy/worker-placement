@@ -1,0 +1,77 @@
+{
+  "ticker": "TDG",
+  "scores": [
+    {
+      "claim_id": "TDG-1",
+      "claim_text": "Defense business ~35-40% of net sales ($3,761M FY2025); supplies U.S. armed forces and friendly foreign governments via defense OEMs and direct military buying agencies.",
+      "severity": "PASS",
+      "supports": ["Mode A", "Mode B"],
+      "M_check": "usaspending.query_recipient_contracts + query_dod_contracts (recipient=TRANSDIGM)",
+      "M_value": "n_awards=2,503 DoD-dominant; total obligated $64.6M visible across direct subsidiaries (AeroControlex, Skurka Aerospace, Whippany Actuation, Arkwin, Acme Aerospace, TransDigm Inc., etc.); DoD-specific n_awards=2,487. Award descriptions match TDG product taxonomy (pumps, valves, actuators, motors, couplings, fuel systems, battery chargers).",
+      "interpretation": "Direct federal obligations only $64.6M — far below the disclosed $3.76B defense revenue. Per calibration heuristic 10 and TDG's business model, defense revenue flows predominantly through prime contractors (Boeing, Lockheed, RTX, NG, GD, L3Harris) and DLA aftermarket spare-parts buys; direct DoD contracting is a small sliver. The presence of broad sub-recipient activity across the catalog of acquired entities corroborates the disclosed defense footprint. No contradiction; PASS."
+    },
+    {
+      "claim_id": "TDG-2",
+      "claim_text": "Operates approximately 120 manufacturing facilities across 25 U.S. states and 14 foreign countries.",
+      "severity": "PASS",
+      "supports": ["Mode A", "Mode B"],
+      "M_check": "epa_frs.query_facilities (per state) + osha_establishments.query_establishments",
+      "M_value": "EPA FRS hits searching only 'TransDigm' parent name: OH=2 (AeroControlex S. Euclid, Aeroproducts Euclid), CA=1 (Adel Wiggins LA). OSHA establishments: 4 confirmed (CEF Industries Addison IL, HARCO Branford CT, Tactair Liverpool NY, Adams Rite Aerospace Fullerton CA) totaling 496 employees; multiple NAICS aerospace codes (336412/336413/332912/334511).",
+      "interpretation": "Direct parent-name hits are only a small subset because TDG operates ~50 acquired brands under their own names (AeroControlex, Whippany, Champion, Schneller, Adams Rite, Arkwin, Skurka, Acme, CEF, Harco, Tactair, AdelWiggins, AeroProducts, Simmonds, Servotronics). Registry coverage spans IL/CT/NY/CA/OH so far with matching aerospace NAICS — consistent with a multi-state aerospace manufacturing footprint. ~120 facilities is plausible; cannot fully enumerate via parent name alone but registry footprint is genuine and substantial. PASS."
+    },
+    {
+      "claim_id": "TDG-3",
+      "claim_text": "$413M FY2025 acquisitions including Servotronics ($133M); $757M Simmonds Precision acquired from RTX on Oct 6, 2025.",
+      "severity": "PASS",
+      "supports": ["Mode A", "Mode B"],
+      "M_check": "edgar_fts.query_fulltext(Simmonds Precision Products, cik=RTX 0000101829) + acq_coherence.score_acquisition_coherence",
+      "M_value": "EDGAR FTS: 16 hits in RTX/UTC filings for 'Simmonds Precision Products' across 10-Ks 2018-2025 plus 8-K dated 2026-01-27 and 10-Q 2026-04-21 (consistent with divestiture/transition references). acq_coherence: mean=0.85 (COHERENT_ROLLUP); Servotronics coherence=0.85 (precision servo valves, aftermarket aerospace); Simmonds=0.85 (fuel/inerting/sensors, recurring aerospace).",
+      "interpretation": "Both acquisitions are genuine — Simmonds was a long-standing UTC/RTX/Goodrich subsidiary, well-documented in RTX EDGAR filings. Aggregate roll-up coherence is high (0.85) and aligned with TDG's stated thesis of proprietary aerospace components with aftermarket content. No revenue-synthetic flags. PASS."
+    },
+    {
+      "claim_id": "TDG-4",
+      "claim_text": "$90/share special cash dividend Aug-Sep 2025, funded by $5,000M new debt; FY2025 stockholders' deficit $(9,686)M (worsened from $(6,290)M).",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": ["Mode A", "Mode B"],
+      "M_check": "sec_filings.list_filings_by_form (8-K cluster around Aug 2025) + insider_vs_calendar.query_insider_sales_near_budget_events",
+      "M_value": "8-K filings confirmed clustered around dividend/debt issuance dates (Aug 2025 cluster present in TDG SEC filings list). Insider sales: n_form4=84, n_proximate_sales=97 with $131.3M of insider sales clustered around events; 97 of 97 proximate are DISCRETIONARY (non-10b5-1). Top seller: CEO Kevin Stein selling $9.5M, $9.0M, $8.4M, $8.1M tranches in Jan-Feb 2026 around bipartisan_budget_signed event; other large sellers W. Nicholas Howley (executive chairman), Joel Reiss, Patrick Murphy. Total event-proximate insider sales value $131M of $527M aggregate sales.",
+      "interpretation": "Mode B is the load-bearing finding: ALL 97 event-proximate insider sales are discretionary (zero on Rule 10b5-1 plans), the CEO and exec chairman repeatedly transact in tight clusters around budget/calendar events, and they collected dividend equivalents on options in addition to base shares. The pattern — levering up by $5B to issue a $90/share special dividend the executives personally benefit from (cash dividend equivalents on options), into a stockholders' deficit already at -$9.7B, with executives then selling discretionarily into the resulting stock strength — is the textbook TDG levered-rollup playbook but flags as SEVE on the Mode B discipline (heuristic: discretionary sales clustered to capital events). Note: this is structural TDG behavior, not fraud, but per the rubric the Mode B signal is unambiguous."
+    },
+    {
+      "claim_id": "TDG-5",
+      "claim_text": "Manufactures specialized equipment for NASA space telescopes.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["Mode A", "Mode B"],
+      "M_check": "usaspending.query_recipient_contracts(awarding_agency=NASA) + nasa_ntrs.query_ntrs(TransDigm)",
+      "M_value": "NASA direct contracts to TRANSDIGM: 0 awards. NASA NTRS technical-reports search for 'TransDigm': 0 hits (NASA_NO_FOOTPRINT).",
+      "interpretation": "Per calibration heuristic 6 (name-variant fragility) and TDG's sub-tier supplier model, NASA space-telescope hardware is supplied via primes (NG for JWST/Roman, Ball Aerospace, Harris/L3Harris) — TDG subsidiaries (e.g., Schneller, Aerosonic, Avista, parachute units) likely supply at component level and would not be a direct NASA contractor or NTRS author. The claim is narrow and qualitative ('specialized equipment ... aiding space exploration') without a named program, so registry absence does not constitute a contradiction. UNVERIFIABLE rather than SEVE."
+    },
+    {
+      "claim_id": "TDG-6",
+      "claim_text": "Total debt $30,015M (up from $24,880M); $11,000M FY2025 debt financing transactions.",
+      "severity": "PASS",
+      "supports": ["Mode A", "Mode B"],
+      "M_check": "sec_filings.list_filings_by_form + claim_evolution.query_claim_evolution(material weakness)",
+      "M_value": "TDG SEC 8-K cadence shows dense Aug-Sep 2025 cluster consistent with debt issuance + dividend events. claim_evolution(material weakness): n_subsequent_mentions=6, all 10-Ks 2021-2025, evolution_status=MENTIONED_INCIDENTALLY, classification_counts: AFFIRMED=0, AMENDED=0, adverse_findings=[]. No going-concern or adverse ICFR language.",
+      "interpretation": "Debt level is enormous and growing, but TDG generated $2.04B operating cash flow and maintains 2.7x earnings-to-fixed-charges coverage. ICFR clean (no adverse findings or remediation in claim_evolution). Mode A and Mode B both corroborate the disclosure as accurate and consistent — this is risky capital structure but truthfully reported. PASS."
+    },
+    {
+      "claim_id": "TDG-7",
+      "claim_text": "Top 10 customers ~40% of net sales; no single customer >10%; ~90% proprietary products; ~55% aftermarket.",
+      "severity": "PASS",
+      "supports": ["Mode A", "Mode B"],
+      "M_check": "edgar_fts.query_fulltext(TransDigm in Boeing 10-K cik=0000012927) + usaspending.query_recipient_contracts top recipients",
+      "M_value": "Boeing 10-K FTS hits for 'TransDigm': 0. Boeing FTS hits for 'Adams Rite Aerospace' (TDG subsidiary): 0. usaspending top DoD recipients across the TRANSDIGM recipient set are split across 5+ subsidiary entities, each absorbing $1-12M obligations — no single subsidiary dominates federal share.",
+      "interpretation": "Per calibration heuristic 7, 0 mentions in Boeing's 10-K is the expected pattern when a supplier ships at sub-tier level (TDG ships to Boeing's BCA but is buried under thousands of vendors that never get named in the prime's filings). The diffuse distribution of DoD obligations across many TDG subsidiaries corroborates the 'no customer >10%' claim — TDG's revenue base is genuinely fragmented across primes, airlines, MRO shops and DLA. PASS."
+    },
+    {
+      "claim_id": "TDG-8",
+      "claim_text": "95 acquisitions since 1993 inception, focused on proprietary aerospace components with significant aftermarket content.",
+      "severity": "PASS",
+      "supports": ["Mode A", "Mode B"],
+      "M_check": "sec_filings.list_filings_by_form(TDG 8-Ks) + uspto_odp.query_assignee across subsidiary brands",
+      "M_value": "TDG 8-K cadence is dense and persistent over the available history. USPTO across subsidiary assignees: Simmonds Precision n_granted=160; Adams Rite Aerospace=6; Schneller=5; Whippany Actuation=4; Champion Aerospace=3; AeroControlex=1; Tactair=1; parent TransDigm=4. Aggregate granted patents across enumerated subsidiaries >180, with Simmonds alone bringing an institutional aerospace IP stack via the just-closed RTX divestiture.",
+      "interpretation": "Subsidiary patent footprint corroborates the rollup of established aerospace component shops with genuine technical IP — no Nikola-pattern (heuristic 8). Coherent thesis confirmed by acq_coherence in TDG-3. PASS."
+    }
+  ]
+}

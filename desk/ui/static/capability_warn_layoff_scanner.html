@@ -1,0 +1,145 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>warn_layoff_scanner</title><style>
+body{margin:0;background:#0b0e12;color:#e8ebee;font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:26px 24px 90px}
+a{color:#8b7cf6} h1{font-size:23px;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:#7d858e;margin:0 0 20px;font-size:13px}
+h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:#7d858e;margin:24px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 10px;border-bottom:1px solid #242a31;text-align:left;vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#7d858e}
+.k{font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:20px}
+.k-generator{color:#c3b8fb;background:rgba(139,124,246,.15)}
+.k-detector{color:#eccb8a;background:rgba(217,164,65,.15)}
+.k-watcher{color:#8ee5c1;background:rgba(53,201,143,.15)}
+.k-evidence{color:#b3bcc6;background:rgba(138,147,158,.15)}
+.h-OK{color:#35c98f} .h-STALE{color:#d9a441} .h-ERROR{color:#e0736a} .h-NEVER_RUN{color:#8a939e}
+pre{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px;overflow-x:auto;font-size:12px;line-height:1.5}
+.panel{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px 18px;margin-bottom:12px}
+ul{margin:4px 0;padding-left:20px} li{margin-bottom:4px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+</style></head><body><div class="wrap"><h1>warn_layoff_scanner</h1><p class="sub">registered capability · warn_layoff_scanner</p><a href="signals.html">&larr; all signals</a><div class="panel" style="margin-top:10px"><span class="k k-generator">GENERATOR</span> &nbsp;<span class="h-NEVER_RUN"><b>NEVER_RUN</b></span> · last run <span class="mono">never</span></div><p>Stage 0b generator: WARN-notice layoff waves (state filings; margin actions/distress).</p><form method="POST" action="/signals/run" style="margin:10px 0"><input type="hidden" name="name" value="warn_layoff_scanner"><input name="symbol" placeholder="symbol (if applicable)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px"><input name="symbols" placeholder="universe, comma-sep (generators)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px;margin-left:6px"><button type="submit" style="background:#8b7cf6;color:#0b0e12;border:0;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;margin-left:6px">Run now</button></form><h2>Datasources</h2><ul><li>reference implementation: verticals/generators/warn_layoff_scanner.py (see the code section for the feeds it touches)</li></ul><h2>Applies to</h2><ul><li><b>strategies:</b> value_band_entry</li></ul><h2>The code</h2><pre>&quot;&quot;&quot;warn_layoff_scanner — Stage 0b generator: WARN-notice layoff waves (state filings; margin actions/distress).
+
+WARN notices are filed 60+ days BEFORE mass layoffs — a genuinely leading, free, public signal of cost actions
+(bullish margin tell on strong names) or distress (bearish on weak ones). v1 covers CALIFORNIA (EDD xlsx — the
+largest and best-structured state feed) + TEXAS (TWC yearly listing) where parseable; other states degrade
+honestly. Employer-&gt;ticker mapping = SignalOS downstream.
+
+  python3 verticals/generators/warn_layoff_scanner.py [--days 30]
+Writes data/WARN_LAYOFFS.json. READ-ONLY.
+
+CLOUD-IP CAVEAT (2026-07-12): the CA EDD site blocks datacenter/cloud IPs — a sweep AGENT running there
+gets an empty fetch and may misread it as &quot;stale/no data&quot; (this happened once). This is NOT staleness and
+NOT a cache: there is no cache fallback; `_ca()` fetches live only. An empty result sets degraded=[&quot;CA
+fetch/parse failed&quot;] — trust that flag, not an assumption. From the cron (residential IP) the live path
+returns current notices normally. If an agent needs WARN data, run it locally or use the last cron output.
+&quot;&quot;&quot;
+from __future__ import annotations
+import json, io, re, datetime, argparse, urllib.request
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+OUT = HERE / &quot;data&quot; / &quot;WARN_LAYOFFS.json&quot;
+UA = {&quot;User-Agent&quot;: &quot;Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/124.0 Safari/537.36&quot;}
+CA_PAGE = &quot;https://edd.ca.gov/en/jobs_and_training/Layoff_Services_WARN&quot;
+
+
+def _get(url) -&gt; bytes | None:
+    try:
+        req = urllib.request.Request(url, headers=UA)
+        with urllib.request.urlopen(req, timeout=60) as r:
+            return r.read()
+    except Exception:
+        return None
+
+
+def _ca(days: int) -&gt; list[dict]:
+    page = _get(CA_PAGE)
+    if not page:
+        return []
+    m = re.search(r&#x27;href=&quot;(/siteassets/files/jobs_and_training/warn/[^&quot;]+\.xlsx)&quot;&#x27;, page.decode(&quot;utf-8&quot;, &quot;ignore&quot;))
+    if not m:
+        return []
+    raw = _get(&quot;https://edd.ca.gov&quot; + m.group(1))
+    if not raw:
+        return []
+    try:
+        import pandas as pd
+        # the EDD workbook: header row varies; find the sheet with &#x27;Company&#x27; col
+        xl = pd.ExcelFile(io.BytesIO(raw))
+        for sheet in xl.sheet_names:
+            df = xl.parse(sheet, header=None)
+            hdr = None
+            for i in range(min(8, len(df))):
+                row = [str(x).lower() for x in df.iloc[i].tolist()]
+                if any(&quot;company&quot; in c for c in row):
+                    hdr = i
+                    break
+            if hdr is None:
+                continue
+            df = xl.parse(sheet, header=hdr)
+            cols = {c.lower().strip(): c for c in df.columns if isinstance(c, str)}
+            comp = next((cols[c] for c in cols if &quot;company&quot; in c), None)
+            emp = next((cols[c] for c in cols if &quot;employees&quot; in c or &quot;affected&quot; in c), None)
+            dt = next((cols[c] for c in cols if &quot;notice&quot; in c and &quot;date&quot; in c), None) or \
+                 next((cols[c] for c in cols if &quot;received&quot; in c), None)
+            if not comp:
+                continue
+            cutoff = datetime.date.today() - datetime.timedelta(days=days)
+            out = []
+            for _, r in df.iterrows():
+                try:
+                    d = r[dt]
+                    d = d.date() if hasattr(d, &quot;date&quot;) else datetime.datetime.strptime(str(d)[:10], &quot;%Y-%m-%d&quot;).date()
+                except Exception:
+                    continue
+                if d &lt; cutoff:
+                    continue
+                out.append({&quot;state&quot;: &quot;CA&quot;, &quot;date&quot;: d.isoformat(), &quot;employer&quot;: str(r[comp])[:60],
+                            &quot;affected&quot;: int(r[emp]) if emp and str(r[emp]).replace(&quot;.0&quot;, &quot;&quot;).isdigit() else None})
+            if out:
+                return out
+        return []
+    except Exception:
+        return []
+
+
+def scan(days: int) -&gt; dict:
+    ca = _ca(days)
+    rows = sorted(ca, key=lambda r: (r[&quot;date&quot;]), reverse=True)
+    # aggregate repeat filers (multi-site waves) — the interesting cluster signal
+    agg = {}
+    for r in rows:
+        k = re.sub(r&quot;[^A-Z0-9 ]&quot;, &quot;&quot;, r[&quot;employer&quot;].upper())[:40]
+        a = agg.setdefault(k, {&quot;employer&quot;: r[&quot;employer&quot;], &quot;notices&quot;: 0, &quot;affected&quot;: 0})
+        a[&quot;notices&quot;] += 1
+        a[&quot;affected&quot;] += r[&quot;affected&quot;] or 0
+    waves = sorted([a for a in agg.values() if a[&quot;notices&quot;] &gt;= 2 or a[&quot;affected&quot;] &gt;= 250],
+                   key=lambda a: -a[&quot;affected&quot;])
+    return {&quot;asof&quot;: datetime.date.today().isoformat(), &quot;window_days&quot;: days,
+            &quot;n_notices&quot;: len(rows), &quot;states_covered&quot;: [&quot;CA&quot;] if ca else [],
+            &quot;degraded&quot;: [] if ca else [&quot;CA fetch/parse failed — no reading&quot;],
+            &quot;waves&quot;: waves[:15], &quot;recent&quot;: rows[:20],
+            &quot;note&quot;: &quot;WARN leads layoffs 60+ days; employer-&gt;ticker = SignalOS step; TX/NY feeds queued&quot;}
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument(&quot;--days&quot;, type=int, default=30)
+    a = ap.parse_args()
+    res = scan(a.days)
+    print(f&quot;=== WARN LAYOFF SCANNER  {res[&#x27;asof&#x27;]}  ({res[&#x27;n_notices&#x27;]} notices, {res[&#x27;window_days&#x27;]}d, states {res[&#x27;states_covered&#x27;] or &#x27;NONE — degraded&#x27;}) ===&quot;)
+    if res[&quot;degraded&quot;]:
+        for d in res[&quot;degraded&quot;]:
+            print(f&quot;  DEGRADED: {d}&quot;)
+    if res[&quot;waves&quot;]:
+        print(&quot;  WAVES (multi-notice or &gt;=250 affected):&quot;)
+        for w in res[&quot;waves&quot;][:10]:
+            print(f&quot;   {w[&#x27;employer&#x27;]:&lt;52} {w[&#x27;notices&#x27;]} notices  {w[&#x27;affected&#x27;]:&gt;6,} affected&quot;)
+    print(&quot;  PROMOTE: SignalOS maps employers -&gt; tickers; wave at a STRONG name = margin action (bullish tell); at a WEAK one = distress.&quot;)
+    OUT.write_text(json.dumps(res, indent=1))
+    print(f&quot;[-&gt; {OUT.name}]&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</pre></div></body></html>

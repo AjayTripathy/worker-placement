@@ -1,0 +1,423 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>borrow_fee_scanner</title><style>
+body{margin:0;background:#0b0e12;color:#e8ebee;font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:26px 24px 90px}
+a{color:#8b7cf6} h1{font-size:23px;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:#7d858e;margin:0 0 20px;font-size:13px}
+h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:#7d858e;margin:24px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 10px;border-bottom:1px solid #242a31;text-align:left;vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#7d858e}
+.k{font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:20px}
+.k-generator{color:#c3b8fb;background:rgba(139,124,246,.15)}
+.k-detector{color:#eccb8a;background:rgba(217,164,65,.15)}
+.k-watcher{color:#8ee5c1;background:rgba(53,201,143,.15)}
+.k-evidence{color:#b3bcc6;background:rgba(138,147,158,.15)}
+.h-OK{color:#35c98f} .h-STALE{color:#d9a441} .h-ERROR{color:#e0736a} .h-NEVER_RUN{color:#8a939e}
+pre{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px;overflow-x:auto;font-size:12px;line-height:1.5}
+.panel{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px 18px;margin-bottom:12px}
+ul{margin:4px 0;padding-left:20px} li{margin-bottom:4px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+</style></head><body><div class="wrap"><h1>borrow_fee_scanner</h1><p class="sub">registered capability · borrow_fee_scanner</p><a href="signals.html">&larr; all signals</a><div class="panel" style="margin-top:10px"><span class="k k-generator">GENERATOR</span> &nbsp;<span class="h-NEVER_RUN"><b>NEVER_RUN</b></span> · last run <span class="mono">never</span></div><p>Stage-0b INFO generator: BROAD short-pressure / short-volume-ratio spike scan.</p><form method="POST" action="/signals/run" style="margin:10px 0"><input type="hidden" name="name" value="borrow_fee_scanner"><input name="symbol" placeholder="symbol (if applicable)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px"><input name="symbols" placeholder="universe, comma-sep (generators)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px;margin-left:6px"><button type="submit" style="background:#8b7cf6;color:#0b0e12;border:0;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;margin-left:6px">Run now</button></form><h2>Datasources</h2><ul><li>reference implementation: verticals/generators/borrow_fee_scanner.py (see the code section for the feeds it touches)</li></ul><h2>Applies to</h2><ul><li><b>strategies:</b> value_band_entry</li></ul><h2>The code</h2><pre>&quot;&quot;&quot;borrow_fee_scanner — Stage-0b INFO generator: BROAD short-pressure / short-volume-ratio spike scan.
+
+THESIS (INFO-class, latency edge): a spike in short-selling PRESSURE — the daily short-volume ratio
+climbing sharply above a name&#x27;s OWN trailing baseline for &gt;=2 consecutive days — is a LEADING tell of
+either fundamental DISTRESS (the short is right; deterioration ahead) or a crowded SQUEEZE-SETUP (an
+un-broken name with a piled-in short book). The pressure builds in the tape BEFORE the price resolves,
+so the edge is LATENCY: FINRA publishes this file T+1, weeks ahead of the bi-monthly short-interest print.
+
+This GENERALIZES desk/squeeze_watch.py — which only watches the 3-name SpaceX proxy-hedge basket
+(ASTS/LUNR/BKSY) for a synchronized COVERING drop — into a broad daily scan of the full ~12k-name NMS
+consolidated file, looking for the OPPOSITE-and-general signature: a short-ratio SPIKE UP on any name.
+
+CRITICAL DOCTRINE — baked in (repo memory: the MAUDE-velocity lesson):
+  A short-pressure spike measures SUPPLY / POSITIONING, NOT conviction. Naive velocity signals have
+  LR ~ 1 unless you separate demand-driven from supply-driven flow. So this scanner does NOT emit a
+  buy/sell on the spike alone. It (1) measures the spike against the name&#x27;s OWN baseline (absolute
+  short-ratio level is meaningless — MM/liquidity-provider hedging keeps it structurally 0.4-0.7),
+  (2) CLASSIFIES each flagged name through the conditioning layer (discovery_state) into distress /
+  squeeze-setup / noise, and (3) PROPOSES only — never a trade. A real spike on an already
+  DISCOVERED_CROWDED name is NOT a fresh trade (the RCAT lesson: crowding is squeeze fuel already
+  priced). The classification + conditioning are the whole point; the raw spike is just the trigger.
+
+BORROW FEE: the IBKR MCP surface (get_price_snapshot) exposes NO short-borrow-fee / utilization /
+securities-lending field — its market-data names are price/volume/IV/OI only. So borrow_fee_or_null is
+recorded as null with an honest caveat. We do NOT fabricate a borrow cost. The FINRA short-volume leg
+carries the signal; a real borrow-fee feed (IBKR SLB / Ortex / S3) is the v2 enrichment.
+
+DATA (free): FINRA CNMS Reg-SHO daily short-sale volume — http://cdn.finra.org/equity/regsho/daily/
+CNMSshvolYYYYMMDD.txt (pipe-delimited: Date|Symbol|ShortVolume|ShortExemptVolume|TotalVolume|Market).
+Same source + fingerprint logic as squeeze_watch. READ-ONLY. Never places an order.
+
+    python3 verticals/generators/borrow_fee_scanner.py
+Writes data/BORROW_FEE.json; persists data/borrow_fee_state.json for the multi-day consecutive logic.
+&quot;&quot;&quot;
+from __future__ import annotations
+
+import datetime
+import json
+import sys
+import urllib.request
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[1]
+OUT = HERE / &quot;data&quot; / &quot;BORROW_FEE.json&quot;
+STATE = HERE / &quot;data&quot; / &quot;borrow_fee_state.json&quot;
+
+HDRS = {&quot;User-Agent&quot;: &quot;signalos-research 4tripathy@gmail.com&quot;}
+URL = &quot;https://cdn.finra.org/equity/regsho/daily/CNMSshvol{d}.txt&quot;
+
+# ── Fingerprint (squeeze_watch generalized: a SPIKE UP on the whole universe) ────────────────────
+LOOKBACK = 22            # trading-day files to keep in state
+BASELINE_MIN = 8         # need &gt;=8 prior days to trust a baseline
+SPIKE_PP = 0.12          # latest ratio must sit &gt;=12pp ABOVE the trailing baseline mean
+CONSEC = 2               # ...for &gt;=2 consecutive days (one day = noise)
+# Liquidity floor: the file is dominated by illiquid microcaps where the ratio is meaningless noise.
+# Require real two-sided volume so the spike reflects genuine short flow, not a handful of prints.
+MIN_TOTAL_VOL = 300_000    # min shares/day on the latest day (a 99% ratio on a few hundred shares is noise)
+MIN_DOLLAR_VOL = 1_000_000  # min notional $/day (latest total_vol x last price) — kills ultra-thin names
+# Cap how many flagged names get the (expensive, multi-connector) discovery_state classification.
+MAX_CLASSIFY = 25
+
+
+# ── EQUITY-ONLY guard ─────────────────────────────────────────────────────────────────────────────
+# THE FIX (e2e over-firing bug): the FINRA short-VOLUME file&#x27;s ratio is dominated by bona-fide
+# MARKET-MAKER / authorized-participant hedging. For an ETF/ETN that MM/AP creation-redemption plumbing
+# pins the short-vol ratio near ~99% — a pure SUPPLY-SIDE ARTIFACT with zero conviction/squeeze content
+# (you can&#x27;t squeeze a name whose shares are minted on demand). Live top-25 was ~all ETFs (EFV, IYG,
+# USTB, HFXI, BCI, SIO, FLAU, DFGP, GLIX, CCNR ...). This scanner hunts SINGLE-NAME distress/squeeze
+# setups, so we hard-filter the candidate universe to genuine common stock (quoteType == &#x27;EQUITY&#x27;) BEFORE
+# the expensive discovery_state classification — so ETFs never consume the MAX_CLASSIFY budget or appear
+# in &#x27;flagged&#x27;. Cached to avoid re-fetching the same tickers.
+_QT_CACHE: dict[str, str] = {}
+# quoteTypes we DROP. Allow-list is &quot;EQUITY only&quot;, but we keep an explicit deny-set for readability.
+_NON_EQUITY_QT = frozenset({&quot;ETF&quot;, &quot;ETN&quot;, &quot;MUTUALFUND&quot;, &quot;MONEYMARKET&quot;, &quot;INDEX&quot;, &quot;CURRENCY&quot;,
+                            &quot;CRYPTOCURRENCY&quot;, &quot;FUTURE&quot;, &quot;OPTION&quot;})
+
+
+def _quote_type(sym: str) -&gt; str:
+    &quot;&quot;&quot;yfinance quoteType (UPPER) for sym; &#x27;&#x27; if unresolved. Cached. fast_info lacks quote_type,
+    so .info is required (heavier, but we only call it on the small spike/prelim list).&quot;&quot;&quot;
+    if sym in _QT_CACHE:
+        return _QT_CACHE[sym]
+    qt = &quot;&quot;
+    try:
+        import yfinance as yf
+        qt = str((yf.Ticker(sym).info or {}).get(&quot;quoteType&quot;) or &quot;&quot;).upper()
+    except Exception:
+        qt = &quot;&quot;
+    _QT_CACHE[sym] = qt
+    return qt
+
+
+def _is_equity(sym: str) -&gt; bool:
+    &quot;&quot;&quot;True iff sym classifies as genuine single-name common stock (quoteType == &#x27;EQUITY&#x27;).
+    UNRESOLVED (empty quoteType — yfinance miss / rate-limit) is treated as EQUITY so a lookup outage
+    does not silently blind the whole scan; the deny-set only excludes POSITIVELY-identified funds.&quot;&quot;&quot;
+    qt = _quote_type(sym)
+    if qt == &quot;&quot;:
+        return True   # fail-open: unresolved != fund; don&#x27;t drop real equities on a yfinance hiccup
+    if qt in _NON_EQUITY_QT:
+        return False
+    return qt == &quot;EQUITY&quot;
+
+
+def _fetch_day(d: datetime.date) -&gt; dict[str, tuple[float, float]]:
+    &quot;&quot;&quot;{sym: (short_vol, total_vol)} for ALL NMS names on date d; {} if no file (holiday/weekend/403).&quot;&quot;&quot;
+    try:
+        req = urllib.request.Request(URL.format(d=d.strftime(&quot;%Y%m%d&quot;)), headers=HDRS)
+        with urllib.request.urlopen(req, timeout=45) as r:
+            txt = r.read().decode(errors=&quot;ignore&quot;)
+    except Exception:
+        return {}
+    out: dict[str, tuple[float, float]] = {}
+    for ln in txt.splitlines()[1:]:
+        p = ln.split(&quot;|&quot;)
+        if len(p) &gt;= 5 and p[1] and p[1].isascii():
+            try:
+                sv, tv = float(p[2]), float(p[4])
+            except ValueError:
+                continue
+            if tv &gt; 0:
+                out[p[1]] = (sv, tv)
+    return out
+
+
+def _refresh_state() -&gt; dict:
+    &quot;&quot;&quot;Load state, backfill missing trailing FINRA days, self-prune to LOOKBACK. Compact storage:
+    per date we keep {sym: [short_ratio_x1000_int]} to stay small across ~12k names x 22 days.&quot;&quot;&quot;
+    state = json.load(open(STATE)) if STATE.exists() else {&quot;days&quot;: {}}
+    days = state.setdefault(&quot;days&quot;, {})
+    d = datetime.date.today()
+    tried, got = 0, 0
+    # Walk back until we have LOOKBACK+2 real trading-day files (skips weekends/holidays/403s).
+    while len([k for k in days]) &lt; LOOKBACK + 2 and tried &lt; 45:
+        d -= datetime.timedelta(days=1)
+        tried += 1
+        k = d.isoformat()
+        if k in days:
+            continue
+        row = _fetch_day(d)
+        if row:
+            # store short-volume RATIO (x1000, int) — compact and all we need downstream
+            days[k] = {s: round(sv / tv * 1000) for s, (sv, tv) in row.items()}
+            # keep raw latest-day volumes for the newest day (for the liquidity gate + reporting)
+            if got == 0:
+                state[&quot;latest_vol&quot;] = {s: round(tv) for s, (sv, tv) in row.items()}
+                state[&quot;latest_date&quot;] = k
+            got += 1
+    # prune to newest LOOKBACK days
+    for k in sorted(days)[:-LOOKBACK]:
+        days.pop(k, None)
+    return state
+
+
+def scan(dry: bool = False) -&gt; dict:
+    state = _refresh_state()
+    days = state[&quot;days&quot;]
+    dates = sorted(days)
+    caveats = []
+    if len(dates) &lt; BASELINE_MIN + CONSEC:
+        res = {&quot;asof&quot;: datetime.date.today().isoformat(), &quot;n_scanned&quot;: 0, &quot;flagged&quot;: [],
+               &quot;note&quot;: &quot;insufficient FINRA history to compute baselines (need &quot;
+                       f&quot;{BASELINE_MIN + CONSEC} trading days, have {len(dates)})&quot;,
+               &quot;caveats&quot;: [&quot;FINRA files unavailable or first run — rerun after backfill&quot;]}
+        if not dry:
+            OUT.write_text(json.dumps(res, indent=1))
+            json.dump(state, open(STATE, &quot;w&quot;))
+        return res
+
+    latest_date = dates[-1]
+    latest_vol = state.get(&quot;latest_vol&quot;, {})
+    consec_dates = dates[-CONSEC:]
+    base_dates = dates[:-CONSEC]
+
+    # Candidate spikes: for each name present on ALL of the last CONSEC days, ratio must sit
+    # &gt;=SPIKE_PP above its trailing baseline mean on EVERY one of those days.
+    prelim = []
+    universe = set()
+    for s, r in days[latest_date].items():
+        universe.add(s)
+    n_scanned = len(universe)
+
+    for s in universe:
+        # baseline from prior days (exclude the CONSEC recent window)
+        base = [days[dt][s] / 1000.0 for dt in base_dates if s in days[dt]]
+        if len(base) &lt; BASELINE_MIN:
+            continue
+        recent = [days[dt][s] / 1000.0 for dt in consec_dates if s in days[dt]]
+        if len(recent) &lt; CONSEC:
+            continue
+        baseline = sum(base) / len(base)
+        # spike on EVERY consecutive day
+        if not all(r - baseline &gt;= SPIKE_PP for r in recent):
+            continue
+        # liquidity gate on the latest day
+        tv = latest_vol.get(s, 0)
+        if tv &lt; MIN_TOTAL_VOL:
+            continue
+        latest_ratio = recent[-1]
+        prelim.append({
+            &quot;ticker&quot;: s,
+            &quot;short_vol_ratio&quot;: round(latest_ratio, 3),
+            &quot;baseline&quot;: round(baseline, 3),
+            &quot;spike_pp&quot;: round((latest_ratio - baseline) * 100, 1),
+            &quot;consecutive_days&quot;: CONSEC,
+            &quot;latest_total_vol&quot;: tv,
+        })
+
+    prelim.sort(key=lambda x: -x[&quot;spike_pp&quot;])
+    n_spikes = len(prelim)
+
+    # ── EQUITY-ONLY + $-liquidity filter (applied BEFORE the MAX_CLASSIFY budget) ─────────────────
+    # The e2e over-firing bug: the live top-25 was ~all ETFs (EFV/IYG/USTB/HFXI/BCI/SIO/FLAU/DFGP/...)
+    # whose ~99% short-vol ratio is MM/authorized-participant creation-redemption plumbing, not short
+    # pressure. We drop non-equity (quoteType != &#x27;EQUITY&#x27;) and ultra-thin names HERE, so ETFs never
+    # consume the classify budget or reach &#x27;flagged&#x27;. We resolve quoteType once per ticker (cached) and,
+    # in the same yfinance pull, apply a notional $-volume floor (last price x latest share volume).
+    equity_candidates = []
+    n_dropped_etf = 0
+    n_dropped_thin = 0
+    yf_ok = True
+    try:
+        import yfinance as yf  # noqa: F401  (import here so an outage fails-open below)
+    except Exception:
+        yf_ok = False
+        caveats.append(&quot;yfinance unavailable — equity-only / $-volume filter FAILED OPEN (fund tickers &quot;
+                       &quot;may leak into &#x27;flagged&#x27;; treat ETF-looking names as artifact).&quot;)
+    for row in prelim:
+        s = row[&quot;ticker&quot;]
+        if yf_ok and not _is_equity(s):
+            n_dropped_etf += 1
+            continue
+        # $-volume floor: reuse the same yfinance handle for a last price; unresolved price → fail-open.
+        px = None
+        if yf_ok:
+            try:
+                import yfinance as yf
+                fi = yf.Ticker(s).fast_info
+                px = fi.get(&quot;last_price&quot;) or fi.get(&quot;previous_close&quot;)
+            except Exception:
+                px = None
+        if px:
+            row[&quot;last_price&quot;] = round(float(px), 4)
+            row[&quot;latest_dollar_vol&quot;] = round(float(px) * row[&quot;latest_total_vol&quot;])
+            if row[&quot;latest_dollar_vol&quot;] &lt; MIN_DOLLAR_VOL:
+                n_dropped_thin += 1
+                continue
+        equity_candidates.append(row)
+
+    n_equity = len(equity_candidates)
+    to_classify = equity_candidates[:MAX_CLASSIFY]
+    if n_dropped_etf:
+        caveats.append(f&quot;{n_dropped_etf} spiking names DROPPED as non-equity (ETF/ETN/fund) — their ~99% &quot;
+                       &quot;short-vol ratio is MM/authorized-participant creation-redemption plumbing, a &quot;
+                       &quot;SUPPLY-side artifact, not a squeeze/distress setup. Equity-only by design.&quot;)
+    if n_dropped_thin:
+        caveats.append(f&quot;{n_dropped_thin} spiking equities DROPPED below the ${MIN_DOLLAR_VOL:,}/day &quot;
+                       &quot;notional-volume floor (a 99% ratio on a handful of shares is noise).&quot;)
+    if n_equity &gt; MAX_CLASSIFY:
+        caveats.append(f&quot;{n_equity} real equities spiked; classifying only the top {MAX_CLASSIFY} by &quot;
+                       &quot;spike_pp (discovery_state is a multi-connector pull). Full spike list not enriched.&quot;)
+
+    # ── CLASSIFY through the conditioning layer ──────────────────────────────────────────────────
+    # distress        : deterioration ahead — the short is likely RIGHT. AVOID / short-side only.
+    # squeeze-setup   : un-broken name, crowded short book, NOT already discovered → potential squeeze.
+    # already-crowded : real spike but the name is DISCOVERED_CROWDED → NOT a fresh trade (RCAT lesson).
+    # noise           : spike present but conditioning says nothing actionable / low confidence.
+    flagged = []
+    try:
+        sys.path.insert(0, str(ROOT))
+        from verticals.buyside_dd.connectors.discovery_state import discovery_state
+        have_ds = True
+    except Exception as e:  # pragma: no cover
+        have_ds = False
+        caveats.append(f&quot;discovery_state unavailable ({e}); flagged names carry the FINRA spike only, &quot;
+                       &quot;UNCLASSIFIED — supply/conviction separation NOT performed.&quot;)
+
+    # NOTE: ETFs/ETNs/funds are already excluded upstream by the equity-only filter (they never reach
+    # to_classify), so no per-name fund guard is needed here — everything below is genuine equity.
+    for row in to_classify:
+        t = row[&quot;ticker&quot;]
+        ds_regime = None
+        note = &quot;&quot;
+        classification = &quot;unclassified&quot;
+        if have_ds:
+            try:
+                ds = discovery_state(t, enable_options=False, enable_13f=False)
+                ds_regime = ds.get(&quot;regime&quot;)
+                si = (ds.get(&quot;components&quot;, {}).get(&quot;short_interest&quot;) or {})
+                si_pct = si.get(&quot;short_interest_pct&quot;)
+                ac = (ds.get(&quot;components&quot;, {}).get(&quot;analyst_coverage&quot;) or {})
+                rec_key = ac.get(&quot;recommendation_key&quot;)
+                # Classification logic — conditioning-layer driven, doctrine-compliant:
+                if ds_regime in (&quot;DISCOVERED_CROWDED&quot;,):
+                    classification = &quot;already-crowded&quot;
+                    note = (&quot;spike is REAL but the conditioning layer reads the name DISCOVERED_CROWDED — &quot;
+                            &quot;the short/attention is already priced (RCAT lesson: crowding is squeeze fuel, &quot;
+                            &quot;not a fresh entry). INFO only.&quot;)
+                elif ds_regime in (&quot;UNDISCOVERED&quot;, &quot;UNDISCOVERED_RETAIL_ONLY&quot;, &quot;DISCOVERING&quot;):
+                    # supply-vs-demand split we CAN&#x27;T fully do from FINRA alone → route by soft tells:
+                    # a bearish sell-side tilt or elevated SI leans distress; a quiet, un-crowded name
+                    # with a fresh short SPIKE leans squeeze-setup. Both are PROPOSALS, not calls.
+                    bearish = (rec_key in (&quot;underperform&quot;, &quot;sell&quot;)) or (si_pct is not None and si_pct &gt;= 20)
+                    if bearish:
+                        classification = &quot;distress&quot;
+                        note = (&quot;fresh short-pressure spike + bearish sell-side / elevated SI → the short &quot;
+                                &quot;may be RIGHT (deterioration). AVOID long / short-side candidate. VERIFY &quot;
+                                &quot;the fundamental catalyst before acting — this is a supply signal, not a call.&quot;)
+                    else:
+                        classification = &quot;squeeze-setup&quot;
+                        note = (&quot;fresh short-pressure spike on an un-crowded, not-yet-discovered name with &quot;
+                                &quot;no bearish sell-side tilt → potential SQUEEZE-SETUP. NOT a buy: confirm the &quot;
+                                &quot;name is un-broken (no distress catalyst) + a real borrow constraint before &quot;
+                                &quot;any defined-risk expression. Supply signal, PROPOSE only.&quot;)
+                else:
+                    classification = &quot;noise&quot;
+                    note = f&quot;conditioning layer inconclusive (regime={ds_regime}); treat as noise.&quot;
+            except Exception as e:
+                classification = &quot;unclassified&quot;
+                note = f&quot;discovery_state failed for {t}: {e}&quot;
+        row_out = {
+            &quot;ticker&quot;: t,
+            &quot;name&quot;: t,  # FINRA carries no issuer name; ticker is the key
+            &quot;short_vol_ratio&quot;: row[&quot;short_vol_ratio&quot;],
+            &quot;baseline&quot;: row[&quot;baseline&quot;],
+            &quot;spike_pp&quot;: row[&quot;spike_pp&quot;],
+            &quot;consecutive_days&quot;: row[&quot;consecutive_days&quot;],
+            &quot;latest_total_vol&quot;: row[&quot;latest_total_vol&quot;],
+            &quot;last_price&quot;: row.get(&quot;last_price&quot;),
+            &quot;latest_dollar_vol&quot;: row.get(&quot;latest_dollar_vol&quot;),
+            &quot;quote_type&quot;: &quot;EQUITY&quot;,       # equity-only filter guarantees this; ETFs never reach here
+            &quot;borrow_fee_or_null&quot;: None,   # IBKR MCP exposes no borrow/utilization field — never fabricate
+            &quot;discovery_state&quot;: ds_regime,
+            &quot;classification&quot;: classification,
+            &quot;note&quot;: note,
+        }
+        flagged.append(row_out)
+
+    res = {
+        &quot;asof&quot;: latest_date,
+        &quot;n_scanned&quot;: n_scanned,
+        &quot;n_spikes&quot;: n_spikes,
+        &quot;n_equity_spikes&quot;: n_equity,
+        &quot;n_dropped_nonequity&quot;: n_dropped_etf,
+        &quot;n_dropped_thin&quot;: n_dropped_thin,
+        &quot;flagged&quot;: flagged,
+        &quot;note&quot;: (&quot;BROAD short-pressure / short-volume-ratio SPIKE scan (generalizes squeeze_watch&#x27;s &quot;
+                 &quot;3-name basket to the full FINRA NMS file). A spike = short-vol ratio &gt;=&quot;
+                 f&quot;{int(SPIKE_PP*100)}pp above the name&#x27;s OWN {BASELINE_MIN}+day baseline for &quot;
+                 f&quot;&gt;={CONSEC} consecutive days, on genuine SINGLE-NAME EQUITIES (quoteType==&#x27;EQUITY&#x27;) &quot;
+                 f&quot;with &gt;={MIN_TOTAL_VOL:,} shares/day AND &gt;=${MIN_DOLLAR_VOL:,}/day notional. &quot;
+                 &quot;DOCTRINE: a spike measures SUPPLY/positioning, NOT conviction (the MAUDE-velocity &quot;
+                 &quot;lesson — naive velocity has LR~1). Each name is CLASSIFIED through the conditioning &quot;
+                 &quot;layer (distress vs squeeze-setup vs already-crowded vs noise) and PROPOSED only — &quot;
+                 &quot;never a buy/sell on the spike alone. A real spike on a DISCOVERED_CROWDED name is &quot;
+                 &quot;not a fresh trade (RCAT).&quot;),
+        &quot;caveats&quot;: caveats + [
+            &quot;EQUITY-ONLY BY DESIGN: ETFs/ETNs/funds are EXCLUDED. On a fund the FINRA short-vol ratio &quot;
+            &quot;runs ~99% because it is authorized-participant / market-maker creation-redemption plumbing &quot;
+            &quot;(shares minted on demand), a pure SUPPLY-side artifact with zero squeeze content — not short &quot;
+            &quot;pressure. Only quoteType==&#x27;EQUITY&#x27; single names are flagged (unresolved quoteType fails OPEN).&quot;,
+            &quot;ABSOLUTE short-vol ratio is structurally high (MM/liquidity-provider hedging keeps it &quot;
+            &quot;0.4-0.7 for most names) — ONLY the spike-vs-own-baseline is signal; the level is not.&quot;,
+            &quot;FINRA short VOLUME != short INTEREST (it&#x27;s tape-side sell flow incl. bona-fide MM hedging), &quot;
+            &quot;and it excludes dark/ATS off-tape prints unevenly. It&#x27;s a LEADING proxy, not a position count.&quot;,
+            &quot;borrow_fee_or_null is null: the IBKR MCP get_price_snapshot surface exposes no borrow-fee / &quot;
+            &quot;utilization / securities-lending field. Not fabricated. A real borrow feed = v2.&quot;,
+            &quot;distress vs squeeze-setup here is a SOFT conditioning-layer lean (sell-side tilt / SI% + &quot;
+            &quot;discovery regime), NOT a demand-vs-supply decomposition of the short flow itself (v2).&quot;,
+        ],
+    }
+    if not dry:
+        OUT.write_text(json.dumps(res, indent=1))
+        # don&#x27;t persist the giant latest_vol map long-term; keep state lean
+        state.pop(&quot;latest_vol&quot;, None)
+        json.dump({&quot;days&quot;: state[&quot;days&quot;]}, open(STATE, &quot;w&quot;))
+    return res
+
+
+def main():
+    res = scan(dry=&quot;--dry&quot; in sys.argv)
+    print(f&quot;=== BORROW-FEE / SHORT-PRESSURE SCANNER  asof {res.get(&#x27;asof&#x27;)}  &quot;
+          f&quot;({res.get(&#x27;n_scanned&#x27;, 0):,} names scanned, {res.get(&#x27;n_spikes&#x27;, 0)} spikes, &quot;
+          f&quot;{res.get(&#x27;n_dropped_nonequity&#x27;, 0)} ETF/fund dropped, &quot;
+          f&quot;{res.get(&#x27;n_dropped_thin&#x27;, 0)} thin dropped, &quot;
+          f&quot;{len(res.get(&#x27;flagged&#x27;, []))} equities classified) ===&quot;)
+    if not res.get(&quot;flagged&quot;):
+        print(&quot;  no qualifying short-pressure spikes today.&quot;)
+    for r in res.get(&quot;flagged&quot;, []):
+        tag = {&quot;distress&quot;: &quot;DISTRESS &quot;, &quot;squeeze-setup&quot;: &quot;SQUEEZE? &quot;, &quot;already-crowded&quot;: &quot;CROWDED  &quot;,
+               &quot;etf-plumbing&quot;: &quot;etf-plumb&quot;, &quot;noise&quot;: &quot;noise    &quot;,
+               &quot;unclassified&quot;: &quot;unclass  &quot;}.get(r[&quot;classification&quot;], &quot;?        &quot;)
+        print(f&quot;  {tag} {r[&#x27;ticker&#x27;]:8} ratio {r[&#x27;short_vol_ratio&#x27;]:.2f} vs base {r[&#x27;baseline&#x27;]:.2f} &quot;
+              f&quot;(+{r[&#x27;spike_pp&#x27;]:.0f}pp) vol {r[&#x27;latest_total_vol&#x27;]/1e6:.1f}M  &quot;
+              f&quot;[{r[&#x27;discovery_state&#x27;] or &#x27;n/a&#x27;}]&quot;)
+    if res.get(&quot;caveats&quot;):
+        print(&quot;  caveats: SUPPLY not conviction (PROPOSE only); borrow_fee=null (MCP has no field).&quot;)
+    print(f&quot;[-&gt; {OUT.name}]&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</pre></div></body></html>

@@ -1,0 +1,132 @@
+{
+  "ticker": "QUBT",
+  "cik": "0001758009",
+  "cutoff": "2026-05-20",
+  "filing": "0001213900-26-022417_10-K.txt",
+  "form": "10-K",
+  "filed": "2026-03-02",
+  "cohort": "jbook_exposure_divergence",
+  "_extraction_note": "10-K is conspicuously LIGHT on specific Pentagon Program Elements / named DoD programs. The defense exposure narrative rides entirely on the LSI acquisition's framing ('aerospace and defense applications') without naming any PE, PE number, IDIQ, contract value, or program-of-record. Claims below capture (a) the defense-adjacent narrative load-bearing on LSI A&D exposure, (b) the LIDAR-from-aircraft/drones/satellites pipeline language, (c) implicit DoD-customer-grant funding source, and (d) control claims (patents, facilities, counterparty disclosure). Because no specific PE is named, pentagon_jbook will largely return UNVERIFIABLE — that itself is a signal: the J-Book pattern fires when the company NAMES a PE that is then unfunded; the inverse pattern here is 'A&D narrative without any named, lookup-able PE,' which is a softer red flag (claim is unfalsifiable rather than falsified).",
+  "claims": [
+    {
+      "claim_id": "C1",
+      "claim_text": "LSI (acquired February 2026) provides photonics products and services to a customer base 'in a wide array of industries that include aerospace and defense, sensing and instrumentation, and optical communications.' Acquiring LSI is described as providing 'advanced semiconductors and related components, as well as design, testing and consulting services to industry, in particular for Aerospace and Defense applications.'",
+      "subject": "Luminar Semiconductor, Inc. (LSI)",
+      "predicate": "serves",
+      "object_value": "aerospace and defense customers (no specific DoD program, PE number, IDIQ, or contract value disclosed)",
+      "source_quote": "These production resources are employed to deliver high performance, high reliability products to a growing number of customers in a wide array of industries that include aerospace and defense, sensing and instrumentation, and optical communications. Acquiring LSI provides QCi with advanced semiconductors and related components, as well as design, testing and consulting services to industry, in particular for Aerospace and Defense applications.",
+      "category": "jbook_program_revenue",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "params": {"contractor_name": "Luminar Semiconductor", "cutoff_date": "2026-05-20"}},
+        {"source": "pentagon_jbook.query_program_funding", "params": {"contractor_name": "LSI", "cutoff_date": "2026-05-20"}},
+        {"source": "usaspending.query_dod_contracts", "params": {"recipient_name": "Luminar Semiconductor, Inc."}},
+        {"source": "usaspending.query_dod_contracts", "params": {"recipient_name": "Luminar Semiconductor"}}
+      ]
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "QCi's LIDAR technology enables 'LiDAR machines that are greatly enhanced in their ability to measure at improved resolution and distances from aircraft, drones, and even satellites' — forward-looking pipeline statement implying DoD/IC customer use, but no specific DoD program (e.g., SDA Tracking Layer, Skyborg, CCA, Project Maven, BQM-167) is named as a customer or design-in.",
+      "subject": "Quantum Computing Inc.",
+      "predicate": "develops LIDAR for",
+      "object_value": "aircraft / drones / satellites (no specific DoD platform or PE)",
+      "source_quote": "The practical benefits on payload and signal-to-noise enhancement can be used to produce LiDAR machines that are greatly enhanced in their ability to measure at improved resolution and distances from aircraft, drones, and even satellites.",
+      "category": "jbook_program_pipeline",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "params": {"program_name": "SDA Tracking Layer", "cutoff_date": "2026-05-20"}},
+        {"source": "pentagon_jbook.query_program_funding", "params": {"program_name": "AFRL Quantum Networking", "cutoff_date": "2026-05-20"}},
+        {"source": "pentagon_jbook.query_program_funding", "params": {"contractor_name": "Quantum Computing", "cutoff_date": "2026-05-20"}},
+        {"source": "pentagon_jbook.query_program_funding", "params": {"contractor_name": "QPhoton", "cutoff_date": "2026-05-20"}}
+      ]
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "QCi expects to finance operating/investing needs through 'U.S. government grant and loan programs' — names federal funding as a planned funding source but does not name specific grant programs, PEs, or contract vehicles.",
+      "subject": "Quantum Computing Inc.",
+      "predicate": "expects funding from",
+      "object_value": "U.S. government grant and loan programs (unspecified)",
+      "source_quote": "Until such time as we can generate significant revenue from sales or subscriptions of our hardware offerings, we expect to finance our operating and investing needs through our cash and cash equivalents and, equity and/or debt financings or other capital sources, including but not limited to U.S. government grant and loan programs.",
+      "category": "dod_customer_concentration",
+      "queries": [
+        {"source": "usaspending.query_dod_contracts", "params": {"recipient_name": "Quantum Computing Inc."}},
+        {"source": "usaspending.query_federal_presence", "params": {"recipient_name": "Quantum Computing Inc.", "cutoff_date": "2026-05-20"}},
+        {"source": "usaspending.query_federal_presence", "params": {"recipient_name": "QPhoton", "cutoff_date": "2026-05-20"}}
+      ]
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Total reported revenue in FY2025 was $682 thousand (Services $368K, Products $314K), up from $373K in FY2024 — derived primarily from professional services contracts. This contradicts any large-scale Pentagon program revenue narrative.",
+      "subject": "Quantum Computing Inc.",
+      "predicate": "reported FY2025 revenue of",
+      "object_value": "$682,000 total (services $368K, products $314K)",
+      "source_quote": "The Company s revenue consists of (in thousands): Year Ended December 31, 2025 2024 2023 Services $ 368 $ 346 $ 353 Products 314 27 5 Total $ 682 $ 373 $ 358",
+      "category": "dod_customer_concentration",
+      "queries": [
+        {"source": "usaspending.query_dod_contracts", "params": {"recipient_name": "Quantum Computing Inc."}},
+        {"source": "usaspending.query_federal_presence", "params": {"recipient_name": "Quantum Computing", "cutoff_date": "2026-05-20"}}
+      ]
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "QCi acquired Luminar Semiconductor, Inc. (LSI) on February 2, 2026 for $110 million cash from Luminar Technologies, Inc., which was a Chapter 11 debtor (Section 363 stalking-horse sale). QCi is now a $1.5B-cash quantum optimization company that just bought a bankrupt LiDAR auto-supplier-derived chip business and re-purposed its narrative around 'aerospace and defense.' This is the acq_coherence test case.",
+      "subject": "Quantum Computing Inc.",
+      "predicate": "acquired",
+      "object_value": "Luminar Semiconductor, Inc. for $110M cash (out of bankruptcy, Feb 2 2026)",
+      "source_quote": "The Transaction was completed on February 2, 2026. The consideration paid by the Company at closing consisted of approximately $97.5 million in cash, along with the $11.0 million of funds that were placed with an escrow agent... The Seller, together with certain of its subsidiaries, is a debtor in a voluntary Chapter 11 case before the United States Bankruptcy Court for the Southern District of Texas... Upon Bankruptcy Court approval, the Company was designated as the stalking horse bidder in connection with a sale of the Target under Section 363 of the Bankruptcy Code.",
+      "category": "rollup_thesis",
+      "queries": [
+        {"source": "acq_coherence.score_acquisition_coherence", "params": {"acquirer_ticker": "QUBT", "target_name": "Luminar Semiconductor", "cutoff_date": "2026-05-20"}},
+        {"source": "edgar_fts.query_fulltext", "params": {"q": "Luminar Semiconductor stalking horse", "cutoff_date": "2026-05-20"}}
+      ]
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "QCi has three granted U.S. patents in its name (machine-learning mapping for QPUs, variational analog quantum oracle learning). Through LSI, QCi acquired 23 issued U.S. patents (chip-based modulation, tunable lasers, optical devices), 16 pending U.S. applications, and 9 foreign publications. Control claim — verifiable via USPTO.",
+      "subject": "Quantum Computing Inc.",
+      "predicate": "holds",
+      "object_value": "3 own granted US patents + 23 LSI-acquired granted US patents",
+      "source_quote": "The Company has three granted United States patents... In connection with the Luminar Acquisition (as defined below), QCi acquired 23 issued patents, 16 pending United States patents and 9 foreign patent publications.",
+      "category": "patent",
+      "queries": [
+        {"source": "uspto_odp.query_assignee", "params": {"assignee": "Quantum Computing Inc.", "cutoff_date": "2026-05-20"}},
+        {"source": "uspto_odp.query_assignee", "params": {"assignee": "Luminar Semiconductor", "cutoff_date": "2026-05-20"}}
+      ]
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "QCi operates an AZ Chips Facility for TFLN chip R&D, prototyping and small-batch manufacturing at Arizona State University Research Park in Tempe, AZ — 9,261 sq ft, lease ending Nov 30, 2028. Plus LSI-acquired facilities in Santa Barbara, CA (20,337 sq ft), Wilmington MA (7,573 sq ft), Cranbury NJ (16,464 sq ft), Bedford MA (19,332 sq ft). Control claim — verifiable via EPA FRS / county records.",
+      "subject": "Quantum Computing Inc.",
+      "predicate": "operates facilities at",
+      "object_value": "Tempe AZ; Santa Barbara CA; Wilmington MA; Cranbury NJ; Bedford MA; Hoboken NJ (HQ)",
+      "source_quote": "The Company leases 9,261 square feet of manufacturing (semiconductor and photonic chip fabrication), laboratory, clean room, and office space in a multi-tenant building in Tempe, AZ for 51-months ending November 30, 2028... As a result of the LSI Acquisition, we also have a leased facility in Santa Barbara, CA for 20,337 square feet which expires November 30, 2026, a leased facility in Wilmington, MA for 7,573 square feet... a lease in Cranbury, NJ for 16,464 square feet... and a leased facility in Beford, MA for 19,332 square feet which expires August 31, 2028.",
+      "category": "facility",
+      "queries": [
+        {"source": "epa_frs.query_facilities", "params": {"q": "Luminar Semiconductor", "state": "CA"}},
+        {"source": "epa_frs.query_facilities", "params": {"q": "Quantum Computing", "state": "AZ"}}
+      ]
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "QCi raised $1,475.1 million net in 2025 through 86.3 million shares of common stock issuance; cash + investments of $1,520.4M at year-end (cash $737.9M + investments $782.5M). This is a small-revenue ($682K) company that is now mostly a cash shell with a quantum R&D operation and the LSI acquisition.",
+      "subject": "Quantum Computing Inc.",
+      "predicate": "raised net 2025",
+      "object_value": "$1,475.1M equity, 86.3M shares issued",
+      "source_quote": "During the year ended December 31, 2025, the Company raised net proceeds of $1,475.1 million through the private placement of equity... working capital of $1,122.7 million...",
+      "category": "other",
+      "queries": [
+        {"source": "insider_vs_calendar.query_insider_sales_near_budget_events", "params": {"cik": "0001758009", "cutoff_date": "2026-05-20"}}
+      ]
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "QCi is named in a Securities Class Action (filed Feb 25 2025) alleging false/misleading statements about 'the Company's customers, contracts and business operations' between Mar 30 2020 and Jan 15 2025, plus four shareholder derivative actions (Mar 2025, May 2025, Jun 2025, Sep 2025). The class period and the explicit subject matter ('customers, contracts and business operations') directly attack the J-Book-pattern claim space, even though the 10-K itself does not name any specific PE.",
+      "subject": "Quantum Computing Inc.",
+      "predicate": "is defendant in",
+      "object_value": "Securities Class Action alleging false statements re: customers/contracts; 4 derivative actions",
+      "source_quote": "On February 25, 2025, a class action lawsuit was filed against the Company and certain of its current and past officers in the New Jersey District Court... alleging violations of Section 10(b) and 20(a) of the Exchange Act. The complaint alleges that the Company made false and/or misleading statements and/or failed to disclose material information about the Company s customers, contracts and business operations in its public statements and SEC filings.",
+      "category": "counterparty_disclosure",
+      "queries": [
+        {"source": "edgar_fts.query_fulltext", "params": {"q": "Quantum Computing Inc securities class action customers contracts", "cutoff_date": "2026-05-20"}}
+      ]
+    }
+  ]
+}

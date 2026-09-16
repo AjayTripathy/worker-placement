@@ -1,0 +1,95 @@
+{
+  "ticker": "CRS",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Aerospace and Defense = $1,768.6M FY25 (62% of $2,877.1M net sales)",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "usaspending.query_recipient_contracts (Mode A) + usaspending.query_dod_contracts (Mode B)",
+      "M_value": "8 federal awards / $3.26M total (5 DoD / $3.14M) to CARPENTER TECHNOLOGY CORPORATION, LATROBE SPECIALTY METALS, CARPENTER ADDITIVE U.S. LLC including SP800022C0008 STRATEGIC BUFFER BEARING GRADE STEEL ($1.04M), SP800022C0013 300 M STEEL BUFFER ($912K), N0016724P0275 INGOT PRODUCTION, NASA 80NSSC26P0149 GRX-810 ADDITIVE POWDER STUDY.",
+      "interpretation": "Carpenter is a sub-tier specialty-alloy supplier whose A&D revenue flows through commercial primes (Boeing, GE Aero, P&W, Airbus) and engine OEMs. The 10-K does not claim direct federal contract revenue, so the small DoD obligations are corroborative, not contradictory. Heuristic 10 (IDIQ vs obligated) satisfied; absence of large prime-contract obligations is normal for sub-tier mill suppliers."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Mills in Reading PA, Latrobe PA, Athens AL, Hartsville SC, Clearwater FL, Washington PA, Orwigsburg PA, Elyria OH, Wauseon OH",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "epa_frs.query_facilities multi-state (Mode A) + epa_emissions (Mode B implicit via registry)",
+      "M_value": "PA: 4 facilities (Reading River Rd, Reading 101 W Bern, Latrobe 2626 Ligonier, plus zip-stub). AL: CARPENTER TECHNOLOGY CORP - ATHENS SOUTH FACILITY in Tanner. SC: CARPENTER TECHNOLOGY - HARTSVILLE OPERATIONS in McBee. FL: CARPENTER TECHNOLOGY CORPORATION in Clearwater. OH: CARPENTER TECHNOLOGY CORPORATION in Wauseon. Total ~10+ EPA-registered Carpenter sites; every disclosed location appears.",
+      "interpretation": "Strong registry corroboration. Specialty-alloy mills are emission-heavy and properly FRS-registered. No location absent."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Owns US and international patents in specialty alloys / additive manufacturing / soft magnetics; $26.1M FY25 R&D",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "uspto_odp.query_assignee parent name (Mode A) + acquired entity 'Dynamet' (Mode B)",
+      "M_value": "Parent Carpenter Technology Corporation: 30 applications / 7 granted pre-cutoff. Granted: US12188112 (Jan 2025, cold-worked cobalt-free stainless steel articles), US12121967 (Oct 2024, METAL POWDER MANAGEMENT SYSTEM FOR ADDITIVE MANUFACTURING). Pending: high-Mo duplex stainless, low-CTE nickel/cobalt alloys (Inconel-class). Dynamet Technology (acquired predecessor): 9 applications, 1 historical grant US10174407 oxygen-enriched Ti-6Al-4V (now expired non-payment).",
+      "interpretation": "PASS per heuristic 8 (n_granted >= 5 with claimed-category hits). Granted patents directly match claimed innovation areas: alloys (cobalt-free stainless), additive manufacturing (powder management), titanium (via Dynamet). $26.1M R&D consistent with this filing pace."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "No single customer >= 10% of total net sales FY23-FY25",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "Internal 10-K narrative (Mode A) + usaspending top-recipient identification (Mode B)",
+      "M_value": "USAspending top recipients show no single federal end-customer concentration; largest single DoD obligation is $1.04M (Strategic Buffer Bearing Steel) — far below any 10% threshold of $2,877M revenue (would require $287M from a single customer). Commercial customers (Boeing, engine OEMs) not visible in usaspending but mill supplier dependency on any single prime is a known structural risk; 10-K's no-concentration disclosure is internally consistent across three years.",
+      "interpretation": "Heuristic 7 applies inversely: company declares NO concentration, so there is no 'unnamed Customer A' to identify. PASS."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "$400M share buyback authorized July 2024; $101.9M executed by 6/30/2025; 100,000 shares Q4 FY25 at $240.72 avg",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": false,
+      "M_check": "sec_filings.list_filings_by_form 8-K (Mode A) + insider_vs_calendar.query_insider_sales_near_budget_events(cik='0000017843', window_days=14, start_date='2024-01-01', end_date='2026-05-20') (Mode B)",
+      "M_value": "Mode A: 50+ 8-K filings on record including capital-return cadence. Mode B: 46 Form 4 filings; 56 total insider sales worth $76.5M aggregate; 10 proximate to budget/fiscal events; 9 are DISCRETIONARY (non-10b5-1). signal=CLUSTERED_DISCRETIONARY. Most striking: 9 discretionary sales clustered 7 days AFTER the 2026-04-28 FY27 J-Book release totaling $5.53M, primarily by AKINS MARSHALL D (Chief Commercial Officer, ~$4.5M alone on 2026-05-05) and HART ANASTASIOS JOHN. Window: 14 days, kwargs exactly as specified.",
+      "interpretation": "Per prompt's explicit Mode B rule: 'If the call returns CLUSTERED_DISCRETIONARY signal: that is the highest-signal flag → SEVE or RED.' The Chief Commercial Officer (closest insider to A&D / federal-program sales pipeline) executed multi-tranche discretionary sales totaling >$4.5M within 7 days of the J-Book release, in addition to the buyback overhang absorbing dilution from compensation. This is a Mode B finding that the Mode A buyback-confirmation alone would have missed. SEVERE_UNDERDELIVERY — the capital-return narrative is being used as a price-support backstop while top commercial insider exits."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Outstanding 6.375% Senior Notes Due 2028 and 7.625% Senior Notes Due 2030",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "sec_filings.list_filings_by_form 8-K (Mode A) + claim_evolution / edgar_fts (Mode B)",
+      "M_value": "8-K filings confirm both note series existed; post-filing 8-K dated 2025-11-20 (0001104659-25-114628) announces new note issuance and redemption in full of BOTH the 6.375% 2028s AND the 7.625% 2030s, plus amendment/restatement of credit facility ($350M secured → $500M unsecured, $650M accordion, maturity 2030).",
+      "interpretation": "Both note series corroborated as of filing date. Post-filing refinance is a positive credit signal (secured → unsecured upgrade implies improved credit profile). PASS."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "~4,500 employees; 179 union production at Washington PA (CBA exp 8/31/2025), 461 union production at Latrobe PA (CBA exp 7/31/2027)",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "osha_establishments.query_establishments (Mode A) + bls_qcew (Mode B)",
+      "M_value": "16 OSHA establishment records matching Carpenter Technology including Athens AL (annual avg employees 151, NAICS 331110 forgings iron/steel mills), Athens South Additive (17 employees, NAICS 332117 powder metallurgy), Dynamet Clearwater FL, Philadelphia corporate offices (46 employees), Reading PA. NAICS codes consistent with claimed operations.",
+      "interpretation": "Headcount and facility footprint consistent with OSHA registry. Union locations (Washington PA, Latrobe PA) confirmed via FRS Latrobe + OSHA records. PASS."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "PEP segment includes Carpenter Additive (powder additive manufacturing) and Dynamet titanium business — differentiated tech position",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "uspto_odp.query_assignee 'Carpenter Additive' (Mode A) + 'Dynamet' (Mode B)",
+      "M_value": "Carpenter Additive as own assignee: 0 applications (expected — IP assigned to parent Carpenter Technology Corporation). Dynamet Technology Inc.: 9 historical applications, 1 historical grant US10174407 (oxygen-enriched Ti-6Al-4V). Carpenter Additive U.S. LLC appears as recipient on NASA award 80NSSC26P0149 for GRX-810 commercial powder reuse study (corroborates operating presence). Parent's US12121967 grant (metal powder management for additive manufacturing) covers the Carpenter Additive technology directly.",
+      "interpretation": "Brand-as-assignee shows 0 hits but that is the expected pattern when subsidiaries assign IP to parent. Real activity (NASA additive powder award; parent's granted additive patent) confirms the differentiated capability. PASS."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "Material exposure to Boeing as commercial aviation customer (risk-factor disclosure naming Boeing as a 'key participant')",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": false,
+      "M_check": "edgar_fts.query_fulltext(search_term='Carpenter Technology') (Mode A) + edgar_fts(cik='0000012927') Boeing's filings (Mode B)",
+      "M_value": "Boeing (CIK 0000012927) shows 0 mentions of 'Carpenter Technology' in EDGAR full-text search. Carpenter's own 10-K mentions Boeing only once, embedded inside a forward-looking-statement risk factor, not as a named material customer.",
+      "interpretation": "Per heuristic 7: 0 mentions in counterparty's 10-K is SEVE only when (a) counterparty large [YES], (b) claim is material [Carpenter's claim is vague — Boeing is cited as risk, not as a >10% customer (Carpenter declares no 10% customer)], (c) revenue exceeds sub-tier disclosure thresholds [unknown]. Carpenter's Boeing reference is hedge-language not a revenue claim. The asymmetric absence (Carpenter discloses Boeing as risk; Boeing never names Carpenter as supplier) is MODERATE_UNDERDELIVERY — flags Boeing-dependency narrative inconsistency without rising to a hard contradiction."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "Effective ICFR; clean Section 302/906 certs; no material weakness",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "claim_evolution.query_claim_evolution(search_term='material weakness') (Mode A) + ...(search_term='restatement') (Mode B)",
+      "M_value": "Material weakness search across 24-month window: 2 incidental mentions both classified UNRELATED (auditor-standard methodology boilerplate, not findings). Restatement search: 4 hits all classified AMENDED — all referring to amendment/restatement of the credit facility (commercial contract, not financial statements). No adverse ICFR finding, no financial restatement, no PCAOB adverse opinion.",
+      "interpretation": "ICFR remains clean; no recurring material weakness; no actual financial restatement. PASS."
+    }
+  ]
+}

@@ -1,0 +1,102 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>litigation_flow_scanner</title><style>
+body{margin:0;background:#0b0e12;color:#e8ebee;font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:26px 24px 90px}
+a{color:#8b7cf6} h1{font-size:23px;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:#7d858e;margin:0 0 20px;font-size:13px}
+h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:#7d858e;margin:24px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 10px;border-bottom:1px solid #242a31;text-align:left;vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#7d858e}
+.k{font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:20px}
+.k-generator{color:#c3b8fb;background:rgba(139,124,246,.15)}
+.k-detector{color:#eccb8a;background:rgba(217,164,65,.15)}
+.k-watcher{color:#8ee5c1;background:rgba(53,201,143,.15)}
+.k-evidence{color:#b3bcc6;background:rgba(138,147,158,.15)}
+.h-OK{color:#35c98f} .h-STALE{color:#d9a441} .h-ERROR{color:#e0736a} .h-NEVER_RUN{color:#8a939e}
+pre{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px;overflow-x:auto;font-size:12px;line-height:1.5}
+.panel{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px 18px;margin-bottom:12px}
+ul{margin:4px 0;padding-left:20px} li{margin-bottom:4px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+</style></head><body><div class="wrap"><h1>litigation_flow_scanner</h1><p class="sub">registered capability · litigation_flow_scanner</p><a href="signals.html">&larr; all signals</a><div class="panel" style="margin-top:10px"><span class="k k-generator">GENERATOR</span> &nbsp;<span class="h-NEVER_RUN"><b>NEVER_RUN</b></span> · last run <span class="mono">never</span></div><p>Stage 0b generator: NEW material federal suits, whole docket (CourtListener).</p><form method="POST" action="/signals/run" style="margin:10px 0"><input type="hidden" name="name" value="litigation_flow_scanner"><input name="symbol" placeholder="symbol (if applicable)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px"><input name="symbols" placeholder="universe, comma-sep (generators)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px;margin-left:6px"><button type="submit" style="background:#8b7cf6;color:#0b0e12;border:0;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;margin-left:6px">Run now</button></form><h2>Datasources</h2><ul><li>reference implementation: verticals/generators/litigation_flow_scanner.py (see the code section for the feeds it touches)</li></ul><h2>Applies to</h2><ul><li><b>strategies:</b> quality_value</li></ul><h2>The code</h2><pre>&quot;&quot;&quot;litigation_flow_scanner — Stage 0b generator: NEW material federal suits, whole docket (CourtListener).
+
+Inverts the litigation_screen verifier: instead of checking a named principal, scan the last N days of NEW
+federal-district dockets in the MATERIAL nature-of-suit categories (securities fraud 850, RICO 470, False
+Claims/qui tam 375/376, franchise 895-ish, investor classes) and surface PUBLIC-COMPANY defendants as
+short/avoid seeds. Exclusion is the product: these seeds mostly protect capital.
+
+  python3 verticals/generators/litigation_flow_scanner.py [--days 7]
+Writes data/NEW_LITIGATION.json. READ-ONLY; free CourtListener API (no auth needed at modest volume).
+&quot;&quot;&quot;
+from __future__ import annotations
+import json, datetime, argparse, urllib.parse, urllib.request
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+OUT = HERE / &quot;data&quot; / &quot;NEW_LITIGATION.json&quot;
+CL = &quot;https://www.courtlistener.com/api/rest/v4/search/&quot;
+HDRS = {&quot;User-Agent&quot;: &quot;signalos-research 4tripathy@gmail.com&quot;}
+# material nature-of-suit fielded queries (the anonymous SEARCH endpoint; /dockets/ requires auth)
+NOS = {&#x27;suitNature:&quot;securities&quot;&#x27;: &quot;securities/commodities/exchange&quot;, &#x27;suitNature:&quot;racketeer&quot;&#x27;: &quot;RICO&quot;,
+       &#x27;suitNature:&quot;false claims&quot;&#x27;: &quot;False Claims Act&quot;, &#x27;suitNature:&quot;qui tam&quot;&#x27;: &quot;qui tam (31 USC 3729)&quot;}
+CORP = (&quot;INC&quot;, &quot;CORP&quot;, &quot;LLC&quot;, &quot;LTD&quot;, &quot;CO.&quot;, &quot;COMPANY&quot;, &quot;PLC&quot;, &quot;HOLDINGS&quot;, &quot;GROUP&quot;, &quot;TECHNOLOGIES&quot;, &quot;PHARMA&quot;)
+
+
+def _fetch(nos_q: str, since: str) -&gt; list[dict]:
+    out, url = [], (CL + &quot;?&quot; + urllib.parse.urlencode({
+        &quot;type&quot;: &quot;r&quot;, &quot;q&quot;: nos_q, &quot;filed_after&quot;: since, &quot;order_by&quot;: &quot;dateFiled desc&quot;}))
+    for _ in range(3):
+        try:
+            req = urllib.request.Request(url, headers=HDRS)
+            with urllib.request.urlopen(req, timeout=40) as r:
+                d = json.load(r)
+        except Exception:
+            break
+        out.extend(d.get(&quot;results&quot;, []))
+        url = d.get(&quot;next&quot;)
+        if not url:
+            break
+    return out
+
+
+def _corp_defendants(case_name: str) -&gt; list[str]:
+    &quot;&quot;&quot;Corporate-looking defendant names from &#x27;X v. Y&#x27; (crude; SignalOS resolves properly downstream).&quot;&quot;&quot;
+    if &quot; v. &quot; not in (case_name or &quot;&quot;):
+        return []
+    tail = case_name.split(&quot; v. &quot;, 1)[1]
+    return [p.strip() for p in tail.split(&quot; et al&quot;)[0].split(&quot;;&quot;)
+            if any(k in p.upper() for k in CORP)][:3]
+
+
+def scan(days: int) -&gt; dict:
+    since = (datetime.date.today() - datetime.timedelta(days=days)).isoformat()
+    rows = []
+    for code, label in NOS.items():
+        for d in _fetch(code, since):
+            defs = _corp_defendants(d.get(&quot;caseName&quot;, &quot;&quot;))
+            if not defs:
+                continue
+            rows.append({&quot;filed&quot;: d.get(&quot;dateFiled&quot;, &quot;&quot;)[:10], &quot;nos&quot;: label, &quot;court&quot;: d.get(&quot;court_id&quot;) or d.get(&quot;court&quot;, &quot;&quot;),
+                         &quot;case&quot;: (d.get(&quot;caseName&quot;) or &quot;&quot;)[:90], &quot;corp_defendants&quot;: defs,
+                         &quot;docket&quot;: f&quot;https://www.courtlistener.com{d.get(&#x27;docket_absolute_url&#x27;) or d.get(&#x27;absolute_url&#x27;,&#x27;&#x27;)}&quot;})
+    rows.sort(key=lambda r: (r[&quot;filed&quot;] or &quot;&quot;), reverse=True)
+    return {&quot;asof&quot;: datetime.date.today().isoformat(), &quot;since&quot;: since, &quot;n_material_suits&quot;: len(rows), &quot;suits&quot;: rows}
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument(&quot;--days&quot;, type=int, default=7)
+    a = ap.parse_args()
+    res = scan(a.days)
+    print(f&quot;=== NEW-LITIGATION SCANNER  {res[&#x27;asof&#x27;]}  ({res[&#x27;n_material_suits&#x27;]} material federal suits w/ corporate defendants since {res[&#x27;since&#x27;]}) ===&quot;)
+    for r in res[&quot;suits&quot;][:15]:
+        print(f&quot;   {r[&#x27;filed&#x27;]}  [{r[&#x27;nos&#x27;][:22]:&lt;22}] {r[&#x27;case&#x27;][:66]}&quot;)
+    if res[&quot;n_material_suits&quot;] &gt; 15:
+        print(f&quot;   ... +{res[&#x27;n_material_suits&#x27;]-15} more in the JSON&quot;)
+    print(&quot;  PROMOTE: SignalOS resolves corporate defendants -&gt; tickers; PUBLIC defendants = avoid/short seeds; exclusion is the product.&quot;)
+    OUT.write_text(json.dumps(res, indent=1))
+    print(f&quot;[-&gt; {OUT.name}]&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</pre></div></body></html>

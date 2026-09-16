@@ -1,0 +1,25 @@
+## RED BENCH — DDOG — RECOMMEND: REJECT
+
+Premise tape-verified first: 08-06 close **$229.29** vs 08-05 close **$283.17** = **−19.03%** (IBKR daily bars). Live after-hours **$231.00**. 358,956,785 shares (10-Q) → **$82.3B** mcap. Premise CONFIRMED.
+
+**1. The buy case's stated cause is FALSE — there was no guide cut. | 8-K EX-99.1 series | Q2 rev $1,121.5M beat the $1.07–1.08B guide; FY raised $4.30–4.34B → $4.45–4.47B (+$140M). Revenue *accelerated* (+32.1% Q1 → +35.7% Q2). NRR ~120%, up from mid-110% a year ago. | CONFIRMED** — SEV: framing. Anyone buying "overreaction to a cut" is buying a fiction. The −19% has a different, worse cause.
+
+**2. STRONGEST KILL — the largest customer is already shrinking, disclosed for the first time. | 10-Q (ddog-20260630.htm), Item 1A + NRR note | "our AI-native cohort, which cohort includes our largest customer, contributed high single digit percentage points to the total Company year-over-year revenue growth for the quarter ended June 30, 2026… **Beginning in the third quarter of 2026, we saw our largest customer reduce their usage.**" Disclosure-evolution across 7 filings: cohort contribution 5pp (Q4-24) → 6 → 10 → 8 → 7 → high-single (Q1-26) → high-single (Q2-26); the reduction sentence is **NEW this quarter**. | CONFIRMED** — SEV: CRITICAL. ~8.5 of 35.7 growth points ≈ **24% of all growth, ~$70M of the $294.7M y/y increment**, sits in a cohort fronted by one unnamed whale that is now optimizing. Cohort ARR% and whale ARR% are **NOT DISCLOSED**; `customer_id` cannot resolve it (SaaS leaves no customs BOL) — **coverage gap, reported not skipped**. Whale identity **UNVERIFIED** (web-search budget exhausted).
+
+**3. Seasonality-adjusted, the Q3 guide is a genuine break, not a comp artifact. | desk/seasonality.py DDOG (n=31) | Sept-quarter median QoQ = +7.5%. Guided Q2→Q3 = **+1.65%** ($1,121.5M → $1,140M mid). Even applying the habitual beat (guide-high vs actual: +4.53/+4.08/+4.72/+3.84%, mean +4.29%), implied Q3 QoQ ≈ +6.5% — still below seasonal, vs Q2 actual +11.4% (above its +10.0% median). | CONFIRMED** — SEV: HIGH. The sandbag defense doesn't rescue it, and the beat streak is *narrowing* (+3.84% latest, smallest of four).
+
+**4. Valuation is not repaired by −19%. | 10-Q cash flow + FY guide | EV ≈ $78.3B ($82.3B − $5.0B cash + $0.99B converts). 17.6× FY26 revenue; 77× FY26 non-GAAP EBIT. GAAP operating margin **0%** (Q2 GAAP op income $5M). 6mo FCF $567.8M less 6mo gross SBC $433.2M → SBC-adjusted FCF ≈ **$270M annualized = ~290× EV**. | CONFIRMED** — SEV: HIGH.
+
+**5. Crowding — this is a give-back of a parabola, not a compounder dip. | IBKR 5Y monthly | Apr-2026 close $132.19 → Aug-5 high $292.72 (+121% in ~4 months). The −19% retraces only ~37% of that move; DDOG is still **+73% above April** and **+69.9% YTD**. | CONFIRMED** — SEV: HIGH. Positioning unwinds off an all-time high made *the prior session* do not complete in one day.
+
+**6. Optimization-cycle precedent. | IBKR monthly | 2021-23: $199.68 → $61.34 = **−69% over 14 months**, multiple failed first-bounces. 2025 scare: $170.08 → $81.63 = −52% in 4 months. | CONFIRMED** — SEV: MED-HIGH.
+
+**7. Insiders distributed into the top. | EDGAR Form 144, 38 filings since Jun-1-26 | $285.9M proposed, incl. **$36.6M filed 08-05** (the 52-week-high session) and $5.66M on print day. | CONFIRMED** (10b5-1 mix unquantified) — SEV: MED.
+
+**STRONGEST SINGLE KILL:** Finding 2. World (c) does not merely fail to be confirmed — the company's own 10-Q states the reverse is already happening at the single customer that drove the acceleration. That is world (b), concentrated in a whale, with the disclosure landing *after* a 121% four-month run. Note the honesty read: this is **disclosed** bad news (Item 1A), but the press-release takeaway ("strong quarter… customers are building and deploying with AI") diverges from it — the market re-priced on the filing, not the headline.
+
+**WHAT WOULD CHANGE MY MIND:** (a) Q3 prints ≥$1,194M (+34.8% y/y), holding the beat cadence *despite* the whale — proves the base absorbed it; (b) DDOG quantifies the whale as <5% of ARR, or names a replacement ramp; (c) RPO resumes building (it added just $10.2M in six months, $3,461.2M → $3,471.4M, after +52% y/y through Dec-31-25 — flat forward book while revenue burns the Q4-25 backlog); (d) price re-tests the $135–150 pre-parabola shelf, where world (c) optionality is free.
+
+**Conviction: 8/10.** REJECT the print-day entry, not the franchise. This is a real business with 120% NRR and 23% non-GAAP margins — but you are asked to pay ~290× SBC-adjusted FCF, 73% above April, into a disclosed and un-sized whale contraction whose last two analogues ran −52% and −69%. Wait for Q3 or the shelf.
+
+Working files: `/private/tmp/claude-501/-Users-ajay-exalted-signalos/19e93dcd-f148-4785-93b6-9c5d766d691a/scratchpad/ddog_10q.txt`, `.../ddog_pr.txt`, `.../pr_Q1-26.txt` (guide series).

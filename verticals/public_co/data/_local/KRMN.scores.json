@@ -1,0 +1,68 @@
+{
+  "ticker": "KRMN",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Services to U.S. military end-users accounted for ~$225M (~80%) of FY2023 revenue, directly or indirectly via primes.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "usaspending.query_federal_presence(name_variants=[Karman Space and Defense, Karman Holdings, Systima Technologies, AMRO Fabricating, Aerospace Engineering, American Automated Engineering, Rapid Machine Solutions])",
+      "M_value": "signal=RECURRING_FEDERAL; 3 UEIs resolved (Systima, U.S. Technology Aerospace Engineering, American Automated Engineering); n_contracts=40, contracts_amount=$46.66M lifetime direct; agencies=DoD(27)+NASA(1); grants=0.",
+      "interpretation": "Independent registry confirms a real, recurring DoD/NASA federal recipient profile. Direct awards (~$47M lifetime) are far below the ~$225M FY23 military revenue BECAUSE the prospectus explicitly frames Karman as a piece-part/subcomponent supplier whose military revenue flows INDIRECTLY through prime contractors (87% sole/single-source to primes) — those dollars are recorded as the prime's federal award, not Karman's. Per calibration #5, the indirect majority is not separately registry-visible and is not a contradiction. The directly-visible RECURRING_FEDERAL signal corroborates the federal-customer claim. PASS."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Karman captured multiple positions on key hypersonic development programs and provided content across U.S. Army/Navy/Air Force/MDA missile programs and NASA-sponsored programs.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "usaspending (harvest award titles) -> pentagon_jbook.query_program_funding per named program: Standoff Precision Guided Munitions/SOPGM, GBU-X, Small Diameter Bomb, Hypersonic, Long-Range Hypersonic Weapon, Conventional Prompt Strike, Hypersonic Defense; nasa_ntrs(Systima/Karman).",
+      "M_value": "Harvested Systima/AAE awards: 'SPEED LOADER AGILE POD SUPPORT' (FA8656, AF, $10.7M), 'GBU-X WEAPON CARRIAGE/INTERFACE/DEPLOYMENT DEMO' ($4.55M), 'STANDOFF PRECISION GUIDED MUNITIONS (SOPGM) ENGINEERING SUPPORT' ($4.39M), 'PEREGRINE 2.0 MOTOR' (NASA, AAE), Navy graphite-mandrel (solid-rocket-motor tooling). J-Book per program: Small Diameter Bomb FUNDED_SHRINKING $29.91M FY25 + SDB II FUNDED_STEADY; Long-Range Hypersonic Weapon FUNDED_STEADY $669.18M FY25; Hypersonic Defense FUNDED_SHRINKING $182.28M FY25; AF Hypersonics Prototyping UNFUNDED_THIS_YEAR (FY25 0); Conventional Prompt Strike UNFUNDED_THIS_YEAR (FY25 0); SOPGM/GBU-X NOT_FOUND in corpus. NASA: usaspending shows 1 direct NASA contract (Peregrine motor); nasa_ntrs 'Systima'=0, 'Karman'=name-ambiguous (von Karman aerodynamics).",
+      "interpretation": "Per-program J-Book discipline (one query per material named/harvested program, by program name not contractor-only) confirms the marquee hypersonic/missile programs underpinning the claim ARE forward-funded: Army LRHW $669M STEADY and MDA Hypersonic Defense $182M are large and active; the SDB family (which Systima's SPEED LOADER / GBU-X munitions-carriage awards directly map to) remains funded. Two adjacent programs (AF Hypersonics Prototyping, Navy CPS) show FY25 zeros, but the prospectus's own 'over 100 programs, no single >10%' diversification means no single-program de-funding is material — the inverse of the YSS/IONQ single-program-dependence catch. Award descriptions independently corroborate hypersonic/munitions/solid-rocket-motor content. PASS."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Space & Launch revenues supported by Blue Origin's New Glenn and ULA's Vulcan launch-vehicle programs.",
+      "severity": "UNVERIFIABLE",
+      "supports": null,
+      "M_check": "edgar_fts.query_fulltext(search_term=Karman / Systima); usaspending (commercial launch primes); these counterparties' own disclosure.",
+      "M_value": "edgar_fts 'Systima'=0 hits; 'Karman'=1881 hits but dominated by 'Von Karman' real-estate/aerodynamics false positives (top filers KBS REIT). Blue Origin is privately held (no SEC filings); ULA is a Boeing/Lockheed JV. No direct federal award ties Karman to either commercial launch program.",
+      "interpretation": "New Glenn and Vulcan are commercial/JV launch programs whose component-supplier rosters are not disclosed in any federal registry, and the counterparties (private Blue Origin, JV ULA) do not file 10-Ks that would name a subcomponent vendor. Per calibration #5, counterparty silence here is non-informative, not a contradiction. UNVERIFIABLE — honestly recorded rather than forcing weak severity."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": ">100 active programs, no single >10% of sales; three largest customers 47.3% of FY2023 revenue; sole/single-source contracts ~87% of 2023 revenue.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "revenue_concentration.query_revenue_concentration(top_customer_pct=47.3, FY2023); cross-read vs usaspending program diversity.",
+      "M_value": "revenue_concentration=UNVERIFIABLE (detector requires IDIQ vehicle/task-order % which a subcomponent supplier does not report; not a services prime). usaspending shows ~40 distinct awards across multiple munitions/space programs, consistent with a many-program supplier rather than single-program dependence.",
+      "interpretation": "The concentration metrics are fully and plainly disclosed in the prospectus (top-3 47.3%, 87% sole/single-source, no single program >10%). This is honest disclosure of a real but bounded concentration; the federal-award spread corroborates program diversity. The services-prime concentration detector does not structurally apply (no IDIQ/task-order axis), so this is scored on disclosure honesty. PASS."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "IP comprises patents/trade secrets/proprietary know-how (Design/Proprietary/Process IP); >90% of FY2023 revenue integrated at least one IP category; an executive is a named inventor on multiple patents.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "uspto_odp.query_assignee(Systima / Karman / AMRO, cutoff 2025-02-13).",
+      "M_value": "Systima Technologies, Inc.: 7 applications, 6 granted pre-cutoff incl. 'METHOD OF MAKING CARBONIZED COMPOSITES' (CPC C08J/B29C — ablative/carbonized composites). 'Karman' assignee = von Karman Institute (unrelated); 'AMRO' = ABN AMRO bank (unrelated) — name-variant noise.",
+      "interpretation": "The operating subsidiary with the deepest engineering IP (Systima) holds 6 granted patents directly on-thesis: carbonized/ablative composites, which is exactly the Propulsion Systems 'ablative composites' capability the prospectus claims. Not a Nikola-style empty-portfolio pattern. Patent existence and technology-area match both corroborate the IP claim. PASS."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Operates four manufacturing subsidiaries in Brea, El Monte, Huntington Beach (CA) and Mukilteo (WA), HQ Dallas TX, vertically integrated production.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "osha_establishments.query_establishments(Systima WA; AMRO CA; Mukilteo NAICS 3364).",
+      "M_value": "Systima Technologies Inc — 6500 Harbor Heights Pkwy, Mukilteo WA, 390 avg employees, REGISTERED_EMPLOYER. Amro Fabricating Corp — South El Monte CA, NAICS 336414 'Guided missile and space vehicle manufacturing,' 250 employees (+ Corona CA site, same NAICS). King Machine LLC also Mukilteo NAICS 336413 (aircraft parts).",
+      "interpretation": "The named CA and WA facilities are independently registered with OSHA at material scale (390 + 250+ employees) and carry the precisely on-thesis NAICS 336414 'Guided missile and space vehicle manufacturing.' Physical operational footprint is corroborated. PASS."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "FY2022 and FY2023 financial statements were restated; the company has identified material weaknesses in internal control over financial reporting.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": true,
+      "M_check": "Disclosed in-prospectus (auditor Moss Adams restatement note dated Dec 23, 2024; Risk Factors 'material weaknesses'); going_concern_detector.query_going_concern(cik=0002040127).",
+      "M_value": "Prospectus discloses a restatement of FY22/FY23 (Notes 3,12,13) and multiple identified material weaknesses in ICFR. going_concern_detector=NO_GOING_CONCERN (note: detector reached a post-cutoff 2026 10-K, disregarded for blinding; the pre-cutoff prospectus itself contains no going-concern language).",
+      "interpretation": "This is a genuine quality flag — a restatement plus unremediated material weaknesses at IPO — but it is fully and honestly disclosed by the issuer in the prospectus (auditor-affirmed restatement, named in Risk Factors). Under the honesty-alpha framework, honest disclosure of a real control weakness is a MODERATE underdelivery in fundamentals, not a hidden contradiction or fabrication. No going-concern doubt. MODERATE_UNDERDELIVERY."
+    }
+  ]
+}

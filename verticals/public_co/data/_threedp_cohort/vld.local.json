@@ -1,0 +1,633 @@
+{
+  "ticker": "vld",
+  "cutoff_date": "2024-03-31",
+  "cik": "0001825079",
+  "outcome": null,
+  "outcome_detail": "",
+  "filing": "0001628280-21-020343_S-1.txt",
+  "provider": "local",
+  "n_claims": 7,
+  "n_contradicted": 0,
+  "severity_score": 0.0,
+  "score_per_claim": 0.0,
+  "counts": {
+    "UNVERIFIABLE": 6,
+    "PASS": 1
+  },
+  "claims": [
+    {
+      "claim_id": "C-001",
+      "claim_text": "Velo3D operates an 80,000+ square foot manufacturing facility in Fremont, California where all Sapphire metal AM systems are assembled and tested.",
+      "subject": "Velo3D",
+      "predicate": "operates_factory_at",
+      "object_value": "Fremont, CA, USA (Lakeview, 80,000 sq ft, leased)",
+      "source_quote": "All of our Sapphire systems are manufactured in our 80,000+ square foot manufacturing facility in Fremont, California.",
+      "category": "physical_facility"
+    },
+    {
+      "claim_id": "C-002",
+      "claim_text": "Space Exploration Technologies Corp. (SpaceX) is Velo3D's largest customer, accounting for 28.4% of FY2022 revenue.",
+      "subject": "Velo3D",
+      "predicate": "has_customer",
+      "object_value": "SpaceX (28.4% of 2022 revenue)",
+      "source_quote": "Our largest customer, Space Exploration Technologies Corp. (\"SpaceX\"), accounted for 28.4% and 27.8% of our revenue for the year ended December 31, 2022 and 2021, respectively.",
+      "category": "customer_pipeline"
+    },
+    {
+      "claim_id": "C-003",
+      "claim_text": "Velo3D owns 58 issued patents (40 US, 18 foreign) plus 22 pending applications protecting its laser powder bed fusion (L-PBF) and Sapphire technology as of 12/31/2022.",
+      "subject": "Velo3D",
+      "predicate": "owns_patents_in",
+      "object_value": "58 issued (40 US + 18 foreign) covering L-PBF, AM, Sapphire systems, software",
+      "source_quote": "As of December 31, 2022, we own 58 issued patents of which 40 are issued U.S. patents, and 18 are issued foreign patents.",
+      "category": "technology"
+    },
+    {
+      "claim_id": "C-004",
+      "claim_text": "Velo3D has distribution partnerships with Taiyo Nippon Sanso (Japan), Avaco (South Korea), GoEngineer (US/North America) and HarTech Group (US/North America).",
+      "subject": "Velo3D",
+      "predicate": "has_partnership_with",
+      "object_value": "Taiyo Nippon Sanso, Avaco, GoEngineer, HarTech Group",
+      "source_quote": "We rely on our own sales team, as well as multiple distribution partners, including Taiyo Nippon Sanso (Japan), Avaco (South Korea), and GoEngineer and HarTech Group (North America).",
+      "category": "partnership"
+    },
+    {
+      "claim_id": "C-005",
+      "claim_text": "Velo3D operates a European Headquarters at the Augsburg Innovation Park in Augsburg, Germany with sales, application engineering and field service personnel.",
+      "subject": "Velo3D",
+      "predicate": "operates_office_at",
+      "object_value": "Augsburg Innovation Park, Augsburg, Germany (5,000 sq ft, leased)",
+      "source_quote": "Our European Headquarters at the Augsburg Innovation Park, located in Augsburg, Germany, includes teams of sales, application engineering and field service engineering personnel.",
+      "category": "physical_facility"
+    },
+    {
+      "claim_id": "C-006",
+      "claim_text": "Velo3D had 294 full-time employees as of December 31, 2022 (up from 193 in 2021).",
+      "subject": "Velo3D",
+      "predicate": "headcount_is",
+      "object_value": "294 FTE (12/31/2022)",
+      "source_quote": "As of December 31, 2022 and 2021, we had 294 and 193, respectively, full-time employees, the majority of them based at our headquarters in Campbell, California and our manufacturing facility in Fremont, California.",
+      "category": "other"
+    },
+    {
+      "claim_id": "C-007",
+      "claim_text": "Velo3D has shipped commercial Sapphire systems since the end of 2018, Sapphire XC since end of 2021, and Sapphire XC 1MZ since end of 2022 to industrial OEM customers.",
+      "subject": "Velo3D",
+      "predicate": "produces_product",
+      "object_value": "Sapphire family of metal 3D printers (Sapphire, Sapphire XC, Sapphire 1MZ, Sapphire XC 1MZ)",
+      "source_quote": "We shipped our first Sapphire XC 1MZ system at the end of 2022, one year after the Sapphire XC launch at the end of 2021, and we shipped our first Sapphire system at the end of 2018.",
+      "category": "production_volume"
+    }
+  ],
+  "queries_per_claim": {
+    "C-001": [
+      {
+        "source": "epa_frs.query_facilities",
+        "kwargs": {
+          "facility_name": "Velo3D",
+          "state_abbr": "CA"
+        },
+        "rationale": "Check whether Velo3D is registered as an EPA-regulated industrial facility in California for its Fremont assembly operations. Note: metal powder bed fusion uses fine metal powders (Ti, Ni alloys) which often trigger air/dust permits and SARA Tier II reporting."
+      },
+      {
+        "source": "epa_frs.query_facilities",
+        "kwargs": {
+          "facility_name": "Velo",
+          "state_abbr": "CA",
+          "city_filter": "Fremont"
+        },
+        "rationale": "Broader name search localized to Fremont in case the registry uses a different legal name."
+      }
+    ],
+    "C-002": [
+      {
+        "source": "edgar_fts.query_fulltext",
+        "kwargs": {
+          "search_term": "Velo3D",
+          "cutoff_date": "2024-03-31",
+          "start_date": "2018-01-01"
+        },
+        "rationale": "SpaceX is private (no CIK), so we test external SEC-filer footprint of the Velo3D brand. Distinctive name should appear across customer/competitor/supplier filings if it is a real industrial OEM with multi-year shipments."
+      }
+    ],
+    "C-003": [
+      {
+        "source": "google_patents.query_assignee",
+        "kwargs": {
+          "assignee_name": "Velo3D",
+          "cutoff_date": "2023-01-01",
+          "categorize": {
+            "laser_powder_bed_fusion": [
+              "laser",
+              "powder",
+              "bed",
+              "fusion",
+              "sintering"
+            ],
+            "additive_manufacturing": [
+              "additive",
+              "3D print",
+              "manufacturing",
+              "Sapphire"
+            ],
+            "support_structures": [
+              "support",
+              "structure",
+              "geometry"
+            ],
+            "software": [
+              "software",
+              "recipe",
+              "control"
+            ]
+          }
+        },
+        "rationale": "Check granted-patent count by claimed assignee and categorize by claimed L-PBF / AM / software buckets."
+      }
+    ],
+    "C-004": [
+      {
+        "source": "edgar_fts.query_fulltext",
+        "kwargs": {
+          "search_term": "Velo3D",
+          "cutoff_date": "2024-03-31",
+          "start_date": "2018-01-01",
+          "forms": "10-K,10-Q,20-F,40-F"
+        },
+        "rationale": "GoEngineer and HarTech are private US distributors but Taiyo Nippon Sanso parent is a public foreign issuer. Brand-mention base-rate sets context for whether US-listed counterparties disclose Velo3D."
+      }
+    ],
+    "C-005": [
+      {
+        "source": "edgar_fts.query_fulltext",
+        "kwargs": {
+          "search_term": "Augsburg Innovation Park",
+          "cutoff_date": "2024-03-31",
+          "start_date": "2018-01-01"
+        },
+        "rationale": "Augsburg Innovation Park is an institutional German tech park frequently named in corporate disclosures of tenants/partners. Real presence often surfaces somewhere in EDGAR."
+      }
+    ],
+    "C-006": [],
+    "C-007": [
+      {
+        "source": "edgar_fts.query_fulltext",
+        "kwargs": {
+          "search_term": "Sapphire XC",
+          "cutoff_date": "2024-03-31",
+          "start_date": "2018-01-01"
+        },
+        "rationale": "Distinctive product name. If Sapphire XC printers are real and shipping to industrial OEMs, the product name should leave traces in customer/competitor SEC filings."
+      }
+    ]
+  },
+  "evidence_per_claim": {
+    "C-001": [
+      {
+        "source": "epa_frs.query_facilities",
+        "kwargs": {
+          "facility_name": "Velo3D",
+          "state_abbr": "CA"
+        },
+        "result": {
+          "search_name": "Velo3D",
+          "state_abbr": "CA",
+          "city_filter": null,
+          "n_facilities": 0,
+          "facilities": [],
+          "epa_error": null
+        }
+      },
+      {
+        "source": "epa_frs.query_facilities",
+        "kwargs": {
+          "facility_name": "Velo",
+          "state_abbr": "CA",
+          "city_filter": "Fremont"
+        },
+        "result": {
+          "search_name": "Velo",
+          "state_abbr": "CA",
+          "city_filter": "Fremont",
+          "n_facilities": 0,
+          "facilities": [],
+          "epa_error": null
+        }
+      }
+    ],
+    "C-005": [
+      {
+        "source": "edgar_fts.query_fulltext",
+        "kwargs": {
+          "search_term": "Augsburg Innovation Park",
+          "cutoff_date": "2024-03-31",
+          "start_date": "2018-01-01"
+        },
+        "result": {
+          "search_term": "Augsburg Innovation Park",
+          "cik": null,
+          "total_hits": 2,
+          "top_filings": [
+            {
+              "form": "10-K",
+              "filing_date": "2022-03-28",
+              "accession": "0001628280-22-007442:velo-20211231.htm",
+              "company": [
+                "Velo3D, Inc.  (VLD, VLD-WT)  (CIK 0001825079)"
+              ]
+            },
+            {
+              "form": "10-K",
+              "filing_date": "2023-03-20",
+              "accession": "0001825079-23-000012:velo-20221231.htm",
+              "company": [
+                "Velo3D, Inc.  (VLD, VLD-WT)  (CIK 0001825079)"
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "C-006": [],
+    "C-002": [
+      {
+        "source": "edgar_fts.query_fulltext",
+        "kwargs": {
+          "search_term": "Velo3D",
+          "cutoff_date": "2024-03-31",
+          "start_date": "2018-01-01"
+        },
+        "result": {
+          "search_term": "Velo3D",
+          "cik": null,
+          "total_hits": 234,
+          "top_filings": [
+            {
+              "form": "8-K",
+              "filing_date": "2021-06-23",
+              "accession": "0001104659-21-084473:tm2120366d1_ex99-1.htm",
+              "company": [
+                "JAWS Spitfire Acquisition Corp  (VLD, VLD-WT)  (CIK 0001825079)"
+              ]
+            },
+            {
+              "form": "8-K",
+              "filing_date": "2021-10-05",
+              "accession": "0001628280-21-019670:exhibit991-super8k.htm",
+              "company": [
+                "Velo3D, Inc.  (VLD, VLD-WT)  (CIK 0001825079)"
+              ]
+            },
+            {
+              "form": "8-K",
+              "filing_date": "2022-03-02",
+              "accession": "0001628280-22-004679:exhibit991-directortransit.htm",
+              "company": [
+                "Velo3D, Inc.  (VLD, VLD-WT)  (CIK 0001825079)"
+              ]
+            },
+            {
+              "form": "8-K",
+              "filing_date": "2021-03-23",
+              "accession": "0001104659-21-040077:tm2110566d1_ex99-2.htm",
+              "company": [
+                "JAWS Spitfire Acquisition Corp  (VLD, VLD-WT)  (CIK 0001825079)"
+              ]
+            },
+            {
+              "form": "8-K",
+              "filing_date": "2023-09-26",
+              "accession": "0001825079-23-000037:exh991-pressreleasebill.htm",
+              "company": [
+                "Velo3D, Inc.  (VLD, VLD-WT)  (CIK 0001825079)"
+              ]
+            },
+            {
+              "form": "8-K",
+              "filing_date": "2023-05-01",
+              "accession": "0001825079-23-000018:exhibit991q12023earningsre.htm",
+              "company": [
+                "Velo3D, Inc.  (VLD, VLD-WT)  (CIK 0001825079)"
+              ]
+            },
+            {
+              "form": "8-K",
+              "filing_date": "2021-10-05",
+              "accession": "0001628280-21-019670:velo-20210929.htm",
+              "company": [
+                "Velo3D, Inc.  (VLD, VLD-WT)  (CIK 0001825079)"
+              ]
+            },
+            {
+              "form": "8-K",
+              "filing_date": "2023-12-15",
+              "accession": "0001825079-23-000051:ex991-vldxceotransition.htm",
+              "company": [
+                "Velo3D, Inc.  (VLD, VLD-WT)  (CIK 0001825079)"
+              ]
+            },
+            {
+              "form": "8-K",
+              "filing_date": "2023-12-28",
+              "accession": "0001825079-23-000052:exhibit992-projectvectorxd.htm",
+              "company": [
+                "Velo3D, Inc.  (VLD, VLD-WT)  (CIK 0001825079)"
+              ]
+            },
+            {
+              "form": "8-K",
+              "filing_date": "2023-07-31",
+              "accession": "0001825079-23-000026:exhibit991-adriankeppler.htm",
+              "company": [
+                "Velo3D, Inc.  (VLD, VLD-WT)  (CIK 0001825079)"
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "C-004": [
+      {
+        "source": "edgar_fts.query_fulltext",
+        "kwargs": {
+          "search_term": "Velo3D",
+          "cutoff_date": "2024-03-31",
+          "start_date": "2018-01-01",
+          "forms": "10-K,10-Q,20-F,40-F"
+        },
+        "result": {
+          "search_term": "Velo3D",
+          "cik": null,
+          "total_hits": 80,
+          "top_filings": [
+            {
+              "form": "10-Q",
+              "filing_date": "2023-05-10",
+              "accession": "0001825079-23-000019:velo-20230331.htm",
+              "company": [
+                "Velo3D, Inc.  (VLD, VLD-WT)  (CIK 0001825079)"
+              ]
+            },
+            {
+              "form": "10-Q",
+              "filing_date": "2021-11-16",
+              "accession": "0001628280-21-023566:velo-20210930.htm",
+              "company": [
+                "Velo3D, Inc.  (VLD, VLD-WT)  (CIK 0001825079)"
+              ]
+            },
+            {
+              "form": "10-Q",
+              "filing_date": "2023-11-20",
+              "accession": "0001825079-23-000044:velo-20230930.htm",
+              "company": [
+                "Velo3D, Inc.  (VLD, VLD-WT)  (CIK 0001825079)"
+              ]
+            },
+            {
+              "form": "10-K",
+              "filing_date": "2022-03-28",
+              "accession": "0001628280-22-007442:velo-20211231.htm",
+              "company": [
+                "Velo3D, Inc.  (VLD, VLD-WT)  (CIK 0001825079)"
+              ]
+            },
+            {
+              "form": "10-K",
+              "filing_date": "2023-03-20",
+              "accession": "0001825079-23-000012:velo-20221231.htm",
+              "company": [
+                "Velo3D, Inc.  (VLD, VLD-WT)  (CIK 0001825079)"
+              ]
+            },
+            {
+              "form": "10-Q",
+              "filing_date": "2022-11-14",
+              "accession": "0001825079-22-000002:velo-20220930.htm",
+              "company": [
+                "Velo3D, Inc.  (VLD, VLD-WT)  (CIK 0001825079)"
+              ]
+            },
+            {
+              "form": "10-Q",
+              "filing_date": "2023-05-10",
+              "accession": "0001825079-23-000019:exhibit101-svbletteragreem.htm",
+              "company": [
+                "Velo3D, Inc.  (VLD, VLD-WT)  (CIK 0001825079)"
+              ]
+            },
+            {
+              "form": "10-Q",
+              "filing_date": "2023-08-15",
+              "accession": "0001825079-23-000030:velo-20230630.htm",
+              "company": [
+                "Velo3D, Inc.  (VLD, VLD-WT)  (CIK 0001825079)"
+              ]
+            },
+            {
+              "form": "10-Q",
+              "filing_date": "2022-05-16",
+              "accession": "0001628280-22-014489:velo-20220331.htm",
+              "company": [
+                "Velo3D, Inc.  (VLD, VLD-WT)  (CIK 0001825079)"
+              ]
+            },
+            {
+              "form": "10-K",
+              "filing_date": "2023-03-20",
+              "accession": "0001825079-23-000012:vld-10xk2022xexhibit211.htm",
+              "company": [
+                "Velo3D, Inc.  (VLD, VLD-WT)  (CIK 0001825079)"
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "C-007": [
+      {
+        "source": "edgar_fts.query_fulltext",
+        "kwargs": {
+          "search_term": "Sapphire XC",
+          "cutoff_date": "2024-03-31",
+          "start_date": "2018-01-01"
+        },
+        "result": {
+          "search_term": "Sapphire XC",
+          "cik": null,
+          "total_hits": 29,
+          "top_filings": [
+            {
+              "form": "8-K",
+              "filing_date": "2022-03-02",
+              "accession": "0001628280-22-004685:exhibit992-q421supplemen.htm",
+              "company": [
+                "Velo3D, Inc.  (VLD, VLD-WT)  (CIK 0001825079)"
+              ]
+            },
+            {
+              "form": "8-K",
+              "filing_date": "2022-05-10",
+              "accession": "0001628280-22-013601:exhibit992q122supplement.htm",
+              "company": [
+                "Velo3D, Inc.  (VLD, VLD-WT)  (CIK 0001825079)"
+              ]
+            },
+            {
+              "form": "8-K",
+              "filing_date": "2021-11-09",
+              "accession": "0001628280-21-022537:exhibit9928-k.htm",
+              "company": [
+                "Velo3D, Inc.  (VLD, VLD-WT)  (CIK 0001825079)"
+              ]
+            },
+            {
+              "form": "8-K",
+              "filing_date": "2022-03-02",
+              "accession": "0001628280-22-004685:exhibit991-q42021earningsr.htm",
+              "company": [
+                "Velo3D, Inc.  (VLD, VLD-WT)  (CIK 0001825079)"
+              ]
+            },
+            {
+              "form": "8-K",
+              "filing_date": "2022-05-10",
+              "accession": "0001628280-22-013601:exhibit991q12022earningsre.htm",
+              "company": [
+                "Velo3D, Inc.  (VLD, VLD-WT)  (CIK 0001825079)"
+              ]
+            },
+            {
+              "form": "8-K",
+              "filing_date": "2021-11-09",
+              "accession": "0001628280-21-022537:exhibit991-8xk.htm",
+              "company": [
+                "Velo3D, Inc.  (VLD, VLD-WT)  (CIK 0001825079)"
+              ]
+            },
+            {
+              "form": "8-K",
+              "filing_date": "2023-03-02",
+              "accession": "0001825079-23-000010:exhibit991q42022earningsre.htm",
+              "company": [
+                "Velo3D, Inc.  (VLD, VLD-WT)  (CIK 0001825079)"
+              ]
+            },
+            {
+              "form": "10-K",
+              "filing_date": "2023-03-20",
+              "accession": "0001825079-23-000012:velo-20221231.htm",
+              "company": [
+                "Velo3D, Inc.  (VLD, VLD-WT)  (CIK 0001825079)"
+              ]
+            },
+            {
+              "form": "8-K",
+              "filing_date": "2022-08-09",
+              "accession": "0001628280-22-021910:exhibit991q22022earningsre.htm",
+              "company": [
+                "Velo3D, Inc.  (VLD, VLD-WT)  (CIK 0001825079)"
+              ]
+            },
+            {
+              "form": "8-K",
+              "filing_date": "2021-06-23",
+              "accession": "0001104659-21-084473:tm2120366d1_ex99-1.htm",
+              "company": [
+                "JAWS Spitfire Acquisition Corp  (VLD, VLD-WT)  (CIK 0001825079)"
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "C-003": [
+      {
+        "source": "google_patents.query_assignee",
+        "kwargs": {
+          "assignee_name": "Velo3D",
+          "cutoff_date": "2023-01-01",
+          "categorize": {
+            "laser_powder_bed_fusion": [
+              "laser",
+              "powder",
+              "bed",
+              "fusion",
+              "sintering"
+            ],
+            "additive_manufacturing": [
+              "additive",
+              "3D print",
+              "manufacturing",
+              "Sapphire"
+            ],
+            "support_structures": [
+              "support",
+              "structure",
+              "geometry"
+            ],
+            "software": [
+              "software",
+              "recipe",
+              "control"
+            ]
+          }
+        },
+        "result": {
+          "error": "status_503"
+        }
+      }
+    ]
+  },
+  "findings_by_claim": {
+    "C-001": {
+      "severity": "UNVERIFIABLE",
+      "supports": null,
+      "M_check": "EPA FRS query for facility_name='Velo3D' (CA) and facility_name='Velo' city='Fremont' (CA).",
+      "M_value": "0 facilities returned in either query.",
+      "interpretation": "Velo3D explicitly says manufacturing operations are 'limited to the final assembly and test of the system' with components/sub-assemblies sourced from suppliers. This is light-assembly of a finished machine, not metal-powder-handling production at scale, and the 10-K does not claim emissions-permitted activity. Per EPA FRS scope heuristic, absence is consistent with normal practice for a final-assembly site of integrated machines, even at 80,000 sq ft. Cannot be scored as RED_FLAG without a positive jurisdictional expectation; mark UNVERIFIABLE."
+    },
+    "C-002": {
+      "severity": "UNVERIFIABLE",
+      "supports": null,
+      "M_check": "Tried EDGAR fulltext for 'Velo3D' brand; SpaceX is private (no CIK), so direct counterparty disclosure cannot be tested.",
+      "M_value": "Velo3D returns 234 EDGAR hits since 2018; top-10 visible filings are all self-filings (CIK 0001825079). SpaceX has no SEC disclosures.",
+      "interpretation": "Per the named-counterparty recipe, the test only applies when the counterparty is a US-listed filer with a CIK. SpaceX is private and does not file 10-Ks, so neither corroboration nor contradiction is observable in EDGAR. The framework cannot adjudicate this claim from public M-sources; classify as UNVERIFIABLE rather than treating EDGAR silence as a signal."
+    },
+    "C-003": {
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "USPTO ODP query_assignee('Velo3D', cutoff=2023-01-01)",
+      "M_value": "n_total=293, n_granted=41, category_counts={'laser_powder_bed_fusion': 2, 'additive_manufacturing': 16, 'support_structures': 0, 'software': 15}",
+      "interpretation": "USPTO ODP shows 41 granted patents pre-cutoff with at least one match in claimed categories ({'laser_powder_bed_fusion': 2, 'additive_manufacturing': 16, 'support_structures': 0, 'software': 15}). Real portfolio exists."
+    },
+    "C-004": {
+      "severity": "UNVERIFIABLE",
+      "supports": null,
+      "M_check": "EDGAR fulltext for 'Velo3D' brand across major form types (10-K/Q, 20-F, 40-F).",
+      "M_value": "234 total hits since 2018; visible top-10 filings are all self-filings.",
+      "interpretation": "Three of the four named distributors (GoEngineer, HarTech, Avaco) are private and not US-listed. Taiyo Nippon Sanso is a Japan-listed gas-and-engineering conglomerate (parent Nippon Sanso Holdings) for which Velo3D 3D printer distribution would be financially immaterial; per the foreign-issuer-disclosure heuristic, 0-2 EDGAR mentions of a foreign counterparty/parent is consistent with normal practice. No basis to flag, no basis to confirm. UNVERIFIABLE."
+    },
+    "C-005": {
+      "severity": "UNVERIFIABLE",
+      "supports": null,
+      "M_check": "EDGAR fulltext for 'Augsburg Innovation Park'.",
+      "M_value": "2 hits, both Velo3D's own 10-Ks (FY21 and FY22).",
+      "interpretation": "The Augsburg Innovation Park is a real German tech-park; a 5,000-sqft sales/engineering office is not a class of asset that would normally be cross-referenced in US-listed filings. EPA FRS doesn't apply (foreign and non-industrial). No external M-source corroboration is naturally available for this kind of claim; UNVERIFIABLE."
+    },
+    "C-006": {
+      "severity": "UNVERIFIABLE",
+      "supports": null,
+      "M_check": "No M-recipe applies \u2014 headcount is not directly verifiable via the available registries.",
+      "M_value": "n/a",
+      "interpretation": "Headcount claims are difficult to test against the framework's current registry catalog. No query run."
+    },
+    "C-007": {
+      "severity": "UNVERIFIABLE",
+      "supports": null,
+      "M_check": "EDGAR fulltext for distinctive product name 'Sapphire XC'.",
+      "M_value": "29 hits; top-10 visible filings are all Velo3D's own 8-Ks/10-K.",
+      "interpretation": "External-validation evidence is thin \u2014 the distinctive product name does not surface in non-Velo3D EDGAR filings within the visible top-10. However, Velo3D's largest disclosed customer (SpaceX, 28% of revenue) is private and would never disclose in EDGAR, and 'Sapphire' as a single word is too generic to expect industry-wide hits. Per heuristic 7, treat absence-of-counterparty-mention as UNVERIFIABLE rather than RED_FLAG when the disclosed primary customer base is dominated by a private filer. A more decisive test would require trade-press or import/export records, which are not in the catalog."
+    }
+  }
+}

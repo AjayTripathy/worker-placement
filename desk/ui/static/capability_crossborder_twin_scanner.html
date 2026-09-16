@@ -1,0 +1,154 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>crossborder_twin_scanner</title><style>
+body{margin:0;background:#0b0e12;color:#e8ebee;font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:26px 24px 90px}
+a{color:#8b7cf6} h1{font-size:23px;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:#7d858e;margin:0 0 20px;font-size:13px}
+h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:#7d858e;margin:24px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 10px;border-bottom:1px solid #242a31;text-align:left;vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#7d858e}
+.k{font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:20px}
+.k-generator{color:#c3b8fb;background:rgba(139,124,246,.15)}
+.k-detector{color:#eccb8a;background:rgba(217,164,65,.15)}
+.k-watcher{color:#8ee5c1;background:rgba(53,201,143,.15)}
+.k-evidence{color:#b3bcc6;background:rgba(138,147,158,.15)}
+.h-OK{color:#35c98f} .h-STALE{color:#d9a441} .h-ERROR{color:#e0736a} .h-NEVER_RUN{color:#8a939e}
+pre{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px;overflow-x:auto;font-size:12px;line-height:1.5}
+.panel{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px 18px;margin-bottom:12px}
+ul{margin:4px 0;padding-left:20px} li{margin-bottom:4px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+</style></head><body><div class="wrap"><h1>crossborder_twin_scanner</h1><p class="sub">registered capability · crossborder_twin_scanner</p><a href="signals.html">&larr; all signals</a><div class="panel" style="margin-top:10px"><span class="k k-generator">GENERATOR</span> &nbsp;<span class="h-NEVER_RUN"><b>NEVER_RUN</b></span> · last run <span class="mono">never</span></div><p>Stage 0b generator: EM/DM TWIN-PAIR valuation gaps vs justified country risk.</p><form method="POST" action="/signals/run" style="margin:10px 0"><input type="hidden" name="name" value="crossborder_twin_scanner"><input name="symbol" placeholder="symbol (if applicable)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px"><input name="symbols" placeholder="universe, comma-sep (generators)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px;margin-left:6px"><button type="submit" style="background:#8b7cf6;color:#0b0e12;border:0;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;margin-left:6px">Run now</button></form><h2>Datasources</h2><ul><li>reference implementation: verticals/generators/crossborder_twin_scanner.py (see the code section for the feeds it touches)</li></ul><h2>Applies to</h2><ul><li><b>strategies:</b> value_band_entry</li></ul><h2>The code</h2><pre>&quot;&quot;&quot;crossborder_twin_scanner — Stage 0b generator: EM/DM TWIN-PAIR valuation gaps vs justified country risk.
+
+USER HYPOTHESIS (2026-07-03): find companies with comparables in low-risk countries whose valuation gap
+EXCEEDS what the country risk premium justifies. Twin pairs (parent/subsidiary or same-business) isolate
+the country+structure wedge better than sector medians.
+
+FOUR GUARDS ENCODED FROM THE WEEK&#x27;S LESSONS (before first run, so the first run can&#x27;t flatter itself):
+ (1) GROWTH: a PE gap explained by a growth differential is DESERVED (GARP/PEG-fragility lesson) —
+     every pair carries rev-growth columns; excess with growth_gap &gt; 3pp against the EM name = suspect;
+ (2) STRUCTURE-EARNED: controlling shareholders / float / withholding make discounts PARTLY CORRECT
+     (BSBR verdict 2026-07-03) — curated structural notes render beside the number, never hidden;
+ (3) LAMBDA: CRP applies to where revenue is EARNED not where the ticker lists (Damodaran λ);
+     curated lambda_em on each pair (1.0 = fully domestic);
+ (4) DATA BASIS: no ADR priceToBook anywhere; PE-only math with 1&lt;PE&lt;80 sanity + trailing-vs-forward
+     flagged; any |excess| &gt; 15pp = artifact trap (ADR/currency basis, the BCH class), rejected.
+The scanner proposes; the pipeline disposes. Seeds carry NO priority pre-validation.
+
+  python3 verticals/generators/crossborder_twin_scanner.py
+Writes data/CROSSBORDER_TWINS.json. READ-ONLY.
+&quot;&quot;&quot;
+from __future__ import annotations
+import json, datetime
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+OUT = HERE / &quot;data&quot; / &quot;CROSSBORDER_TWINS.json&quot;
+
+# Damodaran CRP (Jan-2026 vintage, pp) — subset needed by the pairs table
+CRP = {&quot;Brazil&quot;: 3.24, &quot;Mexico&quot;: 2.42, &quot;Indonesia&quot;: 2.46, &quot;India&quot;: 2.26, &quot;Chile&quot;: 1.10,
+       &quot;Peru&quot;: 2.05, &quot;Colombia&quot;: 2.85, &quot;Poland&quot;: 1.10, &quot;Philippines&quot;: 2.46, &quot;S.Africa&quot;: 3.43,
+       &quot;Malaysia&quot;: 1.64, &quot;Thailand&quot;: 2.26, &quot;US&quot;: 0.0, &quot;UK&quot;: 0.79, &quot;Switzerland&quot;: 0.0,
+       &quot;Netherlands&quot;: 0.0, &quot;France&quot;: 0.79, &quot;Germany&quot;: 0.0, &quot;Japan&quot;: 0.99}
+
+# curated twin pairs: (em_ticker, em_name, em_country, lambda_em, dm_ticker, dm_name, dm_country, match_quality, structure_note)
+PAIRS = [
+ (&quot;WALMEX.MX&quot;,&quot;Wal-Mart de México&quot;,&quot;Mexico&quot;,0.95,&quot;WMT&quot;,&quot;Walmart&quot;,&quot;US&quot;,&quot;parent-sub&quot;,&quot;WMT owns ~70%; float ok; same format/brand&quot;),
+ (&quot;KOF&quot;,&quot;Coca-Cola FEMSA (ADR)&quot;,&quot;Mexico&quot;,0.85,&quot;KO&quot;,&quot;Coca-Cola&quot;,&quot;US&quot;,&quot;system-twin&quot;,&quot;KO owns ~28% + FEMSA control; bottler vs brand — margin structure differs&quot;),
+ (&quot;AC.MX&quot;,&quot;Arca Continental&quot;,&quot;Mexico&quot;,0.80,&quot;KO&quot;,&quot;Coca-Cola&quot;,&quot;US&quot;,&quot;system-twin&quot;,&quot;bottler vs brand caveat as KOF&quot;),
+ (&quot;ABEV&quot;,&quot;Ambev (ADR)&quot;,&quot;Brazil&quot;,0.90,&quot;BUD&quot;,&quot;AB InBev&quot;,&quot;Belgium&quot;,&quot;parent-sub&quot;,&quot;ABI owns ~62%; same brands; BUD itself carries EM mix (lambda_dm high)&quot;),
+ (&quot;UNVR.JK&quot;,&quot;Unilever Indonesia&quot;,&quot;Indonesia&quot;,1.00,&quot;ULVR.L&quot;,&quot;Unilever plc&quot;,&quot;UK&quot;,&quot;parent-sub&quot;,&quot;parent owns ~85%; float thin; SAME products&quot;),
+ (&quot;HINDUNILVR.NS&quot;,&quot;Hindustan Unilever&quot;,&quot;India&quot;,1.00,&quot;ULVR.L&quot;,&quot;Unilever plc&quot;,&quot;UK&quot;,&quot;parent-sub&quot;,&quot;parent ~62%; the REVERSE tell — India glamour premium&quot;),
+ (&quot;NESTLEIND.NS&quot;,&quot;Nestlé India&quot;,&quot;India&quot;,1.00,&quot;NESN.SW&quot;,&quot;Nestlé SA&quot;,&quot;Switzerland&quot;,&quot;parent-sub&quot;,&quot;parent ~63%; reverse-tell candidate&quot;),
+ (&quot;CX&quot;,&quot;Cemex (ADR)&quot;,&quot;Mexico&quot;,0.60,&quot;HOLN.SW&quot;,&quot;Holcim&quot;,&quot;Switzerland&quot;,&quot;same-business&quot;,&quot;CX ~40% US/EU revenue -&gt; lambda 0.6; leverage differs (CX heavier)&quot;),
+ (&quot;TLK&quot;,&quot;Telkom Indonesia (ADR)&quot;,&quot;Indonesia&quot;,1.00,&quot;DTE.DE&quot;,&quot;Deutsche Telekom&quot;,&quot;Germany&quot;,&quot;same-business&quot;,&quot;SOE (state 52%) — structure-earned discount candidate&quot;),
+ (&quot;BAP&quot;,&quot;Credicorp (Peru)&quot;,&quot;Peru&quot;,0.90,&quot;JPM&quot;,&quot;JPMorgan&quot;,&quot;US&quot;,&quot;same-business&quot;,&quot;bank pair kept for continuity w/ CRP scanner; Lima-listed via NYSE holdco&quot;),
+ (&quot;SQM&quot;,&quot;SQM (ADR)&quot;,&quot;Chile&quot;,0.70,&quot;ALB&quot;,&quot;Albemarle&quot;,&quot;US&quot;,&quot;same-business&quot;,&quot;lithium twins; both cyclical — PE unstable at cycle turns, EV/EBITDA sanity advised&quot;),
+ (&quot;GFNORTEO.MX&quot;,&quot;Banorte&quot;,&quot;Mexico&quot;,1.00,&quot;USB&quot;,&quot;US Bancorp&quot;,&quot;US&quot;,&quot;same-business&quot;,&quot;bank; no controlling parent (true float) — cleaner than BSBR&quot;),
+ (&quot;BIMBOA.MX&quot;,&quot;Grupo Bimbo&quot;,&quot;Mexico&quot;,0.55,&quot;K&quot;,&quot;Kellanova/US packaged&quot;,&quot;US&quot;,&quot;same-business&quot;,&quot;~45% US revenue -&gt; lambda 0.55&quot;),
+ (&quot;JSE-like SAB? skip&quot;,&quot;&quot;,&quot;S.Africa&quot;,1.0,&quot;&quot;,&quot;&quot;,&quot;&quot;,&quot;skip&quot;,&quot;placeholder pruned at runtime&quot;),
+ (&quot;MHPC.L&quot;,&quot;MHP (Ukraine GDR)&quot;,&quot;Ukraine&quot;,1.0,&quot;TSN&quot;,&quot;Tyson Foods&quot;,&quot;US&quot;,&quot;same-business&quot;,&quot;war-risk extreme case; CRP table lacks Ukraine -&gt; handled as 15pp manual&quot;),
+]
+US_ERP = 4.23
+
+
+def _met(sym):
+    try:
+        import yfinance as yf
+        info = yf.Ticker(sym).info
+        pe_f = info.get(&quot;forwardPE&quot;); pe_t = info.get(&quot;trailingPE&quot;)
+        g = info.get(&quot;revenueGrowth&quot;)
+        pe = pe_f if pe_f and 1 &lt; pe_f &lt; 80 else (pe_t if pe_t and 1 &lt; pe_t &lt; 80 else None)
+        return pe, (&quot;fwd&quot; if pe is pe_f else &quot;trl&quot;), (round(g * 100, 1) if g is not None else None)
+    except Exception:
+        return None, None, None
+
+
+def scan():
+    rows, rejects = [], []
+    for em, em_n, ctry, lam, dm, dm_n, dm_c, quality, note in PAIRS:
+        if quality == &quot;skip&quot; or not dm:
+            continue
+        pe_e, basis_e, g_e = _met(em)
+        pe_d, basis_d, g_d = _met(dm)
+        if not pe_e or not pe_d:
+            rejects.append({&quot;pair&quot;: f&quot;{em}/{dm}&quot;, &quot;guard&quot;: &quot;no usable PE&quot;})
+            continue
+        ey_gap = (1 / pe_e - 1 / pe_d) * 100
+        crp = CRP.get(ctry, 15.0 if ctry == &quot;Ukraine&quot; else None)
+        if crp is None:
+            rejects.append({&quot;pair&quot;: f&quot;{em}/{dm}&quot;, &quot;guard&quot;: f&quot;no CRP for {ctry}&quot;})
+            continue
+        justified = crp * lam - CRP.get(dm_c, 0.0)
+        excess = ey_gap - justified
+        if abs(excess) &gt; 15:
+            rejects.append({&quot;pair&quot;: f&quot;{em}/{dm}&quot;, &quot;guard&quot;: f&quot;artifact trap |excess| {excess:.0f}pp (BCH class)&quot;})
+            continue
+        growth_gap = (g_d - g_e) if (g_d is not None and g_e is not None) else None
+        growth_flag = bool(growth_gap is not None and growth_gap &gt; 3 and excess &gt; 0)
+        rows.append({&quot;em&quot;: em, &quot;em_name&quot;: em_n, &quot;dm&quot;: dm, &quot;country&quot;: ctry, &quot;lambda&quot;: lam,
+                     &quot;pe_em&quot;: round(pe_e, 1), &quot;pe_dm&quot;: round(pe_d, 1), &quot;basis&quot;: f&quot;{basis_e}/{basis_d}&quot;,
+                     &quot;ey_gap_pp&quot;: round(ey_gap, 1), &quot;justified_pp&quot;: round(justified, 1),
+                     &quot;excess_pp&quot;: round(excess, 1), &quot;rev_g_em&quot;: g_e, &quot;rev_g_dm&quot;: g_d,
+                     &quot;growth_explains&quot;: growth_flag, &quot;match&quot;: quality, &quot;structure&quot;: note})
+    rows.sort(key=lambda r: -r[&quot;excess_pp&quot;])
+    return {&quot;asof&quot;: datetime.date.today().isoformat(), &quot;crp_vintage&quot;: &quot;Jan-2026&quot;,
+            &quot;doctrine&quot;: &quot;guards 1-4 in docstring; excess&gt;0 + growth_explains=False + structure surmountable = candidate; &quot;
+                        &quot;NEGATIVE excess rows = glamour-premium calibration (the India tell), not shorts&quot;,
+            &quot;pairs&quot;: rows, &quot;rejects&quot;: rejects}
+
+
+BASELINE = HERE / &quot;data&quot; / &quot;CROSSBORDER_TWINS_BASELINE_20260703.json&quot;
+DRIFT_FLAG_PP = 2.0     # a pair moving &gt;=2pp vs its baseline excess = a dislocation candidate, not a level
+
+
+def main():
+    res = scan()
+    # dislocation detection: daily cadence exists to catch a pair BLOWING OUT vs its own history
+    try:
+        base = {p[&quot;em&quot;]: p[&quot;excess_pp&quot;] for p in json.loads(BASELINE.read_text()).get(&quot;pairs&quot;, [])}
+        for p in res[&quot;pairs&quot;]:
+            b = base.get(p[&quot;em&quot;])
+            if b is not None:
+                p[&quot;drift_pp&quot;] = round(p[&quot;excess_pp&quot;] - b, 1)
+    except Exception:
+        pass
+    print(f&quot;=== CROSS-BORDER TWIN SCANNER  {res[&#x27;asof&#x27;]}  ({len(res[&#x27;pairs&#x27;])} pairs, {len(res[&#x27;rejects&#x27;])} rejected) ===&quot;)
+    for p in res[&quot;pairs&quot;]:
+        d = p.get(&quot;drift_pp&quot;)
+        if d is not None and abs(d) &gt;= DRIFT_FLAG_PP:
+            print(f&quot;  &gt;&gt;&gt; FLAG TWIN-DISLOCATION: {p[&#x27;em&#x27;]} vs {p[&#x27;dm&#x27;]} excess moved {d:+}pp vs the Jul-2026 baseline &quot;
+                  f&quot;(now {p[&#x27;excess_pp&#x27;]}pp) — check what broke: FX panic / country headline / earnings; &quot;
+                  f&quot;same-business pair = the Oakland-playbook shape IF the cause doesn&#x27;t touch the business&quot;)
+    for r in res[&quot;pairs&quot;]:
+        gf = &quot; GROWTH-EXPLAINED&quot; if r[&quot;growth_explains&quot;] else &quot;&quot;
+        print(f&quot;  {r[&#x27;em&#x27;]:&lt;14} PE {r[&#x27;pe_em&#x27;]:&gt;5} vs {r[&#x27;dm&#x27;]:&lt;7} PE {r[&#x27;pe_dm&#x27;]:&gt;5} | EY gap {r[&#x27;ey_gap_pp&#x27;]:&gt;5}pp&quot;
+              f&quot; just. {r[&#x27;justified_pp&#x27;]:&gt;4}pp -&gt; EXCESS {r[&#x27;excess_pp&#x27;]:&gt;5}pp{gf} | {r[&#x27;structure&#x27;][:45]}&quot;)
+    for x in res[&quot;rejects&quot;]:
+        print(f&quot;  REJECT {x[&#x27;pair&#x27;]}: {x[&#x27;guard&#x27;]}&quot;)
+    OUT.write_text(json.dumps(res, indent=1))
+    print(f&quot;[-&gt; {OUT.name}]  The scanner proposes; the pipeline disposes.&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</pre></div></body></html>

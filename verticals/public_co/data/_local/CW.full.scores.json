@@ -1,0 +1,109 @@
+{
+  "ticker": "CW",
+  "cutoff": "2026-05-20",
+  "filing": "0001628280-26-007587_10-K.txt",
+  "filing_date": "2026-02-12",
+  "filing_age_days": 97,
+  "scores": [
+    {
+      "claim_id": "CW-01",
+      "claim_text": "47% of 2025 net sales (~$1.647B) from U.S. Government and prime contractors",
+      "severity": "PASS",
+      "supports": true,
+      "M_check_mode_A": "usaspending.query_recipient_contracts(recipient_name='Curtiss-Wright')",
+      "M_check_mode_B": "usaspending.query_dod_contracts(recipient_name='Curtiss-Wright')",
+      "M_value": "2,609 federal awards $336.8M; 2,361 DoD awards $325M; subs span Curtiss-Wright Electro-Mechanical, Curtiss-Wright DS, Curtiss-Wright Flow Control, Curtiss-Wright Controls — across NAVSEA, F-35, etc.",
+      "interpretation": "PASS on Mode A: deep federal contractor footprint with named subsidiaries across DoD/DoJ. Mode B note: direct USAspending obligations ($325M DoD) are far below disclosed $1.647B in US Gov sales — gap consistent with subcontractor revenue (CW supplies primes like GD/HII/BWXT/Newport News for Virginia/Columbia/Ford) which USAspending does not surface. Per heuristic 10, this is expected for a defense electronics + naval propulsion sub-tier supplier and not a contradiction."
+    },
+    {
+      "claim_id": "CW-02",
+      "claim_text": "Supplies Virginia/Columbia/Ford-class shipbuilding programs",
+      "severity": "PASS",
+      "supports": true,
+      "M_check_mode_A": "usaspending.query_dod_contracts(recipient_name='Curtiss-Wright')",
+      "M_check_mode_B": "pentagon_jbook.query_program_funding(program_name='Columbia/Virginia/Ford', contractor='Curtiss-Wright')",
+      "M_value": "USAspending shows CURTISS-WRIGHT ELECTRO-MECHANICAL CORPORATION as direct NAVSEA awardee with awards like N0010423CZA21 ($57.6M MOTOR,ALTERNATING C), N0010423CZA20 ($33.3M ACTUATOR,MECHANICAL), N0002405C4217 ($16.2M MISCELLANEOUS ENGINES AND COMPONENTS / SHIPS / Cheswick, PA). Pentagon J-Book corpus returned NOT_FOUND for Columbia/Virginia/Ford (J-Book hand-extracted set does not cover these shipbuilding lines).",
+      "interpretation": "Mode A: confirmed via NAVSEA awards to CW Electro-Mechanical (Cheswick PA naval-nuclear propulsion plant). Mode B: pentagon_jbook NOT_FOUND is a coverage gap (per its own _note), not a contradiction — shipbuilding programs are funded via SCN appropriation outside the J-Book RDT&E/Procurement program lines we have indexed. Heuristic 1/5: do not red-flag on out-of-scope registry silence."
+    },
+    {
+      "claim_id": "CW-03",
+      "claim_text": "Supplies Westinghouse AP1000 Reactor Coolant Pumps and CRDMs; pursuing SMR designs",
+      "severity": "UNVERIFIABLE",
+      "supports": null,
+      "M_check_mode_A": "edgar_fts.query_fulltext('AP1000 reactor coolant pump')",
+      "M_check_mode_B": "edgar_fts.query_fulltext('Curtiss-Wright Reactor Coolant Pump')",
+      "M_value": "Mode A returned 0 filings for 'AP1000 reactor coolant pump' phrase; Mode B 0 filings for 'Curtiss-Wright Reactor Coolant Pump'. Westinghouse Electric is privately-held (Brookfield/Cameco JV post-2023) and does not file 10-Ks — counterparty-disclosure check is structurally not applicable.",
+      "interpretation": "Per heuristic 7: counterparty (Westinghouse) is private — zero-hits in EDGAR is expected and not a SEVERE. CW has been the public-record AP1000 RCP supplier since the original 2007 Westinghouse contract; this is well-established A&D history but cannot be cleanly verified through our 32-source M-catalog at this run. UNVERIFIABLE."
+    },
+    {
+      "claim_id": "CW-04",
+      "claim_text": "2 acquisitions in 2024 for $235M (zero in 2025); $1.7B goodwill",
+      "severity": "PASS",
+      "supports": true,
+      "M_check_mode_A": "sec_filings.list_filings_by_form(cik='0000026324', forms=['8-K'])",
+      "M_check_mode_B": "acq_coherence.score_acquisition_coherence(parent_thesis=CW A&D + nuclear, acquisitions=[WSC Inc., Ultra Energy])",
+      "M_value": "8-K corpus shows 2024 8-Ks consistent with acquisition activity. Acq coherence (LLM): WSC Inc. coherence=0.75 (nuclear simulation/training), Ultra Energy coherence=0.82 (nuclear sensors/I&C), mean=0.785, signal=COHERENT_ROLLUP. Both targets identified via prior-year ICFR carve-out language in 2024 10-K ('did not include the internal control over financial reporting at WSC and Ultra Energy').",
+      "interpretation": "PASS: both 2024 acquisitions are nuclear adjacencies (training/simulation + I&C sensors) directly extending CW's stated commercial-nuclear and naval-nuclear thesis. No Mode B incoherence flag — this is a disciplined adjacency rollup, not a synthetic-growth pattern."
+    },
+    {
+      "claim_id": "CW-05",
+      "claim_text": "146 facilities worldwide; principal US manufacturing in AZ, CA, NY, NC, OH, PA, SC + Canada/Mexico/UK",
+      "severity": "PASS",
+      "supports": true,
+      "M_check_mode_A": "epa_frs.query_facilities('Curtiss-Wright', state)",
+      "M_check_mode_B": "osha_establishments.query_establishments(company_name='Curtiss-Wright')",
+      "M_value": "EPA FRS: 4 facilities in PA (Cheswick Electro-Mechanical, Mt Pleasant APSD, Bethlehem EPD, Newtown), 16 in NY, plus 9 'Metal Improvement' (Curtiss-Wright Surface Technologies brand) sites in CA. OSHA returned 15 matches including Metal Improvement Livermore CA, Williams Controls Portland OR, Arens Controls Arlington Heights IL, CW Gilbert AZ, CW Fleet Solutions Chesapeake VA (Naval ship building NAICS 336611), CW Hauppauge NY (sensors), CW Flow Control Aston PA.",
+      "interpretation": "PASS: state-level footprint matches the 10-K narrative (AZ Gilbert, PA Cheswick/Bethlehem/Newtown/Aston, NY Hauppauge, CA Livermore, OR Portland confirmed via brand subsidiaries). OSHA cross-confirms via Surface Technologies / Williams Controls / Arens Controls / Fleet Solutions subsidiary brands. Heuristic 1 satisfied: EPA-regulated naval-nuclear & metal-finishing operations are properly scoped to FRS."
+    },
+    {
+      "claim_id": "CW-06",
+      "claim_text": "$465M buyback in 2025; 10b5-1 plans of $200M+$200M in 2025 and $60M+$100M for 2026",
+      "severity": "PASS",
+      "supports": true,
+      "M_check_mode_A": "sec_filings.list_filings_by_form(cik='0000026324', forms=['8-K'])",
+      "M_check_mode_B": "insider_vs_calendar.query_insider_sales_near_budget_events(cik='0000026324', window_days=14, start_date='2024-01-01', end_date='2026-05-20')",
+      "M_value": "8-K of 2025-08-11 (accession 0001628280-25-039508), 2025-09-11 (0000026324-25-000042), 2025-11-21 (0001628280-25-053521) consistent with buyback program / 10b5-1 plan announcements. Insider behavior (Mode B): n_form4=57, n_sales=27, total $26.7M; n_proximate_sales=1 ($172,800 by Watts John C on 2026-01-08, 12 days before FY26 bipartisan budget signed), is_10b5_1=True → signal=ROUTINE_10B5_1; n_discretionary_proximate=0.",
+      "interpretation": "PASS. Mode A: repurchase 8-Ks present, 10b5-1 plan filings on the dates 10-K describes. Mode B (per the prompt's exact kwarg spec): insider sales are ROUTINE_10B5_1 with ZERO discretionary clusters around budget/PB events. This is the inverse of the SEVE-RED CLUSTERED_DISCRETIONARY pattern."
+    },
+    {
+      "claim_id": "CW-07",
+      "claim_text": "Patent / IP leadership claim across MOSA defense electronics + nuclear + valves; on >400 platforms and >3,000 programs",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": false,
+      "M_check_mode_A": "uspto_odp.query_assignee('Curtiss-Wright', cutoff='2026-05-20')",
+      "M_check_mode_B": "uspto_odp.query_assignee('Curtiss-Wright Controls' / 'Curtiss-Wright Electro-Mechanical' / 'Curtiss-Wright Flow Control')",
+      "M_value": "Broad 'Curtiss-Wright' search returned 1,010 applications / 357 granted, but applicant filter shows the bulk are Wright Medical Technology / Wright Electric / Howard Wright / other 'Wright' assignees — NOT Curtiss-Wright Corp. Subsidiary-specific searches: 'Curtiss-Wright Controls' = 10 apps / 2 granted; 'Curtiss-Wright Electro-Mechanical' = 17 apps / 2 granted (3 CW-filtered granted); 'Curtiss-Wright Flow Control' = 37 apps / 7 granted (6 CW-filtered granted); 'Curtiss-Wright Defense Solutions' = 0 / 0.",
+      "interpretation": "MOD: Granted patents under Curtiss-Wright legal-entity assignee names total ~11-15 across all subsidiaries (per heuristic 8 PASS threshold of >=5 with claimed-category hit). PASS on the absolute floor — but for a 'patent and trade-secret based' >400-platform claimant with $1.7B goodwill, the public patent count is unimpressive vs. peers. Per heuristic 8 this is NOT a Nikola pattern (no claimed-category zero); but the IP narrative is materially thinner than the company's positioning. Flagged MOD."
+    },
+    {
+      "claim_id": "CW-08",
+      "claim_text": "Deloitte unqualified ICFR opinion as of Dec 31, 2025; no material weakness; 2024 Restructuring substantially complete",
+      "severity": "PASS",
+      "supports": true,
+      "M_check_mode_A": "edgar_fts.query_fulltext('Curtiss-Wright material weakness', cik='0000026324')",
+      "M_check_mode_B": "claim_evolution.query_claim_evolution(cik='0000026324', search_term='material weakness', base_filing_date='2024-02-15', cutoff_date='2026-05-20')",
+      "M_value": "edgar_fts: 0 hits for the explicit phrase 'Curtiss-Wright material weakness' in CW filings. claim_evolution: 3 mentions, all classified UNRELATED (standard auditor boilerplate; prior-year 10-K explicitly noted the WSC and Ultra Energy ICFR carve-outs as new acquisitions, which is GAAP-permitted and not adverse). 0 adverse findings, 0 amendment hits. evolution_status = MENTIONED_INCIDENTALLY.",
+      "interpretation": "PASS: no material weakness or restatement history; ICFR carve-out for the 2024 acquisitions (WSC/Ultra Energy) is standard post-acquisition treatment, not adverse."
+    },
+    {
+      "claim_id": "CW-09",
+      "claim_text": "No single customer >10% of net sales 2023-2025; US Gov aggregate 47%",
+      "severity": "PASS",
+      "supports": true,
+      "M_check_mode_A": "Read 10-K narrative",
+      "M_check_mode_B": "usaspending.query_recipient_contracts(recipient_name='Curtiss-Wright') — identify top US Gov agencies",
+      "M_value": "Top direct USAspending recipients of CW awards: DoD (Navy/Air Force) dominant via NAVSEA SUPSHIP awards to CW Electro-Mechanical (Cheswick PA), Air Force F-35 data acquisition awards to CW DS Inc., DoJ ($17.5M deployment kits to CW DS). FY snapshot largest single UEI: parent CURTISS-WRIGHT CORPORATION at $33.9M, then CW DS / CW Electro-Mechanical / CW Flow Control subs ($15M / $13M / $10M tier). 37 UEIs total resolved.",
+      "interpretation": "PASS: highly diversified federal footprint across DoD/DoJ and multiple Navy program offices, consistent with 'no single customer >10%' framing. US Gov as aggregate top exposure makes sense at the ~47% disclosed level. No hidden concentration identified."
+    },
+    {
+      "claim_id": "CW-10",
+      "claim_text": "Active SAM.gov federal contractor registration",
+      "severity": "PASS",
+      "supports": true,
+      "M_check_mode_A": "sam_entity.query_entity_by_uei('J9V9SJL4CW97')",
+      "M_check_mode_B": "usaspending.query_federal_presence(name_variants=[...])",
+      "M_value": "sam_entity returned no_entity_found for the parent UEI (consistent with the SAM API key/scope limitation for many lookups), but Mode B usaspending.query_federal_presence resolved 37 distinct UEIs across Curtiss-Wright Corporation + DS + Electro-Mechanical + Controls + Flow Control + Surface Technologies. The 2,609 federal awards in claim CW-01 cannot exist without an active SAM registration.",
+      "interpretation": "PASS via Mode B (federal-presence cross-check): CW is unambiguously an active multi-UEI federal contractor; the Mode A sam_entity lookup tool returned no_entity_found, which is a tool-coverage issue rather than a contradiction (heuristic 1/5)."
+    }
+  ]
+}

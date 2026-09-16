@@ -1,0 +1,86 @@
+{
+  "ticker": "RCAT",
+  "cutoff": "2026-05-16",
+  "filing": "0001628280-26-019861_10-K.txt",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Teal selected as winner of U.S. Army SRR Program of Record (Nov 2024); FY2025 revenue growth attributed primarily to scaling drone deliveries under SRR program.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": ["usaspending.query_dod_contracts: Teal Drones 27 awards, $2.17M total; largest single award $750K (FA700025P0127 for 74 Teal 2 drones to USAFA/A3); no award description mentions 'Short Range Reconnaissance' or 'Program of Record'", "usaspending.query_recipient_contracts: Red Cat Holdings 18 awards $3.79M total across DoD ($pieces), DHS, USDA, VA — bulk to non-DoD agencies", "Award IDs are predominantly Air Force base-level FA-series purchase orders ranging $15K-$750K, plus Army National Guard small buys — not Program-of-Record IDIQ ceilings"],
+      "M_check": "usaspending.gov DoD obligations to all RCAT recipient name variants (Red Cat, Teal Drones, FlightWave, Red Cat Holdings, Skypersonic)",
+      "M_value": {"teal_dod_n_awards": 27, "teal_dod_total_usd": 2170157.21, "redcat_dod_n_awards": 7, "redcat_dod_total_usd": 474996.63, "flightwave_dod_n_awards": 8, "flightwave_dod_total_usd": 2297860.0, "skypersonic_dod_n_awards": 0, "all_subsidiaries_dod_total_usd": 4942014, "largest_single_teal_award_usd": 750000, "largest_award_descr": "74 TEAL 2 DRONES FOR USAFA/A3", "any_award_mentioning_SRR_or_program_of_record": "none in top 25 descriptions"},
+      "interpretation": "RCAT claims FY2025 $40.7M revenue with ~73% from US Government (~$29.7M), primarily driven by SRR Program of Record scaling. USAspending shows only ~$4.9M of DoD obligations across ALL RCAT subsidiaries (Teal, FlightWave, Red Cat) and ~$7.0M including non-DoD federal — a ~4-6x gap vs. claimed government revenue. Per Heuristic 9 (DoD-CONTRACT-SPECIFIC): absence of SRR-named obligations for a company claiming an SRR Program of Record win is a hard contradiction. Could be explained by: (1) deliveries flowing through DLA/intermediaries not captured by recipient search; (2) IDIQ task orders not yet obligated; (3) sales to Defense Innovation Unit/Blue UAS Marketplace channel; or (4) genuine overstatement. Caveat: 2.5 page-result limit on top_awards may miss aggregation tail. The 27-award Teal total $2.17M is real, but $4.9M aggregate << $29.7M claimed. Severity: SEVERE_UNDERDELIVERY rather than RED_FLAG_NEGATIVE because some DoD presence exists and the program selection date (Nov 2024) is recent enough that ramp-up could lag obligation visibility — but the gap is large and SRR program-of-record awards should appear by FY2025 close."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "FY2025: ~73% of $40.7M revenue from US Government (~$29.7M).",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": ["Sum of USAspending-traceable federal obligations to all RCAT subsidiaries: ~$7M lifetime, of which ~$4.9M is DoD", "Even if all $4.9M DoD obligations to Teal+FlightWave+Red Cat had occurred in FY2025 alone (they did not — they accumulate 2020-2026), the figure is ~16% of claimed FY2025 US-Govt revenue", "Concentration disclosure shows one customer = 73% of FY2025 revenue (Customer A: 88% of receivables) — consistent with single-program reliance"],
+      "M_check": "USAspending sum across recipient name variants; cross-check against 73% US-Govt revenue concentration disclosure",
+      "M_value": {"claimed_us_gov_revenue_fy25_usd": 29711000, "usaspending_lifetime_2020_2026_all_subs_dod_usd": 4942014, "ratio_obligated_to_claimed": 0.166, "single_customer_concentration_pct": 73},
+      "interpretation": "Either claimed revenue substantially overstates real federal demand, OR USAspending recipient-name search materially undercounts via (a) prime-sub flow-throughs where RCAT is a subcontractor not the named recipient (NDAA/Blue UAS purchases via large primes); (b) sales through DIU's Blue UAS Marketplace where final recipient may be a procurement office aggregator; (c) Foreign Military Sales not in USAspending. Customer A at 73% revenue is consistent with a single Program-of-Record buyer — but that buyer's purchases should appear as obligations. This is the same divergence pattern as C1 — sized at fiscal-year resolution. Severity: SEVERE_UNDERDELIVERY."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Teal 2 is Blue UAS Certified by DoD.",
+      "severity": "PASS",
+      "supports": ["usaspending.query_recipient_contracts: at least one Teal Drones award explicitly references 'DEFENSE INNOVATION UNIT APPROVED BLUE SUAS UNITS' (FA820124F0312, $56,223), confirming DIU/Blue UAS pathway"],
+      "M_check": "USAspending search for DIU / Blue UAS award descriptions to Teal Drones",
+      "M_value": {"blue_uas_referencing_award_count": 1, "blue_uas_referencing_award_id": "FA820124F0312", "blue_uas_referencing_award_amount": 56223.93},
+      "interpretation": "Direct USAspending corroboration of Blue UAS / DIU pathway. The Blue UAS certification claim is independently verified by a DIU-funded purchase order. PASS."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Partnership/development roadmap with AeroVironment (AVAV) — FANG FPV as P550 payload (marsupial config).",
+      "severity": "UNVERIFIABLE",
+      "supports": ["edgar_fts AVAV CIK=0001368622: 3 hits for 'Red Cat' — all in DEF 14A filings (2023, 2024, 2025), almost certainly executive-compensation peer-group disclosure rather than substantive partnership", "edgar_fts AVAV: 0 hits for 'FANG' and 0 hits for 'Teal Drones'", "Red Cat's own filings mention AeroVironment 10 times — but partnership corroboration requires reciprocal disclosure"],
+      "M_check": "edgar_fts.query_fulltext on AVAV (CIK=0001368622) for distinctive product/co name terms",
+      "M_value": {"avav_red_cat_hits": 3, "avav_red_cat_hit_forms": "all DEF 14A (compensation peer group)", "avav_FANG_hits": 0, "avav_Teal_Drones_hits": 0, "rcat_AeroVironment_self_mentions": 10},
+      "interpretation": "AVAV's disclosure does not corroborate the partnership in any substantive form (no product names, no operational language; only DEF 14A appearances consistent with comp-peer listing). However, per Heuristic 4 (Investment vs operating partnerships) and Heuristic 7 (counterparty-disclosure threshold), a 'development roadmap' / early integration partnership announced in 8-Ks is NOT material enough to trigger AVAV's own 10-K disclosure obligations. The partnership is plausibly real and announced bilaterally but has no commercial obligations yet. UNVERIFIABLE rather than SEVERE because the materiality threshold for AVAV is not met."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Successfully completed flight testing of Black Widow drone with Palantir VNav software in GPS-denied conditions.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["edgar_fts Palantir CIK=0001321655: 0 hits for 'Red Cat', 0 hits for 'Black Widow', 0 hits for 'VNav' — Palantir does not disclose this in any SEC filing"],
+      "M_check": "edgar_fts.query_fulltext on PLTR (CIK=0001321655) for Red Cat / Black Widow / VNav",
+      "M_value": {"pltr_red_cat_hits": 0, "pltr_black_widow_hits": 0, "pltr_vnav_hits": 0},
+      "interpretation": "Palantir's filings contain no mention of Red Cat, Black Widow, or VNav. Per Heuristic 7 (counterparty-disclosure threshold): for Palantir ($100B+ company), a single drone-vendor flight test would not meet materiality threshold for 10-K disclosure. The claim is a 'successful flight test' — not a contract, revenue, or commitment — and is independently a low-bar marketing claim. UNVERIFIABLE rather than SEVERE because the materiality bar at PLTR is high and the claim itself is operational not financial."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Operates manufacturing facilities in Salt Lake UT (37K sq ft), Valdosta GA (155K sq ft), Torrance CA (51K sq ft), Carson CA (14K sq ft).",
+      "severity": "PASS",
+      "supports": ["epa_frs.query_facilities: 'Teal' hits in GA/CA are all unrelated subdivisions/streets (Teal Lake, Teal Ranch, etc.) — no RCAT-affiliated facility found", "Per Heuristic 1 (EPA FRS scope): drone assembly is not EPA-regulated process; absence from FRS is expected and not a contradiction", "Lease schedule in Item 2 Properties is granular with addresses, monthly rents ($46K-$66K range), and expiration dates — internal consistency is high"],
+      "M_check": "EPA FRS facility search by 'Teal' / 'Red Cat' / 'FlightWave' in UT, GA, CA",
+      "M_value": {"epa_frs_ut_teal": 0, "epa_frs_ga_teal_matches": 5, "epa_frs_ga_teal_relevant": 0, "epa_frs_ca_teal_matches": 9, "epa_frs_ca_teal_relevant": 0, "lease_payment_total_undiscounted_usd_k": 23271, "annual_2026_lease_obligation_usd_k": 2554},
+      "interpretation": "EPA FRS is the wrong M-source for drone-assembly facilities (Heuristic 1). The lease schedule is detailed enough to be internally falsifiable (monthly rents map roughly to claimed sq ft at credible $/sqft rates: 155K sq ft in Valdosta @ $48,550/mo = ~$3.75/sqft annual, plausible for rural GA industrial). PASS."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "FlightWave (acquired Sept 2024) has existing relationships with several U.S. government agencies including classification as approved vendors — basis for $8.7M of goodwill.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["usaspending.query_dod_contracts: FlightWave 8 awards totaling $2.30M — confirms FlightWave does have DoD contracts", "Total FlightWave obligations ($2.3M) is modest relative to $14M purchase price and $8.7M ascribed goodwill", "Acquisition was Sept 2024; some obligations may post-date acquisition"],
+      "M_check": "usaspending DoD obligations to FlightWave (recipient substring)",
+      "M_value": {"flightwave_dod_n_awards": 8, "flightwave_dod_total_usd": 2297860.0},
+      "interpretation": "FlightWave's DoD presence is real but modest ($2.3M lifetime). Ascribing $8.7M of goodwill to 'approved vendor' relationships with 'several US government agencies' is a soft claim — the actually-traceable federal contracting footprint is small. Not a hard contradiction (federal relationship exists), but ratio of goodwill to demonstrable revenue history is high. MODERATE_UNDERDELIVERY."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Holds equity in Firestorm Labs via SAFE that converted to Series A Preferred in July 2025; recorded at fair value $0.69M.",
+      "severity": "PASS",
+      "supports": ["edgar_fts: 'Firestorm Labs' 15 hits across multiple filers including Ondas (ONDS) 8-K from March 2026 — confirms Firestorm Labs exists as a real entity referenced by other public defense-tech filers"],
+      "M_check": "edgar_fts.query_fulltext for 'Firestorm Labs' across all filers",
+      "M_value": {"firestorm_labs_total_hits": 15, "external_corroborating_filers": "Ondas Inc (ONDS) 8-K 2026-03-23"},
+      "interpretation": "Firestorm Labs exists and is externally referenced by another public defense filer (Ondas). The SAFE-to-Series-A conversion timing is consistent with a real Series A financing event. Investment is small ($0.69M) — non-material. PASS."
+    }
+  ],
+  "summary_counts": {
+    "PASS": 3,
+    "MODERATE_UNDERDELIVERY": 1,
+    "SEVERE_UNDERDELIVERY": 2,
+    "RED_FLAG_NEGATIVE": 0,
+    "UNVERIFIABLE": 2
+  }
+}

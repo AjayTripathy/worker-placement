@@ -1,0 +1,877 @@
+{
+ "_doctrine": {
+  "program": "Dead-Chain Court-Band Option-Writing Program",
+  "purpose": "Names with an ADJUDICATED court band but a coverage-orphaned (DEAD/THIN) put chain at/below that band -- where our own resting size IS the two-sided market, not a price-taker in someone else's liquidity.",
+  "three_edges": [
+   "SPREAD edge: on a DEAD/THIN chain the quoted spread is a market-maker autoquote model, not a cleared price -- resting at/inside mid captures the spread instead of paying it, because there is no competing organic flow to outbid us.",
+   "STRIKE edge: every strike is anchored to an ADJUDICATED court band (never a chase) -- assignment, if it happens, buys us the stock AT OR BELOW a level the court has already underwritten as ownable.",
+   "CAPACITY edge: our own court-stated liquidity ceilings (VEL $10-15k, FSBW $8-12k, NATR starter-only, etc.) are the position's real capacity constraint, not the option chain's -- we are deliberately small enough that our own footprint cannot move the name, which is what keeps a coverage-orphaned chain durably ours to write."
+  ],
+  "five_program_rules": [
+   "REST-NEVER-CROSS: always post the offer at or better than mid; never cross the spread to force a fill on a thin/dead chain -- a fast fill on a wide-spread thin chain is itself a red flag (see fill-speed diagnostic).",
+   "SELF-CANCEL: if unfilled and the underlying conditions have moved (band broken, a new event enters the tenor, court verdict downgraded) -- cancel and re-price rather than chase the old level.",
+   "ADVERSE-SELECTION FLAG: run the fill-speed diagnostic and counterparty inference (borrow/short-interest/13D-13G) on every name before writing and after every fill (see ADDENDUM below).",
+   "FLOAT-CAP ASSIGNMENT MATH: contracts sized so that full assignment never exceeds the court's own stated liquidity ceiling for the name -- translate the dollar ceiling into a hard max-contracts number before staging.",
+   "KILL-LINKED BTC PRICED AT FULL SPREAD: if a kill trigger fires, the buy-to-close is executed AT THE FULL OFFER (pay the spread) -- exits are urgency-priced, not patience-priced; never rest a closing order on a kill."
+  ],
+  "adverse_selection_addendum_20260803": {
+   "context": "Principal question: on a coverage-orphaned chain, who is on the other side of our offer -- a market-maker model, or a sharp? These rules are now part of the program, not just this build.",
+   "fill_speed_diagnostic": "Log time-to-fill on every trade. An offer LIFTED WITHIN MINUTES of posting = a market-maker model marked us cheap -> MANDATORY vol-input review before any further writes on that name (our IV/theoretical input was probably stale or wrong). An offer that RESTS DAYS before filling = organic flow found us at a fair level -- the good fill.",
+   "counterparty_inference": "Pre-write AND post-fill (re-check within 5 trading days of ANY fill): check (a) borrow fee/availability trend, (b) FINRA short volume, (c) any fresh 13D/13G on the name. A TIGHTENING BORROW = possible activist-short footprint on the other side of our put sale -> skip the write or halve size. Log the result as fill_forensics on the shadow-ledger row.",
+   "mini_postmortem": "EVERY FILL gets a mini-postmortem at +5 and +20 trading days: news? new filing? borrow move? The cohort's aggregate fill_forensics record is the program's own kill switch -- systematic adverse fills across the cohort self-terminates the program on its own data, no separate review needed.",
+   "taxonomy_note": "MM autoquotes are intermediaries, not sharps -- a fast autoquote lift is a pricing-input problem, not proof of an informed counterparty. The real adverse-counterparty risk in small paper is an ACTIVIST SHORT buying puts as a levered bear expression; this is detectable via the borrow/short-interest instruments the desk already runs, and is partially pre-screened by the honesty-channel courts (shared DNA with short-seller diligence process). FSBW's missed PWBK-acquisition catch (the court didn't surface the merger vote until the 08-03 adjudication, five months after it went public) is logged as the HUMILITY CASE for this taxonomy -- a name can clear every other program gate and still be running on a stale information set; counterparty inference is partly a hedge against our own coverage gaps, not just theirs."
+  },
+  "demand_map_v2_correction_20260803": {
+   "supersedes": "the implicit v1 assumption that locked/concentrated sponsor holders are a plausible source of put-buying demand on these chains -- principal caught the hole; this correction governs the header and the ranking, not just a footnote.",
+   "why_concentrated_holders_are_mostly_excluded": [
+    "Standard IPO/secondary lockup agreements bar hedging outright ('no swap, hedge, or other arrangement transferring the economic consequences of ownership') -- locked sponsors/insiders CANNOT buy puts during their own unlock windows; they are legally the least likely counterparty, not the most likely.",
+    "Officer/director hedging is banned by near-universal post-Dodd-Frank company policy (Item 407(i) disclosure) independent of any lockup -- this persists even after the lockup itself expires.",
+    "Post-lockup affiliates face 16(c)/144 friction on options and typically exit via registered/block secondaries; their OTC hedge dealers (when a true institutional hedge exists) lay off risk in the STOCK, not in listed dead chains -- the flow never reaches our strikes."
+   ],
+   "demand_map": {
+    "modal_buyer": "BORROW-IMPAIRED BEARS -- informed directional shorts who can't get (or can't afford) stock borrow and buy puts as a synthetic short instead. This is the PRIMARY adverse-selection source on a coverage-orphaned chain, promoted from a secondary check to THE primary pre-write gate: run borrow-fee/availability + FINRA short-volume BEFORE sizing any write, not just as a post-fill diagnostic.",
+    "unlock_event_flow": "Real and dated, but THINNER and SMARTER than a sponsor-hedging assumption would imply -- unrestricted (non-affiliate, non-locked) holders and speculators trading the unlock date itself; SPCX's listed-put term structure around its lockup tranches is the on-file proof this flow exists. Treat as a secondary, event-timed demand source, not the modal one.",
+    "pledge_carveout_lenders": "The filings-verifiable NICHE source: lockups customarily carve out pledging sponsor stock as collateral for a bona fide loan, and the LENDER holding that pledge CAN hedge it (they are not the locked party). CENSUS FIELD ADDED per name: does the 424B4/S-1 lockup bar hedging outright, and does it carve out a pledge exception -- cite the specific lockup section. Material mainly for the sponsor-heavy recent-IPO names in this sweep (BOBS, APC, JMKE) and any name with disclosed insider share-pledging (VEL's 84% PE-controlled float + active Form-144 sell-down is the closest analog in this batch, though VEL itself is not a lockup situation).",
+    "other": "Post-news reactive flow (earnings/guide-cut/litigation) and non-affiliate funds running mechanical put-write/collar overlays -- both real, neither concentrated-holder-driven."
+   },
+   "parameter_changes": [
+    "LOWER expected fill rates across the board -- the buyer pool is thinner than a naive 'someone always wants insurance' prior assumed.",
+    "RAISE the required margin over Black-Scholes theoretical on any RESTING offer -- thin, informed-skewed demand means we should be paid MORE, not less, to supply liquidity; do not rest at a thin premium over theoretical just to improve fill odds.",
+    "RANK the inventory by demand-source quality, not just after-tax-carry x band-quality alone -- names with a verifiable pledge-carveout lender or a live unlock-event window rank ABOVE otherwise-equivalent 'sleepy value name nobody is trading' entries, because the former have an identifiable, explainable buyer on the other side and the latter may simply be untraded (adverse-selection-uncertain, not adverse-selection-clean)."
+   ],
+   "unchanged_foundation": "An unfilled court-band put is still a free GTC order economically -- oversupplying resting offers costs ~nothing in itself. What changed is the EXPECTED VALUE if filled (lower fill probability, and a higher share of fills that DO happen are informed/adverse) -- this is a re-pricing of the tail, not a reason to stop writing."
+  },
+  "run_note": "2026-08-03 sweep. IBKR's get_option_data endpoint (the strike-level chain tool that returns call/put contract IDs feeding OI/IV/marks) went systemically DOWN mid-sweep and NEVER RECOVERED this session -- confirmed via >30 combined retries across 4 parallel fork batches plus direct desk-session probes (control-tested on SPY and BKE, both failed identically). search_contracts, get_option_parameters (expiry lists), get_price_snapshot, and get_price_history all worked throughout. CONSEQUENCE: no live OI, no live option marks, no option-implied IV for ANY name this pass, except two DATED facts already on file from the 2026-07-30 sweep (OMF Sep-18 60p OI=20; EQT Sep-18 52.5p OI=2,928). Every premium below is a BLACK-SCHOLES THEORETICAL (r=4%, sigma = the underlying's own IBKR 30-day historical_vol as an IV proxy, T = days-to-expiry/365) and is NOT a tradeable quote. This inventory is therefore a PRE-SCREEN: which names clear the band/economics/event bars well enough to be worth a live OI check the moment the endpoint recovers -- not an executable list. No staging occurred; nothing here is a live order. || UPDATE 2026-08-03 evening: outage recurrence #3 RECOVERED after ~30 min of polling in the dedicated recovery-watch session; OI verification completed for OMF/FAF/JMKE/MCHP/BOBS/TRU -- see oi_verification_20260803.",
+  "margin_over_theoretical_note": "Per Demand Map v2 (parameter changes): thin, informed-skewed demand means we should be PAID MORE, not less, to supply a resting offer. The after-tax-annualized figures below are computed at RAW BS theoretical -- treat that as the floor, not the ask. Recommended resting limit = theoretical x ~1.10-1.20 (10-20% above raw BS fair value), scaled up further for any name without an identifiable demand-source (see demand_source field per candidate)."
+ },
+ "program_ineligible": [
+  {
+   "ticker": "FSBW",
+   "reason": "NO US OPTIONS LISTED",
+   "detail": "search_contracts confirms STK-only (NASDAQ, contract 110394608) -- no OPT section. Matches the 2026-07-30 sweep finding. Band on file: $40-44 (STARTER). PWBK merger vote Aug-13 is moot absent a chain."
+  },
+  {
+   "ticker": "NPB",
+   "reason": "NO US OPTIONS LISTED",
+   "detail": "search_contracts confirms STK+CFD only (NYSE, contract 760778290) -- no OPT section. Matches the 2026-07-30 sweep finding. Band on file: ~$17 (STARTER, 0.5% low-end)."
+  },
+  {
+   "ticker": "APC",
+   "reason": "NO US OPTIONS LISTED",
+   "detail": "Resolves to ARKO Petroleum Corp (NASDAQ, contract 854080544) via the 'ARKO-secondary entry' cross-reference -- STK+CFD only, no OPT section. Recent spinoff; consistent with the task's own flag. Band on file: $17-18.5 (WATCH 5/10). Recourt after listing if/when it lists."
+  },
+  {
+   "ticker": "III",
+   "reason": "NON-US LISTING / OUT OF SCOPE",
+   "detail": "3i Group plc, LSE primary listing (GBP4.16) -- no US OPT section found. Out of scope per the task's own instruction to skip non-US option listings."
+  },
+  {
+   "ticker": "WAL",
+   "reason": "EDGE-CLASS EXCLUDED (house CSP-program gate 2: RP_FAIR/carry names only)",
+   "detail": "WAL is explicitly tagged EDGE-class (scar-retirement thesis, convexity-sensitive) in its own court record; the 2026-07-30 sweep already excluded it on this basis. Reapplying for consistency -- not a liquidity finding. Options ARE listed (NYSE, contract 35090283) if this house gate is ever revisited by the principal."
+  },
+  {
+   "ticker": "OPRT",
+   "reason": "COURT VERDICT IS PRINT-CONDITIONAL, NOT AN ADJUDICATED BAND",
+   "detail": "Court state is WAIT (4.5/10); the $5.00-5.75 band is CONDITIONAL on the Aug-5-2026 AMC print clearing 3 bars. Any tenor from today spans that unresolved print. Options ARE listed (NASDAQ, contract 384944204). Re-sweep after Aug-5."
+  },
+  {
+   "ticker": "EQT",
+   "reason": "LIQUID -- OUT OF PROGRAM SCOPE (the normal CSP lane)",
+   "detail": "Sep-18-2026 52.5p already carries a LIVE short position with OI=2,928 at entry (2026-07-30, csp_shadow_ledger.json) -- unambiguously LIQUID (>500). Excluded by definition; this program targets coverage-orphaned chains, and this strike/name is already the courts' own live liquid CSP position."
+  }
+ ],
+ "program_ineligible_economics": [
+  {
+   "ticker": "EG",
+   "aftertax_pct": 3.9,
+   "detail": "Everest Group, strike $350 (alert level) / ~Jan-2027, theoretical premium implies gross 7.7%. Also note: TLH_CORE's 2026-08-02 cap_reconciliation overrode EG to REMOVE from the buy list (add-test fails 2 of 3; most recent instruction is trim-into-strength) -- even clearing the yield bar wouldn't fix the cooled underlying court."
+  },
+  {
+   "ticker": "VEL",
+   "aftertax_pct": 3.5,
+   "detail": "Velocity Financial, strike $16.50 / ~Dec-2026, gross 7.0%. Court's own explicit ceiling ('ADV $1.58M/day... total position ceiling ~$10-15k, LIMIT-ONLY') would cap this at ~6-9 contracts even if it cleared the bar -- moot given the yield fail. DEMAND NOTE: 84% PE-controlled float with an active Form-144 insider sell-down is a pledge/insider-selling-adjacent signal worth re-checking if the economics ever improve on a deeper strike."
+  },
+  {
+   "ticker": "SBH",
+   "aftertax_pct": 3.1,
+   "detail": "Sally Beauty, strike $12.00 (re-open dislocation level) / ~Dec-2026, gross 6.2%. Court state is WATCH/RP_FAIR self-label, not an entered band."
+  },
+  {
+   "ticker": "GCT",
+   "aftertax_pct": 1.1,
+   "detail": "GigaCloud Technology, strike $28.00 (add-trigger level) / ~Nov-2026, gross 2.2% -- strike so far below spot ($43.74) that even high RV (50.2%) produces a trivial premium. Classic 'band too far below any strike' pattern."
+  },
+  {
+   "ticker": "MCK",
+   "aftertax_pct": 2.8,
+   "detail": "McKesson, strike $750 (near the $751 ladder rung) / Dec-18-2026 (137d), spot $856.19, sigma 28.8% (lowest-vol mega-cap in the batch) -> theoretical $15.82, gross 5.6%. Also likely to reclassify LIQUID on an actual OI check (mega-cap, deep chain)."
+  },
+  {
+   "ticker": "ACEL",
+   "aftertax_pct": 1.4,
+   "detail": "Accel Entertainment, strike $10.50 (band floor) / Dec-18-2026, spot $12.02, sigma only 22.5% (lowest vol name in this whole sweep) -> theoretical $0.11, gross 2.7%. Strike is close to spot but vol is too low to pay a real premium."
+  },
+  {
+   "ticker": "HBB",
+   "aftertax_pct": 3.6,
+   "detail": "Hamilton Beach Brands, strike $18.00 (band ceiling) / Dec-18-2026, spot $22.99 (band is 21.7% OTM -- HBB has run well above its staged ladder since the band was set), sigma 44.2% -> theoretical $0.49, gross 7.2% nominal but marginal after-tax; excluded on the strict >=4% bar (3.6%) though close enough to re-check with a live quote."
+  }
+ ],
+ "program_eligible_caution": [
+  {
+   "ticker": "EVER",
+   "name": "EverQuote",
+   "court_band": "optional <=0.5% momentum starter at 23/21/18.50",
+   "court_verdict": "WATCH -- court REVERSED to a peak-earnings/crash-cheapness TRAP read (the '102.7->93.0' series-splice lesson)",
+   "spot": 25.22,
+   "rv_pct": 51.0,
+   "best_strike_tenor": "$21.00p, ~Dec-2026 (137d)",
+   "oi_status": "UNVERIFIED -- endpoint outage",
+   "aftertax_pct": 9.4,
+   "write_beats_gtc": "ECONOMICS PASS, COURT CAUTION",
+   "demand_source": "unknown-thin-untraded",
+   "rationale": "Yield bar clears cleanly but the underlying conviction is the real disqualifier, not the chain math -- this is NOT a clean carry name. Recommend excluding pending a stronger underlying court, not because of liquidity."
+  },
+  {
+   "ticker": "TRU",
+   "name": "TransUnion",
+   "court_band": "68-72 (mgmt buyback zone, reference only)",
+   "court_verdict": "WATCH -- blue-team DOWNGRADED 7/10->3/10 ('NEITHER bureau until FHFA resolves')",
+   "spot": 78.62,
+   "rv_pct": 44.9,
+   "best_strike_tenor": "$70.00p, ~Dec-2026 (137d)",
+   "oi_status": "VERIFIED 2026-08-03: DEAD -- Dec-18 all strikes OI 0-7; cleanest dead-chain confirmation in the six",
+   "aftertax_pct": 7.9,
+   "write_beats_gtc": "ECONOMICS PASS, COURT CAUTION",
+   "demand_source": "unknown-thin-untraded",
+   "rationale": "Economics clear but the court stood DOWN to 3/10 this week -- 'neither bureau' is close to an active caution, not a live band. Paper-track only even if a live quote confirms the theoretical."
+  },
+  {
+   "ticker": "PRCT",
+   "name": "Procept BioRobotics",
+   "court_band": "ladder $17.75-18.00 / $17.00 (band floor)",
+   "court_verdict": "WATCH, de-rated MedTech; Q2 print Aug-4 AMC (options priced +/-18-20%, a fat binary)",
+   "spot": 18.62,
+   "rv_pct": 68.52,
+   "best_strike_tenor": "$17.00p, ~Jan-2027 (165d)",
+   "oi_status": "UNVERIFIED -- endpoint outage",
+   "aftertax_pct": 15.2,
+   "write_beats_gtc": "ECONOMICS PASS (provisional), EVENT-PENDING",
+   "demand_source": "unknown-thin-untraded",
+   "rationale": "Richest theoretical carry in the sweep, but the entire number is an artifact of PRE-EVENT IV (Aug-4 print, fat +/-18-20% binary, not yet resolved as of this pull). Re-price after the print before treating as actionable; the post-crush IV/OI picture will look very different."
+  },
+  {
+   "ticker": "IBEX",
+   "name": "IBEX Ltd",
+   "court_band": "alert $30 (reference)",
+   "court_verdict": "OWNABLE, low conviction 5.5/10",
+   "spot": 35.34,
+   "rv_pct": 37.7,
+   "best_strike_tenor": "$30.00p, Dec-18-2026 (137d)",
+   "oi_status": "UNVERIFIED -- endpoint outage",
+   "aftertax_pct": 4.2,
+   "write_beats_gtc": "MARGINAL PASS, COURT CAUTION",
+   "demand_source": "unknown-thin-untraded",
+   "rationale": "Barely clears the 4%/yr bar on a low-conviction (5.5/10) court read. Sept GO/NO-GO catalyst (unconfirmed exact date) likely falls mid-tenor -- event risk unresolved. Small-cap BPO with a qualitative-only band; treat as the weakest 'pass' in the set."
+  },
+  {
+   "ticker": "BA",
+   "name": "Boeing",
+   "court_band": "185-200 (great_man cohort)",
+   "court_verdict": "WATCH 4/10 -- 'window consumed, doubt resolved, fairly priced' (explicitly NOT an edge call)",
+   "spot": 217.35,
+   "rv_pct": 31.07,
+   "best_strike_tenor": "$195.00p, Dec-18-2026 (137d)",
+   "oi_status": "UNVERIFIED -- endpoint outage",
+   "aftertax_pct": 4.1,
+   "write_beats_gtc": "MARGINAL PASS, COURT CAUTION",
+   "demand_source": "unknown-thin-untraded",
+   "rationale": "Marginal economics on a mega-cap the court itself calls fair-not-cheap. BA options are almost certainly LIQUID once actually polled -- likely reclassifies out of program scope on live OI."
+  }
+ ],
+ "candidates": [
+  {
+   "ticker": "CAI",
+   "name": "Caris Life Sciences",
+   "court_band": "add zone $15-16 / ownable to $20 / fv_base ~$23",
+   "court_verdict": "HELD, ADJUDICATED 2026-07-20 (fundamentals de-risked, not valuation-cheap)",
+   "spot": 15.67,
+   "rv_pct": 64.56,
+   "strike_tenor": "$15.00p, Dec-18-2026 (137d)",
+   "aftertax_pct": 17.5,
+   "float_cap": "no explicit court ceiling; apply default sleeve cap (CSP notional <=5% of base)",
+   "event": "none dated this pass; verify no Q3 print falls before Dec-18",
+   "demand": "unknown-thin-untraded",
+   "rationale": "Highest after-tax carry in the sweep; strike sits AT the court's own add-zone floor, so assignment is a court-blessed add. Near-the-money strike on a post-IPO name is also the entry most likely to carry real (if thin) OI once verified -- top re-poll priority."
+  },
+  {
+   "ticker": "MCHP",
+   "name": "Microchip Technology",
+   "court_band": "band $60-67 (great_man cohort, light court)",
+   "court_verdict": "WATCH 5/10, 2026-07-31",
+   "spot": 74.29,
+   "rv_pct": 63.38,
+   "strike_tenor": "$65.00p, Dec-18-2026 (137d)",
+   "aftertax_pct": 12.9,
+   "float_cap": "no explicit ceiling on file",
+   "event": "none dated; standard semi quarterly cadence likely falls inside tenor, unconfirmed date",
+   "demand": "unknown-thin-untraded",
+   "rationale": "Strike sits ~12.5% below spot AND at the top of the court's own band -- a real discount to underwrite. Light-court WATCH (5/10) argues for paper-track sizing even if economics clear.",
+   "oi_status": "VERIFIED 2026-08-03: NOT DEAD -- Oct 60/67.5/70 LIQUID (1,560/1,206/598), Dec uniformly THIN (65p OI=83); likely normal-CSP-lane, see contradiction_flag"
+  },
+  {
+   "ticker": "NATR",
+   "name": "Nature's Sunshine",
+   "court_band": "GTC $19.81 (bounded MLM regulatory tail, both US/China axes)",
+   "court_verdict": "STARTER (small), INDEPENDENTLY court-adjudicated 2026-07-24",
+   "spot": 20.15,
+   "rv_pct": 37.83,
+   "strike_tenor": "$19.81p (nearest listed strike), ~Nov-2026 (109d)",
+   "aftertax_pct": 11.5,
+   "float_cap": "court's own ADV cap ($2.47M/day) already limits equity size to STARTER -- apply the same discipline to option collateral: 1-2 contracts max",
+   "event": "none dated this pass",
+   "demand": "unknown-thin-untraded",
+   "rationale": "Strike is literally the court's own numeric GTC level -- as clean a band-match as this sweep produced. Independently adjudicated (not self-labeled), bounded regulatory tail. Genuine small-cap ADV means executability, not economics, is the open question."
+  },
+  {
+   "ticker": "OLLI",
+   "name": "Ollie's Bargain Outlet",
+   "court_band": "ownable to $80 / add aggressively <$72 / alert $66",
+   "court_verdict": "WATCH, ADJUDICATED (rung-3 suspended pending re-arm conditions)",
+   "spot": 73.47,
+   "rv_pct": 45.79,
+   "strike_tenor": "$70.00p, ~Jan-2027 (165d)",
+   "aftertax_pct": 10.3,
+   "float_cap": "no explicit ceiling on file",
+   "event": "Sept print gate (court-named, exact date unconfirmed) likely falls inside tenor -- caution",
+   "demand": "unknown-thin-untraded",
+   "rationale": "Strike is inside the 'add aggressively below ~72' zone; court is WATCH not OWNABLE right now (rung-3 explicitly suspended) -- a paid-to-wait-for-the-reopen structure, not a confirmed add signal."
+  },
+  {
+   "ticker": "HRTG",
+   "name": "Heritage Insurance Holdings",
+   "court_band": "stage <=$28.50 / stand-down >=$29.50",
+   "court_verdict": "OWNABLE (spot 29.37 is just below the stand-down ceiling)",
+   "spot": 29.37,
+   "rv_pct": 37.87,
+   "strike_tenor": "$28.50p, Dec-18-2026 (137d)",
+   "aftertax_pct": 9.6,
+   "float_cap": "no explicit ceiling on file; court notes 'size conservatively, near stand-down'",
+   "event": "Aug-11 print (ESTIMATE, unconfirmed exact date) likely near tenor inception",
+   "demand": "unknown-thin-untraded",
+   "rationale": "Strike is EXACTLY the court's own stage level ($28.50) -- as clean a band-match as CAI/NATR. Spot sitting right at the stand-down ceiling means the underlying is already at its own decision boundary, which is exactly the kind of name that gets quietly orphaned by coverage."
+  },
+  {
+   "ticker": "BOBS",
+   "name": "Bob's Discount Furniture",
+   "court_band": "$13.5-15.5 or Bain-secondary entry",
+   "court_verdict": "WAIT 6/10, 2026-07-31; lockup Aug-3-2026 VERIFIED",
+   "spot": 16.67,
+   "rv_pct": 58.0,
+   "strike_tenor": "$14.00p, ~Nov-2026 (109d)",
+   "aftertax_pct": 9.8,
+   "float_cap": "no explicit ceiling; recent IPO -- default to smallest lot regardless of theoretical economics",
+   "event": "lockup Aug-3 is essentially at inception (1 day out at sweep time), already priced into whatever chain exists, not a mid-tenor surprise",
+   "demand": "unlock_event_flow",
+   "rationale": "DEMAND MAP v2 ELEVATE: this is exactly the unlock-event-flow archetype (real, dated demand per the SPCX precedent) rather than a sleepy untraded name -- ranks above equivalent-yield value names on demand-source quality. Genuine fundamentals conviction is thin (WAIT 6/10, not an entered court), so size stays small regardless.",
+   "oi_status": "VERIFIED 2026-08-03: 12.5p OI=102 (THIN), 15p OI=1 (DEAD); census $14 strike DOES NOT EXIST (12.5/15 only)"
+  },
+  {
+   "ticker": "LDOS",
+   "name": "Leidos Holdings",
+   "court_band": "add-zone <=$118 / held cost $109.49 / fv_base $125-137",
+   "court_verdict": "HELD, GOV-SLEEVE SOURCING COURT 2026-07-23 (ADJUDICATED)",
+   "spot": 115.6,
+   "rv_pct": 36.28,
+   "strike_tenor": "$110.00p, Dec-18-2026 (137d)",
+   "aftertax_pct": 8.1,
+   "float_cap": "no explicit ceiling on file",
+   "event": "Aug-4 print is a REGISTERED gate (catalyst_action_registry cat_date 2026-08-04) -- lands at tenor inception (day ~1-2), not mid-tenor",
+   "demand": "unknown-thin-untraded",
+   "rationale": "Strike sits almost exactly at held cost basis ($109.49) -- assignment would essentially match the existing cost basis. Aug-4 print resolves within days of any fresh write; re-price after that print clears rather than write into it blind."
+  },
+  {
+   "ticker": "STC",
+   "name": "Stewart Information Services",
+   "court_band": "price leg $60-64 (1.05-1.15x book)",
+   "court_verdict": "WATCH 5/10 + PAIR RULING (FNF dominates the axis; STC redundant per the court's own ruling)",
+   "spot": 67.59,
+   "rv_pct": 44.04,
+   "strike_tenor": "$60.00p, Dec-18-2026 (137d)",
+   "aftertax_pct": 7.5,
+   "float_cap": "no explicit ceiling on file",
+   "event": "none dated; NAR EHS monthly data is the evidence leg, recurring not single-date",
+   "demand": "unknown-thin-untraded",
+   "rationale": "Strike at the band floor. NOTE: the court's own most-recent ruling treats STC as REDUNDANT to FNF on this axis ('keep FNF as the axis expression; both = redundant') -- program-eligible on the chain math, but the underlying name is not the court's preferred expression."
+  },
+  {
+   "ticker": "KNSL",
+   "name": "Kinsale Capital Group",
+   "court_band": "STARTER $322 GTC",
+   "court_verdict": "STARTER, TWO-MODE COURT 2026-07-23 (clean name, no takeaway-vs-data divergence)",
+   "spot": 356.42,
+   "rv_pct": 37.91,
+   "strike_tenor": "$320.00p, Dec-18-2026 (137d)",
+   "aftertax_pct": 6.1,
+   "float_cap": "no explicit ceiling on file",
+   "event": "none dated on file; quarterly print timing unconfirmed",
+   "demand": "unknown-thin-untraded",
+   "rationale": "Strike matches the court's own GTC level almost exactly. One of the cleanest underlying courts in the whole sweep (7/10 VALUE+CARRY, reserves redundant/maturity-tested) even though the option-chain yield is mid-pack."
+  },
+  {
+   "ticker": "G",
+   "name": "Genpact Ltd",
+   "court_band": "filled $29.00 (band top)",
+   "court_verdict": "HELD, FILLED 2026-07-06 at the court's own band top",
+   "spot": 35.17,
+   "rv_pct": 45.84,
+   "strike_tenor": "$29.00p, Dec-18-2026 (137d)",
+   "aftertax_pct": 5.4,
+   "float_cap": "no explicit ceiling on file",
+   "event": "Aug-6 print gates tranche-2 -- lands at tenor inception (day ~3-4), not mid-tenor; re-price after it clears",
+   "demand": "unknown-thin-untraded",
+   "rationale": "Strike matches the exact fill price of the existing equity position -- an option write here would only assign at a level we already hold at. 17.5% OTM is a real discount to today's spot."
+  },
+  {
+   "ticker": "WRB",
+   "name": "W.R. Berkley Corp",
+   "court_band": "STARTER $71.50 GTC",
+   "court_verdict": "STARTER, TWO-MODE COURT 2026-07-23 (durable ~20% ROE, honest disclosed reserve blemish)",
+   "spot": 72.54,
+   "rv_pct": 24.9,
+   "strike_tenor": "$70.00p, Dec-18-2026 (137d)",
+   "aftertax_pct": 5.2,
+   "float_cap": "no explicit ceiling on file",
+   "event": "none dated on file",
+   "demand": "unknown-thin-untraded",
+   "rationale": "Lowest realized-vol name in the insurance cohort (24.9%), so the modest yield is a volatility-input fact, not a band problem -- strike is close to spot (3.5% OTM) and matches the court's own GTC level almost exactly."
+  },
+  {
+   "ticker": "XOM",
+   "name": "ExxonMobil",
+   "court_band": "staged $155.00 GTC",
+   "court_verdict": "STARTER, RP_FAIR carry, ADJUDICATED 2026-07-23",
+   "spot": 151.92,
+   "rv_pct": 27.66,
+   "strike_tenor": "$150.00p, Dec-18-2026 (137d)",
+   "aftertax_pct": 7.3,
+   "float_cap": "no explicit ceiling; mega-cap, likely reclassifies LIQUID on an actual OI check",
+   "event": "Aug-5 10-Q lands at tenor inception (day ~2); Q3 print (~late-Oct, unconfirmed) also inside tenor",
+   "demand": "unknown-thin-untraded",
+   "rationale": "Strike sits just below spot and just below the court's own GTC level. FLAGGED FOR LIKELY RECLASSIFICATION: mega-cap with genuinely deep option markets -- probably LIQUID once actually polled, unlike the small/mid-caps in this list. Listed here for completeness, not as a confident dead-chain call."
+  },
+  {
+   "ticker": "SU",
+   "name": "Suncor Energy",
+   "court_band": "ladder $64.00/$62.50/$61.00",
+   "court_verdict": "STARTER, RP_FAIR carry, ADJUDICATED 2026-07-23",
+   "spot": 66.07,
+   "rv_pct": 28.5,
+   "strike_tenor": "$64.00p, Dec-18-2026 (137d)",
+   "aftertax_pct": 6.5,
+   "float_cap": "no explicit ceiling on file",
+   "event": "Q2 print Aug-4 AMC lands at tenor inception (day 1), not mid-tenor",
+   "demand": "unknown-thin-untraded",
+   "rationale": "Strike = the ladder's top rung. Same reclassification-risk caveat as XOM applies less strongly (SU is liquid but smaller); genuinely worth a live re-poll rather than assuming liquid."
+  },
+  {
+   "ticker": "OMF",
+   "name": "OneMain Holdings",
+   "court_band": "rung2 $60 resting (HELD)",
+   "court_verdict": "HELD, print-cleared entry 2026-07-29",
+   "spot": 62.58,
+   "rv_pct": 27.93,
+   "strike_tenor": "$60.00p, Nov-20-2026 (no Dec-26 expiry exists)",
+   "aftertax_pct": 6.4,
+   "float_cap": "no explicit ceiling beyond standard sleeve caution",
+   "event": "none dated inside tenor",
+   "demand": "unknown-thin-untraded (but chain fact is VERIFIED, not theoretical -- see oi_status)",
+   "rationale": "THE closest thing this sweep has to a confirmed, precedented DEAD chain: Sep-18-2026 60p carried OI=20 as of the 2026-07-30 sweep (dated, on file in csp_shadow_ledger.json) -- a real, dated data point, not a theoretical guess, and exactly the archetype this program targets. TOP re-poll priority to convert from PROVISIONAL to LIVE the moment the endpoint recovers.",
+   "oi_status": "VERIFIED 2026-08-03: Nov-20 60p OI=77 (THIN, not DEAD); 50p/52.5p OI 2,393/7,496 (LIQUID) -- chain NOT coverage-orphaned; see oi_verification_20260803.OMF contradiction_flag"
+  },
+  {
+   "ticker": "JMKE",
+   "name": "Jersey Mike's Subs",
+   "court_band": "WAIT execution band $15-18 (court's DECLINE verdict applies to $21-25)",
+   "court_verdict": "WAIT, ADJUDICATED 2026-07-29; pre-registered CSP gates-v2 ARMED (catalyst_action_registry, cat_date 2026-08-06)",
+   "spot": 23.17,
+   "rv_pct": null,
+   "strike_tenor": "$18.00p, Feb-19-2027 (200d, spans the Jan-25/26-27 lockup BY DESIGN per the pre-registered protocol)",
+   "aftertax_pct": 6.2,
+   "float_cap": "no explicit ceiling; pre-registered protocol caps at 1-3 contracts",
+   "event": "the tenor DELIBERATELY spans the lockup -- a designed feature of the pre-registered protocol, not accidental event-contamination",
+   "demand": "unlock_event_flow",
+   "rationale": "DEMAND MAP v2 ELEVATE: this name already has its own dedicated, more rigorous protocol on file (catalyst_action_registry 'JMKE', gates v2: spot>=19.50 [passes, 23.17], Feb-19-2027 expiry exists [confirmed], 18p/17.5p bid>=1.25 spread<=0.20 required before staging) -- DEFER TO THAT PROTOCOL rather than this sweep's generic bar. Listed here for completeness and because it is a clean unlock_event_flow demand-source example, not as an independent recommendation.",
+   "oi_status": "VERIFIED 2026-08-03: OI=0 at ALL 12 puts across all 4 expiries (DEAD, never-traded). NO 18.0 strike exists -- gate contract is the Feb-19-27 17.5p (907463825@SMART)"
+  },
+  {
+   "ticker": "BKE",
+   "name": "Buckle Inc",
+   "court_band": "GTC ladder $42.00/$41.00",
+   "court_verdict": "STARTER, ADJUDICATED (Q2 FY26 print ~late-Aug decisive)",
+   "spot": 43.77,
+   "rv_pct": 28.18,
+   "strike_tenor": "$41.00p, Dec-18-2026 (137d)",
+   "aftertax_pct": 4.9,
+   "float_cap": "no explicit ceiling on file",
+   "event": "Q2 FY26 print ~late-Aug (unconfirmed exact date) falls inside tenor; monthly same-store-comp is recurring/non-blocking",
+   "demand": "unknown-thin-untraded",
+   "rationale": "Strike matches the bottom rung of the court's own GTC ladder. Marginal after-tax carry, near the bottom of the clean-pass group."
+  },
+  {
+   "ticker": "DFIN",
+   "name": "Donnelley Financial Solutions",
+   "court_band": "add only on a dip into low-$36s",
+   "court_verdict": "HELD, Q2-26 GRADED 2026-07-30 (HOLD, no thesis break)",
+   "spot": 47.3,
+   "rv_pct": 49.54,
+   "strike_tenor": "$36.00p, ~Jan-2027 (165d)",
+   "aftertax_pct": 4.4,
+   "float_cap": "no explicit ceiling on file",
+   "event": "Q2 print already happened (2026-07-30, graded HOLD); next print ~late-Oct/Nov unconfirmed but likely inside tenor",
+   "demand": "unknown-thin-untraded",
+   "rationale": "Strike is ~24% below spot, matching the court's explicit 'low-$36s' add level. Q3 tripwire (software growth <7% or mix <44%) is a live exit-review trigger for the underlying position -- a put write here inherits that same risk."
+  }
+ ],
+ "ranked_summary": [
+  "1. OMF -- 6.4%/yr aftertax theoretical | demand_source=unknown-thin-untraded (but chain fact is VERIFIED, not theoretical -- see oi_status) | HELD, print-cleared entry 2026-07-29",
+  "2. BOBS -- 9.8%/yr aftertax theoretical | demand_source=unlock_event_flow | WAIT 6/10, 2026-07-31; lockup Aug-3-2026 VERIFIED",
+  "3. JMKE -- 6.2%/yr aftertax theoretical | demand_source=unlock_event_flow | WAIT, ADJUDICATED 2026-07-29; pre-registered CSP gates-v2 ARMED (catal",
+  "4. CAI -- 17.5%/yr aftertax theoretical | demand_source=unknown-thin-untraded | HELD, ADJUDICATED 2026-07-20 (fundamentals de-risked, not valuation-ch",
+  "5. MCHP -- 12.9%/yr aftertax theoretical | demand_source=unknown-thin-untraded | WATCH 5/10, 2026-07-31",
+  "6. NATR -- 11.5%/yr aftertax theoretical | demand_source=unknown-thin-untraded | STARTER (small), INDEPENDENTLY court-adjudicated 2026-07-24",
+  "7. OLLI -- 10.3%/yr aftertax theoretical | demand_source=unknown-thin-untraded | WATCH, ADJUDICATED (rung-3 suspended pending re-arm conditions)",
+  "8. HRTG -- 9.6%/yr aftertax theoretical | demand_source=unknown-thin-untraded | OWNABLE (spot 29.37 is just below the stand-down ceiling)",
+  "9. LDOS -- 8.1%/yr aftertax theoretical | demand_source=unknown-thin-untraded | HELD, GOV-SLEEVE SOURCING COURT 2026-07-23 (ADJUDICATED)",
+  "10. STC -- 7.5%/yr aftertax theoretical | demand_source=unknown-thin-untraded | WATCH 5/10 + PAIR RULING (FNF dominates the axis; STC redundant per th",
+  "11. XOM -- 7.3%/yr aftertax theoretical | demand_source=unknown-thin-untraded | STARTER, RP_FAIR carry, ADJUDICATED 2026-07-23",
+  "12. SU -- 6.5%/yr aftertax theoretical | demand_source=unknown-thin-untraded | STARTER, RP_FAIR carry, ADJUDICATED 2026-07-23",
+  "13. KNSL -- 6.1%/yr aftertax theoretical | demand_source=unknown-thin-untraded | STARTER, TWO-MODE COURT 2026-07-23 (clean name, no takeaway-vs-data di",
+  "14. G -- 5.4%/yr aftertax theoretical | demand_source=unknown-thin-untraded | HELD, FILLED 2026-07-06 at the court's own band top",
+  "15. WRB -- 5.2%/yr aftertax theoretical | demand_source=unknown-thin-untraded | STARTER, TWO-MODE COURT 2026-07-23 (durable ~20% ROE, honest disclosed",
+  "16. BKE -- 4.9%/yr aftertax theoretical | demand_source=unknown-thin-untraded | STARTER, ADJUDICATED (Q2 FY26 print ~late-Aug decisive)",
+  "17. DFIN -- 4.4%/yr aftertax theoretical | demand_source=unknown-thin-untraded | HELD, Q2-26 GRADED 2026-07-30 (HOLD, no thesis break)"
+ ],
+ "ranked_summary_note": "Ranked per Demand Map v2: OMF leads despite modest yield because it is the ONLY chain fact this sweep actually VERIFIED (dated OI=20, not theoretical); BOBS and JMKE rank above equivalent- or higher-yield sleepy-value names because they carry an identifiable, dated demand-source (unlock-event flow) rather than 'unknown-thin-untraded' -- the latter tag means adverse-selection-UNCERTAIN, not adverse-selection-clean, per the correction. Below that, ranked by raw after-tax carry among otherwise-equivalent unknown-demand names.",
+ "next_steps": [
+  "Re-run get_option_data for the FULL 22-name eligible+caution universe the moment the IBKR chain endpoint recovers; no WRITE-BEATS-GTC verdict is executable until live OI/marks/IV replace the BS theoretical.",
+  "OMF is the only pre-verified DEAD chain (dated) -- first re-poll priority.",
+  "PRCT re-price is time-sensitive: the Aug-4 print resolves within days of this sweep -- repull post-crush before treating its 15.2% theoretical as real.",
+  "G, LDOS, SU also have prints landing at/near tenor inception (Aug-4/5/6) -- repull after those clear rather than write blind into them.",
+  "Per Demand Map v2: raise the resting ask above raw theoretical (10-20%+) on every 'unknown-thin-untraded' name; do not rest at the bare BS-fair price.",
+  "No staging this pass per the standing house rule -- Monday's staging list goes to the principal separately."
+ ],
+ "oi_verification_20260803": {
+  "_meta": {
+   "run": "2026-08-03 evening endpoint-recovery watch",
+   "endpoint_outage": "recurrence #3; get_option_data down at watch start, RECOVERED after ~30 minutes of polling (8 failed polls at ~180s cadence, both SMART and IBUSOPT id variants failing identically; search_contracts/get_option_parameters/get_price_snapshot healthy throughout). Post-recovery the endpoint remained flaky under parallel load (single-call pacing required); one transient get_price_snapshot rate-limit burst mid-pass, recovered after 90s.",
+   "oi_bands": "DEAD <25 | THIN 25-500 | LIQUID >500 (per census precedents: OI=20=DEAD, OI=2928=LIQUID)",
+   "data_note": "Weekend pull: bid/ask empty as expected; deliverables are OI + IV (annual, IBKR implied_vol) + mark (plprice, where served). Marks missing on many thin contracts -- normal for a closed session. Live bids at Monday open.",
+   "fields": "per strike: [put OI, annual IV %, mark $ or null]"
+  },
+  "OMF": {
+   "expiry": "2026-11-20 (NOTE: no Dec-2026 expiry exists for OMF; listed tenors are Aug/Sep-26, Nov-20-26, Feb-19-27 -- Nov-20 is the census tenor and was used)",
+   "strikes": {
+    "50": [
+     2393,
+     36.4,
+     0.91
+    ],
+    "52.5": [
+     7496,
+     34.5,
+     1.27
+    ],
+    "55": [
+     347,
+     32.9,
+     1.8
+    ],
+    "57.5": [
+     75,
+     31.6,
+     null
+    ],
+    "60": [
+     77,
+     30.6,
+     3.49
+    ],
+    "62.5": [
+     30,
+     29.9,
+     null
+    ],
+    "65": [
+     35,
+     29.5,
+     6.23
+    ]
+   },
+   "retag": "NOT DEAD -- THIN at the band strikes (55-65: OI 30-347), LIQUID at 50/52.5 (OI 2,393 / 7,496)",
+   "contradiction_flag": "MATERIAL. Census carried the Nov 60p as 'DEAD by extension' from the dated Sep-18 60p OI=20. Reality: Nov 60p OI=77 (THIN), and the 50/52.5 strikes hold 9,889 contracts of put OI combined -- this chain is NOT coverage-orphaned below spot. Large existing downside-put positioning is exactly the borrow-impaired-bear footprint the Demand Map v2 gate exists for: run borrow-fee/FINRA short-volume PRE-WRITE and treat the 52.5p wall as possible informed positioning, not latent demand for our offer. The program's spread-edge premise (our resting size IS the market) does NOT hold on OMF."
+  },
+  "FAF": {
+   "expiry_oct": "2026-10-16",
+   "strikes_oct": {
+    "60": [
+     2,
+     35.5,
+     0.42
+    ],
+    "65": [
+     374,
+     33.3,
+     null
+    ],
+    "70": [
+     0,
+     32.1,
+     null
+    ],
+    "75": [
+     0,
+     31.9,
+     null
+    ]
+   },
+   "expiry_jan": "2027-01-15",
+   "strikes_jan": {
+    "60": [
+     2,
+     36.5,
+     null
+    ],
+    "65": [
+     3,
+     33.3,
+     2.41
+    ],
+    "70": [
+     0,
+     31.4,
+     null
+    ],
+    "75": [
+     0,
+     30.7,
+     null
+    ]
+   },
+   "retag": "DEAD both tenors, with ONE exception: Oct-16 65p OI=374 (THIN -- real existing interest at that strike)",
+   "contradiction_flag": "none material -- dead-chain assumption confirmed; the Oct 65p THIN pocket is the only strike with a pre-existing market"
+  },
+  "JMKE": {
+   "expiries": [
+    "2026-08-21",
+    "2026-09-18",
+    "2026-11-20",
+    "2027-02-19"
+   ],
+   "strikes_listed": "15 / 17.5 / 20 ONLY at every expiry -- NO 18.0 strike exists anywhere on the chain (gate's '18p/17.5p' test resolves to the 17.5p)",
+   "all_contracts": "OI=0, IV invalid (-1), no mark, at ALL 12 put contracts across all 4 expiries -- never-traded, freshly-listed chain",
+   "retag": "DEAD (fully -- zero OI chain-wide)",
+   "monday_decision_note": "The Feb-19-2027 17.5p (contract 907463825@SMART) is the gate contract. There is NO standing market: Monday's 'bid' vs the $1.25 gate will be a fresh MM autoquote, not organic flow -- per program rule 1 and the fill-speed diagnostic, treat a fast lift of any resting offer as a pricing-input red flag, and note the pre-registered gate also requires spread<=0.20 which a brand-new autoquote may fail on width alone.",
+   "contradiction_flag": "none -- census assumed unverified-dead; confirmed dead, but the ABSENCE of an 18 strike corrects the census's '$18.00p' strike_tenor (nearest listed = 17.5)"
+  },
+  "MCHP": {
+   "expiry_oct": "2026-10-16",
+   "strikes_oct": {
+    "55": [
+     71,
+     74.1,
+     null
+    ],
+    "57.5": [
+     53,
+     72.9,
+     null
+    ],
+    "60": [
+     1560,
+     71.9,
+     3.49
+    ],
+    "62.5": [
+     176,
+     71.0,
+     4.28
+    ],
+    "65": [
+     242,
+     70.2,
+     null
+    ],
+    "67.5": [
+     1206,
+     69.5,
+     null
+    ],
+    "70": [
+     598,
+     68.9,
+     null
+    ]
+   },
+   "expiry_dec": "2026-12-18",
+   "strikes_dec": {
+    "55": [
+     295,
+     70.2,
+     3.96
+    ],
+    "57.5": [
+     167,
+     69.6,
+     null
+    ],
+    "60": [
+     128,
+     69.1,
+     null
+    ],
+    "62.5": [
+     91,
+     68.7,
+     null
+    ],
+    "65": [
+     83,
+     68.3,
+     7.56
+    ],
+    "67.5": [
+     377,
+     67.9,
+     null
+    ],
+    "70": [
+     262,
+     67.6,
+     null
+    ]
+   },
+   "retag": "NOT DEAD -- Oct-16 is MIXED THIN/LIQUID (60p OI=1,560; 67.5p 1,206; 70p 598 all LIQUID); Dec-18 uniformly THIN (83-377)",
+   "contradiction_flag": "MATERIAL. Census listed MCHP as a dead-chain candidate; the Oct chain has three LIQUID strikes and the Dec band strike (65p) carries OI=83. MCHP is a normal thin-but-made market, not coverage-orphaned -- the spread edge is much weaker here and the name likely belongs in the normal CSP lane, not this program. Also note option IV ~68-74% vs the census's 63.4% RV input -- the BS theoreticals UNDERSTATED premium."
+  },
+  "BOBS": {
+   "expiry": "2026-11-20",
+   "strikes_listed": "12.5 and 15 ONLY in the 12-17 window -- the census's $14.00p strike DOES NOT EXIST",
+   "strikes": {
+    "12.5": [
+     102,
+     87.3,
+     null
+    ],
+    "15": [
+     1,
+     85.3,
+     null
+    ]
+   },
+   "retag": "15p DEAD (OI=1); 12.5p THIN (OI=102)",
+   "contradiction_flag": "MODERATE. Dead-chain read broadly holds, but (a) the census strike_tenor '$14.00p' is unlistable -- nearest are 15 (above band midpoint) and 12.5 (below band floor); (b) the 12.5p already carries OI=102, consistent with the unlock_event_flow demand thesis (someone bought deep-downside puts into the Aug-3 lockup). IV ~85-87% vs census RV 58% -- theoreticals materially understated."
+  },
+  "TRU": {
+   "expiry": "2026-12-18",
+   "strikes": {
+    "60": [
+     6,
+     null,
+     null
+    ],
+    "62.5": [
+     0,
+     49.5,
+     null
+    ],
+    "65": [
+     4,
+     48.6,
+     null
+    ],
+    "67.5": [
+     0,
+     47.7,
+     null
+    ],
+    "70": [
+     3,
+     47.0,
+     null
+    ],
+    "72.5": [
+     7,
+     46.4,
+     null
+    ],
+    "75": [
+     6,
+     45.8,
+     null
+    ]
+   },
+   "retag": "DEAD -- every strike OI 0-7",
+   "contradiction_flag": "none -- a genuinely coverage-orphaned mid-cap chain, the cleanest census confirmation in the six. (Underlying court caution unchanged: 3/10 'neither bureau', paper-track only.) NOTE: option IV ~46-49% vs census RV 44.9% -- theoreticals roughly right here."
+  }
+ },
+ "scope_ruling_20260803": {
+  "principal_challenge": "'isn't the thesis we sell where underwritten even into Helsinki/Paris precisely because no one else is doing it?' - CORRECT in principle; the US-only census scope was convenience, not thesis",
+  "boundary_rule": "LISTED-BUT-DEAD = our niche wherever it exists, any venue IBKR routes (Euronext/Eurex/OSE included). UNLISTED = truly out for the taxable book - writing without a chain means being an OTC dealer, which is the fund-wrapper endgame (licensing/ISDA infrastructure), not a retail account's move. The boundary is verify-per-name, never assume-per-region",
+  "verified_20260803": {
+   "VRLA.PA": "NO listed options (get_option_parameters empty) - GTC-only, now by fact",
+   "KALMAR.HE": "NO listed options - GTC-only by fact",
+   "IPS.PA": "HAS an OPT section on Euronext (seen in search) - but paper-only until the Sept-14 B1 resolution; becomes a candidate if B1 resolves YES",
+   "SAP": "US-listed chain liquid - normal lane"
+  },
+  "followup_owed": "Europe/Japan chain sweep across the adjudicated book (KER.PA, MMB.PA, JUN3.DE, P911.DE, DGE.L, the TSEJ holds - note Japan single-stock options are near-nonexistent outside OSE's top names) - same census format, multiplier caution MANDATORY (Euronext contracts are often 10-share multipliers, not 100 - the priceMagnifier class of error)",
+  "omf_conversion_test": "Monday live: VRP check (IV 30.6 vs forward RV) + Q3-event pre-commitment ruling + put-wall forensics -> if all pass, convert part of the 60-rung to 2-3 short Nov 60p (basis 56.51 beats both rungs)"
+ },
+ "experiment_1_fill": {
+  "date": "2026-08-03",
+  "result": "FILLED fast (~1 session)",
+  "fill": 3.4048,
+  "interpretation_pending": "fast fill = motivated buyer; forensics +5d (08-10) and +20d (08-31) decide informed-vs-hedger before ANY program scaling; TRU stays queued regardless until forensics complete"
+ },
+ "pricing_postmortem_20260803": {
+  "rev": 2,
+  "rev1_error": "rev-1 used T=1.45y for a 0.45y option (Jan-2027 read as Jan-2028) and claimed a ~50% underpricing; caught by dead_chain_pricer.py on its FIRST run",
+  "corrected": "fill 3.4048 implies 29.8% vs RV 29.2% = AT actuarial; reservation ask (RV+4) = 4.01 -> concession ~$120/2lots (mark-inherited pricing), not ~$700",
+  "carry": "10.7%/yr on strike pre-tax, ~15% stacked, ~7.5% after-tax vs 3.9% muni = CLEARS the household hurdle ~2x",
+  "captivity_evidence": "same-day 65p print at 3.50 vs theoretical ~1.8 = a captive buyer paying ~2x fair for a WORSE strike; the premium is real and collectible at reservation",
+  "RULES_STANDING": [
+   "reservation ask = max(BSM at max(RV1y,RV2y) + 3-5pt captivity, mark) - desk/dead_chain_pricer.py is the MANDATORY staging step (also runs the --check gate on any candidate ask)",
+   "tenor computed by machine from the calendar, never by eye",
+   "corrections re-derive their own numbers before shipping"
+  ],
+  "disposition": "hold 2 lots; forensics +5d/+20d proceed with the ORIGINAL two-hypothesis frame restored (fill was at fair vol, so the fast fill again reads as motivated-buyer information, not free-money pickup)",
+  "model_upgrade_20260803": {
+   "principal_directive": "re-derive the price ENTIRELY from the model for dead chains - the mark is never an input, only an optional floor",
+   "upgrades": [
+    "American CRR binomial (400 steps) replaces European BSM for theoreticals",
+    "downside skew bump 0.30 vol pts per % OTM (a wing quoted at flat ATM RV gives away the skew premium every liquid surface charges)",
+    "--mark is floor-only and says so in the output"
+   ],
+   "faf_final_grade": "fill 3.40 vs full-model theo 3.70 / reservation 4.41 -> the check now REFUSES our own fill; concession ~$60-200/2lots depending on layer; final honest reading: at flat-vol actuarial, below skew-fair",
+   "tru_and_future": "every leg quotes at the model reservation (FAF-equivalent would have been 4.41); no staging without the pricer run attached to the record"
+  }
+ },
+ "quote_structure_20260803": {
+  "standard": "SPLIT-OFFER DISCOVERY LADDER (principal-approved): every dead-chain name rests TWO lots minimum - lot 1 at the model reservation (or the observed-trade floor if higher), lot 2 at ~1.5-1.8x full-model fair. Fill pattern IS the demand curve: only lot-1 fills -> captivity premium modest, model calibrated; both fill -> shift the whole ladder up; neither fills -> price was discovered too (the demand was transient). Every fill becomes calibration data, never regret.",
+  "faf_65p_decision": {
+   "case": "same-day print at 3.50 = 1.48x full-model fair (theo 2.36 w/ +4.4 skew pts at 14.5% OTM; model reservation 2.96; floor engages at 3.50). Assignment basis at 3.50 = 61.50, BELOW the courted band bottom (66) - the risk case is strictly better than what the court approved on the equity side.",
+   "ladder": "SELL 1x Jan-15-27 65p @ 3.50 (observed-trade floor) + SELL 1x @ 4.40 (probe ~1.85x fair)",
+   "carry_at_floor": "11.9%/yr on strike, 8.1% after-tax vs 3.9% muni - clears",
+   "forensics_tension": "the program's no-scaling-before-forensics rule (Aug-10/+20d Aug-31) technically gates this; the counter is that basis-below-band bounds the tail identically to a courted equity limit at 61.50, and the demand datum is perishable. DECISION RESTS WITH THE PRINCIPAL'S CLICK - staged, not auto-submitted; noted as an explicit exception if clicked before Aug-10."
+  },
+  "seventy_counterfactual_refined": "with skew in the model, the demonstrated markup is 1.48x (not 1.94x) -> the 70s would plausibly have cleared ~5.50; foregone ~$415 vs fair-value $59 - the number to grade the ladder against on TRU",
+  "SUPERSEDED_20260803": "WITHDRAWN for same-strike offers \u2014 see LADDER_SUPERSEDED_greedy_only_20260803. Two prices on ONE strike lets the buyer take the cheap lot first; the split subsidises a high-reservation buyer. Still valid across DIFFERENT strikes."
+ },
+ "write_candidates_review_20260803_late": {
+  "chain_endpoint": "STILL DOWN (7th outage today) - no ladder can be staged; specs recorded for the moment it recovers",
+  "FAF_65p_repriced_at_spot_75.40": {
+   "theo": 2.33,
+   "reservation_plus4": 2.92,
+   "basis_if_assigned": 62.08,
+   "vs_earlier": "spot drifted 75.15->75.40 so both strikes are marginally further OTM and slightly cheaper; the 3.50 observed-trade FLOOR still exceeds the 2.92 model reservation, so the floor rule governs: quote 3.50, not 2.92",
+   "ruling": "ladder UNCHANGED - 1x @3.50 (observed-trade floor) + 1x @4.40 probe. Basis 61.50 at the floor price is BELOW the courted band bottom of 66 - the risk case is strictly better than the equity entry the court already approved.",
+   "constraint": "still inside the no-scaling-before-forensics window (Aug-10 / Aug-31). Clicking before Aug-10 is an explicit documented exception, not drift."
+  },
+  "JMKE": {
+   "question": "principal asked about selling at our value floor",
+   "CORRECTION": "we do NOT own JMKE - the court verdict is WAIT with band $15-18 and zero position. There is nothing to sell. The real question is whether to WRITE puts against the band.",
+   "spot": 24.4,
+   "bid_ask": "24.30 x 24.40 - deep two-sided, this is NOT a dead chain",
+   "chain": "LIVE and listed (Aug/Sep/Nov-26, Feb-27) - so the dead-chain program does not apply; this would be template-1 (event-IV at a pre-committed court band) or nothing",
+   "put_math_at_est_55_vol": {
+    "Feb27_17.5p": {
+     "theo": 1.31,
+     "basis": 16.19,
+     "yield_pct": 13.6
+    },
+    "Feb27_20p": {
+     "theo": 1.99,
+     "basis": 18.01,
+     "yield_pct": 18.1
+    }
+   },
+   "RULING": "DO NOT WRITE YET. Three blockers: (1) the armed JMKE gate is JOINT - 17.5p bid >=1.25 AND spread <=0.20 AND spot >=19.50 - and spot at 24.40 means the market is 25%+ above our band, so a fill would only arrive on a violent move toward the band, i.e. adverse selection; (2) IPO vol is an ESTIMATE (~55%) with no history to measure - the pricer needs realized vol and there is <1 month of tape, so we cannot compute a reservation ask honestly; (3) stabilization ends ~Aug-29 and lockup ~Jan-2027 - both are DATED SUPPLY inside any tenor we would write, exactly the 'no event-or-supply in tenor' gate failing.",
+   "revisit": "after ~3 months of tape gives a real RV, and after the Aug-29 stabilization expiry clears"
+  },
+  "other_write_candidates_screened": {
+   "method": "applied the two-template ruling to the live book rather than hunting new names",
+   "eligible_now": "NONE beyond the FAF 65p ladder",
+   "why": "template-1 needs a courted band + an event in tenor + IV>RV (QCOM/EQT/MCHP are already written; OMF 60/57.5p are resting unfilled and must not be chased); template-2 needs a genuinely dead chain (FAF is the only verified one - VRLA/KALMAR have NO listed chains at all, TRU is queued behind FAF's forensics, MCHP/OMF are live chains not dead ones)",
+   "standing_rule_reaffirmed": "the program scales on FORENSICS EVIDENCE, not on opportunity count. One experiment, two checkpoints, then TRU."
+  }
+ },
+ "faf_65p_ladder_PRICED_20260803": {
+  "user_directive": "write more FAF at 65, double-check with the script, and CAPTURE THE MARKET-MAKER PREMIUM this time",
+  "pricer_run": "desk/dead_chain_pricer.py on FRESH 1y IBKR bars (250 sessions, not the stale cached closes)",
+  "spot": 75.4,
+  "rv_1y": 0.292,
+  "rv_2y": 0.292,
+  "65p": {
+   "otm_pct": 14.8,
+   "skew_pts": 4.5,
+   "pricing_sigma": 0.337,
+   "theoretical_american": 2.33,
+   "model_reservation_plus4": 2.93,
+   "observed_trade_floor": 3.5,
+   "FLOOR_GOVERNS": "the pricer printed '[floor] observed mark 3.50 > model reservation 2.93 - quote the mark (a floor only, NEVER a discount)'. A real trade above the model RAISES our ask. 3.50 = 1.50x theoretical.",
+   "carry_at_3.50": {
+    "yield_on_strike_pct": 11.91,
+    "stacked_pre_tax_pct": 16.21,
+    "after_tax_pct": 8.11,
+    "vs_muni_hurdle": "CLEARS at ~2x"
+   },
+   "basis_if_assigned": 61.5
+  },
+  "THE_MARKET_MAKER_PREMIUM_CAPTURE": {
+   "what_went_wrong_last_time": "we sold the 70p at 3.4048 - the pricer NOW REFUSES that price ('prices 0.24 below RV-theoretical; this is the FAF error, do not stage'). Fair was 3.64, reservation 4.36. We gave away ~0.96 vs reservation on 2 lots = ~$192.",
+   "the_evidence_of_what_a_captive_buyer_pays": "the same session, someone paid 3.50 for the 65p - a WORSE strike - against a 2.33 theoretical. That is 1.50x fair. Applying the same markup to the 70p's 3.64 fair implies ~5.46 was clearable.",
+   "so_this_time": "SPLIT-OFFER DISCOVERY LADDER per the codified program standard. Lot 1 at 3.50 (the observed-trade floor, already 1.50x fair). Lot 2 at 4.40 (~1.9x fair) - the probe that tests whether the captivity premium extends beyond the one print we saw. If BOTH fill, every future leg on the census reprices upward; if only lot 1 fills, the floor is the market and the model reservation was too low."
+  },
+  "staging": {
+   "status": "STAGED \u2014 instruction 142, awaiting the principal's click",
+   "order": "SELL 2 x FAF Jan-15-2027 65 Put @ LIMIT 4.40 GTC (single order, both lots at the high price per the greedy-only correction)",
+   "contract_id": "883106625@SMART",
+   "localSymbol": "FAF   270115P00065000",
+   "WORKAROUND_THAT_UNBLOCKED_IT": "the claude.ai chain endpoint stayed down for ~14h on this session, but a conId is a conId: resolved it via qualifyContracts on the LOCAL IB GATEWAY read-only session (port 4001, IPv6 - an IPv4-only probe misses it), then passed the conId to the claude.ai connector for staging. A contract LOOKUP is not an order; the order rail is untouched and the transmit discipline stands. Credit: the quality-drawdown court lane found this first.",
+   "SELF_VERIFICATION": "the same lookup returned conId 883106665 for the Jan-27 70 PUT, which EXACTLY matches the contract_id on our existing FAF short-put position. That match is the proof the 65p id is real rather than guessed \u2014 the check that makes using a locally-resolved id safe.",
+   "economics_at_4.40": {
+    "x_theoretical": 1.89,
+    "yield_on_strike_pct": 15.0,
+    "stacked_pre_tax_pct": 19.3,
+    "after_tax_pct": 9.6,
+    "basis_if_assigned": 60.6,
+    "vs_courted_band_bottom": 66,
+    "note": "basis is 8% BELOW the band bottom \u2014 the assignment case improves as the ask rises"
+   },
+   "time_ladder": "if unfilled ~10 sessions, step to 4.00, then 3.50 (the observed captive print). Never post two prices on the same strike simultaneously.",
+   "instruction_expires": "2026-08-11"
+  },
+  "risk_frame": "basis 61.50 at the floor price is BELOW the courted band bottom of 66 - assignment gives a better entry than the equity court approved. Still inside the no-scaling-before-forensics window (Aug-10/Aug-31); this is the documented exception, sized 1+1 lots."
+ },
+ "LADDER_SUPERSEDED_greedy_only_20260803": {
+  "principal_challenge": "'why not: don't worry about the captive buyer, post the unfair lot only?'",
+  "VERDICT": "CORRECT \u2014 the split ladder is superseded. My design had a queue-priority flaw I had not thought through.",
+  "the_flaw": "in a lit book the buyer lifts the LOWEST offer first. Posting 3.50 alongside 4.40 does not discover the demand curve, it SUBSIDISES it: a buyer whose reservation is 4.40 takes the 3.50 lot first and pays an average of 3.95. Worked example, 2-lot buyer at 4.40 reservation: split ladder collects $790, two lots posted at 4.40 collect $880 \u2014 the split costs $90 to learn something we do not need.",
+  "why_the_information_argument_fails": "the split was justified as 'mapping the demand curve'. But we do not need the curve \u2014 we need ONE BIT: does captivity clear ~1.9x fair? A single high offer answers exactly that bit. A no-fill is not a failed experiment, it is the answer (captivity is false at that price), and it costs nothing to learn.",
+  "cost_of_a_resting_unfilled_offer": "ZERO \u2014 no margin encumbered until fill, no resting fee, GTC is free. The only 'cost' of the greedy-only post is foregone premium we were never owed.",
+  "REVISED_ORDER": {
+   "instruction": "SELL 2 x FAF Jan-15-2027 65 Put @ LIMIT 4.40 GTC (one order, both lots at the high price)",
+   "x_fair": 1.89,
+   "yield_on_strike_pct": 15.0,
+   "stacked_pre_tax_pct": 19.3,
+   "after_tax_pct": 9.6,
+   "basis_if_assigned": 60.6,
+   "vs_courted_band_bottom": 66,
+   "note": "basis 60.60 is 8% BELOW the band bottom \u2014 the assignment case improves as the ask rises, which is the whole asymmetry"
+  },
+  "what_replaces_the_ladder_as_the_experiment": "price-discovery by LADDERING IN TIME, not in the book: post high, and only if it sits unfilled for a defined window (say 10 sessions) step down 3.50-4.00. That sequence never leaves money on the table to a high-reservation buyer, and still finds the clearing price \u2014 it just finds it more slowly.",
+  "generalisation_for_the_program": "on a dead chain we are the ONLY supply, so we face no queue competition from other sellers \u2014 but we DO face queue competition from ourselves. Never post two prices on the same strike simultaneously. One offer, at the top of the plausible range, stepped down over time.",
+  "supersedes": "quote_structure_20260803 (split-offer discovery ladder) \u2014 that standard is WITHDRAWN for same-strike offers; it remains valid ACROSS strikes (65 and 70 simultaneously is fine, they are different instruments)."
+ }
+}

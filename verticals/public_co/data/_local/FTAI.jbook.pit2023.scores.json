@@ -1,0 +1,103 @@
+{
+  "ticker": "FTAI",
+  "cutoff": "2023-01-15",
+  "filing": "0001590364-22-000002_10-K.txt",
+  "framework_note": "FTAI (Fortress Transportation and Infrastructure Investors LLC, pre-spin) is a commercial-aviation engine lessor and infrastructure-asset owner (Jefferson Terminal crude, Repauno port, Long Ridge port/power, Transtar railroads). The 10-K names ZERO Pentagon Program Elements, ZERO DoD programs, ZERO military platforms/customers. Cohort metadata 'military adjacency via LM2500/CFM56' is not borne out by the filing. pentagon_jbook returned NOT_FOUND on every reasonable query (contractor_name: FTAI / FTAI Aviation / Fortress Transportation; program_name: LM2500 / CFM56). USAspending returned zero DoD awards for FTAI Aviation / Fortress Transportation / Transtar LLC. The framework correctly classifies this as OUT-OF-COHORT for the J-Book divergence pattern: there are no J-Book-grounded forward-looking claims to falsify. Severity scoring below applies the calibration rubric — most claims become UNVERIFIABLE via J-Book (NOT_FOUND → UNVERIFIABLE per heuristic 1 and 7) or PASS via orthogonal verification.",
+  "scores": [
+    {
+      "claim_id": "FTAI-001",
+      "claim_text": "FTAI announced in Q4 2021 it intends to spin off its infrastructure business as a separate publicly traded entity in Q2 2022, with $800M cash remit.",
+      "severity": "PASS",
+      "supports": ["edgar_fts.query_fulltext"],
+      "M_check": "edgar_fts.query_fulltext",
+      "M_value": "Confirmed: FTAI Infrastructure Inc. (FIP, CIK 0001899883) appears in EDGAR with 10-Q filings starting 2022-08-25 (period 2022-06-30) and 2022-11-03 (period 2022-09-30). The spin-off was completed and the new entity is filing as a separate registrant, validating the claim well before the 2023-01-15 cutoff.",
+      "interpretation": "Forward-looking corporate-action claim was delivered on/near the promised timeline. PASS."
+    },
+    {
+      "claim_id": "FTAI-002",
+      "claim_text": "Aviation Leasing segment generates equipment-leasing revenue from commercial aircraft/engines (total equipment-leasing revenue $335.6M in 2021).",
+      "severity": "UNVERIFIABLE",
+      "supports": ["pentagon_jbook.query_program_funding", "usaspending.query_dod_contracts"],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "pentagon_jbook NOT_FOUND for contractor_name=FTAI Aviation and Fortress Transportation. USAspending: 0 DoD awards for both recipient names (Jan 2020 - Dec 2026). The segment is COMMERCIAL aviation leasing — there is no claim of DoD revenue, so 'pentagon_jbook divergence' is not applicable. The claim itself is a backward-looking revenue figure (audited 10-K), which we treat as a fact rather than a falsifiable forward-claim.",
+      "interpretation": "Out-of-pattern for this cohort. No DoD program named, no military customer named, no J-Book line implicated. UNVERIFIABLE under J-Book (heuristic 7: NOT_FOUND != red flag) — this is the correct classification: claim is not J-Book-grounded."
+    },
+    {
+      "claim_id": "FTAI-003",
+      "claim_text": "Transtar (acquired Jul 2021): 5 freight railroads + 1 switching company; 16% of assets, 13% of revenues in 2021.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["usaspending.query_dod_contracts"],
+      "M_check": "usaspending.query_dod_contracts",
+      "M_value": "USAspending: 0 DoD awards for recipient_name=Transtar LLC (2020-2026). Transtar is a commercial freight rail operator serving manufacturing/production facilities — narrative does not claim DoD haulage. The 16%/13% materiality is internal accounting, not a J-Book-grounded forward claim.",
+      "interpretation": "Out-of-pattern. No DoD claim to falsify. UNVERIFIABLE under the J-Book pattern (correctly so)."
+    },
+    {
+      "claim_id": "FTAI-004",
+      "claim_text": "Jefferson Terminal: exited crude marketing strategy in Q4 2019; crude marketing revenues $166M (2019) -> $0 (2021).",
+      "severity": "PASS",
+      "supports": ["edgar_fts.query_fulltext"],
+      "M_check": "edgar_fts.query_fulltext",
+      "M_value": "EDGAR confirms ongoing disclosure of Jefferson Terminal post-2021 in FTAI Infrastructure 10-Qs (2022-08-25, 2022-11-03). The exit-strategy narrative is consistent with later filings (no reversal / re-entry suggested). Backward-looking accounting transition, well-disclosed.",
+      "interpretation": "Backward-looking disclosure, internally consistent. PASS."
+    },
+    {
+      "claim_id": "FTAI-005",
+      "claim_text": "Repauno: 1,630-acre Delaware River deep-water port being redeveloped as multi-modal terminal.",
+      "severity": "PASS",
+      "supports": ["epa_frs.query_facilities"],
+      "M_check": "epa_frs.query_facilities",
+      "M_value": "EPA FRS returns 5 facilities matching 'Repauno' in NJ, including 'REPAUNO PORT & RAIL - BULLET TANKS' (Delaware River Partners LLC, Greenwich Twp, NJ) and the legacy DuPont/Chemours sites at 200 N Repauno Ave, Gibbstown, NJ 08027. Facility exists and matches the described footprint.",
+      "interpretation": "Existence/footprint claim verified by EPA registry. PASS."
+    },
+    {
+      "claim_id": "FTAI-006",
+      "claim_text": "Long Ridge: 1,660-acre Ohio River multi-modal port with operating power plant (equity-method investment).",
+      "severity": "PASS",
+      "supports": ["epa_frs.query_facilities"],
+      "M_check": "epa_frs.query_facilities",
+      "M_value": "EPA FRS returns 5 facilities for 'Long Ridge' in OH, including multiple 'LONG RIDGE ENERGY GENERATION' registrations at 43840 OH-7, Hannibal OH 43931 (Monroe County, Ohio River). Power-plant facility presence confirmed.",
+      "interpretation": "Existence/footprint claim verified. PASS."
+    },
+    {
+      "claim_id": "FTAI-007",
+      "claim_text": "Aviation Leasing credit risk limited by $145.5M maintenance reserves and security deposits at Dec 31 2021.",
+      "severity": "PASS",
+      "supports": [],
+      "M_check": "internal_disclosure_only",
+      "M_value": "Audited 10-K disclosure (E&Y signed unqualified opinion 2022-02-25). No external verifier appropriate; PASS pending future deterioration of these reserves in subsequent filings.",
+      "interpretation": "Standard credit-risk disclosure. PASS."
+    },
+    {
+      "claim_id": "FTAI-008",
+      "claim_text": "$3.3B outstanding principal and $1.2B interest obligations at Dec 31 2021; $100.5M / $185.4M due in next twelve months.",
+      "severity": "PASS",
+      "supports": [],
+      "M_check": "internal_disclosure_only",
+      "M_value": "Audited balance-sheet item. Not falsifiable by external M-source within this framework; included as control.",
+      "interpretation": "Standard balance-sheet disclosure. PASS."
+    },
+    {
+      "claim_id": "FTAI-009",
+      "claim_text": "Cohort metadata claimed 'military adjacency via LM2500 marine engines / CFM56 modules' — filing contains no DoD/PE/military identifier.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["pentagon_jbook.query_program_funding"],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "pentagon_jbook returned NOT_FOUND for program_name=LM2500, program_name=CFM56, contractor_name=FTAI, contractor_name=FTAI Aviation, contractor_name=Fortress Transportation. Ticker_entity_resolution and ticker_pe_crosswalk both return NOT FOUND for ticker FTAI. The 410-PE corpus does not cover Navy DDG-51/CG-47 propulsion (LM2500) nor commercial CFM56 engine families, and the FTAI 10-K does not name them either — so this is a true coverage gap rather than a divergence signal.",
+      "interpretation": "META-FINDING: This ticker should be flagged as OUT-OF-COHORT for the J-Book divergence pattern. The cohort metadata's 'military adjacency' hypothesis is not supported by the FY2021 10-K, which reads as a pure commercial transportation/infrastructure leasing thesis. Framework correctly returns UNVERIFIABLE (heuristic 7: NOT_FOUND != red flag absent a named PE). Recommend dropping FTAI from defense-tech J-Book divergence cohort, OR re-running against post-spin FTAI Aviation 10-K (period 2022, filed 2023) if the aviation-only entity surfaces military-engine-aftermarket claims."
+    }
+  ],
+  "summary": {
+    "n_claims": 9,
+    "n_queries": 14,
+    "severity_counts": {
+      "PASS": 6,
+      "MODERATE_UNDERDELIVERY": 0,
+      "SEVERE_UNDERDELIVERY": 0,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 3
+    },
+    "jbook_grounded_claims": 1,
+    "jbook_fired_on": 0,
+    "verdict": "OUT-OF-COHORT for J-Book divergence pattern. Filing is commercial transportation/infrastructure narrative with zero named DoD programs."
+  }
+}

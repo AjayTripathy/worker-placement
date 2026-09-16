@@ -1,0 +1,115 @@
+{
+  "ticker": "KTOS",
+  "cutoff": "2026-05-16",
+  "filing": "0001069258-26-000013_10-K.txt",
+  "filing_form": "10-K",
+  "filing_date": "2026-02-23",
+  "claims": [
+    {
+      "claim_id": "KTOS-1",
+      "claim_text": "In fiscal 2025, 2024, and 2023, Kratos generated 68%, 67%, and 69%, respectively, of its total revenues from contracts with the U.S. Government (all military branches and FMS), either as a prime contractor or subcontractor. FY2025 total revenue was $1,346.8M, implying ~$915M of U.S. Government revenue.",
+      "subject": "Kratos Defense & Security Solutions",
+      "predicate": "U.S. Government revenue share / total contract dollars",
+      "object_value": "68% of $1,346.8M FY2025 = ~$915M USG revenue",
+      "source_quote": "In fiscal 2025, 2024 and 2023, we generated 68%, 67% and 69%, respectively, of our total revenues from contracts with the U.S. Government (including all branches of the U.S. military and FMS), either as a prime contractor or a subcontractor.",
+      "category": "customer_pipeline",
+      "queries": [
+        {"source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "Kratos", "start_date": "2023-01-01", "end_date": "2026-05-16", "page_size": 25}},
+        {"source": "usaspending.query_recipient_contracts", "kwargs": {"recipient_name": "Kratos", "start_date": "2023-01-01", "end_date": "2026-05-16", "page_size": 25}}
+      ]
+    },
+    {
+      "claim_id": "KTOS-2",
+      "claim_text": "Kratos is establishing a new facility 'related to the Sentinel intercontinental ballistic missile (ICBM) program', implying Kratos is on-program supplier/subcontractor (Sentinel prime is Northrop Grumman).",
+      "subject": "Kratos / Sentinel ICBM program",
+      "predicate": "is a supplier on (building facility for)",
+      "object_value": "Sentinel ICBM program participation",
+      "source_quote": "establishment of a new facility related to the Sentinel intercontinental ballistic missile (ICBM) program",
+      "category": "customer_pipeline",
+      "queries": [
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Kratos", "cutoff_date": "2026-05-16", "cik": "0001133421"}},
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Sentinel", "cutoff_date": "2026-05-16", "cik": "0001069258"}},
+        {"source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "Kratos", "start_date": "2023-01-01", "end_date": "2026-05-16", "page_size": 25}}
+      ]
+    },
+    {
+      "claim_id": "KTOS-3",
+      "claim_text": "On June 3, 2025, Kratos and GE Aerospace announced a formal teaming agreement to advance the development and production of engines for the next generation of affordable unmanned aerial systems and Collaborative Combat Aircraft-type (CCA-type) aircraft. Through Dec 28, 2025 Kratos recorded $31.5M revenue and $31.9M cost on the program; $12.9M revenue / $13.3M cost in FY2025 alone.",
+      "subject": "Kratos / GE Aerospace teaming",
+      "predicate": "formal teaming agreement on jet engines for unmanned / CCA aircraft",
+      "object_value": "GE Aerospace partnership, $31.5M cumulative revenue",
+      "source_quote": "On June 3, 2025, the Company and GE Aerospace ( GE ) announced a formal teaming agreement to advance the development and production of engines for the next generation of affordable unmanned aerial systems and Collaborative Combat Aircraft-type (CCA-type) aircraft.",
+      "category": "partnership",
+      "queries": [
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Kratos", "cutoff_date": "2026-05-16", "cik": "0000040545"}},
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Kratos teaming", "cutoff_date": "2026-05-16"}}
+      ]
+    },
+    {
+      "claim_id": "KTOS-4",
+      "claim_text": "Kratos describes itself as an 'IP-centric technology company with proprietary products, technology and systems' across unmanned aerial drones, hypersonics, jet engines, microwave electronics, C5ISR, and training. This implies a material patent portfolio.",
+      "subject": "Kratos Defense & Security Solutions",
+      "predicate": "owns granted patent portfolio across claimed tech areas",
+      "object_value": "n_granted >= 5 with hits in claimed categories (drones/hypersonic/microwave/jet engines)",
+      "source_quote": "IP-centric technology company with proprietary products, technology and systems which address critical current and emerging threats faced by U.S. and allied militaries.",
+      "category": "technology",
+      "queries": [
+        {"source": "uspto_odp.query_assignee", "kwargs": {"assignee_name": "Kratos", "cutoff_date": "2026-05-16", "categorize": {"drone_unmanned": ["unmanned", "uav", "drone", "valkyrie"], "hypersonic": ["hypersonic", "rocket", "propulsion", "engine"], "microwave_rf": ["microwave", "rf", "radar", "antenna"], "c5isr_satellite": ["satellite", "command", "control", "communication"]}}},
+        {"source": "uspto_odp.query_assignee", "kwargs": {"assignee_name": "Florida Turbine", "cutoff_date": "2026-05-16"}}
+      ]
+    },
+    {
+      "claim_id": "KTOS-5",
+      "claim_text": "Kratos operates microwave electronics manufacturing facilities including in Israel and substantial US manufacturing (machining, milling, casting, 3D printing, additive manufacturing) supporting jet engine and hardware products. KGS segment had $619M owned + $1,136M leased = 1,755K sqft across the US.",
+      "subject": "Kratos Government Solutions manufacturing footprint",
+      "predicate": "operates US manufacturing facilities at named locations",
+      "object_value": "EPA FRS hits at Kratos KGS named US sites (especially AL, CA, FL, IN, MD, OK)",
+      "source_quote": "Kratos Government Solutions : Birmingham and Huntsville, AL; Placerville, San Diego, and San Jose, CA; Colorado Springs and Englewood, CO; Jupiter and Orlando, FL; Crane, IN, Baltimore, Princess Anne, and Lanham, MD; Reno, NV, Bristow, OK; Dallastown and York, PA; Plano, TX",
+      "category": "physical_facility",
+      "queries": [
+        {"source": "epa_frs.query_facilities", "kwargs": {"facility_name": "Kratos", "state_abbr": "CA"}},
+        {"source": "epa_frs.query_facilities", "kwargs": {"facility_name": "Kratos", "state_abbr": "AL"}},
+        {"source": "epa_frs.query_facilities", "kwargs": {"facility_name": "Kratos", "state_abbr": "OK"}}
+      ]
+    },
+    {
+      "claim_id": "KTOS-6",
+      "claim_text": "Kratos has 'Unmanned Systems' segment producing jet powered unmanned aerial drone systems including the Kratos Valkyrie (XQ-58); claims to be a major OEM of named tactical drones (XQ-58, Mako, BQM-167). FY2025 US segment revenue was $292.0M.",
+      "subject": "Kratos Unmanned Systems / Valkyrie XQ-58",
+      "predicate": "is OEM and recipient of DoD contracts for tactical drones",
+      "object_value": "DoD contracts under Kratos Unmanned Systems / Aerial Systems / XQ-58 / Valkyrie / BQM-167 / Mako program references",
+      "source_quote": "Kratos primary business areas include ... jet powered unmanned aerial drone systems ... unmanned jet powered aircraft such as Kratos Valkyrie ahead of potential contract award",
+      "category": "production_volume",
+      "queries": [
+        {"source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "Kratos Unmanned", "start_date": "2022-01-01", "end_date": "2026-05-16", "page_size": 25}},
+        {"source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "Composite Engineering", "start_date": "2020-01-01", "end_date": "2026-05-16", "page_size": 10}}
+      ]
+    },
+    {
+      "claim_id": "KTOS-7",
+      "claim_text": "On November 4, 2025, Kratos entered a definitive merger agreement to acquire Orbit Technologies Ltd. (Israeli company, traded on Tel Aviv Stock Exchange) for approximately $356.3M, funded via balance-sheet cash, expected to close in 1H 2026.",
+      "subject": "Kratos / Orbit Technologies Ltd",
+      "predicate": "definitive merger agreement to acquire",
+      "object_value": "$356.3M aggregate consideration, all-cash from balance sheet",
+      "source_quote": "On November 4, 2025, the Company and certain of its subsidiaries entered into a definitive merger agreement ... to acquire Orbit Technologies Ltd. ... The aggregate consideration payable by the Company pursuant to the Orbit Merger Agreement is expected to be approximately $ 356.3 million, which is expected to be funded via cash on the Company s balance sheet immediately prior to closing.",
+      "category": "vendor_relationship",
+      "queries": [
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Orbit Technologies", "cutoff_date": "2026-05-16", "cik": "0001069258"}},
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Orbit Merger", "cutoff_date": "2026-05-16"}}
+      ]
+    },
+    {
+      "claim_id": "KTOS-8",
+      "claim_text": "On February 20, 2026, Kratos entered into the 2026 Credit Agreement with PNC Bank (administrative agent) establishing a five-year senior secured $300M revolving credit facility (with $35M swingline and $50M LOC sub-facilities, plus uncommitted incremental of up to $135M). The 2022 Credit Agreement (which had $200M Term Loan A + $200M revolver) was terminated.",
+      "subject": "Kratos / PNC Bank 2026 Credit Agreement",
+      "predicate": "entered new credit facility / refinanced 2022 facility",
+      "object_value": "$300M revolver, PNC as admin agent, 5-year term",
+      "source_quote": "On February 20, 2026, the Company entered into a Credit Agreement (the 2026 Credit Agreement ), by and among the Company, the guarantors from time to time party thereto, the lenders from time to time party thereto (the Lenders ), and PNC Bank, National Association (the Administrative Agent ), in its capacity as administrative agent ... The 2026 Credit Agreement establishes a five-year senior secured credit facility which is comprised of a $300 million revolving credit facility",
+      "category": "financial_distress",
+      "queries": [
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "PNC Bank", "cutoff_date": "2026-05-16", "cik": "0001069258"}},
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "2026 Credit Agreement", "cutoff_date": "2026-05-16", "cik": "0001069258"}}
+      ]
+    }
+  ]
+}

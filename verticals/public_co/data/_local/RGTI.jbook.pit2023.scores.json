@@ -1,0 +1,68 @@
+{
+  "ticker": "RGTI",
+  "cutoff": "2023-01-15",
+  "filing": "0001564590-22-006345_10-K.txt",
+  "scoring_summary": {
+    "severity_counts": {
+      "PASS": 0,
+      "MODERATE_UNDERDELIVERY": 0,
+      "SEVERE_UNDERDELIVERY": 0,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 5
+    },
+    "jbook_grounded_claims_total": 0,
+    "pentagon_jbook_fired_count": 0,
+    "structural_finding": "Pre-validated filing is the Supernova SPAC's last pre-merger 10-K (CIK 0001838359, filed 2022-02-23, FY ended 2021-12-31). It contains no Rigetti operating disclosure, no DoD program names, no PE numbers, no AFRL/DARPA contract narrative. The J-Book Exposure Divergence pattern cannot be tested against this artifact. All five extracted claims are SPAC-shell or control claims; pentagon_jbook fired only on the adjacent IonQ analog (CONTROL, not a Rigetti claim). The framework's correct PIT-2023-01-15 verdict for this filing is UNVERIFIABLE w.r.t. the cohort thesis. Operator note: refresh_cohort_filings.py picked a pre-merger SPAC 10-K; the first Rigetti operating 10-K under this CIK is 0001193125-23-080486_10-K (filed 2023-03-27) — outside the PIT 2023-01-15 cutoff. So as of 2023-01-15 NO Rigetti annual report existed; only the 10-Qs (0001193125-22-218918, 0001193125-22-290115) and the S-1 (0001193125-22-218934). This is itself a meaningful framework finding: under strict PIT 2023-01-15, RGTI has no 10-K to extract J-Book claims from."
+  },
+  "scores": [
+    {
+      "claim_id": "c1",
+      "claim_text": "Supernova / Rigetti merger conditioned on >= $165M available cash at closing.",
+      "severity": "UNVERIFIABLE",
+      "supports": "Closing condition stated in 10-K is a binary contractual term, not a J-Book program claim. Edgar_fts returned 111 hits for 'Rigetti' under CIK 0001838359 within the cutoff window (PIT 2023-01-15), confirming the SPAC/merger narrative was extensively disclosed and ultimately consummated (8-K dated 2022-03-07 confirms close).",
+      "M_check": "edgar_fts.query_fulltext",
+      "M_value": {"search_term": "Rigetti", "cik": "0001838359", "total_hits": 111, "cutoff_date": "2023-01-15"},
+      "interpretation": "Not a J-Book claim. Out of scope for cohort. UNVERIFIABLE w.r.t. divergence pattern; no severity signal."
+    },
+    {
+      "claim_id": "c2",
+      "claim_text": "Approx $345M in trust + $147.5M committed PIPE to fund the de-SPAC.",
+      "severity": "UNVERIFIABLE",
+      "supports": "SPAC trust-account disclosure; not a Pentagon program-element claim. No J-Book linkage exists for this claim type.",
+      "M_check": null,
+      "M_value": null,
+      "interpretation": "Out of cohort scope. The historical record (8-K 2022-03-07 confirming merger close) implies the minimum-cash floor was satisfied, but this is a corporate-finance claim, not a forward J-Book exposure claim."
+    },
+    {
+      "claim_id": "c3",
+      "claim_text": "Substantial doubt about going-concern absent merger consummation.",
+      "severity": "UNVERIFIABLE",
+      "supports": "Standard SPAC going-concern language. Resolved by merger close one month after filing. No J-Book program element exposure.",
+      "M_check": null,
+      "M_value": null,
+      "interpretation": "Out of cohort scope."
+    },
+    {
+      "claim_id": "c4",
+      "claim_text": "Business combination must close by 2023-03-04 or trust liquidates.",
+      "severity": "UNVERIFIABLE",
+      "supports": "Deadline disclosure; not a Pentagon program claim. Per edgar_fts, the merger closed 2022-03-02 (8-K 0001193125-22-067932 filed 2022-03-07), well before the deadline.",
+      "M_check": null,
+      "M_value": null,
+      "interpretation": "Out of cohort scope; not divergence-pattern bearing."
+    },
+    {
+      "claim_id": "c5_control_jbook_check",
+      "claim_text": "CONTROL: No Rigetti-named PEs in this filing; nearest J-Book analogs are AFRL Quantum Networking line items.",
+      "severity": "UNVERIFIABLE",
+      "supports": "pentagon_jbook.query_program_funding(contractor_name='Rigetti') -> NOT_FOUND at cutoff 2023-01-15 (Rigetti is not a named contractor in the corpus's 410 PEs). pentagon_jbook.query_program_funding(program_name='AFRL Quantum Networking') -> matches the IonQ AFRL Quantum Networking program with status FUNDED_GROWING at cutoff 2023-01-15 (FY22 $13M -> FY23 $26M). That program lists IonQ Inc as primary contractor, NOT Rigetti, so it is not corroborative evidence for any Rigetti claim. usaspending.query_dod_contracts(recipient_name='Rigetti Computing') -> 0 awards under that exact recipient name in the DoD obligations window 2020-2026, which is a coverage/normalization signal rather than a hard zero (Rigetti has historically held DoD R&D awards under variant legal-entity names). Per heuristic #7 (NOT_FOUND != red flag) and the structural absence of any Rigetti claim in the filing, score is UNVERIFIABLE.",
+      "M_check": "pentagon_jbook.query_program_funding + usaspending.query_dod_contracts",
+      "M_value": {
+        "pentagon_jbook_contractor_Rigetti": {"signal": "NOT_FOUND", "n_matches": 0, "cutoff_year": 2023},
+        "pentagon_jbook_program_AFRL_Quantum_Networking": {"signal": "FUNDED_GROWING", "primary_contractor": "IonQ Inc (not Rigetti)", "fy22_M": 13, "fy23_M": 26, "earmark_secured": true},
+        "usaspending_dod_Rigetti_Computing": {"n_awards": 0, "total_amount": 0.0, "note": "Coverage/normalization signal — variant entity names may be required"}
+      },
+      "interpretation": "Adjacent AFRL Quantum Networking line item is FUNDED_GROWING at PIT 2023-01-15, but it's an IonQ contract, not Rigetti. The filing makes no J-Book-grounded claim, so there's nothing to verify or contradict. Framework correctly declines to score a divergence pattern that the disclosure itself does not invoke. Cohort signal for RGTI at PIT 2023-01-15: NO_SIGNAL_FROM_DISCLOSURE — refresh_cohort_filings should be rerun against a Rigetti operating filing (10-Q 0001193125-22-290115 filed 2022-11-14 is the latest operating filing before cutoff)."
+    }
+  ]
+}

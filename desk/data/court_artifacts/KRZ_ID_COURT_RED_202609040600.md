@@ -1,0 +1,68 @@
+## RED BENCH — KRZ.ID — RECOMMEND: REJECT
+
+**PACK: acknowledged.** The pack returned `no tape source reachable`, no filings, no XBRL — every tape/cap-structure number below is superseded by live sources I fetched myself, cited per line. Kerry files no 10-Q/10-K (Irish issuer, no EDGAR), so the SEC-XBRL and 403-proxy rails in the manifest are a **COVERAGE GAP** for this name; H1 2026 figures come from Kerry's own release.
+
+**Tape (live, not stale):** €84.25, Euronext Dublin close 2026-09-03 16:30 GMT; 52wk €64.30–€89.25 → **dd52 = −5.6% off high, pct_off_low = +31.0%**; 50dma €83.11, 200dma €75.69; ADV-day notional ≈ €14.2m. Cap structure: 158.73m shares, mcap €13.37bn, EV €15.60bn → net debt €2.23bn ≈ 1.9x EBITDA (H1 EBITDA €558m annualised). [stockanalysis.com/quote/ise/KRZ/](https://stockanalysis.com/quote/ise/KRZ/statistics/)
+
+### KILL FINDINGS
+
+**1. The prize cannot clear +50% even at 100% capture. FATAL. KILL-CLASS: NOVEL.**
+{claim: "the chemistry layer gets paid on every NA launch" is material to KRZ | tool: TAM arithmetic from vendor category value + pack EV/EBITDA | result: global NA-beer retail value ≈ US$24bn (2025, VENDOR DATA, [gminsights](https://www.gminsights.com/industry-analysis/non-alcoholic-beer-market)). Flavour-house-addressable slice (maskers, aroma systems, mouthfeel) at a generous 0.5–1.5% of retail = **$120–360m globally, all suppliers**. Grant Kerry a *monopoly*: ~€110–330m revenue → €18–55m EBITDA at group's 16.7% margin → at the pack-derived 13.23x EV/EBITDA, **€0.24–0.73bn = 1.5–4.7% of Kerry's €15.6bn EV**. At flavour-house margins (25%) and 20x: still only **2.8–8.5%** | REFUTED}. The thesis being *completely right* is a single-digit re-rate. Realistic share (Kerry vs Givaudan/IFF/Symrise/Döhler/BarthHaas) puts NA-exposed revenue at **0.24–0.72% of FY26 consensus revenue €6.83bn** — the thesis's own 2% bar missed by 3–8x, the third death by the same cause.
+
+**2. The thesis cannot move the street's load-bearing number. FATAL. KILL-CLASS: NOVEL.**
+{claim: divergence exists | tool: consensus extraction | result: street FY26 revenue **€6.83bn (+1.06%)**, EPS **€5.10**; FY27 **€7.16bn (+4.80%)**, EPS **€5.64**; 15 analysts, PT range €81–€111 ([forecast](https://stockanalysis.com/quote/ise/KRZ/forecast/)). NA at 0.24–0.72% of revenue growing at IWSR's ~9% CAGR contributes **+0.02 to +0.06pp** of group growth — inside the estimate range's noise | CONFIRMED}. We agree with the street, and we agree *by construction*: there is no arithmetic path from this thesis to a different FY26/27 number. That is the kill.
+
+**3. Picks-and-shovels INVERTS here — oligopsony, not atomized buyers. FATAL. KILL-CLASS: NOVEL** *(the attack the brief missed)*.
+{claim: Adobe/SEMR measurement-layer analogy | tool: patent register read, brief C11/C4 | result: the Adobe anchor works because thousands of fragmented buyers cannot in-house the shovel. NA beer's buyers are **five brewers**, and they hold the IP: Heineken Supply Chain B.V. (WO2026032794A1, 2026-02-12), Suntory (CN116367731A), Tsingtao (CN115232688B), with Heineken R&D co-authoring the TU Delft aldehyde chemistry ([Google Patents](https://patents.google.com/?q=%22alcohol-free+beer%22&after=priority:20200101)) | REFUTED}. The layer that "gets paid regardless of brand" is owned by the brands.
+
+**4. The peer-reviewed add-backs are commodities. SIZING. KILL-CLASS: NOVEL.**
+{claim: repair spend accrues to a flavour house | tool: primary | result: Bóna et al., *Membranes* 2023 — the panel required **glycerol and mineral salts** to fix "empty/overly bitter" RO beer ([doi 10.3390/membranes13030283](https://doi.org/10.3390/membranes13030283)); the biological route routes spend to **Novonesis/Lallemand yeast**, capex-free, bypassing both flavour house and GEA | CONFIRMED}.
+
+**5. Kerry specifically is the wrong horse. SIZING. KILL-CLASS: NOVEL.**
+{claim: "closest to per-customer NA systems work" | tool: company site read + patent register | result: Kerry's alcohol and brewing pages name **no dealcoholisation, no NA beer** ([alcohol](https://www.kerry.com/markets/food-and-beverage-applications/beverage/alcohol), [brewing](https://www.kerry.com/markets/food-and-beverage-applications/beverage/alcohol/beer-brewing-ingredients)); its named NA platform is **spirits-facing** botanicals (2020) while beer/cider is ~70% of category growth | REFUTED}. Kerry is the *weakest* of the five on NA evidence, not the closest.
+
+**6. Materiality legs 2 and 3 are structurally underivable. DATA.**
+Beverage share of group is **27.66% (H1 26) vs 27.65% (H1 25)** — flat to a basis point, with beverage −3.63% against group −3.66% ([interim report](https://www.investegate.co.uk/announcement/rns/kerry-group-a-shares-cdi---kyga/kerry-group-interim-management-report-2026/9692301)). The Asahi template returns *no signal*. Margin by end-use market does not exist: segments are geographic only.
+
+**7. No dislocation to buy. TIMING. KILL-CLASS: CONSENSUS.**
+{claim: entry opportunity | tool: computed from 52wk series | result: −5.6% off high, +31% off low, above 50d and 200d, 13 Buy / 6 Hold / 0 Sell | REFUTED}. discovery_state = **DISCOVERED/CROWDED-adjacent** — conditions size/timing only, does not kill on its own.
+
+**8. Integrity flag against my own case. DATA.** All five pre-flight `uspto_patents` runs returned null *because google_patents threw HTTP 503* — that is an **infra failure masquerading as a negative result**, not evidence of absent IP. Per T7 no kill here rests on patent absence; findings 3 and 5 rest on filings that were *found*, not on Kerry's zeros.
+
+**STRONGEST SINGLE KILL:** Finding 1. Price the roof before arguing the ladder: hand Kerry a *monopoly* on the entire global flavour-house-addressable NA-beer ingredient pool — every masker, every aroma system, every mouthfeel rebuild, worldwide, competitors erased — and it buys €18–55m of EBITDA against a €15.6bn EV. That is a **1.5–4.7% re-rate in the impossible case**, and 0.24–0.72% of revenue in the real one. A thesis whose perfect execution is indistinguishable from noise in a ±1pp revenue estimate is not a small position; it is not a position. Buying KRZ.ID on this ticket purchases 99.4%+ non-NA Kerry — a decelerating food-ingredients business at 15.7x forward — under an NA label that contributes nothing to the outcome. Same death as the prior two: sub-2% exposure, killed on the denominator.
+
+**WHAT WOULD CHANGE MY MIND:** (a) Kerry disclosing, or IR confirming, NA-exposed revenue ≥2% of group with growth ≥2x group — one number settles it; (b) a named NA beer/spirit brand publicly attributing its formulation to a Kerry system (customer lock-in evidence, currently zero); (c) a brewery bill-of-materials showing flavour-house-addressable add-back spend >€5/hL for NA vs conventional, which would multiply my TAM by ~4x and put the monopoly case near +20%; (d) a Kerry NA-beer patent family surfacing on a *working* register — the 503-corrupted preflight must be re-run before anyone treats Kerry's zeros as real.
+
+**Conviction on the KILL case: 9/10.** The two FATALs are arithmetic on figures Kerry itself published plus a vendor category value; only a 4x error in the ingredient-spend estimate moves the verdict, and finding 2 survives even then.
+
+**Scope note (not a save):** this rejects the *NA picks-and-shovels thesis*, not Kerry as an equity. Kerry at ~15–16.5x FY26/27 EPS against Givaudan/Symrise in the high-20s, with volume +3.3%, margin +60bps and a 20–21% 2030 target, may be a separate compounder case. It must be courted as one, with its own ROE/margin gate — never smuggled in on this ticket.
+
+**PRINT PROXIMITY: NONE — verified.** H1 2026 reported 2026-07-29; the next event is a Q3 trading update inferred at ~early-Nov 2026 with **no date published** on Kerry's IR calendar as of 2026-09-03. Ex-dividend 2026-10-08 (€1.40, 1.66% yield) is a corporate action, not a print. Nothing within 5 trading days; no pre-print reconstruction owed.
+
+**Fillability:** ~€14.2m/day notional; a ≤1% ADV ladder = ~€142k/day clip — a full slot fills in ~1 session. Liquidity is not the binding constraint. EUR-funded, Irish DWT documentation required. Moot given REJECT.
+
+## DETECTORS CONSULTED
+- **lockup_expiration_calendar** — NOT-FIRED. Kerry is a 40-year-listed €13.4bn issuer; no follow-on, no lockup, no insider overhang. Share count *fell* (~2.9m redeemed, Dairy deal).
+- **app_review_velocity** — NOT-FIRED. B2B ingredients supplier; no consumer app.
+- **beauty_velocity_poll** — NOT-FIRED. No beauty brand exposure.
+- **beauty_virality** — NOT-FIRED. Same; no cosmeceutical vehicle mapping applies.
+- **consumer_product_heat** — NOT-FIRED, and note the *inversion*: Kerry sells into consumer brands but owns none, so heat on any NA brand does not attribute to Kerry — which is finding 5 restated in detector terms.
+- **consumer_product_reviews** — NOT-FIRED. No own-brand review surface.
+- **crop_yield_ndvi** — UNCHECKABLE. Kerry has real ag input exposure (dairy, cereal/malt extract feedstock) but discloses no sourcing geographies or contracted acreage; an NDVI read needs named growing regions. Missing evidence: sourcing-origin disclosure.
+- **customer_id** — UNCHECKABLE and materially so. Kerry names no NA customer (brief §6 item 5) and, as an EU-to-EU ingredients shipper, generates little US customs BOL. Missing evidence: US import BOLs naming Kerry as shipper to a brewer consignee — this is the single detector that would settle finding 5.
+- **forest_integrity** — NOT-FIRED. No timber/harvest-plan claim.
+- **oil_storage** — NOT-FIRED. No petroleum or storage business.
+- **origin_mix** — UNCHECKABLE. No China-sourcing claim made; Kerry discloses revenue by geography (Americas €1,818m / Europe €687m / APMEA €831m) but not input origin. Missing evidence: customs/Census import lines by HS code.
+- **usaspending** — NOT-FIRED. No government-customer claim; Kerry's US revenue is commercial food/beverage.
+- **uspto_patents** — **FIRED, but as an INFRA finding, not a moat finding.** All five preflight runs (Kerry Group / Kerry Luxembourg / Kerry Group Services International / GEA Process Engineering / Givaudan) returned zero observations because the google_patents fallback threw **HTTP 503**. Per the infra-masquerading-as-negative rule this is a tool outage; it must be re-run before any bench cites Kerry's zeros. The *human* register reads that did return — Heineken/Suntory/Tsingtao NA filings, Givaudan WO2026068507A1, IFF ES2987952T3 — carry findings 3 and 5.
+- **concentration_instability** — UNCHECKABLE. Kerry discloses no >10% customer and no contract-renewal language; as an Irish issuer it files no 10-K/10-Q, so the detector's source document does not exist. Missing evidence: a customer-concentration note in the Annual Report — its *absence* is itself the disclosure-granularity finding (T1).
+
+```kg_candidate
+{"name": "oligopsony_inverts_picks_and_shovels", "kind": "mechanism", "one_line": "A picks-and-shovels thesis fails when the shovel's buyers are a concentrated oligopsony that already holds the enabling IP in-house.", "fires_on": "Any 'the arms dealer gets paid regardless of who wins' thesis where the top 5 customers exceed ~50% of end-market volume AND the patent register shows those customers filing on the enabling technology themselves. Test: count register filings by BUYER vs by the proposed supplier over the last 5 years; buyer-dominant = mechanism fires and the thesis inverts.", "evidence_here": "NA beer: Heineken Supply Chain B.V. (WO2026032794A1, WO2025061705A1), Suntory (CN116367731A), Tsingtao (CN115232688B) hold the post-2020 NA-beer register; Heineken R&D co-authors the TU Delft aldehyde chemistry. Kerry, the proposed shovel-seller, has zero NA filings and its own alcohol/brewing pages name no dealcoholisation offer. The peer-reviewed repairs (glycerol, mineral salts) are commodities the brewer buys direct.", "applies_to_guess": {"issuer_features": ["b2b_ingredients_supplier", "concentrated_end_market", "picks_and_shovels_thesis", "customer_holds_enabling_ip"], "sic_prefixes": ["2000", "2080", "2086", "2870", "3556"]}}
+```
+
+```kg_candidate
+{"name": "monopoly_capture_prize_test", "kind": "detector", "one_line": "Before litigating a growth-layer thesis, price the counterfactual where the issuer captures 100% of the addressable layer; if that prize is a single-digit re-rate, the thesis is dead regardless of execution.", "fires_on": "Any 'exposed to a fast-growing layer' thesis on a large-cap issuer where the layer's global TAM is estimable. Compute: layer TAM x 100% capture x issuer margin x issuer EV/EBITDA, divided by current EV. <10% = REJECT irrespective of every downstream argument; the materiality question is settled before the moat question is asked.", "evidence_here": "KRZ.ID: NA-beer flavour-house TAM $120-360m globally; Kerry at 100% capture = EUR18-55m EBITDA = 1.5-4.7% of EUR15.6bn EV at the 13.23x pack multiple. Two benches could argue Kerry's moat exhaustively and never reach a number that matters. Generalises the SLI lesson (price the roof before arguing the ladder) from project developers to exposure-layer theses.", "applies_to_guess": {"issuer_features": ["large_cap_diversified", "thematic_exposure_claim", "no_segment_disclosure_for_theme"], "sic_prefixes": []}}
+```
+
+> [runner pack_field_misquote_check — WARN, not a reject: SUPERSESSION-DECLARED (verify, not a fabrication flag) — pct_off_low: bench quotes +31.0 vs pack +52.0. Adjudicator: audit this bench's tape framing against the pack before crediting drawdown-anchored findings.]

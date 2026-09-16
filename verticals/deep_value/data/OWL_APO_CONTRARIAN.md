@@ -1,0 +1,10 @@
+# OWL & APO — Contrarian Private-Credit DD
+
+*SignalOS contrarian steelman → adversarial refutation → forensic balance-sheet audit (2026-06-28). Both came out of the HNW-shovels screen as "disguised private-credit-bubble longs." Read-only.*
+
+## Verdicts
+- **OWL (Blue Owl) — NOT_YET.** Cheap on the sector's metric (~8–9× owner cash after a 42% de-rate from a 20×+ peak), but the dividend (~$0.92 on $0.84–0.90 DE = ~118% cash payout) is uncovered and funded from capital+debt; 68% goodwill; non-traded BDC redemption gates firing (Q1 requests 40.7% / 21.9%). Forensic audit verdict: **WEAKENED** — equity insulated from *principal* markdowns but exposed via fee/AUM → goodwill. **Quant:** base FV ~$12.50 (14× DE), +49% from spot — but only ~16% cushion to a dividend-cut bear (~$7.20). Own up to ~$9.00 on the multiple; size up only on a covered-dividend reset or peaking redemptions.
+- **APO (Apollo) — AVOID.** The Athene Level-3, affiliated-originated credit tail is **UNDERPRICED** — only −18% off peak vs historic troughs ~half that. The bull's "no-run" pillar was refuted (ADS BDC gated at 45% proration; MidCap defaults doubling to 5.3% at 85% of NAV; $9B CRE dumped onto Athene). **Quant:** spot ~$115 = 12.3× fwd ANI = at/above base FV $122 (EV only ~+5% incl div). No margin of safety until **~$100** (~22% to FV) and real value at **$80–85** (~9× fwd = bear FV).
+
+## The unifying finding
+Both are *some* flavor of "long the private-credit boom continues," and **neither diversifies** an equity book (same risk-on factor). The split: **OWL has no principal balance sheet** (the mark-to-model lag dents only the fee base ~8% of FRE → starter-able at the right price), while **APO warehouses the principal in Athene** (the lag hits the equity, with insurance leverage on top → wait). The forensic audit on OWL specifically caught that "8.7× FRE" is really ~14–21× *owner cash* once the growing stock-comp add-back is charged — the headline multiple flatters every alt-manager equally, so it doesn't change OWL's *relative* cheapness, but the uncovered dividend and goodwill tower are the real, OWL-specific constraints.

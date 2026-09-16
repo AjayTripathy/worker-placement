@@ -1,0 +1,144 @@
+{
+  "ticker": "PL",
+  "cutoff": "2024-09-01",
+  "filing": "0001836833-24-000037_10-K.txt",
+  "filing_form": "10-K",
+  "filing_filed_date": "2024-03-29",
+  "filing_report_date": "2024-01-31",
+  "company": "Planet Labs PBC",
+  "cik": "0001836833",
+  "cohort": "j_book_exposure_divergence",
+  "extraction_notes": "FY24 10-K is light on J-Book-grounded specifics: no PE numbers, no named DoD programs (no Maven/EOCL/Hybrid Architecture/SDA/etc.). Defense & Intelligence is named as one of multiple customer verticals. Planet Labs Federal Inc. exists as the cleared subsidiary. Customer concentration claim (21% from one unnamed customer) is the most material disclosure but the customer is not named, so it cannot be pin-tied to a specific PE. Claims below extract the closest available DoD/government-program language plus 3 control claims (patent / facility / counterparty).",
+  "claims": [
+    {
+      "claim_id": "C1",
+      "claim_text": "One customer accounted for 21% of revenue for the fiscal year ended January 31, 2024 (FY24), up from 19% (FY23) and 18% (FY22) — material single-customer concentration without naming the customer or the underlying contract/program.",
+      "subject": "Planet Labs PBC",
+      "predicate": "single_customer_revenue_share",
+      "object_value": "21% FY24",
+      "source_quote": "For the fiscal year ended January 31, 2024, one customer accounted for 21% of revenue.",
+      "category": "dod_customer_concentration",
+      "queries": [
+        {"source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "Planet Labs Federal, Inc."}, "rationale": "Identify any DoD-side concentration that could support the 21% single-customer disclosure"},
+        {"source": "usaspending.query_federal_presence", "kwargs": {"recipient_name": "Planet Labs"}, "rationale": "Get total federal obligation footprint and top awarding agencies"},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "Planet Labs", "cutoff_date": "2024-09-01"}, "rationale": "Search J-Book corpus for any PE on which Planet is a primary contractor"},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "Planet Labs Federal", "cutoff_date": "2024-09-01"}, "rationale": "Same lookup against the federal subsidiary name"}
+      ]
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Planet positions its 'Defense & Intelligence' vertical as a strategic growth area, with governments engaging commercial remote-sensing companies for sharable, unclassified subscription products to complement traditional defense and security industrial solutions — implying forward DoD/IC revenue.",
+      "subject": "Planet Labs PBC",
+      "predicate": "forward_vertical_pipeline",
+      "object_value": "Defense & Intelligence vertical growth",
+      "source_quote": "Governments are strategically engaging with commercial space and remote sensing companies to leverage sharable, unclassified subscription products to complement more traditional defense and security industrial solutions. ... we believe geo-mapping foundation data, maritime domain awareness, humanitarian and disaster recovery, and natural resource monitoring are examples of the many potential drivers of this opportunity.",
+      "category": "jbook_program_pipeline",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"program_name": "Commercial Imagery", "cutoff_date": "2024-09-01"}, "rationale": "Probe for any commercial-imagery PE in the J-Book corpus"},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"program_name": "Electro-Optical Commercial Layer", "cutoff_date": "2024-09-01"}, "rationale": "NRO EOCL is the canonical commercial-imagery procurement vehicle"},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"program_name": "Geospatial Intelligence", "cutoff_date": "2024-09-01"}, "rationale": "NGA-side commercial GEOINT line"}
+      ]
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Planet states defense and intelligence customers drove year-over-year revenue growth: 'The increase in revenue was primarily driven by growth in the Civil Government and Defense and Intelligence customers.' Forward-looking implication of continued DoD/IC growth.",
+      "subject": "Planet Labs PBC",
+      "predicate": "vertical_revenue_growth_driver",
+      "object_value": "Civil Government + D&I drove FY24 YoY growth",
+      "source_quote": "The increase in revenue was primarily driven by growth in the Civil Government and Defense and Intelligence customers.",
+      "category": "dod_customer_concentration",
+      "queries": [
+        {"source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "Planet Labs Federal"}, "rationale": "Confirm DoD obligation trajectory matches the growth claim"},
+        {"source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "Planet Labs"}, "rationale": "Parent-level DoD lookup"}
+      ]
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Planet states it is a prime contractor to the U.S. government: 'As a prime contractor to the U.S. government, from time to time we rely upon subcontractors to perform work under government contracts.'",
+      "subject": "Planet Labs PBC",
+      "predicate": "is_prime_contractor",
+      "object_value": "USG prime contractor",
+      "source_quote": "As a prime contractor to the U.S. government, from time to time we rely upon subcontractors to perform work under government contracts.",
+      "category": "dod_customer_concentration",
+      "queries": [
+        {"source": "usaspending.query_federal_presence", "kwargs": {"recipient_name": "Planet Labs Federal"}, "rationale": "Confirm prime contractor status by inspecting obligations"},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "Planet Labs Federal", "cutoff_date": "2024-09-01"}, "rationale": "Does Planet Labs Federal appear as a primary contractor on any J-Book PE?"}
+      ]
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Planet Labs Federal, Inc. holds (or is in process of holding) facility security clearance under NISPOM for performing services requiring access to classified information for the U.S. government — implying ability to win classified DoD/IC contracts.",
+      "subject": "Planet Labs Federal, Inc.",
+      "predicate": "holds_facility_clearance",
+      "object_value": "NISPOM facility clearance",
+      "source_quote": "We must comply with the Department of Defense National Industrial Security Program Operating Manual for the facility security clearance of our subsidiary, Planet Labs Federal, Inc., which is a prerequisite to our ability to perform services requiring access to classified information and information systems for the U.S. government.",
+      "category": "dod_customer_concentration",
+      "queries": [
+        {"source": "usaspending.query_federal_presence", "kwargs": {"recipient_name": "Planet Labs Federal"}, "rationale": "Does the federal sub have obligations that would require clearance?"}
+      ]
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Planet identifies its competitive set for Defense & Intelligence imagery as including BlackSky Global LLC and Maxar Technologies — both of which hold NRO EOCL / commercial-imagery contracts. By naming them as direct competitors, Planet implies it competes for the same forward DoD/IC procurement vehicles.",
+      "subject": "Planet Labs PBC",
+      "predicate": "competitive_position_for_DoD_IC",
+      "object_value": "Direct competitor to BlackSky, Maxar, Airbus, Satellogic",
+      "source_quote": "Existing competitors include Airbus Defense and Space, BlackSky Global LLC, ImageSat International N.V., Maxar Technologies Ltd., Satellogic S.A., CG Satellite ...",
+      "category": "jbook_program_pipeline",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "BlackSky", "cutoff_date": "2024-09-01"}, "rationale": "Use named competitor as a proxy to surface the relevant PE (commercial EO)"},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "Maxar", "cutoff_date": "2024-09-01"}, "rationale": "Same — Maxar PE inclusion would reveal the relevant J-Book line"},
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"cik": "0001753539", "query": "Planet Labs", "after_date": "2023-01-01", "before_date": "2024-09-01"}, "rationale": "BlackSky counterparty disclosure mentioning Planet (control on counterparty corroboration)"}
+      ]
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Planet states its average contract length continues to be approximately two years (weighted on ACV basis) — implying near-term revenue is heavily dependent on renewals from existing customers, including the concentrated 21% customer.",
+      "subject": "Planet Labs PBC",
+      "predicate": "avg_contract_length",
+      "object_value": "~2 years ACV-weighted",
+      "source_quote": "Our average contract length continues to be approximately two years, weighted on an annual contract value basis.",
+      "category": "dod_customer_concentration",
+      "queries": [
+        {"source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "Planet Labs Federal"}, "rationale": "Compare base period of obligated DoD contracts to verify ~2yr cadence"}
+      ]
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "[CONTROL] Planet Labs Federal, Inc. is headquartered at a leased Washington, D.C. office.",
+      "subject": "Planet Labs Federal, Inc.",
+      "predicate": "has_office",
+      "object_value": "Washington, D.C. leased HQ",
+      "source_quote": "square foot Washington, D.C., office that serves as the corporate headquarters for our subsidiary, Planet Labs Federal, Inc.",
+      "category": "facility",
+      "queries": [
+        {"source": "epa_frs.query_facilities", "kwargs": {"company_name": "Planet Labs"}, "rationale": "Sanity check: EO ops are not heavy industrial, expect low/no FRS hits"},
+        {"source": "dol_h1b_lca.query_lca_filings", "kwargs": {"employer_name": "Planet Labs Federal", "state": "DC"}, "rationale": "Worksite corroboration"}
+      ]
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "[CONTROL] Planet operates the largest fleet of Earth-observation satellites in history, having collected over 2,700 images on average for every point on Earth's landmass.",
+      "subject": "Planet Labs PBC",
+      "predicate": "largest_eo_fleet",
+      "object_value": "Largest fleet by satellite count; >2,700 images per land point",
+      "source_quote": "We have collected over 2,700 images on average for every point on Earth s landmass, creating a non-replicable historical archive ... making our fleet the largest fleet of Earth observation satellites in history.",
+      "category": "patent",
+      "queries": [
+        {"source": "uspto_odp.query_assignee", "kwargs": {"assignee": "Planet Labs"}, "rationale": "Patent corroboration of satellite/EO IP"}
+      ]
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "[CONTROL] Planet receives certain U.S. government R&D funding accounted for under ASC 912-730 (Contractors — Federal Government — R&D), recognized over the term of each agreement as a reduction of R&D expenses.",
+      "subject": "Planet Labs PBC",
+      "predicate": "receives_federal_RD_funding",
+      "object_value": "ASC 912-730 federal R&D awards",
+      "source_quote": "Government grant arrangements are in the scope of ASC 912-730, Contractors –Federal Government – Research and Development ... funding is recognized over the term of each agreement as a reduction of research and development expenses based on a cost incurred method.",
+      "category": "counterparty_disclosure",
+      "queries": [
+        {"source": "usaspending.query_recipient_grants", "kwargs": {"recipient_name": "Planet Labs"}, "rationale": "Verify federal grant footprint that would flow through ASC 912-730"}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+DRD's two loudest red attacks (Eskom power, tailings grade decline) are both testably refuted by the FY2026 print that landed 2026-08-19 — but the FY2027 cost guide plus a *strengthening* rand means the operating-leverage thesis has already been collected, and at spot the coming year is flat-to-down.
+
+| ticker | class | refuting metric | current value/trend (cited) | next print date | note |
+|---|---|---|---|---|---|
+| DRD | **DAMAGE-ABSENT** (named narrative) | Eskom grid electricity consumption + cash cost/kg vs SA input inflation | Eskom draw **−14%**; net consumption **216,357 MWh (−10%)**; solar **146,873 MWh (+35%)**; cash cost **+7%** vs mgmt-cited "double-digit" diesel/cyanide/labour/trucking inflation ([6-K FY2026, 2026-08-19, acc. 0001628280-26-057862](https://www.sec.gov/Archives/edgar/data/1023512/000162828026057862/)) | Q1 FY2027 operating update ~Oct–Nov 2026 (pattern: [operatingupdateq3_2026.htm](https://www.sec.gov/Archives/edgar/data/1023512/000162828026031016/operatingupdateq3_2026.htm)) | Solar/BESS is structurally de-risking the Eskom attack, not merely surviving it |
+| DRD | **DAMAGE-ABSENT** (grade axis) | Group yield g/t + reserve tonnes/grade | Yield **0.193 g/t, UP 2% YoY** (Ergo H2 0.191 vs 0.169; FWGR H2 0.223 vs 0.212); reserves **694.53 Mt @ 0.29 g/t = 6.22 Moz ≈ 27 yrs** at 25.07 Mt/yr; Kloof 2 adds 67.36 Mt (+4 yrs FWGR LOM) ([6-K FY2026](https://www.sec.gov/Archives/edgar/data/1023512/000162828026057862/); [FY2025 20-F](https://www.sec.gov/Archives/edgar/data/1023512/000162828025047346/drd-20250630.htm)) | same | "Decline curve" is the wrong model — this is a blend-managed retreatment book, not a depleting orebody |
+| DRD | **DAMAGE-ARRIVING** (rand axis — the live one) | Realized rand gold price per kg | FY26 realized **R2,289,250/kg (+40%)**; **spot = R2,323,842/kg** ($4,467/oz × 16.18) = only **+1.5%** vs the FY26 *average* and **−4.8%** vs the **H2 FY26 realized R2,440,367/kg**. Rand **+8.5% YoY** (17.68→16.18); USD gold **−20%** off the 2026-01-29 record $5,597 | same | This is the attack that actually bites, and it compounds with the FY27 cost guide |
+
+**The decisive number the +14.5% print-pop ignored.** FY2027 guidance is production 160–170koz with AISC **~R1,230,000/kg** (+14%). At flat current spot:
+
+- FY2026 AISC margin: (2,289,250 − 1,078,068) × 4,865 kg sold = **R5.89bn**
+- FY2027 at spot: (2,323,842 − 1,230,000) × 5,000–5,300 kg = **R5.47–5.80bn → −2% to −7%**, despite production +3–10%
+- vs the H2 FY26 run-rate the market just repriced on: annualized **R6.82bn** → FY27 at spot is **−17%**
+
+**Tripwire (falsifiable):** DRD needs **USD gold ≥ ~$4,560/oz at a flat 16.18 rand** merely to hold FY2026 margin flat in FY2027. Spot $4,467 is *below* that line. Leverage is genuinely ~2.1x on the rand gold price — but it is symmetric and starts from flat, not up.
+
+**COURT-WORTHY (damage-absent, ranked):**
+1. **DRD** — the only member. The SA/power/grade discount is empirically wrong (yield up, Eskom draw down, 27-yr reserves), yet the name is *not* cheap on the axis that matters: the rand gold price is flat-to-down vs realized, costs are guided +14%, and the stock has run **+20% in 13 sessions** ($24.16 on 8/12 → $28.98) with **+14.5% on the print day alone**. The dispersion worth trading here is the opposite sign from the cohort premise.
+
+**Category flag for the sleeve (raise at court).** The 7/08 backtest verdict was that crash convexity is nearly monopolized by gold-**royalty**. DRD is not a royalty — it is an operating processor with full ZAR cost pass-through (+14% guided) and R3bn FY2027 capex against R2.27bn FY26 FCF. Slotting it into a royalty-core ballast sleeve is a category substitution that changes what the sleeve is for; capex only falls to R1.9bn/R1.3bn in FY2028/29, so the "dividend will grow" claim is back-loaded past FY2027.
+
+**Executability (mandatory check — PASSES).** ADV ~200–600k sh/day (~400k × $29 ≈ **$11.6M/day**); the 1%-participation rail is **~$116k/day**, so a $30–50k slice fills inside one session. NYSE-listed ADR (1 ADS = 10 ordinary), no thin-name constraint. *Caveat: I could not confirm the IBKR account line directly — the `search_contracts`/snapshot tool permission was denied this session; ADV is from the Yahoo history tape, not the gateway.*
+
+**COURT-WORTHINESS DRD: 6/10 — two red attacks die on the metrics, but the entry band and the royalty-vs-processor category question both change sizing, so escalation earns its keep.**
+
+**PRINT PROXIMITY: NONE within 5 trading days — FY2026 annual results ALREADY PRINTED 2026-08-19 (6-K acc. 0001628280-26-057862, in pack; stock +14.53% that day). The pack's "2027-02-17" is yfinance-derived and UNCONFIRMED; the true next event is a Q1 FY2027 operating update ~Oct–Nov 2026, unconfirmed by any company PR.**
+
+Reconstruction not triggered, but the post-print call: **BAND-BELOW, NOT STARTER at $28.98.** The print is collected, the run-rate behind it is 4.8% above spot economics, and the name has already re-rated 20% off its August low — a ballast entry here is a chase into a year that is flat-to-down at current gold. Work a band around **$23–25** (the pre-print $24.16 level, ≈ R36–38 JSE), or require USD gold to hold **>$4,560/oz** as the mechanism that makes FY2027 growth real before paying up.
+
+Two things I could not verify and am not asserting: the granular FY2026 segment financials came from a filing **mirror plus the results-slide summary**, because EDGAR returned HTTP 403 to my fetcher on every direct attempt — the two independent reads agree, and the realized-price cross-check (R11,159.0m ÷ 4,865 kg = R2,293,730/kg vs the stated R2,289,250/kg, 0.2% apart) is internally consistent, but it is not a primary read. Separately, the prompt's requested **dispersion-vs-cohort-median** is not computable: `knowledge_graph/cohorts.json` was permission-denied, so COHORT resolved to "?" and this is a single-member triage — the ranking above is ordinal only.

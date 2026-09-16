@@ -1,0 +1,120 @@
+{
+  "ticker": "DRH",
+  "company": "DiamondRock Hospitality Co",
+  "cutoff": "2025-05-15",
+  "filing": "0001298946-25-000015_10K.txt",
+  "filing_date": "2025-02-28",
+  "cik": "0001298946",
+  "sector": "Real Estate",
+  "industry": "REIT - Hotel & Motel",
+  "group": "boring_middle",
+  "rfm_tuples": [
+    {
+      "claim_id": "C1",
+      "R": "Our credit facility and term loans contain several financial covenants ... A summary of the most significant covenants are as follows: Actual at December 31, 2024 — Maximum leverage ratio 60% (covenant), 26.5% (actual); Minimum fixed charge coverage ratio 1.50x (covenant), 3.05x (actual); Secured recourse indebtedness <45% of Total Asset Value (covenant), 8.5% (actual); Unencumbered leverage ratio 60.0% (covenant), 27.4% (actual); Unencumbered implied debt service coverage ratio 1.20x (covenant), 2.75x (actual).",
+      "f": "Verify covenant headroom in 10-K and confirm Q1 2025 10-Q does not show any covenant amendments, waivers, or material erosion. Mode B: also EDGAR-FTS for 'covenant amendment' filings.",
+      "M_source": "self_text + claim_evolution + edgar_fts.query_fulltext",
+      "M_value": "All five covenants are wide of the trigger (leverage 26.5% vs 60% max; FCC 3.05x vs 1.50x min — i.e. ~2x cushion on the binding covenant). Q1 2025 10-Q reaffirms identical covenant structure with no amendments. EDGAR-FTS for 'DiamondRock covenant amendment' returns zero hits. No 8-K Item 1.01 covenant-amendment filings between 10-K and cutoff.",
+      "severity": "PASS",
+      "interpretation": "Wide covenant headroom on a low-leverage REIT balance sheet. Mode A and Mode B both clear — no concealed waivers or amendments."
+    },
+    {
+      "claim_id": "C2",
+      "R": "We have three mortgage loans that mature in the next 12 months. Our first mortgage loan maturity is on May 6, 2025, and we plan to repay that mortgage loan using cash on hand. We are actively pursuing a financing transaction, the proceeds of which we plan to use to repay the remaining mortgage loans that mature in 2025. (Q1 2025 10-Q)",
+      "f": "Mode A: verify 2025 mortgage maturity schedule against debt note ($71.3M Worthington May 2025, $54.3M Hotel Clio July 2025, $168.2M Westin Boston Seaport Nov 2025 = ~$293M). Mode B: derive whether the disclosed liquidity is actually sufficient and whether the 'actively pursuing' refinance language is hedged.",
+      "M_source": "self_text + Q1 2025 10-Q debt note + EDGAR-FTS for mortgage refinance",
+      "M_value": "Q1 2025: $400M revolver capacity (undrawn), ~$144M unrestricted cash (post Westin DC sale of $89M net proceeds), plus revolver = sufficient for May Worthington ($71M) and Hotel Clio ($54M) maturities even WITHOUT new financing. The big test is the $168M Westin Boston Seaport in Nov 2025; even there, cash + full revolver = ~$540M of available liquidity vs $293M of 2025 mortgage maturities. No 8-K announcing a refinancing as of cutoff — that is a Mode B mild concern (could indicate the refinance market is unfavorable for the asset class).",
+      "severity": "PASS",
+      "interpretation": "Refinance/repay capacity is comfortably in excess of 2025 maturities even on the conservative 'use cash + revolver' path the 10-Q explicitly outlines. Honest, well-laddered disclosure."
+    },
+    {
+      "claim_id": "C3",
+      "R": "Our independent public accounting firm is KPMG LLP, McLean, Virginia, PCAOB Auditor ID: 185.",
+      "f": "auditor_change_tracker — scan 5-year 8-K Item 4.01 history for resignations, disagreements, or Big 4 downgrades.",
+      "M_source": "auditor_change_tracker",
+      "M_value": "n_8k_item_401 = 0; n_big4_resignations = 0; n_disagreements = 0; signal = CLEAN_AUDITOR_TENURE. KPMG has audited DRH continuously (no changes in 5-year lookback).",
+      "severity": "PASS",
+      "interpretation": "Big-4 auditor with multi-year tenure, no Item 4.01 events. Clean forensic signal."
+    },
+    {
+      "claim_id": "C4",
+      "R": "During the year ended December 31, 2024, we recorded impairment losses of $32.6 million related to the Westin Washington D.C. City Center and $1.6 million related to the write-off of construction in progress that was determined not to be recoverable. ... On February 19, 2025, we sold the Westin Washington D.C. City Center to an unaffiliated third party for $92.0 million.",
+      "f": "Mode A: verify impairment is disclosed with mechanism and quantification. Mode B: verify subsequent-event closing terms match and that there are no other concealed impairment candidates by sniffing held-for-sale schedules.",
+      "M_source": "self_text + Q1 2025 10-Q subsequent events + claim_evolution",
+      "M_value": "Impairment fully disclosed with mechanism (recoverability test, sale price $92M as fair-value benchmark, held-for-sale classification). Sale CLOSED Feb 19 2025 at the disclosed $92M (10-K and Q1 10-Q both confirm). Q1 2025: 'For the three months ended March 31, 2025, there were no incremental impairment losses.' Net proceeds received: $89.0M. No other hotels in held-for-sale status as of Q1 2025.",
+      "severity": "PASS",
+      "interpretation": "Textbook honest impairment disclosure. The Westin DC was identified, marked, and sold at the carrying value. No daisy-chain of additional concealed impairments."
+    },
+    {
+      "claim_id": "C5",
+      "R": "We have concentration risk related to one of our hotel properties. As of and for the year ended December 31, 2024, Chicago Marriott represented 11% of total revenues and total assets, and 10% of income before taxes.",
+      "f": "Mode A: verify the 11% concentration claim is accurate. Mode B: derive whether the concentrated asset is performing — if Chicago Marriott is decelerating, the 11% concentration becomes a forward-revenue risk that the 10-K downplays.",
+      "M_source": "self_text + per-hotel RevPAR tables (10-K + Q1 10-Q)",
+      "M_value": "2024 full-year RevPAR for Chicago Marriott Magnificent Mile: 63.4% occupancy, $257.60 ADR, $163.27 RevPAR (+11.3% YoY — the best YoY performance in the entire portfolio). Q1 2025 Chicago Marriott: 42.9% occupancy, $199.47 ADR, $85.67 RevPAR (+6.8% YoY). 42.9% Q1 occupancy is seasonally low (Chicago Q1 is the weakest hotel quarter) but YoY positive and above 2024 Q1. No signs the concentrated asset is decelerating.",
+      "severity": "PASS",
+      "interpretation": "Concentration is real (11% top hotel) but the asset is performing well YoY in both annual and Q1 readings. Disclosure is accurate; Mode B does not surface concealed deterioration at the concentrated property."
+    },
+    {
+      "claim_id": "C6",
+      "R": "Our corporate expenses increased $20.9 million, from $32.0 million for the year ended December 31, 2023 to $52.9 million for the year ended December 31, 2024, primarily due to $20.4 million of severance expense recognized due to the leadership changes announced in April 2024.",
+      "f": "Mode B: a 65% YoY corporate-expense jump can mask management instability. Verify the leadership change is fully disclosed, the severance amount is quantified, and there is no recurring expense creep beyond the one-time severance.",
+      "M_source": "self_text + Q1 2025 10-Q corporate expenses comparison",
+      "M_value": "April 2024 leadership change is fully described: Jeffrey J. Donnelly took the CEO seat (signature page confirms — CEO and Director, Feb 28 2025); Briony R. Quinn is CFO. The $20.4M severance is quantified, one-time, and attributable to the prior CEO transition. Q1 2025 corporate expenses normalize back to a lower run-rate. No additional executive turnover in 8-Ks pre-cutoff.",
+      "severity": "PASS",
+      "interpretation": "Mode B catch was a possible concern but the disclosure is transparent and the severance is a clearly identified one-timer. Donnelly has been in seat through the cutoff with no further turnover. Clean."
+    },
+    {
+      "claim_id": "C7",
+      "R": "Implied claim — for a REIT trading at a -16.9% pre-cutoff drawdown, insider behavior should NOT be cluster-selling around quarterly disclosures or capital events.",
+      "f": "insider_vs_calendar — scan all Form 4 sale transactions in the 365 days pre-cutoff, classify as open-market vs vesting-tax (code F) vs 10b5-1.",
+      "M_source": "form4 / insider_vs_calendar",
+      "M_value": "18 Form 4 filings, 5 'sales' totaling $613K, ALL coded F (statutory tax withholding on RSU vesting — NOT discretionary). 0 discretionary sales, 0 10b5-1 sales, 0 open-market sales. Sellers: CEO Donnelly, CFO Quinn, EVP Spierto, all on Feb-27/Mar-3 2025 (typical post-vesting tax withholding window). The 'matched event' classification (FY25 House appropriations bill) is a generic calendar match irrelevant to a hotel REIT. Signal: ROUTINE_10B5_1 (effectively no discretionary insider selling).",
+      "severity": "PASS",
+      "interpretation": "Insiders are NOT discretionarily selling into the drawdown. All Form 4 sales are tax-withholding on vesting. This is a positive forensic signal — leadership is not exiting."
+    },
+    {
+      "claim_id": "C8",
+      "R": "We did not include going-concern or substantial-doubt language in this Annual Report on Form 10-K.",
+      "f": "going_concern_local — scan filing for going-concern, substantial-doubt, and cure-conditional language.",
+      "M_source": "going_concern_local.going_concern_from_text",
+      "M_value": "signal = NO_GOING_CONCERN. n_matches = 0; n_current_period = 0; n_cure = 0. No going-concern, substantial-doubt, or conditional-cure language anywhere in the 10-K. 'Material weakness' appears once as boilerplate auditor risk-assessment language, not as an actual deficiency.",
+      "severity": "PASS",
+      "interpretation": "Clean. No going-concern footprint, no auditor caveat — appropriate for a REIT with 26.5% leverage, 3.05x FCC, and $400M of undrawn revolver."
+    },
+    {
+      "claim_id": "C9",
+      "R": "We may be unable to comply with financial covenants, obtain waivers, or renegotiate such covenants under our senior unsecured credit facility and unsecured term loans, which could result in a default and potential acceleration of our indebtedness ... (Risk Factor)",
+      "f": "Mode B claim-evolution — for a REIT with a $300M Jan 2026 term loan and $293M of 2025 mortgage maturities, check whether claim language ESCALATED between the FY23 10-K, the FY24 10-K, and the Q1 2025 10-Q (an escalation pattern would signal management is preparing the disclosure record for a covenant amendment).",
+      "M_source": "claim_evolution + self_text",
+      "M_value": "claim_evolution for 'Westin Boston Seaport District mortgage' returns 1 subsequent mention in the Q1 10-Q, classified AFFIRMED (REAFFIRMED_IN_STRUCTURED_DISCLOSURE) with no adverse_hits and no amendment_hits. The covenant risk-factor language in the FY24 10-K is materially identical to the FY23 10-K (no escalation). Q1 10-Q uses the same boilerplate. No 8-K covenant amendment.",
+      "severity": "PASS",
+      "interpretation": "Mode B test would surface escalating covenant risk language if management were preparing for a problem. Here the language is stable and the structured-disclosure mention is an AFFIRMATION not an amendment."
+    },
+    {
+      "claim_id": "C10",
+      "R": "We are subject to various claims, lawsuits and legal proceedings, including routine litigation arising in the ordinary course of business regarding the operation of our hotels and other Company matters. (Q1 2025 10-Q, Note 12)",
+      "f": "Mode B counterparty mirror — search EDGAR-FTS for any third-party filer naming DiamondRock or specific DRH hotels as counterparty in distressed/litigation contexts.",
+      "M_source": "edgar_fts.query_fulltext",
+      "M_value": "EDGAR FTS for DRH/DiamondRock counterparty mentions returns no third-party filings flagging DRH or its hotels in distressed contexts. The 'Hotel Clio mortgage' search returns 2 hits, both DRH's own filings. No CMBS/SPV distress filings, no franchise-counterparty disputes elevated to material-litigation status, no insurance recovery disputes.",
+      "severity": "PASS",
+      "interpretation": "Counterparty-mirror check is clean. Routine-litigation language in Note 12 is unaccompanied by external filer corroboration of any specific material exposure."
+    }
+  ],
+  "supplemental_signals": {
+    "auditor_signal": "PASS — KPMG LLP, no Item 4.01 events in 5-year lookback (CLEAN_AUDITOR_TENURE).",
+    "going_concern": "NO going-concern language. No substantial-doubt language. No cure-conditional language.",
+    "insider_behavior": "$613K of Form-4 'sales' in 365d pre-cutoff, 100% statutory tax-withholding (code F). Zero discretionary sales by any officer or director. CEO Donnelly (in seat since April 2024) and CFO Quinn have not sold a single discretionary share.",
+    "covenant_headroom": "Wide. Leverage covenant 60% max / 26.5% actual; FCC 1.50x min / 3.05x actual; secured-recourse <45% / 8.5% actual; unencumbered leverage 60% / 27.4% actual; unencumbered DSC 1.20x / 2.75x actual. No covenant amendments in 8-K record.",
+    "debt_maturity_profile": "2025 mortgages: $71.3M Worthington (May), $54.3M Hotel Clio (July), $168.2M Westin Boston Seaport (Nov) = ~$293M. Plus $300M term loan Jan 2026. Liquidity (cash + $400M revolver) > $540M.",
+    "impairment_disclosure": "Westin DC City Center impaired $32.6M in Q4 2024 (mechanism: held-for-sale at PSA fair value), sold Feb 19 2025 at $92M (in line with marked value). $1.6M of CIP write-offs. No incremental impairments in Q1 2025.",
+    "concentration_risk": "Chicago Marriott Magnificent Mile = 11% of revenues, 11% of assets, 10% of pre-tax income. 2024 RevPAR +11.3% YoY (best in portfolio); Q1 2025 RevPAR +6.8% YoY. Concentrated asset is performing.",
+    "operating_metrics": "FY24 RevPAR $207.30 (+2.5% YoY); Q1 2025 RevPAR $184.60 (+2.0% YoY); FY24 ADR $284.63 (+1.2%); Q1 2025 ADR $277.01 (+3.2%); FY24 occupancy 72.8% vs 72.0%; portfolio is a 37-hotel premium portfolio (36 after Westin DC sale).",
+    "corporate_expense_one_timer": "$20.4M severance charge in 2024 tied to April 2024 leadership transition; one-time, fully quantified, run-rate normalizes in Q1 2025.",
+    "ten_q_evolution": "Q1 2025 (filed 2025-05-02): total revenues $254.9M (-0.6% YoY), net income $14.9M vs $11.3M YoY (+32%), comparable RevPAR +2.0%, ADR +3.2%, occupancy 66.6% vs 67.5%. Westin DC sale closed Feb 19 2025 with $89M net proceeds. $11.1M of share repurchases at $7.85 avg. Refinance plan disclosed: May Worthington from cash, other two 2025 maturities via financing transaction or cash+revolver.",
+    "counterparty_mirror": "EDGAR FTS shows zero third-party filings flagging DRH or its specific hotels as distressed counterparties.",
+    "drawdown_attribution_pre_cutoff": "-16.9% drawdown into 2025-05-15 likely reflects (a) sector pressure on lodging REITs from macro/tariff-cycle slowdown fears flagged in MD&A risk factors, (b) general REIT rate sensitivity, (c) ~$293M of 2025 mortgage maturities pending refinance — NOT idiosyncratic concealed distress."
+  },
+  "summary": "DRH is a textbook honest lodging-REIT disclosure with 10 PASS tuples and zero MODERATE/SEVERE flags. Mode A verification (covenants, impairment, auditor, insider, concentration, going concern) is clean across the board. Mode B derivations — escalating covenant language, concealed concentration deterioration, cluster insider selling, counterparty mirror disclosures, recurring corporate-expense creep beyond the one-time severance — all return clean. Specifically: KPMG Big-4 auditor with no Item 4.01 events; no going-concern/substantial-doubt language; covenant headroom is wide (binding FCC covenant has ~2x cushion); 2025 mortgage maturities (~$293M) are well-covered by cash + $400M undrawn revolver (>$540M of liquidity); Westin DC City Center was honestly impaired at YE24 and sold at the marked value in Feb 2025; the 11%-concentration Chicago Marriott is the portfolio's best-performing hotel; insider selling is 100% statutory tax-withholding (zero discretionary sales); $20.4M corporate-expense jump is a quantified one-time severance tied to the April 2024 CEO transition. The -16.9% pre-cutoff drawdown looks sector-correlated (lodging-REIT macro/tariff anxiety + rate sensitivity + maturity-wall optics), not idiosyncratic concealed distress.",
+  "composite": 0.82,
+  "verdict": "LONG-tier"
+}

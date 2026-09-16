@@ -1,0 +1,133 @@
+{
+  "ticker": "CDRE",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Cadre serves DoW + DoS + DoJ + DoI + DHS + DoC + DoE; no individual customer >10% of revenue.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending.query_federal_presence resolved 4 UEIs across Safariland/Cadre name variants with 85 federal contracts (Safariland brand: 5 DoD, 27 DoJ, 3 DHS recorded; lifetime $0.80M — small, consistent with the company's own claim that no single agency/customer is >10% of revenue).",
+        "Med-Eng brand (see C5) carries the bulk of CDRE federal-defense revenue ($54.8M lifetime, 22 DoD contracts).",
+        "pentagon_jbook returned NOT_FOUND on Safariland / Cadre Holdings / Med-Eng as contractor names. CDRE's defense revenue flows almost entirely through P-40 procurement lines (body armor, holsters, EOD kits, ammunition / clothing / troop-support lines) NOT through named RDT&E PE numbers — exactly the wrong substrate for the J-Book divergence pattern."
+      ],
+      "M_check": "usaspending.query_federal_presence + pentagon_jbook.query_program_funding (contractor lookup)",
+      "M_value": "RECURRING_FEDERAL across brands; J-Book NOT_FOUND (coverage gap, not a red flag)",
+      "interpretation": "PASS. The customer-concentration claim is consistent with the diffuse federal footprint usaspending shows (DoJ-heavy on the Safariland LLC entity, DoD-heavy on Med-Eng, DoS-heavy on ICOR EOD FMS). The J-Book divergence framework does not bind to this name — CDRE is a procurement-line, multi-agency, low-concentration seller. NOT_FOUND in pentagon_jbook is a coverage gap (P-40 troop-support / body-armor / FMS lines not seeded in the 410-PE corpus), not evidence of any divergence."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Cadre/Med-Eng is the leading global provider of EOD-technician equipment; EOD market driven by 'continued emergence of new global threats'.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending.query_federal_presence on ICOR Technology (Med-Eng's EOD-robot subsidiary acquired Jan 2024) → 39 contracts / $8.3M / 19 DoS + 6 DoJ — consistent with State-Department-funded FMS EOD aid to allied partners (the actual revenue channel for Med-Eng EOD globally).",
+        "usaspending on Med-Eng variants → 22 DoD contracts / $54.8M lifetime — recurring military EOD buyer base.",
+        "pentagon_jbook NOT_FOUND on 'Explosive Ordnance Disposal' / 'EOD' / Med-Eng / ICOR Technology contractor — the J-Book corpus does not include the AF/Army/Navy EOD Equipment P-40 procurement lines (e.g., Army 'Other Procurement' EOD line, Navy 'Other Procurement' EOD equipment), so this returns as coverage gap, not as funding loss."
+      ],
+      "M_check": "usaspending.query_federal_presence + pentagon_jbook.query_program_funding (program/contractor)",
+      "M_value": "RECURRING_FEDERAL (Med-Eng DoD $54.8M; ICOR DoS $8.3M FMS); J-Book NOT_FOUND (coverage gap)",
+      "interpretation": "PASS. Both DoD and DoS channels show recurring EOD-equipment spending across the FY18-FY26 window. The EOD pipeline claim is forward-looking-but-narrative-not-load-bearing (no quantified revenue tied to a specific program), and the verifying tools show real, non-trivial dollars actually flowing. NOT_FOUND in pentagon_jbook reflects corpus scope (DARPA/MDA/SOCOM/OSD/AF/SF), not program loss."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Cadre nuclear safety TAM is $3-6B, driven by DoE's 80-plutonium-pits-by-2030 mandate (NNSA stockpile modernization).",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "doe_budget.query_program_funding NOT_FOUND on all of: 'plutonium pit production', 'Stockpile Stewardship', 'NNSA Weapons Activities', and contractor Alpha Safety.",
+        "doe_budget M-source self-documents: corpus is FY2026 DOE Office of Science only (ASCR/BES/BER/FES/HEP/NP — 78 programs); NNSA / Defense Environmental Cleanup volumes are NOT yet ingested. So this UNFUNDED-looking answer is a pure coverage gap on the verifier, not a signal about NNSA's actual posture.",
+        "usaspending on Alpha Safety → INFLATION_SUSPECT (0 UEIs), but that brand is a holdco — operational revenue likely flows through its subsidiary names (e.g., Cargo Technology, Cherokee Federal counterparties) which we have not yet enumerated."
+      ],
+      "M_check": "doe_budget.query_program_funding (NNSA programs) + usaspending.query_federal_presence (Alpha Safety)",
+      "M_value": "NOT_FOUND on all NNSA queries (verifier coverage gap, NOT a funding-loss signal); contractor lookup returns INFLATION_SUSPECT but only because brand-level holding name has no UEI",
+      "interpretation": "UNVERIFIABLE per heuristic #7 (NOT_FOUND in the J-Book/DOE-budget corpus is not a red flag when the corpus does not cover the relevant volume). The claim is plausible on its face (the 80-pits-by-2030 NNSA mandate is well-established public policy), but to actually score it we would need NNSA Weapons Activities and Defense Environmental Management funding trajectories ingested into doe_budget. Note this as a coverage gap to extend the corpus."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "DoE EM remediation pipeline ($545B liability backlog) + reactor decommissioning drives nuclear-safety demand.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "doe_budget NOT_FOUND on 'Environmental Management', 'Defense Environmental Cleanup', 'Hanford'.",
+        "DOE-EM volume not in the corpus; cannot verify forward funding trajectory of EM line items (Hanford / Savannah River / Idaho National Lab) at this cutoff."
+      ],
+      "M_check": "doe_budget.query_program_funding (EM programs)",
+      "M_value": "NOT_FOUND (corpus coverage gap on DOE-EM volume)",
+      "interpretation": "UNVERIFIABLE per heuristic #7. The 545B-liability figure is a long-running DoE public statement; the question for divergence-pattern analysis would be whether FY2026 EM appropriations are growing/shrinking vs the headline. Until DOE-EM volume is ingested, this remains a coverage gap."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Orders backlog grew $61M YoY to $189.8M, driven by Zircaloy ($51.3M), global EOD ($12.5M), chemiluminescent ($3.7M), and US-gov + intl duty-gear holsters ($1.6M). Backlog presented as forward-looking sales indicator.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending on Med-Eng (the EOD brand) → 22 DoD + 5 DoJ + 1 DoS contracts / $54.8M lifetime — RECURRING_FEDERAL. The $12.5M global-EOD backlog jump is consistent with a real, recurring EOD channel.",
+        "pentagon_jbook NOT_FOUND on 'duty gear' and 'holster' — these are body-armor/duty-gear P-40 lines (Army OPA, DLA Troop Support, FBI/DOJ/DHS appropriations) not seeded in the J-Book corpus. NOT_FOUND here is coverage gap, not funding loss.",
+        "The biggest single contributor to the backlog jump ($51.3M of $61.0M = 84%) is the Zircaloy acquisition itself — i.e., the order book of the acquired company, not new DoD wins. This is mechanically true and not a J-Book-divergence story."
+      ],
+      "M_check": "usaspending.query_federal_presence (Med-Eng) + pentagon_jbook.query_program_funding (duty gear / holster)",
+      "M_value": "Med-Eng RECURRING_FEDERAL ($54.8M); J-Book NOT_FOUND (coverage gap)",
+      "interpretation": "PASS. Backlog growth is dominated by an M&A roll-up (Zircaloy), with the organic federal piece (~$14M) plausibly supported by Med-Eng's $54.8M historical federal record. No specific program-element claim is made that the framework could falsify."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Cadre acquired Zircaloy (Carr's Engineering Limited ex-Chirton + Carr's Engineering US) Apr-2025 for $98.9M; contributed $49.2M FY25 revenue.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "usaspending on Carr's Engineering / Carrs Engineering / Zircaloy → INFLATION_SUSPECT (0 UEIs, 0 contracts). Consistent with the entity being UK-domiciled (Carr's Engineering Limited is a UK company) and selling primarily to UK MoD / Sellafield / UK civil nuclear customers rather than to USAspending-tracked US federal customers.",
+        "doe_budget NOT_FOUND on 'fuel cycle' and Carr's Engineering contractor (corpus coverage gap on civil-nuclear / fuel-cycle line items).",
+        "The 8% of FY25 sales figure (Zircaloy = $49.2M of $610.3M total) is a mechanical revenue carry-over from the acquired business, not a J-Book-divergence claim."
+      ],
+      "M_check": "usaspending.query_federal_presence + doe_budget.query_program_funding",
+      "M_value": "INFLATION_SUSPECT on US federal presence (Zircaloy is UK-centric); doe_budget NOT_FOUND",
+      "interpretation": "UNVERIFIABLE for the J-Book pattern. Acquisition-economics claim ($98.9M / $49.2M / 8% of sales) is in-period historical and out of scope for forward-funding divergence; the acquired business is UK-based, outside USAspending coverage and outside the J-Book corpus."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Cadre acquired TYR Tactical Jan-2026 for ~$174M ($150M cash + $24M stock), funded by $62.5M revolver draw. TYR = tactical body-armor / SOF-LCE.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending on TYR Tactical → RECURRING_FEDERAL: 1 UEI, 38 contracts, $12.4M lifetime; 15 DoD + 3 DoJ + 5 DoT + 1 NASA + 1 DoEd. Confirms TYR has a real DoD customer base (consistent with Cadre's strategic rationale for the acquisition).",
+        "pentagon_jbook NOT_FOUND on TYR Tactical contractor and 'Soldier Protection System' program — SPS PE is an Army OPA P-40 line not seeded in the corpus, so this is a coverage gap.",
+        "The $174M purchase price is roughly 14x TYR's lifetime federal dollars — but that price reflects expected commercial LEO / FMS revenue plus growth, not just federal-DoD obligation history."
+      ],
+      "M_check": "usaspending.query_federal_presence (TYR Tactical) + pentagon_jbook.query_program_funding (SPS / TYR contractor)",
+      "M_value": "RECURRING_FEDERAL ($12.4M, 15 DoD contracts); J-Book NOT_FOUND (P-40 coverage gap)",
+      "interpretation": "PASS. Acquisition's federal-presence claim is verified — TYR is a real DoD recipient with a history of obligations. No specific program-element callout is made that the framework could falsify."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "R&D grew to $11.4M FY25 from $8.4M FY24 and $7.0M FY23 — claimed as evidence of innovation investment.",
+      "severity": "PASS",
+      "supports": [
+        "uspto_odp.query_assignee('Safariland') → 98 total applications, 48 granted patents pre-cutoff. Recent filings (2024-2025) include ballistic vests, holsters, holster tensioner devices — all directly tied to product lines CDRE sells. Real, active prosecution consistent with rising R&D spend.",
+        "uspto_odp.query_assignee('Med-Eng') → 668 granted patents reported, BUT inspection of top hits shows the query substring-matched unrelated medical / spa / dental companies ('Cygnus Med', 'Red Mountain Med Spa', 'INTER-MED') — the Med-Eng EOD brand patents are diluted by namespace collision. Treat the Med-Eng number as a noisy upper bound; the Safariland number is cleanly attributable."
+      ],
+      "M_check": "uspto_odp.query_assignee",
+      "M_value": "Safariland: 98 apps / 48 granted, on-strategy CPCs (A41D 13/0518 body armor, F41H 5/013 ballistic protection, F41C 33/0263 holsters); Med-Eng query noisy",
+      "interpretation": "PASS. Safariland patent activity is on-strategy and growing, consistent with the rising R&D line. The Med-Eng query result is a noise alert (substring collision) for future runs — should be tightened to 'Med-Eng Systems' or filed-by-attorney filters."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "HQ + manufacturing at 13386 International Parkway, Jacksonville, FL 32218 (~36,941 sf office + 95,283 sf manufacturing).",
+      "severity": "PASS",
+      "supports": [
+        "epa_frs.query_facilities returned 3 SAFARILAND, LLC FL facilities: registry_id 110038371437 at 13386 INTERNATIONAL PKWY, JACKSONVILLE, DUVAL, FL 32218 — exact match to the 10-K address. Also a second registration at the same address (110070289166) and a third at 3041 Faye Road, Jacksonville 32226.",
+        "Physical facility existence at the disclosed HQ confirmed."
+      ],
+      "M_check": "epa_frs.query_facilities",
+      "M_value": "3 EPA-FRS facilities matching SAFARILAND, LLC in Jacksonville FL incl. exact HQ-address match",
+      "interpretation": "PASS. Property claim is independently verified by an EPA registry."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "$307.3M outstanding debt; 2024 Credit Agreement (PNC); 4.00x → 3.50x net leverage covenant step-down after Mar-31-2026; in compliance at YE25.",
+      "severity": "PASS",
+      "supports": [
+        "edgar_fts.query_fulltext on 'Cadre Holdings covenant amendment' over 2025-06-01 through 2026-05-20 in 8-Ks → 0 hits. No public covenant amendment / waiver filed between the credit agreement and this 10-K — consistent with the company's claim of compliance.",
+        "Step-down to 3.50x occurs at Mar-31-2026 (after the YE2025 balance-sheet date but before cutoff). With $307.3M debt and $111.7M FY25 Adj. EBITDA (the company's own number), naive net-leverage ≈ (307.3 - 122.9 cash) / 111.7 ≈ 1.65x — well below the 3.50x post-step-down covenant. TYR acquisition adds ~$62.5M revolver draw + EBITDA contribution; even pro forma the cushion is wide.",
+        "Note: this is a non-J-Book control claim and unrelated to the program-funding divergence pattern."
+      ],
+      "M_check": "edgar_fts.query_fulltext (covenant amendment / waiver search)",
+      "M_value": "0 hits in 8-K full-text — no covenant waiver / amendment publicly filed in the window",
+      "interpretation": "PASS. Covenant-compliance claim consistent with both the absence of any amendment 8-K and the naive leverage math against disclosed cash + EBITDA."
+    }
+  ],
+  "framework_note": "CDRE is a stress-test of the J-Book divergence pattern: the company makes NO named-PE / named-Program-of-Record claims, NO program-revenue concentration claims (explicitly: 'no individual customer >10% of total revenue'), and sells across DoS/DoW/DoJ/DoI/DHS/DoC/DoE through P-40 procurement and Foreign Military Sales lines that are deliberately outside the 410-PE J-Book corpus (which is RDT&E-heavy plus AF Aircraft / Other Procurement). pentagon_jbook fired on 0 of 6 J-Book-grounded claims with a positive match; all 6 returned NOT_FOUND (coverage gap, not divergence). doe_budget returned NOT_FOUND on all 7 nuclear-safety claim queries (NNSA + EM volumes not yet ingested — corpus is DOE Office of Science only). usaspending was the workhorse: confirmed Med-Eng RECURRING_FEDERAL ($54.8M), ICOR EOD FMS ($8.3M, DoS-heavy), TYR Tactical RECURRING_FEDERAL ($12.4M), and Safariland LLC small ($0.8M). The right framework for this name is procurement-line obligation tracking + DOE-EM/NNSA budget ingestion, not the J-Book RDT&E pattern."
+}

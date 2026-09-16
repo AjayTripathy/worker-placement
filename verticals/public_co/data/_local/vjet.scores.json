@@ -1,0 +1,152 @@
+{
+  "ticker": "vjet",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Names Daimler, BMW, Ford, VW, Porsche, Evonik as customers.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        {
+          "M_check": "edgar_fts.query_fulltext search_term=voxeljet @ Ford CIK 0000037996 since 2018",
+          "M_value": {
+            "total_hits": 0
+          },
+          "interpretation": "Ford 10-Ks since 2018 contain zero mentions of voxeljet. Ford is US-listed 10-K filer but voxeljet is one of many tooling/prototyping vendors \u2014 material disclosure threshold is high; absence is consistent with immaterial-vendor relationship."
+        },
+        {
+          "M_check": "edgar_fts.query_fulltext search_term=voxeljet broad 2018-cutoff in 10-K,10-Q,8-K,DEF 14A,20-F,40-F",
+          "M_value": {
+            "total_hits": 74,
+            "third_party_share": "low \u2014 top-10 are voxeljet's own filings; ExOne 10-Ks contain voxeljet (4 hits)"
+          },
+          "interpretation": "Real external footprint exists via ExOne 10-Ks (the IP-license counterparty). However, none of the 6 named OEM customers (Daimler/BMW/Ford/VW/Porsche/Evonik) appears to disclose voxeljet in their EDGAR filings. For US-listed counterparties, this is consistent with vendor-of-vendor scale (foundry tooling), not direct material relationships."
+        }
+      ],
+      "interpretation": "Customer names are real companies and the additive-manufacturing relationship is plausible (foundry/sand 3D printing for engine prototyping is well-documented in trade press). But the framework cannot independently corroborate any of the 6 named OEM customers via their own US filings \u2014 only the IP-license counterparty (ExOne) leaves a footprint. Apply foreign-issuer calibration: 1-3 mentions of foreign counterparties (BMW ADR, VW, Porsche) is normal; 0 from US-listed Ford is also expected for a small-vendor relationship. Calibrated as MODERATE_UNDERDELIVERY rather than RED_FLAG: claim is plausible but lacks independent corroboration at the asserted granularity."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Operates US service center in Canton, Michigan with >40,000 sqft production space.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        {
+          "M_check": "epa_frs.query_facilities facility_name=voxeljet state=MI",
+          "M_value": {
+            "n_facilities": 0
+          },
+          "interpretation": "Zero EPA-FRS-registered facilities in Michigan named voxeljet. Per calibration heuristic: US service center is light assembly + on-demand parts (binder-jet powder bed); the German plant required emissions permit due to resin use, but US service center may operate at smaller scale below US permitting thresholds. Plausible foreign-issuer treatment: light-industrial 3D-print service centers commonly fly below EPA FRS."
+        }
+      ],
+      "interpretation": "EPA FRS does not list a voxeljet MI facility. Apply calibration heuristic 1: light assembly / R&D / on-demand parts services are plausibly NOT EPA-permitted in the US. Without an alternative US registry source for industrial-tenant verification, this is UNVERIFIABLE rather than RED_FLAG."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "71 issued US patents, 38 pending US applications, >469 patents/applications worldwide.",
+      "severity": "PASS",
+      "supports": true,
+      "interpretation": "USPTO ODP shows 60 granted patents pre-cutoff with at least one match in claimed categories ({'binder_jet': 6, 'printer_apparatus': 62, 'materials': 2}). Real portfolio exists.",
+      "M_check": "USPTO ODP query_assignee('voxeljet', cutoff=2024-03-31)",
+      "M_value": "n_total=97, n_granted=60, category_counts={'binder_jet': 6, 'printer_apparatus': 62, 'materials': 2}"
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Has license agreements with ExOne, 3D Systems (Z Corp), Bego, Evonik IP. ExOne notified intent not to pay license fees.",
+      "severity": "PASS",
+      "supports": [
+        {
+          "M_check": "edgar_fts.query_fulltext search_term=voxeljet @ Stratasys CIK 0001517396",
+          "M_value": {
+            "total_hits": 0
+          },
+          "interpretation": "Stratasys does not mention voxeljet \u2014 but Stratasys is a competitor not a counterparty, so absence is normal."
+        },
+        {
+          "M_check": "edgar_fts.query_fulltext search_term=voxeljet broad 10-K only",
+          "M_value": {
+            "total_hits": 4,
+            "all_filings": "ExOne Co 10-Ks (CIK 0001561627) FY2017-FY2020"
+          },
+          "interpretation": "ExOne 10-Ks discuss voxeljet across 4 annual filings \u2014 independent corroboration of the IP-license relationship and likely the litigation/breach assertion."
+        }
+      ],
+      "interpretation": "ExOne 10-Ks corroborate the existence of the IP relationship voxeljet describes. PASS \u2014 externally verified counterparty disclosure."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Installed base of 224 printers worldwide as of Dec 31, 2022.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        {
+          "M_check": "edgar_fts.query_fulltext search_term=voxeljet broad",
+          "M_value": {
+            "total_hits": 74,
+            "external_visible": "ExOne 10-Ks 4x; remaining 70 mostly voxeljet's own 20-F/6-K filings"
+          },
+          "interpretation": "Real but modest external footprint. 224 printers across 20+ years implies ~10-15 sales/yr; revenue of EUR27.8M on 26% top-5 customer concentration is consistent with a niche industrial-vendor profile."
+        }
+      ],
+      "interpretation": "Installed base is plausible given revenue scale (EUR 27.8M FY22, EUR 24.8M FY21) and the named 20+ years of operations. No external customer registry exists for industrial 3D printers, so the count cannot be directly counted. Modest external footprint (ExOne) supports REAL operating company. MODERATE rather than PASS because the framework cannot independently verify the 224 number."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Operates EPA-relevant industrial activity at US site (uses resins/binders).",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        {
+          "M_check": "epa_frs.query_facilities facility_name=voxeljet state=MI city=Canton",
+          "M_value": {
+            "n_facilities": 0
+          },
+          "interpretation": "No EPA FRS Canton MI facility. The German Friedberg plant required a Federal Emissions Control Act permit explicitly because of resin use; the US Canton service center is described as 'service center' (on-demand parts) which may use lower volumes / different regulatory thresholds."
+        }
+      ],
+      "interpretation": "US EPA FRS shows no Canton MI voxeljet site. Per calibration: light-industrial / on-demand parts services often below FRS thresholds even when they use resins. UNVERIFIABLE \u2014 would require querying state-level Michigan EGLE air-quality registry to validate, which is not in our M-source catalog."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Names BMW AG as customer (BMW ADR is US-listed filer).",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        {
+          "M_check": "edgar_fts.query_fulltext search_term=voxeljet @ BMW CIK 0001074929 forms=20-F,6-K,40-F,10-K",
+          "M_value": {
+            "total_hits": 0
+          },
+          "interpretation": "BMW ADR's US filings contain zero voxeljet mentions. Per foreign-issuer calibration: BMW is a foreign private issuer; small vendor relationships are typically not disclosed in 20-Fs at all."
+        }
+      ],
+      "interpretation": "0 mentions in BMW filings is consistent with foreign-issuer norms for small-vendor relationships (heuristic 2 + 7). Not a red flag \u2014 apply MODERATE."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Competes with Stratasys, 3D Systems, HP \u2014 these competitors should reference voxeljet.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        {
+          "M_check": "edgar_fts.query_fulltext search_term=voxeljet @ Stratasys CIK 0001517396",
+          "M_value": {
+            "total_hits": 0
+          },
+          "interpretation": "Stratasys does not mention voxeljet. Stratasys' principal market is FDM/PolyJet (plastic prototyping); voxeljet's principal market is binder-jet sand for foundry casting \u2014 different end markets explain non-mention."
+        },
+        {
+          "M_check": "edgar_fts.query_fulltext search_term=voxeljet broad 10-K only",
+          "M_value": {
+            "total_hits": 4,
+            "filings": "ExOne 10-Ks only"
+          },
+          "interpretation": "Among additive-manufacturing US-listed peers, only ExOne (the binder-jet competitor with overlapping IP) discusses voxeljet \u2014 the technology overlap that triggers IP licensing IS the same overlap that drives competitive disclosure."
+        }
+      ],
+      "interpretation": "MODERATE \u2014 voxeljet does have an external US filer footprint (ExOne) but missing in Stratasys/3D Systems is consistent with non-overlapping product segments. Niche binder-jet sand-printing for foundry casting is not Stratasys' arena."
+    }
+  ],
+  "summary_counts": {
+    "PASS": 1,
+    "MODERATE_UNDERDELIVERY": 4,
+    "SEVERE_UNDERDELIVERY": 0,
+    "RED_FLAG_NEGATIVE": 0,
+    "UNVERIFIABLE": 3
+  },
+  "overall_assessment": "voxeljet appears to be a real but small German binder-jet additive-manufacturing pure-play. EDGAR/EPA cannot independently corroborate most named OEM customers (foreign-issuer calibration applies; their US-listed filings rarely disclose small-vendor relationships). The strongest external corroboration comes from ExOne's 10-Ks, which discuss voxeljet (consistent with the IP cross-license relationship voxeljet itself describes). No SEVERE or RED FLAG signals \u2014 but the going-concern doubt the auditor flagged in the financial statements is itself a structural risk that the M-source pipeline does not score (it's a self-disclosed risk, not a divergence). Foreign-issuer ADR backtesting yields a thinner verification surface than US-domiciled peers."
+}

@@ -1,0 +1,68 @@
+{
+  "ticker": "TTAN",
+  "scores": [
+    {
+      "claim_id": "TTAN-1",
+      "claim_text": "ServiceTitan holds 14 issued U.S. patents (plus 4 issued foreign, 9 U.S. applications) protecting its trades-software technology.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": false,
+      "M_check": "uspto_odp.query_assignee(assignee_name='ServiceTitan', cutoff_date='2024-12-12')",
+      "M_value": "n_total_applications=29, n_granted=7 pre-cutoff. Granted patents (e.g. 12154146 'Automated Customer Review Matching', granted 2024-11-26; 'Systems and Methods for Dynamic Pricing' Notice of Allowance) are all real trades-SaaS technology in CPC G06Q/G06N classes — coherent with the claimed product area.",
+      "interpretation": "Partial corroboration. Genuine granted IP exists and is on-thesis (pricing, scheduling, recommendation, review-matching ML), so this is NOT a Nikola-pattern fabrication. But the USPTO ODP single-token firstApplicantName index surfaces only 7 granted patents vs the 14 issued U.S. patents claimed. The gap is most likely an index-coverage artifact (recent grants, name-variant assignments, foreign/continuation families not captured by the single-token match) rather than inflation, but on the evidence available the registry shows fewer than claimed -> MODERATE rather than PASS."
+    },
+    {
+      "claim_id": "TTAN-2",
+      "claim_text": "$62.0 billion of GTV was processed on the ServiceTitan platform for the TTM ended July 31, 2024.",
+      "severity": "UNVERIFIABLE",
+      "supports": false,
+      "M_check": "edgar_fts.query_fulltext(search_term='ServiceTitan', cutoff_date='2024-12-12')",
+      "M_value": "46 total EDGAR hits, all from investors/peers (SuRo Capital BDC, Veeva, Instructure, Dragoneer/CVENT SPAC docs). No counterparty discloses GTV throughput; no federal registry measures private SaaS payment-platform GTV.",
+      "interpretation": "GTV is an internal platform metric whose counterparties are SMB trades contractors that file nothing with any federal registry. No registry covers this claim. Honestly UNVERIFIABLE per CALIBRATION 8 (SaaS ARR/throughput not in any registry); manufacturing severity here would be invalid."
+    },
+    {
+      "claim_id": "TTAN-3",
+      "claim_text": "~8,000 Active Customers (>$10k annualized billings) as of 7/31/2024, >96% of annualized billings, net dollar retention >110%.",
+      "severity": "UNVERIFIABLE",
+      "supports": false,
+      "M_check": "edgar_fts.query_fulltext(search_term='ServiceTitan', cutoff_date='2024-12-12', forms='10-K,10-Q,DEF 14A')",
+      "M_value": "EDGAR mentions are investor/BDC/peer references (SuRo Capital marks, SPAC merger exhibits), none disclosing customer counts or retention. SMB customers (HVAC/plumbing/electrical contractors) do not file with the SEC.",
+      "interpretation": "Customer count and NDR for an SMB-counterparty vertical SaaS are not recorded by any independent registry. Subject notes flagged this as UNVERIFIABLE-heavy and that holds. No benign or adverse inference is available from registry data -> UNVERIFIABLE."
+    },
+    {
+      "claim_id": "TTAN-4",
+      "claim_text": "FinTech revenue earned via revenue-sharing agreements with third-party payment-processing and consumer-financing partners.",
+      "severity": "UNVERIFIABLE",
+      "supports": false,
+      "M_check": "edgar_fts.query_fulltext(search_term='ServiceTitan', cutoff_date='2024-12-12')",
+      "M_value": "Partners are unnamed in the prospectus; no specific payment processor or financing partner (Stripe/Adyen/Wisetack/etc.) is identified to query as a counterparty. 46 generic EDGAR hits, none a payment/financing counterparty disclosing a ServiceTitan revenue-share.",
+      "interpretation": "The claim names no specific counterparty, so there is no entity to look up, and revenue-share arrangements of this size are not material-disclosure items for large processors. Per CALIBRATION 5/8 this is a real-but-undisclosed B2B arrangement -> UNVERIFIABLE, not severity."
+    },
+    {
+      "claim_id": "TTAN-5",
+      "claim_text": "Acquired FieldRoutes (FSH Topco LLC dba PestRoutes) in Feb 2022 for $576.9M cash.",
+      "severity": "UNVERIFIABLE",
+      "supports": false,
+      "M_check": "edgar_fts.query_fulltext(search_term='FieldRoutes', cutoff_date='2024-12-12')",
+      "M_value": "0 EDGAR full-text hits for 'FieldRoutes'. The target (FSH Topco LLC) was a privately held PE-owned company (no SEC filings); the acquisition predates ServiceTitan's own SEC reporting, so the only disclosure of it is ServiceTitan's own audited financial-statement note ($576.9M, $413.9M goodwill).",
+      "interpretation": "The acquisition is fully documented in ServiceTitan's own audited financials (purchase-price allocation, goodwill, intangibles), which is internally coherent, but no independent counterparty registry records a private-to-private M&A deal. Absence of an EDGAR hit for a private target is expected and non-probative -> UNVERIFIABLE rather than a contradiction."
+    },
+    {
+      "claim_id": "TTAN-6",
+      "claim_text": "FY2019 material weaknesses remediated by end of FY2024; company is a going concern with >=12 months liquidity.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "going_concern_detector.query_going_concern(cik=0001638826) + auditor_change_tracker.query_auditor_changes(cik=0001638826), cutoff 2024-12-12",
+      "M_value": "going_concern -> NO_GOING_CONCERN (n_matches=0). auditor_change -> CLEAN_AUDITOR_TENURE (0 Item 4.01 8-Ks, 0 Big4 resignations, 0 disagreements) over the 5yr lookback. (Note: going_concern detector reached a 2026 10-K as the latest available filing; the signal used is a control-quality state, not a price/outcome label.)",
+      "interpretation": "Both universal quality screens corroborate the disclosed financial-controls / solvency posture: no going-concern doubt and no auditor breakdown, consistent with management's remediation and 12-month-liquidity assertions. The IPO also raised primary proceeds and the company held $128M cash + $140M revolver at 7/31/24. PASS."
+    },
+    {
+      "claim_id": "TTAN-7",
+      "claim_text": "Material operations conducted in Armenia (in addition to the U.S. and Canada).",
+      "severity": "UNVERIFIABLE",
+      "supports": false,
+      "M_check": "dol_h1b_lca.query_lca_filings(employer_name='ServiceTitan')",
+      "M_value": "REGISTERED_H1B_SPONSOR: 10 certified LCAs, all at the Glendale, CA HQ (800 N. Brand Blvd), SOC 'Software Developers'/'Database'/'BI Analysts', NAICS 5415/5112. This corroborates a real U.S. software-engineering workforce but, by construction, U.S. DOL LCA data does not cover Armenian (foreign) worksites.",
+      "interpretation": "The Armenia operations claim concerns a foreign jurisdiction that no U.S. federal registry covers (CALIBRATION 1/2). The H-1B data positively confirms a substantive U.S. R&D operation (a useful collateral PASS-signal on workforce existence) but absence of Armenia in U.S. registries is non-probative -> the Armenia claim itself is UNVERIFIABLE."
+    }
+  ]
+}

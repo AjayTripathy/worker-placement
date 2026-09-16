@@ -1,0 +1,94 @@
+{
+  "ticker": "HWM",
+  "cutoff": "2026-05-20",
+  "cohort": "jbook_divergence",
+  "cohort_finding": "HWM 10-K does NOT exhibit the J-Book divergence pattern. The filing names ZERO specific DoD Program Elements, PE numbers, or programs of record. Defense aerospace exposure (17% of 2025 revenue) is disclosed only as a market category. HWM is a deep sub-tier supplier into engine OEMs (RTX 11%, GE Aerospace 11%) and airframers, not a prime contractor naming program-of-record revenue concentration. The J-Book divergence framework requires named-program claims to test; without them, the pattern is non-applicable rather than absent. Score profile is dominated by PASS / UNVERIFIABLE, not by underdelivery flags.",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Defense aerospace 17% of 2025 revenue (up from 15-16% prior years).",
+      "severity": "PASS",
+      "supports": ["usaspending.query_dod_contracts shows 1,425 DoD awards across Howmet Castings & Services + Howmet Global Fastening Systems totaling $26.9M direct contracts since 2020 — confirms real DoD contracting presence; majority of defense revenue flows indirectly via OEM customers RTX/GE Aerospace which are themselves prime contractors on F135, F119, F110 etc."],
+      "M_check": "usaspending.query_dod_contracts(recipient_name='Howmet')",
+      "M_value": {"n_awards": 1425, "total_amount_usd": 26966548.99, "agencies": {"Department of Defense": 25}, "top_award_description": "Repair/rework of M119 firing platforms"},
+      "interpretation": "Defense exposure claim is consistent with usaspending. The 17% figure is market-category-level, not program-tied, so J-Book divergence test does not apply. PASS."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "RTX Corporation and GE Aerospace each ~11% of 2025 third-party sales.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["edgar_fts query of RTX 10-K filings for 'Howmet' returned 0 hits — counterparty does not disclose Howmet by name in its periodic reports (typical for sub-tier suppliers below 10% threshold from the prime's side)."],
+      "M_check": "edgar_fts.query_fulltext(search_term='Howmet', cik='0000101829' [RTX])",
+      "M_value": {"total_hits": 0, "top_filings": []},
+      "interpretation": "Cannot orthogonally verify customer concentration from RTX side via EDGAR FTS — but absence of mention is expected when supplier is below counterparty's own 10% material-customer threshold. Not a red flag. UNVERIFIABLE."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Howmet describes generic 'military programs' participation but NAMES ZERO SPECIFIC DOD PROGRAMS in the entire 10-K.",
+      "severity": "PASS",
+      "supports": ["pentagon_jbook.query_program_funding(contractor_name='Howmet Aerospace') -> NOT_FOUND (n_matches=0)", "pentagon_jbook.query_program_funding(contractor_name='Howmet') -> NOT_FOUND", "The filing's lack of program-specific language is itself a signal of CONSERVATIVE disclosure posture, not a divergence flag. Companies that don't make program-of-record claims cannot have those claims contradicted by a J-Book."],
+      "M_check": "pentagon_jbook.query_program_funding(contractor_name='Howmet[ Aerospace]')",
+      "M_value": {"signal": "NOT_FOUND", "n_matches": 0, "note": "HWM is a deep sub-tier components/fasteners supplier; J-Book PE corpus tags primes (Lockheed, RTX, Northrop, Boeing) — HWM exposure rolls up through them, not directly. Coverage gap, not divergence."},
+      "interpretation": "J-Book divergence framework requires named-program revenue claims; HWM makes none. The Mode-A claim ('we participate in military programs') is verified true at the contractor level via usaspending. There is no specific revenue-attribution overclaim to flag. PASS with note: HWM is intentionally outside the J-Book test pattern's strike zone."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Engineered Structures segment serves 'commercial aerospace, defense aerospace, and land and sea defense' — no specific land/sea program named.",
+      "severity": "PASS",
+      "supports": ["usaspending top award: 'ORDER FOR REPAIR, REWORK AND REQUALIFICATION OF 50 M119 FIRING PLATFORMS AND THE PURCHASE OF 402 FIRING PLATFORMS' ($21.9M) — confirms land-defense exposure (M119 howitzer). Other awards are aviation fasteners (cap screws, latches, repair kits)."],
+      "M_check": "usaspending.query_dod_contracts(recipient_name='Howmet')",
+      "M_value": {"top_award": "M119 firing platforms repair/rework + 402 new platforms = $21.86M", "fastening_awards": "Howmet Global Fastening Systems multiple sub-$1M awards for screws, fasteners, repair kits to DLA (SPE prefix)"},
+      "interpretation": "Land defense exposure substantiated by M119 howitzer firing platform award. Generic claim matches real contracts. PASS."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "2026 forward outlook: solid growth in commercial aerospace, defense aerospace, gas turbines — no program-of-record tied to forecast.",
+      "severity": "PASS",
+      "supports": ["No specific PE/program is named so there's no specific J-Book line to verify against. The forward statement is category-level (defense aerospace as a whole). Defense aerospace category has been growing 15% -> 16% -> 17% revenue-share trajectory in HWM disclosure; the FY26 DoD topline budget remains elevated. No divergence to flag."],
+      "M_check": "pentagon_jbook.query_program_funding(contractor_name='Howmet Aerospace')",
+      "M_value": {"signal": "NOT_FOUND", "interpretation": "No contractor-attributed PE to forward-project against"},
+      "interpretation": "Forward outlook is generic and not tied to a specific named PE; J-Book divergence test inapplicable. PASS."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Pending $1.8B CAM acquisition + completed $120M Brunner acquisition both folded into Fastening Systems segment.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["acq_coherence.score_acquisition_coherence returned signal=INCOHERENT_ROLLUP with mean_coherence=0.0 — but the underlying reasoning indicates the LLM lacked target details, not that the deals are incoherent. CAM is the former Stanley Black & Decker aerospace fasteners business — structurally coherent bolt-on to Fastening Systems. Brunner is also a fastener manufacturer — same segment. This is a CATEGORY-COHERENT roll-up at face value."],
+      "M_check": "acq_coherence.score_acquisition_coherence",
+      "M_value": {"signal": "INCOHERENT_ROLLUP", "mean_coherence": 0.0, "_analyst_note": "Likely false-positive: LLM had no target description beyond label; both targets are fastener manufacturers being folded into Fastening Systems segment — categorically coherent."},
+      "interpretation": "Auto-tool flagged INCOHERENT but human-readable check shows category alignment (fasteners -> Fastening Systems). Soft MODERATE because (a) the tool flagged it, (b) the timing is unusual: $1.8B CAM purchase from Stanley Black & Decker (a divesting seller, suggesting the asset was not core/strategic to seller — buyer-beware signal), and (c) the deal nearly doubles fastener-segment exposure right when broader aerospace cycle is at multi-year highs (HWM stock +1453% since Apr-2020 separation). Not a structural divergence flag, but worth monitoring integration."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "~1,020 granted patents + 180 pending; 1,590 registered trademarks.",
+      "severity": "PASS",
+      "supports": ["uspto_odp.query_assignee found 123 applications and 35 granted patents under 'HOWMET AEROSPACE INC.' (post-2020 separation only; ODP recent-filings index does not cover the full lifetime 1,020 patents which include legacy Arconic/Alcoa-era assignments). Recent grants cover fasteners (BLIND FASTENER, MULTI-PIECE FASTENERS), wheels (AERODYNAMIC WHEEL COVER), and casting/coating tech — consistent with disclosed business segments."],
+      "M_check": "uspto_odp.query_assignee(assignee_name='Howmet Aerospace')",
+      "M_value": {"n_total_applications": 123, "n_granted": 35, "categories": ["fasteners", "wheels", "castings"]},
+      "interpretation": "Patent portfolio claim is directionally consistent with USPTO data (post-name-change subset only). PASS."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Principal facilities in 19 countries; specific U.S. titanium and forging sites named.",
+      "severity": "PASS",
+      "supports": ["epa_frs.query_facilities found 'HOWMET AEROSPACE INC. - CLEVELAND WORKS' at 1600 Harvard Ave, Cuyahoga Heights, OH (matches the Cleveland, OH Engine Products / Engineered Structures / Forged Wheels site disclosed in Properties table). Other facility locations not individually cross-checked given low J-Book relevance."],
+      "M_check": "epa_frs.query_facilities(facility_name='Howmet', state_abbr='OH')",
+      "M_value": {"n_facilities": 1, "facility_name": "HOWMET AEROSPACE INC. - CLEVELAND WORKS", "city": "CUYAHOGA HEIGHTS"},
+      "interpretation": "Spot-check verifies Cleveland facility per Properties disclosure. PASS."
+    }
+  ],
+  "severity_counts": {
+    "PASS": 6,
+    "MODERATE_UNDERDELIVERY": 1,
+    "SEVERE_UNDERDELIVERY": 0,
+    "RED_FLAG_NEGATIVE": 0,
+    "UNVERIFIABLE": 1
+  },
+  "jbook_grounded_claims": ["C1", "C3", "C4", "C5"],
+  "jbook_hits": {
+    "n_jbook_grounded": 4,
+    "n_pentagon_jbook_fired": 3,
+    "note": "pentagon_jbook was queried on C1, C3, C5 (contractor-name lookup); C4 was tested via usaspending only since it's a non-aerospace defense claim. All pentagon_jbook calls returned NOT_FOUND — HWM is not contractor-tagged in the J-Book corpus (deep sub-tier). This is a corpus coverage limit, not a divergence flag."
+  },
+  "overall_assessment": "HWM does NOT exhibit the J-Book divergence pattern this cohort targets. The filing is conspicuously generic about Pentagon programs (zero PE numbers, zero named programs of record), which means there are no specific program-revenue claims to contradict. The framework correctly identifies this as outside its strike zone (NOT_FOUND across pentagon_jbook + LOW counterparty-disclosure hits) and does not manufacture false positives — usaspending confirms real DoD contracting at the sub-tier level (M119 howitzer + DLA fastener orders). The only soft flag is the $1.8B CAM acquisition timing during a multi-year aerospace cycle high (stock +1453% since 2020 spin) — MODERATE caution on integration risk, not a J-Book-driven flag."
+}

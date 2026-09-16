@@ -1,0 +1,179 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>preferred_oddlot_scanner</title><style>
+body{margin:0;background:#0b0e12;color:#e8ebee;font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:26px 24px 90px}
+a{color:#8b7cf6} h1{font-size:23px;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:#7d858e;margin:0 0 20px;font-size:13px}
+h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:#7d858e;margin:24px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 10px;border-bottom:1px solid #242a31;text-align:left;vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#7d858e}
+.k{font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:20px}
+.k-generator{color:#c3b8fb;background:rgba(139,124,246,.15)}
+.k-detector{color:#eccb8a;background:rgba(217,164,65,.15)}
+.k-watcher{color:#8ee5c1;background:rgba(53,201,143,.15)}
+.k-evidence{color:#b3bcc6;background:rgba(138,147,158,.15)}
+.h-OK{color:#35c98f} .h-STALE{color:#d9a441} .h-ERROR{color:#e0736a} .h-NEVER_RUN{color:#8a939e}
+pre{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px;overflow-x:auto;font-size:12px;line-height:1.5}
+.panel{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px 18px;margin-bottom:12px}
+ul{margin:4px 0;padding-left:20px} li{margin-bottom:4px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+</style></head><body><div class="wrap"><h1>preferred_oddlot_scanner</h1><p class="sub">registered capability · preferred_oddlot_scanner</p><a href="signals.html">&larr; all signals</a><div class="panel" style="margin-top:10px"><span class="k k-generator">GENERATOR</span> &nbsp;<span class="h-NEVER_RUN"><b>NEVER_RUN</b></span> · last run <span class="mono">never</span></div><p>Stage 0b generator: mispriced $25-par preferreds &amp; baby bonds (CARRY).</p><form method="POST" action="/signals/run" style="margin:10px 0"><input type="hidden" name="name" value="preferred_oddlot_scanner"><input name="symbol" placeholder="symbol (if applicable)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px"><input name="symbols" placeholder="universe, comma-sep (generators)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px;margin-left:6px"><button type="submit" style="background:#8b7cf6;color:#0b0e12;border:0;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;margin-left:6px">Run now</button></form><h2>Datasources</h2><ul><li>reference implementation: verticals/generators/preferred_oddlot_scanner.py (see the code section for the feeds it touches)</li></ul><h2>Applies to</h2><ul><li><b>strategies:</b> bonds</li></ul><h2>The code</h2><pre>&quot;&quot;&quot;preferred_oddlot_scanner — Stage 0b generator: mispriced $25-par preferreds &amp; baby bonds (CARRY).
+
+THE PUREST OFFICE-THESIS EDGE: institutions cannot trade odd lots of $25-par exchange-traded
+preferreds / baby bonds economically — the tickets are too small to bother, so deep-discount +
+illiquid names carry a pull-to-par + credit-mispricing that nobody at size captures. A small
+investor + AI screening the full universe IS the edge (capacity-ceilinged, fee-replication carry).
+
+v1 screens a SEED universe on the three things computable from live data — no hardcoded coupons
+(dividend pulled from yfinance so nothing is fabricated), par assumed $25 exchange-traded:
+  1. DISCOUNT-TO-PAR   price vs $25 -&gt; pull-to-par convexity if the credit is money-good
+  2. CURRENT YIELD     live trailing dividend / price
+  3. ILLIQUIDITY       $-volume (LOW = the odd-lot / institutional-neglect signature)
+The odd-lot score = discount × illiquidity-neglect. Credit-is-money-good is the DD step (a deep
+discount on impaired credit is a value trap, not a gift — verify the issuer&#x27;s senior curve/coverage).
+The universe is a SEED to EXPAND + VERIFY; unresolvable tickers self-drop (reported, never silent).
+
+    python3 verticals/generators/preferred_oddlot_scanner.py
+Writes data/PREFERRED_ODDLOT.json. READ-ONLY.
+&quot;&quot;&quot;
+from __future__ import annotations
+
+import datetime
+import json
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+OUT = HERE / &quot;data&quot; / &quot;PREFERRED_ODDLOT.json&quot;
+PAR = 25.0
+
+# SEED universe (exchange-traded $25-par preferreds &amp; baby bonds). ticker | issuer | sector.
+# NO coupons hardcoded — the live trailing dividend is pulled from yfinance. Bad tickers self-drop.
+# We already hold OXLCZ (a baby bond) ad hoc — this systematizes the sleeve. EXPAND this list.
+UNIVERSE = [
+    (&quot;OXLCZ&quot;, &quot;Oxford Lane Capital&quot;, &quot;BDC/CLO baby bond&quot;),
+    (&quot;OXLCL&quot;, &quot;Oxford Lane Capital&quot;, &quot;BDC/CLO baby bond&quot;),
+    (&quot;OXLCN&quot;, &quot;Oxford Lane Capital&quot;, &quot;BDC/CLO baby bond&quot;),
+    (&quot;ECCC&quot;,  &quot;Eagle Point Credit&quot;, &quot;BDC/CLO baby bond&quot;),
+    (&quot;ECCV&quot;,  &quot;Eagle Point Credit&quot;, &quot;BDC/CLO baby bond&quot;),
+    (&quot;ECCX&quot;,  &quot;Eagle Point Credit&quot;, &quot;BDC/CLO baby bond&quot;),
+    (&quot;ECCF&quot;,  &quot;Eagle Point Credit&quot;, &quot;BDC/CLO baby bond&quot;),
+    (&quot;PBB&quot;,   &quot;Prospect Capital&quot;, &quot;BDC baby bond&quot;),
+    (&quot;SACC&quot;,  &quot;Sachem Capital&quot;, &quot;mortgage-REIT baby bond&quot;),
+    (&quot;SCCB&quot;,  &quot;Sachem Capital&quot;, &quot;mortgage-REIT baby bond&quot;),
+    (&quot;AGNCP&quot;, &quot;AGNC Investment&quot;, &quot;agency-mREIT preferred&quot;),
+    (&quot;AGNCN&quot;, &quot;AGNC Investment&quot;, &quot;agency-mREIT preferred&quot;),
+    (&quot;AGNCM&quot;, &quot;AGNC Investment&quot;, &quot;agency-mREIT preferred&quot;),
+    (&quot;NLY-PF&quot;, &quot;Annaly Capital&quot;, &quot;agency-mREIT preferred&quot;),
+    (&quot;NLY-PI&quot;, &quot;Annaly Capital&quot;, &quot;agency-mREIT preferred&quot;),
+    (&quot;RITM-PA&quot;, &quot;Rithm Capital&quot;, &quot;mortgage-REIT preferred&quot;),
+    (&quot;RITM-PB&quot;, &quot;Rithm Capital&quot;, &quot;mortgage-REIT preferred&quot;),
+    (&quot;RITM-PD&quot;, &quot;Rithm Capital&quot;, &quot;mortgage-REIT preferred&quot;),
+    (&quot;TWO-PA&quot;, &quot;Two Harbors&quot;, &quot;mortgage-REIT preferred&quot;),
+    (&quot;TWO-PB&quot;, &quot;Two Harbors&quot;, &quot;mortgage-REIT preferred&quot;),
+    (&quot;GSL-PB&quot;, &quot;Global Ship Lease&quot;, &quot;shipping preferred&quot;),
+    (&quot;SB-PC&quot;, &quot;Safe Bulkers&quot;, &quot;shipping preferred&quot;),
+    (&quot;SB-PD&quot;, &quot;Safe Bulkers&quot;, &quot;shipping preferred&quot;),
+    (&quot;GNL-PA&quot;, &quot;Global Net Lease&quot;, &quot;net-lease-REIT preferred&quot;),
+    (&quot;GNL-PB&quot;, &quot;Global Net Lease&quot;, &quot;net-lease-REIT preferred&quot;),
+    (&quot;SLG-PI&quot;, &quot;SL Green Realty&quot;, &quot;office-REIT preferred&quot;),
+    (&quot;CIM-PA&quot;, &quot;Chimera Investment&quot;, &quot;mortgage-REIT preferred&quot;),
+    (&quot;CIM-PB&quot;, &quot;Chimera Investment&quot;, &quot;mortgage-REIT preferred&quot;),
+]
+
+DISCOUNT_FLOOR = 0.04       # &gt;=4% below par to matter (pull-to-par convexity)
+ODDLOT_ADV_USD = 1_500_000  # &lt;=~$1.5M/day $-volume = the institutional-neglect / odd-lot signature
+
+
+def _pull(tickers):
+    &quot;&quot;&quot;Live price + trailing dividend + $-volume via yfinance. Returns {t: {...}} for resolvers.&quot;&quot;&quot;
+    import yfinance as yf
+    out = {}
+    try:
+        data = yf.Tickers(&quot; &quot;.join(tickers))
+    except Exception:
+        return out
+    for t in tickers:
+        try:
+            tk = data.tickers.get(t) or yf.Ticker(t)
+            fi = getattr(tk, &quot;fast_info&quot;, {}) or {}
+            px = fi.get(&quot;last_price&quot;) or fi.get(&quot;lastPrice&quot;)
+            vol = fi.get(&quot;last_volume&quot;) or fi.get(&quot;lastVolume&quot;)
+            info = {}
+            if px is None:
+                info = tk.info or {}
+                px = info.get(&quot;regularMarketPrice&quot;) or info.get(&quot;previousClose&quot;)
+                vol = vol or info.get(&quot;regularMarketVolume&quot;) or info.get(&quot;averageVolume&quot;)
+            if not px:
+                continue
+            # trailing dividend: prefer explicit rate, else sum last 12m of the dividend series
+            div = None
+            info = info or (tk.info or {})
+            div = info.get(&quot;trailingAnnualDividendRate&quot;) or info.get(&quot;dividendRate&quot;)
+            if not div:
+                try:
+                    dv = tk.dividends
+                    if len(dv):
+                        cut = datetime.datetime.now(dv.index.tz) - datetime.timedelta(days=365) if dv.index.tz else \
+                              datetime.datetime.now() - datetime.timedelta(days=365)
+                        div = float(dv[dv.index &gt;= cut].sum())
+                except Exception:
+                    div = None
+            out[t] = {&quot;px&quot;: float(px), &quot;vol&quot;: float(vol or 0), &quot;div&quot;: float(div) if div else None}
+        except Exception:
+            continue
+    return out
+
+
+def scan() -&gt; dict:
+    px = _pull([t for t, _, _ in UNIVERSE])
+    resolved, dropped, rows = 0, [], []
+    for t, issuer, sector in UNIVERSE:
+        d = px.get(t)
+        if not d or not d.get(&quot;px&quot;):
+            dropped.append(t)
+            continue
+        resolved += 1
+        p = d[&quot;px&quot;]
+        disc = PAR / p - 1 if p else 0            # +ve = trading below par
+        cur_yld = (d[&quot;div&quot;] / p) if d.get(&quot;div&quot;) and p else None
+        advusd = d[&quot;px&quot;] * d[&quot;vol&quot;]               # crude 1-day $-volume proxy
+        oddlot = advusd &lt;= ODDLOT_ADV_USD
+        rows.append({
+            &quot;ticker&quot;: t, &quot;issuer&quot;: issuer, &quot;sector&quot;: sector, &quot;price&quot;: round(p, 2),
+            &quot;disc_to_par_pct&quot;: round(disc * 100, 1), &quot;current_yield_pct&quot;: round(cur_yld * 100, 2) if cur_yld else None,
+            &quot;dollar_vol_1d&quot;: round(advusd), &quot;oddlot_illiquid&quot;: oddlot,
+        })
+    # candidates: below par by the floor AND odd-lot-illiquid (the neglect signature).
+    cands = [r for r in rows if r[&quot;disc_to_par_pct&quot;] &gt;= DISCOUNT_FLOOR * 100 and r[&quot;oddlot_illiquid&quot;]]
+    # score = discount (pull-to-par upside) × neglect (how far below the odd-lot ADV line)
+    for r in cands:
+        neglect = min(1.0, (ODDLOT_ADV_USD - r[&quot;dollar_vol_1d&quot;]) / ODDLOT_ADV_USD) if r[&quot;dollar_vol_1d&quot;] &lt; ODDLOT_ADV_USD else 0
+        r[&quot;oddlot_score&quot;] = round((r[&quot;disc_to_par_pct&quot;] / 100) * (0.5 + 0.5 * neglect) + (r[&quot;current_yield_pct&quot;] or 0) / 200, 3)
+    cands.sort(key=lambda r: -r[&quot;oddlot_score&quot;])
+    return {&quot;asof&quot;: datetime.date.today().isoformat(), &quot;par&quot;: PAR,
+            &quot;universe&quot;: len(UNIVERSE), &quot;resolved&quot;: resolved, &quot;dropped&quot;: dropped,
+            &quot;candidates&quot;: cands, &quot;all&quot;: sorted(rows, key=lambda r: -r[&quot;disc_to_par_pct&quot;]),
+            &quot;note&quot;: &quot;PULL-TO-PAR + odd-lot NEGLECT screen on $25-par preferreds/baby bonds. A deep discount is only a &quot;
+                    &quot;gift if the credit is MONEY-GOOD — the DD/court step is the issuer&#x27;s senior curve + coverage + &quot;
+                    &quot;call schedule (a deep discount on impaired credit is a value trap). Seed universe — EXPAND + VERIFY; &quot;
+                    &quot;dropped tickers didn&#x27;t resolve on yfinance (bad symbol or no data), never silently omitted.&quot;}
+
+
+def main():
+    res = scan()
+    OUT.write_text(json.dumps(res, indent=1))
+    print(f&quot;=== PREFERRED / BABY-BOND ODD-LOT SCANNER  {res[&#x27;asof&#x27;]}  &quot;
+          f&quot;({res[&#x27;resolved&#x27;]}/{res[&#x27;universe&#x27;]} resolved, {len(res[&#x27;candidates&#x27;])} candidates) ===&quot;)
+    print(&quot;  ODD-LOT MISPRICING CANDIDATES (below par + illiquid — verify credit money-good in DD):&quot;)
+    for r in res[&quot;candidates&quot;][:12]:
+        y = f&quot;{r[&#x27;current_yield_pct&#x27;]:.1f}%y&quot; if r[&quot;current_yield_pct&quot;] else &quot;y?&quot;
+        print(f&quot;    {r[&#x27;ticker&#x27;]:8} {r[&#x27;issuer&#x27;][:22]:22} ${r[&#x27;price&#x27;]:6.2f}  {r[&#x27;disc_to_par_pct&#x27;]:+5.1f}% vs par  &quot;
+              f&quot;{y:7} ${r[&#x27;dollar_vol_1d&#x27;]/1e3:6.0f}k/d  score {r[&#x27;oddlot_score&#x27;]}&quot;)
+    if res[&quot;dropped&quot;]:
+        print(f&quot;  dropped (unresolved): {res[&#x27;dropped&#x27;]}&quot;)
+    print(f&quot;[-&gt; {OUT.name}]&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</pre></div></body></html>

@@ -1,0 +1,866 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>cohort_dislocation</title><style>
+body{margin:0;background:#0b0e12;color:#e8ebee;font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:26px 24px 90px}
+a{color:#8b7cf6} h1{font-size:23px;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:#7d858e;margin:0 0 20px;font-size:13px}
+h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:#7d858e;margin:24px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 10px;border-bottom:1px solid #242a31;text-align:left;vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#7d858e}
+.k{font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:20px}
+.k-generator{color:#c3b8fb;background:rgba(139,124,246,.15)}
+.k-detector{color:#eccb8a;background:rgba(217,164,65,.15)}
+.k-watcher{color:#8ee5c1;background:rgba(53,201,143,.15)}
+.k-evidence{color:#b3bcc6;background:rgba(138,147,158,.15)}
+.h-OK{color:#35c98f} .h-STALE{color:#d9a441} .h-ERROR{color:#e0736a} .h-NEVER_RUN{color:#8a939e}
+pre{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px;overflow-x:auto;font-size:12px;line-height:1.5}
+.panel{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px 18px;margin-bottom:12px}
+ul{margin:4px 0;padding-left:20px} li{margin-bottom:4px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+</style></head><body><div class="wrap"><h1>cohort_dislocation</h1><p class="sub">registered capability · cohort_dislocation</p><a href="signals.html">&larr; all signals</a><div class="panel" style="margin-top:10px"><span class="k k-generator">GENERATOR</span> &nbsp;<span class="h-NEVER_RUN"><b>NEVER_RUN</b></span> · last run <span class="mono">never</span></div><p>the COHORT-AGGREGATE leg of the dislocation watch (built 2026-08-13).</p><form method="POST" action="/signals/run" style="margin:10px 0"><input type="hidden" name="name" value="cohort_dislocation"><input name="symbol" placeholder="symbol (if applicable)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px"><input name="symbols" placeholder="universe, comma-sep (generators)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px;margin-left:6px"><button type="submit" style="background:#8b7cf6;color:#0b0e12;border:0;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;margin-left:6px">Run now</button></form><h2>Datasources</h2><ul><li>reference implementation: verticals/generators/cohort_dislocation.py (see the code section for the feeds it touches)</li></ul><h2>Applies to</h2><ul><li><b>strategies:</b> value_band_entry</li></ul><h2>The code</h2><pre>&quot;&quot;&quot;cohort_dislocation — the COHORT-AGGREGATE leg of the dislocation watch (built 2026-08-13).
+
+THE GAP IT FILLS (the SPGI miss, 2026-08-13). Every dislocation layer the desk owns screens ONE
+NAME AT A TIME: dislocation_sweep (researched US names), intl_dislocation_sweep (foreign shelves),
+broken_print_radar (single-session tape breaks). In early August 2026 the market re-rated the
+financial-data vendors as a CLASS on the AI-disintermediation narrative — SPGI, MCO and MSCI each
+grinding 6-12pp below SPY over 21 sessions. No single-name screen fired: each name individually sat
+just under the -8%/5d and -15%/21d bars. The THEME was the signal and nothing aggregated it.
+
+This layer asks the aggregate question: is a whole COHORT being marked down together, and if so
+which member is the best-in-class name getting dragged with it? It is deliberately a THEME screen,
+never a ticker screen — the output is a cohort plus one court question.
+
+SIGNAL = the cohort&#x27;s MEDIAN idiosyncratic excess vs SPY, plus BREADTH (how much of the cohort is
+participating). Median not mean, because one blown-up member is not a class de-rate. Breadth,
+because a median can be dragged by a minority. Both must clear:
+
+    FIRE:  median 21d excess &lt;= -6.0pp  AND  breadth &gt;= 60% of members negative   (n &gt;= 4)
+           or the 63d GRIND leg: median 63d excess &lt;= -10.0pp AND breadth &gt;= 60%
+    HIGH:  median 21d excess &lt;= -12.0pp (or 63d &lt;= -18.0pp)
+
+WHY -6pp AND 60% (tuned against a recorded tape, and the tuning is reported honestly). The
+single-name sweep fires at -15pp/21d; a cohort whose MEDIAN member is down 6pp is a much rarer
+event than any one name down 6pp, because idiosyncratic moves cancel in a median — the point is
+that the aggregate survives the cancellation. Measured on the recorded Apr-Aug 2026 tape of the
+financial-data vendors (tests/golden, 70 evaluable sessions): the raw gate CLEARS on 18 of 70
+sessions, which is why the raw gate alone is not the detector — after the episode dedup below
+those 18 sessions become 5 events (2026-05-01, 05-05, 05-20, 07-01, 08-05), i.e. roughly 1.4 per
+cohort per month, clustered into a deep uniform May selloff and the shallower summer grind. That
+is the intended shape: a court-sized number of theme questions, not a daily feed. Anyone
+re-tuning these numbers should re-run that measurement rather than trust this paragraph.
+
+EPISODE DEDUP. A cohort de-rate persists for weeks, so a fresh fire is emitted only when the
+cohort ENTERS a de-rate or MATERIALLY deepens (median at least DEEPEN_PP lower than the level
+already reported) — a same-severity check alone let the May episode emit six fires as its median
+oscillated across the HIGH boundary.
+
+REGIME GUARD. Excess-vs-SPY already nets out a market-wide selloff, so many cohorts clearing at
+once means a broad ROTATION, not twenty independent themes. When more than REGIME_SHARE of
+evaluated cohorts clear, every fire that day carries a REGIME WARNING in its evidence line.
+
+SINGLE-NAME SKEW GUARD. Every cohort also reports its EX-WORST-MEMBER median: drop the deepest
+member and re-take the median. When the ex-worst median no longer clears the fire bar, the de-rate
+is concentrated rather than broad — the fire still stands (it is real information) but severity is
+capped at MED and the evidence line says SKEW explicitly, so the court is never told &quot;the whole
+cohort de-rated&quot; when three of five names did. On the anchor date this fires exactly: the vendor
+cohort&#x27;s median is -6.7pp but its ex-worst median is only -2.1pp, because SPGI/MCO/MSCI sold off
+while FDS/MORN rallied. That IS the finding, stated honestly.
+
+COHORT MEMBERSHIP, two sources:
+  1. CURATED narrative cohorts in knowledge_graph/cohorts.json (the researched names) — versioned
+     data, shared with desk/class_dislocation.
+  2. AUTO industry cohorts for the unresearched broad universe, from a locally cached
+     yfinance-industry mapper (data/industry_map.json) filled by polite budgeted batching, with
+     the Nasdaq screener&#x27;s sector/industry/mcap as the free bulk fallback.
+  KNOWN LIMIT, measured not assumed: the auto buckets are COARSER than the narratives that price
+  them. yfinance files SPGI/MCO/FDS/MSCI/MORN together with ICE/NDAQ/TRU under &quot;Financial Data &amp;
+  Stock Exchanges&quot; — and on the anchor date the exchanges were RALLYING, so the auto bucket&#x27;s
+  median is +3pp and the de-rate is invisible. The auto leg is recall, the curated leg is
+  precision; both run, and a diluted auto bucket is reported (dilution_note) rather than trusted.
+
+  AUTO-LEG COVERAGE GATE. Because the mapper fills over days, an early auto cohort is not its
+  industry — it is whichever few names the budget reached first (the first live runs produced an
+  &quot;industry:Biotechnology&quot; of FOUR names and fired on it). Auto cohorts are therefore built and
+  reported but cannot FIRE until the map covers AUTO_MIN_COVERAGE of the liquid tape. Curated
+  cohorts are unaffected: their membership is explicit, not sampled.
+
+  DUPLICATE SUPPRESSION. When an auto bucket and a curated cohort hold essentially the same names
+  (Jaccard &gt;= 0.8) only the curated one fires — the first live run handed the court the identical
+  five-vendor question twice under two different cohort names.
+
+BENCHMARK = SPY, so this layer is US-listed only. The international sweep&#x27;s names are read for
+context and coverage accounting but are NEVER aggregated into a SPY-benchmarked cohort (a Tokyo
+line measured against SPY measures the yen — the sibling sweep&#x27;s lesson, in cohort form).
+
+RATE BUDGET. This layer is designed to REUSE, not refetch: price series live in a shared day-keyed
+cache (data/cohort_px_cache.json) so a same-day re-run costs zero network, and the sweep outputs
+are read for context/cross-check instead of re-derived. The only genuinely new cost is the
+industry mapper&#x27;s yfinance .info calls, hard-capped at --map-budget per run (default 120, ~0.35s
+apart) so the map fills incrementally over days rather than in one rate-limiting burst.
+
+DEGRADED-LOUD. Unmapped names, unpriced names and cohorts that fell under the member floor are all
+COUNTED and NAMED in the summary. A cohort layer that silently dropped half its members would
+report &quot;no theme de-rate&quot; for a theme it simply could not see.
+
+Emits DETFIRE|cohort_dislocation|&lt;COHORT&gt;|&lt;SEV&gt;|&lt;evidence&gt; for the cohort plus a companion
+DETFIRE|cohort_dislocation|&lt;TICKER&gt;|&lt;SEV&gt;|... for the best-in-class member, both through the
+registry&#x27;s detector_scan extractor. PROPOSES ONLY. Writes data/COHORT_DISLOCATION.json +
+data/cohort_dislocation_state.json (new-vs-deepened dedup).
+
+  python3 verticals/generators/cohort_dislocation.py [--map-budget 120] [--max-symbols 600] [--dry-run]
+&quot;&quot;&quot;
+from __future__ import annotations
+
+import argparse
+import datetime
+import json
+import statistics
+import sys
+import time
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+DATA = HERE / &quot;data&quot;
+
+OUT_JSON = DATA / &quot;COHORT_DISLOCATION.json&quot;
+STATE = DATA / &quot;cohort_dislocation_state.json&quot;
+PX_CACHE = DATA / &quot;cohort_px_cache.json&quot;
+MAP_STORE = DATA / &quot;industry_map.json&quot;
+
+# sibling sweep outputs — READ ONLY, and every one of them is optional
+SWEEP_US = DATA / &quot;DISLOCATION_SWEEP.json&quot;
+SWEEP_INTL = DATA / &quot;INTL_DISLOCATION_SWEEP.json&quot;
+SWEEP_BROAD_CANDIDATES = (&quot;US_BROAD_DISLOCATION_SWEEP.json&quot;, &quot;BROAD_DISLOCATION_SWEEP.json&quot;,
+                          &quot;US_BROAD_SWEEP.json&quot;, &quot;BROAD_SWEEP.json&quot;)
+
+COHORT_FILE = ROOT / &quot;knowledge_graph&quot; / &quot;cohorts.json&quot;
+LEDGER = ROOT / &quot;desk&quot; / &quot;data&quot; / &quot;research_ledger.json&quot;
+CIK_MAP = ROOT / &quot;desk&quot; / &quot;data&quot; / &quot;cik_map.json&quot;
+
+BENCH = &quot;SPY&quot;
+
+# ------------------------------------------------------------------ gates (documented above)
+FIRE_MEDIAN_21 = -6.0        # pp of excess vs SPY
+FIRE_MEDIAN_63 = -10.0       # the GRIND leg — slower de-rates the 21d window flattens
+HIGH_MEDIAN_21 = -12.0
+HIGH_MEDIAN_63 = -18.0
+FIRE_BREADTH = 0.60
+MIN_MEMBERS = 4              # below this a &quot;median&quot; is a coin flip
+AUTO_MIN_MCAP = 1e9          # auto industry cohorts: liquid members only (microcaps are not a theme)
+QUIET_DAYS = 10              # new-or-deepened only, like the sibling sweeps
+DEEPEN_PP = 3.0              # inside the quiet window, only a MATERIALLY deeper median re-fires
+BENCH_STALE_DAYS = 5         # a benchmark close older than this cannot anchor an excess
+REGIME_SHARE = 0.25          # &gt;this share of cohorts firing at once = rotation, not a theme
+AUTO_MIN_COVERAGE = 0.50     # auto industry cohorts stay PROVISIONAL until the map covers this
+
+
+# ============================================================ PURE: aggregation math (offline-tested)
+def excess_pct(bars: dict, bench: dict, n: int) -&gt; float | None:
+    &quot;&quot;&quot;Idiosyncratic n-session return vs the benchmark, DATE-ALIGNED.
+
+    The benchmark close is looked up as of the member&#x27;s OWN anchor date (not by position), because
+    a member with a missing session would otherwise be compared across a different window. A bench
+    close staler than BENCH_STALE_DAYS relative to the anchor refuses the measurement (None) rather
+    than silently producing a mis-windowed &#x27;excess&#x27;.
+    &quot;&quot;&quot;
+    closes, dates = bars.get(&quot;close&quot;) or [], bars.get(&quot;dates&quot;) or []
+    if len(closes) &lt; n + 1 or len(dates) != len(closes):
+        return None
+    last_i, anchor_i = len(closes) - 1, len(closes) - 1 - n
+    if not closes[anchor_i] or not closes[last_i]:
+        return None
+    r = (closes[last_i] / closes[anchor_i] - 1) * 100
+    b_last = _bench_close_asof(bench, dates[last_i])
+    b_anchor = _bench_close_asof(bench, dates[anchor_i])
+    if b_last is None or b_anchor is None:
+        return None
+    return r - (b_last / b_anchor - 1) * 100
+
+
+def _bench_close_asof(bench: dict, date: str) -&gt; float | None:
+    &quot;&quot;&quot;Benchmark close on `date`, else the most recent close within BENCH_STALE_DAYS before it.&quot;&quot;&quot;
+    bd, bc = bench.get(&quot;dates&quot;) or [], bench.get(&quot;close&quot;) or []
+    if not bd or len(bd) != len(bc):
+        return None
+    best = None
+    for d, c in zip(bd, bc):
+        if d &lt;= date and c:
+            best = (d, c)
+        elif d &gt; date:
+            break
+    if not best:
+        return None
+    try:
+        gap = (datetime.date.fromisoformat(date) - datetime.date.fromisoformat(best[0])).days
+    except ValueError:
+        return None
+    return best[1] if gap &lt;= BENCH_STALE_DAYS else None
+
+
+def cohort_stats(ex21: dict[str, float], ex63: dict[str, float] | None = None) -&gt; dict:
+    &quot;&quot;&quot;Pure aggregation over {ticker: excess_pp}. Median + breadth + the ex-worst skew guard.&quot;&quot;&quot;
+    ex63 = ex63 or {}
+    st: dict = {&quot;n&quot;: len(ex21), &quot;n63&quot;: len(ex63)}
+    if ex21:
+        vals = list(ex21.values())
+        worst = min(ex21, key=lambda t: ex21[t])
+        rest = [v for t, v in ex21.items() if t != worst]
+        st.update({
+            &quot;median21&quot;: round(statistics.median(vals), 2),
+            &quot;breadth21&quot;: round(sum(1 for v in vals if v &lt; 0) / len(vals), 3),
+            &quot;worst_member&quot;: worst,
+            &quot;worst21&quot;: round(ex21[worst], 2),
+            &quot;ex_worst_median21&quot;: round(statistics.median(rest), 2) if rest else None,
+            &quot;best21&quot;: round(max(vals), 2),
+            &quot;dispersion21&quot;: round(max(vals) - min(vals), 2),
+        })
+    if ex63:
+        v63 = list(ex63.values())
+        st.update({&quot;median63&quot;: round(statistics.median(v63), 2),
+                   &quot;breadth63&quot;: round(sum(1 for v in v63 if v &lt; 0) / len(v63), 3)})
+    return st
+
+
+def evaluate(st: dict) -&gt; dict:
+    &quot;&quot;&quot;Fire decision + severity + the skew annotation. Pure — no I/O, no thresholds hidden.&quot;&quot;&quot;
+    m21, b21 = st.get(&quot;median21&quot;), st.get(&quot;breadth21&quot;)
+    m63, b63 = st.get(&quot;median63&quot;), st.get(&quot;breadth63&quot;)
+    n, n63 = st.get(&quot;n&quot;, 0), st.get(&quot;n63&quot;, 0)
+    legs = []
+    if n &gt;= MIN_MEMBERS and m21 is not None and b21 is not None \
+            and m21 &lt;= FIRE_MEDIAN_21 and b21 &gt;= FIRE_BREADTH:
+        legs.append(&quot;21d&quot;)
+    if n63 &gt;= MIN_MEMBERS and m63 is not None and b63 is not None \
+            and m63 &lt;= FIRE_MEDIAN_63 and b63 &gt;= FIRE_BREADTH:
+        legs.append(&quot;63d&quot;)
+    if not legs:
+        return {&quot;fires&quot;: False, &quot;legs&quot;: [], &quot;severity&quot;: None, &quot;skew&quot;: False,
+                &quot;reason&quot;: _no_fire_reason(st)}
+    deep = (m21 is not None and m21 &lt;= HIGH_MEDIAN_21) or (m63 is not None and m63 &lt;= HIGH_MEDIAN_63)
+    sev = &quot;HIGH&quot; if deep else &quot;MED&quot;
+    # SKEW GUARD: if dropping the single deepest member takes the cohort back above the fire bar,
+    # the de-rate is concentrated, not broad. Fire stands (it is real) but never as HIGH.
+    exw = st.get(&quot;ex_worst_median21&quot;)
+    skew = &quot;21d&quot; in legs and exw is not None and exw &gt; FIRE_MEDIAN_21
+    if skew:
+        sev = &quot;MED&quot;
+    return {&quot;fires&quot;: True, &quot;legs&quot;: legs, &quot;severity&quot;: sev, &quot;skew&quot;: skew, &quot;reason&quot;: None}
+
+
+def _no_fire_reason(st: dict) -&gt; str:
+    if st.get(&quot;n&quot;, 0) &lt; MIN_MEMBERS:
+        return f&quot;only {st.get(&#x27;n&#x27;, 0)} priced members (floor {MIN_MEMBERS})&quot;
+    m21, b21 = st.get(&quot;median21&quot;), st.get(&quot;breadth21&quot;)
+    if m21 is not None and m21 &gt; FIRE_MEDIAN_21:
+        return f&quot;median21 {m21:+.1f}pp above {FIRE_MEDIAN_21}pp&quot;
+    if b21 is not None and b21 &lt; FIRE_BREADTH:
+        return f&quot;breadth {b21:.0%} below {FIRE_BREADTH:.0%} (median carried by a minority)&quot;
+    return &quot;below gates&quot;
+
+
+def best_in_class(ex21: dict[str, float], meta: dict[str, dict]) -&gt; dict | None:
+    &quot;&quot;&quot;The largest, least-levered member being DRAGGED — the name the court should look at first.
+
+    Ranked over the members with NEGATIVE excess only (a member that rallied is not being dragged).
+    Score = 0.6 * size rank + 0.4 * balance-sheet rank. Missing balance-sheet data scores NEUTRAL
+    and is named in data_gaps — never treated as clean (the pull-cap-structure rule).
+    &quot;&quot;&quot;
+    dragged = {t: v for t, v in ex21.items() if v &lt; 0}
+    pool = dragged or ex21
+    if not pool:
+        return None
+    rows = []
+    for t in pool:
+        m = meta.get(t) or {}
+        mcap = m.get(&quot;mcap&quot;) or 0
+        cash, debt = m.get(&quot;cash&quot;), m.get(&quot;debt&quot;)
+        net_cash = (cash - debt) if (cash is not None and debt is not None) else None
+        rows.append({&quot;ticker&quot;: t, &quot;excess21&quot;: round(pool[t], 2), &quot;mcap&quot;: mcap,
+                     &quot;net_cash&quot;: net_cash, &quot;cash&quot;: cash, &quot;debt&quot;: debt})
+    caps = sorted({r[&quot;mcap&quot;] for r in rows})
+    known_lev = [r for r in rows if r[&quot;net_cash&quot;] is not None and r[&quot;mcap&quot;]]
+    lev_vals = sorted({(r[&quot;net_cash&quot;] / r[&quot;mcap&quot;]) for r in known_lev})
+    for r in rows:
+        r[&quot;size_rank&quot;] = (caps.index(r[&quot;mcap&quot;]) / max(len(caps) - 1, 1)) if len(caps) &gt; 1 else 0.5
+        if r[&quot;net_cash&quot;] is not None and r[&quot;mcap&quot;] and len(lev_vals) &gt; 1:
+            r[&quot;lev_rank&quot;] = lev_vals.index(r[&quot;net_cash&quot;] / r[&quot;mcap&quot;]) / (len(lev_vals) - 1)
+        else:
+            r[&quot;lev_rank&quot;] = 0.5          # NEUTRAL, not clean
+        r[&quot;score&quot;] = round(0.6 * r[&quot;size_rank&quot;] + 0.4 * r[&quot;lev_rank&quot;], 4)
+    rows.sort(key=lambda r: (-r[&quot;score&quot;], -r[&quot;mcap&quot;]))
+    top = rows[0]
+    gaps = []
+    if top[&quot;net_cash&quot;] is None:
+        gaps.append(&quot;leverage UNKNOWN (no cash/debt in the mapper cache) — scored NEUTRAL, not clean&quot;)
+    if not top[&quot;mcap&quot;]:
+        gaps.append(&quot;market cap UNKNOWN&quot;)
+    return {**top, &quot;data_gaps&quot;: gaps, &quot;ranked&quot;: [r[&quot;ticker&quot;] for r in rows[:8]],
+            &quot;pool&quot;: &quot;dragged members&quot; if dragged else &quot;all members (none negative)&quot;}
+
+
+def court_question(cohort: str, best: dict | None) -&gt; str:
+    name = best[&quot;ticker&quot;] if best else &quot;the best-in-class member&quot;
+    return (f&quot;cohort de-rate: is {name} dislocated with its cohort or correctly repriced?&quot;)
+
+
+def fire_line(cohort: str, st: dict, verdict: dict, best: dict | None, ctx: str = &quot;&quot;) -&gt; str:
+    &quot;&quot;&quot;DETFIRE|cohort_dislocation|&lt;COHORT&gt;|&lt;SEV&gt;|&lt;evidence&gt; — the cohort-level line.&quot;&quot;&quot;
+    m21 = st.get(&quot;median21&quot;)
+    bits = [f&quot;median 21d excess {m21:+.1f}pp vs SPY&quot; if m21 is not None else &quot;21d n/a&quot;,
+            f&quot;breadth {st[&#x27;breadth21&#x27;]:.0%} of {st[&#x27;n&#x27;]} members negative&quot; if st.get(&quot;breadth21&quot;) is not None
+            else f&quot;{st.get(&#x27;n&#x27;, 0)} members&quot;]
+    if st.get(&quot;median63&quot;) is not None:
+        bits.append(f&quot;63d median {st[&#x27;median63&#x27;]:+.1f}pp ({st[&#x27;breadth63&#x27;]:.0%} breadth)&quot;)
+    if st.get(&quot;ex_worst_median21&quot;) is not None:
+        bits.append(f&quot;ex-worst({st[&#x27;worst_member&#x27;]} {st[&#x27;worst21&#x27;]:+.1f}pp) median &quot;
+                    f&quot;{st[&#x27;ex_worst_median21&#x27;]:+.1f}pp&quot;)
+    ev = f&quot;cohort de-rate [{&#x27;+&#x27;.join(verdict[&#x27;legs&#x27;])} leg]: &quot; + &quot;; &quot;.join(bits)
+    if verdict[&quot;skew&quot;]:
+        ev += (&quot; — SKEW: dropping the deepest member takes the cohort back above the fire bar, so &quot;
+               &quot;this is a CONCENTRATED de-rate, not a uniform one; do not tell the court &#x27;the whole &quot;
+               &quot;cohort re-rated&#x27;&quot;)
+    if best:
+        parts = [f&quot;{best[&#x27;excess21&#x27;]:+.1f}pp&quot;]
+        if best.get(&quot;mcap&quot;):
+            parts.append(f&quot;mcap ${best[&#x27;mcap&#x27;]/1e9:.1f}B&quot;)
+        if best.get(&quot;net_cash&quot;) is not None:
+            nc = best[&quot;net_cash&quot;]
+            parts.append(f&quot;net cash ${nc/1e9:.2f}B&quot; if nc &gt;= 0 else f&quot;net DEBT ${-nc/1e9:.2f}B&quot;)
+        ev += f&quot;. BEST-IN-CLASS DRAGGED: {best[&#x27;ticker&#x27;]} ({&#x27;, &#x27;.join(parts)})&quot;
+        for g in best[&quot;data_gaps&quot;]:
+            ev += f&quot; [{g}]&quot;
+    if ctx:
+        ev += f&quot;. {ctx}&quot;
+    ev += (f&quot;. COURT QUESTION: {court_question(cohort, best)}&quot;
+           &quot; — PROPOSES ONLY: cause-check -&gt; discovery_state -&gt; court (v1.4) before any staging;&quot;
+           &quot; a cohort that fell together may be correctly repriced, and a shallow &#x27;no cause found&#x27;&quot;
+           &quot; is beta, not a dislocation&quot;)
+    return f&quot;DETFIRE|cohort_dislocation|{cohort}|{verdict[&#x27;severity&#x27;]}|{ev}&quot;
+
+
+def member_fire_line(cohort: str, verdict: dict, best: dict) -&gt; str:
+    &quot;&quot;&quot;Companion line so the best-in-class name routes into the feed as a TICKER, not a theme.&quot;&quot;&quot;
+    return (f&quot;DETFIRE|cohort_dislocation|{best[&#x27;ticker&#x27;]}|{verdict[&#x27;severity&#x27;]}|&quot;
+            f&quot;best-in-class member of the de-rating cohort &#x27;{cohort}&#x27; ({best[&#x27;excess21&#x27;]:+.1f}pp &quot;
+            f&quot;21d excess vs SPY; ranked #1 of {len(best[&#x27;ranked&#x27;])} on size+balance-sheet). &quot;
+            f&quot;COURT QUESTION: {court_question(cohort, best)}&quot;
+            f&quot; — PROPOSES ONLY: the cohort fired, not this name; cause-check -&gt; discovery_state -&gt; &quot;
+            f&quot;court (v1.4) before any staging&quot;)
+
+
+# ============================================================ PURE: cohort assembly
+def parse_curated(blob: dict) -&gt; dict[str, list[str]]:
+    &quot;&quot;&quot;Curated narrative cohorts from knowledge_graph/cohorts.json.
+
+    Defensive on purpose: the live file has one cohort (osb_prediction_market_exposed) sitting at
+    the TOP level rather than inside &quot;cohorts&quot; — an editing slip that a strict reader would silently
+    drop. Any top-level dict carrying &quot;members&quot; is accepted as a cohort.
+    &quot;&quot;&quot;
+    out: dict[str, list[str]] = {}
+    for name, spec in (blob.get(&quot;cohorts&quot;) or {}).items():
+        if isinstance(spec, dict) and spec.get(&quot;members&quot;):
+            out[f&quot;narrative:{name}&quot;] = [str(t).strip().upper() for t in spec[&quot;members&quot;]]
+    for name, spec in blob.items():
+        if name in (&quot;cohorts&quot;, &quot;_doc&quot;) or not isinstance(spec, dict):
+            continue
+        if spec.get(&quot;members&quot;) and f&quot;narrative:{name}&quot; not in out:
+            out[f&quot;narrative:{name}&quot;] = [str(t).strip().upper() for t in spec[&quot;members&quot;]]
+    return out
+
+
+def auto_cohorts(meta: dict[str, dict], min_mcap: float = AUTO_MIN_MCAP) -&gt; dict[str, list[str]]:
+    &quot;&quot;&quot;industry:&lt;label&gt; cohorts over every mapped name above the liquidity floor.&quot;&quot;&quot;
+    out: dict[str, list[str]] = {}
+    for t, m in meta.items():
+        ind = (m.get(&quot;industry&quot;) or &quot;&quot;).strip()
+        if not ind or (m.get(&quot;mcap&quot;) or 0) &lt; min_mcap:
+            continue
+        out.setdefault(f&quot;industry:{ind}&quot;, []).append(t)
+    return {k: sorted(v) for k, v in out.items() if len(v) &gt;= MIN_MEMBERS}
+
+
+def is_us_symbol(t: str) -&gt; bool:
+    &quot;&quot;&quot;SPY-benchmarking only makes sense for US lines (the cross-benchmark guard).&quot;&quot;&quot;
+    return bool(t) and &quot;.&quot; not in t and &quot;-&quot; not in t and t.isascii() and t.isalpha() and len(t) &lt;= 5
+
+
+# ============================================================ I/O: sweep context (all optional)
+def load_sweep_context() -&gt; dict:
+    &quot;&quot;&quot;Read the sibling sweeps for universe seeds + cross-check. Every file is optional.&quot;&quot;&quot;
+    ctx: dict = {&quot;files&quot;: {}, &quot;seed_tickers&quot;: set(), &quot;us_excess21&quot;: {}, &quot;spy21_pct&quot;: None,
+                 &quot;intl_tickers&quot;: set()}
+    try:
+        d = json.loads(SWEEP_US.read_text())
+        ctx[&quot;files&quot;][&quot;DISLOCATION_SWEEP.json&quot;] = d.get(&quot;asof&quot;)
+        ctx[&quot;spy21_pct&quot;] = d.get(&quot;spy21_pct&quot;)
+        for h in d.get(&quot;hits&quot;) or []:
+            t = str(h.get(&quot;ticker&quot;) or &quot;&quot;).upper()
+            if t:
+                ctx[&quot;seed_tickers&quot;].add(t)
+                if h.get(&quot;excess21_pct&quot;) is not None:
+                    ctx[&quot;us_excess21&quot;][t] = h[&quot;excess21_pct&quot;]
+    except Exception as e:
+        ctx[&quot;files&quot;][&quot;DISLOCATION_SWEEP.json&quot;] = f&quot;ABSENT/UNREADABLE ({type(e).__name__})&quot;
+    try:
+        d = json.loads(SWEEP_INTL.read_text())
+        ctx[&quot;files&quot;][&quot;INTL_DISLOCATION_SWEEP.json&quot;] = d.get(&quot;asof&quot;)
+        for h in d.get(&quot;hits&quot;) or []:
+            t = str(h.get(&quot;ticker&quot;) or &quot;&quot;).upper()
+            if t:
+                ctx[&quot;intl_tickers&quot;].add(t)     # context only — never SPY-benchmarked
+    except Exception as e:
+        ctx[&quot;files&quot;][&quot;INTL_DISLOCATION_SWEEP.json&quot;] = f&quot;ABSENT/UNREADABLE ({type(e).__name__})&quot;
+    for fn in SWEEP_BROAD_CANDIDATES:          # the sibling&#x27;s broad-US leg, whenever it lands
+        p = DATA / fn
+        if not p.exists():
+            continue
+        try:
+            d = json.loads(p.read_text())
+            ctx[&quot;files&quot;][fn] = d.get(&quot;asof&quot;)
+            for h in (d.get(&quot;hits&quot;) or d.get(&quot;names&quot;) or []):
+                t = str((h.get(&quot;ticker&quot;) if isinstance(h, dict) else h) or &quot;&quot;).upper()
+                if t and is_us_symbol(t):
+                    ctx[&quot;seed_tickers&quot;].add(t)
+                    if isinstance(h, dict) and h.get(&quot;excess21_pct&quot;) is not None:
+                        ctx[&quot;us_excess21&quot;][t] = h[&quot;excess21_pct&quot;]
+        except Exception as e:
+            ctx[&quot;files&quot;][fn] = f&quot;UNREADABLE ({type(e).__name__})&quot;
+        break
+    else:
+        ctx[&quot;files&quot;][&quot;us_broad_sweep&quot;] = &quot;NOT YET LANDED (sibling in flight) — tolerated&quot;
+    return ctx
+
+
+# ============================================================ I/O: the cached industry mapper
+def load_map() -&gt; dict:
+    try:
+        return json.loads(MAP_STORE.read_text()).get(&quot;names&quot;) or {}
+    except Exception:
+        return {}
+
+
+def save_map(m: dict) -&gt; None:
+    MAP_STORE.write_text(json.dumps(
+        {&quot;_doc&quot;: &quot;cached ticker -&gt; {sector, industry, mcap, cash, debt} for cohort_dislocation. &quot;
+                 &quot;Industry is near-static so rows never expire; mcap/cash/debt refresh on re-map. &quot;
+                 &quot;Filled incrementally under --map-budget to stay inside the yfinance rate budget.&quot;,
+         &quot;asof&quot;: datetime.date.today().isoformat(), &quot;names&quot;: m}, indent=1))
+
+
+def screener_meta() -&gt; dict[str, dict]:
+    &quot;&quot;&quot;One free Nasdaq-screener call: the whole US tape&#x27;s sector/industry/mcap.
+
+    Used as the BULK fallback layer. Its industry labels are a different (coarser, and differently
+    cut) taxonomy from yfinance&#x27;s — it files SPGI under &#x27;Finance: Consumer Services&#x27; with the
+    consumer lenders and FDS under &#x27;Computer Software&#x27;, which is precisely why it cannot carry the
+    auto cohorts on its own. It is excellent for mcap and for a sector floor.
+    &quot;&quot;&quot;
+    try:
+        sys.path.insert(0, str(ROOT / &quot;verticals&quot; / &quot;deep_value&quot;))
+        from universe import _get, NASDAQ_URL, NASDAQ_HDRS
+        rows = _get(NASDAQ_URL, NASDAQ_HDRS)[&quot;data&quot;][&quot;rows&quot;]
+    except Exception as e:
+        print(f&quot;[cohort_dislocation] Nasdaq screener unavailable ({type(e).__name__}) — &quot;
+              f&quot;mcap/sector fallback degraded; mapper cache carries the run&quot;)
+        return {}
+    out = {}
+    for r in rows:
+        t = str(r.get(&quot;symbol&quot;) or &quot;&quot;).strip().upper()
+        if not is_us_symbol(t):
+            continue
+        try:
+            mc = float(str(r.get(&quot;marketCap&quot;, &quot;&quot;)).replace(&quot;$&quot;, &quot;&quot;).replace(&quot;,&quot;, &quot;&quot;) or 0)
+        except ValueError:
+            mc = 0.0
+        out[t] = {&quot;screener_sector&quot;: r.get(&quot;sector&quot;), &quot;screener_industry&quot;: r.get(&quot;industry&quot;),
+                  &quot;mcap&quot;: mc}
+    return out
+
+
+MAP_RETRY_DAYS = 30
+
+
+def _needs_map(t: str, cache: dict, today: str) -&gt; bool:
+    &quot;&quot;&quot;Unmapped, or a NEGATIVE cache entry old enough to be worth one retry.
+
+    Negative caching matters: the priority list carries ledger names that are foreign lines with
+    US-shaped symbols (EMAAR, POLI, CBKD). Without it every run spent budget re-asking Yahoo about
+    the same names it had already refused, so the map crawled forward far slower than the budget
+    implied.
+    &quot;&quot;&quot;
+    row = cache.get(t)
+    if row is None:
+        return True
+    if row.get(&quot;industry&quot;):
+        return False
+    try:
+        age = (datetime.date.fromisoformat(today)
+               - datetime.date.fromisoformat(row.get(&quot;failed&quot;) or today)).days
+    except ValueError:
+        return False
+    return age &gt;= MAP_RETRY_DAYS
+
+
+def map_names(tickers: list[str], cache: dict, budget: int, sleep: float = 0.35,
+              today: str | None = None) -&gt; dict:
+    &quot;&quot;&quot;Fill industry/mcap/cash/debt for up to `budget` unmapped names. Polite and bounded.&quot;&quot;&quot;
+    today = today or datetime.date.today().isoformat()
+    todo = [t for t in tickers if _needs_map(t, cache, today)][:max(budget, 0)]
+    if not todo:
+        return {&quot;attempted&quot;: 0, &quot;mapped&quot;: 0, &quot;failed&quot;: []}
+    import yfinance as yf
+    mapped, failed = 0, []
+    for i, t in enumerate(todo):
+        try:
+            info = yf.Ticker(t).info or {}
+            ind = info.get(&quot;industry&quot;)
+        except Exception:
+            ind, info = None, {}
+        if ind:
+            cache[t] = {&quot;sector&quot;: info.get(&quot;sector&quot;), &quot;industry&quot;: ind,
+                        &quot;mcap&quot;: info.get(&quot;marketCap&quot;), &quot;cash&quot;: info.get(&quot;totalCash&quot;),
+                        &quot;debt&quot;: info.get(&quot;totalDebt&quot;), &quot;src&quot;: &quot;yfinance.info&quot;, &quot;asof&quot;: today}
+            mapped += 1
+        else:
+            failed.append(t)
+            cache[t] = {&quot;industry&quot;: None, &quot;src&quot;: &quot;yfinance.info&quot;, &quot;failed&quot;: today,
+                        &quot;note&quot;: f&quot;no industry from yfinance — retried after {MAP_RETRY_DAYS}d&quot;}
+        if i &lt; len(todo) - 1:
+            time.sleep(sleep)
+    return {&quot;attempted&quot;: len(todo), &quot;mapped&quot;: mapped, &quot;failed&quot;: failed}
+
+
+# ============================================================ I/O: the shared price-series cache
+def load_px_cache() -&gt; dict:
+    try:
+        return json.loads(PX_CACHE.read_text())
+    except Exception:
+        return {}
+
+
+def fetch_series(symbols: list[str], cache: dict, today: str, max_symbols: int) -&gt; tuple[dict, list]:
+    &quot;&quot;&quot;Day-keyed reuse: anything already fetched TODAY costs nothing. Chunked batch download.&quot;&quot;&quot;
+    need = [s for s in symbols if (cache.get(s) or {}).get(&quot;fetched&quot;) != today][:max_symbols]
+    if need:
+        import yfinance as yf
+        for i in range(0, len(need), 80):
+            chunk = need[i:i + 80]
+            try:
+                px = yf.download(chunk, period=&quot;9mo&quot;, progress=False, auto_adjust=True)[&quot;Close&quot;]
+            except Exception as e:
+                print(f&quot;[cohort_dislocation] price chunk failed ({type(e).__name__}) — &quot;
+                      f&quot;{len(chunk)} names fall back to any cached series&quot;)
+                continue
+            for s in chunk:
+                try:
+                    ser = (px[s] if hasattr(px, &quot;columns&quot;) and s in px.columns else px).dropna()
+                except Exception:
+                    continue
+                if len(ser) &gt;= 22:
+                    cache[s] = {&quot;dates&quot;: [d.date().isoformat() for d in ser.index],
+                                &quot;close&quot;: [round(float(v), 4) for v in ser],
+                                &quot;fetched&quot;: today}
+    unpriced = [s for s in symbols if s not in cache]
+    return cache, unpriced
+
+
+# ============================================================ the scan
+def scan(cohorts: dict[str, list[str]], bars: dict, meta: dict[str, dict], today: str,
+         state: dict | None = None) -&gt; tuple[list[dict], dict, dict]:
+    &quot;&quot;&quot;Pure over its inputs: cohorts + bars + meta -&gt; (fires, new_state, coverage).&quot;&quot;&quot;
+    state = dict(state or {})
+    bench = bars.get(BENCH)
+    if not bench:
+        raise RuntimeError(f&quot;{BENCH} series missing — every excess in this layer is measured &quot;
+                           f&quot;against it; refusing to scan (a cohort layer without its benchmark &quot;
+                           f&quot;reports beta as a theme)&quot;)
+    fires, evaluated, skipped = [], [], []
+    for cohort, members in sorted(cohorts.items()):
+        us = [t for t in members if is_us_symbol(t)]
+        dropped_intl = [t for t in members if t not in us]
+        ex21, ex63, unpriced = {}, {}, []
+        for t in us:
+            b = bars.get(t)
+            if not b:
+                unpriced.append(t)
+                continue
+            e21 = excess_pct(b, bench, 21)
+            if e21 is None:
+                unpriced.append(t)
+                continue
+            ex21[t] = e21
+            e63 = excess_pct(b, bench, 63)
+            if e63 is not None:
+                ex63[t] = e63
+        st = cohort_stats(ex21, ex63)
+        st.update({&quot;cohort&quot;: cohort, &quot;members_total&quot;: len(members), &quot;unpriced&quot;: sorted(unpriced),
+                   &quot;dropped_non_us&quot;: sorted(dropped_intl)})
+        verdict = evaluate(st)
+        row = {**st, **{f&quot;verdict_{k}&quot;: v for k, v in verdict.items()},
+               &quot;members_by_excess21&quot;: sorted(((t, round(v, 2)) for t, v in ex21.items()),
+                                             key=lambda x: x[1])}
+        if st[&quot;n&quot;] &lt; MIN_MEMBERS:
+            skipped.append({&quot;cohort&quot;: cohort, &quot;n&quot;: st[&quot;n&quot;], &quot;reason&quot;: verdict[&quot;reason&quot;]})
+            continue
+        evaluated.append(row)
+        if not verdict[&quot;fires&quot;]:
+            # COOLING-OFF, not an instant re-arm. A cohort de-rate oscillates around the bar for
+            # weeks; popping the state on the first quiet session re-armed the detector mid-episode
+            # and fragmented the recorded May selloff into five &quot;new&quot; fires. The cohort must sit
+            # BELOW the gate for QUIET_DAYS before it can fire as a new episode.
+            prior = state.get(cohort)
+            if prior:
+                cs = prior.get(&quot;clear_since&quot;)
+                if not cs:
+                    prior[&quot;clear_since&quot;] = today
+                else:
+                    try:
+                        cleared = (datetime.date.fromisoformat(today)
+                                   - datetime.date.fromisoformat(cs)).days
+                    except ValueError:
+                        cleared = 999
+                    if cleared &gt;= QUIET_DAYS:
+                        state.pop(cohort, None)
+            continue
+        # EPISODE DEDUP. A cohort de-rate is a multi-week episode, not a daily event: gating only
+        # on &quot;same severity&quot; let the recorded May 2026 vendor selloff emit SIX fires as the median
+        # oscillated across the HIGH boundary. Inside the quiet window a repeat fires ONLY if the
+        # median deepened materially (DEEPEN_PP) past the level already reported.
+        prior = state.get(cohort)
+        if prior:
+            try:
+                age = (datetime.date.fromisoformat(today)
+                       - datetime.date.fromisoformat(prior.get(&quot;fired&quot;, today))).days
+            except ValueError:
+                age = 999
+            pm, cm = prior.get(&quot;median21&quot;), st.get(&quot;median21&quot;)
+            deepened = (pm is not None and cm is not None and cm &lt;= pm - DEEPEN_PP)
+            if age &lt; QUIET_DAYS * 1.5 and not deepened:
+                row[&quot;suppressed_repeat&quot;] = True
+                continue
+        best = best_in_class(ex21, meta)
+        state[cohort] = {&quot;severity&quot;: verdict[&quot;severity&quot;], &quot;fired&quot;: today,
+                         &quot;median21&quot;: st.get(&quot;median21&quot;), &quot;clear_since&quot;: None}
+        fires.append({**row, &quot;best_in_class&quot;: best, &quot;severity&quot;: verdict[&quot;severity&quot;],
+                      &quot;legs&quot;: verdict[&quot;legs&quot;], &quot;skew&quot;: verdict[&quot;skew&quot;],
+                      &quot;court_question&quot;: court_question(cohort, best), &quot;fired&quot;: today})
+    # DUPLICATE-COHORT SUPPRESSION (caught by the first live run). An auto industry bucket can hold
+    # essentially the same names as a curated narrative cohort — on 2026-08-13 both fired on the
+    # identical five vendors, handing the court the same question twice under two names. The
+    # CURATED cohort wins: it is the precise, tape-audited one. The auto twin keeps its state entry
+    # (it did clear the gate, so it must not re-fire tomorrow) but emits nothing.
+    narrative_sets = {f[&quot;cohort&quot;]: {t for t, _ in f[&quot;members_by_excess21&quot;]}
+                      for f in fires if f[&quot;cohort&quot;].startswith(&quot;narrative:&quot;)}
+    kept = []
+    for f in fires:
+        s = {t for t, _ in f[&quot;members_by_excess21&quot;]}
+        dup = next((n for n, ns in narrative_sets.items()
+                    if s and n != f[&quot;cohort&quot;] and len(s &amp; ns) / len(s | ns) &gt;= 0.8), None)
+        if f[&quot;cohort&quot;].startswith(&quot;industry:&quot;) and dup:
+            f[&quot;suppressed_duplicate_of&quot;] = dup
+            for row in evaluated:
+                if row[&quot;cohort&quot;] == f[&quot;cohort&quot;]:
+                    row[&quot;suppressed_duplicate_of&quot;] = dup
+            continue
+        kept.append(f)
+    fires = kept
+
+    # REGIME GUARD (the beta-bleed doctrine in cohort form). Excess-vs-SPY already nets out a
+    # market-wide selloff, so many cohorts clearing the bar at once is not a market drop — it is a
+    # broad ROTATION out of a whole side of the tape. Either way it is not &quot;this theme de-rated&quot;,
+    # and the court must not be handed twenty independent-looking theme questions on one factor day.
+    clearing = sum(1 for r in evaluated
+                   if r.get(&quot;verdict_fires&quot;) and not r.get(&quot;suppressed_duplicate_of&quot;))
+    share = (clearing / len(evaluated)) if evaluated else 0.0
+    regime = len(evaluated) &gt;= 8 and share &gt; REGIME_SHARE
+    for f in fires:
+        f[&quot;regime_share&quot;] = round(share, 3)
+        f[&quot;regime_warning&quot;] = regime
+    coverage = {&quot;cohorts_evaluated&quot;: len(evaluated), &quot;cohorts_below_member_floor&quot;: skipped,
+                &quot;evaluated&quot;: evaluated, &quot;gate_clearing&quot;: clearing,
+                &quot;gate_clearing_share&quot;: round(share, 3), &quot;regime_warning&quot;: regime}
+    return fires, state, coverage
+
+
+# ============================================================ run
+def run(map_budget: int, max_symbols: int, dry_run: bool, min_mcap: float) -&gt; list[dict]:
+    today = datetime.date.today().isoformat()
+    ctx = load_sweep_context()
+    print(f&quot;[cohort_dislocation] sweep context: &quot;
+          + &quot;; &quot;.join(f&quot;{k}={v}&quot; for k, v in ctx[&quot;files&quot;].items()))
+
+    curated_blob = {}
+    try:
+        curated_blob = json.loads(COHORT_FILE.read_text())
+    except Exception as e:
+        print(f&quot;[cohort_dislocation] cohorts.json unreadable ({type(e).__name__}) — &quot;
+              f&quot;curated leg DISABLED this run (auto leg still runs)&quot;)
+    curated = parse_curated(curated_blob)
+
+    scr = screener_meta()
+    cache = load_map()
+
+    # MAPPING PRIORITY: names we can actually act on first — curated members, then the sweeps&#x27;
+    # own hits, then the ledger, then the largest unmapped caps. The budget is small on purpose,
+    # so what it spends on matters more than how much it spends.
+    prio: list[str] = []
+    for members in curated.values():
+        prio += [t for t in members if is_us_symbol(t)]
+    prio += sorted(t for t in ctx[&quot;seed_tickers&quot;] if is_us_symbol(t))
+    try:
+        prio += [str(r.get(&quot;ticker&quot;) or &quot;&quot;).upper()
+                 for r in json.loads(LEDGER.read_text()).get(&quot;names&quot;, [])
+                 if is_us_symbol(str(r.get(&quot;ticker&quot;) or &quot;&quot;).upper())]
+    except Exception:
+        pass
+    prio += [t for t, m in sorted(scr.items(), key=lambda kv: -(kv[1].get(&quot;mcap&quot;) or 0))
+             if (m.get(&quot;mcap&quot;) or 0) &gt;= min_mcap]
+    seen: set[str] = set()
+    prio = [t for t in prio if not (t in seen or seen.add(t))]
+
+    mstat = map_names(prio, cache, map_budget, today=today)
+    if mstat[&quot;attempted&quot;]:
+        save_map(cache)
+    mapped_ok = sum(1 for r in cache.values() if r.get(&quot;industry&quot;))
+    print(f&quot;[cohort_dislocation] industry map: {mapped_ok} mapped / {len(cache)} probed &quot;
+          f&quot;(+{mstat[&#x27;mapped&#x27;]} this run of {mstat[&#x27;attempted&#x27;]} attempted, &quot;
+          f&quot;{len(mstat[&#x27;failed&#x27;])} refused)&quot;)
+
+    # meta merges the mapper (industry, cash/debt) over the screener (mcap floor)
+    meta: dict[str, dict] = {}
+    for t, m in scr.items():
+        meta[t] = {&quot;mcap&quot;: m.get(&quot;mcap&quot;), &quot;sector&quot;: m.get(&quot;screener_sector&quot;),
+                   &quot;industry&quot;: None, &quot;src&quot;: &quot;screener&quot;}
+    for t, m in cache.items():
+        row = meta.setdefault(t, {})
+        row.update({&quot;industry&quot;: m.get(&quot;industry&quot;), &quot;sector&quot;: m.get(&quot;sector&quot;) or row.get(&quot;sector&quot;),
+                    &quot;cash&quot;: m.get(&quot;cash&quot;), &quot;debt&quot;: m.get(&quot;debt&quot;), &quot;src&quot;: &quot;yfinance.info&quot;})
+        if m.get(&quot;mcap&quot;):
+            row[&quot;mcap&quot;] = m[&quot;mcap&quot;]
+
+    # AUTO-LEG COVERAGE GATE (the &quot;industry:Biotechnology, n=4&quot; artifact from the first live runs).
+    # The mapper fills over days, so early on an auto cohort is not the industry — it is whichever
+    # handful of that industry&#x27;s names the budget happened to reach first, and a median over them is
+    # a median over an arbitrary sample. Auto cohorts therefore only FIRE once the map covers
+    # AUTO_MIN_COVERAGE of the liquid tape; until then they are built, reported and counted, but
+    # cannot emit. Curated cohorts are unaffected — their membership is explicit, not sampled.
+    liquid = [t for t, m in meta.items() if (m.get(&quot;mcap&quot;) or 0) &gt;= min_mcap]
+    mapped_liquid = [t for t in liquid if meta[t].get(&quot;industry&quot;)]
+    auto_coverage = (len(mapped_liquid) / len(liquid)) if liquid else 0.0
+    auto = auto_cohorts(meta, min_mcap)
+    auto_provisional = auto_coverage &lt; AUTO_MIN_COVERAGE
+    cohorts = {**curated, **({} if auto_provisional else auto)}
+    members_needed = sorted({t for v in cohorts.values() for t in v if is_us_symbol(t)} | {BENCH})
+
+    # DEGRADED-LOUD on mapping: curated members with no industry row are fine (membership is
+    # explicit) but auto-cohort candidates without one are INVISIBLE to this layer — count them.
+    unmapped_liquid = [t for t, m in meta.items()
+                       if not m.get(&quot;industry&quot;) and (m.get(&quot;mcap&quot;) or 0) &gt;= min_mcap]
+
+    px = load_px_cache()
+    px, unpriced = fetch_series(members_needed, px, today, max_symbols)
+    try:
+        PX_CACHE.write_text(json.dumps(px))
+    except Exception as e:
+        print(f&quot;[cohort_dislocation] px cache write failed ({type(e).__name__}) — &quot;
+              f&quot;next run will refetch&quot;)
+
+    try:
+        state = json.loads(STATE.read_text())
+    except Exception:
+        state = {}
+
+    fires, new_state, coverage = scan(cohorts, px, meta, today, state)
+
+    regime_ctx = (&quot;REGIME WARNING: {:.0%} of evaluated cohorts cleared the bar on this tape — that &quot;
+                  &quot;is a broad rotation, not a single-theme de-rate; treat every fire today as &quot;
+                  &quot;factor-driven until a cohort-specific cause is dated&quot;
+                  .format(coverage[&quot;gate_clearing_share&quot;])) if coverage[&quot;regime_warning&quot;] else &quot;&quot;
+    for f in fires:
+        print(fire_line(f[&quot;cohort&quot;], f, {&quot;legs&quot;: f[&quot;legs&quot;], &quot;severity&quot;: f[&quot;severity&quot;],
+                                         &quot;skew&quot;: f[&quot;skew&quot;]}, f[&quot;best_in_class&quot;], regime_ctx))
+        if f[&quot;best_in_class&quot;]:
+            print(member_fire_line(f[&quot;cohort&quot;], {&quot;severity&quot;: f[&quot;severity&quot;]}, f[&quot;best_in_class&quot;]))
+
+    # DILUTION DIAGNOSTIC: an auto industry bucket that holds a firing curated cohort but does not
+    # itself fire is a coarseness failure, not a quiet tape. Say so — this is exactly how the
+    # data-vendor de-rate hides behind the rallying exchanges.
+    dilution = []
+    fired_names = {t for f in fires for t, _ in f[&quot;members_by_excess21&quot;]}
+    for row in coverage[&quot;evaluated&quot;]:
+        if row[&quot;cohort&quot;].startswith(&quot;industry:&quot;) and not row[&quot;verdict_fires&quot;]:
+            overlap = fired_names &amp; {t for t, _ in row[&quot;members_by_excess21&quot;]}
+            if len(overlap) &gt;= 2:
+                dilution.append({&quot;industry_cohort&quot;: row[&quot;cohort&quot;], &quot;median21&quot;: row.get(&quot;median21&quot;),
+                                 &quot;overlap_with_firing_cohorts&quot;: sorted(overlap),
+                                 &quot;note&quot;: &quot;auto bucket is COARSER than the narrative pricing it — &quot;
+                                         &quot;the de-rate is inside this bucket but averaged away&quot;})
+
+    out = {&quot;asof&quot;: today, &quot;gates&quot;: {&quot;fire_median21_pp&quot;: FIRE_MEDIAN_21,
+                                    &quot;fire_median63_pp&quot;: FIRE_MEDIAN_63,
+                                    &quot;fire_breadth&quot;: FIRE_BREADTH, &quot;min_members&quot;: MIN_MEMBERS,
+                                    &quot;high_median21_pp&quot;: HIGH_MEDIAN_21, &quot;benchmark&quot;: BENCH},
+           &quot;sweep_context&quot;: {k: v for k, v in ctx[&quot;files&quot;].items()},
+           &quot;cohorts_total&quot;: len(cohorts), &quot;curated&quot;: len(curated),
+           &quot;auto_industry&quot;: len(cohorts) - len(curated),
+           &quot;auto_leg&quot;: {&quot;provisional&quot;: auto_provisional,
+                        &quot;coverage&quot;: round(auto_coverage, 3),
+                        &quot;coverage_gate&quot;: AUTO_MIN_COVERAGE,
+                        &quot;cohorts_built_but_withheld&quot;: sorted(auto) if auto_provisional else [],
+                        &quot;note&quot;: &quot;auto industry cohorts cannot fire until the mapper covers &quot;
+                                f&quot;{AUTO_MIN_COVERAGE:.0%} of the liquid tape — before that a &quot;
+                                &quot;cohort is an arbitrary sample of its industry, not the industry&quot;},
+           &quot;coverage&quot;: {&quot;members_needed&quot;: len(members_needed),
+                        &quot;priced&quot;: len(members_needed) - len(unpriced),
+                        &quot;unpriced&quot;: sorted(unpriced)[:80],
+                        &quot;unpriced_n&quot;: len(unpriced),
+                        &quot;industry_mapped&quot;: mapped_ok,
+                        &quot;industry_probed_incl_negative_cache&quot;: len(cache),
+                        &quot;unmapped_liquid_n&quot;: len(unmapped_liquid),
+                        &quot;unmapped_liquid_sample&quot;: sorted(unmapped_liquid)[:40],
+                        &quot;map_budget_used&quot;: mstat[&quot;attempted&quot;], &quot;map_failed&quot;: mstat[&quot;failed&quot;][:20],
+                        &quot;intl_names_seen_not_aggregated&quot;: len(ctx[&quot;intl_tickers&quot;])},
+           &quot;cohorts_evaluated&quot;: coverage[&quot;cohorts_evaluated&quot;],
+           &quot;below_member_floor&quot;: coverage[&quot;cohorts_below_member_floor&quot;][:40],
+           &quot;dilution_diagnostics&quot;: dilution,
+           &quot;fires&quot;: fires,
+           &quot;evaluated&quot;: sorted(coverage[&quot;evaluated&quot;], key=lambda r: (r.get(&quot;median21&quot;) or 0))[:60]}
+    if not dry_run:
+        OUT_JSON.write_text(json.dumps(out, indent=1))
+        STATE.write_text(json.dumps(new_state, indent=1))
+
+    if auto_provisional:
+        print(f&quot;AUTO LEG PROVISIONAL: industry map covers {auto_coverage:.1%} of the &quot;
+              f&quot;{len(liquid)} liquid names (gate {AUTO_MIN_COVERAGE:.0%}) — {len(auto)} auto &quot;
+              f&quot;cohorts built but WITHHELD from firing (a 4-name &#x27;industry&#x27; is an arbitrary &quot;
+              f&quot;sample, not a theme). Curated cohorts fire normally.&quot;)
+    print(f&quot;[cohort_dislocation] {today}: {len(cohorts)} cohorts &quot;
+          f&quot;({len(curated)} curated + {len(cohorts) - len(curated)} auto-industry), &quot;
+          f&quot;{coverage[&#x27;cohorts_evaluated&#x27;]} evaluated, {len(fires)} FIRED&quot;)
+    if unpriced:
+        print(f&quot;DEGRADED-LOUD: {len(members_needed) - len(unpriced)} of {len(members_needed)} &quot;
+              f&quot;cohort members priced; {len(unpriced)} DEGRADED — &quot;
+              f&quot;{&#x27;, &#x27;.join(sorted(unpriced)[:25])}{&#x27; ...&#x27; if len(unpriced) &gt; 25 else &#x27;&#x27;}&quot;)
+    if unmapped_liquid:
+        print(f&quot;DEGRADED-LOUD: {len(unmapped_liquid)} liquid names (&gt;= ${min_mcap/1e9:.1f}B) have NO &quot;
+              f&quot;industry row and are invisible to the auto leg — the map fills &quot;
+              f&quot;{map_budget}/run; {len(unmapped_liquid)//max(map_budget,1)+1} more runs to close&quot;)
+    for d in dilution:
+        print(f&quot;DILUTION: {d[&#x27;industry_cohort&#x27;]} median {d[&#x27;median21&#x27;]:+.1f}pp does NOT fire but &quot;
+              f&quot;contains {d[&#x27;overlap_with_firing_cohorts&#x27;]} from a firing cohort — coarse bucket&quot;)
+    return fires
+
+
+if __name__ == &quot;__main__&quot;:
+    ap = argparse.ArgumentParser()
+    ap.add_argument(&quot;--map-budget&quot;, type=int, default=120,
+                    help=&quot;max NEW yfinance .info lookups this run (rate budget)&quot;)
+    ap.add_argument(&quot;--max-symbols&quot;, type=int, default=600, help=&quot;max price series to fetch&quot;)
+    ap.add_argument(&quot;--min-mcap&quot;, type=float, default=AUTO_MIN_MCAP)
+    ap.add_argument(&quot;--dry-run&quot;, action=&quot;store_true&quot;)
+    a = ap.parse_args()
+    run(a.map_budget, a.max_symbols, a.dry_run, a.min_mcap)
+</pre></div></body></html>

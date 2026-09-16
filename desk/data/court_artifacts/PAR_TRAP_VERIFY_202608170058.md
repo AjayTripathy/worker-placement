@@ -1,0 +1,15 @@
+### PAR (PAR Technology — restaurant/retail POS + Punchh/Stuzo/Delaget SaaS, NYSE) — screen "growth troughed −22.3% (2024-06) → latest +43.8%, −70% off high" — **SCREEN-ARTIFACT**
+
+**KILL FACTS (the screen row, not the company)**
+- **The −22.3% trough never happened.** PAR reported Q2-2024 revenue **$78.2M vs $69.5M in Q2-2023 = +12.4% growth**, both continuing-ops (8-K ex-99.1, https://www.sec.gov/Archives/edgar/data/708821/000070882124000076/aex991earningsreleasexq220.htm — figures read via secondary rendering; SEC returns 403 to this fetcher). The screen divided recast Q2-2024 ($78.150M) by **as-reported** Q2-2023 ($100.544M, which still contained the Government segment). Corrected value: **+12.4%, not −22.3%.** Defect class: family-1 extension — *cross-filing basis mismatch across a discontinued-ops recast*. The Government segment (PGSC→Booz Allen, RRC→NexTech, $102M) was reclassified to discontinued ops in the quarter ended 6/30/2024 (https://www.businesswire.com/news/home/20240610850484/en/) — the "break" **is** the reclassification, and its date is the reclassification date.
+- **The +43.8% is stale and acquired.** It is Q2-2025/Q2-2024 (112.404/78.150). True latest is **Q2-2026 $133.4M vs $112.4M = +18.7%** (https://www.businesswire.com/news/home/20260806432665/en/). The Q2-2024 base excludes Stuzo (3/2024), most of TASK (4/2024) and all Delaget (12/31/2024); company-disclosed organic ARR growth was 15% of 22% total in Q3-2025. **No cause-reversal exists to trade.**
+- **Correction to the pack:** its XBRL block mixes recast/as-reported `Revenues` contexts and stops at 2025-06-30 — four quarters behind the 10-Q shipped with it. That block generated this row.
+
+**LIVE FACTS (residual name, judged on its own)**
+- Real: ARR $338.0M (+17%), 174.3k sites, adj EBITDA $14.3M (+158%), FY26 guide raised to $516–523M / $50–53M.
+- Not cheap once levered: 10-Q 2026-06-30 (https://www.sec.gov/Archives/edgar/data/708821/000070882126000103/) — notes $53.0M 1.50%'27 + $115.0M 1.00%'30 + $265.0M 4.00%'31 = $433.0M principal, cash $77.4M, 41,362,708 shares (8/4/26) → **EV ≈ $1.14B = 3.4x ARR, 22x adj EBITDA**. H1-26 OCF **−$9.4M**, capex+cap-software $6.2M → FCF ≈ −$15.6M; SBC $14.0M H1 ≈ 55% of the EBITDA addback. March-2026 refi took cash interest ~$5.2M → ~$12.5M/yr and set the '31 strike at **$19.02 = spot** (13.9M shares, +33.7%) while $33.1M went to buy 2.09M shares at ~$15.84. Goodwill $895.1M **exceeds** the $788M cap.
+- **Priced by whom:** covered (Goldman PT $40→$18, William Blair). Not an orphan → fair-carry rule does not apply.
+
+**RESOLVES ON:** 2026-11-05 Q3 print (UNCONFIRMED date) — TTM OCF positive with the 4.00% coupon fully running (first payment 2026-09-15); FY26 10-K (~Feb-2027) goodwill test, cap-below-goodwill is a triggering indicator; price ≤$12 (converts far OTM, ~2.5x ARR).
+
+**Disposition:** AVOID/DECLINE for this lane + reopen-condition — reopen only on two consecutive quarters of positive FCF, or ≤$12. File the recast-join defect into the screen guard so no discontinued-ops divestor can print a fake trough again.

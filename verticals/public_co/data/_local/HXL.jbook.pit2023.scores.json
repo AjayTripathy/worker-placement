@@ -1,0 +1,144 @@
+{
+  "ticker": "HXL",
+  "cutoff": "2023-01-15",
+  "scores": [
+    {
+      "claim_id": "c1",
+      "claim_text": "F-35 is Hexcel's largest S&D program, <25% of S&D revenues.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook returned 2 matched PEs for 'F-35' (F-35 C2D2 PE 0604840F; F-35 Squadrons PE 0207142F) but BOTH yielded NOT_FOUND_IN_TIMERANGE for the 2023 cutoff — the corpus is FY2026 R-2/P-40 exhibits, which do not contain pre-cutoff historical funding rows.",
+        "Contractor-level lookup 'Lockheed Martin' returned SDA Transport Layer programs (Tranche 3 UNFUNDED_TWO_PLUS_YEARS, T0-2 FUNDED_SHRINKING, T3 Tracking Layer FUNDED_STEADY) — orthogonal to F-35 and not informative for Hexcel's F-35 exposure.",
+        "usaspending.query_dod_contracts shows 83 awards / $8.6M total to Hexcel Corp / Hexcel Corporation / ARC Technologies LLC (a Hexcel sub) — confirms Hexcel is a real DoD vendor, but contracts are sub-tier (radar camouflage units, DLA fiber-reinforcing material, EMERGENT IV BAA proposals) and do NOT identify a Hexcel F-35 contract line."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='F-35', cutoff_date='2023-01-15')",
+      "M_value": "NOT_FOUND_IN_TIMERANGE (primary_match: F-35 C2D2 PE 0604840F, status_declared=null)",
+      "interpretation": "Hexcel is a Tier-2 composites supplier; it sells materials INTO Lockheed Martin's F-35 supply chain rather than holding a PE-level prime contract. The J-Book corpus does not contain pre-2023 funding rows, so the FY2021-base 'largest program' claim cannot be verified or falsified from the FY26 corpus. The corpus-coverage gap rule applies (heuristic #1: NOT_FOUND/NOT_FOUND_IN_TIMERANGE → UNVERIFIABLE; #7: do not penalize NOT_FOUND). Note: at 2023-01-15 cutoff, F-35 was a steady-state production program with multi-year LRIP/Lot procurement; framework would have read the claim as benign."
+    },
+    {
+      "claim_id": "c2",
+      "claim_text": "Bell-Boeing V-22 Osprey is one of Hexcel's two largest blade programs.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook returned NOT_FOUND for both 'V-22 Osprey' and 'V-22' — corpus does not cover V-22 procurement P-40 lines.",
+        "Heuristic #7 explicitly states NOT_FOUND is not a red flag; v1 corpus focuses on RDT&E/Procurement PEs not legacy rotorcraft.",
+        "Materially, V-22 procurement was already in tail-down mode by 2023 cutoff (multi-year contract MV-22B Lot 17 had been awarded); this is platform-level information, not a Hexcel-specific divergence."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='V-22 Osprey', cutoff_date='2023-01-15')",
+      "M_value": "NOT_FOUND",
+      "interpretation": "Corpus coverage gap, not an underdelivery signal. Hexcel sells blade materials into the V-22 supply chain via Bell/Boeing; this is a sub-tier exposure that is not directly J-Book-mappable to a single PE."
+    },
+    {
+      "claim_id": "c3",
+      "claim_text": "UH-60 Black Hawk wide-chord blade program is one of Hexcel's two largest blade programs.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook returned NOT_FOUND for 'UH-60 Black Hawk'.",
+        "UH-60M procurement is in Army Aircraft Procurement (P-40 line) which is not in the v1 corpus.",
+        "Hexcel is again at the materials layer, supplying Sikorsky (LMT subsidiary)."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='UH-60 Black Hawk', cutoff_date='2023-01-15')",
+      "M_value": "NOT_FOUND",
+      "interpretation": "Coverage gap rule applies (heuristic #7). UH-60M was on a multi-year-X contract (MYP IX, FY22-26) signed 2022; rate was steady to declining at the time but the claim is sub-tier."
+    },
+    {
+      "claim_id": "c4",
+      "claim_text": "CH-53K King Stallion is a future growth program for Hexcel (composite blades + new helicopter programs in prototype).",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook returned NOT_FOUND for 'CH-53K'.",
+        "CH-53K is in Navy Aircraft Procurement (P-40) plus a small remaining RDT&E tail; not in v1 corpus.",
+        "Forward language ('future growth', 'prototypes') is exactly the J-Book-grounded pipeline-language pattern the rubric flags, but corpus cannot adjudicate it."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='CH-53K', cutoff_date='2023-01-15')",
+      "M_value": "NOT_FOUND",
+      "interpretation": "If corpus did cover Navy P-40 lines, this would be a primary verification target because the company is asserting forward growth dependence. Recommend extending programs.json. Until then, UNVERIFIABLE per heuristic #7. Note: CH-53K Lot 5 procurement was on track at the 2023-01-15 cutoff, so even with coverage the score would likely have been PASS or MODERATE at worst (price/performance issues, not funding)."
+    },
+    {
+      "claim_id": "c5",
+      "claim_text": "Hexcel is qualified to supply Airbus A400M military transport.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook returned NOT_FOUND — A400M is a European OCCAR program, outside DoD J-Book scope by design.",
+        "Heuristic #7 explicitly notes corpus does not cover every J-Book line worldwide and that European/foreign programs would be expected misses."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='A400M', cutoff_date='2023-01-15')",
+      "M_value": "NOT_FOUND",
+      "interpretation": "Out-of-scope for Pentagon J-Book by definition. Not a red flag. The claim is also a qualification statement, not a forward-revenue assertion, so materiality is low (heuristic #2)."
+    },
+    {
+      "claim_id": "c6",
+      "claim_text": "Government-funded space launch (solid rocket booster cases, fairings, payload doors) and satellite buses/solar arrays are continuing demand sources; sales depend on what is funded.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook matched 'Space Launch' to 'National Security Space Launch Program' PE 1206853SF (Space Force) — but with NOT_FOUND_IN_TIMERANGE for 2023 cutoff (corpus is FY26 only).",
+        "The PE that DID match has no UNFUNDED status declared (status_declared=null), no replacement_program, no earmark flag. There is no negative forward signal.",
+        "Solid Rocket Motor query returned NOT_FOUND.",
+        "Importantly, Hexcel itself flags 'sales are dependent upon those that are funded and the extent of the funding' — i.e., the filing PRE-DISCLOSES the funding-dependency risk. This is the opposite of the J-Book divergence pattern."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Space Launch', cutoff_date='2023-01-15')",
+      "M_value": "NOT_FOUND_IN_TIMERANGE (matched PE 1206853SF NSSL, no negative status)",
+      "interpretation": "Hexcel's space narrative is generic and self-hedged; there is no specific PE-revenue tied to a vanishing line. The company already disclosed that 2021 Space sales DECLINED 3.0%. Pre-disclosure of weakness defeats the divergence-pattern thesis. PASS per heuristic #1 (no negative J-Book signal) and heuristic #2 (low materiality — language is qualitative)."
+    },
+    {
+      "claim_id": "c7",
+      "claim_text": "No S&D program other than F-35 is >10% of S&D revenue; portfolio is diversified across many named platforms.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook contractor lookup for 'Hexcel' returned NOT_FOUND — corpus does not index Hexcel as a primary contractor on any seeded PE (it is in fact a Tier-2/3 supplier).",
+        "usaspending corroborates Tier-2 status: $8.6M total DoD obligations across 83 awards is trivial vs Hexcel's FY2021 ~$1.3B revenue; the company is NOT primarily a federal-contract revenue entity, it sells through Airbus/Boeing/Lockheed/Sikorsky/Bell.",
+        "The 'no program >10% (ex-F-35)' diversification claim is the OPPOSITE of the canonical concentration pattern this cohort targets."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(contractor_name='Hexcel', cutoff_date='2023-01-15')",
+      "M_value": "NOT_FOUND (zero primary-contractor matches)",
+      "interpretation": "Diversification claim is structurally consistent with Hexcel's business model (materials supplier across many platforms). The J-Book divergence pattern targets small-caps with concentrated PE exposure — Hexcel is the inverse case. PASS."
+    },
+    {
+      "claim_id": "c8",
+      "claim_text": "Top-2 customers (Airbus and Boeing) and their subcontractors are 49% of 2021 net sales (down from 64% in 2019); Airbus 33% (29% CA + 4% S&D), Boeing 16% (12% CA + 4% S&D).",
+      "severity": "PASS",
+      "supports": [
+        "edgar_fts.query_fulltext(search_term='Hexcel', cik=0000936468) → 0 hits in Lockheed Martin filings since 2018.",
+        "edgar_fts.query_fulltext(search_term='Hexcel', cik=0000012927) → 0 hits in Boeing filings since 2018.",
+        "Counterparty non-mention is EXPECTED — neither Boeing nor Lockheed individually discloses Hexcel as a material supplier, which is consistent with Tier-2 status. This is a NULL counterparty signal, not a divergence.",
+        "The customer-concentration trend (64%→52%→49%) is moving in the correct direction (diversifying)."
+      ],
+      "M_check": "edgar_fts.query_fulltext (Boeing CIK 12927 and Lockheed CIK 936468)",
+      "M_value": "0 hits each — Tier-2 supplier invisibility, expected",
+      "interpretation": "Counterparty-disclosure null is structurally expected for a sub-tier materials supplier; not informative for the J-Book divergence pattern. Concentration is also DECLINING, which weakens any 'top-customer dependency' thesis. PASS."
+    },
+    {
+      "claim_id": "c9",
+      "claim_text": "Hexcel operates manufacturing facilities in Americas, Asia Pacific, Europe, India, Africa.",
+      "severity": "PASS",
+      "supports": [
+        "epa_frs.query_facilities(facility_name='Hexcel', state_abbr='UT') confirmed 7 distinct Hexcel facility registry IDs in Utah alone (Salt Lake Operations 6800 W 5400 S West Valley City; South Jordan 10913 S River Front Pkwy; Honycomb Building 5400 S 7000 W).",
+        "The Salt Lake Operations facility (registry 110020094351) matches the company's known carbon-fiber production footprint."
+      ],
+      "M_check": "epa_frs.query_facilities(facility_name='Hexcel', state_abbr='UT')",
+      "M_value": "n_facilities=7 in Utah; corroborates US manufacturing presence",
+      "interpretation": "Independent regulatory corroboration of the facility claim. PASS."
+    },
+    {
+      "claim_id": "c10",
+      "claim_text": "Hexcel increased PAN and carbon-fiber capacity to serve aerospace demand; a new production line can take up to a year to qualify.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "EPA FRS facility-registry data corroborates a stable Utah manufacturing footprint but does not adjudicate capacity TIMING claims.",
+        "No M-source in catalog directly verifies 'capacity expansion in recent years' for a specific product line."
+      ],
+      "M_check": "epa_frs.query_facilities (indirect)",
+      "M_value": "facilities confirmed; capacity-expansion timing not addressable",
+      "interpretation": "Operational claim outside the J-Book divergence frame; not verifiable from available M-sources. UNVERIFIABLE."
+    }
+  ],
+  "summary": {
+    "n_claims": 10,
+    "n_queries_executed": 13,
+    "severity_counts": {"PASS": 4, "MODERATE_UNDERDELIVERY": 0, "SEVERE_UNDERDELIVERY": 0, "RED_FLAG_NEGATIVE": 0, "UNVERIFIABLE": 6},
+    "jbook_grounded_claims": 7,
+    "jbook_fired_with_match": 2,
+    "jbook_not_found": 5,
+    "framework_diagnosis": "HEXCEL IS A NEGATIVE CONTROL FOR THE J-BOOK DIVERGENCE PATTERN. The canonical YSS/IONQ pattern requires (a) small-cap with (b) concentrated revenue from (c) a named Program Element that (d) the J-Book has zeroed. Hexcel violates all four prongs: it is mid-cap ~$1.3B revenue, top-program concentration is bounded (<25% of S&D = <8% of total), it names platforms (F-35, V-22, UH-60, CH-53K) NOT Program Elements, and customer concentration is DECLINING. The framework correctly does NOT fire any severity flags. The 5 NOT_FOUND results reflect (i) corpus coverage gaps for legacy rotorcraft P-40 lines (V-22, UH-60, CH-53K) and (ii) out-of-scope European programs (A400M). The 2 NOT_FOUND_IN_TIMERANGE results (F-35, NSSL) reflect FY26-only corpus vs 2023 cutoff. CONCLUSION: framework would not have generated a short signal on HXL at 2023-01-15, which is appropriate — Hexcel's risks (Boeing 787 production cuts, COVID-19 widebody hangover, wind-energy attrition) are commercial-aerospace + industrial, not Pentagon-program divergence."
+  }
+}

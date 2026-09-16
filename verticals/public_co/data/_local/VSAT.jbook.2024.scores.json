@@ -1,0 +1,151 @@
+{
+  "ticker": "VSAT",
+  "cutoff": "2024-09-01",
+  "filing": "0000950170-24-066031_10-K.txt",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Government systems = $1.36B FY24 (31.8% of revenue), DoD as primary customer, segment marketed as forward growth pillar.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending.query_dod_contracts(recipient_name='Viasat') -> 592 awards, $1.18B obligated 2020-2024-09 — confirms past DoD revenue at the scale claimed",
+        "pentagon_jbook contractor lookup for 'Viasat'/'Inmarsat' returned NOT_FOUND — but this is a CORPUS COVERAGE GAP (primary_contractors arrays are unpopulated for most SATCOM PEs; not a substantive disconfirmation)"
+      ],
+      "M_check": "usaspending.query_dod_contracts",
+      "M_value": "n_awards=592, total_amount=$1,180,278,879",
+      "interpretation": "The base claim (Viasat is a material DoD contractor through FY2024) is confirmed by USAspending. Whether the FORWARD government systems pipeline holds depends on the specific program-of-record exposures scored in C2-C9 below. The segment-level concentration claim by itself passes."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Protected Tactical Service (PTS) field-demo participation; forward positioning on PTS / PTES production program of record.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook PE 1206761SF (Protected Tactical Service) -> FUNDED_STEADY at $210.7M latest funded year",
+        "pentagon_jbook PE 1206760SF (Protected Tactical Enterprise Service) -> FUNDED_STEADY at $70.3M",
+        "usaspending confirms $45.3M PTS field demo award FA880816C0005 to Viasat"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding (pe=1206761SF, 1206760SF)",
+      "M_value": "PTS FUNDED_STEADY $210.7M; PTES FUNDED_STEADY $70.3M",
+      "interpretation": "The Pentagon J-Book at cutoff shows the named PTS/PTES programs are funded and steady. Viasat's forward narrative about positioning for tactical SATCOM follow-on is structurally supported by the budget — no J-Book divergence. Note that Viasat is not the recorded prime on the PTS PE production line (PTS production prime is widely reported as Boeing / Northrop), but the PTS ECOSYSTEM continues to fund the terminal/modem subcontractor opportunity Viasat has historically been awarded under."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Inmarsat Government provides L-band narrowband DoD SATCOM (L-TAC, LACE); forward narrative positions narrowband as material going forward.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook PE 1203109SF (Narrowband Satellite Communications) -> FUNDED_STEADY at $160.4M",
+        "usaspending: Inmarsat Government 652 DoD awards, $532M obligated 2020-2024-09 with marquee CONUS L-band ($226M) and Space Segment NA/SA ($70.6M) line items"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding (pe=1203109SF)",
+      "M_value": "Narrowband SATCOM FUNDED_STEADY $160.4M",
+      "interpretation": "Both legs check out: the L-band/narrowband Pentagon PE is funded and steady, and USAspending confirms Inmarsat received the very awards (CONUS L-band, Space Segment NA/SA) that the company's narrowband narrative relies on. No divergence."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Forward positioning on WGS and Commercial SATCOM ecosystem (multi-band terminals).",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook PE 1206433SF (Wideband Global SATCOM) -> FUNDED_STEADY $34.4M",
+        "pentagon_jbook PE 1206445SF (Commercial SATCOM / COMSATCOM Integration) -> FUNDED_STEADY $69.0M"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding (pe=1206445SF, 1206433SF)",
+      "M_value": "WGS FUNDED_STEADY $34.4M; COMSATCOM FUNDED_STEADY $69.0M",
+      "interpretation": "Both WGS sustainment funding and the COMSATCOM integration PE are steady at cutoff. Viasat's COMSATCOM-leasing and multi-band terminal forward narrative is consistent with budget direction. The WGS line is small (sustainment-only after constellation completion) — interpret as PASS but note WGS is a sustainment tail, not a growth driver."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "MIDS-JTRS / Link-16 terminal prime work continues (Navy IDIQ N0003920F0291 $58.4M; N0003918F1373 $50.4M); forward terminal pipeline persists post-TDL divestiture.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending confirms MIDS JTRS terminal awards >$100M to Viasat through cutoff",
+        "pentagon_jbook PE 0604281F (Tactical Data Networks Enterprise) -> FUNDED_STEADY at the J-Book line that funds MIDS terminal modernization"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding + usaspending cross-check",
+      "M_value": "Tactical Data Networks Enterprise FUNDED_STEADY",
+      "interpretation": "MIDS JTRS terminal IDIQ is real and the funding PE is steady. Forward terminal pipeline narrative passes."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Link-16 TDL Business sold to L3Harris ($1.96B) in Jan 2023 — removes Link-16 platform-of-record from continuing operations.",
+      "severity": "PASS",
+      "supports": [
+        "edgar_fts: L3Harris (CIK 0000202058) own SEC filings contain 8 hits on 'Link-16', including an 8-K dated 2023-01-03 (exhibit991viasat_acqxclose.htm) and the FY2022 10-K (filed 2023-02-24) — full counterparty corroboration",
+        "usaspending shows L3Harris with thousands of DoD awards continuing — Link-16 revenue moved to L3Harris, not lost"
+      ],
+      "M_check": "edgar_fts.query_fulltext (cik=0000202058, search_term='Link-16')",
+      "M_value": "8 hits including 2023-01-03 closing 8-K",
+      "interpretation": "Counterparty disclosure fully confirms the divestiture. No discrepancy."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "BFT2 ($136.2M) and AMSS III ($476.5M) DISA program-of-record IDIQs underpin forward government mobile broadband revenue.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending verifies HC108418C0002 (BFT2) at $136.2M and HC101318C0001 (AMSS III) at $476.5M to Viasat Inc.",
+        "These DISA-managed IDIQs feed the COMSATCOM PE (1206445SF) which is FUNDED_STEADY"
+      ],
+      "M_check": "usaspending.query_dod_contracts + pentagon_jbook (COMSATCOM)",
+      "M_value": "BFT2 $136M + AMSS III $476M; COMSATCOM PE FUNDED_STEADY",
+      "interpretation": "Both flagship DISA IDIQs are confirmed and the funding PE that backs the commercial-augmentation revenue is steady. No J-Book divergence."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Forward strategy depends on stable/growing US defense space-connectivity spending.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook PE 1206431SF (Advanced EHF MILSATCOM) -> FUNDED_STEADY (sustainment $3.9M)",
+        "pentagon_jbook PE 1206432SF (Polar MILSATCOM) -> FUNDED_STEADY $74.7M",
+        "pentagon_jbook PE 1206855SF (Evolved Strategic SATCOM) -> FUNDED_STEADY $473.6M (large protected-SATCOM successor program)"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding (multiple SATCOM PEs)",
+      "M_value": "AEHF FUNDED_STEADY $3.9M; Polar FUNDED_STEADY $74.7M; ESS FUNDED_STEADY $473.6M",
+      "interpretation": "The macro DoD SATCOM PE basket (AEHF sustainment, Polar MILSATCOM, Evolved Strategic SATCOM) is all funded and steady at cutoff. ESS in particular ($473.6M FUNDED_STEADY) is the protected-SATCOM growth budget that the entire wideband-protected ecosystem (including PTS / PTES) feeds into. Forward DoD SATCOM funding direction supports Viasat's narrative."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "Small-satellite work positions Viasat for a 'tactical space layer' — SDA proliferated-LEO exposure (Tracking/Transport Layer).",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook 'Tranche 3 Transport Layer' (PE 1206410SF) -> NOT_FOUND_IN_TIMERANGE at 2024-09-01 cutoff (the FY27 J-Book status of UNFUNDED_TWO_PLUS_YEARS is post-cutoff information and cannot be used)",
+        "pentagon_jbook 'SDA Transport Layer Tranches 0-2' -> NOT_FOUND_IN_TIMERANGE at cutoff",
+        "Per heuristic 7: NOT_FOUND ≠ red flag; corpus does not have funding-year rows pre-cutoff for SDA Transport Layer PEs"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding (program_name='Tranche 3 Transport Layer')",
+      "M_value": "NOT_FOUND_IN_TIMERANGE for cutoff 2024-09-01",
+      "interpretation": "The corpus is sourced from FY 2026/2027 J-Books, so it cannot answer the 2024-09-01 cutoff status for SDA Transport Layer programs. This is a CORPUS COVERAGE GAP at this cutoff — UNVERIFIABLE per heuristic 7. The Viasat 'tactical space layer' claim is also generic / aspirational (no PE named in the 10-K) so we cannot tie it to a specific J-Book line; cannot test."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "Patent portfolio + IR&D underpin proprietary tech; demonstrated by Acacia/Cisco $99.9M FY24 settlement.",
+      "severity": "PASS",
+      "supports": [
+        "uspto_odp.query_assignee('Viasat') -> 705 granted patents at cutoff — confirms a substantial portfolio backing the IP claims",
+        "Acacia/Cisco settlement is in the 10-K text itself (audit trail to court judgment)"
+      ],
+      "M_check": "uspto_odp.query_assignee",
+      "M_value": "n_granted=705",
+      "interpretation": "Patent existence is verified at a scale consistent with a 38-year-old SATCOM engineering company. Non-J-Book control claim passes."
+    },
+    {
+      "claim_id": "C11",
+      "claim_text": "L3Harris counterparty disclosure of Link-16 TDL acquisition.",
+      "severity": "PASS",
+      "supports": [
+        "edgar_fts shows 8 hits in L3Harris filings for 'Link-16', including the Jan-2023 acquisition close 8-K and the FY2022 10-K"
+      ],
+      "M_check": "edgar_fts.query_fulltext",
+      "M_value": "total_hits=8 in CIK 0000202058 pre-cutoff",
+      "interpretation": "Full bilateral disclosure confirmed; non-J-Book control claim passes."
+    }
+  ],
+  "summary": {
+    "n_claims": 11,
+    "n_queries": 23,
+    "severity_counts": {"PASS": 10, "MODERATE_UNDERDELIVERY": 0, "SEVERE_UNDERDELIVERY": 0, "RED_FLAG_NEGATIVE": 0, "UNVERIFIABLE": 1},
+    "jbook_grounded_claims": 8,
+    "jbook_grounded_claim_ids": ["C1", "C2", "C3", "C4", "C5", "C7", "C8", "C9"],
+    "pentagon_jbook_fired_on": 7,
+    "pentagon_jbook_fired_on_claim_ids": ["C1", "C2", "C3", "C4", "C5", "C7", "C8"],
+    "notes": "All named DoD SATCOM PEs that VSAT's forward narrative ties to (PTS 1206761SF, PTES 1206760SF, Narrowband 1203109SF, COMSATCOM 1206445SF, WGS 1206433SF, Tactical Data Networks Enterprise 0604281F, AEHF 1206431SF, Polar 1206432SF, Evolved Strategic SATCOM 1206855SF) are FUNDED_STEADY at the 2024-09-01 cutoff. USAspending separately confirms 592 Viasat + 652 Inmarsat Government DoD awards (>$1.7B combined) with marquee program names matching the 10-K narrative (PTS field demo, MIDS-JTRS, BFT2, AMSS III, CONUS L-band, MUOS-adjacent Space Segment NA/SA). NO J-Book divergence pattern detected at this cutoff. The Signal OS J-Book primary verifier does NOT fire a negative signal on VSAT at 2024-09-01 — VSAT's forward government SATCOM pipeline is structurally supported by the Pentagon's budget direction. Any post-cutoff distress in VSAT's equity would have to come from non-J-Book causes (commercial broadband / ViaSat-3 anomaly / Inmarsat integration debt service / consumer-broadband competitive pressure) — those are out-of-scope for this cohort. C9 (SDA tactical space layer) is UNVERIFIABLE due to corpus coverage gap pre-cutoff."
+  }
+}

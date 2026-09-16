@@ -1,0 +1,57 @@
+PACK: acknowledged (tape 209.40 / dd52 −14.5% / hi26w 200.6 / BOOK 190sh). Superseded: pack ENTITY/XBRL empty (Danish issuer, no CIK) — I substituted the issuer's own H1-2025 PDF and the FY2025 results wire, which are the audited primaries red never pulled. IBKR quote tool not exercised (COVERAGE GAP, same as red); CPH close 209.40 accepted.
+
+PRINT PROXIMITY: NONE — H1 print landed 21-Aug-2026; next scheduled report Q3, >5 trading days out.
+
+PRIZE-TABLE MANDATE: N/A — commercial vaccine manufacturer, DKK 6.2bn of 2025 revenue, not a pre-revenue project developer.
+
+## BLUE BENCH — BAVA.CO — RED CASE: PARTIALLY OVERTURNED
+
+**1. "H2 margin collapse dressed as a raise" (red's STRONGEST KILL) | check: FY2025 actuals vs H1-2025 report | OVERTURNED — seasonality artifact.** FY25 revenue 6,244; EBITDA incl. other operating income 2,542 (41%), of which DKK 810m was the PRV sale ⇒ **EBITDA before special items 1,732 (27.7%)**. H1-2025 EBITDA was 961 on 2,998 (32%) ⇒ **H2-2025 implied = 771 on 3,246 = 23.8%**. Red's H2-2026 implied is **23.8%**. Identical. BAVA's H2 always carries the R&D/launch/depreciation load and the TH seasonal trough. Worse for red: FY24 EBITDA 1,603, FY25 1,732, FY26 guided 1,710 — **red's own base of 1.40bn sits below all three actuals.** The mid-cycle 1.5–1.6bn the brief capitalises is a *haircut* to delivered earnings, not an extrapolation. Red annualised a seasonal half — the exact sin it convicted the brief of in finding 2. ([H1-2025 PDF](https://www.bavarian-nordic.com/media/372525/2025-q2-en.pdf); [Annual Report 2025](https://www.bavarian-nordic.com/investor/news/news.aspx?news=7455))
+
+**2. "Revenue declining ~−9%" | arithmetic | SUSTAINED as fact, REDUCED as kill.** 6,244→5,700 = −8.7%. But the decline is 100% Public Preparedness lumpiness (PP 3,105→~2,500) while Travel Health grew 2,963→3,000 guided. Guided **EBITDA is flat** (1,732→1,710) on 9% less revenue — margin *expansion*. A tree capitalising EBITDA is indifferent to a revenue-mix decline. Tag: CONSENSUS (in every print write-up), not DATA-novel.
+
+**3. "Landed exactly on consensus ⇒ no edge, FATAL" | check: guidance path + tape | OVERTURNED.** BAVA's **initial FY26 guide (Mar-2026) was DKK 5,000–5,200 rev / ~25% margin ⇒ ~1,275m EBITDA**. Today's 5,700/30% = 1,710m is a **+34% guided-EBITDA upgrade in five months, in two steps**. A pre-print consensus of 5,707 is irreconcilable with a **+9.1% print-day move**; red's "consensus" is the company's post-wire refresh — circular. Per §DIVERGENCE-NOT-COVERAGE: red counted analysts and never put the street's FY27 EBITDA beside ours with a named mechanism. No edge-kill established. Tag CONSENSUS: **REJECTED.**
+
+**4. "DKK 250 is a revealed ceiling, not a floor" | primary wire | SUSTAINED on fact, REDUCED on inference.** 233→250 "best and final" confirmed. But the offer failed *because holders refused to tender* — 250 is simultaneously a bidder ceiling and a **revealed holder floor**, which is what the brief's "reservation-price floor" plainly means; red refuted a reading the brief didn't make. Legitimate residue: 0.30 on a ≥250 re-offer with no new bidder is too high → **cut to 0.22**. (Red also missed that the Danish lapse-period re-bid bar has long since run — Innosera is free to re-approach; PLAUSIBLE, unverified.) KILL-CLASS NOVEL: **upheld** — this is red's one genuinely new contribution.
+
+**5. 9–10x double-counts control | REDUCED.** Consistency point is fair, but 8x is too punitive for 61% GM / 18.2% ROIC. Settle **8.5x**.
+
+**6. Travel Health = competitor-outage windfall | SUSTAINED, but self-defeating.** Red's own evidence is that the street models the H2 reversal ⇒ priced ⇒ not a kill. Counter-evidence on conservatism: the Aug-2025 TH guide of 2,750 was **beaten by 7.7% (2,963 actual)**. Apply that pattern and FY26 TH ≈ 3,230, H2 TH ≈ 1,490 not 1,258.
+
+**7. Correlated policy tails | REDUCED — channel confusion (§policy-channel≠anchor).** ACIP/MMWR governs *commercial coverage* (Vimkunya, RabAvert). The unsecured ~1,500m of 2027 preparedness is **BARDA/ASPR and EU-HERA stockpile procurement** — a contracting channel ACIP does not touch. Two of three legs de-correlate. Bear 0.25→**0.28**, not 0.30.
+
+**8. Cash spoken for; H1 OCF −401m | SUSTAINED.** Confirmed severe: H1-2025 OCF was **+883m**; a −1,284m YoY swing. Red's post-buyback 1.55bn / 72.1M-share reconciliation is internally consistent (no double-count remains). Keep as the live kill-trigger.
+
+**9. Tape kills the add | SUSTAINED as no-add, OVERTURNED as a kill.** The brief claimed no dislocation. Note the tape *also* says 209.4 is 16% below a price a PE consortium bid nine months ago.
+
+**NEW FINDINGS RED MISSED:**
+- **(BLUE) The "800m secured for 2027" is a calendar artifact, not a demand cliff.** The Aug-2025 report quantified secured revenue only for the *then-current* year ("secured approximately DKK 3,100 million … in 2025") and gave no 2026 figure beyond a USD 143.6m option — yet 2026 PP now stands at ~2,500m with 2,300m secured. The T+1 book is always thin in August and fills. CONFIRMED from primary. This is the strongest single rebuttal to red's 2027 bridge, and red built its bear branch on it.
+- **(BLUE) Board-revealed FV.** DKK 1.25bn of buybacks authorised with **shares cancelled**, months after the board rejected 250. On red's own 184 FV that is deliberate value destruction by a board that just ran an LBO defence — implausible; more likely red's FV is low.
+- **(RED-SIDE, missed) H2-2026 TH guide 1,258 vs H2-2025 actual 1,577 (−20%)** — the guided TH reversal is steeper than red argued.
+
+**NET POSITION AFTER BOTH BENCHES:** Blue-ratified tree (72.1M shares, net cash 1.55bn): bear 0.28 → 138 (FY27 EBITDA 1.2bn @7x) · base 0.50 → 1.6bn @8.5x = **210** · deal 0.22 @250. **pw FV ≈ 199.** Spot 209.4 is ~5% *above* FV — FAIR-to-modestly-rich, not the 14% overvaluation red claimed, and not cheap. **HOLD the 190sh at current size; NO-ADD confirmed** (spot above band top and above pw FV; add-gate #3 firing is necessary, not sufficient). Rungs derived, **nothing staged** per the 2026-08-21 principal amendment: first trim **233** (the pre-raise offer level, ~1.17× FV); **260 rung SURVIVES** and red's finding 4 strengthens it. Kill-triggers stay tax-blind: Q3 OCF not ≥ +600m, 2027 secured PP still <1,500m at the Q3 print, or a named-price re-offer rumour. **Kills after audit: 1 novel (F4, reduced to a sizing cut) / 2 consensus (F2, F6); zero FATAL survives.** Red attacked the easiest leg — an arithmetic residual it never seasonality-checked — and its one strong leg (F4) it over-read.
+
+**Conviction: 7.5/10.** The H2-margin overturn and the FY24/25/26 EBITDA series are hard primary arithmetic; the residual uncertainty is the 2027 PP book, genuinely unknowable pre-Q3.
+
+## DETECTORS CONSULTED
+- clinicaltrials_lookup — NOT-FIRED (no load-bearing pipeline claim; value is in marketed products).
+- common_control_merger_accounting — NOT-FIRED (no common-control absorption).
+- competitor_trial_omission — NOT-FIRED (no S-1; listed commercial issuer).
+- lockup_expiration_calendar — NOT-FIRED (inverse condition: shares being cancelled, no follow-on).
+- pe_dividend_recap_pre_ipo — NOT-FIRED (PE bid *failed*; no sponsor control, no recap).
+- app_review_velocity — NOT-FIRED (prescription/clinic-administered vaccines; no consumer app).
+- beauty_velocity_poll / beauty_virality / consumer_product_heat / consumer_product_reviews — NOT-FIRED (no consumer-virality channel; travel-vaccine demand is clinic-mediated).
+- albuquerque_permits / austin_permits / bozeman_permits — NOT-FIRED (manufacturing network is Kvistgård DK + Bern CH; no US permit jurisdiction match — dispatch false-positive).
+- crop_yield_ndvi — NOT-FIRED (no agricultural exposure — dispatch false-positive).
+- **usaspending — FIRED (partial), and this is the binding next pull.** BARDA/ASPR is the counterparty for the unsecured ~1,500m of 2027 preparedness. Not run this session → the 2027 bridge is PLAUSIBLE on both benches. **Required before the Q3 court**; ~98d obligation lag means an early-2027 award would surface by ~Feb-2027.
+
+*Dispatch note: 8 of 14 entries in my pack are consumer/permit/ag connectors matched on features a Danish vaccine maker cannot possess; red's pack surfaced a muni land-secured cluster instead. Two different false-positive clusters from the same dispatch index — worth a fix ticket.*
+
+```kg_candidate
+{"name": "seasonal_h2_residual_control", "kind": "detector", "one_line": "Before calling a guided second-half margin step-down a collapse, compute the SAME residual for the prior year from audited actuals — semiannual reporters with H2-loaded R&D/launch spend show a stable, recurring H2 margin trough.", "fires_on": "An implied residual-period margin is used as a bear datum without a prior-year same-residual control; fires when prior-year implied H2 margin is within 200bps of the current implied H2 margin.", "evidence_here": "BAVA H2-2025 implied EBITDA-before-special 771 on 3,246 = 23.8% (FY25 1,732 ex-PRV minus H1 961); H2-2026 implied 620 on 2,608 = 23.8%. Red graded a recurring seasonal trough as a guided collapse and called it FATAL.", "applies_to_guess": {"issuer_features": ["reports_semiannually", "guides_margin_percentage", "h2_loaded_rd_or_launch_spend"], "sic_prefixes": ["283", "28", "384"]}}
+```
+```kg_candidate
+{"name": "forward_book_disclosure_lag", "kind": "mechanism", "one_line": "Contracted-revenue disclosures for year T+1 are systematically thin at the mid-year print because government/institutional orders book on a rolling ~2-quarter lead; comparing T+1-secured against T-secured measures the calendar, not demand.", "fires_on": "A bear case cites 'only X secured for next year vs Y for this year' from a mid-year report, without the prior-year mid-year disclosure of the same forward metric as a control.", "evidence_here": "BAVA Aug-2026: 2,300m secured 2026 vs 800m secured 2027. Aug-2025 report quantified only current-year ('approximately DKK 3,100 million in contracts ... in 2025') and gave no 2026 figure — yet 2026 PP landed at ~2,500m with 2,300m secured.", "applies_to_guess": {"issuer_features": ["government_contract_revenue", "stockpile_procurement", "discloses_secured_revenue"], "sic_prefixes": ["283", "376", "372"]}}
+```
+
+Sources: [H1-2025 interim report (PDF, primary)](https://www.bavarian-nordic.com/media/372525/2025-q2-en.pdf) · [Annual Report 2025 / FY25 actuals](https://www.bavarian-nordic.com/investor/news/news.aspx?news=7455) · [H1-2026 results wire](https://www.globenewswire.com/news-release/2026/08/21/3348889/0/en/bavarian-nordic-reports-strong-first-half-2026-results.html) · [Innosera offer raised to DKK 250, best and final](https://www.globenewswire.com/news-release/2025/10/15/3167333/0/en/Consortium-consisting-of-Nordic-Capital-and-Permira-increases-offer-price-and-extends-offer-period-until-5-November-2025-in-respect-of-the-takeover-offer-to-the-shareholders-of-Bav.html) · [Offer withdrawn 5-Nov-2025](https://www.globenewswire.com/news-release/2025/11/06/3182703/0/en/consortium-consisting-of-nordic-capital-and-permira-announces-preliminary-result-of-the-takeover-offer-to-shareholders-of-bavarian-nordic-and-that-the-offer-is-withdrawn-and-will-n.html)

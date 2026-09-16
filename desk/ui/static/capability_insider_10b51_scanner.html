@@ -1,0 +1,344 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>insider_10b51_scanner</title><style>
+body{margin:0;background:#0b0e12;color:#e8ebee;font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:26px 24px 90px}
+a{color:#8b7cf6} h1{font-size:23px;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:#7d858e;margin:0 0 20px;font-size:13px}
+h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:#7d858e;margin:24px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 10px;border-bottom:1px solid #242a31;text-align:left;vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#7d858e}
+.k{font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:20px}
+.k-generator{color:#c3b8fb;background:rgba(139,124,246,.15)}
+.k-detector{color:#eccb8a;background:rgba(217,164,65,.15)}
+.k-watcher{color:#8ee5c1;background:rgba(53,201,143,.15)}
+.k-evidence{color:#b3bcc6;background:rgba(138,147,158,.15)}
+.h-OK{color:#35c98f} .h-STALE{color:#d9a441} .h-ERROR{color:#e0736a} .h-NEVER_RUN{color:#8a939e}
+pre{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px;overflow-x:auto;font-size:12px;line-height:1.5}
+.panel{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px 18px;margin-bottom:12px}
+ul{margin:4px 0;padding-left:20px} li{margin-bottom:4px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+</style></head><body><div class="wrap"><h1>insider_10b51_scanner</h1><p class="sub">registered capability · insider_10b51_scanner</p><a href="signals.html">&larr; all signals</a><div class="panel" style="margin-top:10px"><span class="k k-generator">GENERATOR</span> &nbsp;<span class="h-NEVER_RUN"><b>NEVER_RUN</b></span> · last run <span class="mono">never</span></div><p>Stage 0b INFO/nowcast: insider BUY CLUSTERS + Rule 10b5-1 PLAN TERMINATIONS (EDGAR).</p><form method="POST" action="/signals/run" style="margin:10px 0"><input type="hidden" name="name" value="insider_10b51_scanner"><input name="symbol" placeholder="symbol (if applicable)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px"><input name="symbols" placeholder="universe, comma-sep (generators)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px;margin-left:6px"><button type="submit" style="background:#8b7cf6;color:#0b0e12;border:0;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;margin-left:6px">Run now</button></form><h2>Datasources</h2><ul><li>reference implementation: verticals/generators/insider_10b51_scanner.py (see the code section for the feeds it touches)</li></ul><h2>Applies to</h2><ul><li><b>strategies:</b> quality_value</li></ul><h2>The code</h2><pre>&quot;&quot;&quot;insider_10b51_scanner — Stage 0b INFO/nowcast: insider BUY CLUSTERS + Rule 10b5-1 PLAN TERMINATIONS (EDGAR).
+
+Primary-source nowcast off two SEC channels that LEAD the tape:
+
+  (a) OPEN-MARKET BUY CLUSTERS (primary leg — structured, reliable). Recent Form 4s (EFTS forms=4 feed) -&gt;
+      fetch the ownership XML -&gt; parse nonDerivativeTransaction code &#x27;P&#x27; / acquired &#x27;A&#x27; open-market buys -&gt;
+      cluster by issuer: a CLUSTER = &gt;=2 DISTINCT reporting owners buying within a ~10-day window. Each buy is
+      tagged with the Rule 10b5-1 indicator (&lt;aff10b5One&gt; checkbox + a &quot;Rule 10b5-1&quot; footnote) — a CLUSTER of
+      NON-plan (discretionary) buys is the stronger conviction tell; plan-driven buys are pre-scheduled and carry
+      less signal. USD-sized, small/mid-cap focus (mega-cap insider buys are noise the whole market already sees).
+
+  (b) 10b5-1 PLAN TERMINATIONS (v1 / best-effort). An insider KILLING a pre-set trading plan (disclosed as
+      free-text under Reg S-K Item 408 in 10-Q/10-K, and on 8-K) is a notable tell — plans are disproportionately
+      terminated AHEAD of material events. EFTS full-text search on 10-Q/10-K/8-K for the &quot;Rule 10b5-1&quot; + a
+      terminate-stem co-occurrence, returned as issuer + filing url + snippet. Item 408 language is unstructured,
+      so this leg is explicitly v1 — a REVIEW queue (resolve the plan holder + the event in DD), not a fire.
+
+HONESTY DOCTRINE (inherited from insider_cluster_scanner, the priced-in debate + the 2026-07-02 drift backtest =
+NULL for small-cap clusters): Form 4s are maximally public — NO clean informational edge is claimed. The value is
+(1) ATTENTION ALLOCATION — point scarce diligence at conditioned subsets; (2) the 10b5-1 DIMENSION this scanner
+adds on top of the plain cluster scanner: discretionary-vs-plan tagging + the termination REVIEW queue. Narrow &amp;
+high-precision by design (recall-floor discipline): a handful of genuine clusters + real terminations beats a wall
+of single-insider / plan-driven noise. The scanner proposes; it never sizes and never orders.
+
+    python3 verticals/generators/insider_10b51_scanner.py [--days 10] [--pages 4]
+Writes data/INSIDER_10B51.json. READ-ONLY.
+&quot;&quot;&quot;
+from __future__ import annotations
+
+import argparse
+import datetime
+import json
+import re
+import time
+import urllib.parse
+import urllib.request
+from pathlib import Path
+from xml.etree import ElementTree as ET
+
+HERE = Path(__file__).resolve().parent
+OUT = HERE / &quot;data&quot; / &quot;INSIDER_10B51.json&quot;
+HDRS = {&quot;User-Agent&quot;: &quot;signalos-research 4tripathy@gmail.com&quot;}
+
+EFTS = &quot;https://efts.sec.gov/LATEST/search-index&quot;
+TICKERS_URL = &quot;https://www.sec.gov/files/company_tickers.json&quot;
+
+MIN_BUY_USD = 50_000        # per reporting-owner floor — below this is not a conviction buy
+CLUSTER_WINDOW_D = 10       # &gt;=2 distinct owners within this trailing window = a cluster
+CLUSTER_MAX_MCAP_HINT = None  # mktcap gating is a v2 overlay (see caveats); here we drop obvious mega-caps by name
+# free-text terminate stems paired with &quot;Rule 10b5-1&quot; for the (b) leg. Kept TIGHT (co-occurrence, not just &quot;plan&quot;).
+TERM_QUERY = &#x27;%22Rule+10b5-1%22+terminated&#x27;
+TERM_FORMS = &quot;10-Q,10-K,8-K&quot;
+# fund/LP Form 4s are mechanics, not insider conviction — same guard the plain cluster scanner uses
+FUND_MARKERS = (&quot; FUND&quot;, &quot; L.P&quot;, &quot; LP,&quot;, &quot; LP &quot;, &quot;CAPITAL INCOME&quot;, &quot;INFRASTRUCTURE STRATEGIES&quot;, &quot; TRUST &quot;)
+# crude mega-cap drop by issuer name so the cluster leg stays small/mid focused (the capacity niche)
+MEGA_MARKERS = ()  # intentionally empty — we gate by USD/name-fund only; mktcap gating is a v2 yfinance overlay
+
+
+def _get(url: str, retries: int = 2, timeout: int = 30) -&gt; bytes | None:
+    for _ in range(retries + 1):
+        try:
+            req = urllib.request.Request(url, headers=HDRS)
+            with urllib.request.urlopen(req, timeout=timeout) as r:
+                return r.read()
+        except Exception:
+            time.sleep(1.2)     # be polite to EDGAR on 429/timeout
+    return None
+
+
+def _get_json(url: str, retries: int = 2) -&gt; dict:
+    raw = _get(url, retries=retries)
+    if not raw:
+        return {}
+    try:
+        return json.loads(raw)
+    except Exception:
+        return {}
+
+
+def _ticker_map() -&gt; dict:
+    &quot;&quot;&quot;CIK(int) -&gt; {&#x27;ticker&#x27;,&#x27;title&#x27;} from the SEC canonical map.&quot;&quot;&quot;
+    d = _get_json(TICKERS_URL)
+    out = {}
+    for _, row in (d or {}).items():
+        try:
+            out[int(row[&quot;cik_str&quot;])] = {&quot;ticker&quot;: row[&quot;ticker&quot;].upper(), &quot;title&quot;: row[&quot;title&quot;]}
+        except Exception:
+            continue
+    return out
+
+
+def _efts_form4_hits(days: int, pages: int) -&gt; list[dict]:
+    &quot;&quot;&quot;Recent Form 4 filings from the EFTS full-text index (dated window, bounded pages).&quot;&quot;&quot;
+    today = datetime.date.today()
+    start = (today - datetime.timedelta(days=days)).isoformat()
+    end = today.isoformat()
+    hits, seen = [], set()
+    for page in range(pages):
+        params = {&quot;q&quot;: &#x27;&quot;purchase&quot;&#x27;, &quot;forms&quot;: &quot;4&quot;, &quot;startdt&quot;: start, &quot;enddt&quot;: end}
+        if page:
+            params[&quot;from&quot;] = page * 100     # EFTS returns up to 100/page
+        # NOTE: do NOT mark &#x27;&quot;&#x27; safe — a raw quote in the URL 400s; urlencode must escape it to %22
+        url = EFTS + &quot;?&quot; + urllib.parse.urlencode(params)
+        d = _get_json(url)
+        page_hits = (((d or {}).get(&quot;hits&quot;) or {}).get(&quot;hits&quot;)) or []
+        if not page_hits:
+            break
+        for h in page_hits:
+            adsh = (h.get(&quot;_source&quot;) or {}).get(&quot;adsh&quot;)
+            _id = h.get(&quot;_id&quot;, &quot;&quot;)
+            if _id in seen:
+                continue
+            seen.add(_id)
+            hits.append(h)
+        time.sleep(0.4)
+    return hits
+
+
+def _accession_xml_url(hit: dict) -&gt; str | None:
+    &quot;&quot;&quot;Build the primary-doc XML URL from an EFTS hit (_id = &#x27;accession:document.xml&#x27;).&quot;&quot;&quot;
+    src = hit.get(&quot;_source&quot;) or {}
+    ciks = src.get(&quot;ciks&quot;) or []
+    adsh = src.get(&quot;adsh&quot;) or &quot;&quot;
+    _id = hit.get(&quot;_id&quot;) or &quot;&quot;
+    doc = _id.split(&quot;:&quot;, 1)[1] if &quot;:&quot; in _id else &quot;&quot;
+    if not (adsh and doc and ciks):
+        return None
+    acc_nodash = adsh.replace(&quot;-&quot;, &quot;&quot;)
+    # the FILER CIK (the reporting owner) is usually the last in ciks; the archives path works off any of them,
+    # but the doc lives under the filing&#x27;s own accession dir — try each cik until one resolves.
+    for cik in ciks:
+        yield_url = f&quot;https://www.sec.gov/Archives/edgar/data/{int(cik)}/{acc_nodash}/{doc}&quot;
+        return yield_url  # first cik path is canonical for Form 4 ownership docs
+    return None
+
+
+def _parse_form4(xml_bytes: bytes) -&gt; dict | None:
+    &quot;&quot;&quot;Open-market (code-P / acquired-A) purchase summary from one Form 4 ownership XML, or None.&quot;&quot;&quot;
+    txt = xml_bytes.decode(&quot;latin-1&quot;, &quot;ignore&quot;)
+    # ownership.xml is bare XML; some legacy docs wrap in &lt;XML&gt;..&lt;/XML&gt;
+    m = re.search(r&quot;&lt;XML&gt;(.*?)&lt;/XML&gt;&quot;, txt, re.S | re.I)
+    body = m.group(1).strip() if m else txt.strip()
+    try:
+        root = ET.fromstring(body)
+    except ET.ParseError:
+        return None
+    issuer = (root.findtext(&quot;.//issuerName&quot;) or &quot;&quot;).strip()
+    sym = (root.findtext(&quot;.//issuerTradingSymbol&quot;) or &quot;&quot;).upper().strip()
+    owner = (root.findtext(&quot;.//rptOwnerName&quot;) or &quot;&quot;).strip()
+    officer = (root.findtext(&quot;.//isOfficer&quot;) or &quot;0&quot;) in (&quot;1&quot;, &quot;true&quot;)
+    director = (root.findtext(&quot;.//isDirector&quot;) or &quot;0&quot;) in (&quot;1&quot;, &quot;true&quot;)
+    date = (root.findtext(&quot;.//periodOfReport&quot;) or &quot;&quot;).strip()
+    buy_usd = 0.0
+    for tr in root.iter(&quot;nonDerivativeTransaction&quot;):
+        code = tr.findtext(&quot;.//transactionCode&quot;) or &quot;&quot;
+        acq = tr.findtext(&quot;.//transactionAcquiredDisposedCode/value&quot;) or &quot;&quot;
+        if code == &quot;P&quot; and acq == &quot;A&quot;:
+            sh = float(tr.findtext(&quot;.//transactionShares/value&quot;) or 0)
+            px = float(tr.findtext(&quot;.//transactionPricePerShare/value&quot;) or 0)
+            buy_usd += sh * px
+    if buy_usd &lt; MIN_BUY_USD or not sym or sym in (&quot;NONE&quot;, &quot;N/A&quot;, &quot;NA&quot;, &quot;-&quot;):
+        return None
+    if any(k in issuer.upper() for k in FUND_MARKERS):
+        return None
+    # Rule 10b5-1 indicator: the aff10b5One checkbox OR a &quot;Rule 10b5-1&quot; footnote. Discretionary (NOT plan) buys
+    # are the stronger conviction tell; a plan-driven buy is pre-scheduled and carries less signal.
+    aff = (root.findtext(&quot;.//aff10b5One&quot;) or &quot;&quot;).strip().lower()
+    fn_10b51 = bool(re.search(r&quot;rule\s*10b5[- ]?1&quot;, txt, re.I))
+    under_10b51 = aff in (&quot;true&quot;, &quot;1&quot;) or fn_10b51
+    return {&quot;symbol&quot;: sym, &quot;issuer&quot;: issuer[:60], &quot;owner&quot;: owner[:40],
+            &quot;role&quot;: &quot;officer&quot; if officer else &quot;director&quot; if director else &quot;10%+&quot;,
+            &quot;buy_usd&quot;: round(buy_usd), &quot;date&quot;: date, &quot;under_10b51&quot;: under_10b51}
+
+
+def _scan_buy_clusters(days: int, pages: int) -&gt; tuple[list[dict], int, int]:
+    &quot;&quot;&quot;Return (clusters, n_form4_parsed, n_buys). A cluster = &gt;=2 distinct owners, code-P, within the window.&quot;&quot;&quot;
+    tmap = _ticker_map()
+    hits = _efts_form4_hits(days, pages)
+    buys = []
+    for i, h in enumerate(hits):
+        url = _accession_xml_url(h)
+        if not url:
+            continue
+        raw = _get(url)
+        if not raw:
+            continue
+        r = _parse_form4(raw)
+        if r:
+            # confirm ticker/name via the SEC map when the XML symbol is thin
+            src = h.get(&quot;_source&quot;) or {}
+            for cik in src.get(&quot;ciks&quot;) or []:
+                info = tmap.get(int(cik))
+                if info and (not r[&quot;symbol&quot;] or r[&quot;symbol&quot;] in (&quot;NONE&quot;, &quot;NA&quot;)):
+                    r[&quot;symbol&quot;] = info[&quot;ticker&quot;]
+                    break
+            buys.append(r)
+        if i % 6 == 5:
+            time.sleep(0.4)     # SEC-safe pace
+    # dedupe (owner/symbol/date/usd) — EFTS can surface the same doc twice
+    seen, uniq = set(), []
+    for b in buys:
+        key = (b[&quot;symbol&quot;], b[&quot;owner&quot;], b[&quot;date&quot;], b[&quot;buy_usd&quot;])
+        if key not in seen:
+            seen.add(key)
+            uniq.append(b)
+    # cluster within the window
+    win = (datetime.date.today() - datetime.timedelta(days=CLUSTER_WINDOW_D)).isoformat()
+    recent = [b for b in uniq if (b[&quot;date&quot;] or &quot;9999&quot;) &gt;= win]
+    by_sym: dict[str, list] = {}
+    for b in recent:
+        by_sym.setdefault(b[&quot;symbol&quot;], []).append(b)
+    clusters = []
+    for sym, bs in by_sym.items():
+        owners = {b[&quot;owner&quot;] for b in bs}
+        if len(owners) &lt; 2:
+            continue
+        dates = sorted(b[&quot;date&quot;] for b in bs if b[&quot;date&quot;])
+        n_plan = sum(1 for b in bs if b[&quot;under_10b51&quot;])
+        clusters.append({
+            &quot;ticker&quot;: sym, &quot;name&quot;: bs[0][&quot;issuer&quot;], &quot;n_insiders&quot;: len(owners),
+            &quot;total_usd&quot;: sum(b[&quot;buy_usd&quot;] for b in bs),
+            &quot;first&quot;: dates[0] if dates else &quot;&quot;, &quot;last&quot;: dates[-1] if dates else &quot;&quot;,
+            &quot;under_10b51&quot;: n_plan,           # how many of the buys were plan-driven (lower conviction)
+            &quot;roles&quot;: sorted({b[&quot;role&quot;] for b in bs}),
+            &quot;note&quot;: (&quot;DISCRETIONARY cluster (no 10b5-1 tag) — stronger conviction tell&quot;
+                     if n_plan == 0 else
+                     f&quot;{n_plan}/{len(bs)} buys were 10b5-1 plan-driven (pre-scheduled, weaker tell)&quot;),
+            &quot;buys&quot;: sorted(bs, key=lambda x: -x[&quot;buy_usd&quot;])[:6],
+        })
+    # discretionary clusters first, then by size — the recall-floor: precision over count
+    clusters.sort(key=lambda c: (c[&quot;under_10b51&quot;] &gt; 0, -c[&quot;n_insiders&quot;], -c[&quot;total_usd&quot;]))
+    return clusters, len(uniq), len(recent)
+
+
+def _scan_terminations(days: int) -&gt; list[dict]:
+    &quot;&quot;&quot;v1/best-effort: EFTS full-text &#x27;Rule 10b5-1&#x27; + terminate-stem on 10-Q/10-K/8-K -&gt; issuer + url + snippet.&quot;&quot;&quot;
+    today = datetime.date.today()
+    start = (today - datetime.timedelta(days=days)).isoformat()
+    end = today.isoformat()
+    url = (EFTS + &quot;?&quot; + urllib.parse.urlencode(
+        {&quot;forms&quot;: TERM_FORMS, &quot;startdt&quot;: start, &quot;enddt&quot;: end}, safe=&quot;&quot;) + f&quot;&amp;q={TERM_QUERY}&quot;)
+    d = _get_json(url)
+    hits = (((d or {}).get(&quot;hits&quot;) or {}).get(&quot;hits&quot;)) or []
+    out, seen = [], set()
+    for h in hits:
+        src = h.get(&quot;_source&quot;) or {}
+        names = src.get(&quot;display_names&quot;) or []
+        name = names[0] if names else &quot;&quot;
+        # pull the ticker out of &quot;NAME  (TICK)  (CIK ...)&quot; when present
+        tm = re.search(r&quot;\(([A-Z.\-]{1,6})\)&quot;, name)
+        ticker = tm.group(1) if tm else &quot;&quot;
+        adsh = src.get(&quot;adsh&quot;) or &quot;&quot;
+        _id = h.get(&quot;_id&quot;) or &quot;&quot;
+        if adsh in seen:
+            continue
+        seen.add(adsh)
+        doc = _id.split(&quot;:&quot;, 1)[1] if &quot;:&quot; in _id else &quot;&quot;
+        ciks = src.get(&quot;ciks&quot;) or []
+        acc_nodash = adsh.replace(&quot;-&quot;, &quot;&quot;)
+        filing_url = (f&quot;https://www.sec.gov/Archives/edgar/data/{int(ciks[0])}/{acc_nodash}/{doc}&quot;
+                      if ciks and doc else
+                      f&quot;https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&amp;filenum=&amp;accession_number={adsh}&quot;)
+        out.append({
+            &quot;ticker&quot;: ticker, &quot;name&quot;: re.sub(r&quot;\s*\(.*&quot;, &quot;&quot;, name).strip()[:60],
+            &quot;form&quot;: src.get(&quot;form&quot;, &quot;&quot;), &quot;date&quot;: src.get(&quot;file_date&quot;, &quot;&quot;), &quot;url&quot;: filing_url,
+            &quot;snippet&quot;: &quot;co-occurrence of &#x27;Rule 10b5-1&#x27; + &#x27;terminated&#x27; in this filing — resolve the plan holder + &quot;
+                       &quot;the pending event in DD (Item 408 language is free-text; verify it is a plan TERMINATION, &quot;
+                       &quot;not a routine adoption/expiry).&quot;,
+        })
+    out.sort(key=lambda r: (r[&quot;date&quot;] or &quot;&quot;), reverse=True)
+    return out
+
+
+def scan(days: int, pages: int) -&gt; dict:
+    today = datetime.date.today()
+    clusters, n_parsed, n_buys = _scan_buy_clusters(days, pages)
+    terms = _scan_terminations(days)
+    return {
+        &quot;asof&quot;: today.isoformat(), &quot;window_days&quot;: CLUSTER_WINDOW_D, &quot;lookback_days&quot;: days,
+        &quot;form4_buys_in_window&quot;: n_buys, &quot;n_buy_clusters&quot;: len(clusters), &quot;n_plan_terminations&quot;: len(terms),
+        &quot;buy_clusters&quot;: clusters, &quot;plan_terminations&quot;: terms,
+        &quot;note&quot;: &quot;TWO SEC-primary legs. (a) BUY CLUSTERS: &gt;=2 distinct insiders, code-P open-market, &gt;=$50k each, &quot;
+                f&quot;within {CLUSTER_WINDOW_D}d; each buy tagged with the Rule 10b5-1 indicator — a DISCRETIONARY &quot;
+                &quot;(non-plan) cluster is the stronger conviction tell (under_10b51 counts the plan-driven buys). &quot;
+                &quot;(b) PLAN TERMINATIONS (v1/best-effort): EFTS full-text &#x27;Rule 10b5-1&#x27;+&#x27;terminated&#x27; on 10-Q/10-K/8-K &quot;
+                &quot;-&gt; a REVIEW queue (Item 408 is free-text; DD must confirm it is a termination, not adoption/expiry). &quot;
+                &quot;DOCTRINE: Form 4s are maximally public — no clean informational edge; value = attention allocation + &quot;
+                &quot;the 10b5-1 dimension. Narrow/high-precision by design. Proposes, never sizes. READ-ONLY.&quot;,
+    }
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument(&quot;--days&quot;, type=int, default=10, help=&quot;lookback window (days) for Form 4s + terminations&quot;)
+    ap.add_argument(&quot;--pages&quot;, type=int, default=4, help=&quot;EFTS Form 4 pages to pull (100/page, bounded)&quot;)
+    a = ap.parse_args()
+    res = scan(a.days, a.pages)
+    print(f&quot;=== INSIDER 10b5-1 SCANNER  {res[&#x27;asof&#x27;]}  &quot;
+          f&quot;({res[&#x27;form4_buys_in_window&#x27;]} code-P buys in the {res[&#x27;window_days&#x27;]}d window; &quot;
+          f&quot;{res[&#x27;n_buy_clusters&#x27;]} clusters; {res[&#x27;n_plan_terminations&#x27;]} 10b5-1 termination hits) ===&quot;)
+    if res[&quot;buy_clusters&quot;]:
+        print(f&quot;  BUY CLUSTERS (&gt;=2 distinct insiders, &gt;=${MIN_BUY_USD/1000:.0f}k each — DISCRETIONARY first):&quot;)
+        for c in res[&quot;buy_clusters&quot;][:12]:
+            tag = &quot;DISCR&quot; if c[&quot;under_10b51&quot;] == 0 else f&quot;{c[&#x27;under_10b51&#x27;]}x-plan&quot;
+            print(f&quot;   {c[&#x27;ticker&#x27;]:&lt;6} {c[&#x27;name&#x27;][:34]:&lt;34} {c[&#x27;n_insiders&#x27;]} insiders  &quot;
+                  f&quot;${c[&#x27;total_usd&#x27;]:&gt;10,}  [{tag:&lt;7}] {c[&#x27;first&#x27;]}..{c[&#x27;last&#x27;]}  ({&#x27;/&#x27;.join(c[&#x27;roles&#x27;])})&quot;)
+    else:
+        print(&quot;  no buy clusters in the window (honest null — single-insider buys are not surfaced)&quot;)
+    if res[&quot;plan_terminations&quot;]:
+        print(&quot;  10b5-1 PLAN TERMINATION hits (v1/best-effort — REVIEW queue, confirm in DD):&quot;)
+        for t in res[&quot;plan_terminations&quot;][:10]:
+            tk = t[&quot;ticker&quot;] or &quot;?&quot;
+            print(f&quot;   {tk:&lt;6} {t[&#x27;name&#x27;][:34]:&lt;34} {t[&#x27;form&#x27;]:&lt;5} {t[&#x27;date&#x27;]}  {t[&#x27;url&#x27;]}&quot;)
+    else:
+        print(&quot;  no &#x27;Rule 10b5-1&#x27;+&#x27;terminated&#x27; filing hits in the window&quot;)
+    print(&quot;  PROMOTE: trap-screen the DISCRETIONARY small/mid clusters first; termination hits -&gt; DD resolves the&quot;)
+    print(&quot;  plan holder + the pending event. DOCTRINE: no edge claimed on public Form 4s; attention-allocation + the&quot;)
+    print(&quot;  10b5-1 dimension. The scanner proposes; it never sizes.&quot;)
+    OUT.write_text(json.dumps(res, indent=1))
+    print(f&quot;[-&gt; {OUT.name}]&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</pre></div></body></html>

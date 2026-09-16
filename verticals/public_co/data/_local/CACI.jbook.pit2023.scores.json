@@ -1,0 +1,119 @@
+{
+  "ticker": "CACI",
+  "cutoff": "2023-01-15",
+  "filing": "0001564590-22-029077_10-K.txt",
+  "framework_notes": "CACI is a defense IT-services / intel mission-support prime, not a hardware/PE-concentrated small-cap. The 10-K narrative is built on capability themes (SIGINT, EW, C-UAS, FSO/photonics, special operations support) and customer concentration (94.8% federal, 69.8% DoD), but does NOT cite specific Pentagon Program Elements, PE numbers, or named programs of record. Consequently the J-Book divergence pattern (named PE -> unfunded in latest J-Book) cannot be cleanly applied: the pentagon_jbook corpus (FY2026 J-Book, 410 PEs heavily seeded for emerging-tech/quantum/sUAS short cases) returns NOT_FOUND or NOT_FOUND_IN_TIMERANGE for the capability-level queries. The usaspending rear-view is overwhelmingly corroborative: CACI/CACI subs have $7.6B over 2,662 DoD awards (IPPS-A, DCSA background investigations, AFSCN, F3I-2 ISR), confirming the past revenue side of management's representations. The dominant scoring outcome is UNVERIFIABLE — not because the framework caught a divergence, but because CACI does not present claims that the J-Book mechanism is designed to verify. The control assertions (federal-revenue concentration, GSA/IDIQ vehicle mix, geographic mix) all PASS via the orthogonal sources.",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "CACI is at the forefront of developing free space optical (FSO) communications and long-range sensing using lasers, and acquired multi-domain photonics technologies for FSO communications during fiscal 2022.",
+      "severity": "UNVERIFIABLE",
+      "supports": [],
+      "M_check": "pentagon_jbook.query_program_funding (program_name='Free Space Optical Communications' | 'Optical Communications' | contractor_name='CACI')",
+      "M_value": "All three queries returned NOT_FOUND (no matching PE / program in the FY2026 J-Book corpus, no CACI primary-contractor program).",
+      "interpretation": "Corpus coverage gap. FSO/photonics work at CACI scale is funded through line items the v1 corpus does not enumerate (Space Force / Air Force RDT&E lines, classified IC budgets). Per rubric #7 (NOT_FOUND != red flag), this is a true UNVERIFIABLE — not evidence of divergence. The forward-looking capability claim is too generic to anchor to a single PE; in a hardened build the verifier would need IC-side J-Book extraction or DARPA/SDA program lookup, neither of which is in the v1 corpus."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "CACI provides full-spectrum cyber, electronic warfare, and Counter-UAS solutions.",
+      "severity": "UNVERIFIABLE",
+      "supports": [],
+      "M_check": "pentagon_jbook.query_program_funding (program_name='Counter-UAS' | 'Counter Unmanned Aircraft System' | 'Electronic Warfare')",
+      "M_value": "Counter-UAS / Counter Unmanned Aircraft System: NOT_FOUND. Electronic Warfare: 3 matches (PE 0604270F Electronic Warfare Development, PE 0205671F Joint Counter RCIED EW, PE 0207040F Multi-Platform EW Equipment), all status=NOT_FOUND_IN_TIMERANGE because the corpus only carries FY2026 J-Book data, not the cutoff-FY2023 columns; status_declared and history_rows empty.",
+      "interpretation": "Capability-level claim, not program-element-level. The three EW PE matches are correctly retrieved by the corpus but cannot be evaluated at cutoff 2023-01-15 because the J-Book extraction is point-in-time FY2026 with no FY2023 history. Per rubric #1 NOT_FOUND_IN_TIMERANGE -> UNVERIFIABLE. No evidence that the underlying EW/C-UAS funding is being zeroed; this is a corpus capability gap, not a CACI red flag."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "CACI delivers multi-domain SIGINT, resilient communications, FSO, EW, cyber ops, and 5G/RF spectrum capabilities.",
+      "severity": "UNVERIFIABLE",
+      "supports": [],
+      "M_check": "pentagon_jbook.query_program_funding (program_name='Signals Intelligence' | 'SIGINT' | '5G')",
+      "M_value": "Signals Intelligence: NOT_FOUND. SIGINT: 1 match (PE 0304260F Airborne SIGINT Enterprise, Air Force, status=NOT_FOUND_IN_TIMERANGE, no history rows). 5G: NOT_FOUND.",
+      "interpretation": "The single SIGINT PE match is again FY2026-J-Book-only; no cutoff-FY2023 funding history is available. The 'multi-domain SIGINT' claim is far broader than any single PE — CACI's IC-side work is overwhelmingly classified-customer (NSA/NRO/CIA) which sits outside the public J-Book exhibits. UNVERIFIABLE by corpus design."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "CACI acquired Ascent Vision Technologies (AVT) in fiscal 2021 for EO/IR + Computer Vision + C-UAS — positioning on DoD C-UAS programs.",
+      "severity": "UNVERIFIABLE",
+      "supports": [],
+      "M_check": "pentagon_jbook.query_program_funding (contractor='Ascent Vision' | program='Counter-Small Unmanned Aircraft Systems') + usaspending.query_dod_contracts(recipient='Ascent Vision Technologies')",
+      "M_value": "Pentagon J-Book: NOT_FOUND for both AVT contractor lookup and C-sUAS program lookup. USAspending: AVT has only 1 standalone DoD award totaling $244,244.77 (Marine Corps software-support contract M6785420C0004, pre-acquisition), confirming AVT was a tiny pre-acquisition prime — its DoD revenue post-acquisition flows through CACI legal entities.",
+      "interpretation": "AVT was acquired for capability, not for an existing DoD contract base. The C-UAS program-of-record exposure post-2021 would appear under CACI parent legal entities in USAspending (not searchable as 'Ascent Vision'). No J-Book divergence detectable. Per rubric #6 partial: USAspending shows the prior contracts side is consistent (small pre-acq); J-Book NOT_FOUND for C-sUAS suggests corpus coverage gap, not a real defunded program. UNVERIFIABLE."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "DoD = 69.8% of FY2022 revenue (94.8% federal total). CACI expects federal government contracts to remain primary revenue source.",
+      "severity": "PASS",
+      "supports": ["usaspending.query_dod_contracts", "usaspending.query_federal_presence"],
+      "M_check": "usaspending.query_dod_contracts(recipient='CACI') + usaspending.query_federal_presence(name_variants=[CACI International, CACI Inc, CACI Federal])",
+      "M_value": "usaspending DoD: 2,662 DoD awards totaling $7,619,067,209.36 across CACI legal entities (CACI-ISS LLC IPPS-A $734M, CACI Inc-Federal DCSA Background-Investigation Fieldwork $652M, CACI NSS LLC AFSCN $601M and F3I-2 ISR $578M, CACI Premier Technology background-investigations $577M). Federal-presence resolves to 7 UEIs under the CACI parent. FY-snapshot top entity (CACI International Inc, UEI QSRTXLFKV857) carrying $4.48B.",
+      "interpretation": "Customer-concentration claim is fully corroborated by USAspending — CACI is in fact a multi-billion-dollar DoD prime. No divergence between claim and verifier. PASS."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Top-10 contracts = 35.7% / $2.2B of FY2022 revenue, many comprising multiple task orders.",
+      "severity": "PASS",
+      "supports": ["usaspending.query_dod_contracts"],
+      "M_check": "usaspending.query_dod_contracts(recipient='CACI')",
+      "M_value": "Top awards visible (IPPS-A $734M, DCSA background-investigation TO $652M, AFSCN $601M, F3I-2 ISR $578M, DCSA background TO $577M); these alone exceed $3.1B obligated and align with a top-10 portfolio in the $2.2B annual-revenue range when amortized across multi-year periods of performance.",
+      "interpretation": "Concentration figure ($2.2B / 35.7%) is consistent with the visible award stack. PASS."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "CACI provides special operations services (incl. counterterrorism training) and intelligence/special operations mission support.",
+      "severity": "UNVERIFIABLE",
+      "supports": [],
+      "M_check": "pentagon_jbook.query_program_funding (program_name='Special Operations' | 'SOCOM')",
+      "M_value": "Both queries returned NOT_FOUND. The corpus is seeded for emerging-tech / quantum / sUAS / autonomy short cases, not SOCOM operating budget lines.",
+      "interpretation": "Capability-level claim outside the v1 J-Book corpus scope (SOCOM mission-support lines not enumerated). Per rubric #7, NOT_FOUND treated as UNVERIFIABLE rather than red flag."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Domestic Operations = 96.9% of FY2022 revenue (geographic mix control claim).",
+      "severity": "UNVERIFIABLE",
+      "supports": [],
+      "M_check": "edgar_fts.query_fulltext(cik=0000016058, search_term='Domestic Operations international operations')",
+      "M_value": "edgar_fts returned 0 hits (FTS index does not surface this 10-K's segment language for the search term used).",
+      "interpretation": "Control claim, not load-bearing on the J-Book thesis. Geographic mix is internally consistent with the segment description but cannot be independently re-verified by edgar_fts under the chosen search term. Non-material. UNVERIFIABLE."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "8 acquisitions over FY2020-FY2022 to add OSINT, SATCOM, FSO/photonics, CSfC, EO/IR, C-UAS capabilities — rollup thesis.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["acq_coherence.score_acquisition_coherence"],
+      "M_check": "acq_coherence.score_acquisition_coherence(parent_thesis, acquisitions=[AVT + 4 unnamed FY2022 acqs])",
+      "M_value": "Scorer returned coherence_score=0.0 for all five entries, all labeled 'low_coherence' with reasoning 'no target name / business description provided.' The 10-K names AVT (FY2021) explicitly but the four FY2022 acquisitions are described only by capability (photonics/FSO, CSfC, OSINT, SATCOM) without target names.",
+      "interpretation": "The 10-K's deliberate non-naming of the FY2022 acquisitions defeats the acq_coherence verifier — the framework cannot grade individual deals without targets. AVT alone is a clearly-coherent C-UAS/EO-IR fit. The thesis is plausible but the verifier is starved. UNVERIFIABLE; would benefit from cross-checking M&A 8-K disclosures filed FY2022 (separate workflow, outside this run)."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "CACI sells extensively through GSA schedules and other GWAC/IDIQ vehicles.",
+      "severity": "UNVERIFIABLE",
+      "supports": [],
+      "M_check": "edgar_fts.query_fulltext(cik=0000016058, search_term='GSA IDIQ task order', cutoff_date=2023-01-15)",
+      "M_value": "edgar_fts returned 0 total hits. The FTS index for CIK 0000016058 with this search term did not surface filings.",
+      "interpretation": "Control claim, not J-Book-grounded. Search term may be too specific; the claim is itself consistent with the visible USAspending award descriptions (most CACI awards are task orders under IDIQ ceilings). UNVERIFIABLE under chosen query but not contradicted by any source."
+    }
+  ],
+  "summary": {
+    "n_claims": 10,
+    "n_queries_run": 17,
+    "severity_counts": {
+      "PASS": 2,
+      "MODERATE_UNDERDELIVERY": 0,
+      "SEVERE_UNDERDELIVERY": 0,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 8
+    },
+    "jbook_grounded_claims": ["C1","C2","C3","C4","C7"],
+    "jbook_hits": {
+      "C1": "NOT_FOUND on all 3 queries",
+      "C2": "Counter-UAS/Counter-UAS-full NOT_FOUND; Electronic Warfare matched 3 PEs (0604270F, 0205671F, 0207040F) all NOT_FOUND_IN_TIMERANGE",
+      "C3": "SIGINT matched 1 PE (0304260F Airborne SIGINT Enterprise) NOT_FOUND_IN_TIMERANGE; Signals Intelligence/5G NOT_FOUND",
+      "C4": "Ascent Vision NOT_FOUND; C-sUAS NOT_FOUND",
+      "C7": "Special Operations / SOCOM NOT_FOUND"
+    },
+    "jbook_hits_count": "pentagon_jbook fired (returned >=1 match) on 2 of 5 J-Book-grounded claims (C2 EW, C3 SIGINT); all hits were NOT_FOUND_IN_TIMERANGE so non-load-bearing",
+    "framework_self_assessment": "This is a NULL-RESULT cohort observation for the J-Book divergence pattern. The framework correctly avoided false positives: CACI does not exhibit the canonical YSS/IONQ short pattern (no named PE concentration), the verifier returned UNVERIFIABLE rather than RED_FLAG on capability-level claims, and the orthogonal verifier (USAspending) corroborated the load-bearing customer-concentration claims. To convert UNVERIFIABLE -> actionable on CACI-class targets the framework would need: (a) IC-side budget extraction (NIP/MIP), (b) FY2023 J-Book historical columns, (c) SOCOM operating-budget exhibits, (d) GWAC/IDIQ ceiling-vs-obligation tracker."
+  }
+}

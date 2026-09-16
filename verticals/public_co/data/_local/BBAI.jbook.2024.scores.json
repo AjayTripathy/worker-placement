@@ -1,0 +1,113 @@
+{
+  "ticker": "BBAI",
+  "cutoff": "2024-09-01",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Revenue from Army programs increased in FY2023 due to new contract awards and higher volume.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["pentagon_jbook.query_program_funding(contractor_name=BigBear.ai) → NOT_FOUND", "pentagon_jbook.query_program_funding(contractor_name=BigBear.ai Federal) → NOT_FOUND", "usaspending.query_dod_contracts(BigBear.ai Federal LLC) → 6 DoD awards / $8.28M / agencies={DoD:6}"],
+      "M_check": "pentagon_jbook + usaspending",
+      "M_value": "J-Book NOT_FOUND for BBAI as contractor; USAspending confirms DoD awards including Global Force Information Management follow-on production (W519TC24C0040, $3.9M) and Orion Decision Support Platform via Tradewinds (W519TC25C0017, $4.3M)",
+      "interpretation": "BBAI does receive Army-channel contracts (GFIM follow-on production, ARFORGEN Synchronization Tool family at the legacy ProModel sub, Orion DSP via Tradewinds). However the 10-K does NOT name the specific Army programs by name or PE number — it only says 'certain Army programs.' Per heuristic 7, NOT_FOUND in J-Book is not a red flag when the company didn't name a PE. The forward-pipeline risk cannot be assessed from disclosure alone — this is itself an opacity signal but per rubric scores UNVERIFIABLE for the pentagon_jbook leg. USAspending leg cross-checks as PASS — past Army revenue is real."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Air Force EPASS program wound down in Q2 2023.",
+      "severity": "PASS",
+      "supports": ["pentagon_jbook.query_program_funding(program_name=EPASS) → NOT_FOUND", "pentagon_jbook.query_program_funding(program_name=Engineering Professional and Administrative Support Services) → NOT_FOUND", "earmark_detector(EPASS) → NOT_EARMARK"],
+      "M_check": "pentagon_jbook",
+      "M_value": "NOT_FOUND in corpus",
+      "interpretation": "BBAI itself discloses that EPASS wound down — this is honest forward-looking disclosure, not a divergence. The company is NOT claiming forward revenue from EPASS; it is explaining a past wind-down as headwind. EPASS is an Air Force services-acquisition vehicle (multi-billion umbrella IDIQ) that is not an RDT&E PE — wouldn't expect it in the J-Book corpus. PASS: disclosure aligns with the wind-down as stated; no narrative-dependency risk from this line."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Three customers contributed 49% of FY2023 revenue (anonymized as Customer A/B/C); identities undisclosed.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["usaspending.query_federal_presence(BBAI family) → 92 contracts / $108.5M lifetime / agencies={DoD:50, GSA:4, DHS:6, EXIM:6, VA:2, HHS:3} / signal=RECURRING_FEDERAL", "usaspending.query_dod_contracts(BBAI Federal) → 6 awards / $8.28M (recent DoD direct)"],
+      "M_check": "usaspending.query_federal_presence (best-fit federal-presence verifier)",
+      "M_value": "RECURRING_FEDERAL; 6 UEIs resolved across name variants; lifetime contracts amount $108.5M, dominated by ProModel Government Solutions legacy awards (ARFORGEN Synchronization Tool, J35 Orion Support)",
+      "interpretation": "Past federal presence is real ($108.5M cumulative). However, the 10-K leaves a material opacity gap: 49% of FY2023 revenue is from three named-but-undisclosed customers. Combined with 'classified contracts' caveats, an investor cannot map Customer A/B/C onto any specific Pentagon PE — i.e., cannot run the J-Book forward-funding check at all. Per the materiality test, a 21%-of-revenue counterparty whose program identity is unknown is moderate-severity narrative risk: real today, unverifiable forward. Not RED because legacy contract base is dispersed; not PASS because forward-funding visibility is structurally blocked. MODERATE_UNDERDELIVERY (of disclosure, not necessarily of funding)."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "$89M of $168M total backlog is from significant customers, recognized through FY2026.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["pentagon_jbook(contractor=BigBear.ai Federal) → NOT_FOUND", "usaspending.query_federal_presence → RECURRING_FEDERAL but DoD direct awards in 2023-2024 only $8.28M; gap implies large flow through prime subs (LMT/NOC/GD) or via classified vehicles"],
+      "M_check": "pentagon_jbook + usaspending gap analysis",
+      "M_value": "J-Book has zero coverage for any BBAI-named program; direct DoD obligations to BBAI Federal LLC are <$10M annual run-rate vs. claimed $89M backlog from significant customers",
+      "interpretation": "Backlog-to-direct-obligation gap is material: $89M backlog from significant customers vs ~$8M of direct DoD awards visible in USAspending under BBAI Federal LLC name. The bridge is presumably (a) classified contracts hidden from USAspending Q-search by name-suppression, (b) flow-through from prime contractors (LMT, NOC, GD), or (c) the ProModel/Pangiam subsidiary UEIs that bear different recipient names. The federal_presence cross-check ($108M lifetime) confirms the gap is bridged historically by the ProModel sub, but ProModel's largest legacy contracts (ARFORGEN AST, J35 Orion DSP) appear to be mature and not obviously growing in the public award stream. MODERATE: backlog is real but its program-identity is fully opaque; forward-funding cannot be J-Book-verified."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "BBAI is positioned to benefit from the Jan 2024 National Defense Industrial Strategy and DoD AI sensor-integration push (JADC2/CJADC2-adjacent).",
+      "severity": "UNVERIFIABLE",
+      "supports": ["pentagon_jbook(JADC2) → NOT_FOUND", "pentagon_jbook(CJADC2) → NOT_FOUND", "pentagon_jbook(Joint All Domain Command and Control) → NOT_FOUND"],
+      "M_check": "pentagon_jbook",
+      "M_value": "NOT_FOUND across JADC2/CJADC2 variants in corpus",
+      "interpretation": "The cohort prompt notes JADC2 is largely cross-service umbrella funding distributed across many service-specific PEs — would not appear as a single line in the J-Book. The corpus coverage gap means this aspirational/forward narrative cannot be falsified or confirmed. BBAI is not making a quantitative claim ('X% of revenue from JADC2') — it's saying 'we made targeted investments in foundational software' in response to the strategy. Score UNVERIFIABLE per heuristic 7."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Project Maven / DARPA narrative (per cohort metadata).",
+      "severity": "UNVERIFIABLE",
+      "supports": ["pentagon_jbook(Project Maven) → NOT_FOUND", "pentagon_jbook(Maven Smart System) → NOT_FOUND", "pentagon_jbook(contractor=BigBear.ai) → NOT_FOUND"],
+      "M_check": "pentagon_jbook",
+      "M_value": "NOT_FOUND; Maven is a CDAO-administered program, often funded via cross-service O&M and classified lines that don't surface in the R-2 PE corpus",
+      "interpretation": "The 10-K itself does not name 'Project Maven' or 'DARPA' specifically — the cohort metadata flags these as adjacent narrative themes, not direct claims by management. Absent a management claim to verify, this is UNVERIFIABLE — but the disclosure gap is itself worth flagging: a company whose narrative is 'AI for defense' yet does not name a single Maven contract, DARPA seedling, or PE number is structurally setup for J-Book divergence going forward."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Pangiam acquisition (closed 2/29/2024) positions BBAI as foundational leader in vision AI / digital identity (TSA/CBP, global trade).",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["acq_coherence.score_acquisition_coherence → MIXED_COHERENCE (mean 0.56); Pangiam scored 0.78 (high coherence) but ProModel Corporation 0.35 (low, revenue-synthetic)"],
+      "M_check": "acq_coherence",
+      "M_value": "MIXED_COHERENCE; total low-coherence acquisition value = $16.1M (ProModel Corp 2022); Pangiam itself is coherent with thesis",
+      "interpretation": "Pangiam itself is technologically coherent with BBAI's edge-AI/vision thesis (TSA/CBP vertical overlap). But the broader acquisition pattern (ProModel Government Solutions 2020 → ProModel Corp 2022 → Pangiam 2024) shows the IONQ-style 'roll-up to support narrative' pattern: ProModel Corp 2022 was flagged revenue-synthetic. The $70M Pangiam deal is all-stock (61.8M shares at $1.3439) — i.e. funded by issuing 24% of outstanding shares at a depressed price, suggesting capital constraints. MODERATE — the pivot is coherent enough not to be RED but the stock-funded rollup pattern matches the framework's distress-cluster heuristic."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "TAM $80B → $272B (2024→2028).",
+      "severity": "UNVERIFIABLE",
+      "supports": [],
+      "M_check": "n/a (not J-Book-verifiable; TAM claims aren't grounded in any specific PE)",
+      "M_value": "n/a",
+      "interpretation": "TAM claims by definition cite 'third-party industry reports' and are forward-looking aspirational; not in scope for this cohort's J-Book divergence test. Treat as control — UNVERIFIABLE but not a J-Book finding."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "~480 employees, 5 office locations, vast majority security-cleared.",
+      "severity": "PASS",
+      "supports": [],
+      "M_check": "n/a (control claim — facility/HR)",
+      "M_value": "n/a",
+      "interpretation": "Control claim — no J-Book pattern engagement. Plausibility check (480 employees across 5 offices in defense-cluster geographies) is consistent with the company's revenue scale ($155M). PASS."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "Virgin Orbit (commercial-space customer) declared bankruptcy Q2 2023; BBAI absorbed the loss.",
+      "severity": "PASS",
+      "supports": ["edgar_fts(BigBear.ai, cik=L3Harris) → 1 hit (8-K, 2023-07-26 investor letter)"],
+      "M_check": "edgar_fts (control / counterparty)",
+      "M_value": "1 external counterparty disclosure (L3Harris 8-K 2023-07-26); Lockheed/Northrop/GD have zero mentions of BBAI",
+      "interpretation": "BBAI's disclosure of the Virgin Orbit loss is forthright; the $1.4M bad-debt reserve is appropriately sized. PASS. Note: the very low external corroboration (only 1 L3Harris mention; no Lockheed/Northrop/GD reciprocal mention) is mild evidence that BBAI is NOT a material subcontractor named in primes' filings — consistent with the small DoD-direct award profile but a soft signal that the company's positioning as a key prime-partner is overstated."
+    }
+  ],
+  "summary": {
+    "n_claims": 10,
+    "n_jbook_grounded": 6,
+    "n_queries": 20,
+    "severity_counts": {
+      "PASS": 3,
+      "MODERATE_UNDERDELIVERY": 3,
+      "SEVERE_UNDERDELIVERY": 0,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 4
+    },
+    "jbook_hits": {
+      "pentagon_jbook_fired_on": 0,
+      "of_jbook_grounded_claims": 6,
+      "note": "Zero positive J-Book hits — every BBAI-grounded program query returned NOT_FOUND. This is a CORPUS COVERAGE finding, not a forward-funding red flag (heuristic 7). The deeper finding is the EXTRACTION-LEVEL OPACITY: BBAI's pre-cutoff filings do not name a single Pentagon PE number or program-of-record by name, only generic 'Army programs / Air Force programs / DoD' phrasing. The J-Book divergence pattern that catches YSS/IONQ requires the issuer to NAME a specific PE; BBAI does not — so the framework cannot fire on the primary pattern. The secondary finding is the Customer A/B/C anonymization combined with $89M of significant-customer backlog: classic 'unverifiable forward concentration.' Combined with MIXED acquisition coherence (ProModel Corp revenue-synthetic) and the all-stock Pangiam roll-up at a depressed price, the structural signature is consistent with a company under narrative pressure but the framework cannot pin a SEVERE/RED on any single J-Book line."
+    }
+  }
+}

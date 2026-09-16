@@ -1,0 +1,42 @@
+## CAUSE-CHECK (ordered first; the leak specifics were unverified)
+
+Reconstructed timeline, trade press + Rockstar's own statement:
+
+- **8/18** — "CyberLeek" publishes two gameplay clips + a Leonida map image. Motive is a memecoin pump wrapped in an anti-digital-only manifesto ("HIGHER MARKET CAP = MORE LEEKS" watermark on the 8/21 clip).
+- **8/18–21** — clips 3–6, released via memecoin-holder polls. Interactive control demonstrated (shooting "LEEK" into a wall) ⇒ **genuine playable build**, not pre-rendered footage.
+- **8/26** — first true **story spoilers** (Lucia prison prologue). Rockstar confirms authenticity, calls it "heartbreaking," says they are **"nearly there"** and asks fans to wait for **November 19** — an explicit date reaffirmation.
+- **8/27** — CyberLeek withdraws ~$250k; $CYBERLEEK collapses ~86% from peak; **leaking appears to stop.**
+- **8/27–28** — official Netflix Extended Look. Stock **+2.5%**.
+- **8/31** — **−6.7%** on ~3x volume. BofA reiterates Buy/$368 the same day.
+
+**The decisive finding: I could not locate any new leak event, delay report, downgrade, or company disclosure dated 8/29–8/31.** The leaker had already cashed out and gone quiet on 8/27, and the last new information before the drop was *record demand*. Two secondary outlets attribute part of the 8/31 slide to the "$43M impairment" — that charge was disclosed in the **8/7** print, three weeks earlier. That is a stale-datum artifact in the coverage, not a cause.
+
+Delay evidence is **absent**: the only "delay" source is Mike York, a Rockstar animator who left in **2019**, speculating via a sports-betting site, published **8/5 — before the leak**. BofA's read is the material one: footage is consistent with a genuine playable build, but **no clear evidence a distributable copy exists** — i.e. piracy/security exposure, not a ship-date or demand event.
+
+**Correction to one of the court's own frames.** The brief assumes a slip moves "~$3–4bn bookings FY27→FY28." That does not reconcile with the company's guide. FY27 net bookings guidance is **$8.0–8.2bn, ~20% growth over FY26 at midpoint** ⇒ FY26 ≈ $6.75bn ⇒ **implied GTA VI contribution in FY27 ≈ $1.3–2.0bn** (Nov 19 launch = ~4.5 months inside FY27). Newzoo's $3.3–5.2bn launch-week figure is *gross consumer spend*, not publisher net bookings, and is not additive to a fiscal-year guide. Flagged as **my derivation, not a company statement** — but if right, the delay scenario is roughly **half** the size the brief prices.
+
+---
+
+Single-member principal-directed event; no peer cohort is defined in the event JSON and I could not read `knowledge_graph/cohorts.json` this session (permission denied), so **dispersion-vs-cohort-median is not computable** and I have not fabricated one.
+
+| ticker | class | refuting metric | current value/trend (cited) | next print date | note |
+|---|---|---|---|---|---|
+| TTWO | **DAMAGE-ABSENT** | FY2027 Net Bookings guidance $8.0–8.2bn + the Nov 19 ship date holding (the two things a real leak-damage thesis must break) | **Reiterated 8/7/26** at $8.0–8.2bn, ~20% YoY growth at midpoint; Q1 actual **$1,386M beat the high end** of $1,320–1,370M; Q2 FY27 guided $1,620–1,670M. Rockstar **reaffirmed Nov 19 on 8/26**, mid-leak, calling the game "nearly there" ([rockstargames.com newswire](https://www.rockstargames.com/newswire/article/ak3ak31a49a221/grand-theft-auto-vi-is-now-set-to-launch-november-19-2026); 8-K [0001628280-26-054580](https://www.sec.gov/Archives/edgar/data/0000946581/000162828026054580/ttwo1q27earningsrelease.htm)) | **~2026-11-09 — UNCONFIRMED** (yfinance-derived; company has not announced — its Q1 date was pre-announced 7/9 for an 8/7 print) | Post-leak demand set records: Twitch concurrents 881k→**1.8M**, **3.97M** peak across reaction streams, Netflix US web users **+125%**, both platforms outaged. Damage channel that *is* real is narrow and **pre-dates the leak**: physical-retail cancellations over the no-disc/code-in-box decision (June, anecdotal, digital-dominated mix) |
+
+**COURT-WORTHY (damage-absent, ranked):**
+
+1. **TTWO** — the 8/31 −6.7% carries **no identifiable new information**: the leaker had cashed out and stopped on 8/27, the last real datum before the drop was record post-leak engagement, and the guide and ship date were both reaffirmed *during* the leak. The market repriced a narrative on a Monday, not a fact. The offset is that this is the **most-discovered name on the board** (29 analysts, Strong Buy, consensus PT ~$293, BofA $368) — so this is a timing/instrument question, not a discovery edge.
+
+**COURT-WORTHINESS TTWO: 7/10** — classification is confidently damage-absent, but instrument choice (stock vs. Nov 19 event vol) and the crowding discount are unresolved and swing sizing materially.
+
+**PRINT PROXIMITY: 2026-11-09 — UNCONFIRMED (yfinance-derived; not announced by the company — take2games.com/ir/press-releases shows no Q2 FY27 date, and the Q1 date was announced ~4 weeks ahead via a 7/9 PR). ~48 trading days out, so no print-decisive reconstruction is triggered.**
+
+Two things the court must not conflate: the **~Nov 9 print lands 10 days *before* launch** and therefore carries only the guide and the date confirmation (decisive for *delay*); the first print carrying actual GTA VI units is **Q3 FY27, ~Feb 2027** (decisive for *spoiler demand damage*). The real catalyst between them is **Nov 19 itself**.
+
+Three gaps I could not close, which the court should treat as open rather than settled:
+
+- **Options positioning / event IV into Nov 19 is UNVERIFIED** — the IBKR tools require permission this session and were denied, so frame (d), whether event vol is the better instrument than stock, is exactly the unresolved question driving the 7/10 rather than a lower score.
+- **The $1.3–2.0bn implied GTA VI contribution is my back-solve**, not a disclosed figure; FY26 actual net bookings should be pulled from the 10-K before the delay scenario is priced.
+- **Residual tail is not zero**: the leaker demonstrably held a playable build and threatened ending spoilers before going quiet. Quiet since 8/27 is not the same as disarmed.
+
+Sources: [Rockstar Newswire — Nov 19 launch](https://www.rockstargames.com/newswire/article/ak3ak31a49a221/grand-theft-auto-vi-is-now-set-to-launch-november-19-2026) · [SEC 8-K Q1 FY27 earnings release](https://www.sec.gov/Archives/edgar/data/0000946581/000162828026054580/ttwo1q27earningsrelease.htm) · [Q1 FY27 call transcript](https://www.fool.com/earnings/call-transcripts/2026/08/14/take-two-ttwo-q1-2027-earnings-call-transcript/) · [Investing.com — Q1 FY27 slides](https://www.investing.com/news/company-news/taketwo-q1-fy2027-slides-bookings-beat-gta-vi-on-track-93CH-4846664) · [Engadget — Rockstar "nearly finished"](https://www.engadget.com/2244659/rockstar-calls-gta-6-leaks-heartbreaking-says-game-is-nearly-finished/) · [Investing.com — why TTWO slid 8/31, BofA $368](https://www.investing.com/news/stock-market-news/why-is-taketwo-interactive-stock-sliding-today-93CH-4882958) · [Kotaku — CyberLeek cash-out 8/27](https://kotaku.com/gta6-grand-theft-auto-6-leaks-cyberleek-memecoin-rockstar-cash-out-2000728825) · [Kotaku — story spoilers](https://kotaku.com/watch-out-the-gta-6-leaker-is-now-sharing-story-spoilers-2000728456) · [PushSquare — playable build](https://www.pushsquare.com/news/2026/08/gta-6-gameplay-leaks-continue-as-group-makes-demands-of-rockstar) · [StreamsCharts — 3.97M peak](https://streamscharts.com/news/gta-vi-gameplay-reveal-viewership) · [GamesBeat — Netflix +35% (Sensor Tower)](https://gamesbeat.com/netflixs-viewership-spiked-by-35-for-the-gta-vi-preview-sensor-tower/) · [TipRanks — consensus PT $292.88](https://www.tipranks.com/news/take-two-stock-ttwo-jumps-as-gta-6-preview-overwhelms-netflix-and-twitch) · [VGC — Newzoo preorders (late-June week)](https://www.videogameschronicle.com/news/analytics-firm-says-gta-6-has-the-strongest-pre-order-campaign-on-record-is-on-track-to-sell-37-51-million-in-its-first-week/) · [Notebookcheck — ex-dev delay claim](https://www.notebookcheck.net/Ex-Rockstar-dev-says-GTA-6-release-date-delay-of-6-months-possible-despite-pre-orders.1360870.0.html) · [GTABoom — no-disc cancellations](https://www.gtaboom.com/gta-6-pre-orders-canceled-over-no-disc-release-says-gamestop-a687) · [Variety — subpoenas to Microsoft/Discord](https://variety.com/2026/gaming/news/gta-6-leaks-rockstar-subpoenas-microsoft-discord-1236840176/)

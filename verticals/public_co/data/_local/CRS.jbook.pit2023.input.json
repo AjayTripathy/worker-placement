@@ -1,0 +1,114 @@
+{
+  "ticker": "CRS",
+  "cik": "0000017843",
+  "company_name": "Carpenter Technology Corporation",
+  "cutoff": "2023-01-15",
+  "filing": "0000017843-22-000019_10-K.txt",
+  "filing_form": "10-K",
+  "filing_date": "2022-08-15",
+  "cohort": "jbook_exposure_divergence",
+  "extraction_note": "Filing reports Aerospace & Defense as a single blended end-use market bucket. No specific Pentagon Program Elements (PE numbers), no named DoD programs of record, no named DoD customers, no IDIQ/program-of-record narratives. Defense exposure is Tier-3 / sub-tier specialty alloy supplier; the only named tier-1 customer is Howmet Aerospace (formerly Arconic) which was a 10% customer in FY20 but fell below 10% in FY21/FY22. The J-Book divergence pattern (named PE -> unfunded) has near-zero surface area in this filing.",
+  "claims": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Aerospace and Defense end-use market generated $790.2 million in FY2022 net sales, representing 43% of total net sales, up from $710.9M (48% mix) in FY2021 and down from $1,313.7M (60% mix) in FY2020.",
+      "subject": "Carpenter Technology",
+      "predicate": "reports A&D end-use revenue",
+      "object_value": "$790.2M FY22 / 43% of net sales (recovering from COVID trough)",
+      "source_quote": "Aerospace and Defense $ 790.2 43 % $ 710.9 48 % $ 1,313.7 60 %",
+      "category": "dod_customer_concentration",
+      "notes": "Aggregated A&D bucket; NOT decomposed into commercial-aero vs DoD. From context (jet engines, Howmet customer), majority is commercial aerospace, not DoD direct.",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "Carpenter Technology", "cutoff_date": "2023-01-15"}, "rationale": "Test whether J-Book corpus indexes Carpenter as a primary contractor on any specific PE"},
+        {"source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "Carpenter Technology Corporation"}, "rationale": "Confirm whether Carpenter has any direct DoD prime obligations (vs. sub-tier supplier through Howmet/GE/PW)"}
+      ]
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Forward-looking growth expectation: 'we expect to see continued growth across our end-use markets, especially in Aerospace, Defense and Medical applications, where customers are still ramping to pre-pandemic levels.'",
+      "subject": "Carpenter Technology",
+      "predicate": "forecasts growth",
+      "object_value": "FY23+ growth in Aerospace, Defense, Medical driven by post-COVID ramp",
+      "source_quote": "Looking ahead, we expect to see continued growth across our end-use markets, especially in Aerospace, Defense and Medical applications, where customers are still ramping to pre-pandemic levels.",
+      "category": "jbook_program_pipeline",
+      "notes": "Generic recovery narrative; no specific program named. Forward expectation is tied to commercial aero ramp + medical, not a named DoD program-of-record. Materiality of DoD-specific portion is low.",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "Carpenter Technology Corporation", "cutoff_date": "2023-01-15"}, "rationale": "Catch-all: confirm no named PE attaches to Carpenter directly in J-Book corpus"}
+      ]
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Backlog grew nearly 3x year-over-year to $1,539.3 million as of June 30, 2022 (from $529.3M at June 30, 2021), 'the majority of which is expected to be shipped within fiscal year 2023'.",
+      "subject": "Carpenter Technology",
+      "predicate": "reports backlog",
+      "object_value": "$1,539.3M backlog, ~$1,010M YoY increase, most shippable in FY23",
+      "source_quote": "As of June 30, 2022, we had a sales backlog of orders excluding surcharge, believed to be firm, of approximately $1,539.3 million, the majority of which is expected to be shipped within fiscal year 2023.",
+      "category": "rollup_thesis",
+      "notes": "Backlog is aggregate across all end-use markets; not allocated to DoD-specific programs. Treated as control claim — not a J-Book-grounded assertion.",
+      "queries": [
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"query": "Carpenter Technology backlog", "cik": "0000017843", "form_types": ["10-K", "10-Q"]}, "rationale": "Self-consistency check on backlog disclosure"}
+      ]
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Howmet Aerospace Inc. (formerly Arconic Inc.) accounted for ~10% of net sales in FY2020 (90% via SAO, 10% via PEP); no single customer reached the 10% threshold in FY2021 or FY2022.",
+      "subject": "Carpenter Technology",
+      "predicate": "reports customer concentration",
+      "object_value": "Howmet ~10% in FY20; below threshold in FY21/FY22",
+      "source_quote": "One customer, Howmet Aerospace Inc. (formerly Arconic Inc.), accounted for approximately 10 percent of net sales for the year ended June 30, 2020. ... No single customer accounted for 10 percent or more of total net sales for the years ended June 30, 2022 and June 30, 2021.",
+      "category": "counterparty_disclosure",
+      "notes": "Howmet is the only named customer. Howmet is a tier-1 engine-structures supplier (CFM/GEnx/V2500/LEAP/GE9X); routes Carpenter's alloy into commercial AND defense engine platforms but Carpenter does not name the downstream platform.",
+      "queries": [
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"query": "Carpenter Technology specialty alloy", "cik": "0000004281", "form_types": ["10-K", "10-Q"]}, "rationale": "Look for Howmet's mention of Carpenter as a supplier (counterparty corroboration)"}
+      ]
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Carpenter is a 'recognized leader in high-performance specialty alloy-based materials and process solutions for critical applications in the aerospace, defense, medical, transportation, energy, industrial and consumer end-use markets', with competitors numbering 'less than ten' in high-value demanding applications.",
+      "subject": "Carpenter Technology",
+      "predicate": "asserts competitive position",
+      "object_value": "Leader in specialty alloys; <10 competitors in high-value demanding apps",
+      "source_quote": "There are less than ten companies producing one or more similar products that we consider our major competitors for our high-value products used in demanding applications, particularly in our Aerospace and Defense and Energy end-use markets.",
+      "category": "rollup_thesis",
+      "notes": "Market-structure claim; not a specific program claim. Control claim.",
+      "queries": []
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Carpenter owns U.S. and international patents and has granted licenses, but 'do not consider our business to be materially dependent upon any single such item or related group of such items.'",
+      "subject": "Carpenter Technology",
+      "predicate": "discloses patent portfolio",
+      "object_value": "Patents exist but immaterial individually",
+      "source_quote": "We own a number of United States and international patents and have granted licenses under some of them. ... we do not consider our business to be materially dependent upon any single such item or related group of such items.",
+      "category": "patent",
+      "notes": "Control claim — patent portfolio exists but explicitly disclaimed as immaterial. Standard USPTO check.",
+      "queries": [
+        {"source": "uspto_odp.query_assignee", "kwargs": {"assignee_name": "Carpenter Technology Corporation"}, "rationale": "Confirm patent portfolio exists (corroborates claim, not load-bearing)"}
+      ]
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "R&D spending was $20.4M in FY22, $19.7M FY21, $28.0M FY20; 'our ability to be an innovator in special material development and manufacturing processes has been and will continue to be an important factor in the success of the Company.'",
+      "subject": "Carpenter Technology",
+      "predicate": "reports R&D",
+      "object_value": "$20.4M FY22 (~1.1% of sales)",
+      "source_quote": "Our expenditures for Company-sponsored research and development were $20.4 million, $19.7 million and $28.0 million in fiscal years 2022, 2021 and 2020, respectively.",
+      "category": "other",
+      "notes": "R&D scale is modest (~1% of sales). No DoD-funded RDT&E line items claimed; this is company-sponsored.",
+      "queries": []
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Carpenter operates mills in Reading and Latrobe, Pennsylvania, with additional operations in South Carolina and Alabama; PEP segment includes Dynamet titanium (a major aerospace fastener-alloy supplier) and Carpenter Additive.",
+      "subject": "Carpenter Technology",
+      "predicate": "discloses facility footprint",
+      "object_value": "PA (Reading/Latrobe), SC, AL; Dynamet titanium + Additive in PEP",
+      "source_quote": "This includes operations performed at mills primarily in Reading and Latrobe, Pennsylvania and surrounding areas as well as South Carolina and Alabama. ... This segment includes the Dynamet titanium business, the Carpenter Additive business and the Latrobe and Mexico distribution businesses.",
+      "category": "facility",
+      "notes": "Facility claim — control. EPA FRS would corroborate but not relevant to J-Book divergence.",
+      "queries": [
+        {"source": "epa_frs.query_facilities", "kwargs": {"company": "Carpenter Technology", "state": "PA"}, "rationale": "Corroborate facility footprint (control)"}
+      ]
+    }
+  ]
+}

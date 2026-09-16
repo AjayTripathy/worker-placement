@@ -1,0 +1,95 @@
+{
+  "ticker": "RKLB",
+  "scores": [
+    {
+      "claim_id": "RKLB-001",
+      "claim_text": "Rocket Lab signed an SDA Tranche 3 contract in December 2025, contributing materially to backlog growth from $1,067.0M to $1,847.3M.",
+      "severity": "PASS",
+      "supports": ["pentagon_jbook.query_program_funding"],
+      "M_check": "Mode A: usaspending shows $81.3M aggregate federal awards to ROCKET LAB USA INC (no T3 award yet, as expected for a Dec-2025 contract that has not yet flowed to FPDS). Mode B: pentagon_jbook confirms Tranche 3 Tracking Layer (PE 1206410SF) FUNDED_STEADY at $3.5B across 4 contractors (Lockheed, Northrop, L3 Harris, Rocket Lab) awarded Dec 2025 - exactly matches the company's 10-K disclosure.",
+      "M_value": {"jbook_status": "FUNDED_STEADY", "fy2026_funded_M": 3500, "primary_contractors_include_rocket_lab": true},
+      "interpretation": "Mode B strongly corroborates: T3 Tracking Layer is funded in PB 2026 with Rocket Lab named as a primary contractor. PASS."
+    },
+    {
+      "claim_id": "RKLB-002",
+      "claim_text": "Federal customers including DoW, NASA, DARPA, NRO - implying material federal contracts.",
+      "severity": "PASS",
+      "supports": ["usaspending.query_recipient_contracts", "usaspending.query_dod_contracts"],
+      "M_check": "Mode A: usaspending returns 17 federal contract awards totaling $81.3M to ROCKET LAB USA INC, including NASA VADR ($32.5M), CAPSTONE ($10.1M), DARPA R3D2 ($6.8M), DoD STP-S30 ($14.5M), and Rocket Lab National Security LLC NSSL Phase 3 Lane 1 ($5.0M). All named federal customers in claim are corroborated. Mode B (RPO gap): obligated federal $$ ($81M total) is far below $1.85B backlog, BUT this is consistent with mostly commercial bookings + multi-year T3 not yet obligated; not a material gap.",
+      "M_value": {"n_awards": 17, "total_obligated_usd": 81318408, "n_dod_awards": 7, "dod_obligated_usd": 27525120},
+      "interpretation": "All four named federal customers (DoW/DoD, NASA, DARPA, NRO via subcontracts) confirmed via direct prime awards. PASS."
+    },
+    {
+      "claim_id": "RKLB-003",
+      "claim_text": "Rollup of 5 acquisitions: Sinclair Interplanetary, ASI, Planetary Systems, SolAero, GEOST.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["uspto_odp.query_assignee", "acq_coherence.score_acquisition_coherence"],
+      "M_check": "Mode A: USPTO confirms SolAero is a real, productive IP entity (174 granted patents in solar cell / multijunction tech, applicant 'SolAero Technologies Corp.'). GEOST USPTO returns only 1 abandoned 2013 application (not the same GEOST - that record is for a different Geost, Inc., a posture-sensor company). Real GEOST (optical EO/IR payloads) has minimal patent footprint. Mode B: acq_coherence aggregate returned 'INCOHERENT_ROLLUP' with mean_coherence=0.0, but the LLM cited insufficient deal details rather than thesis mismatch - treat as tool-input limitation rather than substantive INCOHERENT signal.",
+      "M_value": {"solaero_n_granted": 174, "geost_n_granted": 0, "acq_coherence_signal": "INCOHERENT_ROLLUP_tool_artifact"},
+      "interpretation": "SolAero is real and well-IP'd. GEOST has near-zero independent patent footprint as a defense optics shop (typical for trade-secret-heavy EO/IR). The rollup is thematically coherent (all space-segment vertical components feeding Rocket Lab's end-to-end thesis), but GEOST's lack of independent IP and its very recent August-2025 acquisition timing (just months before T3 award announcement) deserves a MODERATE flag pending Mode B aggregate confirmation."
+    },
+    {
+      "claim_id": "RKLB-004",
+      "claim_text": "Rocket Lab raised $1,119.5M via ATM Equity Offerings in 2025 - material dilution.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": ["sec_filings.list_filings_by_form", "insider_vs_calendar.query_insider_sales_near_budget_events"],
+      "M_check": "Mode A: SEC confirms 5 separate 424B5 prospectus supplements filed 2025-03-11, 2025-05-30, 2025-09-15, 2026-03-17, and 2026-05-20 - exactly the ATM cadence consistent with the disclosed $1.12B raise. Mode B (THE HIGH-SIGNAL CHECK): insider_vs_calendar returned signal=CLUSTERED_DISCRETIONARY. 178 total insider sales worth $604.1M aggregated; 54 sales totaling $232.7M proximate to budget/calendar events; 23 of those are DISCRETIONARY (non-10b5-1). FY25 fiscal year-end window alone saw 38 sales / 19 discretionary / $210M in value across 5 owners including CEO Peter Beck (10b5-1 plan), Director Matthew Ocko (discretionary, repeated), Adam Spice (CFO), Frank Klein, Arjun Kampani. Director Alex Slusky sold $11.8M (all discretionary) within 14 days of the FY27 J-Book release on 2026-04-28.",
+      "M_value": {"n_424B5": 5, "insider_signal": "CLUSTERED_DISCRETIONARY", "total_sales_value_usd": 604099811, "proximate_value_usd": 232674980, "n_discretionary_proximate": 23, "key_event_FY25_yearend_value_usd": 210042444, "key_event_FY27_jbook_value_usd": 11807634},
+      "interpretation": "Mode B fires the highest-signal flag in the framework: CLUSTERED_DISCRETIONARY insider sales near FY25 year-end and the April 2026 FY27 J-Book release. Director Matthew Ocko's repeated 9/16/2025 discretionary sales totaling well over $100M and Alex Slusky's $11.8M discretionary sales adjacent to the FY27 J-Book release (which confirmed Tranche 3 Transport Layer unfunded for second year per the budget event note) is a textbook SEVE indicator per the prompt heuristics."
+    },
+    {
+      "claim_id": "RKLB-005",
+      "claim_text": "Solar cell production facility in Albuquerque, NM ~160,000 sq ft.",
+      "severity": "PASS",
+      "supports": ["epa_frs.query_facilities", "osha_establishments.query_establishments"],
+      "M_check": "Mode A: EPA FRS confirms SOLAERO TECHNOLOGIES CORPORATION at 10420 RESEARCH RD SE, ALBUQUERQUE, NM 87123 (registry_id 110004282071). Mode B: OSHA confirms same address with 399 annual average employees, NAICS 334413 (semiconductor/solar) - consistent with a real 160k sqft solar production facility.",
+      "M_value": {"epa_facility_id": "110004282071", "osha_employees": 399, "naics": "334413"},
+      "interpretation": "Cleanly verified across both EPA FRS and OSHA. PASS."
+    },
+    {
+      "claim_id": "RKLB-006",
+      "claim_text": "Patent portfolio covering Electron, Rutherford, Archimedes, Photon, Neutron IP.",
+      "severity": "PASS",
+      "supports": ["uspto_odp.query_assignee"],
+      "M_check": "Mode A: USPTO ODP shows 14 granted patents under 'Rocket Lab USA, Inc.' assignee (24 applications total) covering rocket engine injectors, jettisonable battery systems for electric turbopumps, satellite deployer composite guide rails, regeneratively cooled turbopump impellers. Mode B (subsidiary assignees): SolAero Technologies Corp has 174 granted patents (multijunction solar cells, automated assembly). Combined, the IP footprint is substantial and on-thesis. Per heuristic 8 (n_granted >= 5 in claimed area = PASS).",
+      "M_value": {"rocket_lab_n_granted": 14, "solaero_n_granted": 174, "total_combined": 188},
+      "interpretation": "Patent portfolio cleanly corroborated across parent + acquired-entity assignee searches. PASS."
+    },
+    {
+      "claim_id": "RKLB-007",
+      "claim_text": "Direct Funding Agreement with U.S. Department of Commerce.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["usaspending.query_recipient_grants"],
+      "M_check": "Mode A: usaspending shows only $563K of DoC awards under 'Rocket Lab' (and that recipient is 'LEAN ROCKET LAB' - a Michigan accelerator, NOT Rocket Lab USA). Mode B: SolAero shows $14.1M in DoD assistance awards (FA86502025507 $8M and FA86502025527 $6M), not DoC. The DoC 'Direct Funding Agreement' referenced in the 10-K (likely CHIPS Act funding for SolAero solar-cell domestic production) is NOT yet visible in usaspending grants under either Rocket Lab or SolAero. Could be a non-grant DoC instrument or hasn't yet been reported through USAspending pipelines.",
+      "M_value": {"doc_grants_to_rocket_lab": 0, "doc_grants_to_solaero": 0, "dod_grants_to_solaero": 14149317},
+      "interpretation": "Company says they have a DoC Direct Funding Agreement (restricts dividends/buybacks - a material covenant), but no DoC obligation found in usaspending. Could be a pending or non-grant instrument; MOD pending clarification of whether it's a non-grant transaction (Loan, CHIPS PIA, etc.) or genuinely missing."
+    },
+    {
+      "claim_id": "RKLB-008",
+      "claim_text": "NSSL Phase 3 / Space Force program participation.",
+      "severity": "PASS",
+      "supports": ["usaspending.query_dod_contracts", "pentagon_jbook.query_program_funding"],
+      "M_check": "Mode A: usaspending shows ROCKET LAB NATIONAL SECURITY LLC award FA881125FB007 for $5.0M described as 'NATIONAL SECURITY SPACE LAUNCH (NSSL) PHASE 3 LANE 1 LAUNCH SERVICES PROCUREMENT'. Mode B: pentagon_jbook confirms NSSL Program (PE 1206853SF) FUNDED in PB2026 at $6.6M (down from $157M FY24, $103M FY25 - signal=FUNDED_SHRINKING). Program exists and is funded but shrinking on the RDT&E side (Phase 3 R&D winding down as procurement ramps).",
+      "M_value": {"nssl_obligated_usd": 5000000, "jbook_signal": "FUNDED_SHRINKING", "fy26_funded_M": 6.595},
+      "interpretation": "NSSL Phase 3 Lane 1 participation directly corroborated via specific contract award + J-Book program existence. PASS. (Note: Phase 3 RDT&E shrinkage is expected as program transitions to procurement phase, not a red flag.)"
+    },
+    {
+      "claim_id": "RKLB-009",
+      "claim_text": "MDA Corporation procurement contract for 17 spacecraft buses with delivery delays.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["edgar_fts.query_fulltext"],
+      "M_check": "Mode A/B: MDA Corporation is a Canadian-listed company (TSX: MDA), not a U.S. SEC registrant. EDGAR FTS yields 488 hits for 'Rocket Lab' globally but no counterparty-CIK match (no MDA CIK in our common-CP list). Per heuristic 2 (foreign-issuer caveat), MDA's filings wouldn't appear in EDGAR. Cannot run the standard counterparty-disclosure cross-check.",
+      "M_value": {"edgar_total_hits_global": 488, "mda_in_edgar": false, "is_canadian_issuer": true},
+      "interpretation": "Real MDA-RKLB relationship is publicly known and the 10-K disclosure is internally consistent (delays + LDs both ways), but our M-sources do not cover TSX filings - UNVERIFIABLE."
+    },
+    {
+      "claim_id": "RKLB-010",
+      "claim_text": "Securities class action re Neutron development; amended complaint pending. Jan 21 2026 Neutron Stage 1 tank rupture.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["claim_evolution.query_claim_evolution"],
+      "M_check": "Mode A: claim_evolution shows Neutron narrative REAFFIRMED across 36 subsequent 8-K mentions including the 2026-01-22 8-K acknowledging the tank rupture, the Q3-2024 'multiple-launch agreement', and the Feb-2026 10-K affirming 'significant qualification milestones'. Mode B (material weakness narrative): material weakness language in 2024 10-K was 'AFFIRMED' but in context that prior MWs had been remediated; 2025/2026 10-K mentions are 'UNRELATED' boilerplate. No adverse ICFR opinion. However, the Jan 21 2026 Stage 1 tank rupture during hydrostatic pressure trial is a real technical setback affecting Neutron schedule, and the still-pending amended securities class action (re-filed Dec 2025) is a live legal risk.",
+      "M_value": {"neutron_8k_mentions": 36, "evolution_status": "REAFFIRMED_IN_8K_ONLY", "material_weakness_status": "remediated_or_unrelated", "tank_rupture_disclosed_2026_01_22": true},
+      "interpretation": "Company's narrative is internally consistent and supported by serial 8-K disclosures. ICFR is clean (heuristic 7 doesn't trigger). However, Neutron Stage 1 rupture + active amended securities complaint + the CLUSTERED_DISCRETIONARY insider-sale signal taken together suggest meaningful execution risk on the centerpiece Neutron program. MODERATE_UNDERDELIVERY - claim of progress is technically true but understates the gap between disclosed milestone language and the Jan 2026 hardware failure."
+    }
+  ]
+}

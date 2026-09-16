@@ -1,0 +1,108 @@
+{
+  "ticker": "RCAT",
+  "cutoff": "2026-05-20",
+  "filing": "0001628280-26-019861_10-K.txt",
+  "filing_date": "2026-03-19",
+  "filing_age_days": 62,
+  "scores": [
+    {
+      "claim_id": "RCAT-1",
+      "claim_text": "Teal Drones won the U.S. Army SRR Program of Record (Nov 2024); FY2025 revenue growth attributed primarily to SRR deliveries.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["usaspending.query_dod_contracts(Teal Drones)", "pentagon_jbook.query_program_funding(SRR)"],
+      "M_check": "Mode A: USAspending DoD contracts for Teal Drones; Mode B: J-Book lookup of Short Range Reconnaissance program funding",
+      "M_value": "Mode A PASS-PARTIAL: 27 DoD obligations totaling $2.16M for Teal Drones — confirms Teal is a real DoD vendor but the visible obligated $$ are SBIR/Blue UAS Border Patrol style buys (e.g., 'TEAL 2 DRONES IAW QUOTE 00000775'), NOT a Program of Record line for SRR. No award descriptions reference 'SRR' or 'Short Range Reconnaissance' explicitly. Mode B NOT_FOUND: J-Book corpus does not surface a Short Range Reconnaissance program line — could mean the program is below the J-Book extraction threshold, or that no separate PE-line was created (SRR is often line-item funded inside Army PB-23 etc.). Cannot Mode-B contradict.",
+      "interpretation": "Teal Drones is a real DoD/DHS vendor with $2-13M cumulative federal obligations (counting all subs); a Nov 2024 SRR Program of Record win is plausible because contract obligations typically lag award by several quarters and SRR LRIP units would post in 2026. However, the company's $40.7M FY25 revenue with 73% from USG implies ~$29.7M of federal revenue, while visible USAspending obligations across ALL entity variants are only $12.6M cumulative through cutoff — a meaningful gap. Possible reasons: (a) Army has not yet obligated the LRIP funds on a separate Teal-named recipient line; (b) obligations route through a prime/integrator. Tracked as MOD pending. Not a hard contradiction."
+    },
+    {
+      "claim_id": "RCAT-2",
+      "claim_text": "FY2025 customer concentration: 73% of revenue from one customer; Customer A = 88% of A/R.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": ["usaspending.query_federal_presence(multi-variant)", "usaspending.query_dod_contracts(Teal Drones)"],
+      "M_check": "Mode A: USAspending federal presence for Red Cat + Teal + FlightWave + Skypersonic. Mode B: identify unnamed Customer A (assumed US Army) via top recipient.",
+      "M_value": "Mode A: total federal contracts across ALL entity variants (Red Cat Holdings UEI, Teal Drones UEI, FlightWave UEI, Skypersonic UEI) = $12.65M cumulative across all years, 77 contracts. Mode B: top awarding agencies are DHS ($1.7M Border Patrol BPA), DoD ($1.9M FlightWave Edge-130 TACFI, $0.75M Teal 2 for USAFA/A3), USDA, NASA, VA, Interior, Commerce, Energy. No single agency obligation in the $20-30M range that would correspond to an Army SRR LRIP order representing 73% of $40.7M.",
+      "interpretation": "RCAT claims $29.7M of FY2025 revenue (73%) came from US Government, with one customer = 73% (likely the Army via SRR). But cumulative federal obligations across all RCAT subsidiaries through cutoff are only $12.65M and no single FY2025 obligation exceeds ~$1.9M. This is a MATERIAL DIVERGENCE between disclosed federal revenue ($29.7M FY25) and obligated $$ visible in USAspending. Either (a) SRR LRIP awards post-Nov-2024 obligated under a prime/integrator name and Teal is sub-tier (in which case the company's framing of 'we won the SRR Program of Record' is misleading), or (b) obligations are pending. Either way the gap is SEVE."
+    },
+    {
+      "claim_id": "RCAT-3",
+      "claim_text": "Raised ~$249M in gross proceeds across three 2025 registered direct offerings ($30M April / $46.8M June / $172.5M Sept + over-allotment).",
+      "severity": "PASS",
+      "supports": ["sec_filings.list_filings_by_form(S-3)", "insider_vs_calendar.query_insider_sales_near_budget_events"],
+      "M_check": "Mode A: SEC S-3 shelf registrations on file. Mode B: insider Form 4 sales clustered around the equity raises / fiscal-year-end.",
+      "M_value": "Mode A PASS: 5 S-3 filings on file at CIK 0000748268, with shelves filed 2024-11-14, 2025-03-10, 2025-09-15 — timing aligns with the three raises. Mode B: 26 Form 4 filings, 19 total insider sales totaling $5.2M; 2 sales (1 discretionary, non-10b5-1) clustered to fiscal-year-end Sept 30 2025 — a $940K non-10b5-1 sale by Hitchcock Geoffrey Wayne on 2025-10-01 (1 day after FYE, ~3 weeks after the $172.5M Sept raise), and a $109K sale by Moe Christopher R. on 2025-09-29.",
+      "interpretation": "The equity raise sequence is corroborated by S-3 filings. The Mode B insider-sale check finds one non-10b5-1 discretionary sale of ~$940K clustered to fiscal year end / just after the largest of the three equity raises — that's a soft yellow flag but not by itself SEVE because (a) the F-code on the Hitchcock sale was 'F' (likely tax-withholding on vesting, not open-market discretionary) and (b) the only true open-market 'S' sale was Moe's $109K. Overall PASS with a note."
+    },
+    {
+      "claim_id": "RCAT-4",
+      "claim_text": "All-domain defense rollup: Teal + FlightWave + Skypersonic + Blue Ops; divested Rotor Riot / Fat Shark consumer segment.",
+      "severity": "PASS",
+      "supports": ["edgar_fts.query_fulltext(FlightWave)", "acq_coherence.score_acquisition_coherence"],
+      "M_check": "Mode A: edgar_fts confirms FlightWave acquisition; Mode B: acq_coherence on full rollup vs parent thesis.",
+      "M_value": "Mode A: FlightWave acquisition is real (USAspending shows Edge-130 TACFI obligation $1.9M to FlightWave Aerospace Systems UEI CFMHAEJVU8H1). Mode B: acq_coherence aggregate signal = COHERENT_ROLLUP, mean_coherence = 0.80. Per-acq: Teal 0.95, FlightWave 0.85, Blue Ops 0.85, Skypersonic 0.55 (only mild divergence — commercial inspection drones). No revenue-synthetic flags. n_low_coherence=0.",
+      "interpretation": "Rollup is technologically coherent under the all-domain defense thesis. This is NOT a Nikola-style incoherent rollup. PASS."
+    },
+    {
+      "claim_id": "RCAT-5",
+      "claim_text": "Teal 2 is Blue UAS Certified by DoD; FANG is NDAA-compliant.",
+      "severity": "PASS",
+      "supports": ["usaspending.query_dod_contracts(Teal Drones)"],
+      "M_check": "Mode A: DoD contracts whose descriptions reference Blue UAS / NDAA list.",
+      "M_value": "USAspending obligations include Award W912LQ25FA019: 'THE UAS MUST BE LISTED ON THE BLUE UAS CERTIFIED LIST. HTTPS://WWW.DIU.MIL/BLUE-UAS-CLEARED-LIST' procuring 18 Teal Blue UAS units for Virginia Army National Guard. DHS Border Patrol award 70B02C23F00001136 explicitly procures 'BLUE SMALL UNMANNED AIRCRAFT SYSTEMS (SUAS) FOR U.S. BORDER PATROL' from Teal — confirming Teal is on the Blue UAS cleared list.",
+      "interpretation": "Blue UAS certification claim is independently corroborated by federal procurement language in multiple awards that explicitly require Blue UAS cleared status and award to Teal. PASS."
+    },
+    {
+      "claim_id": "RCAT-6",
+      "claim_text": "Five U.S. manufacturing facilities totaling ~269K sqft (Salt Lake UT, Valdosta GA, Torrance CA, Carson CA, West Palm Beach FL).",
+      "severity": "UNVERIFIABLE",
+      "supports": ["osha_establishments.query_establishments", "epa_frs.query_facilities"],
+      "M_check": "Mode A: OSHA establishments hits; Mode B: EPA FRS facility hits.",
+      "M_value": "OSHA: 0 matches for 'Teal Drones' and 0 for 'Red Cat'. EPA FRS: 0 facilities for Teal Drones UT.",
+      "interpretation": "Per calibration heuristic 1, light electronics/drone assembly is typically NOT in EPA FRS. OSHA injury-rate data may also lag for new facilities — Valdosta GA was acquired/expanded recently. Absence here is not a red flag for drone assembly. UNVERIFIABLE — the claim is a lease/operational claim better verified via leases (which are disclosed in 10-K Item 2) rather than EPA/OSHA."
+    },
+    {
+      "claim_id": "RCAT-7",
+      "claim_text": "Named partnerships: AeroVironment (FANG-on-P550 marsupial), Palantir (VNav on Black Widow), Apium Swarm Robotics.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["edgar_fts.query_fulltext(AVAV cik=0001368622)", "edgar_fts.query_fulltext(PLTR cik=0001321655)"],
+      "M_check": "Mode A: partners are real public companies; Mode B: counterparty 10-K/10-Q mentions of Red Cat.",
+      "M_value": "AeroVironment (CIK 0001368622): 3 hits for 'Red Cat' but ALL in DEF 14A proxy statements (not operational 10-K/10-Q disclosure). 0 hits for 'FANG drone OR marsupial CLIK' in AV filings. Palantir (CIK 0001321655): 0 hits for 'Red Cat' or 'Red Cat Holdings' or 'FANG/Black Widow drone' across all forms through cutoff.",
+      "interpretation": "Partnerships are characterized in RCAT's 10-K as 'development roadmaps', 'flight testing', and 'MOUs' — i.e., announcement-stage collaborations not yet material to counterparties. Palantir's silence on a 'first known commercial demonstration of visual navigation software on a drone already accepted into a U.S. Army program' is notable but not SEVE because (a) RCAT is far below Palantir's materiality threshold and (b) the test was a one-off demo, not a contracted partnership. AVAV's mentions are proxy-only. The framing 'we have partnerships with AVAV and PLTR' is technically true but in practice these are PR-stage. MOD."
+    },
+    {
+      "claim_id": "RCAT-8",
+      "claim_text": "ICFR not effective at Dec 31, 2025; material weakness 'existed in prior year' (recurring).",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": ["claim_evolution.query_claim_evolution(material weakness)"],
+      "M_check": "Mode A: confirm material weakness disclosure in 10-K text. Mode B: claim_evolution for subsequent treatment and prior-year persistence.",
+      "M_value": "Mode A confirmed in 10-K Item 9A: 'the Company s internal control over financial reporting was not effective as of December 31, 2025 due to the material weaknesses... insufficient number of resources that resulted in inadequate levels of supervision and review and segregation of duties... The above material weaknesses existed in prior year.' Mode B: claim_evolution shows 2 subsequent mentions in 10-Q (2026-05-07) and 8-K (2026-05-14) within the post-filing window. Material weakness is being carried forward and tracked, not remediated. The disclosure explicitly states 'cannot be considered remediated until remediated controls operate for a sufficient period of time'.",
+      "interpretation": "RECURRING material weakness (existed prior year + current year + still flagged in post-filing 10-Q) at a company that just raised $249M and is scaling Army revenue from $5M to $41M YoY is a significant control risk — exactly the period when ICFR matters most. The company is candid about it (disclosed clearly) but has not remediated. SEVE per heuristic 'recurring material weakness is RED' — slightly softened to SEVE given disclosure is candid and KPMG (new auditor 2025) issued an unqualified opinion on the financials nonetheless."
+    },
+    {
+      "claim_id": "RCAT-9",
+      "claim_text": "Accumulated deficit $196.8M; 73% of revenue from US Government; 3% gross margin on the SRR ramp.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["usaspending.query_federal_presence(multi-variant)"],
+      "M_check": "Mode A: federal revenue presence; Mode B: compare obligated $$ to disclosed federal-revenue share.",
+      "M_value": "Disclosed federal revenue FY25 = ~73% * $40.7M = $29.7M. USAspending cumulative obligations across all entity variants = $12.65M. Gap of ~$17M vs FY25 alone — even more vs cumulative claim. Cross-references RCAT-2.",
+      "interpretation": "The 3% gross margin on a 'production' Program of Record win is itself a yellow flag — a real SRR LRIP would be expected to be margin-positive once initial unit costs are absorbed. Combined with the federal-obligations gap from RCAT-2/RCAT-1, the financial profile suggests either (a) commercial-tier pricing forced by competitive procurement, (b) initial losses on LRIP units with margin improvement deferred, or (c) the revenue is not primarily Army contracts in the conventional sense. MOD."
+    },
+    {
+      "claim_id": "RCAT-10",
+      "claim_text": "Firestorm Labs SAFE investment converted to Series A Preferred (FV $692K) in July 2025.",
+      "severity": "PASS",
+      "supports": ["edgar_fts.query_fulltext"],
+      "M_check": "Mode A: Firestorm exists as a real entity.",
+      "M_value": "Firestorm Labs is a known defense additive-manufactured UAS startup based in San Diego with publicly disclosed funding rounds; the SAFE→Series A conversion in 2025 is consistent with normal startup financing. Investment is small ($692K FV) and per heuristic 4 (investment vs operating partnerships) does not warrant detailed registry validation.",
+      "interpretation": "Small strategic investment; not material. PASS."
+    }
+  ],
+  "severity_counts": {
+    "PASS": 4,
+    "MODERATE_UNDERDELIVERY": 3,
+    "SEVERE_UNDERDELIVERY": 2,
+    "RED_FLAG_NEGATIVE": 0,
+    "UNVERIFIABLE": 1
+  },
+  "n_claims": 10,
+  "n_queries": 16
+}

@@ -1,0 +1,28 @@
+## Context
+
+The screen's premise fails the cause-check: NMRA's −59.6% dd52 is not indiscriminate cohort selling on a shared narrative — it is one dated, company-published binary. On **2026-06-15** Neumora reported that navacaprant missed the primary endpoint in **both** KOASTAL-2 (−12.2 vs −12.0 placebo, p=0.813) and KOASTAL-3 (−10.1 vs −10.8, p=0.480), discontinued the asset, and cut 35% of staff ([8-K](https://www.sec.gov/Archives/edgar/data/1885522/000119312526270328/d943192d8k.htm)). The −0.35 excess vs the Health Care median *is* the lead-asset failure; there is no external same-event anchor showing the tape under-reacted. Compounding it: the name is **+93% off its low** (0.83 → 1.605), so the screen fired on a stale trailing drawdown in a stock the market has already re-rated *upward*, and the 2026-08-14 10-Q carries a **going-concern qualification**.
+
+| ticker | class | refuting metric | current value/trend (cited) | next print date | note |
+|---|---|---|---|---|---|
+| NMRA | **STRUCTURAL** | Covenant-free cash = cash − minimum-liquidity floor (105–110% of K2HV obligations), against post-RIF quarterly burn | Cash **$116.8M** at 6/30/26 (from $182.5M at 12/31/25); term loan **$60.0M** drawn at ≥10.45%; floor ≈ **$63–66M** ⇒ ~**$51M free** vs ~$25–30M/qtr burn ≈ **<2 quarters**. H1-26 OCF **−$85.9M**. Covenant became effective **2026-07-01**; auditors/management state *"substantial doubt exists about its ability to continue as a going concern"* ([10-Q](https://www.sec.gov/Archives/edgar/data/0001885522/000119312526350370/nmra-20260630.htm), [Q2 PR](https://www.globenewswire.com/news-release/2026/08/14/3345232/0/en/neumora-therapeutics-reports-second-quarter-2026-financial-results-and-provides-business-update.html)) | **2026-11-05** (Q3 10-Q — the first period the covenant is actually tested) | Net cash = **$0.30/sh** on 187,895,912 shares (8/10/26) vs $1.605 → **EV ≈ $245M** for a pre-IND/Ph1 book. Share count 161.9M→187.9M in 12 months = live ATM dilution into every rally. |
+
+**Why not DAMAGE-ABSENT:** the narrative's predicted damage is *in the numbers already* — the asset is dead by company admission, the balance sheet is covenant-encumbered, and the equity is not a discounted cash box (5.3x net cash, EV ≈ $245M).
+
+**Blue-team ratchet (does the rejection survive?):** The remaining book is NMRA-511 (V1a, Alzheimer's agitation, MAD expansion Q4-26), NMRA-898 (M4 PAM, Ph1 data 2H-26), NMRA-215 (NLRP3, favorable repeat tox 7/27/26, IND Q4-26). Real optionality — but NMRA-511's Jan-2026 Ph1b showed placebo-adjusted CMAI of only −2.6 to −2.1 (Cohen's d **0.20–0.23**); the headline d 0.51–0.64 came from an *elevated-anxiety subgroup*. That is the identical post-hoc-subgroup playbook that just failed twice in Phase 3 with navacaprant. The rejection holds.
+
+## COURT-WORTHY (damage-absent, ranked):
+
+**NONE.** No member qualifies as damage-absent. NMRA is STRUCTURAL, is not court-worthy, and does not auto-escalate.
+
+**COURT-WORTHINESS NMRA: 2/10** — the discount is correct and self-disclosed (going concern + dead lead asset + ATM dilution + officer 144s), so a full red/blue court cannot move the sizing decision off zero.
+
+**PRINT PROXIMITY: NONE within 5 trading days** — Q2 already printed 2026-08-14; the yfinance-derived 2026-11-05 date is **UNCONFIRMED** (no company PR names it) and is ~53 trading days out. No pre-print reconstruction is owed. Unscheduled catalyst risk exists in both directions: **NMRA-898 Phase 1 data "in the second half of 2026"** has no announced date and can land at any time.
+
+## Two flags for the pipeline (not for this name)
+
+1. **Screen artifact — stale-drawdown firing.** `pct_off_low 0.934` should suppress or de-rank a dislocation event: a name up 93% off its low is not being sold indiscriminately. Worth wiring as a blob_sweep filter.
+2. **Missing detector — going-concern gate.** The Q2 10-Q's going-concern language is the single most decisive fact here and it appears nowhere in the machine-built evidence pack, which instead surfaced the company's "runway into Q3 2027" framing. A `going_concern` / `min_liquidity_covenant` flag pulled from the 10-Q liquidity note would have short-circuited this triage at step one.
+
+**Verification gap, stated plainly:** direct `sec.gov` fetches returned 403 for me in this session (no full-fingerprint client available here), so the 10-Q figures above — $60.0M drawn, 187,895,912 shares, −$85.9M H1 OCF, the going-concern quote, and the covenant tiers — were read from third-party renderings of accession 0001193125-26-350370, not from EDGAR directly. Sources also disagree on the top covenant tier (**105% vs 110%** of obligations); that does not change the conclusion but should be read off the primary debt note before any position math.
+
+Sources: [8-K 6/15/26 KOASTAL](https://www.sec.gov/Archives/edgar/data/1885522/000119312526270328/d943192d8k.htm) · [10-Q 6/30/26](https://www.sec.gov/Archives/edgar/data/0001885522/000119312526350370/nmra-20260630.htm) · [8-K 7/27/26 NMRA-215 tox](https://www.sec.gov/Archives/edgar/data/0001885522/000119312526316819/nmra-20260727.htm) · [Q2 2026 results](https://www.globenewswire.com/news-release/2026/08/14/3345232/0/en/neumora-therapeutics-reports-second-quarter-2026-financial-results-and-provides-business-update.html) · [KOASTAL data release](https://www.biospace.com/press-releases/neumora-therapeutics-reports-data-from-phase-3-koastal-program-and-provides-business-and-pipeline-update) · [NMRA filings index](https://www.stocktitan.net/sec-filings/NMRA/)

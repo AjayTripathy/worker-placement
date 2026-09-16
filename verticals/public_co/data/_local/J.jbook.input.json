@@ -1,0 +1,119 @@
+{
+  "ticker": "J",
+  "cutoff": "2026-05-20",
+  "filing": "0001628280-25-053316_10-K.txt",
+  "filing_form": "10-K",
+  "filing_filed": "2025-11-20",
+  "company": "Jacobs Solutions Inc.",
+  "cik": "0000052988",
+  "extractor_notes": [
+    "CRITICAL ENTITY-RESOLUTION FINDING: Jacobs Solutions Inc. completed the Reverse Morris Trust Separation Transaction on 2024-09-27, spinning off Critical Mission Solutions (CMS) and Cyber & Intelligence (C&I) into Amentum Holdings Inc. (AMTM). The defense work historically associated with Jacobs (hypersonic test infrastructure, NNSA Nuclear Security Enterprise sustainment, AF Test Range modernization) all moved to Amentum. The FY2025 10-K being scored is from POST-spin Jacobs (continuing operations only).",
+    "Continuing operations (I&AF + PA Consulting) end markets: Critical Infrastructure, Water & Environmental, Life Sciences & Advanced Manufacturing, plus PA Consulting.",
+    "U.S. federal government revenue dropped from 10% (FY24) to 8% (FY25) of continuing-operations revenue. No Pentagon programs are named in the continuing-operations narrative.",
+    "Search of the slice for 'hypersonic', 'NNSA', 'Nuclear Security Enterprise', 'AF Test Range', 'Air Force Test Range', 'Skyborg', 'CCA', 'Project Maven', 'PE 06...' returned ZERO matches. The cohort metadata referencing those programs reflects the PRE-spin Jacobs / current Amentum, not post-spin J.",
+    "Pentagon J-Book corpus by_entity shows 'Jacobs Technology Inc.' as performer on PE 0604879C (Ballistic Missile Defense Sensor Test, MDA) and 'Jacobs Technology IRES Inc.' as contractor on PE 0604102C (Guam Defense Development, MDA). These Jacobs Technology subsidiaries went with the CMS spin to Amentum; revenue from these PEs is no longer attributable to ticker J.",
+    "Because J no longer names DoD Program Elements in its 10-K, the J-BOOK DIVERGENCE PATTERN has limited surface area on this filing. The relevant J-Book signal is the ABSENCE of named-program disclosure, not divergence. We extract a small set of claims grounded in (a) the residual federal exposure that remains, (b) the dependency on the TSA / Amentum stock, and (c) end-market thesis claims to test orthogonally."
+  ],
+  "claims": [
+    {
+      "claim_id": "J-1",
+      "claim_text": "Jacobs completed the Separation Transaction on September 27, 2024, spinning off its Critical Mission Solutions (CMS) and Cyber & Intelligence (C&I) businesses, which were merged into Amentum (AMTM). CMS housed Jacobs' historical Pentagon program work (test ranges, hypersonic infrastructure, NNSA sustainment).",
+      "subject": "Jacobs Solutions Inc.",
+      "predicate": "divested",
+      "object_value": "CMS + C&I -> Amentum (AMTM)",
+      "source_quote": "On September 27, 2024, Jacobs completed the previously announced Reverse Morris Trust transaction pursuant to which (i) Jacobs first transferred its Critical Mission Solutions business (CMS) and portions of the Divergent Solutions (DVS) business (referred to herein as the Cyber & Intelligence business (C&I)... Amentum, the surviving entity of the Separation Transaction, is now an independent public company with common stock listed on the New York Stock Exchange under the symbol AMTM.",
+      "category": "rollup_thesis",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "Jacobs Technology", "cutoff_date": "2026-05-20"}, "rationale": "Verify whether the J-Book corpus still tags Jacobs as a Pentagon contractor; expected post-spin: signals belong to Amentum, not J."},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "Amentum", "cutoff_date": "2026-05-20"}, "rationale": "Confirm the defense PEs moved to AMTM (orthogonal, expected outcome: AMTM is the relevant J-Book entity, not J)."}
+      ]
+    },
+    {
+      "claim_id": "J-2",
+      "claim_text": "U.S. federal government agencies represent 8% of Jacobs' total continuing-operations revenue in FY 2025 (down from 10% in FY 2024 and 9% in FY 2023).",
+      "subject": "Jacobs Solutions Inc.",
+      "predicate": "fed_revenue_share",
+      "object_value": "8% FY25, 10% FY24, 9% FY23",
+      "source_quote": "The following table sets forth the percentage of total revenues from continuing operations earned directly or indirectly from agencies of the U.S. federal government for each of the last three fiscal years: 2025 2024 2023 8% 10% 9%",
+      "category": "dod_customer_concentration",
+      "queries": [
+        {"source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "Jacobs Engineering Group"}, "rationale": "Cross-check post-spin DoD obligations to a Jacobs Solutions subsidiary."},
+        {"source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "Jacobs Solutions"}, "rationale": "Cross-check post-spin DoD obligations to the parent."}
+      ]
+    },
+    {
+      "claim_id": "J-3",
+      "claim_text": "Jacobs Technology Inc. is named in the J-Book corpus as performer on the MDA Ballistic Missile Defense Sensor Test program (PE 0604879C). This subsidiary is part of the CMS spin (now Amentum), not continuing-operations Jacobs.",
+      "subject": "Jacobs Technology Inc.",
+      "predicate": "named_performer",
+      "object_value": "PE 0604879C (Ballistic Missile Defense Sensor Test, MDA)",
+      "source_quote": "[Not present in J's continuing-operations 10-K. Identified via J-Book by_entity index showing 'JACOBS TECHNOLOGY INC.' performer on PE 0604879C.]",
+      "category": "jbook_program_revenue",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"pe_number": "0604879C", "cutoff_date": "2026-05-20"}, "rationale": "Status of MDA Sensor Test under J-Book FY26."}
+      ]
+    },
+    {
+      "claim_id": "J-4",
+      "claim_text": "Jacobs Technology IRES Inc. is named in the J-Book corpus as contractor on PE 0604102C (Guam Defense Development, MDA). This subsidiary moved to Amentum in the Separation.",
+      "subject": "Jacobs Technology IRES Inc.",
+      "predicate": "named_contractor",
+      "object_value": "PE 0604102C (Guam Defense Development, MDA)",
+      "source_quote": "[Not present in J's continuing-operations 10-K. Identified via J-Book by_entity index showing 'JACOBS TECHNOLOGY IRES INC.' as contractor on PE 0604102C.]",
+      "category": "jbook_program_revenue",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"pe_number": "0604102C", "cutoff_date": "2026-05-20"}, "rationale": "Status of Guam Defense Development under J-Book FY26."}
+      ]
+    },
+    {
+      "claim_id": "J-5",
+      "claim_text": "Cohort-metadata named programs that Jacobs (J) is supposedly exposed to: 'hypersonic test infrastructure', 'NNSA Nuclear Security Enterprise sustainment', 'AF Test Range modernization'. The FY2025 10-K mentions NONE of these.",
+      "subject": "Jacobs Solutions Inc.",
+      "predicate": "claimed_program_exposure",
+      "object_value": "hypersonic test infrastructure / NNSA Nuclear Security Enterprise / AF Test Range modernization",
+      "source_quote": "[ABSENT from filing. Search of /tmp/sliced_J.txt for these terms returned 0 hits.]",
+      "category": "jbook_program_revenue",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"program_name": "hypersonic test", "cutoff_date": "2026-05-20"}, "rationale": "Establish J-Book status of hypersonic test infrastructure programs (now AMTM exposure)."},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"program_name": "NNSA Nuclear Security Enterprise", "cutoff_date": "2026-05-20"}, "rationale": "Establish J-Book status (note: NNSA is DOE, not DoD, so likely not in corpus)."},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"program_name": "Air Force Test Range", "cutoff_date": "2026-05-20"}, "rationale": "Establish J-Book status of AF Test Range modernization PEs."}
+      ]
+    },
+    {
+      "claim_id": "J-6",
+      "claim_text": "Jacobs incurred ~$26.0 million in charges during FY2025 associated with the Transition Services Agreement (TSA) with Amentum, and reported a $227.3 million mark-to-market loss on its retained Amentum stock investment.",
+      "subject": "Jacobs Solutions Inc.",
+      "predicate": "spin_related_charges",
+      "object_value": "$26.0M TSA charges; $227.3M MTM loss on Amentum stock",
+      "source_quote": "The year ended September 26, 2025 included approximately $26.0 million in charges associated with the Company's TSA with Amentum... The year ended September 26, 2025 included $227.3 million in mark-to-market losses and other related charges associated with our investment in [Amentum].",
+      "category": "counterparty_disclosure",
+      "queries": [
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"query": "Jacobs Transition Services Agreement", "cik": "0001950780"}, "rationale": "Cross-check Amentum's filings (CIK 0001950780) for matching TSA disclosure."}
+      ]
+    },
+    {
+      "claim_id": "J-7",
+      "claim_text": "Jacobs' continuing operations end markets are Critical Infrastructure, Water & Environmental, and Life Sciences & Advanced Manufacturing, with PA Consulting as a separate segment.",
+      "subject": "Jacobs Solutions Inc.",
+      "predicate": "end_markets",
+      "object_value": "Critical Infrastructure / Water & Environmental / Life Sciences & Advanced Manufacturing / PA Consulting",
+      "source_quote": "Infrastructure & Advanced Facilities (I&AF) ... we combine deep experience in the following end markets - Critical Infrastructure, Water & Environmental and Life Sciences & Advanced Manufacturing.",
+      "category": "rollup_thesis",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "Jacobs Solutions", "cutoff_date": "2026-05-20"}, "rationale": "Verify there is no remaining Pentagon program-element exposure tied to the parent post-spin."}
+      ]
+    },
+    {
+      "claim_id": "J-8",
+      "claim_text": "PA Consulting (Jacobs' 65%-owned segment) generated $1.27B revenue and ~$278M operating profit in FY25, with public-sector clients including the U.K. Ministry of Defence and Norwegian, Danish, Swedish government agencies; no U.S. DoD program revenue is named.",
+      "subject": "PA Consulting",
+      "predicate": "revenue_and_clients",
+      "object_value": "FY25 revenue $1,265.6M; op profit $278.5M; UK MoD + non-US public sector",
+      "source_quote": "PA Consulting Total Revenues from External Customers (1) $ 10,764,206 $ 1,265,577 ... Segment Operating Profit (1) $ 903,548 $ 278,499 ... Public sector clients include the U.K.'s Ministry of Defence, National Highways, The Norwegian Labour and Welfare Administration, The Danish Tax Agency and The Swedish Environmental Protection Agency.",
+      "category": "counterparty_disclosure",
+      "queries": [
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"query": "PA Consulting Jacobs", "cik": "0000052988"}, "rationale": "Confirm PA Consulting disclosure pattern is stable; control claim (non-J-Book)."}
+      ]
+    }
+  ]
+}

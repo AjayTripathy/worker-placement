@@ -1,0 +1,123 @@
+{
+  "ticker": "FMC",
+  "company": "FMC Corporation",
+  "cutoff": "2026-05-20",
+  "filing": "0000037785-26-000041_10-K.txt",
+  "filing_date": "2026-02-27",
+  "cik": "0000037785",
+  "sector": "Basic Materials / Agricultural Chemicals",
+  "drawdown_context": "-70.5% from 52w high, +8% above 52w low; stock declined from $100 base (2020) to $15.83 (12/31/2025) per cumulative-return graph in 10-K",
+  "rfm_tuples": [
+    {
+      "claim_id": "C1",
+      "R": "Going concern is NOT an issue; auditor KPMG issued an unqualified opinion 2026-02-27 and management has cash, revolver capacity and an active strategic review to deleverage.",
+      "f": "If true: (a) no 'substantial doubt' language in 10-K, (b) clean auditor relationship, (c) revolver headroom > near-term maturities or refinancing path visible.",
+      "M_source": "going_concern_detector.query_going_concern (CIK 0000037785) + auditor_change_tracker.query_auditor_changes + filing text on debt maturities/revolver",
+      "M_value": "GC detector: n_matches=0, signal=NO_GOING_CONCERN on accession 0000037785-26-000041. Auditor: CLEAN_AUDITOR_TENURE, 0 Big-4 resignations, 0 disagreements over 5y lookback (KPMG since pre-2021). Filing: $584.5M cash, $1,147.2M revolver headroom, but $1,305.1M debt payable within 12 months \u2014 revolver capacity ALONE does NOT cover 12-month maturities; refinancing required.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Auditor signed off clean, no going-concern language, so the literal claim passes. But the 12-month debt wall ($1.305B) exceeds available revolver headroom ($1.147B) \u2014 survival is contingent on either (a) closing the India sale (gross proceeds $450M held-for-sale carrying value), (b) refinancing senior notes, or (c) strategic transaction. The fact that KPMG and management did NOT add going-concern language despite this profile is itself a calibrated PASS, but the underlying liquidity story is materially tighter than the boilerplate suggests."
+    },
+    {
+      "claim_id": "C2",
+      "R": "FMC is a 'tier-one leader' in agrochemicals with a 'transformative' pipeline of four new active ingredients positioned for shareholder value creation (per Item 1 Business / Strategy).",
+      "f": "If true: stable or growing revenue, gross margins consistent with peer ag-chem (~30-35%), and operating income that funds R&D + debt service.",
+      "M_source": "10-K Note 22 quarterly financials + MD&A revenue/loss disclosures",
+      "M_value": "FY25 revenue $3,467M (Q1 $791.4 + Q2 $1,050.5 + Q3 $542.2 + Q4 $1,083.3) vs FY24 $4,246M \u2014 down ~18% YoY. Q3 included $422M India revenue charge. FY25 net loss attributable to stockholders ~$2,239M (Q1 -15.5 + Q2 +66.7 + Q3 -569.3 + Q4 -1,720.8). Q4 EPS = -$13.74 diluted. Q4 op loss before interest/tax = -$1,416.6M (massive impairment quarter).",
+      "severity": "RED_FLAG_NEGATIVE",
+      "interpretation": "The 'tier-one leader / transformative pipeline' framing is severely contradicted by results: $2.2B net loss on $3.5B revenue, with Q4 alone a -$1.7B loss and -$13.74 EPS, plus a $522M India write-down. The 5-year stockholder return table in the filing literally shows FMC at $15.83 on a $100 base (-84% absolute, -88% vs S&P chemicals)."
+    },
+    {
+      "claim_id": "C3",
+      "R": "FMC's diamide franchise (Rynaxypyr/chlorantraniliprole, ~$0.8B 2025 revenue; Cyazypyr/cyantraniliprole ~$0.4B) is defensible via new formulations, mixtures, lower-cost manufacturing, and 22 US + 393 foreign granted patents that 'continue to provide significant competitive advantage'.",
+      "f": "If true: pipeline of patents extending well beyond the current composition-of-matter expirations (i.e., remaining life heavily weighted to post-2030).",
+      "M_source": "10-K patent expiry table (Item 1) + edgar_fts.query_fulltext on 'Rynaxypyr'",
+      "M_value": "Diamide patents remaining life as of 12/31/2025: Through 2030 = 15 US + 323 foreign (86% of foreign patents expire in next 5 years). 2031-2035 = 2 US + 1 foreign. 2036-2040 = 2 US + 67 foreign. 2041-2045 = 3 US + 2 foreign. Filing states 'expected generic competitors following expiration of composition of matter and process patents' and explicitly that 'Cyazypyr process patent expires 2025'. Edgar FTS: 66 'Rynaxypyr' hits across all filings, top filings dominated by FMC's own 8-Ks \u2014 i.e., no third-party-driven validation cluster.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "interpretation": "The patent estate is dramatically front-loaded against FMC: 323 of 393 foreign diamide patents (82%) expire within 5 years, and Cyazypyr process patent already expired in 2025. Filing's own framing of 'managing post-patent Rynaxypyr active strategy' as a 2026 operational priority confirms the cliff. The 'pipeline' framing of mixtures/formulations is the standard pharma-style life-cycle extension play that consistently loses material revenue to generics post-composition-of-matter."
+    },
+    {
+      "claim_id": "C4",
+      "R": "FMC is 'in compliance with all of our debt covenants' as of 12/31/2025 and the Revolving Credit Facility remains a reliable liquidity source.",
+      "f": "If true: covenants should be at original terms, not require amendment, and 8-K Item 2.03 filings should be limited / routine.",
+      "M_source": "10-K Note 12 disclosures + ucc_proxy.query_ucc_exposure (CIK 0000037785, 36-month window) + 8-K cadence",
+      "M_value": "Per filing: 'In February 2025 and December 2025, we entered into new amendments to our Revolving Credit Facility to amend the maximum leverage and minimum interest coverage ratios.' That is FIVE amendments to the Fifth Amended & Restated Credit Agreement since June 2022 (Amendments 1-5 listed in exhibit index, with No. 5 dated Dec 8, 2025). Also: 'we agreed that it will not repurchase shares until December 31, 2028' as covenant concession. Dividend was cut Oct 2025 to $0.08/share (from a previously higher rate; quarterly dividend reduced 'as part of broader response to challenges'). UCC proxy: 15 distress-term hits in 8-K filings (lien=7, all-assets=2, first-priority lien=2, ucc-1, security agreement, subordination, intercreditor) over 36-month window \u2014 non-trivial cluster.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "interpretation": "Compliance is literally true ONLY because covenants have been repeatedly amended downward. Five covenant amendments in 30 months, share-buyback prohibition through 2028, mandatory dividend cut, and a 8.45% subordinated notes issuance (Sept 2025, $750M) used to take out senior notes \u2014 the entire pattern is a distressed liability-management roadshow. Compliance-via-amendment is the standard pre-restructuring fingerprint."
+    },
+    {
+      "claim_id": "C5",
+      "R": "India divestiture is a strategic portfolio optimization that will close in 2026 at a sale price reflecting $450M fair value (carrying value post-write-down) and a continuing supply agreement.",
+      "f": "If true: $450M of dependable proceeds in 2026, plus retained manufacturing optionality.",
+      "M_source": "10-K MD&A India Held-for-Sale narrative + risk factor on completion uncertainty",
+      "M_value": "FMC took a $522M aggregate charge in 2025 (revenue charges of $422M + asset impairment $195M + advisor costs $7M; less $128M COGS credit), writing carrying value down from $960M (June 30, 2025) to $450M. Filing explicitly warns: 'there is no assurance that we will be able to complete the divestment in the expected timeline and on favorable terms, or that we will be able to successfully enter into a supply agreement with the buyer.' Pre-sale 'commercial actions' included one-time pricing/returns to accelerate receivables and 'address contemporaneous changes in local indirect taxation' \u2014 i.e., the $422M revenue reversal acknowledges that the marketed FY24 India revenue was partly channel-stuff that had to be unwound.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "interpretation": "The 'portfolio optimization' frame masks: (a) a 53% write-down to fair value in a single year, (b) explicit deal-completion risk, (c) a tacit admission via the $422M revenue reversal that prior period India revenues were inflated relative to true sell-through. Proceeds are needed for the 12-month debt wall but are not committed; failure-to-close is a binary refinancing-trigger event in 2026."
+    },
+    {
+      "claim_id": "C6",
+      "R": "FMC operates 19 manufacturing facilities in 14 countries with major R&D in Newark DE, Hyderabad and Copenhagen \u2014 supporting global ag-chem production.",
+      "f": "If true: EPA Facility Registry Service should list real, permitted FMC industrial facilities, especially the Newark DE R&D center.",
+      "M_source": "epa_frs.query_facilities (state=DE, name='FMC') + epa_emissions.query_facility_emissions (state=DE)",
+      "M_value": "EPA FRS in DE: 6 facilities found at 1090 Elkton Road & 1301 Newark Christiana Rd Newark DE, including 'FMC Corporation Stine Research Center' classified as R&D. TRI: 1 facility (FMC CORP NEWARK, TRI ID 19711FMCCR1301O, reporting since 1987). PA: 2 FMC Corp facilities in Philadelphia (HQ \u2014 no industrial reporting, as expected for office HQ).",
+      "severity": "PASS",
+      "interpretation": "Manufacturing/R&D footprint claims are verified at the US sites EPA can see. Most of the 19 facilities are non-US (Brazil, India, etc.) and would not appear in EPA \u2014 the disclosed regional breakdown (NA 5, LA 1, EMEA 5, Asia 8) is consistent with EPA showing only the NA share. No CLAIMED_LOCATION_GAP."
+    },
+    {
+      "claim_id": "C7",
+      "R": "Project Foundation, the 2024 restructuring delivered $165M cost benefits, and FMC's strategy will 'strengthen the balance sheet, deliver sustainable margin improvement and position FMC for long-term growth'.",
+      "f": "If true: gross margin expansion year over year, operating leverage visible, declining debt balance.",
+      "M_source": "10-K Note 22 quarterly gross margins + MD&A debt walk",
+      "M_value": "Gross margin: FY25 = $1,283.0M on $3,467M = 37.0% GAAP; FY24 = $1,648.9M on $4,246M = 38.8%. So gross margin DECLINED 180bp YoY despite the cited $165M cost benefits. Total debt rose from $3,365.3M (12/31/2024) to $4,074.9M (12/31/2025) \u2014 debt INCREASED by $709.6M. New 8.45% subordinated notes issued at distressed coupon ($750M issuance, used $500M to redeem near-term senior notes due May 2026 with $3.3M make-whole premium).",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "interpretation": "The 'strengthen balance sheet / margin improvement' narrative is contradicted by the numbers: debt is up $710M, gross margin is down 180bp, and the new debt was raised at 8.45% \u2014 clearly distressed pricing for an investment-grade industrial. Project Foundation cost savings, if real, were entirely absorbed by India sell-through reversal, FX, and pricing pressure. Forward-looking strategy language is operating in opposition to the realized trajectory."
+    },
+    {
+      "claim_id": "C8",
+      "R": "Insider behavior \u2014 no proximate clustered discretionary sales that would suggest MNPI ahead of the strategic-review and large impairment news.",
+      "f": "If true: minimal discretionary insider selling around budget events / fiscal year end; no clustered discretionary pattern.",
+      "M_source": "insider_vs_calendar.query_insider_sales_near_budget_events (CIK 0000037785, contractor_name='FMC')",
+      "M_value": "84 Form 4 filings; 21 sales totaling $908K; 6 proximate sales ($633K) around events. 0 discretionary proximate sales \u2014 all sales were 10b5-1 plan or routine. No CLUSTERED_DISCRETIONARY signal triggered.",
+      "severity": "PASS",
+      "interpretation": "Insider selling is small in absolute dollar terms (~$900K total for the year) and entirely 10b5-1 / routine. No information-asymmetry red flag from insider behavior."
+    }
+  ],
+  "supplemental_signals": {
+    "borrow_rate_pct": 0.4081,
+    "borrow_trend": "falling",
+    "shares_available_short": 3000000,
+    "borrow_30d_max_pct": 0.7545,
+    "borrow_interpretation": "Cheap and available to borrow \u2014 no short squeeze risk; the bear thesis is not crowded."
+  },
+  "queries_run": [
+    "going_concern_detector.query_going_concern",
+    "auditor_change_tracker.query_auditor_changes",
+    "epa_frs.query_facilities (DE)",
+    "epa_emissions.query_facility_emissions (PA, DE)",
+    "ucc_proxy.query_ucc_exposure",
+    "insider_vs_calendar.query_insider_sales_near_budget_events",
+    "edgar_fts.query_fulltext (Rynaxypyr)",
+    "iborrow.get_borrow_rate",
+    "sec_filings.list_filings_by_form (8-K)",
+    "uspto_odp.query_assignee (rate-limited 429)"
+  ],
+  "score_counts": {
+    "PASS": 2,
+    "MODERATE_UNDERDELIVERY": 1,
+    "SEVERE_UNDERDELIVERY": 4,
+    "RED_FLAG_NEGATIVE": 1,
+    "UNVERIFIABLE": 0
+  },
+  "composite": 1.5,
+  "composite_calc": "(0+0+2+1+3+2+2+0) / 8 non-UNVERIFIABLE claims = 13/8 = 1.625",
+  "summary": "FMC presents as a 'tier-one ag-chem leader' but the disclosed facts describe a deeply distressed credit: -18% revenue YoY, $2.2B FY25 net loss, $710M debt increase, five revolver-covenant amendments in 30 months, dividend cut, 8.45% subordinated notes raised to refinance near-term maturities, an India divestment with $522M write-down that explicitly relied on $422M of pre-sale revenue reversal (admitting prior channel-stuff), and 82% of foreign diamide patents expiring by 2030. The 'no going concern' label is technically accurate but only via the strategic-review safety valve and pending India proceeds \u2014 a LONG thesis on the small-cap basket pilot is NOT supported here despite the trough-drawdown screen; this is a credit-event-risk LONG, not a clean rebound candidate.",
+  "scoring": {
+    "PASS": 2,
+    "UNVERIFIABLE": 0,
+    "MODERATE_UNDERDELIVERY": 1,
+    "SEVERE_UNDERDELIVERY": 4,
+    "RED_FLAG_NEGATIVE": 1,
+    "verifiable_claims": 8,
+    "weighted_sum": "(0*2 + 1*1 + 2*4 + 3*1) / 8 = 12 / 8",
+    "composite": 1.5
+  }
+}

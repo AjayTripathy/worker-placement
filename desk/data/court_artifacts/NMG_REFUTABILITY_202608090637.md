@@ -1,0 +1,43 @@
+## REFUTABILITY TRIAGE — NMG (Nouveau Monde Graphite Inc., CIK 1649752)
+
+Cohort file `knowledge_graph/cohorts.json` was **not readable in this sandbox** (permission denied on `/Users/ajay/exalted/signalos/`), so the priced narrative below is reconstructed from the tape + primary filings rather than read from the cohort definition — flagging that as a provenance gap, not a silent assumption. Cause-check first: NMG's −77.2% dd52 is **two superimposed events, only one of which is business damage** — (1) the USITC's 12-Mar-2026 **negative** injury vote, which vacated the ~220% duty wall on Chinese active anode material and re-opened North America to duty-free Chinese AAM ([USITC](https://www.usitc.gov/press_room/news_release/2026/er0312_68281.htm), overturning Commerce's 11-Feb-2026 final affirmative 93.5% AD / 66.68% CVD — [Federal Register](https://www.federalregister.gov/documents/2026/02/17/2026-02999/active-anode-material-from-the-peoples-republic-of-china-final-affirmative-countervailing-duty)); and (2) a **~105% share-count increase** — 160,826,538 shares pre-raise → **329,114,330** after the 115,847,792-share private placement and 52,440,000 subscription receipts, all struck at US$1.84 ([NMG, 9-Apr-2026](https://nmg.com/nmg-announces-equity-financing-package/); count per [SUPPL](https://www.sec.gov/Archives/edgar/data/1649752/000110465926043157/tm2611280-9_suppl.htm)). Market-cap drawdown from the 52w high is therefore **≈ −53.4%** (160.8M × $6.06 = $975M → $454M), not −77.2%; roughly **half the −0.444 excess_dd vs the Basic Materials median is a per-share artifact of the raise**, and the screen is double-counting it.
+
+---
+
+**PRINT PROXIMITY: 2026-08-12 (Wednesday) — UNCONFIRMED.** yfinance-derived; no NMG press release names the date. Corroborated only circumstantially by a third-party earnings preview flagging a Wednesday-August Q2 report ([boerse-express](https://www.boerse-express.com/news/articles/nouveau-monde-graphite-aktie-q2-bericht-am-mittwoch-erwartet-936521)) and by NMG's own mid-August Q2 filing cadence in prior years. **Treat as 2 trading days out and run the reconstruction.**
+
+### Print-decisive reconstruction (all inputs are pre-print public filings)
+
+**Loudest bear claim into the print:** *"Post-ITC, NMG can't fund the build; expect another dilutive raise or a schedule retreat."*
+
+That claim is **arithmetically pre-resolved on the cash line** — the Q2 balance sheet is a mechanical consequence of a closed, already-disclosed transaction:
+
+| bridge item | value | source |
+|---|---|---|
+| Cash at 31-Mar-2026 | **$57.3M** | Q1 quarterly update, [13-May-2026 6-K](https://www.sec.gov/Archives/edgar/data/1649752/000110465926060100) / [carry](https://www.stocktitan.net/sec-filings/NMG/6-k-nouveau-monde-graphite-inc-current-report-foreign-issuer-a0030b6d8d0b.html) |
+| + Equity package closed **15-May-2026** (escrow released, FID confirmed) | **+US$309.5M gross** | [6-K ex-99.1](https://www.sec.gov/Archives/edgar/data/1649752/000110465926062400/tm2614809d1_ex99-1.htm) |
+| − Underwriting/agent fees (bought-deal tranche ~6%; PP tranches low/no fee) | ≈ −$6–9M | inferred from [SUPPL](https://www.sec.gov/Archives/edgar/data/1649752/000110465926043157/tm2611280-9_suppl.htm) |
+| − Q2 cash opex (run-rate) | ≈ −$10–13M | Q1 trend |
+| − Q2 construction capex (first partial quarter; site work began early Q2) | ≈ −$25–60M | ramp assumption, **the one genuinely unknown term** |
+| **= implied cash at 30-Jun-2026** | **≈ US$285M–$330M** | |
+
+**The decisive read:** a company with a **$454M market cap** should print **~$300M of cash — ~65% of its own market cap** — with the mine already under construction. If the print lands in that band, the "imminent dilution" claim is dead on arrival and the surprise is asymmetric to the upside. Two caveats I will not paper over: (a) **presentation currency** — confirm the $57.3M and the Q2 cash line are on the same CAD/USD basis before scaling the bridge, since the financings are quoted in US$; (b) the capex draw is the only free variable, so a sub-$250M print means the build is consuming cash faster than the feasibility profile, which is a *schedule* datum, not a solvency one.
+
+**Three non-arithmetic items the print reveals that public data cannot:**
+1. **EDC/CIB senior debt status.** US$335M is a **fully committed commitment letter**, not a signed credit agreement — conditions precedent are lender due diligence + customary closing. MD&A language moving to *"executed"* completes the funding chain; still *"commitment letter"* in mid-August is the tell.
+2. **Bécancour FID language.** 13-ktpa Battery Material Plant, Class-3 estimate in development, FID guided **H2-2026**. Reaffirmed vs. slipped to 2027 is the single highest-information sentence in the document.
+3. **Contracted-capex-within-FS.** ">50% of project CAPEX contracted within feasibility-study estimates" as of the Q1 update — a Q2 update showing that share rising *and still within estimates* is the cost-overrun refutation.
+
+**PRE-PRINT POSITION: STARTER** (book is currently NO POSITION / no resting orders). Rationale: the cash line is pre-computable and favorable, the tape at $1.38 sits **25% below the US$1.84 price at which Canada Growth Fund, Investissement Québec and Eni funded in April**, and the one leg that the ITC vote genuinely impairs (Bécancour AAM) is *not* the leg that is funded — so the print's downside axis is a sizing question, not a solvency question. Sized small (~⅓ of intended sleeve) precisely because Bécancour is un-de-risked and post-raise flowback from a doubled share count is an ongoing mechanical seller.
+
+---
+
+| ticker | class | refuting metric | current value/trend (cited) | next print date | note |
+|---|---|---|---|---|---|
+| NMG | **DAMAGE-ABSENT** (funded-mine leg; see note) | (1) Unrestricted cash at 30-Jun-2026 ≥ ~US$280M; (2) EDC/CIB US$335M status = **credit agreement executed** vs. commitment letter; (3) Gov-of-Canada 30 ktpa take-or-pay offtake still binding & CPs satisfied | Cash **$57.3M** at 31-Mar-2026, **+US$309.5M closed 15-May-2026** with escrow released and Phase-2 **FID confirmed** ([6-K](https://www.sec.gov/Archives/edgar/data/1649752/000110465926062400/tm2614809d1_ex99-1.htm)); **definitive Gov-of-Canada offtake signed 13-May-2026 — 30,000 tpa, 7-yr, take-or-pay** ([NMG](https://nmg.com/government-of-canada-offtake-2026/)); ~75% of production commercially covered (Canada + Panasonic 13 ktpa AAM + Traxys); >50% of capex contracted within FS estimates; construction started early Q2-2026, groundbreaking 19-May-2026 | **2026-08-12 (UNCONFIRMED)** | The narrative's predicted damage is *financing failure / offtake collapse*, and both the **US$645M package and the sovereign take-or-pay were executed AFTER the 12-Mar-2026 ITC negative** — the market's own bear catalyst did not stop either. **Explicit caveat:** damage is genuinely **ARRIVING on the Bécancour AAM leg** (unfunded, Class-3 estimate pending, FID H2-2026) — that plant is the tariff-exposed asset and the ITC vote is a real economic hit to it. NMG is pre-revenue, so no margin/volume metric exists to test; the refuting metrics are balance-sheet and contract-status, and they are clean. Ongoing PIK: Q2 note interest of US$337,328 settled in **227,924 shares at US$1.48** on 1-Jul-2026 ([release](https://www.theglobeandmail.com/investing/markets/stocks/NMG/pressreleases/3180444/nouveau-monde-graphite-settles-q2-note-interest-in-shares/)) — 0.07% dilution, immaterial, but confirms cash discipline at the note level. |
+
+**COURT-WORTHY (damage-absent, ranked):**
+
+1. **NMG** — The dispersion the cohort screen is blind to is *within the company*: a **fully-funded, under-construction flake-concentrate mine with a sovereign take-or-pay floor** is being priced alongside an **unfunded, tariff-exposed anode plant**, and the −77.2% dd52 that flagged it is half share-count artifact. The market is marking the whole entity 25% below the price at which three sovereign/strategic balance sheets (Canada Growth Fund, Investissement Québec, Eni) underwrote it eight weeks ago, with ~65% of the market cap likely to print as cash on Wednesday. A court that separates the two legs and prices the mine standalone against the Canada offtake changes the sizing decision materially.
+
+**COURT-WORTHINESS NMG: 8/10** — funded-mine vs. unfunded-AAM-plant dispersion inside one ticker, a mechanically pre-computable cash print 2 days out, and a tape 25% under a fresh sovereign clearing price; the court swings the decision between FLAT and a real position, and the only reason it isn't higher is that the Bécancour leg's impairment is genuinely real, not a misread.

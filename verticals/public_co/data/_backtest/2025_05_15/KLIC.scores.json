@@ -1,0 +1,89 @@
+{
+  "ticker": "KLIC",
+  "scores": [
+    {
+      "claim_id": "KLIC-1",
+      "claim_text": "KLIC is an SEC-registered Pennsylvania-incorporated public semiconductor capital equipment maker (NAICS 33441x family) with dual corporate offices in Singapore and Fort Washington PA, and is the same legal entity SAM.gov and federal registries would index.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "sam_entity.query_entity_by_uei"
+      ],
+      "M_check": "sam_entity.query_entity_by_uei",
+      "M_value": "error: sam_status_429_after_retries",
+      "interpretation": "M-source returned an error; cannot adjudicate this run.",
+      "escalation_needed": false
+    },
+    {
+      "claim_id": "KLIC-2",
+      "claim_text": "KLIC operates 7 named major facilities globally totaling ~726,000 sq ft, including 88,000 sq ft in Fort Washington PA and 65,000 sq ft in Santa Ana CA (the only two US sites).",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "osha_establishments.query_establishments"
+      ],
+      "M_check": "osha_establishments.query_establishments",
+      "M_value": "osha: n_est=0 total_emps=0 top_naics=[] signal=NO_OSHA_FOOTPRINT",
+      "interpretation": "Claim asserts large/thousand-person manufacturing but OSHA 300A returns 0 establishments \u2014 a large-employer claim should produce filings. Escalate for LLM review on whether the absence is genuine or a subsidiary-name search gap.",
+      "escalation_needed": true
+    },
+    {
+      "claim_id": "KLIC-3",
+      "claim_text": "KLIC employs 2,681 full-time + 65 temporary workers worldwide, with ~70 in Israel/Haifa; US headcount is concentrated in Fort Washington PA and Santa Ana CA.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "dol_h1b_lca.query_lca_filings"
+      ],
+      "M_check": "dol_h1b_lca.query_lca_filings",
+      "M_value": "dol_h1b_lca: n_lcas=4 workers=4 top_soc=['Mechanical Engineers'] signal=SMALL_SPONSOR",
+      "interpretation": "Real but small H-1B sponsorship (4 positions) \u2014 ambiguous band; honest small operation or sub-scale relative to claim language. Compare to claim wording.",
+      "escalation_needed": true
+    },
+    {
+      "claim_id": "KLIC-4",
+      "claim_text": "KLIC has no customer accounting for >10% of net revenue in FY24, FY23, or FY22; its major customer base is IDMs, OSATs, and foundry service providers \u2014 a diffuse industrial-customer mix rather than a megacap-concentrated book.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "megacap_namecheck.query_megacap_mentions"
+      ],
+      "M_check": "megacap_namecheck.query_megacap_mentions",
+      "M_value": "megacap_namecheck: 0 total hits across 5 megacaps (0 with any hits)",
+      "interpretation": "0 mentions across 5 megacap SEC filings (10-K/Q + 8-K) over 10 years. None of the named megacap counterparties have ever referenced this small-cap in their own filings. Likely inflation: either fabricated or a sub-material relationship being described as a 'partnership'/'deployment'/'program' that would normally surface in an earnings-call transcript at any material scale.",
+      "escalation_needed": false
+    },
+    {
+      "claim_id": "KLIC-5",
+      "claim_text": "KLIC maintains an active patent portfolio underpinning its wire-bonder, advanced-packaging (APTURA, CuFirst hybrid bonding), and mini-LED (LUMINEX) technology leadership claims.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "uspto_odp.query_assignee"
+      ],
+      "M_check": "uspto_odp.query_assignee",
+      "M_value": "error: status_429",
+      "interpretation": "M-source returned an error; cannot adjudicate this run.",
+      "escalation_needed": false
+    },
+    {
+      "claim_id": "KLIC-6",
+      "claim_text": "Approximately 90.6% of KLIC's FY24 net revenue and 53.3% of FY24 net revenue was shipped to customer locations outside the US, primarily Asia/Pacific and China \u2014 implying material China-export exposure subject to US BIS export controls and tariff regimes.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "bis_export_licenses.query_applicant (proposed, not promoted)"
+      ],
+      "M_check": "bis_export_licenses.query_applicant (proposed, not promoted)",
+      "M_value": "\u2014",
+      "interpretation": "Proposed connector 'bis_export_licenses.query_applicant' not yet built; intentional coverage acknowledgement, not failure.",
+      "escalation_needed": false
+    },
+    {
+      "claim_id": "KLIC-7",
+      "claim_text": "KLIC's FY24 financial profile shows operational stress (Project W cancellation reduced revenue ~$15M, generated $104.7M of restructuring/impairment charges, with $86.2M counterparty reimbursement from the customer) yet the company maintains $577.1M cash, an active dividend ($0.80/yr), and $151M of F",
+      "severity": "PASS",
+      "supports": [
+        "claim_evolution.query_claim_evolution"
+      ],
+      "M_check": "claim_evolution.query_claim_evolution",
+      "M_value": "claim_evolution: 3 subsequent mentions in ['10-Q', 'DEF 14A'] (status: REAFFIRMED_IN_STRUCTURED_DISCLOSURE)",
+      "interpretation": "Focal company has reaffirmed the claim's subject 3 times in structured filings with no adverse-event signatures detected; directional continuity supports the claim.",
+      "escalation_needed": true
+    }
+  ]
+}

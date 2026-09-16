@@ -1,0 +1,104 @@
+{
+  "ticker": "FTAI",
+  "cutoff": "2024-09-01",
+  "filing": "0001590364-24-000003_10-K.txt",
+  "cohort": "jbook_exposure_divergence_2024",
+  "summary_note": "NULL CASE for the J-Book exposure-divergence cohort. FTAI's pre-cutoff filings contain zero named Pentagon programs / PE numbers / DoD customers / program-of-record narratives. The cohort metadata hint ('military adjacency via leasing structures; LM2500 marine, CFM56 modules') is not supported by the 10-K text — engines named are commercial (CFM56-7B, CFM56-5B, V2500), and the only 'military' string mentions are Russia/Ukraine geopolitical risk language. All entity-resolution and direct-contractor M-source lookups (pentagon_jbook contractor lookup, usaspending DoD contracts, J-Book by_entity index) return zero matches. Conclusion: there is no J-Book divergence to find here because there is no J-Book exposure to begin with. The framework should NOT generate red flags merely because the cohort hypothesis was investigated; doing so would be a Mode A failure (extracting claims that don't exist).",
+  "scores": [
+    {
+      "claim_id": "FTAI-2024-C1",
+      "claim_text": "FTAI's Aerospace Products business develops, manufactures, and repairs/sells aftermarket components for CFM56-7B, CFM56-5B, and V2500 engines.",
+      "severity": "PASS",
+      "supports": ["edgar_fts.query_fulltext"],
+      "M_check": "edgar_fts.query_fulltext(search_term='CFM56')",
+      "M_value": {"total_hits": 292},
+      "interpretation": "CFM56 is a well-attested commercial aviation engine family (292 SEC filing mentions). This is a commercial product line, not a DoD program. Claim is consistent with public record."
+    },
+    {
+      "claim_id": "FTAI-2024-C2",
+      "claim_text": "FTAI completed the acquisition of QuickTurn (Quick Turn Engine Center LLC) on December 1, 2023.",
+      "severity": "PASS",
+      "supports": ["epa_frs.query_facilities"],
+      "M_check": "epa_frs.query_facilities(facility_name='Quick Turn', state_abbr='FL')",
+      "M_value": {"n_facilities": 2, "florida_facilities_found": ["M C QUICK TURN (Melbourne)", "QUICK TURN AROUND (Orlando)"]},
+      "interpretation": "Two EPA-registered facilities in Florida contain 'Quick Turn' in the name; the existence of a Florida engine-center / MRO operator is plausible. Not a high-discriminative match (name is generic), but no disconfirming signal."
+    },
+    {
+      "claim_id": "FTAI-2024-C3",
+      "claim_text": "FTAI owns and leases offshore energy equipment as an additional asset class.",
+      "severity": "UNVERIFIABLE",
+      "supports": [],
+      "M_check": "no M-source queried",
+      "M_value": null,
+      "interpretation": "Offshore energy equipment leasing is a commercial line of business; outside the J-Book cohort scope. Not material to the divergence-pattern test."
+    },
+    {
+      "claim_id": "FTAI-2024-C4",
+      "claim_text": "Total consolidated assets of $3.0B and total equity of $175.9M at Dec 31, 2023.",
+      "severity": "UNVERIFIABLE",
+      "supports": [],
+      "M_check": "no M-source queried (balance-sheet aggregates are GAAP-audited; outside our M-source catalog scope)",
+      "M_value": null,
+      "interpretation": "Audited by E&Y per the 10-K; we do not have a financial-statement M-source. Outside cohort scope."
+    },
+    {
+      "claim_id": "FTAI-2024-C5",
+      "claim_text": "FTAI is externally managed by FIG LLC (Fortress affiliate).",
+      "severity": "PASS",
+      "supports": [],
+      "M_check": "no M-source queried; SEC counterparty/manager disclosure is consistent across filings",
+      "M_value": null,
+      "interpretation": "Well-documented external-manager structure. Note for cohort context: external management by Fortress is structurally relevant for any rollup-coherence analysis but not J-Book related."
+    },
+    {
+      "claim_id": "FTAI-2024-C6",
+      "claim_text": "Eight aircraft and seventeen engines still in Russia; $210.7M insured value pending recovery.",
+      "severity": "UNVERIFIABLE",
+      "supports": [],
+      "M_check": "no M-source queried (insurance recoveries are not in scope of catalog)",
+      "M_value": null,
+      "interpretation": "Disclosed contingency, outside the J-Book cohort scope. Forward outcome depends on litigation/insurance, not Pentagon budget."
+    },
+    {
+      "claim_id": "FTAI-2024-C7",
+      "claim_text": "FTAI's MDA references no Pentagon programs, no DoD customers, no PE numbers, and no defense-procurement revenue concentration.",
+      "severity": "PASS",
+      "supports": ["pentagon_jbook.query_program_funding", "usaspending.query_dod_contracts", "edgar_fts.query_fulltext"],
+      "M_check": "pentagon_jbook(contractor_name='FTAI Aviation' / 'Fortress Transportation') + usaspending(recipient_name='FTAI Aviation' / 'Fortress Transportation') + edgar_fts(FTAI in Lockheed/Boeing 10-Ks)",
+      "M_value": {
+        "pentagon_jbook_FTAI_Aviation": "NOT_FOUND (0 matched programs)",
+        "pentagon_jbook_Fortress_Transportation": "NOT_FOUND (0 matched programs)",
+        "usaspending_FTAI_Aviation": "0 awards, $0 obligated",
+        "usaspending_Fortress_Transportation": "0 awards, $0 obligated",
+        "edgar_fts_FTAI_in_Lockheed_10K": "0 hits",
+        "edgar_fts_FTAI_in_Boeing_10K": "0 hits"
+      },
+      "interpretation": "The framework's primary verifier (pentagon_jbook) and orthogonal verifiers (usaspending, edgar_fts counterparty) all return zero defense exposure. This is the CORRECT outcome: the filing makes no J-Book-grounded claim to test. NOT_FOUND in pentagon_jbook is calibrated to UNVERIFIABLE in the rubric, but in combination with zero DoD obligations on usaspending and zero counterparty disclosure mentioning FTAI as a defense partner, the cohort framework correctly identifies FTAI as outside the J-Book exposure-divergence pattern. PASS on the meta-claim (the company correctly did not invoke Pentagon programs as material revenue contributors)."
+    },
+    {
+      "claim_id": "FTAI-2024-C8",
+      "claim_text": "$500M 2030 Notes issued Nov 2023; $2.6B total principal outstanding at YE 2023.",
+      "severity": "UNVERIFIABLE",
+      "supports": [],
+      "M_check": "no M-source queried (capital-structure facts; outside cohort scope)",
+      "M_value": null,
+      "interpretation": "Capital-structure disclosure; not relevant to J-Book divergence pattern."
+    }
+  ],
+  "cohort_meta_finding": {
+    "j_book_grounded_claims": 1,
+    "pentagon_jbook_fired_on": 1,
+    "pentagon_jbook_findings": {
+      "FTAI_Aviation": "NOT_FOUND",
+      "Fortress_Transportation": "NOT_FOUND"
+    },
+    "severity_distribution": {
+      "PASS": 4,
+      "MODERATE_UNDERDELIVERY": 0,
+      "SEVERE_UNDERDELIVERY": 0,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 4
+    },
+    "blinded_forward_test_call": "NO DIVERGENCE DETECTED. FTAI does not exhibit the J-Book exposure-divergence pattern at the 2024-09-01 cutoff. The framework correctly identifies the absence of pattern."
+  }
+}

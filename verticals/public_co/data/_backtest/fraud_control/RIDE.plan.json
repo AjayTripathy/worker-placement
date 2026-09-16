@@ -1,0 +1,377 @@
+{
+  "ticker": "RIDE",
+  "cutoff": "2021-02-01",
+  "filing": "0001104659-20-124501_S1.txt",
+  "plan_version": 1,
+  "claims": [
+    {
+      "claim_id": "RIDE-1",
+      "claim_text": "Lordstown has received pre-orders primarily from fleet operators to purchase over 44,000 Endurance vehicles; the pre-orders are non-binding and required no deposit.",
+      "source_quote": "As of the date of this prospectus, we have received pre-orders primarily from fleet operators to purchase over 44,000 Endurance vehicles. These pre-orders are not binding and did not require any deposit, so there can be no assurance that we will successfully convert them into binding orders or sales... if we were able to convert these pre-orders into binding orders, they would represent sufficient demand to cover production into 2023 based on management's planned production timeline.",
+      "subject": "Lordstown Motors Corp.",
+      "predicate": "has_received_preorders_for_units",
+      "object_value": "44,000+ Endurance vehicles (non-binding, no deposit)",
+      "category": "customer_pipeline",
+      "referent_type": "quantity",
+      "m_source_status": "MAPPED",
+      "source_id": "claim_evolution.query_claim_evolution",
+      "source_params": {
+        "cik": "0001759546",
+        "search_term": "pre-orders",
+        "base_filing_date": "2020-11-12",
+        "cutoff_date": "2021-02-01",
+        "forms": "10-K,10-Q,8-K,DEF 14A"
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "Fleet customer counterparty 10-K corroboration scan",
+          "endpoint_or_method": "edgar_fts.query_fulltext with search_term='Endurance' or 'Lordstown' across major US fleet/leasing operators (Holman, ARI, Wheels, Element Fleet, Penske, FedEx, UPS) — if 44,000 trucks reflects real fleet-side intent, at least the largest LOI-signers should mention Endurance or Lordstown somewhere in their post-2020 filings",
+          "rationale": "44,000 trucks at $52,500 = ~$2.3B implied gross. Even split across 10-20 fleet counterparties this is a board-level capex commitment that would normally surface in a counterparty risk-factor or capex commentary. Total silence across all major US commercial-fleet operators in their own filings is a strong inflation signal.",
+          "expected_observable": "count of fleet/leasing 10-K filings mentioning Endurance or Lordstown",
+          "signal_direction": "0-2 mentions across all major US fleet operators contradicts 44,000-unit fleet pre-order book",
+          "severity_if_contradiction": "SEVERE"
+        },
+        {
+          "source_label": "Secretary of State entity registry lookups on the LOI-signer roster",
+          "endpoint_or_method": "If/when the company files an investor presentation or 10-K Exhibit listing pre-order counterparties, cross-check each entity against its state-of-incorporation SoS registry, EIN/Dun & Bradstreet records, and FMCSA SAFER (for any counterparty that claims to operate a delivery fleet)",
+          "rationale": "Classic SPAC EV fraud pattern is LOIs from shell counterparties with no fleet, no employees, or recently-formed LLCs. Operational-existence test on the LOI counterparty list is the diagnostic for whether the pre-order book represents real demand.",
+          "expected_observable": "per-counterparty triplet: (years-in-operation, employees-reported, registered-fleet-size). Triangulates whether each LOI counterparty has the operational scale to actually take delivery.",
+          "signal_direction": "shell or sub-50-employee counterparties dominating the pre-order book = real fabrication / inflation signal",
+          "severity_if_contradiction": "SEVERE"
+        },
+        {
+          "source_label": "FMCSA SAFER carrier registry",
+          "endpoint_or_method": "https://safer.fmcsa.dot.gov/CompanySnapshot.aspx — per claimed fleet counterparty, lookup power-units, drivers, and operating status",
+          "rationale": "Each LOI-signer represented as a 'fleet operator' should have a registered fleet of vehicles via FMCSA (the federal interstate-trucking registry). Fleet-counterparty footprint is the canonical test for whether they could absorb hundreds-to-thousands of Endurances.",
+          "expected_observable": "per-carrier power-unit + driver counts",
+          "signal_direction": "counterparties with <10 power units claiming 1000+ Endurance pre-orders = contradicts claim",
+          "severity_if_contradiction": "SEVERE"
+        }
+      ],
+      "domain": "autos_vehicles",
+      "claim_type_taxonomy": "commercial_customer",
+      "extraction_notes": "Central fraud-vector claim. The filing itself disclaims the pre-orders as non-binding without deposit. Pre-cutoff (2021-02-01), there is no externally-resolved counterparty list — the LOI counterparties are not named in the S-1. The strongest pre-cutoff test is the focal company's own subsequent disclosure cadence (claim_evolution) plus megacap/fleet counterparty silence. Operational-capacity testing via FMCSA on the eventual LOI roster is invited as a creative extension."
+    },
+    {
+      "claim_id": "RIDE-2",
+      "claim_text": "Lordstown anticipates commencing full production in 2021 with a target of 2,200 Endurance vehicles produced and sold in the year.",
+      "source_quote": "If we are able to complete the foregoing actions consistent with expectations, we anticipate that we will be able to commence full production in 2021 with a target of 2,200 vehicles produced and sold in the year.",
+      "subject": "Lordstown Motors Corp.",
+      "predicate": "targets_production_volume_in_year",
+      "object_value": "2,200 Endurance vehicles in 2021",
+      "category": "production_volume",
+      "referent_type": "quantity",
+      "m_source_status": "MAPPED",
+      "source_id": "nhtsa.query_manufacturer",
+      "source_params": {
+        "name": "Lordstown"
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "NHTSA vPIC manufacturer registration + vehicle-type classification",
+          "endpoint_or_method": "Cross-check whether 'Lordstown' is registered as a complete Truck manufacturer (vs 'Incomplete Vehicle' / chassis-only) pre-cutoff",
+          "rationale": "A legitimate OEM targeting 2,200 truck deliveries within 6-8 months should already be a NHTSA-registered Truck mfr with submitted Part 565 VIN-prefix assignment. 'Incomplete Vehicle' or absent registration pre-production = scope contradiction.",
+          "expected_observable": "manufacturer name, vehicle types, WMI/VIN prefix assignment status",
+          "signal_direction": "absent or 'Incomplete Vehicle' classification contradicts the 'commencement of commercial production' timeline",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "EPA Vehicle Certification (proposed connector)",
+          "endpoint_or_method": "EPA Vehicle Certification database for light-duty vehicle CoCs (Certificates of Conformity); a manufacturer cannot sell on-road in the US without a CoC for the model year",
+          "rationale": "An OEM planning 2021 commercial production of an on-road light-duty truck must obtain an EPA CoC and FMVSS self-certification per model year. Pre-cutoff (2021-02-01), the company would not yet have a CY2021 CoC, but absence of any pending CoC application is an operational-capacity divergence.",
+          "expected_observable": "CoC application status by manufacturer + model year",
+          "signal_direction": "no CoC application 6 months before claimed commercial production = behind schedule vs claimed cadence",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Workforce ramp-up via OSHA Form 300A + BLS QCEW",
+          "endpoint_or_method": "osha_establishments.query_establishments + bls_qcew.query_county_naics for Trumbull County OH NAICS 3361 / 3363",
+          "rationale": "Building 2,200 trucks in CY2021 requires ramping to several hundred production employees at Lordstown by Q2/Q3 2021. Pre-cutoff inspection of OSHA Form 300A filings + Trumbull County QCEW NAICS-3361 employment trajectory probes the operational-capacity precondition.",
+          "expected_observable": "Lordstown establishment headcount at Hallock Young Rd site + Trumbull County 3361 employment trajectory 2019Q4-2020Q4",
+          "signal_direction": "stagnant or sub-200 establishment employment 6 months before claimed full production = under-staffed for the target",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "autos_vehicles",
+      "claim_type_taxonomy": "production_count",
+      "extraction_notes": "Pre-cutoff, NHTSA vPIC registration is the canonical OEM-existence and vehicle-type check. Production-count proof is fundamentally a post-cutoff measurement (deliveries don't yet exist), so NHTSA mfr registration + pre-production preparedness signals (workforce, EPA CoC) are the strongest pre-cutoff proxies."
+    },
+    {
+      "claim_id": "RIDE-3",
+      "claim_text": "The Lordstown Complex spans approximately 6.2 million square feet at 2300 Hallock Young Road, Lordstown, Ohio, in a near-production-ready state with stamping/body/paint/final-assembly lines.",
+      "source_quote": "Located in Lordstown, Ohio, the Lordstown Complex spans 6.2 million square feet and is in a near-production-ready state... The Lordstown Complex consists of four main facilities in one location, in addition to multiple support buildings: (1) General Assembly, (2) a Body Shop, (3) Stamping and (4) a Paint Shop.",
+      "subject": "Lordstown Complex (2300 Hallock Young Rd, Lordstown OH)",
+      "predicate": "is_an_operational_assembly_plant",
+      "object_value": "6,200,000 sq ft former GM Cruze plant",
+      "category": "physical_facility",
+      "referent_type": "physical_object",
+      "m_source_status": "MAPPED",
+      "source_id": "epa_emissions.query_facility_emissions",
+      "source_params": {
+        "company_name": "Lordstown Motors",
+        "state": "OH",
+        "claimed_locations": [{"city": "Lordstown", "state": "OH"}]
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "OSHA Form 300A establishment lookup at Hallock Young Rd",
+          "endpoint_or_method": "osha_establishments.query_establishments with company_name='Lordstown', city='Lordstown', state='OH', naics_prefix='3361'",
+          "rationale": "A 6.2M sq ft former Cruze plant in 'near-production-ready' state with stamping/paint/assembly lines should appear on OSHA Form 300A under the current operator's name. Plant-handover from GM in Nov 2019 means the operator-of-record may still partially reference GM; subsidiary-name asymmetry is the calibration caveat here.",
+          "expected_observable": "establishment record with Lordstown Motors as employer at Hallock Young Rd + annual avg employees",
+          "signal_direction": "absent establishment record OR sub-100 employees at 6.2M sqft site = operational-scale contradiction",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Trumbull County (FIPS 39155) NAICS-3361 employment denominator",
+          "endpoint_or_method": "bls_qcew.query_county_naics(fips5='39155', year=2020, qtr=2-3, naics_prefix='3361', naics_digits=4)",
+          "rationale": "Trumbull County auto-mfg employment denominator. A 6.2M sq ft active assembly plant ramping to 2,200 trucks should materially move county-level NAICS-3361 employment relative to its low-water mark right after GM's exit.",
+          "expected_observable": "Trumbull County NAICS-3361 monthly employment + estab count 2019Q1 through 2020Q4",
+          "signal_direction": "flat or declining county employment through 2020 = the marketed 'near-production-ready' state hasn't yet translated to operational workforce",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "autos_vehicles",
+      "claim_type_taxonomy": "facility_scope",
+      "extraction_notes": "Facility existence at the GM plant is well-documented (the asset purchase from GM is public). The diagnostic question is the 'near-production-ready' qualifier — i.e. operational scale at the marketed site, which EPA FRS reverse-lookup + OSHA + QCEW triangulate."
+    },
+    {
+      "claim_id": "RIDE-4",
+      "claim_text": "Lordstown holds a perpetual license from Elaphe Propulsion Technologies Ltd. to manufacture the Model L-1500 in-wheel hub motor for the Endurance in the United States, Canada and Mexico, with Elaphe initially producing the motors and a planned in-house manufacturing line at the Lordstown Complex.",
+      "source_quote": "We have entered into a licensing agreement with Elaphe Propulsion Technologies Ltd. ('Elaphe') to produce and manufacture the hub motors at the Lordstown Complex. As we retool the Lordstown Complex and ramp up production, Elaphe will initially manufacture its Model L-1500 in-wheel hub motors for us... we entered into a license agreement with Elaphe, pursuant to which Elaphe granted us a perpetual license to manufacture the Elaphe Model L-1500 Endurance Motor for use in the United States, Canada and Mexico in exchange for a license fee calculated on a per motor basis.",
+      "subject": "Lordstown Motors Corp.",
+      "predicate": "holds_license_from",
+      "object_value": "Elaphe Propulsion Technologies Ltd. — perpetual L-1500 hub motor license (US/CA/MX)",
+      "category": "partnership",
+      "referent_type": "entity",
+      "m_source_status": "MAPPED",
+      "source_id": "edgar_fts.query_fulltext",
+      "source_params": {
+        "search_term": "Elaphe",
+        "cutoff_date": "2021-02-01",
+        "start_date": "2018-01-01",
+        "forms": "10-K,10-Q,8-K,DEF 14A,S-1,S-4"
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "USPTO patent assignee search on Elaphe + cross-assignment to Lordstown",
+          "endpoint_or_method": "uspto_odp.query_assignee(assignee_name='Elaphe') and uspto_odp.query_assignee(assignee_name='Lordstown') with cutoff_date='2021-02-01'",
+          "rationale": "A perpetual license on a specific motor model implies underlying Elaphe patents and possibly Lordstown-assigned hub-motor patents. Mapping the IP estate confirms (or fails to confirm) the technological substrate of the license.",
+          "expected_observable": "patent counts and joint-assignee patents",
+          "signal_direction": "0 Elaphe patents = the licensed technology has no IP backing; 0 Lordstown patents in propulsion area = the in-house manufacturing handoff lacks technical IP",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "EU intellectual-property office / Slovenian companies register on Elaphe",
+          "endpoint_or_method": "Slovenian Business Register (AJPES) + EPO assignee search for Elaphe Propulsion Technologies, d.o.o.",
+          "rationale": "Elaphe is a Slovenian company. Its corporate-existence, revenue, and IP estate are externally verifiable via the Slovenian companies register (AJPES) and EPO patent register. A real licensable hub-motor business should leave a multi-year patent + filings trail.",
+          "expected_observable": "AJPES record (active, employees, revenue) + EPO patent count under Elaphe",
+          "signal_direction": "shell or dormant entity = contradicts the existence of a manufacturable hub-motor IP",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "autos_vehicles",
+      "claim_type_taxonomy": "supply_chain",
+      "extraction_notes": "Counterparty (Elaphe) is a non-public Slovenian company, so SEC counterparty-disclosure tests don't apply. The 8-K exhibit references the license agreement, which is testable via edgar_fts. Patent triangulation via USPTO is the highest-value pre-cutoff test."
+    },
+    {
+      "claim_id": "RIDE-5",
+      "claim_text": "Lordstown licenses key electric-pickup-truck and EV intellectual property (patents, copyrights, trade secrets, know-how, software) from Workhorse Group Inc., contributed in exchange for 131,000 founder shares valued at approximately $11.1 million.",
+      "source_quote": "The Company subsequently entered into a common stock subscription agreement whereby the Company issued 131,000 shares to Workhorse Group, Inc. ('Workhorse'), in exchange for the right to use certain intellectual property in vehicle production... Intangible assets include patents, copyrights, trade secrets, know-how, software, and all other intellectual property and proprietary rights (collectively referred to as 'Licensed Technology') connected with the electric pickup truck and other electric vehicle technology. The Licensed Technology was previously owned by Workhorse Group and contributed in exchange for common shares in the Company, which was valued at $11,111,100.",
+      "subject": "Lordstown Motors Corp.",
+      "predicate": "licenses_ip_from",
+      "object_value": "Workhorse Group Inc. — electric pickup IP package ($11.1M valuation)",
+      "category": "technology",
+      "referent_type": "intangible",
+      "m_source_status": "MAPPED",
+      "source_id": "edgar_fts.query_fulltext",
+      "source_params": {
+        "search_term": "Lordstown",
+        "cutoff_date": "2021-02-01",
+        "cik": "0001425287",
+        "start_date": "2018-01-01",
+        "forms": "10-K,10-Q,8-K,DEF 14A"
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "USPTO assignee mapping on Workhorse + assignment-history search on Workhorse->Lordstown",
+          "endpoint_or_method": "uspto_odp.query_assignee(assignee_name='Workhorse') with cutoff_date='2021-02-01'; then USPTO Patent Assignment Search (PAIR) for any Workhorse->Lordstown assignment recordations",
+          "rationale": "Verifies that Workhorse actually held an IP estate of the scale Lordstown describes ('all other intellectual property and proprietary rights connected with the electric pickup truck'). Workhorse's W-15 pickup IP is the substrate — a thin or non-existent Workhorse pickup patent estate would undermine the $11.1M valuation.",
+          "expected_observable": "Workhorse patent + application counts, with title-keyword categorization on 'pickup', 'hub motor', 'battery'; Workhorse->Lordstown assignment recordations",
+          "signal_direction": "minimal Workhorse pickup-related patents = the $11.1M IP contribution is partially constructive (founder-shares insiderness, since CEO Burns was former Workhorse CEO)",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Workhorse Group 10-K disclosures on the IP transfer to Lordstown",
+          "endpoint_or_method": "edgar_fts.query_fulltext with search_term='Lordstown' restricted to Workhorse CIK 0001425287, forms='10-K,10-Q,8-K' — Workhorse should disclose this material IP-out-license / contribution in its own filings",
+          "rationale": "Workhorse Group is itself a public reporter (NASDAQ:WKHS). A material IP contribution to a related-party EV startup founded by its former CEO is a Related-Party Transaction subject to Workhorse-side disclosure. Asymmetric Workhorse-side silence on the IP transfer would be a related-party disclosure red flag.",
+          "expected_observable": "Workhorse 10-K Related-Party section mentioning Lordstown + IP-license transfer + valuation",
+          "signal_direction": "Workhorse-side disclosure should mirror Lordstown's $11.1M valuation; large divergence = arms-length-pricing concern",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "autos_vehicles",
+      "claim_type_taxonomy": "patents_ip",
+      "extraction_notes": "Workhorse Group is public (WKHS, CIK 0001425287). Counterparty-side EDGAR FTS scoped to its CIK is a legitimate counterparty-disclosure test even under H7 because the relationship is between two small-caps, not a small-cap-vs-megacap; the H7 over-fit warning does NOT apply here."
+    },
+    {
+      "claim_id": "RIDE-6",
+      "claim_text": "General Motors LLC (and affiliated GM EV Holdings LLC) participated as a PIPE investor in the Business Combination, with purchase price paid as in-kind consideration plus a cash payment; Lordstown also has an agreement with GM for access to non-customer-facing GM parts (airbags, steering columns, steering wheels) and acquired the Lordstown Complex from GM in November 2019 for a $20M note payable.",
+      "source_quote": "we entered into separate Subscription Agreements, each dated as of August 1, 2020... with certain qualified institutional buyers and accredited investors (the 'PIPE Investors'), including GM EV Holdings LLC (together with General Motors LLC and their respective affiliates, as applicable, 'GM')... we sold an aggregate of 50,000,000 shares of Class A common stock to the PIPE Investors in a private placement for a purchase price of $10.00 per share, and aggregate consideration of $500,000,000... On April 3, 2020, we entered into an agreement with GM that provides us with access to certain non-customer-facing GM parts, including airbags, steering columns and steering wheels.",
+      "subject": "Lordstown Motors Corp.",
+      "predicate": "has_strategic_relationship_with",
+      "object_value": "General Motors (CIK 0001467858) — PIPE investor + parts-access agreement + plant seller",
+      "category": "partnership",
+      "referent_type": "entity",
+      "m_source_status": "MAPPED",
+      "source_id": "edgar_fts.query_fulltext",
+      "source_params": {
+        "search_term": "Lordstown Motors",
+        "cutoff_date": "2021-02-01",
+        "cik": "0001467858",
+        "start_date": "2019-01-01",
+        "forms": "10-K,10-Q,8-K,DEF 14A"
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "GM (megacap) counterparty namecheck",
+          "endpoint_or_method": "megacap_namecheck.query_megacap_mentions(small_cap_name='Lordstown Motors', cutoff_date='2021-02-01', megacap_subset=['GM','Ford','Tesla'])",
+          "rationale": "GM is in the framework's megacap list. The plant-sale + parts-supply + PIPE stake is a material related-party arrangement that should appear in GM's own 10-K/10-Q. Multi-megacap context check.",
+          "expected_observable": "GM-side mention count over 2019-2020 filings",
+          "signal_direction": "3+ mentions = recurring relationship (consistent with claim); 0 mentions = inflation-suspect — but GM-side disclosure threshold for a sub-$10B equity investment is real, so absence here would be diagnostic",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "autos_vehicles",
+      "claim_type_taxonomy": "commercial_customer",
+      "extraction_notes": "GM is megacap (per H7 watchlist). However, GM held a direct PIPE equity stake in Lordstown, so this is NOT a sub-material counterparty relationship — it's a board-level investment. H7 doesn't apply: GM-side disclosure is highly expected. Both edgar_fts(cik=GM) and megacap_namecheck are appropriate. Cross-verifying both is intentional."
+    },
+    {
+      "claim_id": "RIDE-7",
+      "claim_text": "As an OEM, Lordstown will self-certify that its vehicles meet or are exempt from all applicable U.S. Federal Motor Vehicle Safety Standards (FMVSS) before vehicles can be imported into or sold in the United States.",
+      "source_quote": "Our vehicles will be subject to, and must comply with, many regulations established by the National Highway Traffic Safety Administration ('NHTSA'), including applicable U.S. federal motor vehicle safety standards ('FMVSS'). As an OEM, we must self-certify that our vehicles meet or otherwise are exempt from all applicable FMVSS and the NHTSA bumper standards before a vehicle can be imported into or sold in the United States.",
+      "subject": "Lordstown Motors Corp.",
+      "predicate": "must_self_certify_FMVSS_compliance",
+      "object_value": "all applicable FMVSS for the Endurance prior to commercial sale",
+      "category": "regulatory_milestone",
+      "referent_type": "event",
+      "m_source_status": "MAPPED",
+      "source_id": "nhtsa.query_manufacturer",
+      "source_params": {
+        "name": "Lordstown"
+      },
+      "proposed_connector": {
+        "name": "nhtsa.vpic_wmi_part565",
+        "description": "NHTSA vPIC World Manufacturer Identifier (WMI) lookup — Part 565 VIN-prefix assignment per OEM; canonical proof of OEM registration for U.S. vehicle sale",
+        "endpoint": "https://vpic.nhtsa.dot.gov/api/vehicles/getwmismanufacturername/{manufacturer}?format=json",
+        "access_pattern": "api",
+        "auth_required": false,
+        "sample_invocation": "GET https://vpic.nhtsa.dot.gov/api/vehicles/getwmismanufacturername/Lordstown?format=json",
+        "rationale": "Self-certification of FMVSS requires WMI assignment via NHTSA Part 565; pre-production OEMs without a WMI cannot legally sell vehicles. WMI is a more granular check than the bare manufacturer registry already exposed by nhtsa.query_manufacturer.",
+        "estimated_cost": "free",
+        "completeness": "all U.S. OEMs and Part 565 registrants",
+        "referent_type": "manufacturer",
+        "attribute": "WMI_assignment_status"
+      },
+      "creative_extensions": [
+        {
+          "source_label": "Combined NHTSA TP-VOA + EPA OTAQ CoC pre-production audit",
+          "endpoint_or_method": "Cross-check NHTSA TP-VOA (manufacturer Vehicle Owner's Information page) + EPA Office of Transportation and Air Quality CoC application database for any Endurance / Lordstown vehicle line",
+          "rationale": "Both NHTSA (FMVSS self-cert) and EPA (CoC for on-road sale) certifications are public; a credible 2H-2021 commercial-sale timeline requires meaningful certification-prep activity by Q4 2020.",
+          "expected_observable": "pre-cutoff certification application records",
+          "signal_direction": "no pending certification activity 6 months before claimed sale start = timeline divergence",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "autos_vehicles",
+      "claim_type_taxonomy": "certification_milestone",
+      "extraction_notes": "Taxonomy cell (autos_vehicles, certification_milestone) is GAP — proposed EPA Vehicle Certifications + NHTSA Recalls connectors. The nhtsa.query_manufacturer catalog call is the closest catalog source; the WMI-assignment proposal is the precise gap-filler."
+    },
+    {
+      "claim_id": "RIDE-8",
+      "claim_text": "Lordstown has substantial doubt about its ability to continue as a going concern within one year of issuance of its financial statements; cumulative losses since inception are approximately $30.2 million as of June 30, 2020, with $454,827 in cash and cash equivalents at that date.",
+      "source_quote": "Since inception, the Company has incurred cumulative losses of approximately $10,390,514 and $30,211,841 as of December 31, 2019 and June 30, 2020, respectively. As of December 31, 2019, the Company had $2,159,217 in cash and cash equivalents and $454,827 as of June 30, 2020... the Company has concluded that there is substantial doubt about its ability to continue as a going concern within one year after the date that the financial statements are issued.",
+      "subject": "Lordstown Motors Corp.",
+      "predicate": "has_disclosed_going_concern_doubt",
+      "object_value": "$30.2M cumulative loss / $0.45M cash at June 30, 2020 (pre-PIPE)",
+      "category": "financial_distress",
+      "referent_type": "amount",
+      "m_source_status": "MAPPED",
+      "source_id": "claim_evolution.query_claim_evolution",
+      "source_params": {
+        "cik": "0001759546",
+        "search_term": "going concern",
+        "base_filing_date": "2020-11-12",
+        "cutoff_date": "2021-02-01",
+        "forms": "10-K,10-Q,8-K"
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "ucc_proxy via SEC 8-K Item 2.03 filings on Lordstown CIK",
+          "endpoint_or_method": "ucc_proxy.query_ucc_exposure(cik='0001759546', cutoff_date='2021-02-01', window_months=18)",
+          "rationale": "Distress + small cash balance often correlates with toxic-convertible or secured-debt activity. The $20M GM note + Maxim convertible promissory notes are already disclosed; the ucc_proxy check confirms whether the secured-debt pace is in MODERATE or HIGH cluster territory pre-Business-Combination capital raise.",
+          "expected_observable": "Item 2.03 cadence + 10-K Notes secured-debt enumeration",
+          "signal_direction": "HIGH_LIEN_EXPOSURE = cluster consistent with distress; LOW_LIEN_EXPOSURE = the $500M PIPE closing reset the balance sheet (which matches the public-cutoff picture)",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "sec_filings.list_filings_by_form on Lordstown (8-Ks, 10-Q cadence post-merger)",
+          "endpoint_or_method": "sec_filings.list_filings_by_form(cik='0001759546', forms=['8-K','10-Q','S-1/A'], start_date='2020-10-23', cutoff_date='2021-02-01')",
+          "rationale": "Filing cadence and amendment count post-Business-Combination is a distress-discipline proxy. Heavy S-1/A churn + frequent risk-factor amendments would corroborate the going-concern caveat.",
+          "expected_observable": "filings count by form between merger-close (2020-10-23) and cutoff (2021-02-01)",
+          "signal_direction": "elevated 8-K/S-1A activity = consistent with stress; quiet = consistent with successful PIPE closing",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "autos_vehicles",
+      "claim_type_taxonomy": "financial_distress",
+      "extraction_notes": "This is the focal company's own going-concern disclosure. The test is whether it remains disclosed (REAFFIRMED) or is dropped (SILENT_POST_CLAIM — concerning given the company's pre-revenue stage). Note that the $500M PIPE closed Oct 23, 2020 (between the cited 6/30/2020 balance sheet and cutoff) — the going-concern caveat may have been formally lifted post-PIPE; claim_evolution will detect that."
+    },
+    {
+      "claim_id": "RIDE-9",
+      "claim_text": "Lordstown has no current customers and no pending orders; only non-binding pre-orders signed with no customer deposits, and the company has engaged in only limited marketing activities to date.",
+      "source_quote": "With our vehicle still under development, we do not have any current customers or any pending orders and there is no assurance nonbinding pre-orders will be converted into binding orders or sales... Our business model is focused on building relationships with large fleet customers. To date, we have engaged in limited marketing activities and we have no binding contracts with customers. The non-binding pre-orders that we have signed did not require customer deposits and may not be converted into binding orders or sales.",
+      "subject": "Lordstown Motors Corp.",
+      "predicate": "has_zero_binding_customer_contracts",
+      "object_value": "0 binding contracts; only non-binding LOIs; 0 deposits collected",
+      "category": "customer_pipeline",
+      "referent_type": "quantity",
+      "m_source_status": "MAPPED",
+      "source_id": "usaspending.query_federal_presence",
+      "source_params": {
+        "name_variants": ["Lordstown Motors Corp.", "Lordstown Motors", "Lordstown", "Legacy Lordstown"],
+        "start_date": "2019-04-30",
+        "end_date": "2021-02-01",
+        "include_grants": true
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "GSA Vehicle Sales tracker (proposed)",
+          "endpoint_or_method": "GSA Auto Choice / Federal Acquisition Service vehicle-sales tracker — federal fleet customers often signal interest pre-procurement via RFI / sources-sought notices on SAM.gov",
+          "rationale": "If any federal fleet customer is among the 44,000-unit pre-order book (the filing mentions 'governmental organizations with three or more vehicles' as part of target market), a SAM.gov sources-sought or RFI on electric pickup trucks should be discoverable pre-cutoff.",
+          "expected_observable": "SAM.gov posted RFIs / sources-sought for light-duty EV pickups 2019-2021",
+          "signal_direction": "absent federal-side interest signals weakens the implied government-segment portion of the 44,000-unit book",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "SAM.gov entity registration lookup",
+          "endpoint_or_method": "sam_entity.query_entity_by_uei (UEI to be resolved first via usaspending name resolution)",
+          "rationale": "Even if zero federal awards, registered SAM.gov entity status with primary NAICS 3361 corroborates that the company has positioned itself as a federally-eligible vehicle OEM, consistent with its government-fleet TAM claim.",
+          "expected_observable": "SAM record with NAICS 3361xx, address Hallock Young Rd, active registration",
+          "signal_direction": "absent SAM registration OR primary NAICS not 3361/3363 = scope contradiction vs OEM claim",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "autos_vehicles",
+      "claim_type_taxonomy": "federal_customer",
+      "extraction_notes": "The company's TAM includes 'commercial and governmental organizations with three or more vehicles' but no specific federal contract is claimed. Federal-presence query is informative as a calibration baseline rather than a contradiction test — INFLATION_SUSPECT is expected pre-revenue. If the result instead surfaces actual federal awards, that's a positive corroboration (rare for stage)."
+    }
+  ]
+}

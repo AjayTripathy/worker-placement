@@ -1,0 +1,157 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>fda_velocity_scanner</title><style>
+body{margin:0;background:#0b0e12;color:#e8ebee;font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:26px 24px 90px}
+a{color:#8b7cf6} h1{font-size:23px;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:#7d858e;margin:0 0 20px;font-size:13px}
+h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:#7d858e;margin:24px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 10px;border-bottom:1px solid #242a31;text-align:left;vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#7d858e}
+.k{font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:20px}
+.k-generator{color:#c3b8fb;background:rgba(139,124,246,.15)}
+.k-detector{color:#eccb8a;background:rgba(217,164,65,.15)}
+.k-watcher{color:#8ee5c1;background:rgba(53,201,143,.15)}
+.k-evidence{color:#b3bcc6;background:rgba(138,147,158,.15)}
+.h-OK{color:#35c98f} .h-STALE{color:#d9a441} .h-ERROR{color:#e0736a} .h-NEVER_RUN{color:#8a939e}
+pre{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px;overflow-x:auto;font-size:12px;line-height:1.5}
+.panel{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px 18px;margin-bottom:12px}
+ul{margin:4px 0;padding-left:20px} li{margin-bottom:4px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+</style></head><body><div class="wrap"><h1>fda_velocity_scanner</h1><p class="sub">registered capability · fda_velocity_scanner</p><a href="signals.html">&larr; all signals</a><div class="panel" style="margin-top:10px"><span class="k k-generator">GENERATOR</span> &nbsp;<span class="h-NEVER_RUN"><b>NEVER_RUN</b></span> · last run <span class="mono">never</span></div><p>Stage 0b generator: FDA clearance/launch VELOCITY by company (openFDA).</p><form method="POST" action="/signals/run" style="margin:10px 0"><input type="hidden" name="name" value="fda_velocity_scanner"><input name="symbol" placeholder="symbol (if applicable)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px"><input name="symbols" placeholder="universe, comma-sep (generators)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px;margin-left:6px"><button type="submit" style="background:#8b7cf6;color:#0b0e12;border:0;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;margin-left:6px">Run now</button></form><h2>Datasources</h2><ul><li>reference implementation: verticals/generators/fda_velocity_scanner.py (see the code section for the feeds it touches)</li></ul><h2>Applies to</h2><ul><li><b>strategies:</b> quality_value</li></ul><h2>The code</h2><pre>&quot;&quot;&quot;fda_velocity_scanner — Stage 0b generator: FDA clearance/launch VELOCITY by company (openFDA).
+
+Product-cycle tell: a company whose 510(k) clearance count is accelerating is loading a product cycle 2-4
+quarters before it shows in revenue; a stall is the inverse. v1 = device 510(k) clearances by applicant,
+trailing quarter vs the same quarter last year. (PMA/NDC legs queued.) Applicant-&gt;ticker = SignalOS step.
+
+  python3 verticals/generators/fda_velocity_scanner.py
+Writes data/FDA_VELOCITY.json. Free openFDA (keyless at this volume). READ-ONLY.
+&quot;&quot;&quot;
+from __future__ import annotations
+import json, datetime, urllib.parse, urllib.request
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+OUT = HERE / &quot;data&quot; / &quot;FDA_VELOCITY.json&quot;
+API = &quot;https://api.fda.gov/device/510k.json&quot;
+HDRS = {&quot;User-Agent&quot;: &quot;signalos-research 4tripathy@gmail.com&quot;}
+MIN_CUR = 3     # need &gt;=3 clearances in the window to matter
+
+
+def _counts(start: datetime.date, end: datetime.date):
+    &quot;&quot;&quot;Return (counts_by_key, full_term_by_key). key = uppercased[:60] applicant; full term is the
+    original openFDA applicant string, needed for an exact per-applicant product_code query.&quot;&quot;&quot;
+    q = urllib.parse.urlencode({&quot;search&quot;: f&quot;decision_date:[{start} TO {end}]&quot;,
+                                &quot;count&quot;: &quot;applicant.exact&quot;, &quot;limit&quot;: 1000})
+    try:
+        req = urllib.request.Request(f&quot;{API}?{q}&quot;, headers=HDRS)
+        with urllib.request.urlopen(req, timeout=60) as r:
+            d = json.load(r)
+    except Exception:
+        return {}, {}
+    out, full = {}, {}
+    for row in d.get(&quot;results&quot;, []):
+        t = row[&quot;term&quot;].upper()[:60]
+        # entity-resolution guard (ZBH lesson 2026-07-02): same-name DIFFERENT companies pollute counts —
+        # &quot;ZIMMER MEDIZINSYSTEME GMBH&quot; (German aesthetics, CoolTone) is not Zimmer Biomet. The mapping pass
+        # must resolve applicant families before comparing YoY; known-collision names get suffixed as-is
+        # (never merged on a name prefix).
+        out[t] = out.get(t, 0) + row[&quot;count&quot;]
+        full.setdefault(t, row[&quot;term&quot;])
+    return out, full
+
+
+def _current_with_diversity(start: datetime.date, end: datetime.date):
+    &quot;&quot;&quot;ASP/MIX GATE (TMCI lesson 2026-07-11): raw 510(k) acceleration is a FALSE POSITIVE when the new
+    clearances are lower-ASP SKUs CANNIBALIZING one existing product line (Treace: clearances up while
+    revenue fell −10%). Discriminator computable from openFDA alone: how many DISTINCT product_codes the
+    clearance wave spans — concentrated in one code = iteration/cannibalization; spread across many =
+    genuine pipeline breadth. We fetch the window&#x27;s RECORDS (paginated) and aggregate counts + per-applicant
+    product-code diversity LOCALLY (the applicant.exact field is not reliably searchable — 404s — so a
+    per-applicant follow-up query is fragile; a single bulk read is robust and cheaper).
+    Returns (counts_by_key, diversity_by_key).&quot;&quot;&quot;
+    from collections import defaultdict
+    counts, code_counts = defaultdict(int), defaultdict(lambda: defaultdict(int))
+    skip = 0
+    while skip &lt; 25000:
+        q = urllib.parse.urlencode({&quot;search&quot;: f&quot;decision_date:[{start} TO {end}]&quot;, &quot;limit&quot;: 1000, &quot;skip&quot;: skip},
+                                   quote_via=urllib.parse.quote)
+        try:
+            with urllib.request.urlopen(urllib.request.Request(f&quot;{API}?{q}&quot;, headers=HDRS), timeout=60) as r:
+                page = json.load(r).get(&quot;results&quot;, [])
+        except Exception:
+            break
+        if not page:
+            break
+        for rec in page:
+            a = (rec.get(&quot;applicant&quot;) or &quot;&quot;).upper()[:60]
+            pc = rec.get(&quot;product_code&quot;) or &quot;?&quot;
+            if a:
+                counts[a] += 1
+                code_counts[a][pc] += 1
+        if len(page) &lt; 1000:
+            break
+        skip += 1000
+    diversity = {}
+    for a, codes in code_counts.items():
+        n = len(codes)
+        tot = sum(codes.values())
+        top_share = max(codes.values()) / tot if tot else 1.0
+        gate = &quot;ITERATION_RISK&quot; if (n &lt;= 1 or top_share &gt;= 0.67) else &quot;BREADTH&quot;
+        diversity[a] = {&quot;n_codes&quot;: n, &quot;top_share&quot;: round(top_share, 2), &quot;gate&quot;: gate}
+    return dict(counts), diversity
+
+
+def scan() -&gt; dict:
+    today = datetime.date.today()
+    end = today.replace(day=1) - datetime.timedelta(days=1)
+    start = (end - datetime.timedelta(days=89)).replace(day=1)
+    cur, cur_div = _current_with_diversity(start, end)
+    prv, _ = _counts(start.replace(year=start.year - 1), end.replace(year=end.year - 1))
+    rows = []
+    for name, c in cur.items():
+        if c &lt; MIN_CUR:
+            continue
+        p = prv.get(name, 0)
+        rows.append({&quot;applicant&quot;: name.title(), &quot;cur_q&quot;: c, &quot;prior_q&quot;: p, &quot;delta&quot;: c - p, &quot;_key&quot;: name})
+    rows.sort(key=lambda r: -r[&quot;delta&quot;])
+    # ASP/MIX GATE the accelerators: a clearance wave concentrated in one product_code is likely
+    # lower-ASP iteration/cannibalization (TMCI), NOT a revenue-leading pipeline. Only BREADTH is
+    # a clean bullish tell; ITERATION_RISK must have its ASP/mix checked before it&#x27;s actionable.
+    accel = rows[:15]
+    for r in accel:
+        div = cur_div.get(r[&quot;_key&quot;], {&quot;n_codes&quot;: None, &quot;top_share&quot;: None, &quot;gate&quot;: &quot;UNKNOWN&quot;})
+        r[&quot;product_codes&quot;] = div[&quot;n_codes&quot;]
+        r[&quot;top_code_share&quot;] = div[&quot;top_share&quot;]
+        r[&quot;asp_gate&quot;] = div[&quot;gate&quot;]
+        r.pop(&quot;_key&quot;, None)
+    # surface the clean (breadth) accelerators first; iteration-risk sink to the bottom, flagged
+    accel.sort(key=lambda r: (0 if r[&quot;asp_gate&quot;] == &quot;BREADTH&quot; else 1, -r[&quot;delta&quot;]))
+    for r in rows:
+        r.pop(&quot;_key&quot;, None)
+    stalls = sorted([{&quot;applicant&quot;: n.title(), &quot;cur_q&quot;: cur.get(n, 0), &quot;prior_q&quot;: p, &quot;delta&quot;: cur.get(n, 0) - p}
+                     for n, p in prv.items() if p &gt;= 4 and cur.get(n, 0) &lt;= p // 2],
+                    key=lambda r: r[&quot;delta&quot;])[:10]
+    n_breadth = sum(1 for r in accel if r[&quot;asp_gate&quot;] == &quot;BREADTH&quot;)
+    return {&quot;asof&quot;: today.isoformat(), &quot;window&quot;: f&quot;{start}..{end}&quot;, &quot;n_applicants&quot;: len(cur),
+            &quot;accelerating&quot;: accel, &quot;stalling&quot;: stalls,
+            &quot;note&quot;: f&quot;510(k) clearances lead device revenue 2-4 qtrs. ASP-GATED: {n_breadth}/{len(accel)} are BREADTH &quot;
+                    &quot;(diverse product codes = genuine pipeline); ITERATION_RISK (1 code / &gt;=67% concentrated) = likely &quot;
+                    &quot;lower-ASP cannibalization (TMCI trap) — verify ASP/mix before actioning. applicant-&gt;ticker = SignalOS step&quot;}
+
+
+def main():
+    res = scan()
+    print(f&quot;=== FDA CLEARANCE-VELOCITY SCANNER  {res[&#x27;asof&#x27;]}  ({res[&#x27;n_applicants&#x27;]} applicants, window {res[&#x27;window&#x27;]}) ===&quot;)
+    print(&quot;  ACCELERATING (product cycle loading):&quot;)
+    for r in res[&quot;accelerating&quot;][:10]:
+        print(f&quot;   {r[&#x27;applicant&#x27;]:&lt;52} {r[&#x27;cur_q&#x27;]:&gt;3} vs {r[&#x27;prior_q&#x27;]:&gt;3}  ({r[&#x27;delta&#x27;]:+d})&quot;)
+    print(&quot;  STALLING (clearance flow halved+):&quot;)
+    for r in res[&quot;stalling&quot;][:8]:
+        print(f&quot;   {r[&#x27;applicant&#x27;]:&lt;52} {r[&#x27;cur_q&#x27;]:&gt;3} vs {r[&#x27;prior_q&#x27;]:&gt;3}  ({r[&#x27;delta&#x27;]:+d})&quot;)
+    OUT.write_text(json.dumps(res, indent=1))
+    print(f&quot;[-&gt; {OUT.name}]&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</pre></div></body></html>

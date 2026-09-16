@@ -1,0 +1,116 @@
+{
+  "ticker": "SAIC",
+  "cutoff": "2024-09-01",
+  "filing": "0001571123-24-000045_10-K.txt",
+  "framework_note": "SAIC's 10-K is a deliberately PE-name-light disclosure: the company names no Program Element numbers, no quantified revenue attribution to any specific Pentagon program, and describes strategic pillars only at the capability-bucket level (IT Modernization, All Domain Warfighting, Next Generation Space, Undersea Dominance, Border of the Future, Ground Vehicles Support). This is the structural OPPOSITE of the IonQ/YSS J-Book-divergence pattern (small-cap with 80-96% revenue tied to one named PE that is unfunded forward). The J-Book primary verifier returned NOT_FOUND for SAIC contractor lookups in the 410-PE corpus, and the strategic-pillar program queries (JADC2/JWCC/Virginia/ACV/Stryker/SDA-Tracking-Layer) returned NOT_FOUND or NOT_FOUND_IN_TIMERANGE. Per rubric heuristic #7: NOT_FOUND is UNVERIFIABLE, not a red flag — the corpus is hand-extracted and SAIC is a diversified services prime, not a single-PE small-cap. usaspending confirms genuine, recurring, multi-decade DoD revenue across 1.68M contract records totaling $24.8B lifetime obligations across 11 UEIs spanning DoD/NASA/State/DHS/GSA — fully consistent with the 98%-federal-revenue narrative. Net: framework finds no J-Book-divergence red flag at the cutoff; the structural absence of PE-level claims means there is little for the J-Book divergence pattern to grab onto.",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "SAIC derived 98% of total revenues during each of fiscal 2024, 2023, and 2022 from contracts with the U.S. government as a prime contractor or subcontractor.",
+      "severity": "PASS",
+      "supports": "usaspending.query_dod_contracts returned 1,280,019 awards aggregating ~$10.8B in DoD top awards alone (top 4 awards each >$700M with U.S. Army RDECOM Software Engineering Directorate SCRS as the lead vehicle). usaspending.query_federal_presence resolved 11 SAIC UEIs and tallied 1,679,790 federal contracts totaling $24.8B lifetime obligations across DoD/NASA/State/DHS/GSA/Treasury/Interior — fully consistent with the 98%-federal-revenue claim.",
+      "M_check": "usaspending.query_dod_contracts + usaspending.query_federal_presence",
+      "M_value": "n_awards_dod=1,280,019; total_dod_top_awards=$10.79B; n_contracts_federal=1,679,790; total_federal=$24,822M; signal=RECURRING_FEDERAL",
+      "interpretation": "Disclosure corroborated — SAIC is unambiguously a recurring, multi-agency federal contractor."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "In fiscal 2024 the U.S. Army generated 17%, U.S. Navy 13%, Air Force 12%, Other DoD 10%, and Other federal government 46% of SAIC's total revenues.",
+      "severity": "PASS",
+      "supports": "usaspending top DoD awards lead with U.S. Army RDECOM (SCRS, Software Engineering Directorate, contracts in the hundreds of millions each) — consistent with Army being the #1 service customer. Federal-presence shows ~72 DoD-subordinate awarding agencies actively contracting with SAIC plus 29 NASA, 13 GSA, 12 DOI, 7 DHS — service-mix not contradicted.",
+      "M_check": "usaspending.query_dod_contracts",
+      "M_value": "Top DoD award (Army RDECOM SCRS) $923M; second $767M; third $760M — Army-led",
+      "interpretation": "Army-Navy-AF service-mix concentration is observable in usaspending top awards; no contradiction."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "SAIC serves approximately 1,800 active contracts and task orders across the U.S. government with approximately 24,000 employees.",
+      "severity": "PASS",
+      "supports": "Federal-presence query shows 1.68M lifetime contract records across 11 UEIs and dozens of awarding agencies — consistent with an active-portfolio count of ~1,800 at any time.",
+      "M_check": "usaspending.query_federal_presence",
+      "M_value": "n_contracts=1,679,790 (lifetime); 11 UEIs resolved; signal=RECURRING_FEDERAL",
+      "interpretation": "Diversified-portfolio breadth corroborated."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "SAIC positions 'All Domain Warfighting' (JADC2-adjacent C4ISR / data connectivity for DoD + IC) as a core forward growth pillar.",
+      "severity": "UNVERIFIABLE",
+      "supports": "pentagon_jbook lookup for program_name='JADC2' and contractor_name='Science Applications International' both returned NOT_FOUND in the 410-PE corpus. The narrative reference is a pillar-level capability claim, not a specific PE; the framework cannot lookup an unspecified PE.",
+      "M_check": "pentagon_jbook.query_program_funding (program_name='JADC2'); pentagon_jbook.query_program_funding (contractor_name='Science Applications International')",
+      "M_value": "signal=NOT_FOUND, n_matches=0 (both)",
+      "interpretation": "No PE named in filing; capability-bucket pillar language is not falsifiable via J-Book. Per heuristic #7, NOT_FOUND ≠ red flag; this is a coverage / specificity gap."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "SAIC positions 'Next Generation Space' as a forward growth pillar (implicates SDA Transport/Tracking Layer and Space Force RDT&E lines).",
+      "severity": "UNVERIFIABLE",
+      "supports": "pentagon_jbook on PE 1206410SF returned 3 matched programs (Tranche 3 Transport Layer — UNFUNDED_TWO_PLUS_YEARS; SDA Transport Layer T0-T2 — FUNDED_SHRINKING; Tranche 3 Tracking Layer — FUNDED_STEADY). Crucially, SAIC is NOT listed as a primary contractor on any of these (primary contractors are York Space, Lockheed, Northrop, L3Harris, Rocket Lab). And the time-range signal is NOT_FOUND_IN_TIMERANGE — actuals not extracted for the cutoff year. SAIC's 'Next Generation Space' language is capability-level (mission integration), not a claim to be a prime on T3 Transport.",
+      "M_check": "pentagon_jbook.query_program_funding (program_name='Tranche 3 Transport Layer'); (program_name='SDA Tracking Layer'); (pe_number='1206410SF')",
+      "M_value": "PE 1206410SF: 3 matched programs; primary signal=NOT_FOUND_IN_TIMERANGE; declared statuses for sub-programs: UNFUNDED_TWO_PLUS_YEARS / FUNDED_SHRINKING / FUNDED_STEADY; SAIC not in primary_contractors list for any of them",
+      "interpretation": "Two of three SDA sub-programs at PE 1206410SF are declining in the FY27 J-Book — but SAIC has no claimed prime exposure to them, so there is no claim-to-J-Book divergence for SAIC. Per heuristic #7, downgrade to UNVERIFIABLE."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "SAIC positions 'Undersea Dominance' as a forward growth pillar.",
+      "severity": "UNVERIFIABLE",
+      "supports": "pentagon_jbook on 'Undersea Warfare Applied Research' and 'Virginia Class Submarine' returned NOT_FOUND — these Navy lines aren't in the 410-PE corpus (which is heavy on DARPA/MDA/Space Force/SOCOM).",
+      "M_check": "pentagon_jbook.query_program_funding (program_name='Undersea Warfare Applied Research'); (program_name='Virginia Class Submarine')",
+      "M_value": "signal=NOT_FOUND, n_matches=0 (both)",
+      "interpretation": "Corpus coverage gap for Navy submarine production / undersea applied research lines. UNVERIFIABLE per heuristic #7."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "SAIC provides 'Ground Vehicles Support' — integration/modification/upgrade/sustainment of ground vehicles for the U.S. armed forces.",
+      "severity": "UNVERIFIABLE",
+      "supports": "pentagon_jbook on 'Amphibious Combat Vehicle' and 'Stryker' returned NOT_FOUND — Army ground-combat-vehicle procurement lines aren't in the corpus. AAV (the only program SAIC names by acronym in the filing) was terminated in 2018 (pre-cutoff, disclosed) and is not a forward exposure.",
+      "M_check": "pentagon_jbook.query_program_funding (program_name='Amphibious Combat Vehicle'); (program_name='Stryker')",
+      "M_value": "signal=NOT_FOUND, n_matches=0 (both)",
+      "interpretation": "Corpus coverage gap for Army ground-combat-vehicle lines. UNVERIFIABLE per heuristic #7."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "SAIC positions enterprise IT modernization (defense/intel/civilian, cloud, cybersecurity, software) as the core forward portfolio.",
+      "severity": "UNVERIFIABLE",
+      "supports": "pentagon_jbook on 'Joint Warfighting Cloud Capability' and 'JWCC' returned NOT_FOUND. JWCC is a DoD enterprise-cloud IDIQ awarded to four hyperscalers (AWS/Azure/GCP/Oracle) — SAIC is not a JWCC awardee; the company's 'IT modernization' pillar is task-order delivery across many vehicles, not a single named PE.",
+      "M_check": "pentagon_jbook.query_program_funding (program_name='Joint Warfighting Cloud Capability'); (program_name='JWCC')",
+      "M_value": "signal=NOT_FOUND, n_matches=0 (both)",
+      "interpretation": "Capability-bucket pillar language is not falsifiable via J-Book. UNVERIFIABLE per heuristic #7."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "SAIC is a contractor on Pentagon programs covered in the J-Book corpus.",
+      "severity": "UNVERIFIABLE",
+      "supports": "pentagon_jbook contractor-keyed lookups for 'SAIC' and 'Science Applications International Corporation' both returned NOT_FOUND in the by_entity index (which currently has 58 mapped entities, focused on DARPA / MDA / Space Force / SOCOM primaries — i.e., weapons-platform OEMs, not IT integrators). SAIC's contract profile is overwhelmingly O&M / task-order delivery against IDIQ vehicles, which doesn't surface as 'primary contractor' against any individual PE in the J-Book.",
+      "M_check": "pentagon_jbook.query_program_funding (contractor_name='SAIC'); (contractor_name='Science Applications International Corporation')",
+      "M_value": "signal=NOT_FOUND, n_matches=0 (both); by_entity index has 58 mapped entities, none matching SAIC",
+      "interpretation": "Structural mismatch between SAIC's contract model (IDIQ task-order services prime) and the J-Book corpus's program-element granularity. The J-Book divergence pattern is designed for PE-concentrated small-caps; it doesn't fire on diversified service-line primes like SAIC. UNVERIFIABLE."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "SAIC received Federal Grand Jury subpoenas (April 2022 and October 2023) from the DOJ Antitrust Division.",
+      "severity": "UNVERIFIABLE",
+      "supports": "edgar_fts fulltext for 'Science Applications International antitrust grand jury' returned 0 hits — the exact phrase is not a full-text matching string used in 10-Q/10-K disclosures (the language is parameterized through paragraph context). The disclosure is internal to SAIC's own filing; no counterparty SEC filing surfaces it.",
+      "M_check": "edgar_fts.query_fulltext (search_term='Science Applications International antitrust grand jury')",
+      "M_value": "total_hits=0",
+      "interpretation": "Inability to cross-check via EDGAR fulltext does not impeach SAIC's own self-disclosure of the DOJ subpoenas; the company has acknowledged the investigation. Open-ended risk — Antitrust Division criminal investigation, scope undisclosed — but no PE-divergence pattern. Flag for ongoing monitoring outside the J-Book lens."
+    },
+    {
+      "claim_id": "C11",
+      "claim_text": "SAIC operates from approximately 114 properties in 24 states, D.C. and various foreign countries; HQ in Reston, VA.",
+      "severity": "PASS",
+      "supports": "epa_frs returned multiple SAIC-registered facilities in VA (McLean / Vienna / Fairfax County) including 7990 Science Applications Ct, Vienna — corroborates principal VA corporate footprint.",
+      "M_check": "epa_frs.query_facilities (facility_name='Science Applications International', state_abbr='VA')",
+      "M_value": "n_facilities=3 VA matches (McLean, Vienna, plus one more); confirms long-standing physical presence",
+      "interpretation": "Facility footprint corroborated at the HQ-state level; framework cannot enumerate all 114 properties via FRS alone but the named principal locations are real."
+    },
+    {
+      "claim_id": "C12",
+      "claim_text": "SAIC closed sale of its Supply Chain Business to ASRC Federal in May 2023 for $356M cash; prior acquisitions: Halfaker (2021, health IT) and Koverse (2021, data platform for AI/ML on sensitive data).",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": "acq_coherence scored Halfaker at 0.15 (LOW coherence; flagged is_revenue_synthetic=True — 'health IT firm with no stated connection to defense, intelligence, DoD systems, or any of SAIC's core pillars; acquisition adds unrelated vertical revenue') and Koverse at 0.80 (HIGH coherence; AI/ML data platform aligned to SAIC's AI/digital pillars). Mean coherence 0.475, signal=MIXED_COHERENCE.",
+      "M_check": "acq_coherence.score_acquisition_coherence",
+      "M_value": "mean_coherence=0.475; signal=MIXED_COHERENCE; n_low_coherence=1; n_revenue_synthetic=1 (Halfaker)",
+      "interpretation": "Halfaker (federal civilian health IT, e.g., VA modernization) is adjacent-but-non-defense vertical — a legitimate-but-incoherent rollup move for a defense IT prime. Coupled with the Supply Chain Business divestiture (revenue subtraction), this is consistent with portfolio churning around a flat-to-declining defense-IT services growth rate — modest J-Book-adjacent red flag, but not a hard divergence. MODERATE_UNDERDELIVERY for the rollup-thesis lens."
+    }
+  ]
+}

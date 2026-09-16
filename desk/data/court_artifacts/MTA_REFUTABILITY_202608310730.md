@@ -1,0 +1,39 @@
+## Context
+
+Repo files were permission-blocked this session, so `knowledge_graph/cohorts.json` could not be read — the COHORT and NARRATIVE slots are unresolved. I triaged MTA against the three red attacks named in the event context instead (portfolio maturity, dilution history, ADV), and flag that substitution rather than inventing a cohort narrative. All three named attacks fail on primary evidence; the real objection to the name is one the red team did not raise.
+
+| ticker | class | refuting metric | current value/trend (cited) | next print date | note |
+|---|---|---|---|---|---|
+| MTA | **DAMAGE-ABSENT** (all three named attacks refuted) | (a) attributable GEOs + royalty revenue; (b) basic shares o/s; (c) ADV at 1%-participation rail | (a) Q2'26 rev **$5.224M vs $2.695M** Q2'25 (+94%); H1 **$8.288M vs $4.416M**; net income **+$1.223M vs −$1.736M**; GEOs **1,173 vs 840**; 7th royalty (Amalgamated Kirkland) began producing in Q2, La Parrilla H2 ([6-K 2026-08-13](https://www.sec.gov/Archives/edgar/data/1722606/000106299326004314/)). (b) basic shares **93,450,558 vs 92,521,443** = **+1.0% y/y**; H1 issuance 596,426 sh, all RSU/option vesting, no ATM. (c) ADV ~**293k sh** ≈ $3.16M/day notional | **2026-11-12** — yfinance-derived, **UNCONFIRMED** (no company PR names it) | The conversion the bear case says won't happen is happening and is *already capitalized* — see kill below |
+
+**Guidance de-risk (reconstruction from cited figures only):** 2026 guide is 3,500–4,500 GEOs. At Q2 realized **$4,504/GEO**, the low end ≈ $15.8M revenue — H1's $8.288M is already **53% of it**, so the low end requires H2 revenue *below* H1. Midpoint (4,000 GEOs ≈ $18.0M) needs H2 = 54%, only mildly back-weighted. The "development book never converts" attack has an unusually low bar to clear.
+
+**EXECUTABILITY (mandatory, thin name):** ADV ~293,426 sh ([MarketBeat, Jul-2025 — stale by 13 months and almost certainly understated post-re-rating](https://www.marketbeat.com/stocks/NYSEMKT/MTA/)). At $10.785 the 1% rail = **~2,930 sh ≈ $31.6k/day** → a $50k slice fills in ~1.6 days, the full $150k ballast axis in ~4.7 days. **ADV is not a blocker at intended size; the ADV attack fails.** Caveat: the **IBKR line is UNVERIFIED** — the connector required an interactive permission grant this session. MTA is NYSE American-listed so a line is near-certain, but I did not confirm it.
+
+**The kill the red team missed — MTA is the most expensive thing in the ballast cohort, not a discount:**
+93.44M sh × $10.785 = **~$1.008B market cap**; net debt $3.4M (revolver $12.345M + acq. payables $1.778M − cash $10.674M) → **EV ≈ $1.011B**. Against 2026E guidance revenue that is **50–64x EV/revenue** (56x at midpoint) — and royalty revenue is ~90% gross margin, so that is also ~56x gross profit and ~92x H1-annualized operating cash flow. Blue-team fairly: royalties are NAV businesses and EV/revenue is a weak tool when 39 development properties sit outside current revenue at ~$4,500 gold. That is exactly the point — the multiple says the market has **already fully capitalized the development pipeline**. The damage-absent finding is real and it is priced. Per the prob-weighted-FV reflex, priced = FAIR, not cheap.
+
+**Microstructure finding (decisive for the band, and it inverts my prior):** the five 13D/A amendments since March are **accumulation, not distribution**. Tether entities + Giancarlo Devasini went **7.8% (7,201,376 sh, event 2026-01-07)** → **12.1% (11,266,571 sh, event 2026-06-05, Amd. No. 7** — [primary](https://www.sec.gov/Archives/edgar/data/1722606/000110465926071635/primary_doc.xml)), with further amendments 6/16 and 7/15 unread. That is **+4.07M shares in ~5 months ≈ 39k sh/day ≈ 13% of ADV** — a persistent, size-insensitive strategic bid, filed on a **13D** (not 13G). This is the mechanism behind +105% off the low, and it means the marginal price-setter is non-economic. Per the mispricing-artifact rule, the tape is not a clean external anchor here; `discovery_state` is **DISCOVERING/CROWDED, not UNDISCOVERED**.
+
+**Dilution — forward vector, honestly weighted:** a **US$500M base shelf went effective 2026-07-28** (F-10 filed 7/22–7/23, F-10/A 7/27 — [primary](https://www.sec.gov/Archives/edgar/data/1722606/000106299326003785/formf10.htm)), replacing the **C$300M (≈US$220M) 2024 shelf** — a ~2.3x USD upsize to ~50% of market cap. Against that: market cap itself roughly doubled off the low, so the upsize is **roughly proportional to the re-rating and is a routine renewal, not an intent signal**. I decline to score it as a dilution tell. It remains a live vector only because paper-funded royalty acquisition is Metalla's entire growth history.
+
+## COURT-WORTHY (damage-absent, ranked)
+
+1. **MTA** — the only member, and it qualifies on the letter of the test (narrative damage is testably absent: +94% revenue, first profit, +1.0% y/y dilution, adequate ADV) while failing on the spirit: there is no discount to be right about at ~56x EV/revenue, −7% off the 52-week high, with a 12%+ strategic accumulator levitating the marginal print. A court here rules the **entry band**, not the thesis.
+
+## COURT-WORTHINESS MTA: 6/10 — damage genuinely absent and executability adequate, but the pipeline is already fully capitalized, so a court changes the *band*, not the verdict
+
+That clears the ≥6 auto-escalation bar. So the escalation isn't a rubber stamp, the three questions a full red/blue court must resolve — none answerable from this pack:
+1. **Fair NAV at spot gold**, built asset-by-asset (Côté, Tocantinzinho, Wharf, Aranzazu, Endeavor + the 39 development properties) — the only way to test whether 56x EV/revenue is a bubble or a correctly-capitalized pipeline. This is the decisive one.
+2. **Tether's remaining appetite** — read 13D/A amendments 6/16 and 7/15 (unread here) for the current stake and any Item 4 change of purpose. A stake approaching 20% with 13D intent language turns this from "expensive royalty" into a control/takeout situation and inverts the sizing logic.
+3. **Whether the US$500M shelf funds a large royalty acquisition** — the historical pattern, and the main path by which the +1.0% dilution record breaks.
+
+**PRINT PROXIMITY: 2026-11-12 — yfinance-derived, UNCONFIRMED (no company PR names it); ~50 trading days out, well outside the 5-day window, so the print-decisive reconstruction is not triggered.**
+
+**PRE-PRINT POSITION: FLAT**, with a named kill as doctrine requires — not the red team's kills (all three failed), but *the damage-absent conversion story is already in the price at ~56x EV/revenue with the marginal bid set by a strategic accumulator*. Band-not-chase applies with full force at −7% off the high. Revisit on either a gold-led drawdown to the low-$8s (~25% off high, back toward where the pipeline is not fully capitalized) or on court-resolved NAV showing a discount.
+
+### Verification ledger
+- **Verified primary:** Q2/H1 financials, share counts, balance sheet (6-K 2026-08-13, quoted in pack); F-10 US$500M shelf + effectiveness dates; 13D/A 12.1% stake, share count and event date.
+- **Verified secondary:** GEO counts, realized price/GEO, 2026 guidance, producing-vs-development split (7 vs 39), H1 issuance detail — StockTitan summaries of the 6-K; consistent with the pack's primary revenue figures but not independently read off the filing.
+- **Unverified / inferred:** IBKR line (permission-blocked); ADV figure is Jul-2025 and stale; 13D/A amendments 6/16 and 7/15 unread; the 7.8% January datapoint is secondary-sourced with an unconfirmed accession; the C$300M 2024 shelf size is search-sourced, not read off the 2024 F-10.
+- Direct `sec.gov` fetches returned 403 (no header control via WebFetch), so primary content was reached via search-surfaced documents and summaries rather than the EDGAR index.

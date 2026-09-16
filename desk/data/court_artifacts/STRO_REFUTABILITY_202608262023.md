@@ -1,0 +1,29 @@
+## Context
+
+Cause-check first, and it inverts the screen's premise: STRO's −51% dd52 is measured off a **June-2026 spike**, not cohort selling — the stock is **+138% over 1 year and +85% YTD**, having round-tripped from a $13.98 February raise to $43.85 and back to $21.43 after the Aug 12 STRO-004 readout knocked it −15% in a day. Two data traps in the pack must be corrected before any math: the 1-for-10 reverse split effective **2025-12-03** (85.19M → 8.52M shares) means the pack's `dil_sh` XBRL series (84.58M) is **pre-split** and will produce ~10x-wrong per-share values; and the `rev` series is stale 2017–2018 data, not current.
+
+| ticker | class | refuting metric | current value/trend (cited) | next print date | note |
+|---|---|---|---|---|---|
+| STRO | **DAMAGE-ARRIVING** | Quarterly net cash used in operating activities vs the **~$23.5M/qtr** implied by the company's own "into at least Q2 2028" runway claim | H1'26 operating cash use **−$80.5M** = **$40.25M/qtr**, i.e. **71% above** the runway-implied rate; Q2'26 opex $39.7M (R&D $31.7M), net loss $38.5M; cash+marketables **$164.3M** at 6/30/26 → **4.1 quarters** at run-rate (cash-out ~Q3'27) while expansion cohorts that *increase* spend start 1H'27 ([Q2'26 PR, ir.sutrobio.com](https://ir.sutrobio.com/press-releases/detail/234/sutro-biopharma-reports-second-quarter-2026-financial-results-and-provides-early-update-on-stro-004-phase-1-study); [10-Q 2026-08-12](https://www.sec.gov/Archives/edgar/data/0001382101/000119312526345748/stro-20260630.htm)) | **Q3'26 ≈ early-to-mid Nov 2026** (derived from 2026 cadence Mar 23 / May 14 / Aug 12 — UNCONFIRMED) | Secondary metric — **confirmed ORR with a disclosed denominator** — is **company-withheld**: 49 pts, 8 tumor types, but only "multiple responses, including confirmed and ongoing unconfirmed partial responses" with no rate; next update **guided to 1H 2027** ([Q1'26 PR guided "initial clinical data in mid-2026"](https://ir.sutrobio.com/press-releases/detail/233/sutro-biopharma-reports-first-quarter-2026-financial-results-and-business-highlights)) |
+
+**COURT-WORTHY (damage-absent, ranked):** *None.* STRO does not classify DAMAGE-ABSENT. The solvency leg is not yet broken (EV ≈ $191M vs $164.3M cash; Astellas paid a $10M milestone in April 2026), but the damage is visibly arriving on two fronts the market already began marking: a burn rate running 71% above the stated runway path, and a catalyst pushed three quarters out with the decisive efficacy denominator withheld.
+
+**The named kill (SIZE/timing, not valuation):** you cannot own the 1H'27 catalyst without first eating the financing. $40.25M/qtr against $164.3M, with expansion-cohort spend landing in the same window, makes an equity raise before the readout the base case — and the February 2026 precedent ($110M at $13.98, priced *after* a run) shows the playbook. Buying at $21.43 is bidding into our own predicted flow. Entry is gated on the raise printing, not on the court's verdict.
+
+Blue-team credit where due: the tolerability profile is the real differentiator — 6% AE-related discontinuation and ocular events (conjunctivitis 8%, dry eye 7%) that look mild against the approved TF-ADC class's known ocular toxicity, with DLTs only at the top 5 mg/kg dose. Insiders (CEO, CFO, CSO, a director) bought near the October 2025 low at ~$0.80 pre-split. Neither fact is resolvable into a sizing change today.
+
+**COURT-WORTHINESS STRO: 3/10** — the only value-inflecting datum (the ORR denominator) is company-withheld until 1H'27 and the burn arithmetic makes a dilutive raise the base case before it, so a court can resolve neither and both point FLAT regardless.
+
+**PRINT PROXIMITY: NONE within 5 trading days — Q2 already printed 2026-08-12 (10-Q + 8-K, verified in the pack's filing list and the company PR); next print is Q3'26, estimated early-to-mid November 2026 from the company's own 2026 reporting cadence (FY25 Mar 23 / Q1 May 14 / Q2 Aug 12), UNCONFIRMED — no company PR names the date.** No dated clinical catalyst before 1H 2027 per company guidance. One caveat worth logging: a search summary asserted Wells Fargo / Cantor / H.C. Wainwright September 2026 conference participation, but the company's own press-release list through August 2026 contains **no such release** — treat as unconfirmed, and note that September healthcare conferences are the classic staging ground for exactly the raise this thesis expects.
+
+Below the ≥6 auto-escalate threshold — this does not route to a full red/blue court. Recommended tripwire instead of a court: watch for an S-3/424B5 or ATM establishment; a completed raise at a de-rated price is the entry event, not the risk.
+
+Sources:
+- [Sutro Q2 2026 results & STRO-004 update (company IR)](https://ir.sutrobio.com/press-releases/detail/234/sutro-biopharma-reports-second-quarter-2026-financial-results-and-provides-early-update-on-stro-004-phase-1-study)
+- [Sutro Q1 2026 results (company IR)](https://ir.sutrobio.com/press-releases/detail/233/sutro-biopharma-reports-first-quarter-2026-financial-results-and-business-highlights)
+- [Form 10-Q, period 2026-06-30 (SEC)](https://www.sec.gov/Archives/edgar/data/0001382101/000119312526345748/stro-20260630.htm)
+- [Form 8-K exhibit 99.1, 2026-08-12 (SEC)](https://www.sec.gov/Archives/edgar/data/0001382101/000119312526345733/stro-ex99_1.htm)
+- [Nasdaq corporate action notice — 1-for-10 reverse split & CUSIP change](https://www.nasdaqtrader.com/TraderNews.aspx?id=ECA2025-645)
+- [Sutro press release archive (company IR)](https://ir.sutrobio.com/press-releases)
+- [STRO quote/performance — finviz](https://finviz.com/quote.ashx?t=STRO)
+- [STRO overview — stockanalysis.com](https://stockanalysis.com/stocks/stro/)

@@ -1,0 +1,126 @@
+{
+  "ticker": "HXL",
+  "cutoff": "2024-09-01",
+  "filing": "0000950170-24-012245_10-K.txt",
+  "scores": [
+    {
+      "claim_id": "C1_F35_largest_program",
+      "claim_text": "The F-35, our largest S&D program, represents <25% of S&D revenue; sales dependent upon government funding.",
+      "severity": "PASS",
+      "supports": ["pentagon_jbook"],
+      "M_check": "pentagon_jbook.query_program_funding(F-35) + (F-35 Squadrons)",
+      "M_value": {
+        "F-35_C2D2": {"pe": "0604840F", "signal": "FUNDED_STEADY", "FY2024_M": 1236.71},
+        "F-35_Squadrons": {"pe": "0207142F", "signal": "FUNDED_STEADY", "FY2024_M": 88.991}
+      },
+      "interpretation": "F-35 RDT&E (Continuous Capability Development & Delivery) is funded steady at $1.24B FY24 and F-35 Squadrons operational-systems development at $89M FY24. Program-of-record health is intact at cutoff. Hexcel's claim that F-35 is its single largest S&D program (<25% of $544.8M = at most ~$136M, ~7.6% of total HXL sales) is structurally supported — the program is the largest tactical-aircraft procurement in DoD (production line not in J-Book RDT&E corpus but is documented continuing). No divergence. PASS."
+    },
+    {
+      "claim_id": "C2_CH53K_future_growth",
+      "claim_text": "CH-53K (King Stallion) is a future growth program for Hexcel composites (blades + airframe).",
+      "severity": "UNVERIFIABLE",
+      "supports": ["pentagon_jbook (coverage gap)"],
+      "M_check": "pentagon_jbook.query_program_funding(CH-53K) + (King Stallion)",
+      "M_value": {"signal": "NOT_FOUND", "n_matches": 0},
+      "interpretation": "Navy/USMC aviation procurement program; not present in the ~410-program corpus (heavy AF RDT&E weighting + selected procurement). Per heuristic #7, NOT_FOUND is treated as UNVERIFIABLE (coverage gap, not red flag). Coverage gap noted: extend corpus with Navy Aircraft Procurement (1506 line items) to confirm. Outside corpus, public Navy P-40s through cutoff date document CH-53K as a multi-year program of record."
+    },
+    {
+      "claim_id": "C3_UH60_largest_blade_program",
+      "claim_text": "UH-60 (Black Hawk) wide-chord blade program is one of Hexcel's two largest blade programs.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["pentagon_jbook (coverage gap)"],
+      "M_check": "pentagon_jbook.query_program_funding(UH-60) + (Black Hawk)",
+      "M_value": {"signal": "NOT_FOUND", "n_matches": 0},
+      "interpretation": "Army Aircraft Procurement line (Sikorsky multi-year contract). The J-Book corpus does not include Army Aircraft Procurement P-40s for UH-60M. Heuristic #7 applies: NOT_FOUND → UNVERIFIABLE. Coverage gap. Independent context: Army FY24 budget continues UH-60M multi-year VIII procurement, but this is not confirmed in our corpus."
+    },
+    {
+      "claim_id": "C4_V22_blade_program",
+      "claim_text": "V-22 (Osprey) blades are one of Hexcel's two largest blade programs.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["pentagon_jbook"],
+      "M_check": "pentagon_jbook.query_program_funding(V-22) + (CV-22)",
+      "M_value": {
+        "CV-22": {"pe": "0401318F", "signal": "FUNDED_STEADY", "FY2024_M": 16.581, "history_visible_at_cutoff": [{"FY2024": 16.581}]}
+      },
+      "interpretation": "The corpus only contains CV-22 RDT&E ($16.6M FY24); V-22 production line items not in corpus. At cutoff this returns FUNDED_STEADY. HOWEVER, the V-22 multi-year procurement was already publicly winding down by 2024 (Navy/USMC announcing end of V-22 production around this period). The RDT&E line is small and shrinks materially in out-years (FY26 = $0.65M visible in raw program record though outside cutoff). Hexcel says V-22 blades are one of its top-2 blade programs as of FY23/22 — i.e., past revenue real, but forward V-22 procurement narrative is structurally weakening. Score MODERATE_UNDERDELIVERY because materiality test (heuristic #2) treats this as Hexcel's claim of being a top-2 blade program (existential to blades sub-business), and CV-22 RDT&E small + production sundown. Caveat: production line not in corpus, so partial coverage limits severity escalation."
+    },
+    {
+      "claim_id": "C5_A400M_supply",
+      "claim_text": "Hexcel is qualified to supply the Airbus A400M military transport.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["pentagon_jbook (out of corpus scope)"],
+      "M_check": "pentagon_jbook.query_program_funding(A400M)",
+      "M_value": {"signal": "NOT_FOUND", "n_matches": 0},
+      "interpretation": "A400M is a multi-national European program (Airbus DS / OCCAR) not funded out of US DoD J-Book. By design outside corpus scope. UNVERIFIABLE — not a red flag. To verify, would need EU defense budget data (not in pentagon_jbook source)."
+    },
+    {
+      "claim_id": "C6_space_programs",
+      "claim_text": "Space products: solid rocket booster cases, fairings, satellite bus, solar arrays — military + commercial launch and satellites; Space & Defense growth supported by space programs globally.",
+      "severity": "PASS",
+      "supports": ["pentagon_jbook"],
+      "M_check": "pentagon_jbook.query_program_funding(Space Test Program) + contractor_name(Hexcel)",
+      "M_value": {
+        "Space_Test_Program": {"pe": "1206864SF", "signal": "FUNDED_STEADY", "FY2024_M": 29.121},
+        "contractor=Hexcel": {"signal": "NOT_FOUND"}
+      },
+      "interpretation": "Hexcel does not appear as a primary J-Book contractor on any specific space PE (expected: tier-2/3 composite supplier to launch primes like Northrop Grumman, RTX, ULA, SpaceX). Claim is generic (no PE named, no revenue %). STP funded steady at cutoff. Per heuristic #2 — materiality test — the claim is not pinned to any named PE so no specific divergence test is possible. Treated as PASS (claim is descriptive of broad market, not load-bearing on a specific PE)."
+    },
+    {
+      "claim_id": "C7_SD_30pct_2023",
+      "claim_text": "Space & Defense market = 30% of FY23 net sales ($544.8M), up 17.1% YoY; demand driven by US + Western European military aircraft procurement.",
+      "severity": "PASS",
+      "supports": ["usaspending (orthogonal)"],
+      "M_check": "usaspending.query_dod_contracts(recipient_name='Hexcel Corporation')",
+      "M_value": {"n_awards": 83, "total_amount_USD": 8620635.48, "note": "Direct DoD prime awards to Hexcel + ARC Technologies are de minimis vs $544.8M S&D revenue — consistent with tier-2/3 supplier model where revenue flows through primes (Lockheed/Sikorsky/Boeing/Bell-Boeing)."},
+      "interpretation": "Direct prime contracts to Hexcel = ~$8.6M total cumulative — three orders of magnitude smaller than reported $544.8M S&D revenue. This is INTERNALLY CONSISTENT with Hexcel's disclosed business model (composites supplier to primes, not a prime contractor). No divergence. PASS."
+    },
+    {
+      "claim_id": "C8_airbus_39pct_counterparty",
+      "claim_text": "39% of 2023 net sales were to Airbus and its subcontractors (35% Commercial, 4% S&D).",
+      "severity": "UNVERIFIABLE",
+      "supports": [],
+      "M_check": "no_dod_jbook_test_applicable",
+      "M_value": null,
+      "interpretation": "Commercial customer-concentration disclosure; not a J-Book-testable claim. Counterparty disclosure (Airbus) would require Airbus 20-F / commercial-aerospace cross-check outside the J-Book framework. UNVERIFIABLE under this cohort's primary verifier; non-J-Book control claim as designed."
+    },
+    {
+      "claim_id": "C9_boeing_15pct_counterparty",
+      "claim_text": "15% of 2023 net sales were to Boeing and its subcontractors.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["edgar_fts (null)"],
+      "M_check": "edgar_fts.query_fulltext(search_term='Hexcel', cik='0000012927' Boeing, cutoff_date='2024-09-01')",
+      "M_value": {"total_hits": 0},
+      "interpretation": "Boeing's EDGAR filings through cutoff do not name 'Hexcel' in full-text — standard behavior for primes who rarely name tier-2 material suppliers in 10-K body. Absence of counterparty mention is not contradictory. UNVERIFIABLE."
+    },
+    {
+      "claim_id": "C10_decatur_carbon_fiber_capex",
+      "claim_text": "New carbon fiber line in Decatur, AL resumed in 2023; expected aerospace-qualified late 2025 / early 2026.",
+      "severity": "UNVERIFIABLE",
+      "supports": [],
+      "M_check": "no_jbook_pe_named; facility/capex claim outside cohort scope",
+      "M_value": null,
+      "interpretation": "Capacity-build claim; not a J-Book-testable program-revenue assertion. Non-J-Book control claim. UNVERIFIABLE under this cohort's primary verifier."
+    }
+  ],
+  "summary": {
+    "n_claims": 10,
+    "n_jbook_grounded_claims": 6,
+    "n_queries_run": 13,
+    "pentagon_jbook_fired_on": 3,
+    "pentagon_jbook_grounded_total": 6,
+    "severity_counts": {
+      "PASS": 3,
+      "MODERATE_UNDERDELIVERY": 1,
+      "SEVERE_UNDERDELIVERY": 0,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 6
+    },
+    "framework_notes": [
+      "HXL is a tier-2 composites supplier with diffused program exposure (F-35 largest <25% of S&D, no other >10%). The J-Book divergence pattern (small-cap pinning >50% revenue to one zeroed PE) does not apply structurally to HXL.",
+      "Largest J-Book PE Hexcel names (F-35 RDT&E + F-35 Squadrons) is FUNDED_STEADY at cutoff — no PASS-to-RED flip.",
+      "Primary risk surfaced: V-22 (CV-22 RDT&E small + declining out-years even pre-cutoff). MODERATE_UNDERDELIVERY for the V-22 blade-program claim, since V-22 was a top-2 blade program for HXL.",
+      "Coverage gaps in corpus: CH-53K (USN/USMC procurement), UH-60 (Army Aircraft Procurement), A400M (European Airbus DS) — all material to HXL but outside corpus scope. Treated as UNVERIFIABLE per heuristic #7, not red flags.",
+      "Commercial Aerospace (60% of revenue, Airbus A350 + Boeing 787 drivers) is the dominant revenue driver — outside J-Book entirely. This cohort's primary verifier has limited reach for HXL."
+    ]
+  }
+}

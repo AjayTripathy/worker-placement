@@ -1,0 +1,106 @@
+{
+  "ticker": "KTOS",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Kratos is making capital investments in unmanned jet-powered aircraft (Valkyrie / XQ-58) ahead of potential contract award, positioning for Collaborative Combat Aircraft (CCA) program of record.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "pentagon_jbook.query_program_funding('Collaborative Combat Aircraft') -> FUNDED_SHRINKING; PE 0207147F (Air Force RDT&E Vol II). FY24=$0M, FY25=$711.747M, FY26=$111.365M (-84.3% YoY). Latest funded year 2026 at $111M.",
+        "USAspending shows Kratos UAS subsidiary has received ~$1.12B in past DoD contracts, almost entirely for BQM-177A/BQM target-drone production (not CCA itself).",
+        "Filing language is forward-looking and conditional ('ahead of potential contract award'); Kratos is not on the named CCA Increment 1 prime list per the FY26 J-Book (Increment 1 was awarded to two primes in FY24)."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "FUNDED_SHRINKING (FY25 $711.7M -> FY26 $111.4M, -84%)",
+      "interpretation": "CCA is FUNDED_SHRINKING dramatically in the FY26 budget (-84% YoY from FY25 enacted). Kratos is publicly investing capacity 'ahead of contract award' for a program whose RDT&E line shrank ~6x in the latest J-Book and where Kratos is not a named primary contractor in the Increment 1 award (primes are not Kratos). Filing tone implies CCA is a near-term tailwind; J-Book shows the development funding flattening into low procurement levels. Heuristic #1 maps FUNDED_SHRINKING -> MODERATE_UNDERDELIVERY; heuristic #2 (materiality) keeps it at MODERATE because the company's narrative frames CCA as 'positioning' not booked revenue, but the magnitude of the cut is severe and the company keeps building Valkyrie capacity. Worth flagging as forward-pipeline risk."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Kratos identifies jet-powered unmanned aerial drone systems (BQM-167/BQM-177 tactical target drones) as a primary business area and is investing in expansion of unmanned jet drone manufacturing.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook.query_program_funding('BQM-167 AFSAT') -> NOT_FOUND (target-drone procurement lines not in current 410-PE corpus).",
+        "pentagon_jbook.query_program_funding('BQM-177') -> NOT_FOUND.",
+        "usaspending.query_dod_contracts(recipient='Kratos Unmanned Aerial Systems') -> 140 awards, total $1.123B. Largest awards are explicit BQM-177A SSAT Full-Rate Production ($238.8M FY23, $118.8M FY20, $105.9M EMD) and BQM-167 Air Force Sub-Scale Aerial Target Lot 14-16 Production ($119.3M). Past contracts are real; program is active.",
+        "Heuristic #7: NOT_FOUND in J-Book corpus does not signal red flag — target-drone procurement P-40 lines are outside the 410-PE corpus seeded scope."
+      ],
+      "M_check": "pentagon_jbook + usaspending",
+      "M_value": "J-Book NOT_FOUND (corpus gap); USAspending confirms ~$1.1B real past revenue from BQM-177A and BQM-167 production",
+      "interpretation": "USAspending strongly confirms the target-drone franchise is real and material. J-Book corpus gap (no BQM-177/BQM-167 procurement line) is a coverage limitation per heuristic #7, not a red flag. PASS, with note that forward-cycle dependency (US Navy and USAF target-drone reorders) is not independently J-Book-verified here."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Kratos is establishing a new facility related to the Sentinel intercontinental ballistic missile (ICBM) program.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook.query_program_funding('Ground Based Strategic Deterrent') -> FUNDED_GROWING. PE 0605238F (GBSD EMD, now Sentinel). FY24=$4327M, FY25=$2011M, FY26=$2648M. Latest funded year 2026 at $2.65B.",
+        "Sentinel is the renamed GBSD program; prime is Northrop Grumman, with Kratos as a subcontractor providing rocket support / SRM-adjacent services."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "FUNDED_GROWING ($2.01B FY25 -> $2.65B FY26)",
+      "interpretation": "Sentinel J-Book line is FUNDED_GROWING in the most recent budget — Kratos's facility investment claim is congruent with where DoD money is moving. PASS per heuristic #1. Note: Sentinel has Nunn-McCurdy cost-breach issues in 2024-2025 that could affect downstream sub work, but RDT&E EMD funding remains positive in the FY26 J-Book."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Kratos is positioning for hypersonic flight systems revenue (Erinyes, Dark Fury, Zeus SRMs, Oriole, MACH-TB-style) including procurement of long-lead items for 60 Oriole and 60 Zeus SRMs.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "pentagon_jbook.query_program_funding('hypersonic') -> 3 matches: Hypersonics Prototyping (PE 0604033F, Air Force) UNFUNDED_TWO_PLUS_YEARS (FY24=$27.9M, FY25=$0, FY26=$0); Hypersonics Prototyping - Hypersonic Attack Cruise Missile (PE 0604183F); Hypersonic Defense (PE 0604181C).",
+        "pentagon_jbook.query_program_funding('MACH-TB') -> NOT_FOUND (Navy MACH-TB line not in corpus; coverage gap).",
+        "Filing language commits to procuring 60 Oriole + 60 Zeus SRMs as long-lead 'for ballistic missile defense related, hypersonic or other expected customer missions' — i.e., no booked customer."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "Hypersonics Prototyping (USAF) UNFUNDED_TWO_PLUS_YEARS; MACH-TB NOT_FOUND",
+      "interpretation": "Filing implies broad hypersonic demand. The most-cited USAF hypersonic R&D line (Hypersonics Prototyping PE 0604033F) has been zeroed for two consecutive FYs (FY25, FY26). Other hypersonic lines (Defense-wide PE 0604181C, HACM PE 0604183F) still exist but Kratos is not a named prime on either. Forward narrative depends on as-yet-unbooked customers absorbing 60 Oriole + 60 Zeus SRMs. Per heuristic #1, the most-likely-matched USAF prototyping PE returns UNFUNDED_TWO_PLUS_YEARS (RED_FLAG-tier raw), but per heuristic #2 the company's claim is positioning not booked revenue, so down-tier to MODERATE_UNDERDELIVERY. Also: capital is being committed for inventory ahead of customer."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "In fiscal 2025 Kratos generated 68% of total revenues from contracts with the U.S. Government (military and FMS), as prime or sub.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending.query_dod_contracts(recipient='Kratos Defense') -> 458 awards, total ~$1.67B cumulative across multiple Kratos legal entities. Federal-government concentration is real and material.",
+        "Disclosure is consistent with the structural reality of a defense prime."
+      ],
+      "M_check": "usaspending.query_dod_contracts",
+      "M_value": "458 DoD awards, $1.67B cumulative",
+      "interpretation": "USAspending confirms heavy U.S. Government revenue concentration. Disclosure of 68% is corroborated. PASS."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Kratos cites $1.573 billion in remaining performance obligations (backlog) at December 28, 2025, with 54% expected to be recognized in 2026.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "Backlog is a company-disclosed forward-revenue indicator that cannot be independently verified from external M-sources without granular contract-level obligated-vs-ceiling data.",
+        "USAspending shows the historical contract count and totals (~$1.67B cumulative across Kratos entities) but does not break out remaining-to-obligate vs awarded ceilings cleanly."
+      ],
+      "M_check": "usaspending.query_dod_contracts",
+      "M_value": "458 DoD awards, $1.67B cumulative (cannot map directly to RPO)",
+      "interpretation": "Backlog claim is plausible relative to past obligations but cannot be cleanly verified. UNVERIFIABLE per heuristic #7."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Kratos is investing in a new small turbofan jet engine production facility in Oklahoma related to its arrangement with GE Aerospace (Prometheus venture with Rafael also ramping in 2026).",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "edgar_fts.query_fulltext('Kratos', cik=GD 0000040533) -> 0 hits — General Dynamics has not disclosed Kratos as a counterparty (expected; GD is not the cited counterparty).",
+        "edgar_fts.query_fulltext('Prometheus') -> 1,743 hits but overwhelmingly Prometheus Biosciences (a pharma firm), not a Kratos-Rafael venture; no direct counterparty corroboration via EDGAR.",
+        "Cited counterparties (GE Aerospace, Rafael) were not queried because GE/Rafael CIK not provided; could be added in a follow-up."
+      ],
+      "M_check": "edgar_fts.query_fulltext",
+      "M_value": "no counterparty corroboration via EDGAR full-text",
+      "interpretation": "Counterparty disclosure is plausible (GE Aerospace turbofan and Rafael's Prometheus loitering munition are known external programs) but not independently verified through M-sources used. UNVERIFIABLE."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Kratos operates 2.4 million sq ft across 62 locations supporting unmanned jet drone manufacturing, microwave electronics, and hypersonic integration facilities.",
+      "severity": "PASS",
+      "supports": [
+        "epa_frs.query_facilities('Kratos', CA) -> 6 facilities registered, including Kratos Unmanned Aerial Systems in McClellan, CA (matches filing's listed UAS site) and Kratos Defense headquarters in San Diego.",
+        "Facility footprint claim is corroborated by EPA FRS."
+      ],
+      "M_check": "epa_frs.query_facilities",
+      "M_value": "6 EPA-registered facilities in CA including McClellan UAS site",
+      "interpretation": "Facility existence claim verified. PASS."
+    }
+  ]
+}

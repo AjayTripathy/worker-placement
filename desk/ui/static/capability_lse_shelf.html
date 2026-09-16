@@ -1,0 +1,1707 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>lse_shelf</title><style>
+body{margin:0;background:#0b0e12;color:#e8ebee;font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:26px 24px 90px}
+a{color:#8b7cf6} h1{font-size:23px;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:#7d858e;margin:0 0 20px;font-size:13px}
+h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:#7d858e;margin:24px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 10px;border-bottom:1px solid #242a31;text-align:left;vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#7d858e}
+.k{font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:20px}
+.k-generator{color:#c3b8fb;background:rgba(139,124,246,.15)}
+.k-detector{color:#eccb8a;background:rgba(217,164,65,.15)}
+.k-watcher{color:#8ee5c1;background:rgba(53,201,143,.15)}
+.k-evidence{color:#b3bcc6;background:rgba(138,147,158,.15)}
+.h-OK{color:#35c98f} .h-STALE{color:#d9a441} .h-ERROR{color:#e0736a} .h-NEVER_RUN{color:#8a939e}
+pre{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px;overflow-x:auto;font-size:12px;line-height:1.5}
+.panel{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px 18px;margin-bottom:12px}
+ul{margin:4px 0;padding-left:20px} li{margin-bottom:4px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+</style></head><body><div class="wrap"><h1>lse_shelf</h1><p class="sub">registered capability · lse_shelf</p><a href="signals.html">&larr; all signals</a><div class="panel" style="margin-top:10px"><span class="k k-generator">GENERATOR</span> &nbsp;<span class="h-NEVER_RUN"><b>NEVER_RUN</b></span> · last run <span class="mono">never</span></div><p>the LSE MAIN + AIM leg of the global small-value screen.</p><form method="POST" action="/signals/run" style="margin:10px 0"><input type="hidden" name="name" value="lse_shelf"><input name="symbol" placeholder="symbol (if applicable)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px"><input name="symbols" placeholder="universe, comma-sep (generators)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px;margin-left:6px"><button type="submit" style="background:#8b7cf6;color:#0b0e12;border:0;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;margin-left:6px">Run now</button></form><h2>Datasources</h2><ul><li>reference implementation: verticals/generators/lse_shelf.py (see the code section for the feeds it touches)</li></ul><h2>Applies to</h2><ul><li><b>strategies:</b> quality_value</li></ul><h2>The code</h2><pre>&quot;&quot;&quot;lse_shelf — the LSE MAIN + AIM leg of the global small-value screen.
+
+================================ README ================================
+WHAT IT SCREENS
+  UK-listed operating companies, roughly USD 50M - 2B of market cap, on the two venues the
+  Euronext/Nordic leg does not reach: the LSE Main Market and AIM. Sibling of
+  `verticals/generators/euronext_shelf.py` — same composite, same guards, same rule that
+  this is a UNIVERSE + RANKING engine and never the source of record. Anything that reaches
+  a court is re-derived from the primary filing.
+
+WHY THE UK IS ITS OWN LEG (and not just another Euronext venue)
+  Three things are structurally different here and each is scored, not assumed:
+    1. WITHHOLDING TAX IS ZERO. The UK levies no dividend withholding on a US holder. Every
+       other venue on the Euronext leg runs 15-35% with a treaty reclaim that costs paperwork
+       and months of float. On an income-ish value name that is 15-35% of the dividend, kept.
+       It is a REAL edge and `wht_edge_bps` prices it against a 15% treaty-reclaim baseline.
+       CAVEAT: the 0% is a UK-INCORPORATION fact, not a UK-listing fact. Plenty of LSE lines
+       are Irish, Jersey, Guernsey, South African or US issuers, and those carry their own
+       home-country rate. Incorporation is read per name from the exchange&#x27;s own instrument
+       record (`country`), never inferred from the .L suffix.
+    2. STAMP DUTY / SDRT IS A REAL 0.5% FRICTION ON PURCHASES — one-way, unavoidable, and
+       equivalent to giving back roughly a year of a 50bp edge on entry. It is NOT uniform:
+       AIM-quoted shares have been SDRT-exempt since April 2014, and non-UK-incorporated
+       issuers are outside the charge. So the friction is a function of (market, country of
+       incorporation) and is emitted per name as `stamp_pct`. An AIM name and a Main-Market
+       name at the same multiple are NOT the same price.
+    3. CLOSED-END INVESTMENT COMPANIES DOMINATE THE MAIN MARKET. 306 of the 1,013 Main-Market
+       equity lines — 30% — are ICB 302040 Closed End Investments. They are a different lane
+       (NAV-discount, not Graham cheapness) and are excluded by the exchange&#x27;s own sector
+       classification rather than by guessing at names.
+
+UNIVERSE — PRIMARY, from the exchange itself
+  The universe is NOT a Yahoo screener sweep. It is the London Stock Exchange&#x27;s own
+  price-explorer service (api.londonstockexchange.com), swept per (market x ICB sector):
+      POST /api/v1/components/refresh
+        path       = live-markets/market-data-dashboard/price-explorer
+        parameters = markets={MAINMARKET|AIM}&amp;categories=EQUITY&amp;sectors={icb}&amp;indexname=
+  It returns, per line: TIDM, ISIN, issuer code, issuer name, share-line description, ICB
+  sector, quote currency, last/mid price, 52-week high/low and market capitalisation. That
+  is better than a screener in four ways that matter: (a) it is complete — no result cap, so
+  no silently-truncated sector; (b) it carries the MARKET SEGMENT, which is what decides
+  stamp duty; (c) it carries the ISIN, which is the join key to the Takeover Panel&#x27;s live
+  offer-period table; (d) it carries the exchange&#x27;s own ICB sector, which is what excludes
+  the investment trusts. Yahoo is used only for FUNDAMENTALS and price history, keyed off a
+  TIDM -&gt; Yahoo-symbol mapping (`_yahoo_sym`).
+
+SCORING — identical to the Japan/Korea/ESEF/Euronext legs, NOT reimplemented
+  `verticals/deep_value/score.py` is imported: composite = mean of rank-percentiles across
+  {EV/EBIT, FCF-yield, P/B, net-cash/mktcap, NCAV/mktcap}, plus its guards (sub-cash,
+  cash-burner, holdco/NCI, MLP-artifact, negative equity, WC-driven FCF, one-time-gain).
+
+HOW TO RE-RUN
+  python3 lse_shelf.py --refresh-universe      # monthly; ~90 LSE API calls, writes LSE_UNIVERSE.json
+  python3 lse_shelf.py --top 30                # score (fundamentals cached; --refresh-fund to redo)
+  python3 lse_shelf.py --min-mcap-usd 5e7 --max-mcap-usd 2e9 --min-adv-usd 75e3
+  Outputs: data/LSE_SHELF.json ({meta, rows}) — the full scored shelf.
+
+GUARDS — every one is a COLUMN; nothing is silently excluded except funds/financials
+  (a) PENSION / IAS-19 — the guard this build was written around, and the one that is
+      CRITICAL here rather than merely useful. Defined-benefit schemes are pervasive among
+      UK industrials of exactly this vintage and size, and a book-reserve or deficit-funded
+      scheme is DEBT-LIKE while being completely invisible to a net-cash view built from
+      Yahoo&#x27;s balance sheet. The SFPI.PA court (2026-08-03) is the precedent: EUR 50.6M of
+      unfunded retirement obligations — a Key Audit Matter for both auditors — turned &quot;39% of
+      the cap in net cash&quot; into 12-18% and EV/EBIT 4.5x into 6.0-6.5x.
+      Implementation, in order of preference:
+        explicit pension tag -&gt; long-term-provisions proxy -&gt; NOTHING FOUND.
+      The obligation is ADDED to the debt slot before the composite sees it; the raw tag stays
+      auditable in `debt_ex_pension`. Four UK-specific extensions over the Euronext version:
+        * IT IS ADDED NET OF TAX, NOT GROSS. The Euronext leg adds the gross obligation, which
+          over-captures — a deficit is deductible as it is funded, so the claim standing ahead
+          of the equity is the after-tax number. SFPI&#x27;s court did exactly this: EUR 51M gross
+          became EUR 38.3M net of the 25% French rate and EV/EBIT went 4.58x -&gt; 6.06x. The UK
+          main rate is also 25%. `pension_gross` and `pension_net_of_tax` are both emitted.
+        * A SURPLUS IS NOT AN ASSET YOU OWN. UK schemes are increasingly in accounting
+          surplus after the 2022-23 rate move, and the IAS-19 asset lands on the balance
+          sheet and inflates book equity — flattering P/B — while being unavailable to
+          shareholders absent a buyout or a wind-up with a surplus-refund (and a 25% charge).
+          `pension_surplus_in_equity` flags it; the surplus is NEVER netted into cash.
+        * DEFICIT-REPAIR CONTRIBUTIONS ARE A CASH CLAIM AHEAD OF THE EQUITY and they run
+          through operating cash flow, so FCF already carries them — but a scheme in deficit
+          with a recovery plan can absorb years of FCF. `pension_deficit_r` sizes the
+          obligation against market cap; &gt; 25% is a hard read-the-note flag.
+        * `pension_unverified` fires when NO pension or provisions tag is found on a name
+          whose sector is one where DB schemes are the norm. For those, treat net cash as
+          UNVERIFIED, not clean. Absence of a tag is absence of evidence.
+      A provisions proxy is NOT a verification — provisions also carry warranty,
+      restructuring, dilapidations and litigation, so it OVER-captures. Flagged as a proxy so
+      the promoter reads the IAS-19 note before sizing.
+
+  (b) FCF = CFO MINUS TOTAL CAPEX. Verified empirically on this universe (2026-08-04):
+      yfinance&#x27;s `Capital Expenditure` on UK filers ALREADY equals Purchase-of-PPE plus
+      Purchase-of-Intangibles — TW.L 6.7 = 4.2 + 2.5, SGE.L 59 = 41 + 18, ITV.L 54 = 26 + 28.
+      So the total-capex requirement is SATISFIED by that tag, and adding the intangibles
+      line again would double-count. The split is emitted anyway (`capex_ppe`,
+      `capex_intangibles`) and `capex_intang_heavy` fires when intangibles exceed 40% of
+      capex — capitalised development cost is an earnings-quality tell, and the UK small-cap
+      software cohort is where it lives. `capdev_r` sizes it against SALES, which is the form
+      the Tecnotree catch took: EUR 9.7M of capitalised development, 13.4% of sales, was the
+      entire wedge between a EUR 14.8M screen FCF and the company&#x27;s own reported EUR 4.6M.
+      Above 8% of revenue `capdev_heavy` fires and the FCF yield should not be trusted until
+      the intangibles note is read. This check has fired on 3-4 of every 8 verified names
+      across the US, Japan and Europe batches.
+      What FCF does NOT capture, and is flagged instead of silently adjusted: IFRS-16 LEASE
+      PRINCIPAL. Under IFRS-16 the principal repayment sits in FINANCING, so operating cash
+      flow is structurally flattered for lease-heavy models (retail, hospitality, leisure)
+      relative to the pre-2019 series. yfinance does not separate lease principal from debt
+      repayment, so no reliable numeric adjustment exists; `lease_heavy` fires when
+      capitalised lease obligations are the majority of total debt AND exceed 25% of market
+      cap, and the reader is told the FCF yield is overstated for those names.
+
+  (c) EARNINGS DURABILITY, WITH THE CASH-GENERATION CONDITION. The base guard (inherited from
+      the Euronext leg&#x27;s Cantargia catch) fires on three shapes: revenue appearing from ~zero
+      or tripling year on year; EBIT flipping out of a prior-year loss; EBIT positive while
+      FCF is negative. Those catch a licensing upfront or a lumpy project completion, which
+      Yahoo&#x27;s normalised operating income cannot see because the windfall arrives as REVENUE,
+      not as an unusual item.
+      THE CORRECTION APPLIED HERE: the raw test over-fires on genuine turnarounds. A company
+      whose EBIT flipped out of a loss but which ALSO converted that EBIT into cash — positive
+      FCF now and positive operating cash flow in the prior year — is not a one-year artifact;
+      it is a business that was cash-generative through the loss and has now cleared the
+      accounting line. Those are DEMOTED-TO-WATCH (`durability_watch`) rather than dropped
+      from the printed table. The accrual-gap shape (EBIT up, FCF negative) is NEVER rescued
+      by this condition, because the condition IS cash generation and that shape fails it by
+      construction.
+      PROVENANCE, stated plainly: this condition existed in the desk&#x27;s notes only BY
+      REFERENCE. The backtest behind it found that the raw guard BLOCKS HUBS — the desk&#x27;s
+      single best position — and `quality_drawdown.py` carries an explicit docstring
+      prohibition on porting the unconditioned guard into it. The fix itself was never
+      written. This is its first implementation, and the HUBS shape is exactly what it
+      rescues: GAAP EBIT crossing out of a loss while free cash flow was strongly positive on
+      both sides of the cross. It has NOT been backtested on this universe.
+
+  (d) EBIT TREND, TROUGH-ANCHORED. `ebit_trend` on the Euronext leg is current EBIT over the
+      OLDEST annual EBIT on file, which silently assumes the oldest year is representative.
+      It usually is not: if the base year happens to be the cyclical trough, a flat business
+      prints a flattering &quot;3.2x uptrend&quot; and the melting-ice-cube guard goes quiet exactly
+      when it should not. Both anchors are computed here:
+        `ebit_trend`      = current / oldest   (kept for comparability with the Euronext leg)
+        `ebit_vs_peak`    = current / max(history)   — the decline that actually matters
+        `trough_anchored` = the oldest year IS the minimum of the history
+      `melting` now fires on ebit_vs_peak &lt; 0.5 (a real halving from the peak) and
+      `trend_flattered` fires when the base year is the trough AND ebit_trend looks strong
+      while ebit_vs_peak does not. Informational, never a demotion: a trough multiple on a
+      cyclical is the buy and on a structural decliner is the trap, and only a human reading
+      the business can tell which.
+
+  (e) LIQUIDITY — MEDIAN, NOT MEAN. Yahoo&#x27;s `averageDailyVolume3Month` is an arithmetic mean,
+      and on a 400k-shares-a-day AIM name a single 8M-share block trade lifts the 3-month mean
+      by ~10% and can carry a name over an ADV floor it never actually clears. ADV here is the
+      MEDIAN of daily turnover over the last 63 sessions, computed from the daily bar series.
+      `adv_mean_usd` is kept alongside and `adv_block_inflated` fires when the mean exceeds the
+      median by more than 2x — that name trades by appointment.
+      Executability is separately evidenced from the exchange record: live `bid`/`offer` give
+      `spread_bps`, and `nms_shares` (normal market size) is the size a market maker is
+      obliged to quote. A tight-looking screen candidate with a 400bp touch is not acquirable.
+
+  (f) PATH — `pct_off_52w_low` and `days_since_low`, from the daily series. A composite is a
+      SNAPSHOT and cannot tell a name that has been dead cheap for a year from one that fell
+      off a cliff last week; the second is a falling knife with a news event behind it and the
+      first is neglect. `fresh_low` fires under 30 days since the low, and `entry_exhausted`
+      reproduces `quality_drawdown.py`&#x27;s two late-entry modes on identical constants so the
+      two screens grade a path the same way: a big bounce (&gt;35%) off a FRESH low (&lt;90 days),
+      or a very big bounce (&gt;50%) off any low.
+
+  (g) SHARE-COUNT / DUAL-CLASS VERIFICATION. The failure mode is arithmetic and needs no
+      filing to detect: a vendor&#x27;s `sharesOutstanding` is frequently ONE SHARE CLASS while its
+      `marketCap` is the whole company, so cap divided by count does not reconcile to the
+      traded price and every per-share ratio is wrong by the size of the missing class. HOOD
+      is the specimen — 790.6M Class A quoted, 109M Class B omitted, a 12% market-cap error
+      that flowed straight into P/E and P/S; TUYA the same shape. Four counts are cross-
+      checked here: the filing&#x27;s Ordinary Shares Number, the vendor&#x27;s share count, the count
+      implied by the vendor&#x27;s own market cap over the price, and the count implied by the
+      EXCHANGE&#x27;s market cap over the exchange&#x27;s price. `share_count_divergence` is the worst
+      pairwise gap and `share_count_unverified` fires above 5% — or when fewer than two
+      independent counts exist at all, because one unconfirmed number is not a verification.
+      Separately, the exchange&#x27;s issuer code groups every LINE of one issuer, so a
+      genuine dual-class or multi-line structure is visible directly: `n_lines` &gt; 1 sets
+      `multi_line_issuer`, and the dedup keeps the most liquid ordinary line rather than
+      scoring the same fundamentals twice.
+
+  (h) PFIC — the shared gate is ON here, against the Euronext leg&#x27;s precedent, plus the
+      fair-market-value overlay. `verticals/deep_value/pfic_screen.py` is imported, not
+      reimplemented: the ASSET test proxies passive assets over total assets at 50%, and the
+      INCOME test proxies conjunctively (revenue/assets &lt; 10% AND passive &gt;= 40%) — a real
+      operating business with revenue against its asset base is active.
+      WHY THE EURONEXT SKIP DOES NOT TRAVEL. That leg argues EU/EEA operating companies in
+      this band are not a PFIC population. London breaks the argument twice over: the UK&#x27;s
+      closed-end investment companies are statutory PFICs almost to a name (they are excluded
+      here by ICB sector, but the line between &quot;investment company&quot; and &quot;cash-rich holdco&quot; is
+      porous and that sector tag is the only thing holding it); and §1297&#x27;s asset test on a
+      PUBLIC issuer runs on FAIR MARKET VALUE, so the denominator is roughly market cap plus
+      liabilities, not book assets.
+      THE MECHANISM (PDD court, 2026-08-04) is that A DE-RATE MANUFACTURES THE STATUS: passive
+      assets sit fixed in the numerator while the denominator collapses with the multiple. So
+      drawdown is not a coincidence with PFIC risk, it is a CAUSE of it — and a cheapness
+      screen is precisely the instrument that concentrates the exposure. An earlier reading of
+      the EDINET shelf recorded &quot;the PFIC gate anti-selects on drawdown&quot; as a gate DEFECT;
+      that court reversed it — the anti-selection is the mechanism working correctly.
+      `pfic_fmv_share` carries the FMV ratio, the flag fires at 0.50, and `pfic_watch` marks
+      the 0.45-0.50 band, where the tell is the year-over-year diff of the risk-factor
+      sentence itself (&quot;we do not believe we were a PFIC&quot; -&gt; &quot;it is possible that we were&quot;).
+      Nothing is dropped. A genuine net-cash bargain is the name most likely to trip this, and
+      the answer is a QEF or mark-to-market election, not avoidance.
+
+  (i) LIVE OFFER PERIOD + SECTOR TAKEOUT HEAT. The Takeover Panel publishes its Disclosure
+      Table daily — every company currently in an offer period under the Code, with its ISIN
+      and its named offeror. Joined on ISIN (the LSE universe carries it), which is exact,
+      not fuzzy. `in_offer_period` means the name is a merger-arb, not a value screen
+      candidate, and it is DEMOTED from the printed table. Aggregated up, the same table is a
+      free read on where private equity is actually hunting: `sector_takeout_heat` counts live
+      offer periods in the name&#x27;s ICB sector and `pe_bid_sector` fires when at least one of
+      those offerors is a financial sponsor. Sector heat is not a reason to own a name — it is
+      a reason to believe the pond&#x27;s discount has a closing mechanism.
+      AND THE COHORT WARNING THAT GOES WITH IT: the bank-consolidation screen measured its own
+      cohort&#x27;s realised takeout multiples at 0.77-1.06x tangible book against a cohort trading
+      at a 1.41x median — a takeout there is a DOWN round. Nothing on this shelf has been
+      measured that way, so `sector_takeout_heat` is a liquidity-of-exit observation and
+      nothing more. An acquisition is a free option; it is never a thesis.
+
+  (j) FINANCIALS + VEHICLES EXCLUDED FROM THE GRAHAM SCORE. ICB 3xxxx financials, both REIT
+      sectors, real estate, and both investment-vehicle sectors. &quot;Net cash&quot; is meaningless for
+      a deposit-taker and NAV-discount is a different lane. Counts reported; rows stay in the
+      universe file. A second pass on Yahoo&#x27;s industry tag catches strays.
+
+  (k) TRUST / CLIENT-CASH (the OTB.L catch, inherited). Travel, betting, payments, ticketing,
+      insurance-broking and estate agency hold ring-fenced CUSTOMER float on the face of the
+      balance sheet; netting it manufactures phantom EV. Flagged names are scored on the
+      TRUST-SAFE variant (EV with no cash netting). ICB 405010 Travel and Leisure is added to
+      the industry/name regexes as a sector-level trigger.
+
+  (l) NON-EQUITY / SHARE-LINE HYGIENE. The exchange lists preference shares, warrants,
+      nil-paid rights, convertibles and B-share lines in the same EQUITY category. Filtered on
+      the instrument description, which is the exchange&#x27;s own text (&quot;ORD 5P&quot; vs &quot;8% CUM PREF&quot;
+      vs &quot;WTS TO SUB FOR ORD&quot;). Note that &quot;(DI)&quot; — Depositary Interest — is NOT filtered: that
+      is how a legitimately non-UK-incorporated operating company settles in CREST, and
+      Somero, a real business, trades that way.
+
+  (m) CURRENCY PLANE. Quote currency is GBX (pence) on essentially every line while the
+      REPORTING currency is frequently GBP, USD or EUR — miners and oil names report in USD
+      as a rule. Market cap is bridged into the reporting currency exactly once, in
+      `_to_fin_ccy()` (which divides GBX by 100 first), and every ratio is then single-plane.
+      A median-P/B plane check runs before anything prints and hard-fails on a 100x error.
+      This is the priceMagnifier lesson: unit conventions never transfer across venues.
+
+  (o) CASH QUALITY + NET-DEBT SIGN RECONCILIATION — added after primary verification of the
+      first run REFUTED a top-five name outright, and it is the most consequential guard here
+      because it protects the SIGN of the metric everything else leans on.
+      Capital Ltd (CAPD) printed &quot;+11% of the market cap in net cash&quot; and ranked 4th. Its own
+      2025 annual report states NET DEBT of USD 31.8M. The screen was not slightly wrong; it
+      had the sign backwards. The mechanism: `Other Short Term Investments` carried USD 99.8M,
+      which is not a cash equivalent at all — it is a portfolio of LISTED JUNIOR MINER EQUITIES
+      held at fair value through P&amp;L. Netting a marketable-securities book against debt
+      manufactures net cash out of net debt.
+      Two independent checks, either of which demotes the name to a STRICT (true-cash-only)
+      view that then governs EV, EV/EBIT, net cash and the composite:
+        1. `securities_as_cash` — short-term investments are more than 25% of what the screen
+           called cash;
+        2. `netcash_sign_conflict` — the vendor publishes its OWN `Net Debt` line, and our
+           computed net cash agreeing in sign with a positive net debt is a contradiction
+           between two readings of the same balance sheet. Free, independent of our
+           arithmetic, and it should always have been read.
+      `ncash_r_asis` / `am_asis` preserve what the naive computation said, so the correction is
+      auditable rather than invisible. On the first run this moved CAPD from +0.11 to -0.22 net
+      cash and EV/EBIT 5.6x to 7.6x — reconciling to the filer&#x27;s stated net debt exactly once
+      the IFRS-16 lease liabilities inside Total Debt are backed out — and dropped it out of
+      the top fifteen. It also cut Oxford Metrics from +0.66 to +0.24 net cash.
+      A large securities book distorts the INCOME statement too: Capital booked a USD 66.0M
+      realised and unrealised fair-value gain on those stakes in FY2025, which is a
+      mark-to-market and not services earnings, and the unusual-items path cannot see it
+      because it is not tagged unusual. `securities_book_material` fires above 20% of market
+      cap so the reader knows to re-read the P&amp;L as well as the balance sheet.
+      LIMITATION: the vendor&#x27;s `Net Debt` tag is present on only 133 of 249 shelf names, so
+      check 2 is silent on the rest and check 1 carries the load there.
+
+  (n) COVERAGE HONESTY. Yahoo throttles at universe scale and does it SILENTLY — 200s with
+      empty statement frames, no exception. An empty frame is a RETRYABLE failure, never &quot;this
+      company has no balance sheet&quot;; a circuit breaker stops the pass after BREAKER_N
+      consecutive empties and preserves the cache; and per-market pull coverage is printed
+      every run. A partial shelf that knows it is partial beats a full-looking shelf that
+      quietly lost AIM.
+
+WHAT THE FIRST RUN FOUND OUT ABOUT THE POND (2026-08-04, 1,599 lines -&gt; 249 scored)
+  1. THE MAIN MARKET IS MOSTLY NOT OPERATING COMPANIES. 310 of 989 Main-Market equity lines
+     are closed-end investment companies, and 415 of 1,599 across both venues are investment
+     vehicles or property once REITs and real-estate services are added. A screen that reaches
+     the UK through a generic &quot;region=gb&quot; vendor query is scoring a fund register.
+  2. AIM&#x27;S STAMP EXEMPTION IS MORE THAN EATEN BY ITS SPREAD, and the two are usually discussed
+     as though only the first existed. Median touch on the AIM half of this shelf is 234bp
+     against 20bp on the Main Market — an order of magnitude. Entry friction is therefore
+     ~117bp (half-spread) on AIM against ~60bp (50bp SDRT + 10bp half-spread) on Main: AIM is
+     roughly twice as expensive to enter DESPITE paying no stamp duty. Median AIM ADV is $244k
+     against $1.32M, so the same names are also the ones you cannot size. The 0% withholding
+     edge — worth ~60bp a year on a 4%-yielding name against a 15% treaty baseline — does not
+     pay for a 234bp round trip in under two years of holding.
+  3. THE OLDEST-YEAR EBIT ANCHOR FLATTERS NEARLY HALF THIS SHELF. `trough_anchored` fires on
+     111 of 249 names: the earliest annual EBIT on file IS the minimum of the series, so the
+     Euronext leg&#x27;s `ebit_trend` would report an uptrend on 45% of the pond by construction.
+     Anchoring on the peak instead moves 54 names into `melting`, and only 9 of those were
+     visible to the old anchor.
+  4. THE PFIC FMV OVERLAY DOES REAL WORK IN BOTH DIRECTIONS, and the direction it works in is
+     the one the PDD court predicted. It ADDED exactly two names the book test cleared —
+     GENL and OMG, the two most de-rated names near the top of the shelf (P/B 0.54 and 0.71) —
+     because their collapsed market caps shrank the FMV denominator under the fixed pile of
+     cash. And it CLEARED six names the book income-proxy had flagged, whose market caps are
+     large against book. That is the mechanism stated exactly: the de-rate causes the status.
+  5. UK DUAL-CLASS BARELY EXISTS. One multi-line issuer survived the dedup out of 249. The
+     share-count guard still fires on 50 names (20%), but the cause is vendor-vs-filing
+     vintage drift, not a hidden share class — which is the opposite of the US finding that
+     motivated the guard, and is worth knowing before anyone reads a 20% fire rate as alarm.
+  6. THE PROVISIONS PROXY IS LOAD-BEARING AND IT IS OFTEN NOT A PENSION. It supplies the
+     obligation on 119 of 249 names against 60 explicit pension tags. Its single largest hit,
+     Vistry at GBP 269.8M (30% of market cap), is Building Safety Act cladding remediation.
+     Meanwhile 70 names return NO tag at all, 37 of them in sectors where DB schemes are the
+     norm — Costain among them, a contractor with a large well-known scheme. On those, &quot;net
+     cash&quot; is UNVERIFIED, not clean.
+  7. PRIMARY VERIFICATION OF SIX NAMES REFUTED THREE SCREEN NUMBERS — read this before
+     trusting any row. (a) CAPD&#x27;s &quot;+11% net cash&quot; was NET DEBT of USD 31.8M per its own annual
+     report; guard (o) was written in response and now corrects it. (b) CHH and COST were both
+     flagged &quot;no pension tag found&quot; and BOTH have defined-benefit schemes — each in SURPLUS and
+     each RECOGNISED as a balance-sheet asset (Churchill GBP 7.65M, 12% of its equity; Costain
+     GBP 60.0M). So the screen&#x27;s P/B is flattered on both and the surplus is not distributable.
+     `pension_unverified` fired on both, which is the guard doing its job as a ROUTING flag
+     even though the surplus detector itself is dead against this data source. (c) THX&#x27;s EBIT
+     is USD 199.7M, not the ~112M the screen carries, and its net cash is 28% not 32% — but
+     the material omission is that USD 254M of Douta (Senegal) initial capex is earmarked
+     against a USD 137.8M cash balance, so the 41% FCF yield is pre-committed. None of (c) is
+     machine-readable from a balance sheet; it is a notes-and-commitments read, which is a
+     court step. The screen cannot be fixed to catch it and should not pretend otherwise.
+
+  8. THE LIVE-OFFER JOIN WORKS AND IS NOT COSMETIC. Nine shelf names are in a Code offer
+     period today — Senior, Gooch &amp; Housego, Advanced Medical Solutions, Gama Aviation
+     (Epiris) among them — every one of which would otherwise have printed as a cheap
+     industrial. They are merger arb, not value, and they are demoted.
+
+KNOWN LIMITATIONS
+  * Yahoo is a SECONDARY source for fundamentals. Fine for ranking; not evidence. Every name
+    that reaches a court is re-derived from the annual report.
+  * The pension guard&#x27;s provisions proxy over-captures and its &quot;nothing found&quot; case is the
+    dangerous one. It reduces a court-grade question to a screen flag; it does not answer it.
+  * IFRS-16 lease liabilities sit inside Total Debt, so EV is overstated for lease-heavy
+    models. Bias is conservative (bigger EV -&gt; worse multiple -&gt; no false bargain), and the
+    matching CFO flattery runs the other way — for a lease-heavy retailer BOTH distortions
+    are live at once and only the primary statements resolve them.
+  * ADV and the path fields come from Yahoo&#x27;s daily bars, which are consolidated and include
+    off-book/OTC prints on some UK lines; treat the ADV as an upper bound on lit liquidity.
+  * The Takeover Panel table is TODAY&#x27;s state. A name that was taken out last year is not in
+    it. A trailing-24-month takeout history would need the RNS archive and is not built.
+  * Free float is Yahoo&#x27;s `floatShares`, an estimate, and is absent for a real slice of AIM.
+  * The universe is a STATIC snapshot; a delisting or a new admission is invisible until
+    `--refresh-universe`.
+  * `pension_surplus_in_equity` HAS NEVER FIRED — 0 of 249 on the first run — because Yahoo
+    carries no pension-ASSET tag on UK balance sheets at all. The guard is written and is
+    correct in principle (a UK scheme in surplus books an asset that inflates equity and
+    flatters P/B while being unavailable to shareholders), but it is currently DEAD CODE
+    against this data source and cannot be relied on. CONFIRMED against primary sources:
+    Churchill China carries a recognised GBP 7.65M retirement-benefit ASSET (12% of its equity,
+    and a key audit matter) and Costain a GBP 60.0M one — this screen sees neither, and both
+    fell through to `pension_unverified`, which is the only reason they are flagged at all.
+    Reading a surplus needs the annual report; it is a court step, not a screen step.
+  * COMMITTED CAPEX AGAINST A CASH PILE IS INVISIBLE HERE. Thor Explorations&#x27; USD 254M of
+    Douta initial capex, earmarked against a USD 137.8M cash balance, lives in the notes and
+    the MD&amp;A and on the face of nothing. A screen that reads balance sheets will keep scoring
+    pre-committed cash as free cash. Treat `ncash_r` on any miner, developer or project
+    business as a question rather than an answer.
+  * `sector_takeout_heat` fires on 38% of the shelf, which is too broad to discriminate — 39
+    live offer periods spread across a small number of ICB sectors light up most of them. The
+    ISIN-exact `in_offer_period` (9 names) is the column that carries information; treat the
+    sector aggregate as colour only.
+  * The durability guard&#x27;s cash-generation condition has NOT been backtested here. It rescued
+    9 names on this run; whether any of them deserved rescuing is unknown until they are read.
+  * IBKR conids are resolved OUT OF BAND (the IBKR MCP `search_contracts` tool) and merged
+    from data/lse_conids.json. Missing = &quot;not yet verified&quot;, never &quot;not executable&quot;.
+========================================================================
+&quot;&quot;&quot;
+from __future__ import annotations
+import argparse, json, os, re, sys, time, urllib.request
+from collections import Counter, defaultdict
+from concurrent.futures import ThreadPoolExecutor
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+# reuse the shared composite + guards (never reimplemented) — verticals/deep_value/score.py
+sys.path.insert(0, os.path.join(os.path.dirname(HERE), &quot;deep_value&quot;))
+import score as S                                              # noqa: E402
+import pfic_screen as P                                        # noqa: E402
+
+DATA = os.path.join(HERE, &quot;data&quot;)
+UNIVERSE = os.path.join(DATA, &quot;LSE_UNIVERSE.json&quot;)
+FUND_CACHE = os.path.join(DATA, &quot;lse_fund_cache.json&quot;)
+CONIDS = os.path.join(DATA, &quot;lse_conids.json&quot;)
+OFFERS = os.path.join(DATA, &quot;LSE_OFFER_PERIODS.json&quot;)
+OUT = os.path.join(DATA, &quot;LSE_SHELF.json&quot;)
+
+LSE_API = &quot;https://api.londonstockexchange.com/api/v1/components/refresh&quot;
+LSE_INSTRUMENT = &quot;https://api.londonstockexchange.com/api/gw/lse/instruments/alldata/&quot;
+PRICE_EXPLORER_COMPONENT = &quot;block_content%3A9524a5dd-7053-4f7a-ac75-71d12db796b4&quot;
+TAKEOVER_PANEL = &quot;https://www.thetakeoverpanel.org.uk/disclosure/disclosure-table&quot;
+# gov/enterprise sites check the full Chrome fingerprint, not just the UA
+UA = {
+    &quot;User-Agent&quot;: &quot;Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 &quot;
+                  &quot;(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36&quot;,
+    &quot;Accept&quot;: &quot;application/json, text/plain, */*&quot;,
+    &quot;Accept-Language&quot;: &quot;en-GB,en;q=0.9&quot;,
+    &quot;Content-Type&quot;: &quot;application/json&quot;,
+    &quot;Origin&quot;: &quot;https://www.londonstockexchange.com&quot;,
+    &quot;Referer&quot;: &quot;https://www.londonstockexchange.com/&quot;,
+}
+
+MARKETS = {&quot;MAINMARKET&quot;: &quot;LSE Main Market&quot;, &quot;AIM&quot;: &quot;AIM&quot;}
+
+# ICB sectors whose balance-sheet semantics break the Graham score, plus the vehicle sectors.
+FIN_SECTORS = {
+    &quot;301010&quot;: &quot;Banks&quot;, &quot;302010&quot;: &quot;Finance and Credit Services&quot;,
+    &quot;302020&quot;: &quot;Investment Banking and Brokerage Services&quot;,
+    &quot;302030&quot;: &quot;Mortgage Real Estate Investment Trusts&quot;,
+    &quot;302040&quot;: &quot;Closed End Investments&quot;,
+    &quot;302050&quot;: &quot;Open End and Miscellaneous Investment Vehicles&quot;,
+    &quot;303010&quot;: &quot;Life Insurance&quot;, &quot;303020&quot;: &quot;Non-life Insurance&quot;,
+    &quot;351010&quot;: &quot;Real Estate Investment and Services&quot;,
+    &quot;351020&quot;: &quot;Real Estate Investment Trusts&quot;,
+}
+# (k) sector-level trigger for the client-cash guard
+TRUST_SECTORS = {&quot;405010&quot;}          # Travel and Leisure
+# (a) sectors where a legacy DB scheme is the NORM, so a missing tag is suspicious
+DB_PENSION_SECTORS = {
+    &quot;502010&quot;, &quot;502020&quot;, &quot;502030&quot;, &quot;502040&quot;, &quot;502050&quot;, &quot;502060&quot;,   # industrials
+    &quot;501010&quot;, &quot;551010&quot;, &quot;551020&quot;, &quot;552010&quot;,                        # construction / materials / chemicals
+    &quot;402020&quot;, &quot;403010&quot;, &quot;404010&quot;, &quot;451010&quot;, &quot;451020&quot;, &quot;452010&quot;,    # legacy consumer / media / retail
+    &quot;651010&quot;, &quot;651020&quot;, &quot;651030&quot;,                                  # utilities
+}
+
+FX_FALLBACK = {&quot;USD&quot;: 1.0, &quot;GBP&quot;: 1.34, &quot;EUR&quot;: 1.16, &quot;SEK&quot;: 0.105, &quot;NOK&quot;: 0.099,
+               &quot;DKK&quot;: 0.156, &quot;CHF&quot;: 1.25, &quot;CAD&quot;: 0.73, &quot;AUD&quot;: 0.65, &quot;ZAR&quot;: 0.055,
+               &quot;JPY&quot;: 0.0066, &quot;ILS&quot;: 0.30, &quot;SGD&quot;: 0.78, &quot;HKD&quot;: 0.128}
+FX_PAIRS = {&quot;GBP&quot;: &quot;GBPUSD=X&quot;, &quot;EUR&quot;: &quot;EURUSD=X&quot;, &quot;SEK&quot;: &quot;SEKUSD=X&quot;, &quot;NOK&quot;: &quot;NOKUSD=X&quot;,
+            &quot;DKK&quot;: &quot;DKKUSD=X&quot;, &quot;CHF&quot;: &quot;CHFUSD=X&quot;, &quot;CAD&quot;: &quot;CADUSD=X&quot;, &quot;AUD&quot;: &quot;AUDUSD=X&quot;,
+            &quot;ZAR&quot;: &quot;ZARUSD=X&quot;, &quot;JPY&quot;: &quot;JPYUSD=X&quot;, &quot;SGD&quot;: &quot;SGDUSD=X&quot;, &quot;HKD&quot;: &quot;HKDUSD=X&quot;}
+
+# (1) WHT by country of INCORPORATION, not of listing. The 0% is the UK edge; everything else
+#     on this shelf is a foreign issuer that happens to quote in London.
+WHT = {&quot;GB&quot;: (&quot;0%&quot;, 0.0), &quot;JE&quot;: (&quot;0%&quot;, 0.0), &quot;GG&quot;: (&quot;0%&quot;, 0.0), &quot;IM&quot;: (&quot;0%&quot;, 0.0),
+       &quot;BM&quot;: (&quot;0%&quot;, 0.0), &quot;KY&quot;: (&quot;0%&quot;, 0.0), &quot;VG&quot;: (&quot;0%&quot;, 0.0), &quot;GI&quot;: (&quot;0%&quot;, 0.0),
+       &quot;IE&quot;: (&quot;25%r&quot;, 0.25), &quot;US&quot;: (&quot;30%&quot;, 0.30), &quot;ZA&quot;: (&quot;20%r&quot;, 0.20),
+       &quot;AU&quot;: (&quot;30%r&quot;, 0.30), &quot;CA&quot;: (&quot;25%r&quot;, 0.25), &quot;IL&quot;: (&quot;25%r&quot;, 0.25),
+       &quot;FR&quot;: (&quot;25%r&quot;, 0.25), &quot;NL&quot;: (&quot;15%&quot;, 0.15), &quot;LU&quot;: (&quot;15%&quot;, 0.15),
+       &quot;CY&quot;: (&quot;0%&quot;, 0.0), &quot;SG&quot;: (&quot;0%&quot;, 0.0), &quot;HK&quot;: (&quot;0%&quot;, 0.0)}
+TREATY_BASELINE = 0.15      # what a reclaimed European position realistically lands at
+
+# (l) share lines that are not the ordinary equity. The exchange&#x27;s own instrument description.
+NON_ORD = re.compile(
+    r&quot;(\bPREF(ERENCE|ERRED)?\b|\bCUM\b|\bCNV\b|\bCONV\b|\bWT?S\b|\bWARRANT|NIL PAID|\bNPV RTS\b&quot;
+    r&quot;|\bRIGHTS?\b|\bDEB\b|\bLN\b|\bLOAN NOTE|\bUNSEC\b|\bSUBORD|\bGDR\b|\bADR\b|\bADS\b&quot;
+    r&quot;|DEPOSITARY RECEIPT|\bREG\s?S\b|\b144A\b|\bETF\b|\bETP\b|\bETC\b|\bETN\b&quot;
+    r&quot;|\d+\s?%\s|\bTREASURY\b|\bB SHARE|\bC SHARE|\bDEFERRED\b|\bREDEEMABLE\b)&quot;, re.I)
+# fund / vehicle names the ICB sector tag misses
+FUNDISH = re.compile(
+    r&quot;(INVESTMENT TRUST|INVESTMENT COMPANY|\bVCT\b|VENTURE CAPITAL TRUST|\bOEIC\b|\bICVC\b&quot;
+    r&quot;|\bSICAV\b|\bFUND\b|\bFUNDS\b|UNIT TRUST|\bREIT\b|\bSPAC\b|ACQUISITION CORP&quot;
+    r&quot;|CAPITAL PARTNERS PLC|CLOSED[- ]END|\bPCC\b|PROTECTED CELL)&quot;, re.I)
+TRUST_INDUSTRY = re.compile(
+    r&quot;(Travel|Tour|Lodging|Airlines|Gambling|Casino|Betting|Insurance Broker|Ticket&quot;
+    r&quot;|Payment|Real Estate Services|Financial Conglomerates|Resorts)&quot;, re.I)
+TRUST_NAME = re.compile(
+    r&quot;(TRAVEL|HOLIDAY|\bTOURS?\b|CRUISE|TICKET|\bBET\b|BETTING|GAMING|CASINO|LOTTER&quot;
+    r&quot;|BOOKMAK|INSURANCE BROK|ESTATE AGEN|PAYMENTS?\b|PAYTECH|MONEY TRANSFER)&quot;, re.I)
+LEGAL_SFX = re.compile(r&quot;\b(PLC|LIMITED|LTD|GROUP|HOLDINGS?|INC|CORP(ORATION)?|SE|NV|AB)\b\.?&quot;, re.I)
+
+BS_KEYS = (&quot;Total Assets&quot;, &quot;Current Assets&quot;, &quot;Total Liabilities Net Minority Interest&quot;,
+           &quot;Stockholders Equity&quot;, &quot;Cash And Cash Equivalents&quot;)
+MAX_FAILS = 4
+BREAKER_N = 25
+ADV_SESSIONS = 63           # ~3 months of sessions, matching the vendor window we replace
+UK_TAX_RATE = 0.25          # UK main corporation-tax rate — the pension deficit&#x27;s tax shield
+# (f) path constants, kept identical to quality_drawdown.py so the two screens grade the same
+MAX_OFF_LOW, FRESH_LOW_DAYS, HARD_OFF_LOW = 0.35, 90, 0.50
+ORDER_CAP_OF_ADV = 0.20     # never size an order above this share of a day&#x27;s prints (SFPI rule)
+
+
+# ----------------------------------------------------------------- LSE primary API
+def _lse_post(params: str, page: int, size: int = 500, timeout: int = 60) -&gt; dict:
+    body = {&quot;path&quot;: &quot;live-markets/market-data-dashboard/price-explorer&quot;,
+            &quot;parameters&quot;: params,
+            &quot;components&quot;: [{&quot;componentId&quot;: PRICE_EXPLORER_COMPONENT,
+                            &quot;parameters&quot;: f&quot;page%3D{page}%26size%3D{size}&quot;}]}
+    req = urllib.request.Request(LSE_API, data=json.dumps(body).encode(), headers=UA)
+    r = json.load(urllib.request.urlopen(req, timeout=timeout))
+    blocks = {x[&quot;name&quot;]: x[&quot;value&quot;] for x in r[0][&quot;content&quot;]}
+    return blocks
+
+
+def lse_sectors() -&gt; list[dict]:
+    &quot;&quot;&quot;The exchange&#x27;s own ICB sector list — pulled live so a reclassification cannot rot.&quot;&quot;&quot;
+    b = _lse_post(&quot;markets%3DMAINMARKET%26categories%3DEQUITY%26indexname%3D&quot;, 0, size=1)
+    return b[&quot;priceexplorerfields&quot;][&quot;sectors&quot;]
+
+
+def _yahoo_sym(tidm: str) -&gt; str:
+    &quot;&quot;&quot;TIDM -&gt; Yahoo symbol. Taylor Wimpey&#x27;s TIDM is literally &#x27;TW.&#x27; and Yahoo calls it
+    &#x27;TW.L&#x27;; BT&#x27;s second line is &#x27;BT.A&#x27; / &#x27;BT-A.L&#x27;. Trailing dot dropped, interior dot to
+    hyphen, then the venue suffix.&quot;&quot;&quot;
+    t = (tidm or &quot;&quot;).strip().rstrip(&quot;.&quot;)
+    return t.replace(&quot;.&quot;, &quot;-&quot;) + &quot;.L&quot;
+
+
+def refresh_universe(pause: float = 0.35) -&gt; dict:
+    &quot;&quot;&quot;Sweep the LSE price explorer per (market x ICB sector).
+
+    Sector-sliced rather than market-sliced so the ICB sector arrives attached to each line —
+    it is what excludes the investment trusts and what the takeout-heat overlay aggregates on.
+    ~90 calls; run monthly (admissions and delistings move at that pace).
+    &quot;&quot;&quot;
+    secs = lse_sectors()
+    print(f&quot;LSE ICB sectors: {len(secs)}&quot;)
+    rows, dropped_pages = {}, 0
+    for mk in MARKETS:
+        got = 0
+        for s in secs:
+            code, name = s[&quot;key&quot;], s[&quot;value&quot;].strip()
+            page = 0
+            while True:
+                params = (f&quot;markets%3D{mk}%26categories%3DEQUITY%26sectors%3D{code}&quot;
+                          f&quot;%26indexname%3D&quot;)
+                try:
+                    b = _lse_post(params, page)
+                except Exception as e:
+                    print(f&quot;  {mk}/{code} page={page} FAILED: {e}&quot;)
+                    dropped_pages += 1
+                    break
+                v = b.get(&quot;priceexplorersearch&quot;) or {}
+                content = v.get(&quot;content&quot;) or []
+                for x in content:
+                    tidm = x.get(&quot;tidm&quot;)
+                    if not tidm or tidm in rows:
+                        continue
+                    rows[tidm] = {
+                        &quot;tidm&quot;: tidm, &quot;sym&quot;: _yahoo_sym(tidm), &quot;isin&quot;: x.get(&quot;isin&quot;),
+                        &quot;issuercode&quot;: x.get(&quot;issuercode&quot;), &quot;name&quot;: x.get(&quot;issuername&quot;),
+                        &quot;line&quot;: x.get(&quot;name&quot;), &quot;description&quot;: x.get(&quot;description&quot;),
+                        &quot;market&quot;: mk, &quot;sector_code&quot;: code, &quot;sector&quot;: name,
+                        &quot;px_ccy&quot;: x.get(&quot;currency&quot;),
+                        &quot;px&quot;: x.get(&quot;lastprice&quot;) or x.get(&quot;midPrice&quot;),
+                        &quot;mid&quot;: x.get(&quot;midPrice&quot;),
+                        &quot;mcap_local&quot;: x.get(&quot;marketcapitalization&quot;),
+                        &quot;w52_min&quot;: x.get(&quot;fiftyTwoWeeksMin&quot;),
+                        &quot;w52_max&quot;: x.get(&quot;fiftyTwoWeeksMax&quot;),
+                        &quot;islse&quot;: x.get(&quot;islse&quot;),
+                    }
+                    got += 1
+                page += 1
+                time.sleep(pause)
+                if page &gt;= (v.get(&quot;totalPages&quot;) or 1) or not content:
+                    break
+        print(f&quot;  {mk} ({MARKETS[mk]}): {got} equity lines&quot;)
+    os.makedirs(DATA, exist_ok=True)
+    payload = {&quot;meta&quot;: {
+        &quot;generated_utc&quot;: time.strftime(&quot;%Y-%m-%dT%H:%M:%SZ&quot;, time.gmtime()),
+        &quot;source&quot;: &quot;London Stock Exchange price-explorer API (PRIMARY) — &quot;
+                  &quot;POST api.londonstockexchange.com/api/v1/components/refresh, &quot;
+                  &quot;path=live-markets/market-data-dashboard/price-explorer, swept per &quot;
+                  &quot;(market x ICB sector)&quot;,
+        &quot;markets&quot;: list(MARKETS), &quot;sectors&quot;: len(secs), &quot;failed_pages&quot;: dropped_pages,
+        &quot;refresh&quot;: &quot;python3 lse_shelf.py --refresh-universe&quot;},
+        &quot;rows&quot;: list(rows.values())}
+    json.dump(payload, open(UNIVERSE, &quot;w&quot;), ensure_ascii=False, indent=1)
+    print(f&quot;universe written: {len(rows)} lines -&gt; {UNIVERSE}&quot;)
+    return payload
+
+
+def load_universe() -&gt; dict:
+    if not os.path.exists(UNIVERSE):
+        raise SystemExit(&quot;no universe file — run: python3 lse_shelf.py --refresh-universe&quot;)
+    return json.load(open(UNIVERSE))
+
+
+def lse_instrument(tidm: str) -&gt; dict:
+    &quot;&quot;&quot;Per-instrument record: country of INCORPORATION (the WHT key), live bid/offer, NMS.
+
+    Tried with and without the trailing dot because the exchange&#x27;s TIDM for a two-letter
+    issuer carries one (&#x27;TW.&#x27;) and the price explorer sometimes hands back the stripped form.
+    &quot;&quot;&quot;
+    for t in (tidm, tidm.rstrip(&quot;.&quot;), tidm + &quot;.&quot;):
+        try:
+            req = urllib.request.Request(LSE_INSTRUMENT + t,
+                                         headers={k: v for k, v in UA.items()
+                                                  if k != &quot;Content-Type&quot;})
+            d = json.load(urllib.request.urlopen(req, timeout=25))
+            if isinstance(d, dict) and d.get(&quot;tidm&quot;):
+                return d
+        except Exception:
+            continue
+    return {}
+
+
+# ----------------------------------------------------------------- (i) takeover overlay
+def fetch_offer_periods(refresh: bool = True) -&gt; dict:
+    &quot;&quot;&quot;The Takeover Panel Disclosure Table — every UK company currently in an offer period.
+
+    Primary, published daily, and it carries the ISIN, so the join to the universe is EXACT
+    rather than a fuzzy name match. Also carries the named offeror, which is what separates a
+    trade-buyer bid from a private-equity bid.
+    &quot;&quot;&quot;
+    if not refresh and os.path.exists(OFFERS):
+        return json.load(open(OFFERS))
+    try:
+        req = urllib.request.Request(TAKEOVER_PANEL,
+                                     headers={k: v for k, v in UA.items()
+                                              if k not in (&quot;Content-Type&quot;, &quot;Origin&quot;)})
+        html = urllib.request.urlopen(req, timeout=40).read().decode(&quot;utf-8&quot;, &quot;replace&quot;)
+    except Exception as e:
+        print(f&quot;  takeover-panel fetch failed: {e} (overlay disabled this run)&quot;)
+        return {&quot;meta&quot;: {&quot;error&quot;: str(e)}, &quot;by_isin&quot;: {}}
+    out = {}
+    for tr in re.findall(r&quot;&lt;tr[^&gt;]*&gt;(.*?)&lt;/tr&gt;&quot;, html, re.S):
+        cells = [re.sub(r&quot;\s+&quot;, &quot; &quot;, re.sub(r&quot;&lt;[^&gt;]+&gt;&quot;, &quot;&quot;, c)).strip()
+                 for c in re.findall(r&quot;&lt;t[dh][^&gt;]*&gt;(.*?)&lt;/t[dh]&gt;&quot;, tr, re.S)]
+        blob = &quot; | &quot;.join(cells)
+        m = re.search(r&quot;ISIN:\s*([A-Z]{2}[A-Z0-9]{9}\d)&quot;, blob)
+        if not m:
+            continue
+        off = re.search(r&quot;OFFEROR:\s*([^|]+)&quot;, blob)
+        offeror = (off.group(1).strip() if off else
+                   (&quot;no named offeror&quot; if re.search(r&quot;No named offeror&quot;, blob, re.I) else None))
+        out[m.group(1)] = {&quot;offeror&quot;: offeror,
+                           &quot;pe_bidder&quot;: bool(offeror and re.search(
+                               r&quot;(LLP|\bLP\b|Partners|Capital|Equity|Investors|BidCo|Bidco&quot;
+                               r&quot;|newly formed company)&quot;, offeror))}
+    payload = {&quot;meta&quot;: {&quot;generated_utc&quot;: time.strftime(&quot;%Y-%m-%dT%H:%M:%SZ&quot;, time.gmtime()),
+                        &quot;source&quot;: TAKEOVER_PANEL, &quot;n&quot;: len(out)}, &quot;by_isin&quot;: out}
+    os.makedirs(DATA, exist_ok=True)
+    json.dump(payload, open(OFFERS, &quot;w&quot;), ensure_ascii=False, indent=1)
+    print(f&quot;takeover panel: {len(out)} live offer periods&quot;)
+    return payload
+
+
+# ----------------------------------------------------------------- FX
+def live_fx() -&gt; tuple[dict, str]:
+    fx, basis = dict(FX_FALLBACK), &quot;static fallback&quot;
+    try:
+        import yfinance as yf
+        got = 0
+        for ccy, pair in FX_PAIRS.items():
+            try:
+                p = yf.Ticker(pair).fast_info[&quot;last_price&quot;]
+                if p and p &gt; 0:
+                    fx[ccy], got = float(p), got + 1
+            except Exception:
+                pass
+        if got:
+            basis = f&quot;live yfinance FX ({got}/{len(FX_PAIRS)} pairs)&quot;
+    except ImportError:
+        pass
+    return fx, basis
+
+
+def _to_fin_ccy(amount, quote_ccy, fin_ccy, fx):
+    &quot;&quot;&quot;(m) the ONE place a currency plane is crossed. GBX/GBp are pence — divided by 100 here
+    and nowhere else.&quot;&quot;&quot;
+    if amount is None or not quote_ccy or not fin_ccy:
+        return None
+    if quote_ccy.upper() in (&quot;GBP&quot;, &quot;GBX&quot;) and quote_ccy != &quot;GBP&quot;:
+        amount, quote_ccy = amount / 100.0, &quot;GBP&quot;
+    elif quote_ccy in (&quot;GBp&quot;,):
+        amount, quote_ccy = amount / 100.0, &quot;GBP&quot;
+    if quote_ccy in (&quot;ZAc&quot;, &quot;ILA&quot;, &quot;EUX&quot;, &quot;USX&quot;):
+        amount = amount / 100.0
+        quote_ccy = {&quot;ZAc&quot;: &quot;ZAR&quot;, &quot;ILA&quot;: &quot;ILS&quot;, &quot;EUX&quot;: &quot;EUR&quot;, &quot;USX&quot;: &quot;USD&quot;}[quote_ccy]
+    fq, ff = fx.get(quote_ccy), fx.get(fin_ccy)
+    if not fq or not ff:
+        return None
+    return amount * fq / ff
+
+
+# ----------------------------------------------------------------- price history
+def fetch_history(syms: list[str], chunk: int = 60) -&gt; dict:
+    &quot;&quot;&quot;Daily bars -&gt; (e) MEDIAN turnover and (f) the path fields.
+
+    Yahoo&#x27;s averageDailyVolume3Month is a MEAN and a single block print on an AIM line lifts
+    it enough to carry a name over an ADV floor it does not clear on a normal day. The median
+    of the last ADV_SESSIONS daily turnovers is the honest number; the mean is kept beside it
+    so the block-inflation ratio is visible.
+    &quot;&quot;&quot;
+    import numpy as np, yfinance as yf
+    out = {}
+    for i in range(0, len(syms), chunk):
+        part = syms[i:i + chunk]
+        try:
+            d = yf.download(part, period=&quot;1y&quot;, interval=&quot;1d&quot;, group_by=&quot;ticker&quot;,
+                            auto_adjust=False, progress=False, threads=True)
+        except Exception as e:
+            print(f&quot;  history chunk {i} failed: {e}&quot;)
+            continue
+        for s in part:
+            try:
+                df = d[s].dropna(subset=[&quot;Close&quot;]) if len(part) &gt; 1 else d.dropna(subset=[&quot;Close&quot;])
+            except Exception:
+                continue
+            if df is None or df.empty or len(df) &lt; 20:
+                continue
+            tv = (df[&quot;Close&quot;] * df[&quot;Volume&quot;]).dropna()
+            if tv.empty:
+                continue
+            win = tv[-ADV_SESSIONS:]
+            last, lo = float(df[&quot;Close&quot;].iloc[-1]), float(df[&quot;Close&quot;].min())
+            loi = df[&quot;Close&quot;].idxmin()
+            out[s] = {
+                &quot;adv_med_q&quot;: float(np.median(win)),          # quote-plane (pence x shares)
+                &quot;adv_mean_q&quot;: float(win.mean()),
+                &quot;sessions&quot;: int(len(df)),
+                &quot;last_px_q&quot;: last,
+                &quot;low_1y_q&quot;: lo,
+                &quot;high_1y_q&quot;: float(df[&quot;Close&quot;].max()),
+                &quot;pct_off_52w_low&quot;: round(last / lo - 1, 4) if lo &gt; 0 else None,
+                &quot;days_since_low&quot;: int((df.index[-1] - loi).days),
+                &quot;px_asof&quot;: str(df.index[-1].date()),
+            }
+        time.sleep(0.3)
+    return out
+
+
+# ----------------------------------------------------------------- fundamentals
+def _row(df, *labels):
+    if df is None or getattr(df, &quot;empty&quot;, True):
+        return None
+    for lb in labels:
+        if lb in df.index:
+            try:
+                v = df.loc[lb].iloc[0]
+            except Exception:
+                continue
+            if v is not None and v == v:
+                return float(v)
+    return None
+
+
+def _colstamp(df):
+    try:
+        return str(df.columns[0].date())
+    except Exception:
+        return None
+
+
+def _hist(df, *labels, n=5):
+    if df is None or getattr(df, &quot;empty&quot;, True):
+        return []
+    for lb in labels:
+        if lb in df.index:
+            return [float(v) if (v is not None and v == v) else None
+                    for v in list(df.loc[lb].values)[:n]]
+    return []
+
+
+def _map_facts(bs, inc, cf, info, inc_annual=None, cf_annual=None) -&gt; dict:
+    &quot;&quot;&quot;yfinance frames -&gt; the us-gaap key convention score.py consumes.&quot;&quot;&quot;
+    g = {}
+    g[&quot;Assets&quot;] = _row(bs, &quot;Total Assets&quot;)
+    g[&quot;AssetsCurrent&quot;] = _row(bs, &quot;Current Assets&quot;)
+    g[&quot;LiabilitiesCurrent&quot;] = _row(bs, &quot;Current Liabilities&quot;)
+    g[&quot;Liabilities&quot;] = _row(bs, &quot;Total Liabilities Net Minority Interest&quot;)
+    g[&quot;StockholdersEquity&quot;] = _row(bs, &quot;Stockholders Equity&quot;, &quot;Common Stock Equity&quot;)
+    g[&quot;MinorityInterest&quot;] = _row(bs, &quot;Minority Interest&quot;) or 0.0
+    g[&quot;CashAndCashEquivalentsAtCarryingValue&quot;] = _row(
+        bs, &quot;Cash And Cash Equivalents&quot;, &quot;Cash Cash Equivalents And Short Term Investments&quot;)
+    # ---- (o) CASH QUALITY — the CAPD sign inversion --------------------------------
+    # `Other Short Term Investments` is NOT reliably a cash equivalent on this universe. On
+    # Capital Ltd it is a USD 99.8M portfolio of LISTED JUNIOR MINER EQUITIES carried at fair
+    # value through P&amp;L. Netting it against debt turned the company&#x27;s own stated NET DEBT of
+    # USD 31.8M into a printed &quot;+11% of the cap in net cash&quot; — the sign of the single most
+    # load-bearing metric on the shelf, inverted. The raw tag is kept for the as-is view and
+    # a STRICT cash figure (true cash only) is carried beside it.
+    g[&quot;ShortTermInvestments&quot;] = _row(bs, &quot;Other Short Term Investments&quot;)
+    g[&quot;_cash_strict&quot;] = _row(bs, &quot;Cash And Cash Equivalents&quot;)
+    g[&quot;LongTermInvestments&quot;] = _row(bs, &quot;Investments And Advances&quot;, &quot;Long Term Equity Investment&quot;)
+    # the vendor publishes its OWN net-debt line. It is free, independent of our arithmetic,
+    # and disagreeing with it in SIGN means one of the two is wrong — always worth knowing.
+    g[&quot;_net_debt_tag&quot;] = _row(bs, &quot;Net Debt&quot;)
+    g[&quot;DebtLongtermAndShorttermCombinedAmount&quot;] = _row(bs, &quot;Total Debt&quot;)
+    g[&quot;LongTermDebtNoncurrent&quot;] = _row(bs, &quot;Long Term Debt And Capital Lease Obligation&quot;,
+                                       &quot;Long Term Debt&quot;)
+    g[&quot;DebtCurrent&quot;] = _row(bs, &quot;Current Debt And Capital Lease Obligation&quot;, &quot;Current Debt&quot;)
+    g[&quot;_SharesIssued&quot;] = _row(bs, &quot;Ordinary Shares Number&quot;, &quot;Share Issued&quot;)
+    g[&quot;_lease_debt&quot;] = _row(bs, &quot;Capital Lease Obligations&quot;) or 0.0
+
+    # ---- (a) PENSION / IAS-19 -------------------------------------------------------
+    # Debt-like, pervasive on UK industrials of this vintage, and invisible to a net-cash
+    # view built off Yahoo. SFPI.PA (court 2026-08-03) is the precedent: EUR50.6M unfunded,
+    # a Key Audit Matter for both auditors, which turned &quot;39% of the cap in net cash&quot; into
+    # 12-18% and EV/EBIT 4.5x into 6.0-6.5x.
+    _pens = _row(bs, &quot;Pension And Other Post Retirement Benefit Plans&quot;,
+                     &quot;Non Current Pension And Other Postretirement Benefit Plans&quot;,
+                     &quot;Pensionand Other Post Retirement Benefit Plans Non Current&quot;)
+    _pens_cur = _row(bs, &quot;Pensionand Other Post Retirement Benefit Plans Current&quot;,
+                         &quot;Pension And Other Post Retirement Benefit Plans Current&quot;) or 0.0
+    _prov_lt = _row(bs, &quot;Long Term Provisions&quot;) or 0.0
+    obligation = (_pens or 0.0) + _pens_cur
+    if not obligation and _prov_lt:
+        obligation = _prov_lt
+    g[&quot;_pension_obligation&quot;] = obligation or 0.0
+    g[&quot;_pension_source&quot;] = (&quot;pension_tag&quot; if (_pens or _pens_cur) else
+                            &quot;long_term_provisions_proxy&quot; if _prov_lt else &quot;NONE_FOUND&quot;)
+    g[&quot;_pension_is_proxy&quot;] = bool(not (_pens or _pens_cur) and _prov_lt)
+    # a UK scheme in SURPLUS books an ASSET that inflates equity and flatters P/B while being
+    # unavailable to shareholders absent a buyout / surplus refund. Never netted into cash.
+    g[&quot;_pension_asset&quot;] = _row(bs, &quot;Pension And Other Post Retirement Benefit Plans Asset&quot;,
+                               &quot;Prepaid Pension Costs&quot;) or 0.0
+    # TAX-EFFECT BEFORE ADDING TO EV. The Euronext leg adds the obligation GROSS, which
+    # over-captures: a deficit is deductible as it is funded, so the claim on the equity is
+    # the after-tax amount. SFPI&#x27;s court did this explicitly — EUR 51M gross became EUR 38.3M
+    # net of the 25% French rate, and the honest EV/EBIT was 6.06x rather than the 4.58x the
+    # gross-cash screen printed. The UK main rate is also 25%.
+    g[&quot;_pension_gross&quot;] = g[&quot;_pension_obligation&quot;]
+    g[&quot;_pension_net&quot;] = round(g[&quot;_pension_obligation&quot;] * (1 - UK_TAX_RATE), 2)
+    if g[&quot;_pension_net&quot;]:
+        base = g.get(&quot;DebtLongtermAndShorttermCombinedAmount&quot;) or 0.0
+        g[&quot;_debt_ex_pension&quot;] = base
+        g[&quot;DebtLongtermAndShorttermCombinedAmount&quot;] = base + g[&quot;_pension_net&quot;]
+
+    g[&quot;Revenues&quot;] = _row(inc, &quot;Total Revenue&quot;, &quot;Operating Revenue&quot;)
+    g[&quot;OperatingIncomeLoss&quot;] = _row(inc, &quot;Operating Income&quot;)
+    g[&quot;_ebit_reported&quot;] = _row(inc, &quot;Total Operating Income As Reported&quot;)
+    g[&quot;_unusual&quot;] = _row(inc, &quot;Total Unusual Items&quot;, &quot;Special Income Charges&quot;)
+    g[&quot;_ebit_derived&quot;] = False
+    if g[&quot;OperatingIncomeLoss&quot;] is None:
+        pre, ie, ii = (_row(inc, &quot;Pretax Income&quot;), _row(inc, &quot;Interest Expense&quot;),
+                       _row(inc, &quot;Interest Income&quot;))
+        if pre is not None and (ie is not None or ii is not None):
+            g[&quot;OperatingIncomeLoss&quot;] = pre + (ie or 0.0) - (ii or 0.0)
+            g[&quot;_ebit_derived&quot;] = True
+        else:
+            g[&quot;OperatingIncomeLoss&quot;] = _row(inc, &quot;EBIT&quot;)
+            g[&quot;_ebit_derived&quot;] = g[&quot;OperatingIncomeLoss&quot;] is not None
+    # Yahoo&#x27;s Operating Income is NORMALIZED (unusual items already excluded), so feeding a
+    # non-zero OneTimeGain would double-count the add-back. This is exactly WHY the durability
+    # guard (c) exists: normalization strips unusual items but NOT one-time REVENUE.
+    g[&quot;OneTimeGain_ttm&quot;] = 0.0
+
+    # ---- (b) FCF = CFO - TOTAL CAPEX ------------------------------------------------
+    # Verified on this universe 2026-08-04: yfinance&#x27;s `Capital Expenditure` on UK filers
+    # ALREADY equals PPE + intangibles (TW.L 6.7 = 4.2 + 2.5; SGE.L 59 = 41 + 18; ITV.L
+    # 54 = 26 + 28). Adding the intangibles line again would DOUBLE-COUNT. The split is
+    # carried through so capitalised development cost is visible.
+    g[&quot;NetCashProvidedByUsedInOperatingActivities&quot;] = _row(cf, &quot;Operating Cash Flow&quot;)
+    capx = _row(cf, &quot;Capital Expenditure&quot;, &quot;Capital Expenditure Reported&quot;)
+    ppe = _row(cf, &quot;Purchase Of PPE&quot;)
+    intang = _row(cf, &quot;Purchase Of Intangibles&quot;)
+    total = abs(capx) if capx is not None else None
+    if total is None and (ppe is not None or intang is not None):
+        total = abs(ppe or 0.0) + abs(intang or 0.0)
+    elif total is not None and (ppe is not None or intang is not None):
+        # floor at the sum of the components — if the umbrella tag were ever PPE-only the
+        # components win. Bias is conservative (bigger capex -&gt; lower FCF).
+        total = max(total, abs(ppe or 0.0) + abs(intang or 0.0))
+    g[&quot;PaymentsToAcquirePropertyPlantAndEquipment&quot;] = total
+    g[&quot;_capex_ppe&quot;], g[&quot;_capex_intangibles&quot;] = (abs(ppe) if ppe is not None else None,
+                                                abs(intang) if intang is not None else None)
+
+    # ---- (c)/(d) history for the durability + trend guards ---------------------------
+    g[&quot;_rev_hist&quot;] = _hist(inc_annual, &quot;Total Revenue&quot;, &quot;Operating Revenue&quot;)
+    g[&quot;_ebit_hist&quot;] = _hist(inc_annual, &quot;Operating Income&quot;)
+    g[&quot;_cfo_hist&quot;] = _hist(cf_annual, &quot;Operating Cash Flow&quot;)
+    g[&quot;_consol_verified&quot;] = (&quot;Minority Interest&quot; in getattr(bs, &quot;index&quot;, [])
+                             or &quot;Total Equity Gross Minority Interest&quot; in getattr(bs, &quot;index&quot;, []))
+    i = info or {}
+    g[&quot;_float&quot;] = i.get(&quot;floatShares&quot;)
+    g[&quot;_shares_yahoo&quot;] = i.get(&quot;sharesOutstanding&quot;)
+    g[&quot;_mcap_yahoo&quot;] = i.get(&quot;marketCap&quot;)
+    g[&quot;_n_analysts&quot;] = i.get(&quot;numberOfAnalystOpinions&quot;)
+    g[&quot;_industry&quot;] = i.get(&quot;industry&quot;)
+    g[&quot;_sector_info&quot;] = i.get(&quot;sector&quot;)
+    g[&quot;_fin_ccy_info&quot;] = i.get(&quot;financialCurrency&quot;)
+    g[&quot;_bs_date&quot;], g[&quot;_flow_date&quot;] = _colstamp(bs), _colstamp(inc)
+    return g
+
+
+def _pull_one(sym):
+    import yfinance as yf
+    t = yf.Ticker(sym)
+    bs = None
+    try:
+        qbs, abs_ = t.quarterly_balance_sheet, t.balance_sheet
+        ok_q = qbs is not None and not qbs.empty and all(k in qbs.index for k in BS_KEYS)
+        bs = qbs if (ok_q and (abs_ is None or abs_.empty or qbs.columns[0] &gt; abs_.columns[0])) else abs_
+    except Exception:
+        pass
+    inc, cf, info, ttm_i = None, None, None, False
+    try:
+        inc_annual = t.income_stmt
+    except Exception:
+        inc_annual = None
+    try:
+        cf_annual = t.cashflow
+    except Exception:
+        cf_annual = None
+    try:
+        inc = t.ttm_income_stmt
+        ttm_i = inc is not None and not inc.empty
+    except Exception:
+        pass
+    if not ttm_i:
+        inc = inc_annual
+    try:
+        cf = t.ttm_cashflow
+        if cf is None or cf.empty:
+            cf = cf_annual
+    except Exception:
+        cf = cf_annual
+    try:
+        info = t.info
+    except Exception:
+        info = {}
+    f = _map_facts(bs, inc, cf, info, inc_annual=inc_annual, cf_annual=cf_annual)
+    f[&quot;_ttm&quot;] = bool(ttm_i)
+    f[&quot;_fetched&quot;] = time.time()
+    return f
+
+
+def yahoo_throttled() -&gt; bool:
+    &quot;&quot;&quot;Probe the crumb endpoint — the thing that actually rate-limits. yfinance answers a
+    throttle with EMPTY frames and no exception, and reading that as &quot;no balance sheet&quot; is
+    how a throttle silently deletes a whole venue from a shelf.&quot;&quot;&quot;
+    try:
+        import yfinance.data as D
+        return not bool(D.YfData()._get_cookie_and_crumb()[1])
+    except Exception:
+        return False
+
+
+def _safe(sym, tries=2, pace=0.25):
+    import random
+    last = None
+    for k in range(tries):
+        try:
+            f = _pull_one(sym)
+            if f.get(&quot;Assets&quot;):
+                time.sleep(pace)
+                return f
+            last = f
+        except Exception as e:
+            last = {&quot;_error&quot;: f&quot;{type(e).__name__}: {e}&quot;}
+        time.sleep(pace + (2 ** k) + random.random())
+    out = last or {}
+    out[&quot;_fetched&quot;] = time.time()
+    return out
+
+
+def fetch_fundamentals(syms, refresh=False, workers=2, pace=0.25, batch_pause=5.0) -&gt; dict:
+    &quot;&quot;&quot;(n) threaded pull, cached hard, with the silent-throttle circuit breaker.&quot;&quot;&quot;
+    cache = json.load(open(FUND_CACHE)) if os.path.exists(FUND_CACHE) else {}
+    todo = [s for s in syms if refresh or s not in cache
+            or (not cache[s].get(&quot;Assets&quot;) and cache[s].get(&quot;_fails&quot;, 0) &lt; MAX_FAILS)]
+    if not todo:
+        return cache
+    retries = sum(1 for s in todo if s in cache)
+    print(f&quot;pulling fundamentals for {len(todo)} names &quot;
+          f&quot;({len(syms)-len(todo)} cached, {retries} retrying), {workers} workers&quot;)
+    if yahoo_throttled():
+        print(&quot;  !! Yahoo crumb endpoint is rate-limited RIGHT NOW — skipping the pull rather &quot;
+              &quot;than burning the names as failures. Re-run in ~15-30 min; cache resumes.&quot;)
+        return cache
+    done, streak, tripped = 0, 0, False
+    for i in range(0, len(todo), 50):
+        chunk = todo[i:i + 50]
+        with ThreadPoolExecutor(max_workers=workers) as ex:
+            for sym, f in zip(chunk, ex.map(lambda s: _safe(s, pace=pace), chunk)):
+                if not f.get(&quot;Assets&quot;):
+                    streak += 1
+                    old = cache.get(sym)
+                    # NEVER let a throttled empty overwrite a good cached row — a refresh
+                    # would otherwise destroy exactly the data it was run to improve
+                    if old and old.get(&quot;Assets&quot;):
+                        old[&quot;_fails&quot;] = old.get(&quot;_fails&quot;, 0) + 1
+                        old[&quot;_stale_refresh&quot;] = True
+                    else:
+                        f[&quot;_fails&quot;] = (old or {}).get(&quot;_fails&quot;, 0) + 1
+                        cache[sym] = f
+                else:
+                    streak = 0
+                    cache[sym] = f
+                done += 1
+        ok = sum(1 for s in todo[:done] if cache.get(s, {}).get(&quot;Assets&quot;))
+        print(f&quot;  ...{done}/{len(todo)}  ({ok} with a balance sheet)&quot;)
+        json.dump(cache, open(FUND_CACHE, &quot;w&quot;))
+        if streak &gt;= BREAKER_N:
+            tripped = True
+            break
+        if done &lt; len(todo):
+            time.sleep(batch_pause)
+    json.dump(cache, open(FUND_CACHE, &quot;w&quot;))
+    if tripped:
+        print(f&quot;  !! CIRCUIT BREAKER: {streak} consecutive empty pulls = Yahoo is throttling. &quot;
+              f&quot;{len(todo)-done} names unpulled. Shelf is PARTIAL — see meta.pull_complete.&quot;)
+    return cache
+
+
+def _norm_name(n):
+    s = re.sub(r&quot;[^A-Z0-9 ]&quot;, &quot; &quot;, (n or &quot;&quot;).upper())
+    return re.sub(r&quot;\s+&quot;, &quot; &quot;, LEGAL_SFX.sub(&quot; &quot;, s)).strip()
+
+
+# ----------------------------------------------------------------- the screen
+def run(top=30, min_mcap_usd=5e7, max_mcap_usd=2e9, min_adv_usd=75e3, min_float=0.15,
+        refresh_fund=False, workers=2, limit=None, skip_instruments=False):
+    uni = load_universe()
+    rows = uni[&quot;rows&quot;]
+    fx, fx_basis = live_fx()
+    print(f&quot;universe: {len(rows)} lines (generated {uni[&#x27;meta&#x27;][&#x27;generated_utc&#x27;]}) | FX: {fx_basis}&quot;)
+    offers = fetch_offer_periods()
+    by_isin = offers.get(&quot;by_isin&quot;) or {}
+
+    drop = Counter()
+    # ---- (l) non-ordinary share lines -------------------------------------------------
+    cand = []
+    for r in rows:
+        desc = f&quot;{r.get(&#x27;description&#x27;) or &#x27;&#x27;} {r.get(&#x27;line&#x27;) or &#x27;&#x27;}&quot;
+        if NON_ORD.search(desc):
+            drop[&quot;non_ordinary_line&quot;] += 1
+            continue
+        if FUNDISH.search(r.get(&quot;name&quot;) or &quot;&quot;):
+            drop[&quot;fund_vehicle_name&quot;] += 1
+            continue
+        cand.append(r)
+
+    # ---- (g) one issuer, many lines: dedup on the exchange&#x27;s own issuer code ----------
+    lines_by_issuer = defaultdict(list)
+    for r in cand:
+        lines_by_issuer[r.get(&quot;issuercode&quot;) or _norm_name(r.get(&quot;name&quot;))].append(r)
+    deduped = []
+    for key, lines in lines_by_issuer.items():
+        keep = max(lines, key=lambda r: (r.get(&quot;mcap_local&quot;) or 0))
+        keep[&quot;_n_lines&quot;] = len(lines)
+        keep[&quot;_other_lines&quot;] = [x[&quot;tidm&quot;] for x in lines if x[&quot;tidm&quot;] != keep[&quot;tidm&quot;]] or None
+        deduped.append(keep)
+    drop[&quot;dup_issuer_line&quot;] = len(cand) - len(deduped)
+    cand = deduped
+
+    # ---- (j) financials / vehicles out of the Graham score ---------------------------
+    fin_rows = [r for r in cand if r[&quot;sector_code&quot;] in FIN_SECTORS]
+    cand = [r for r in cand if r[&quot;sector_code&quot;] not in FIN_SECTORS]
+    drop[&quot;financials_vehicles&quot;] = len(fin_rows)
+    trusts = sum(1 for r in fin_rows if r[&quot;sector_code&quot;] in (&quot;302040&quot;, &quot;302050&quot;))
+
+    # ---- cheap pre-filters before spending a fundamentals call ------------------------
+    pre = []
+    for r in cand:
+        px, qccy = r.get(&quot;px&quot;), r.get(&quot;px_ccy&quot;)
+        mcap_local = r.get(&quot;mcap_local&quot;)
+        if not px or not qccy:
+            drop[&quot;no_price&quot;] += 1
+            continue
+        # the exchange reports market capitalisation in the MAJOR unit (GBP), not pence
+        mcap_usd = (mcap_local or 0) * fx.get(&quot;GBP&quot; if qccy.upper() in (&quot;GBX&quot;, &quot;GBP&quot;) else qccy,
+                                              fx[&quot;GBP&quot;])
+        if not mcap_usd or mcap_usd &lt;= 0:
+            drop[&quot;no_mcap&quot;] += 1
+            continue
+        r[&quot;_mcap_usd_pre&quot;] = mcap_usd
+        if not (min_mcap_usd &lt;= mcap_usd &lt;= max_mcap_usd):
+            drop[&quot;mcap_band&quot;] += 1
+            continue
+        pre.append(r)
+    print(&quot;pre-filter drops: &quot; + &quot;, &quot;.join(f&quot;{k}={v}&quot; for k, v in drop.most_common()))
+    print(f&quot;in the mcap band: {len(pre)}&quot;)
+
+    # ---- (e)+(f) median ADV and the path fields, from daily bars ----------------------
+    print(f&quot;pulling 1y daily bars for {len(pre)} names (median ADV + path)...&quot;)
+    hist = fetch_history([r[&quot;sym&quot;] for r in pre])
+    print(f&quot;  bars for {len(hist)}/{len(pre)}&quot;)
+    liq = []
+    for r in pre:
+        h = hist.get(r[&quot;sym&quot;])
+        if not h:
+            drop[&quot;no_history&quot;] += 1
+            continue
+        gbp = fx[&quot;GBP&quot;] if (r[&quot;px_ccy&quot;] or &quot;&quot;).upper() in (&quot;GBX&quot;, &quot;GBP&quot;) else fx.get(r[&quot;px_ccy&quot;], 0)
+        scale = 0.01 if (r[&quot;px_ccy&quot;] or &quot;&quot;).upper() in (&quot;GBX&quot;,) else 1.0
+        r[&quot;_adv_usd&quot;] = h[&quot;adv_med_q&quot;] * scale * gbp
+        r[&quot;_adv_mean_usd&quot;] = h[&quot;adv_mean_q&quot;] * scale * gbp
+        r[&quot;_hist&quot;] = h
+        if r[&quot;_adv_usd&quot;] &lt; min_adv_usd:
+            drop[&quot;adv_floor_median&quot;] += 1
+            continue
+        liq.append(r)
+    print(f&quot;candidates for fundamentals: {len(liq)}&quot;)
+    if limit:
+        liq = sorted(liq, key=lambda r: -r[&quot;_adv_usd&quot;])[:limit]
+
+    funds = fetch_fundamentals([r[&quot;sym&quot;] for r in liq], refresh=refresh_fund, workers=workers)
+
+    now = time.time()
+    recs, post = [], Counter()
+    for r in liq:
+        f = funds.get(r[&quot;sym&quot;]) or {}
+        if f.get(&quot;_error&quot;) or not f.get(&quot;Assets&quot;):
+            post[&quot;no_fundamentals&quot;] += 1
+            continue
+        if f.get(&quot;OperatingIncomeLoss&quot;) is None and \
+           f.get(&quot;NetCashProvidedByUsedInOperatingActivities&quot;) is None:
+            post[&quot;no_income_anchor&quot;] += 1
+            continue
+        ind = f.get(&quot;_industry&quot;) or &quot;&quot;
+        if re.search(r&quot;(Bank|Insurance|Asset Management|Capital Markets|REIT|Credit Services&quot;
+                     r&quot;|Mortgage|Closed-End Fund|Shell Compan)&quot;, ind, re.I):
+            post[&quot;financial_industry&quot;] += 1
+            continue
+        invsum = sum((f.get(k) or 0) for k in (&quot;CashAndCashEquivalentsAtCarryingValue&quot;,
+                                               &quot;ShortTermInvestments&quot;, &quot;LongTermInvestments&quot;))
+        if f[&quot;Assets&quot;] and invsum / f[&quot;Assets&quot;] &gt; 0.85 and (f.get(&quot;Revenues&quot;) or 0) &lt; 0.05 * f[&quot;Assets&quot;]:
+            post[&quot;balance_shape_vehicle&quot;] += 1
+            continue
+
+        # ---- (m) the currency plane, crossed exactly once ----------------------------
+        fccy = f.get(&quot;_fin_ccy_info&quot;) or &quot;GBP&quot;
+        qccy = r.get(&quot;px_ccy&quot;) or &quot;GBX&quot;
+        if fccy not in fx:
+            post[&quot;unknown_currency&quot;] += 1
+            continue
+        px_f = _to_fin_ccy(r[&quot;px&quot;], qccy, fccy, fx)
+        shares_filing = f.get(&quot;_SharesIssued&quot;)
+        shares = shares_filing or f.get(&quot;_shares_yahoo&quot;)
+        if px_f and shares:
+            mcap, basis = px_f * shares, (&quot;px*shares(filing)&quot; if shares_filing
+                                          else &quot;px*shares(yahoo)&quot;)
+        else:
+            mcap = _to_fin_ccy((r.get(&quot;mcap_local&quot;) or 0) * 100.0, qccy, fccy, fx)
+            basis = &quot;lse mcap&quot;
+        if not mcap or mcap &lt;= 0:
+            post[&quot;no_mcap_post&quot;] += 1
+            continue
+        mcap_usd = mcap * fx[fccy]
+
+        urow = {&quot;sym&quot;: r[&quot;sym&quot;], &quot;mktcap&quot;: mcap, &quot;px&quot;: r[&quot;px&quot;], &quot;sec&quot;: r[&quot;sector&quot;],
+                &quot;ind&quot;: (r.get(&quot;name&quot;) or &quot;&quot;)[:44], &quot;country&quot;: &quot;GB&quot;}
+        m = S.compute_metrics(urow, f)
+        m[&quot;foreign&quot;], m[&quot;adr&quot;] = True, False
+        m[&quot;tidm&quot;], m[&quot;isin&quot;], m[&quot;name&quot;] = r[&quot;tidm&quot;], r.get(&quot;isin&quot;), r.get(&quot;name&quot;)
+        m[&quot;market&quot;], m[&quot;sector_code&quot;] = r[&quot;market&quot;], r[&quot;sector_code&quot;]
+        m[&quot;mcap_usd&quot;], m[&quot;mcap_basis&quot;] = mcap_usd, basis
+        m[&quot;ccy&quot;], m[&quot;px_ccy&quot;] = fccy, qccy
+        m[&quot;ccy_mismatch&quot;] = fccy != &quot;GBP&quot;
+        m[&quot;industry&quot;] = ind
+
+        # ---- (k) trust / client-cash -------------------------------------------------
+        m[&quot;trust_cash_suspect&quot;] = bool(TRUST_INDUSTRY.search(ind)
+                                       or TRUST_NAME.search(r.get(&quot;name&quot;) or &quot;&quot;)
+                                       or r[&quot;sector_code&quot;] in TRUST_SECTORS)
+        # the UNCORRECTED figures are captured FIRST, before either the cash-quality or the
+        # trust-cash guard rewrites them, so the JSON always shows what the naive computation
+        # said next to what governs
+        m[&quot;am_asis&quot;], m[&quot;ncash_r_asis&quot;] = m[&quot;am&quot;], m[&quot;ncash_r&quot;]
+
+        # ---- (o) CASH QUALITY + SIGN RECONCILIATION ---------------------------------
+        # Applied BEFORE the trust-cash guard so both corrections compose. Two independent
+        # checks, either of which demotes the name to the STRICT (true-cash-only) view:
+        #   1. marketable securities are a material part of what the screen called &quot;cash&quot;;
+        #   2. our net cash disagrees in SIGN with the vendor&#x27;s own Net Debt line.
+        sti = f.get(&quot;ShortTermInvestments&quot;) or 0.0
+        cash_strict = f.get(&quot;_cash_strict&quot;)
+        if cash_strict is None:
+            cash_strict = max((m[&quot;cash&quot;] or 0.0) - sti, 0.0)
+        m[&quot;cash_strict&quot;] = cash_strict
+        m[&quot;st_investments&quot;] = sti or None
+        m[&quot;st_inv_share_of_cash&quot;] = (round(sti / m[&quot;cash&quot;], 3)
+                                     if (sti and m[&quot;cash&quot;] and m[&quot;cash&quot;] &gt; 0) else None)
+        m[&quot;netcash_strict&quot;] = cash_strict - m[&quot;debt&quot;]
+        m[&quot;ncash_r_strict&quot;] = round(m[&quot;netcash_strict&quot;] / mcap, 3) if mcap else None
+        m[&quot;securities_as_cash&quot;] = bool(m[&quot;st_inv_share_of_cash&quot;]
+                                       and m[&quot;st_inv_share_of_cash&quot;] &gt; 0.25)
+        nd = f.get(&quot;_net_debt_tag&quot;)
+        m[&quot;net_debt_vendor&quot;] = nd
+        # the vendor&#x27;s Net Debt is POSITIVE when the company owes money; ours is positive when
+        # it holds money. They should have opposite signs. Agreement of sign = a contradiction.
+        m[&quot;netcash_sign_conflict&quot;] = bool(nd is not None and m[&quot;netcash&quot;] is not None
+                                          and nd &gt; 0 and m[&quot;netcash&quot;] &gt; 0)
+        m[&quot;cash_quality_note&quot;] = None
+        if m[&quot;netcash_sign_conflict&quot;] or m[&quot;securities_as_cash&quot;]:
+            m[&quot;cash_quality_note&quot;] = (
+                f&quot;screen cash {m[&#x27;cash&#x27;]/1e6:.1f}M includes {sti/1e6:.1f}M of short-term &quot;
+                f&quot;INVESTMENTS (marketable securities, not cash equivalents); true cash &quot;
+                f&quot;{cash_strict/1e6:.1f}M. &quot;
+                + (f&quot;The filer&#x27;s own Net Debt line reads {nd/1e6:.1f}M — i.e. NET DEBT, &quot;
+                   f&quot;against a screen that computed net CASH. The screen figure is REFUTED &quot;
+                   f&quot;by the same balance sheet it came from; the strict view governs.&quot;
+                   if m[&quot;netcash_sign_conflict&quot;] else
+                   &quot;Score falls back to the strict view.&quot;))
+            # the strict figure GOVERNS: conservative, and it is the one the filer would
+            # recognise. `ncash_r_asis` preserves what the naive computation said.
+            m[&quot;ncash_r&quot;] = m[&quot;ncash_r_strict&quot;]
+            m[&quot;netcash&quot;] = m[&quot;netcash_strict&quot;]
+            m[&quot;ev&quot;] = mcap + m[&quot;debt&quot;] + m[&quot;mi&quot;] - cash_strict
+            m[&quot;am&quot;] = (m[&quot;ev&quot;] / m[&quot;ebit&quot;]) if (m[&quot;ebit&quot;] and m[&quot;ebit&quot;] &gt; 0 and m[&quot;ev&quot;] &gt; 0) else None
+            m[&quot;subcash&quot;] = m[&quot;ev&quot;] &lt; 0
+        # a large securities book also distorts the P&amp;L: Capital Ltd booked a USD 66.0M
+        # realised+unrealised fair-value gain on its junior-miner stakes in FY2025, which is a
+        # mark-to-market and not services earnings — invisible to the unusual-items path
+        # because it is not tagged unusual.
+        m[&quot;securities_book_material&quot;] = bool(sti and mcap and sti &gt; 0.20 * mcap)
+
+        m[&quot;am_trustsafe&quot;] = None
+        if m[&quot;trust_cash_suspect&quot;]:
+            ev_ts = mcap + m[&quot;debt&quot;] + m[&quot;mi&quot;]
+            m[&quot;ev_trustsafe&quot;] = ev_ts
+            m[&quot;am_trustsafe&quot;] = (ev_ts / m[&quot;ebit&quot;]) if (m[&quot;ebit&quot;] and m[&quot;ebit&quot;] &gt; 0 and ev_ts &gt; 0) else None
+            m[&quot;am&quot;], m[&quot;subcash&quot;] = m[&quot;am_trustsafe&quot;], False
+            m[&quot;ncash_r&quot;] = min(0.0, m[&quot;ncash_r&quot;]) if m[&quot;ncash_r&quot;] is not None else None
+
+        # ---- (a) pension columns -----------------------------------------------------
+        po = f.get(&quot;_pension_gross&quot;) or 0.0
+        m[&quot;pension_gross&quot;] = po or None
+        m[&quot;pension_net_of_tax&quot;] = f.get(&quot;_pension_net&quot;) or None
+        m[&quot;pension_tax_rate&quot;] = UK_TAX_RATE
+        m[&quot;pension_source&quot;] = f.get(&quot;_pension_source&quot;)
+        m[&quot;pension_is_proxy&quot;] = bool(f.get(&quot;_pension_is_proxy&quot;))
+        m[&quot;debt_ex_pension&quot;] = f.get(&quot;_debt_ex_pension&quot;)
+        m[&quot;pension_deficit_r&quot;] = round(po / mcap, 3) if (po and mcap) else None
+        m[&quot;pension_material&quot;] = bool(m[&quot;pension_deficit_r&quot;] and m[&quot;pension_deficit_r&quot;] &gt; 0.25)
+        m[&quot;pension_surplus&quot;] = f.get(&quot;_pension_asset&quot;) or None
+        m[&quot;pension_surplus_in_equity&quot;] = bool(
+            m[&quot;pension_surplus&quot;] and m[&quot;eq&quot;] and m[&quot;pension_surplus&quot;] &gt; 0.10 * m[&quot;eq&quot;])
+        m[&quot;pension_unverified&quot;] = bool(f.get(&quot;_pension_source&quot;) == &quot;NONE_FOUND&quot;
+                                       and r[&quot;sector_code&quot;] in DB_PENSION_SECTORS)
+        # WHAT THE PROVISION ACTUALLY IS depends on the sector, and on this universe the
+        # single largest proxy hit is NOT a pension at all: for UK housebuilders and
+        # contractors, Long Term Provisions is dominated by BUILDING SAFETY ACT cladding
+        # remediation. Vistry&#x27;s GBP 269.8M — 30% of its market cap — is that, not a scheme
+        # deficit. The debt-like TREATMENT is still right (it is a statutory, non-negotiable
+        # cash obligation running on a 30-year lookback, arguably harder than a pension
+        # deficit, which can at least be renegotiated with trustees), but calling it a pension
+        # would send the reader to the wrong note.
+        m[&quot;provision_kind_hint&quot;] = (
+            &quot;Building Safety Act cladding remediation is the usual content for a UK &quot;
+            &quot;housebuilder/contractor — read the provisions note, not the IAS-19 note&quot;
+            if (m[&quot;pension_is_proxy&quot;] and r[&quot;sector_code&quot;] in (&quot;501010&quot;, &quot;402020&quot;)) else
+            &quot;IAS-19 retirement + long-service&quot; if not m[&quot;pension_is_proxy&quot;] and po else None)
+        m[&quot;pension_note&quot;] = (
+            &quot;PROVISIONS PROXY, not a verified pension — the tag also carries warranty, &quot;
+            &quot;restructuring, dilapidations, litigation and (on UK builders) Building Safety Act &quot;
+            &quot;remediation, so it OVER-captures as a pension figure while still being debt-like. &quot;
+            &quot;Read the provisions note AND the auditors&#x27; Key Audit Matter, which is where &quot;
+            &quot;SFPI&#x27;s real number was. UK schemes also bury long-service awards here.&quot;
+            if m[&quot;pension_is_proxy&quot;] else
+            &quot;explicit pension tag&quot; if f.get(&quot;_pension_source&quot;) == &quot;pension_tag&quot; else
+            &quot;NO pension or provisions tag on a sector where DB schemes are the norm — treat net &quot;
+            &quot;cash as UNVERIFIED, not clean&quot; if m[&quot;pension_unverified&quot;] else
+            &quot;no pension tag found (sector where DB schemes are not the norm)&quot;)
+
+        # ---- (b) capex composition + IFRS-16 flattery --------------------------------
+        m[&quot;capex_ppe&quot;], m[&quot;capex_intangibles&quot;] = f.get(&quot;_capex_ppe&quot;), f.get(&quot;_capex_intangibles&quot;)
+        capex_t = f.get(&quot;PaymentsToAcquirePropertyPlantAndEquipment&quot;)
+        m[&quot;capex_total&quot;] = capex_t
+        m[&quot;capex_intang_heavy&quot;] = bool(m[&quot;capex_intangibles&quot;] and capex_t
+                                       and m[&quot;capex_intangibles&quot;] &gt; 0.40 * capex_t)
+        # capitalised development as a share of SALES — the Tecnotree tell (EUR 9.7M, 13.4%
+        # of sales, was the entire wedge between a EUR 14.8M screen FCF and the company&#x27;s own
+        # reported EUR 4.6M). Above ~8% of revenue, read the intangibles note before trusting
+        # the FCF yield at all.
+        m[&quot;capdev_r&quot;] = (round(m[&quot;capex_intangibles&quot;] / m[&quot;rev&quot;], 3)
+                         if (m[&quot;capex_intangibles&quot;] and m.get(&quot;rev&quot;)) else None)
+        m[&quot;capdev_heavy&quot;] = bool(m[&quot;capdev_r&quot;] and m[&quot;capdev_r&quot;] &gt; 0.08)
+        m[&quot;lease_debt&quot;] = f.get(&quot;_lease_debt&quot;)
+        m[&quot;lease_heavy&quot;] = bool(m[&quot;lease_debt&quot;] and m[&quot;debt&quot;]
+                                and m[&quot;lease_debt&quot;] &gt; 0.5 * m[&quot;debt&quot;]
+                                and m[&quot;lease_debt&quot;] &gt; 0.25 * mcap)
+
+        # ---- (c) durability, WITH the cash-generation condition -----------------------
+        rh, eh = (f.get(&quot;_rev_hist&quot;) or []), (f.get(&quot;_ebit_hist&quot;) or [])
+        ch = (f.get(&quot;_cfo_hist&quot;) or [])
+        rev_prior = rh[1] if len(rh) &gt; 1 else None
+        ebit_prior = eh[1] if len(eh) &gt; 1 else None
+        cfo_prior = ch[1] if len(ch) &gt; 1 else None
+        cur_rev, cur_ebit, cur_fcf = m.get(&quot;rev&quot;), m.get(&quot;ebit&quot;), m.get(&quot;fcf&quot;)
+        why, accrual_gap = [], False
+        if cur_rev and cur_rev &gt; 0 and rev_prior is not None:
+            if rev_prior &lt;= 0.02 * abs(cur_rev):
+                why.append(f&quot;revenue from ~0 to {cur_rev/1e6:.0f}M in one year&quot;)
+            elif cur_rev &gt;= 3 * rev_prior &gt; 0:
+                why.append(f&quot;revenue {cur_rev/max(rev_prior,1):.1f}x prior year&quot;)
+        if cur_ebit and cur_ebit &gt; 0 and ebit_prior is not None and ebit_prior &lt; 0:
+            why.append(f&quot;EBIT flipped {ebit_prior/1e6:.0f}M -&gt; {cur_ebit/1e6:.0f}M&quot;)
+        if cur_ebit and cur_ebit &gt; 0 and cur_fcf is not None and cur_fcf &lt; 0:
+            why.append(f&quot;EBIT +{cur_ebit/1e6:.0f}M but FCF {cur_fcf/1e6:.0f}M&quot;)
+            accrual_gap = True
+        # THE CASH-GENERATION CONDITION: a turnaround that converted to cash NOW and was
+        # already cash-generative in the prior year is not a one-year accounting artifact.
+        # It never rescues the accrual-gap shape — that shape fails the condition by
+        # construction, which is the point.
+        cash_generative = bool(cur_fcf is not None and cur_fcf &gt; 0
+                               and cfo_prior is not None and cfo_prior &gt; 0)
+        m[&quot;cash_generative_2y&quot;] = cash_generative
+        m[&quot;durability_why&quot;] = &quot;; &quot;.join(why) or None
+        m[&quot;durability_suspect&quot;] = bool(why) and not (cash_generative and not accrual_gap)
+        m[&quot;durability_watch&quot;] = bool(why) and cash_generative and not accrual_gap
+
+        # ---- (d) EBIT trend, both anchors ---------------------------------------------
+        eh_v = [v for v in eh if v is not None]
+        m[&quot;ebit_hist&quot;] = eh_v or None
+        m[&quot;ebit_oldest&quot;] = eh_v[-1] if len(eh_v) &gt;= 2 else None
+        m[&quot;ebit_peak&quot;] = max(eh_v) if eh_v else None
+        m[&quot;ebit_trend&quot;] = (round(cur_ebit / eh_v[-1], 2)
+                           if (cur_ebit and len(eh_v) &gt;= 2 and eh_v[-1] and eh_v[-1] &gt; 0) else None)
+        m[&quot;ebit_vs_peak&quot;] = (round(cur_ebit / m[&quot;ebit_peak&quot;], 2)
+                             if (cur_ebit and m[&quot;ebit_peak&quot;] and m[&quot;ebit_peak&quot;] &gt; 0) else None)
+        m[&quot;trough_anchored&quot;] = bool(len(eh_v) &gt;= 3 and eh_v[-1] == min(eh_v))
+        m[&quot;melting&quot;] = bool(m[&quot;ebit_vs_peak&quot;] is not None and m[&quot;ebit_vs_peak&quot;] &lt; 0.5)
+        # the base year was the trough, so the &quot;uptrend&quot; is a recovery artifact and the
+        # decline from peak is the number that matters
+        m[&quot;trend_flattered&quot;] = bool(m[&quot;trough_anchored&quot;] and m[&quot;ebit_trend&quot;]
+                                    and m[&quot;ebit_trend&quot;] &gt; 1.2
+                                    and m[&quot;ebit_vs_peak&quot;] is not None and m[&quot;ebit_vs_peak&quot;] &lt; 0.8)
+
+        # ---- (e) liquidity + (f) path -------------------------------------------------
+        h = r[&quot;_hist&quot;]
+        m[&quot;adv_usd&quot;], m[&quot;adv_mean_usd&quot;] = round(r[&quot;_adv_usd&quot;]), round(r[&quot;_adv_mean_usd&quot;])
+        m[&quot;adv_basis&quot;] = f&quot;median of {ADV_SESSIONS} sessions&quot;
+        m[&quot;adv_block_inflated&quot;] = bool(r[&quot;_adv_usd&quot;] &gt; 0
+                                       and r[&quot;_adv_mean_usd&quot;] / r[&quot;_adv_usd&quot;] &gt; 2.0)
+        m[&quot;thin&quot;] = r[&quot;_adv_usd&quot;] &lt; 3e5
+        # a scanner ask is not an acquirable position — carry the size the median day
+        # actually supports (the Seiryo lesson: an order at 82% of a day&#x27;s volume is not a
+        # fill, it is a market impact event)
+        m[&quot;max_order_usd&quot;] = round(ORDER_CAP_OF_ADV * r[&quot;_adv_usd&quot;])
+        m[&quot;pct_off_52w_low&quot;] = h[&quot;pct_off_52w_low&quot;]
+        m[&quot;days_since_low&quot;] = h[&quot;days_since_low&quot;]
+        m[&quot;days_since_52w_low&quot;] = h[&quot;days_since_low&quot;]      # quality_drawdown&#x27;s field name
+        m[&quot;fresh_low&quot;] = bool(h[&quot;days_since_low&quot;] is not None and h[&quot;days_since_low&quot;] &lt; 30)
+        # same two exhaustion modes quality_drawdown grades on, so the screens agree: a big
+        # bounce off a FRESH low, or a very big bounce off any low — either way you are late
+        m[&quot;entry_exhausted&quot;] = bool(
+            h[&quot;pct_off_52w_low&quot;] is not None
+            and ((h[&quot;pct_off_52w_low&quot;] &gt; MAX_OFF_LOW and h[&quot;days_since_low&quot;] &lt; FRESH_LOW_DAYS)
+                 or h[&quot;pct_off_52w_low&quot;] &gt; HARD_OFF_LOW))
+        m[&quot;px_asof&quot;] = h[&quot;px_asof&quot;]
+        m[&quot;px_stale&quot;] = bool(h[&quot;sessions&quot;] &lt; 200)
+
+        flt = f.get(&quot;_float&quot;)
+        m[&quot;float_shares&quot;] = flt
+        m[&quot;float_pct&quot;] = round(flt / shares, 3) if (flt and shares) else None
+        m[&quot;float_unknown&quot;] = m[&quot;float_pct&quot;] is None
+        m[&quot;float_usd&quot;] = round(m[&quot;float_pct&quot;] * mcap_usd) if m[&quot;float_pct&quot;] else None
+        if m[&quot;float_pct&quot;] is not None and m[&quot;float_pct&quot;] &lt; min_float:
+            post[&quot;float_floor&quot;] += 1
+            continue
+
+        # ---- (g) share-count / dual-class verification --------------------------------
+        # The HOOD/TUYA mechanism: a vendor&#x27;s `sharesOutstanding` is often ONE CLASS while its
+        # `marketCap` is the whole company, so cap/shares does not reconcile to the price and
+        # every per-share ratio is wrong by the missing class (HOOD: 790.6M Class A quoted,
+        # 109M Class B omitted, a 12% cap error). The test is arithmetic and needs no filing:
+        # divide each source&#x27;s market cap by its own share count and see whether it equals the
+        # traded price. Three independent counts are compared here — the filing&#x27;s ordinary
+        # share number, the vendor&#x27;s, and the one implied by the EXCHANGE&#x27;s own market cap.
+        implied = None
+        if r.get(&quot;mcap_local&quot;) and r.get(&quot;px&quot;):
+            px_gbp = r[&quot;px&quot;] / 100.0 if (qccy or &quot;&quot;).upper() == &quot;GBX&quot; else r[&quot;px&quot;]
+            implied = r[&quot;mcap_local&quot;] / px_gbp if px_gbp else None
+        # the vendor cap is quoted in the QUOTE currency&#x27;s major unit (GBP), so it is divided
+        # by the price in the same plane — never by the reporting-currency price
+        px_major = (r[&quot;px&quot;] / 100.0) if (qccy or &quot;&quot;).upper() == &quot;GBX&quot; else r[&quot;px&quot;]
+        yh_implied = (f[&quot;_mcap_yahoo&quot;] / px_major
+                      if (f.get(&quot;_mcap_yahoo&quot;) and px_major) else None)
+        counts = {&quot;filing&quot;: shares_filing, &quot;yahoo&quot;: f.get(&quot;_shares_yahoo&quot;),
+                  &quot;lse_implied&quot;: implied, &quot;yahoo_mcap_implied&quot;: yh_implied}
+        vals = [v for v in counts.values() if v and v &gt; 0]
+        m[&quot;share_counts&quot;] = {k: (round(v) if v else None) for k, v in counts.items()}
+        m[&quot;share_count_divergence&quot;] = (round(max(vals) / min(vals) - 1, 3)
+                                       if len(vals) &gt;= 2 else None)
+        m[&quot;share_count_unverified&quot;] = bool(m[&quot;share_count_divergence&quot;] is None
+                                           or m[&quot;share_count_divergence&quot;] &gt; 0.05)
+        m[&quot;n_lines&quot;] = r.get(&quot;_n_lines&quot;, 1)
+        m[&quot;other_lines&quot;] = r.get(&quot;_other_lines&quot;)
+        m[&quot;multi_line_issuer&quot;] = m[&quot;n_lines&quot;] &gt; 1
+
+        # ---- (h) PFIC — the shared gate, plus the FMV overlay -------------------------
+        # The Euronext leg SKIPS PFIC on the theory that EU/EEA operating companies are not a
+        # PFIC population. That reasoning does not survive the crossing to London, for two
+        # separate reasons, so the gate is ON here:
+        #   * the UK IS a PFIC population — its closed-end investment companies are statutory
+        #     PFICs almost to a name. They are excluded from this shelf by ICB sector, but
+        #     the boundary between &quot;investment company&quot; and &quot;cash-rich holdco&quot; is porous and
+        #     the sector tag is the only thing keeping them apart;
+        #   * §1297&#x27;s asset test on a PUBLIC issuer runs on FAIR MARKET VALUE, so the
+        #     denominator is roughly market cap + liabilities, not book assets. That is the
+        #     mechanism (PDD court, 2026-08-04): passive assets sit fixed in the numerator
+        #     while the denominator collapses with the multiple, so THE DE-RATE CAUSES THE TAX
+        #     STATUS. Drawdown is not a coincidence with PFIC risk, it is a cause of it —
+        #     which means a cheapness screen is exactly the instrument that concentrates it.
+        # `pfic_screen.pfic_risk` is imported rather than reimplemented; the FMV overlay is
+        # applied on top the same way screen_europe/japan/korea do it. Nothing is EXCLUDED —
+        # a genuine net-cash bargain is the name most likely to trip it, and the answer is a
+        # QEF/mark-to-market election, not avoidance.
+        pf = P.pfic_risk(m, f)
+        m[&quot;pfic&quot;], m[&quot;pfic_why&quot;] = pf[&quot;pfic&quot;], pf[&quot;reason&quot;]
+        m[&quot;pfic_severity&quot;] = pf.get(&quot;severity&quot;)
+        assets = f.get(&quot;Assets&quot;) or 0
+        liab = f.get(&quot;Liabilities&quot;) or 0
+        fmv_den = mcap + liab
+        share = (invsum / fmv_den) if fmv_den &gt; 0 else None
+        m[&quot;pfic_fmv_share&quot;] = round(share, 3) if share is not None else None
+        if share is not None and share &gt;= 0.50 and not m[&quot;pfic&quot;]:
+            m[&quot;pfic&quot;] = True
+            m[&quot;pfic_why&quot;] = (f&quot;FMV-basis passive {share*100:.0f}% &gt;= 50% &quot;
+                             f&quot;(book test passed: {pf[&#x27;reason&#x27;]})&quot;)
+        # the watch band from the PDD court: above 0.45 the risk-factor language is the thing
+        # that moves (&quot;we do not believe we were a PFIC&quot; -&gt; &quot;it is possible that we were&quot;)
+        m[&quot;pfic_watch&quot;] = bool(share is not None and 0.45 &lt;= share &lt; 0.50 and not m[&quot;pfic&quot;])
+        m[&quot;passive_asset_r&quot;] = round(invsum / assets, 3) if assets else None
+        ebit_margin = (m[&quot;ebit&quot;] / m[&quot;rev&quot;]) if (m.get(&quot;ebit&quot;) is not None and m.get(&quot;rev&quot;)) else None
+        m[&quot;ebit_margin&quot;] = round(ebit_margin, 3) if ebit_margin is not None else None
+
+        # ---- (i) live offer period ----------------------------------------------------
+        off = by_isin.get(r.get(&quot;isin&quot;) or &quot;&quot;)
+        m[&quot;in_offer_period&quot;] = bool(off)
+        m[&quot;offeror&quot;] = (off or {}).get(&quot;offeror&quot;)
+        m[&quot;pe_bidder&quot;] = bool((off or {}).get(&quot;pe_bidder&quot;))
+
+        # ---- vintage / consolidation --------------------------------------------------
+        m[&quot;consol_unverified&quot;] = not f.get(&quot;_consol_verified&quot;)
+        m[&quot;ttm&quot;] = bool(f.get(&quot;_ttm&quot;))
+        m[&quot;bs_date&quot;], m[&quot;flow_date&quot;] = f.get(&quot;_bs_date&quot;), f.get(&quot;_flow_date&quot;)
+        try:
+            m[&quot;flow_months&quot;] = round((now - time.mktime(time.strptime(
+                m[&quot;flow_date&quot;], &quot;%Y-%m-%d&quot;))) / (30.44 * 86400))
+        except (TypeError, ValueError):
+            m[&quot;flow_months&quot;] = None
+        m[&quot;fy_stale&quot;] = bool(m[&quot;flow_months&quot;] and m[&quot;flow_months&quot;] &gt; 15)
+        m[&quot;ebit_derived&quot;] = bool(f.get(&quot;_ebit_derived&quot;))
+        m[&quot;ebit_reported&quot;] = f.get(&quot;_ebit_reported&quot;)
+        m[&quot;unusual_r&quot;] = (round(f[&quot;_unusual&quot;] / m[&quot;ebit&quot;], 3)
+                          if (f.get(&quot;_unusual&quot;) and m.get(&quot;ebit&quot;)) else None)
+        m[&quot;n_analysts&quot;] = f.get(&quot;_n_analysts&quot;)
+        m[&quot;orphan&quot;] = (m[&quot;n_analysts&quot;] or 0) &lt;= 1
+        recs.append(m)
+
+    print(&quot;post-filter drops: &quot; + &quot;, &quot;.join(f&quot;{k}={v}&quot; for k, v in post.most_common()))
+    print(f&quot;scored population: {len(recs)}&quot;)
+
+    # ---- coverage honesty by market ---------------------------------------------------
+    cand_by_mk = Counter(r[&quot;market&quot;] for r in liq)
+    got_by_mk = Counter(r[&quot;market&quot;] for r in liq if (funds.get(r[&quot;sym&quot;]) or {}).get(&quot;Assets&quot;))
+    coverage = {k: {&quot;candidates&quot;: cand_by_mk[k], &quot;with_fundamentals&quot;: got_by_mk[k],
+                    &quot;pct&quot;: round(100 * got_by_mk[k] / cand_by_mk[k]) if cand_by_mk[k] else None}
+                for k in sorted(cand_by_mk)}
+    missing = sum(cand_by_mk.values()) - sum(got_by_mk.values())
+    print(&quot;fundamentals coverage: &quot; +
+          &quot;, &quot;.join(f&quot;{k} {v[&#x27;with_fundamentals&#x27;]}/{v[&#x27;candidates&#x27;]}&quot; for k, v in coverage.items()))
+    worst = min((c[&quot;pct&quot;] for c in coverage.values() if c[&quot;pct&quot;] is not None), default=100)
+    if missing and (missing &gt; 0.02 * sum(cand_by_mk.values()) or worst &lt; 90):
+        print(f&quot;  !! PARTIAL PULL — {missing} candidates without fundamentals, worst market &quot;
+              f&quot;{worst}%. Re-run to resume (cache preserved).&quot;)
+
+    # ---- (m) plane check ---------------------------------------------------------------
+    plane_fail = []
+    for mk in sorted({r[&quot;market&quot;] for r in recs}):
+        pbs = sorted(x[&quot;pb&quot;] for x in recs if x[&quot;market&quot;] == mk and x.get(&quot;pb&quot;))
+        if len(pbs) &lt; 5:
+            continue
+        med = pbs[len(pbs) // 2]
+        ok = 0.05 &lt; med &lt; 50
+        print(f&quot;  plane check {mk}: median P/B {med:.2f} on n={len(pbs)} {&#x27;OK&#x27; if ok else &#x27;*** FAIL ***&#x27;}&quot;)
+        if not ok:
+            plane_fail.append(mk)
+    if plane_fail:
+        raise SystemExit(f&quot;CURRENCY-PLANE FAILURE on {plane_fail} — refusing to emit a shelf&quot;)
+
+    scored = S.composite(recs)
+    shelf = S.clean_shortlist(scored, exclude_adr=False)
+
+    # ---- (1)(2) per-name incorporation, WHT, stamp duty, live spread -------------------
+    # Only the shelf gets the per-instrument call — country of incorporation is what decides
+    # whether the &quot;0% UK withholding&quot; edge is real for this name, and it is NOT implied by
+    # the .L suffix.
+    if not skip_instruments:
+        print(f&quot;resolving incorporation + touch for {len(shelf)} shelf names (LSE instrument API)...&quot;)
+        for i, rr in enumerate(shelf):
+            d = lse_instrument(rr[&quot;tidm&quot;])
+            ctry = (d.get(&quot;country&quot;) or &quot;&quot;).upper() or None
+            rr[&quot;country_incorp&quot;] = ctry
+            wht_s, wht_r = WHT.get(ctry or &quot;&quot;, (&quot;unknown&quot;, None))
+            rr[&quot;wht&quot;], rr[&quot;wht_rate&quot;] = wht_s, wht_r
+            rr[&quot;wht_edge_bps&quot;] = (round((TREATY_BASELINE - wht_r) * 1e4)
+                                  if wht_r is not None else None)
+            # SDRT: 0.5% on purchases of UK-incorporated shares; AIM quoted shares exempt
+            # since Apr-2014; non-UK incorporation is outside the charge.
+            uk_inc = ctry == &quot;GB&quot;
+            rr[&quot;stamp_pct&quot;] = 0.0 if (rr[&quot;market&quot;] == &quot;AIM&quot; or not uk_inc) else 0.5
+            rr[&quot;stamp_why&quot;] = (&quot;AIM-quoted — SDRT exempt since Apr-2014&quot; if rr[&quot;market&quot;] == &quot;AIM&quot;
+                               else &quot;non-UK incorporation — outside the UK stamp charge&quot;
+                               if not uk_inc else &quot;UK-incorporated Main-Market line — 0.5% SDRT on buys&quot;)
+            bid, off_ = d.get(&quot;bid&quot;), d.get(&quot;offer&quot;)
+            rr[&quot;bid&quot;], rr[&quot;offer&quot;] = bid, off_
+            rr[&quot;spread_bps&quot;] = (round(1e4 * (off_ - bid) / ((off_ + bid) / 2))
+                                if (bid and off_ and off_ &gt; bid) else None)
+            rr[&quot;nms_shares&quot;] = d.get(&quot;marketsize&quot;)
+            rr[&quot;lse_segment&quot;] = d.get(&quot;segment&quot;)
+            rr[&quot;wide_touch&quot;] = bool(rr[&quot;spread_bps&quot;] and rr[&quot;spread_bps&quot;] &gt; 200)
+            if (i + 1) % 25 == 0:
+                print(f&quot;  ...{i+1}/{len(shelf)}&quot;)
+            time.sleep(0.2)
+    else:
+        for rr in shelf:
+            rr[&quot;country_incorp&quot;] = None
+            rr[&quot;wht&quot;], rr[&quot;wht_rate&quot;], rr[&quot;wht_edge_bps&quot;] = &quot;unresolved&quot;, None, None
+            rr[&quot;stamp_pct&quot;] = 0.0 if rr[&quot;market&quot;] == &quot;AIM&quot; else 0.5
+            rr[&quot;stamp_why&quot;] = &quot;incorporation not resolved (--skip-instruments)&quot;
+
+    # ---- (i) sector takeout heat -------------------------------------------------------
+    isin2sec = {r.get(&quot;isin&quot;): r.get(&quot;sector_code&quot;) for r in rows if r.get(&quot;isin&quot;)}
+    heat, pe_heat = Counter(), Counter()
+    for isin, o in by_isin.items():
+        sc = isin2sec.get(isin)
+        if sc:
+            heat[sc] += 1
+            if o.get(&quot;pe_bidder&quot;):
+                pe_heat[sc] += 1
+    for rr in shelf:
+        rr[&quot;sector_takeout_heat&quot;] = heat.get(rr[&quot;sector_code&quot;], 0)
+        rr[&quot;pe_bid_sector&quot;] = pe_heat.get(rr[&quot;sector_code&quot;], 0) &gt; 0
+
+    # ---- IBKR conids, merged out of band ------------------------------------------------
+    conids = json.load(open(CONIDS)) if os.path.exists(CONIDS) else {}
+    for rr in shelf:
+        c = conids.get(rr[&quot;sym&quot;]) or conids.get(rr[&quot;tidm&quot;]) or {}
+        rr[&quot;conid&quot;] = c.get(&quot;conid&quot;)
+        rr[&quot;ibkr_symbol&quot;] = c.get(&quot;ibkr_symbol&quot;)
+        rr[&quot;ibkr_exchange&quot;] = c.get(&quot;exchange&quot;) or &quot;LSE&quot;
+        rr[&quot;ibkr_verified_utc&quot;] = c.get(&quot;verified_utc&quot;)
+
+    n_dur = sum(1 for r in shelf if r.get(&quot;durability_suspect&quot;))
+    n_off = sum(1 for r in shelf if r.get(&quot;in_offer_period&quot;))
+    printable = [r for r in shelf
+                 if not r.get(&quot;durability_suspect&quot;) and not r.get(&quot;in_offer_period&quot;)]
+
+    keep = (&quot;tidm&quot;, &quot;sym&quot;, &quot;isin&quot;, &quot;name&quot;, &quot;ind&quot;, &quot;industry&quot;, &quot;sec&quot;, &quot;sector_code&quot;, &quot;market&quot;,
+            &quot;country_incorp&quot;, &quot;ccy&quot;, &quot;px_ccy&quot;, &quot;ccy_mismatch&quot;, &quot;mktcap&quot;, &quot;mcap_usd&quot;,
+            &quot;mcap_basis&quot;, &quot;px&quot;, &quot;px_asof&quot;, &quot;score&quot;, &quot;nmetrics&quot;,
+            &quot;am&quot;, &quot;am_asis&quot;, &quot;am_trustsafe&quot;, &quot;trust_cash_suspect&quot;, &quot;fcfy&quot;, &quot;pb&quot;, &quot;ncash_r&quot;,
+            &quot;ncash_r_asis&quot;, &quot;ncav_r&quot;, &quot;ev&quot;, &quot;ebit&quot;, &quot;ebit_reported&quot;, &quot;ebit_derived&quot;,
+            &quot;unusual_r&quot;, &quot;fcf&quot;, &quot;rev&quot;, &quot;cash&quot;, &quot;debt&quot;, &quot;mi&quot;, &quot;eq&quot;, &quot;netcash&quot;, &quot;subcash&quot;,
+            &quot;cash_strict&quot;, &quot;st_investments&quot;, &quot;st_inv_share_of_cash&quot;, &quot;netcash_strict&quot;,
+            &quot;ncash_r_strict&quot;, &quot;securities_as_cash&quot;, &quot;net_debt_vendor&quot;,
+            &quot;netcash_sign_conflict&quot;, &quot;cash_quality_note&quot;, &quot;securities_book_material&quot;,
+            &quot;capex_total&quot;, &quot;capex_ppe&quot;, &quot;capex_intangibles&quot;, &quot;capex_intang_heavy&quot;,
+            &quot;capdev_r&quot;, &quot;capdev_heavy&quot;, &quot;lease_debt&quot;, &quot;lease_heavy&quot;,
+            &quot;pension_gross&quot;, &quot;pension_net_of_tax&quot;, &quot;pension_tax_rate&quot;, &quot;pension_source&quot;,
+            &quot;pension_is_proxy&quot;, &quot;debt_ex_pension&quot;,
+            &quot;pension_deficit_r&quot;, &quot;pension_material&quot;, &quot;pension_surplus&quot;,
+            &quot;pension_surplus_in_equity&quot;, &quot;pension_unverified&quot;, &quot;pension_note&quot;,
+            &quot;provision_kind_hint&quot;,
+            &quot;durability_suspect&quot;, &quot;durability_watch&quot;, &quot;durability_why&quot;, &quot;cash_generative_2y&quot;,
+            &quot;ebit_trend&quot;, &quot;ebit_vs_peak&quot;, &quot;ebit_peak&quot;, &quot;ebit_oldest&quot;, &quot;ebit_hist&quot;,
+            &quot;trough_anchored&quot;, &quot;trend_flattered&quot;, &quot;melting&quot;,
+            &quot;adv_usd&quot;, &quot;adv_mean_usd&quot;, &quot;adv_basis&quot;, &quot;adv_block_inflated&quot;, &quot;thin&quot;,
+            &quot;max_order_usd&quot;, &quot;spread_bps&quot;, &quot;wide_touch&quot;, &quot;bid&quot;, &quot;offer&quot;, &quot;nms_shares&quot;,
+            &quot;lse_segment&quot;,
+            &quot;pct_off_52w_low&quot;, &quot;days_since_low&quot;, &quot;days_since_52w_low&quot;, &quot;fresh_low&quot;,
+            &quot;entry_exhausted&quot;,
+            &quot;float_pct&quot;, &quot;float_usd&quot;, &quot;float_unknown&quot;,
+            &quot;share_counts&quot;, &quot;share_count_divergence&quot;, &quot;share_count_unverified&quot;,
+            &quot;n_lines&quot;, &quot;other_lines&quot;, &quot;multi_line_issuer&quot;,
+            &quot;passive_asset_r&quot;, &quot;ebit_margin&quot;, &quot;pfic&quot;, &quot;pfic_why&quot;, &quot;pfic_severity&quot;,
+            &quot;pfic_fmv_share&quot;, &quot;pfic_watch&quot;,
+            &quot;in_offer_period&quot;, &quot;offeror&quot;, &quot;pe_bidder&quot;, &quot;sector_takeout_heat&quot;, &quot;pe_bid_sector&quot;,
+            &quot;wht&quot;, &quot;wht_rate&quot;, &quot;wht_edge_bps&quot;, &quot;stamp_pct&quot;, &quot;stamp_why&quot;,
+            &quot;holdco&quot;, &quot;neg_equity&quot;, &quot;wc_fcf&quot;, &quot;mlp_artifact&quot;, &quot;consol_unverified&quot;,
+            &quot;n_analysts&quot;, &quot;orphan&quot;,
+            &quot;ibkr_exchange&quot;, &quot;ibkr_symbol&quot;, &quot;conid&quot;, &quot;ibkr_verified_utc&quot;,
+            &quot;ttm&quot;, &quot;bs_date&quot;, &quot;flow_date&quot;, &quot;flow_months&quot;, &quot;fy_stale&quot;, &quot;px_stale&quot;)
+
+    os.makedirs(DATA, exist_ok=True)
+    meta = {
+        &quot;generated_utc&quot;: time.strftime(&quot;%Y-%m-%dT%H:%M:%SZ&quot;, time.gmtime()),
+        &quot;module&quot;: &quot;verticals/generators/lse_shelf.py&quot;,
+        &quot;thesis&quot;: &quot;UK small-value — LSE Main + AIM; 0% dividend withholding is a genuine &quot;
+                  &quot;structural edge, 0.5% SDRT is a genuine friction, and 30% of the Main &quot;
+                  &quot;Market is closed-end vehicles that belong in a different lane&quot;,
+        &quot;universe_source&quot;: uni[&quot;meta&quot;].get(&quot;source&quot;),
+        &quot;fundamentals_source&quot;: &quot;Yahoo (SECONDARY) — re-derive from the annual report before &quot;
+                               &quot;any court&quot;,
+        &quot;universe_generated_utc&quot;: uni[&quot;meta&quot;][&quot;generated_utc&quot;],
+        &quot;universe_lines&quot;: len(rows),
+        &quot;closed_end_and_vehicles_excluded&quot;: trusts,
+        &quot;fx_basis&quot;: fx_basis, &quot;fx&quot;: {k: round(v, 5) for k, v in fx.items()},
+        &quot;filters&quot;: {&quot;min_mcap_usd&quot;: min_mcap_usd, &quot;max_mcap_usd&quot;: max_mcap_usd,
+                    &quot;min_adv_usd&quot;: min_adv_usd, &quot;min_float&quot;: min_float,
+                    &quot;adv_basis&quot;: f&quot;MEDIAN of {ADV_SESSIONS} sessions (not the vendor mean)&quot;},
+        &quot;prefilter_drops&quot;: dict(drop), &quot;postfilter_drops&quot;: dict(post),
+        &quot;scored&quot;: len(recs), &quot;shelf&quot;: len(shelf),
+        &quot;pull_complete&quot;: missing == 0,
+        &quot;fundamentals_coverage_by_market&quot;: coverage,
+        &quot;candidates_without_fundamentals&quot;: missing,
+        &quot;scored_by_market&quot;: dict(Counter(r[&quot;market&quot;] for r in recs)),
+        &quot;shelf_by_market&quot;: dict(Counter(r[&quot;market&quot;] for r in shelf)),
+        &quot;orphans_on_shelf&quot;: sum(1 for r in shelf if r[&quot;orphan&quot;]),
+        &quot;durability_suspect_demoted&quot;: n_dur,
+        &quot;durability_watch_rescued&quot;: sum(1 for r in shelf if r.get(&quot;durability_watch&quot;)),
+        &quot;in_offer_period_demoted&quot;: n_off,
+        &quot;melting_on_shelf&quot;: sum(1 for r in shelf if r.get(&quot;melting&quot;)),
+        &quot;trend_flattered_on_shelf&quot;: sum(1 for r in shelf if r.get(&quot;trend_flattered&quot;)),
+        &quot;pension_material_on_shelf&quot;: sum(1 for r in shelf if r.get(&quot;pension_material&quot;)),
+        &quot;pension_unverified_on_shelf&quot;: sum(1 for r in shelf if r.get(&quot;pension_unverified&quot;)),
+        &quot;netcash_sign_conflict_on_shelf&quot;: sum(1 for r in shelf if r.get(&quot;netcash_sign_conflict&quot;)),
+        &quot;securities_as_cash_on_shelf&quot;: sum(1 for r in shelf if r.get(&quot;securities_as_cash&quot;)),
+        &quot;pfic_flagged_on_shelf&quot;: sum(1 for r in shelf if r.get(&quot;pfic&quot;)),
+        &quot;pfic_watch_on_shelf&quot;: sum(1 for r in shelf if r.get(&quot;pfic_watch&quot;)),
+        &quot;entry_exhausted_on_shelf&quot;: sum(1 for r in shelf if r.get(&quot;entry_exhausted&quot;)),
+        &quot;share_count_unverified_on_shelf&quot;: sum(1 for r in shelf if r.get(&quot;share_count_unverified&quot;)),
+        &quot;aim_on_shelf&quot;: sum(1 for r in shelf if r[&quot;market&quot;] == &quot;AIM&quot;),
+        &quot;zero_wht_on_shelf&quot;: sum(1 for r in shelf if r.get(&quot;wht_rate&quot;) == 0.0),
+        &quot;live_offer_periods_uk&quot;: len(by_isin),
+        &quot;conids_merged&quot;: sum(1 for r in shelf if r.get(&quot;conid&quot;)),
+        &quot;rerun&quot;: &quot;python3 lse_shelf.py --top 30  (--refresh-universe monthly; &quot;
+                 &quot;--refresh-fund to re-pull financials)&quot;,
+        &quot;known_limitations&quot;: &quot;see module docstring README&quot;,
+    }
+    json.dump({&quot;meta&quot;: meta, &quot;rows&quot;: [{k: r.get(k) for k in keep} for r in shelf]},
+              open(OUT, &quot;w&quot;), ensure_ascii=False, indent=1)
+    print(f&quot;\nwrote {OUT}  ({len(shelf)} scored rows)&quot;)
+
+    def fmt(r):
+        am = f&quot;{r[&#x27;am&#x27;]:.1f}&quot; if r[&quot;am&quot;] else (&quot;subC&quot; if r[&quot;subcash&quot;] else &quot; -&quot;)
+        fy = f&quot;{r[&#x27;fcfy&#x27;]*100:.0f}%&quot; if r[&quot;fcfy&quot;] is not None else &quot; -&quot;
+        pb = f&quot;{r[&#x27;pb&#x27;]:.2f}&quot; if r[&quot;pb&quot;] else &quot; -&quot;
+        nc = f&quot;{r[&#x27;ncash_r&#x27;]:.2f}&quot; if r[&quot;ncash_r&quot;] is not None else &quot; -&quot;
+        na = str(r[&quot;n_analysts&quot;]) if r[&quot;n_analysts&quot;] is not None else &quot;-&quot;
+        off = f&quot;{r[&#x27;pct_off_52w_low&#x27;]*100:.0f}%&quot; if r.get(&quot;pct_off_52w_low&quot;) is not None else &quot; -&quot;
+        fl = &quot; &quot;.join(t for t, on in [
+            (&quot;orphan&quot;, r[&quot;orphan&quot;]), (&quot;thin&quot;, r[&quot;thin&quot;]), (&quot;blocky&quot;, r.get(&quot;adv_block_inflated&quot;)),
+            (f&quot;touch{r[&#x27;spread_bps&#x27;]}bp&quot; if r.get(&quot;spread_bps&quot;) else &quot;&quot;, r.get(&quot;wide_touch&quot;)),
+            (&quot;NETDEBT-CONFLICT!&quot;, r.get(&quot;netcash_sign_conflict&quot;)),
+            (&quot;secs-as-cash&quot;, r.get(&quot;securities_as_cash&quot;) and not r.get(&quot;netcash_sign_conflict&quot;)),
+            (&quot;secs-book&quot;, r.get(&quot;securities_book_material&quot;)),
+            (&quot;PENSION!&quot;, r.get(&quot;pension_material&quot;) and not r.get(&quot;pension_is_proxy&quot;)),
+            (&quot;PROV!&quot;, r.get(&quot;pension_material&quot;) and r.get(&quot;pension_is_proxy&quot;)),
+            (&quot;pens?&quot;, r.get(&quot;pension_unverified&quot;)),
+            (&quot;prov-proxy&quot;, r.get(&quot;pension_is_proxy&quot;)),
+            (&quot;pens-surplus&quot;, r.get(&quot;pension_surplus_in_equity&quot;)),
+            (f&quot;melt{r[&#x27;ebit_vs_peak&#x27;]:.1f}x&quot; if r.get(&quot;ebit_vs_peak&quot;) is not None else &quot;melt&quot;,
+             r.get(&quot;melting&quot;)),
+            (&quot;trough-anchor&quot;, r.get(&quot;trend_flattered&quot;)),
+            (&quot;dur-watch&quot;, r.get(&quot;durability_watch&quot;)), (&quot;lease&quot;, r.get(&quot;lease_heavy&quot;)),
+            (&quot;cap-intang&quot;, r.get(&quot;capex_intang_heavy&quot;)),
+            (&quot;PFIC?&quot;, r.get(&quot;pfic&quot;)), (&quot;pfic-watch&quot;, r.get(&quot;pfic_watch&quot;)),
+            (&quot;capdev&quot;, r.get(&quot;capdev_heavy&quot;)), (&quot;late-entry&quot;, r.get(&quot;entry_exhausted&quot;)),
+            (&quot;shares?&quot;, r.get(&quot;share_count_unverified&quot;)),
+            (&quot;dual-line&quot;, r.get(&quot;multi_line_issuer&quot;)), (&quot;cust-cash?&quot;, r[&quot;trust_cash_suspect&quot;]),
+            (&quot;fx!&quot;, r[&quot;ccy_mismatch&quot;]), (&quot;ebit~&quot;, r[&quot;ebit_derived&quot;]), (&quot;WC-FCF&quot;, r[&quot;wc_fcf&quot;]),
+            (&quot;holdco&quot;, r[&quot;holdco&quot;]), (&quot;neg-eq&quot;, r[&quot;neg_equity&quot;]), (&quot;no-NCI&quot;, r[&quot;consol_unverified&quot;]),
+            (&quot;stale-FY&quot;, r[&quot;fy_stale&quot;]), (&quot;PE-sector&quot;, r.get(&quot;pe_bid_sector&quot;)),
+            (&quot;conid&quot;, bool(r.get(&quot;conid&quot;)))] if on and t)
+        stamp = f&quot;{r.get(&#x27;stamp_pct&#x27;, 0):.1f}&quot; if r.get(&quot;stamp_pct&quot;) is not None else &quot; -&quot;
+        return (f&quot;  {r[&#x27;tidm&#x27;]:7s}{r[&#x27;market&#x27;][:4]:5s}{r[&#x27;mcap_usd&#x27;]/1e6:7.0f}&quot;
+                f&quot;{r[&#x27;adv_usd&#x27;]/1e3:7.0f}{am:&gt;7s}{fy:&gt;6s}{pb:&gt;6s}{nc:&gt;7s}{off:&gt;7s}&quot;
+                f&quot;{na:&gt;3s} {str(r.get(&#x27;wht&#x27;) or &#x27;?&#x27;):&gt;5s}{stamp:&gt;5s} &quot;
+                f&quot;{(r.get(&#x27;name&#x27;) or &#x27;&#x27;)[:24]:24s} {fl}&quot;)
+
+    print(f&quot;\nLSE MAIN + AIM SMALL-VALUE SHELF  n={len(shelf)}  &quot;
+          f&quot;orphans={meta[&#x27;orphans_on_shelf&#x27;]}  AIM={meta[&#x27;aim_on_shelf&#x27;]}  &quot;
+          f&quot;durability-demoted={n_dur}  in-offer-demoted={n_off}&quot;)
+    print(f&quot;  {&#x27;tidm&#x27;:7s}{&#x27;mkt&#x27;:5s}{&#x27;mc$M&#x27;:&gt;7s}{&#x27;ADV$k&#x27;:&gt;7s}{&#x27;EV/EBT&#x27;:&gt;7s}{&#x27;FCFy&#x27;:&gt;6s}&quot;
+          f&quot;{&#x27;P/B&#x27;:&gt;6s}{&#x27;ncash/m&#x27;:&gt;7s}{&#x27;off-lo&#x27;:&gt;7s}{&#x27;an&#x27;:&gt;3s} {&#x27;WHT&#x27;:&gt;5s}{&#x27;stmp&#x27;:&gt;5s} &quot;
+          f&quot;{&#x27;name&#x27;:24s} flags&quot;)
+    for r in printable[:top]:
+        print(fmt(r))
+    print(&quot;\n  (mc/ADV in USD, ADV = MEDIAN daily turnover over 63 sessions; every RATIO computed &quot;
+          &quot;in the reporting ccy — &#x27;fx!&#x27; = reports in something other than GBP; &#x27;stmp&#x27; = stamp &quot;
+          &quot;duty % on a PURCHASE; EV carries IFRS-16 lease debt AND the pension obligation)&quot;)
+    return shelf
+
+
+if __name__ == &quot;__main__&quot;:
+    ap = argparse.ArgumentParser(description=__doc__.split(&quot;====&quot;)[0])
+    ap.add_argument(&quot;--refresh-universe&quot;, action=&quot;store_true&quot;,
+                    help=&quot;re-sweep the LSE price explorer and rewrite the universe file&quot;)
+    ap.add_argument(&quot;--top&quot;, type=int, default=30)
+    ap.add_argument(&quot;--min-mcap-usd&quot;, type=float, default=5e7)
+    ap.add_argument(&quot;--max-mcap-usd&quot;, type=float, default=2e9)
+    ap.add_argument(&quot;--min-adv-usd&quot;, type=float, default=75e3)
+    ap.add_argument(&quot;--min-float&quot;, type=float, default=0.15)
+    ap.add_argument(&quot;--refresh-fund&quot;, action=&quot;store_true&quot;)
+    ap.add_argument(&quot;--workers&quot;, type=int, default=2)
+    ap.add_argument(&quot;--limit&quot;, type=int, default=None,
+                    help=&quot;cap the fundamentals pull to the N most liquid candidates (dev)&quot;)
+    ap.add_argument(&quot;--skip-instruments&quot;, action=&quot;store_true&quot;,
+                    help=&quot;skip the per-name LSE instrument call (no incorporation/touch data)&quot;)
+    a = ap.parse_args()
+    if a.refresh_universe:
+        refresh_universe()
+    run(a.top, a.min_mcap_usd, a.max_mcap_usd, a.min_adv_usd, a.min_float,
+        a.refresh_fund, a.workers, a.limit, a.skip_instruments)
+</pre></div></body></html>

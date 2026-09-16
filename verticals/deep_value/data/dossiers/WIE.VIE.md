@@ -1,0 +1,12 @@
+# WIE.VIE — Wienerberger (clay/pipe/building materials; Vienna)
+**Sleeve:** ukraine_reconstruction_b · **Verdict:** STARTER · DD-verified 2026-06-29
+
+**Conviction:** GENUINE cyclical value (low-quality tier) — the ONE real value name in Option B; DD-verified
+
+## Thesis
+
+LEAD Option-B name (squeeze-out-FREE Ukraine reconstruction). HARD GATE: 100% free float, NO core shareholder, one-share-one-vote (strongest possible pass). EXPOSURE: Eastern Europe ~26% of EUR4.6bn rev; self-identified Rebuilding-Ukraine supplier (bricks/tiles/pipes from CEE plants). Direct Ukraine rev ~1-2% (UNVERIFIABLE, not disclosed) but a CEE rebuild cycle lifts ~1/4 of the book = real regional beta, not a rounding error. VALUE: ~EUR22.80, -25.5% YTD near 52w low (EUR20.86-33.28) = ideal HARVEST entry; EV/EBITDA ~5-5.5x (net debt ~EUR1.5bn ESTIMATED-flag), P/E ~14.9x (D&A-inflated post-Terreal), FCF EUR474m, cheap vs own 6-7x history. SIZING: dispersed structure = NO absorbing squeeze-out tail (recoverable variance only) -> can run ~8-10% vs the 3-4% MHP/AST cap. VSE contract 3306521. Pair: Wienerberger<->Kingspan (building-envelope harvest rotation). || DD VERIFIED 2026-06-29 (FY2025 primary): the deep-value claim SURVIVES. Net debt corrected to EUR1,637m (balance sheet ties: gross 1,918 - cash 281; basket est ~1.5bn was low by ~137m, immaterial + conservative). EV EUR4,107m / Op-EBITDA EUR754m = EV/EBITDA 5.4x VERIFIED; P/E 14.8x (D&A ~50% of EBITDA = structural capital-intensity, NOT a Terreal one-off — D&A rose only +15m YoY); FCF EUR474m (19% yield BUT partly WC release in the downturn — do not capitalize); div 4.2%. CYCLE: trough-to-mid, NOT a trap — EPS 1.52 vs 2022 peak ~3+; NA EBITDA -31% is the drag, Europe +; cheap on depressed earnings = cyclical value. BEAR: ROCE 8.4% & falling = cheap-FOR-A-REASON (low-return heavy industrial; a re-rate may never come); MS Underweight on new-build. Honesty CLEAN. Ukraine = ZERO disclosed revenue (supply-from-CEE optionality only); CEE 25.8% confirmed. Thesis is the EUROPEAN CYCLE, not Ukraine. -> STARTER (small).
+
+
+---
+*Research card auto-generated from the SignalOS research ledger (2026-06-29). Where a full deep-dive exists (DD_* / SLEEVE_* docs), that document carries the worked valuation, Mode-B pass, and primary sources.*

@@ -1,0 +1,270 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>january_reversal_scanner</title><style>
+body{margin:0;background:#0b0e12;color:#e8ebee;font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:26px 24px 90px}
+a{color:#8b7cf6} h1{font-size:23px;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:#7d858e;margin:0 0 20px;font-size:13px}
+h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:#7d858e;margin:24px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 10px;border-bottom:1px solid #242a31;text-align:left;vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#7d858e}
+.k{font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:20px}
+.k-generator{color:#c3b8fb;background:rgba(139,124,246,.15)}
+.k-detector{color:#eccb8a;background:rgba(217,164,65,.15)}
+.k-watcher{color:#8ee5c1;background:rgba(53,201,143,.15)}
+.k-evidence{color:#b3bcc6;background:rgba(138,147,158,.15)}
+.h-OK{color:#35c98f} .h-STALE{color:#d9a441} .h-ERROR{color:#e0736a} .h-NEVER_RUN{color:#8a939e}
+pre{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px;overflow-x:auto;font-size:12px;line-height:1.5}
+.panel{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px 18px;margin-bottom:12px}
+ul{margin:4px 0;padding-left:20px} li{margin-bottom:4px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+</style></head><body><div class="wrap"><h1>january_reversal_scanner</h1><p class="sub">registered capability · january_reversal_scanner</p><a href="signals.html">&larr; all signals</a><div class="panel" style="margin-top:10px"><span class="k k-generator">GENERATOR</span> &nbsp;<span class="h-NEVER_RUN"><b>NEVER_RUN</b></span> · last run <span class="mono">never</span></div><p>Stage 0b FLOW: the REVERSAL leg of the tax-loss dislocation trade.</p><form method="POST" action="/signals/run" style="margin:10px 0"><input type="hidden" name="name" value="january_reversal_scanner"><input name="symbol" placeholder="symbol (if applicable)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px"><input name="symbols" placeholder="universe, comma-sep (generators)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px;margin-left:6px"><button type="submit" style="background:#8b7cf6;color:#0b0e12;border:0;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;margin-left:6px">Run now</button></form><h2>Datasources</h2><ul><li>reference implementation: verticals/generators/january_reversal_scanner.py (see the code section for the feeds it touches)</li></ul><h2>Applies to</h2><ul><li><b>strategies:</b> value_band_entry</li></ul><h2>The code</h2><pre>&quot;&quot;&quot;january_reversal_scanner — Stage 0b FLOW: the REVERSAL leg of the tax-loss dislocation trade.
+
+THESIS (the pair to december_dislocation): taxable investors and Oct-31 fiscal-year funds dump
+their big YTD losers into Nov-Dec for the tax deduction — price-INSENSITIVE, calendar-bounded
+forced selling. That mechanical supply LIFTS at year-end, and the January-effect rebound
+concentrates in exactly the cohort that was dumped: small/low-price/retail-held names too small
+for the factor funds that arbitraged the anomaly out of large caps. That last clause is the whole
+edge — a CAPACITY edge that survives only below the index-flow floor. December is the SELLING leg
+(december_dislocation surfaces the loss basket); this scanner is the BUY-the-bounce RE-ENTRY leg.
+
+We want the names where the December selling was tax-TECHNICAL, not fundamental: small-cap, big
+YTD loss, and NOT a value trap (passes the deep-value quality gauntlet). The rebound is a FLOW
+re-rating as the forced seller exits, not a fundamental call — so quality-at-a-loss DD + court is
+MANDATORY before any re-entry (quality-at-a-loss is exactly where value traps hide: DCGO/COLL/PSIX).
+
+The tradeable structure is the CALENDAR (mirrors russell_recon&#x27;s dormant-countdown pattern):
+  · SELLING window   — ~Dec 1-31: the tax-loss dump; december_dislocation sets the loss basket here
+  · REVERSAL window  — ~Dec 20 - Jan 31: the forced seller is done; buy the bounce in the quality names
+Off-season (now, July) this generator is DORMANT — a dated countdown to the next selling/reversal
+windows and the mechanism. The loss basket isn&#x27;t set until December, so an EMPTY candidate list
+off-season is the CORRECT output; there is nothing to buy the bounce in yet.
+
+  python3 verticals/generators/january_reversal_scanner.py [--force] [--sample N] [--min-loss -30]
+Writes data/JANUARY_REVERSAL.json. READ-ONLY; proposes the re-entry basket, never sizes/orders.
+&quot;&quot;&quot;
+from __future__ import annotations
+import json, datetime, argparse, sys
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[1]
+OUT = HERE / &quot;data&quot; / &quot;JANUARY_REVERSAL.json&quot;
+DEC_BASKET = HERE / &quot;data&quot; / &quot;DECEMBER_CANDIDATES.json&quot;
+sys.path.insert(0, str(ROOT))
+
+HDRS = {&quot;User-Agent&quot;: &quot;signalos-research 4tripathy@gmail.com&quot;}
+
+
+def _next_windows(today: datetime.date) -&gt; dict:
+    &quot;&quot;&quot;The upcoming SELLING (~Dec 1) and REVERSAL (~Dec 20 - Jan 31) windows.
+
+    The relevant reversal window is the current turn-of-year if its Jan-31 end is still ahead,
+    else next year&#x27;s. Selling opens ~Dec 1 of the same turn; reversal spans ~Dec 20 -&gt; Jan 31.
+    &quot;&quot;&quot;
+    # anchor the turn-of-year on the reversal END (Jan 31). If we&#x27;re past this year&#x27;s Jan 31,
+    # the next reversal ends Jan 31 of NEXT year.
+    rev_end = datetime.date(today.year, 1, 31)
+    if today &gt; rev_end:
+        rev_end = datetime.date(today.year + 1, 1, 31)
+    # the December that feeds this reversal is the one immediately before rev_end&#x27;s January
+    sell_year = rev_end.year - 1
+    sell_start = datetime.date(sell_year, 12, 1)
+    sell_end = datetime.date(sell_year, 12, 31)
+    rev_start = datetime.date(sell_year, 12, 20)   # bounce buying starts as selling exhausts
+    return {
+        &quot;selling_window&quot;: {&quot;start&quot;: sell_start.isoformat(), &quot;end&quot;: sell_end.isoformat()},
+        &quot;reversal_window&quot;: {&quot;start&quot;: rev_start.isoformat(), &quot;end&quot;: rev_end.isoformat()},
+    }
+
+
+def phase_for(today: datetime.date, w: dict) -&gt; tuple[str, str, dict]:
+    &quot;&quot;&quot;phase + action + days_to milestones, mirroring russell_recon&#x27;s dated-countdown shape.&quot;&quot;&quot;
+    sell_start = datetime.date.fromisoformat(w[&quot;selling_window&quot;][&quot;start&quot;])
+    rev_start = datetime.date.fromisoformat(w[&quot;reversal_window&quot;][&quot;start&quot;])
+    rev_end = datetime.date.fromisoformat(w[&quot;reversal_window&quot;][&quot;end&quot;])
+    days_to = {
+        &quot;selling_window_start&quot;: (sell_start - today).days,
+        &quot;reversal_window_start&quot;: (rev_start - today).days,
+        &quot;reversal_window_end&quot;: (rev_end - today).days,
+    }
+    if today &lt; sell_start:
+        phase = &quot;DORMANT — off-season (pre-selling)&quot;
+        action = (&quot;Nothing to do; the loss basket isn&#x27;t set until the December tax-loss window. &quot;
+                  f&quot;Selling opens ~{sell_start.isoformat()} ({days_to[&#x27;selling_window_start&#x27;]:+d}d); &quot;
+                  f&quot;the reversal RE-ENTRY window opens ~{rev_start.isoformat()} &quot;
+                  f&quot;({days_to[&#x27;reversal_window_start&#x27;]:+d}d).&quot;)
+    elif today &lt; rev_start:
+        phase = &quot;SELLING UNDERWAY — loss basket forming&quot;
+        action = (&quot;The tax-loss dump is live; december_dislocation is surfacing the loss basket. &quot;
+                  &quot;Do NOT front-run the bounce — the forced seller is still pressing. Pre-screen the &quot;
+                  &quot;basket through DD+court now so the quality names are ready when the reversal opens &quot;
+                  f&quot;~{rev_start.isoformat()} ({days_to[&#x27;reversal_window_start&#x27;]:+d}d).&quot;)
+    elif today &lt;= rev_end:
+        phase = &quot;⚡ REVERSAL WINDOW OPEN — buy the bounce&quot;
+        action = (&quot;The forced seller is exhausting. Pull the December loss basket and surface the &quot;
+                  &quot;re-entry candidates (tax-TECHNICAL selling, not fundamental: small-cap, big YTD &quot;
+                  &quot;loss, quality-gauntlet PASS). Ladder into the quality-at-a-loss names ONLY after &quot;
+                  f&quot;DD+court. Window exits ~{rev_end.isoformat()} ({days_to[&#x27;reversal_window_end&#x27;]:+d}d).&quot;)
+    else:
+        phase = &quot;POST-REVERSAL&quot;
+        action = &quot;Reversal window closed; unwind the calendar leg. Next selling window opens ~Dec 1.&quot;
+    return phase, action, days_to
+
+
+def in_reversal(today: datetime.date, w: dict) -&gt; bool:
+    rev_start = datetime.date.fromisoformat(w[&quot;reversal_window&quot;][&quot;start&quot;])
+    rev_end = datetime.date.fromisoformat(w[&quot;reversal_window&quot;][&quot;end&quot;])
+    return rev_start &lt;= today &lt;= rev_end
+
+
+# --- basket logic reused from december_dislocation (mirror; import the shared quality gates) ---
+
+def _quality(rec: dict) -&gt; tuple[bool, str]:
+    &quot;&quot;&quot;The deep-value gates: TTM EBIT&gt;0, FCF&gt;0, quarter not collapsing (mirrors december_dislocation).&quot;&quot;&quot;
+    ebit = rec.get(&quot;OperatingIncomeLoss&quot;)
+    ocf = rec.get(&quot;NetCashProvidedByUsedInOperatingActivities&quot;)
+    capex = rec.get(&quot;PaymentsToAcquirePropertyPlantAndEquipment&quot;) or 0
+    if ebit is None or ebit &lt;= 0:
+        return False, &quot;EBIT&lt;=0&quot;
+    if ocf is None or (ocf - abs(capex)) &lt;= 0:
+        return False, &quot;FCF&lt;=0&quot;
+    q, qp = rec.get(&quot;OperatingIncomeLoss_q&quot;), rec.get(&quot;OperatingIncomeLoss_q_prior&quot;)
+    if q is not None and qp is not None and qp &gt; 0 and q &lt; 0.4 * qp:
+        return False, &quot;quarter collapsing (&gt;60% EBIT drop)&quot;
+    return True, &quot;ok&quot;
+
+
+def _reversal_candidates_from_dec_basket(min_loss: float) -&gt; tuple[list[dict], str]:
+    &quot;&quot;&quot;In-season: reuse december_dislocation&#x27;s ALREADY-SCREENED loss basket as the re-entry set.
+
+    The December scanner has already applied loss-depth x quality x trap-guards x wash-sale; those
+    ARE the tax-technical, non-value-trap, small-cap names. The reversal leg just re-frames them as
+    BUY-the-bounce candidates. If the December basket is stale/absent, fall back to a live compute.
+    &quot;&quot;&quot;
+    if DEC_BASKET.exists():
+        try:
+            d = json.loads(DEC_BASKET.read_text())
+            cands = []
+            for c in d.get(&quot;candidates&quot;, []):
+                if c.get(&quot;ytd_pct&quot;) is not None and c[&quot;ytd_pct&quot;] &lt;= min_loss:
+                    cands.append({
+                        &quot;sym&quot;: c[&quot;sym&quot;], &quot;ytd_pct&quot;: c[&quot;ytd_pct&quot;], &quot;score&quot;: c.get(&quot;score&quot;),
+                        &quot;ebit_ttm&quot;: c.get(&quot;ebit_ttm&quot;),
+                        &quot;note&quot;: &quot;REVERSAL re-entry — tax-technical selling, quality-gauntlet PASS; &quot;
+                                &quot;DD+court MANDATORY before any ladder (quality-at-a-loss = trap zone)&quot;,
+                    })
+            cands.sort(key=lambda c: -(c.get(&quot;score&quot;) or 0))
+            return cands, f&quot;december_dislocation basket ({d.get(&#x27;asof&#x27;)}, {len(cands)} pass min_loss)&quot;
+        except Exception as e:
+            return [], f&quot;december basket unreadable ({e}); recompute needed&quot;
+    return _reversal_candidates_live(min_loss)
+
+
+def _reversal_candidates_live(min_loss: float) -&gt; tuple[list[dict], str]:
+    &quot;&quot;&quot;Fallback in-season compute if no December basket file exists — mirrors december_dislocation.&quot;&quot;&quot;
+    try:
+        from verticals.deep_value import fundamentals as F
+        from verticals.deep_value.fundamentals import merger_pending, is_foreign_filer
+        import urllib.request, yfinance as yf
+        req = urllib.request.Request(&quot;https://www.sec.gov/files/company_tickers.json&quot;, headers=HDRS)
+        with urllib.request.urlopen(req, timeout=45) as r:
+            tick = json.load(r)
+        cik2sym = {v[&quot;cik_str&quot;]: v[&quot;ticker&quot;] for v in tick.values()}
+        xs = F.build_cross_section()
+        rows = [{&quot;sym&quot;: cik2sym[c], &quot;cik&quot;: c, **rec} for c, rec in xs.items()
+                if cik2sym.get(c) and &quot;.&quot; not in cik2sym[c] and &quot;-&quot; not in cik2sym[c]]
+        syms = [r[&quot;sym&quot;] for r in rows]
+        ytd = {}
+        for i in range(0, len(syms), 100):
+            batch = syms[i:i + 100]
+            try:
+                df = yf.download(batch, start=f&quot;{datetime.date.today().year}-01-01&quot;,
+                                 progress=False, auto_adjust=True)[&quot;Close&quot;]
+            except Exception:
+                continue
+            for s in batch:
+                try:
+                    ser = df[s].dropna() if hasattr(df, &quot;columns&quot;) else df.dropna()
+                    if len(ser) &gt; 20:
+                        ytd[s] = float(ser.iloc[-1] / ser.iloc[0] - 1)
+                except Exception:
+                    pass
+        cands = []
+        for r in rows:
+            yret = ytd.get(r[&quot;sym&quot;])
+            if yret is None or yret &gt; min_loss / 100.0:
+                continue
+            ok, _ = _quality(r)
+            if not ok:
+                continue
+            if merger_pending(r[&quot;cik&quot;]) or is_foreign_filer(r[&quot;cik&quot;]):
+                continue
+            cands.append({&quot;sym&quot;: r[&quot;sym&quot;], &quot;ytd_pct&quot;: round(yret * 100, 1),
+                          &quot;score&quot;: round(abs(yret) * 100, 1), &quot;ebit_ttm&quot;: r.get(&quot;OperatingIncomeLoss&quot;),
+                          &quot;note&quot;: &quot;REVERSAL re-entry (live compute) — DD+court MANDATORY before any ladder&quot;})
+        cands.sort(key=lambda c: -c[&quot;score&quot;])
+        return cands[:40], f&quot;live compute ({len(rows)} universe)&quot;
+    except Exception as e:
+        return [], f&quot;live compute failed ({e})&quot;
+
+
+def scan(min_loss: float, force: bool) -&gt; dict:
+    today = datetime.date.today()
+    w = _next_windows(today)
+    phase, action, days_to = phase_for(today, w)
+    active = in_reversal(today, w) or force
+    candidates, basket_src = [], &quot;dormant — loss basket not set until the December window&quot;
+    if active:
+        candidates, basket_src = _reversal_candidates_from_dec_basket(min_loss)
+    return {
+        &quot;asof&quot;: today.isoformat(),
+        &quot;phase&quot;: phase,
+        &quot;action&quot;: action,
+        &quot;next_selling_window&quot;: w[&quot;selling_window&quot;],
+        &quot;next_reversal_window&quot;: w[&quot;reversal_window&quot;],
+        &quot;days_to&quot;: days_to,
+        &quot;days_to_reversal&quot;: days_to[&quot;reversal_window_start&quot;],
+        &quot;min_loss_pct&quot;: min_loss,
+        &quot;basket_source&quot;: basket_src,
+        &quot;candidates&quot;: candidates,
+        &quot;note&quot;: &quot;FLOW class — the REVERSAL leg that pairs with december_dislocation. Small-caps dumped &quot;
+                &quot;for December tax losses SNAP BACK in January as the price-INSENSITIVE forced selling &quot;
+                &quot;lifts. The effect survives ONLY in small caps too small for the factor funds that &quot;
+                &quot;arbitraged it out of large caps (a CAPACITY edge). Off-season = a dated countdown; the &quot;
+                &quot;loss basket isn&#x27;t set until December, so EMPTY candidates off-season is CORRECT. In the &quot;
+                &quot;reversal window it re-frames december_dislocation&#x27;s already-screened basket as BUY-the-&quot;
+                &quot;bounce re-entries. The rebound is a FLOW re-rating, not a fundamental call — quality-at-&quot;
+                &quot;a-loss DD + court is MANDATORY before any re-entry (that cohort is where value traps hide).&quot;,
+    }
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument(&quot;--force&quot;, action=&quot;store_true&quot;, help=&quot;pull the basket outside the reversal window (test)&quot;)
+    ap.add_argument(&quot;--sample&quot;, type=int, default=None, help=&quot;unused off-season; kept for parity&quot;)
+    ap.add_argument(&quot;--min-loss&quot;, type=float, default=-30.0, help=&quot;min YTD loss %% to count as dumped&quot;)
+    a = ap.parse_args()
+    res = scan(a.min_loss, a.force)
+    sw, rw = res[&quot;next_selling_window&quot;], res[&quot;next_reversal_window&quot;]
+    d = res[&quot;days_to&quot;]
+    print(f&quot;=== JANUARY REVERSAL SCANNER  {res[&#x27;asof&#x27;]} ===&quot;)
+    print(f&quot;  PHASE: {res[&#x27;phase&#x27;]}&quot;)
+    print(f&quot;  SELLING window  {sw[&#x27;start&#x27;]} -&gt; {sw[&#x27;end&#x27;]}  (opens {d[&#x27;selling_window_start&#x27;]:+d}d)&quot;)
+    print(f&quot;  REVERSAL window {rw[&#x27;start&#x27;]} -&gt; {rw[&#x27;end&#x27;]}  (opens {d[&#x27;reversal_window_start&#x27;]:+d}d, &quot;
+          f&quot;closes {d[&#x27;reversal_window_end&#x27;]:+d}d)&quot;)
+    print(f&quot;  ACTION: {res[&#x27;action&#x27;]}&quot;)
+    print(f&quot;  basket: {res[&#x27;basket_source&#x27;]}&quot;)
+    if res[&quot;candidates&quot;]:
+        for c in res[&quot;candidates&quot;][:15]:
+            ebit = c.get(&quot;ebit_ttm&quot;)
+            ebit_s = f&quot;{round(ebit/1e6)}M&quot; if ebit else &quot;?&quot;
+            print(f&quot;  {c[&#x27;sym&#x27;]:&lt;6} YTD {c[&#x27;ytd_pct&#x27;]:&gt;7.1f}%  score {c.get(&#x27;score&#x27;):&gt;5}  EBIT ttm {ebit_s}&quot;)
+    else:
+        print(&quot;  candidates: [] — DORMANT off-season BY DESIGN (nothing to buy the bounce in yet)&quot;)
+    OUT.write_text(json.dumps(res, indent=1))
+    print(f&quot;[-&gt; {OUT.name}]&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</pre></div></body></html>

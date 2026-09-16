@@ -1,0 +1,524 @@
+[
+  {
+    "ticker": "MVST",
+    "cik": "0001760689",
+    "company": "Microvast Holdings, Inc.",
+    "n_claims": 9,
+    "n_scores": 9,
+    "severity_counts": {
+      "PASS": 2,
+      "MODERATE_UNDERDELIVERY": 1,
+      "SEVERE_UNDERDELIVERY": 2,
+      "RED_FLAG_NEGATIVE": 2,
+      "UNVERIFIABLE": 2
+    },
+    "composite_score": 1.5714285714285714,
+    "filing": "0001628280-26-018264_10-K.txt",
+    "red_flag_claims": [
+      {
+        "claim_id": "C5",
+        "claim_text": "Loss of conditional DOE grant; subject of stockholder demands and Schelling securities class action.",
+        "severity": "RED_FLAG_NEGATIVE",
+        "supports": [
+          "usaspending.query_recipient_contracts(Microvast)=0 federal contracts \u2014 no DoD / DOE contract revenue.",
+          "usaspending.query_recipient_grants(Microvast)=1 small grant: DEEE0008366, $499,972 (a minor DOE financial assistance award) \u2014 NOT the major ~$200M conditional DOE grant that the company referenced.",
+          "Filing itself confirms 'loss of a conditional grant from the United States Department of Energy' and pending securities class action (Schelling v. Microvast, S.D. Tex., motion to dismiss granted in part Aug 2025; discovery in progress)."
+        ],
+        "M_check": "usaspending.query_recipient_contracts / grants for DOE award verification",
+        "M_value": "Only $499,972 in cumulative DOE-grant assistance; no large-dollar DOE LPO / grant present",
+        "interpretation": "Heuristic 5 (USAspending DOE coverage) \u2014 major DOE LPO and grant awards DO show up. The absence of any large MVST DOE award post-cutoff confirms the rescission. The company itself acknowledges loss of the conditional grant and resulting securities litigation, with class certification briefing scheduled for June-October 2026. This is a hard adverse signal: a flagship US-policy win that did not materialize, plus active securities-fraud allegations centered on that very disclosure. RED_FLAG_NEGATIVE \u2014 both the operational loss and the active litigation overhang."
+      },
+      {
+        "claim_id": "C6",
+        "claim_text": "Going-concern doubt initially raised; $169.2M cash (only $105M unrestricted; $62.2M trapped in China + Europe subsidiaries); $140.9M convertible loan at SOFR+9.75%; stock at $2.10 vs $11.50 warrant strike.",
+        "severity": "RED_FLAG_NEGATIVE",
+        "supports": [
+          "Self-disclosed: 'substantial doubt about our ability to continue as a going concern' raised, with management mitigation plan based on operating cash flow + refinancing + ATM offering.",
+          "edgar_fts.query_fulltext(Microvast 8-K, CIK 1760689)=179 hits including frequent capital-raising / ATM / amendment 8-Ks consistent with chronic refinancing activity.",
+          "Convertible loan at SOFR+9.75% (3.75% PIK + cash) is distressed-credit pricing, not investment-grade.",
+          "Stock $2.10 vs $11.50 warrant strike = 82% out of the money; warrants effectively worthless; standard de-SPAC battery distress fingerprint."
+        ],
+        "M_check": "edgar_fts.query_fulltext for capital-event 8-K cadence; self-disclosure of going concern",
+        "M_value": "Going-concern doubt + distressed convertible coupon + trapped foreign cash + sub-$3 share price",
+        "interpretation": "Heuristic 10 (delisting / going-concern fingerprints) \u2014 multiple distress markers present. Critically, $62.2M of cash is held in China/Europe subsidiaries and is NOT readily repatriable due to PRC FX controls + adverse US tax \u2014 effectively the US parent has only ~$43M of usable cash against $140.9M of distressed convertible debt and $19.95M+ in unpaid US construction liens. The going-concern qualification was 'alleviated' contingent on assumed refinancing and ATM dilution \u2014 both of which compound dilution risk for equity holders. RED_FLAG_NEGATIVE."
+      }
+    ],
+    "severe_claims": [
+      {
+        "claim_id": "C4",
+        "claim_text": "Clarksville, TN 577,000 sq ft owned facility for ESS/LFP cell production; construction slowed Q4 2023 due to financing; $19.95M DPR Construction lien dispute; $23.6M total liens received.",
+        "severity": "SEVERE_UNDERDELIVERY",
+        "supports": [
+          "epa_frs.query_facilities(Microvast, TN)=1 facility, but it is 'TVA HERTZ TN DELIVERY POINT TO MICROVAST' \u2014 a utility power-delivery point, NOT an EPA-permitted Microvast manufacturing facility.",
+          "Same result with city_filter=Clarksville \u2014 no Microvast-operated EPA-regulated facility in Tennessee.",
+          "Filing acknowledges Clarksville expansion is incomplete, repurposed from 53.5Ah to LFP, blocked by mechanics liens, subject to WARN-Act layoff settlement, restated impairment charge."
+        ],
+        "M_check": "epa_frs.query_facilities for EPA-regulated factory existence",
+        "M_value": "Zero Microvast operating facilities in EPA FRS for TN; only a TVA utility delivery point exists",
+        "interpretation": "Heuristic 1 (EPA FRS scope) \u2014 battery production facilities ARE EPA-regulated for hazmat / air permits. Absence of a Microvast-named EPA-permitted facility in TN, despite a 577,000 sq ft 'owned manufacturing' property, confirms the structure exists but is NOT operating as a permitted battery factory. The disclosed mechanics liens ($23.6M), WARN-Act layoff class action, $19.95M unpaid contractor dispute, and impairment-restatement all corroborate that Clarksville is a stranded asset, not a producing US factory. SEVERE_UNDERDELIVERY relative to the original 2021 promise of US-domestic Clarksville production by 2023-2024."
+      },
+      {
+        "claim_id": "C9",
+        "claim_text": "Restatement of Q2 2024 and Q3 2024 quarterly financial statements due to Clarksville facility impairment error; material weakness in internal controls.",
+        "severity": "SEVERE_UNDERDELIVERY",
+        "supports": [
+          "edgar_fts.query_fulltext('restatement', CIK 0001760689)=18 hits.",
+          "Including 10-Q/A filed 2025-03-31 (accession 0001760689-25-000006) for the Sep 30 2024 period \u2014 confirming the restatement filing.",
+          "Self-disclosed material weakness in ICFR; loss of smaller-reporting-company status effective Dec 31 2025 will require expanded disclosures from Q1 2026 onward."
+        ],
+        "M_check": "edgar_fts.query_fulltext for restatement / 10-Q/A filings",
+        "M_value": "Restatement confirmed via 10-Q/A filing; multiple restatement references in MVST's own filings",
+        "interpretation": "Restatement is corroborated by the actual 10-Q/A filing in EDGAR. Heuristic 11 (revenue-recognition pattern) is adjacent \u2014 material weakness + restatement focused on the SAME asset (Clarksville) that is the subject of mechanics liens, WARN-Act layoff settlement, and construction-dispute litigation. This is a clustered red-flag pattern: bad accounting and bad operating outcome on the same flagship US asset. Combined with the prior 2021 SPAC-period restatement of Tuscan/Microvast financials, this is a repeat-restater pattern. SEVERE_UNDERDELIVERY for governance and controls."
+      }
+    ],
+    "moderate_claims": [
+      {
+        "claim_id": "C7",
+        "claim_text": "Order backlog of $196.1M as of YE2025, majority expected fulfilled in 2026 and 2027.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": [
+          "edgar_fts.query_fulltext(Microvast, CIK Ford 0000037996)=0 hits \u2014 Ford does not mention Microvast.",
+          "edgar_fts.query_fulltext(Microvast, CIK GM 0001467858)=0 hits \u2014 GM does not mention Microvast.",
+          "Backlog disclosed as a single aggregate number with no customer concentration breakdown, no signed-PO vs LOI split."
+        ],
+        "M_check": "edgar_fts.query_fulltext for top-tier US OEM corroboration",
+        "M_value": "No US OEM (Ford/GM) disclosure of Microvast as a counterparty",
+        "interpretation": "MVST does not claim Ford or GM as customers, so the Ford/GM absence is not a contradiction. However, $196.1M of backlog (~12 months of revenue at current run rate) with no segmentation between firm POs and indicative orders, and 'majority' fulfilled across 2026 AND 2027 (i.e., back-end loaded), against a going-concern backdrop and Huzhou Phase 3.2 ramp risk, is soft. Heuristic 11 (revenue-recognition pattern) \u2014 at MVST's stage with material restatement history, an undifferentiated backlog should be discounted. MODERATE_UNDERDELIVERY for disclosure granularity, not for fabricated revenue."
+      }
+    ]
+  },
+  {
+    "ticker": "SES",
+    "cik": "0001819142",
+    "company": "SES AI Corp.",
+    "n_claims": 7,
+    "n_scores": 7,
+    "severity_counts": {
+      "PASS": 0,
+      "MODERATE_UNDERDELIVERY": 4,
+      "SEVERE_UNDERDELIVERY": 1,
+      "RED_FLAG_NEGATIVE": 1,
+      "UNVERIFIABLE": 1
+    },
+    "composite_score": 1.5,
+    "filing": "0001819142-26-000010_10-K.txt",
+    "red_flag_claims": [
+      {
+        "claim_id": "C4",
+        "claim_text": "Strategic pivot from in-house Li-Metal battery manufacturing toward AI/Molecular Universe; capex redirected from manufacturing equipment to AI infrastructure; reduced headcount.",
+        "severity": "RED_FLAG_NEGATIVE",
+        "supports": [
+          "10-K Item 7 MD&A (Investing Activities)",
+          "10-K Item 1 Business"
+        ],
+        "M_check": "epa_frs.query_facilities for Woburn MA",
+        "M_value": "SES (search='SES', state=MA, city=Woburn): 0 facilities. SolidEnergy (state=MA): 1 facility found \u2014 SOLIDENERGY SYSTEMS CORP, 35 Cabot Rd, Woburn MA \u2014 registered under legacy name, NOT updated to current SES AI branding",
+        "interpretation": "Pattern-recognition RED_FLAG: A pre-revenue battery name that originally raised SPAC capital on the OEM JDA / Li-Metal SOP story has, by FY2025, (a) seen its three US-named OEM JDAs all conclude or downshift, (b) zeroed out OEM-funded R&D ($0 vs $8.575M PY), (c) explicitly redirected capex AWAY from battery manufacturing equipment toward 'AI infrastructure / GPU rental / software,' (d) rebranded itself to 'SES AI' and stood up Molecular Universe and a JV with Hisun (which 'will allow us to manufacture our newly discovered materials at commercial scale for customers' \u2014 i.e. SES is no longer planning to manufacture cells at scale itself), (e) acquired a China BESS company (UZ Energy) that now generates 35% of revenue, and (f) reduced headcount, including R&D personnel. Under Heuristic 10, this is a textbook SPAC-era battery name pivoting to an AI buzzword to preserve cash and equity-story optionality without delivering the original battery commercialization. Capex guidance for 2026 is explicitly that 'we continue to spend on AI related infrastructure rather than invest in manufacturing equipment.' This is the most decision-relevant signal in the filing: the original SES investment thesis (lithium-metal cells in named OEM EVs at named SOP year) has been quietly abandoned by management, while the new thesis (AI for materials discovery + acquired China ESS revenue) is unproven and at sub-scale. RED_FLAG because management has effectively confirmed the framework's planned-vs-operational gap by repurposing the capital base."
+      }
+    ],
+    "severe_claims": [
+      {
+        "claim_id": "C1",
+        "claim_text": "Hyundai B-sample JDA concluded December 2025; no announced advancement to C-sample, validation, or SOP.",
+        "severity": "SEVERE_UNDERDELIVERY",
+        "supports": [
+          "10-K Note 5 Partnerships"
+        ],
+        "M_check": "edgar_fts.query_fulltext (general 'SES AI'); Hyundai files no SEC forms (Korean issuer, EDGAR not applicable)",
+        "M_value": "271 EDGAR hits for 'SES AI' but no SEC-filer corroboration possible for Hyundai (foreign issuer not on EDGAR for annual report)",
+        "interpretation": "Calibration Heuristic 3 (planned vs operational / STAGE LADDER): Hyundai started in Dec 2020 with a discovery JDA, advanced to A-sample (Aug 2021), then to B-sample (March 2024 extension). The B-sample JDA *concluded* in December 2025 with NO disclosed follow-on for C-sample or validation. Under the framework's stage ladder, this is a STALLED ladder: the JDA reached B-sample and then was let to expire, despite >5 years of joint work. Combined with $0 JDA reimbursements from any OEM partner in 2025 vs $8.575M in 2024 (also disclosed in Note 5), all OEM-funded R&D has dried up. The pre-SPAC narrative was OEM-funded SOP path; the post-cutoff reality is a quiet termination disclosed only deep in the financial-statement notes. Cannot HARD-contradict via OEM disclosure because Hyundai is a foreign issuer with no EDGAR coverage (Heuristic 2 UNVERIFIABLE caveat), but the company's own disclosure is itself the SEVERE-UNDERDELIVERY signal."
+      }
+    ],
+    "moderate_claims": [
+      {
+        "claim_id": "C2",
+        "claim_text": "GM JDA concluded September 2024 and GM mutually terminated Director Nomination Agreement October 29, 2024; GM no longer a related party.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": [
+          "10-K Item 13 Related-Party Transactions",
+          "10-K Note 5 Partnerships"
+        ],
+        "M_check": "edgar_fts.query_fulltext cik=0001467858 (GM) for 'SES AI' and 'SolidEnergy'",
+        "M_value": "GM 10-K mentions of 'SES AI' = 0; mentions of 'SolidEnergy' = 0",
+        "interpretation": "Calibration Heuristic 7 (counterparty-disclosure threshold): SES's flagship US-OEM JDA (one of the framework's HARD-CONTRADICTION candidates per the cohort prompt) concluded September 2024 and GM exited the board the next month. GM's 10-K filings contain ZERO references to SES AI or SolidEnergy. While JDAs typically don't appear in OEM 10-Ks pre-SOP (so absence alone wouldn't be RED_FLAG), here the company itself discloses the termination, and the equity stake on which the board seat was conditioned has been allowed to fall below 5%. Under Heuristic 4 (investment vs operating), the original GM stake was investment, not a design-win; that investment thesis has now also unwound. SEVERE because GM was the most-frequently-cited OEM in SES IPO marketing and was the only major counterparty filing on EDGAR (verifiable). Stops short of RED_FLAG_NEGATIVE because SES truthfully discloses the termination and books no GM revenue.  [POST-HOC: downgraded from SEVERE_UNDERDELIVERY to MODERATE \u2014 Heuristic 7 pattern subject to counterparty-materiality caveat: focal company may be too small to trigger counterparty's disclosure threshold, so silence isn't conclusive.]",
+        "original_severity": "SEVERE_UNDERDELIVERY"
+      },
+      {
+        "claim_id": "C3",
+        "claim_text": "Honda A-sample JDA concluded June 2023; replaced by B-sample services agreement (Jan 2025 through June 2026). Another OEM B-Sample JDA concluded December 2025.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": [
+          "10-K Note 5 Partnerships"
+        ],
+        "M_check": "edgar_fts.query_fulltext cik=0000715153 (Honda 20-F) for 'SES AI', 'SolidEnergy', 'Apollo'",
+        "M_value": "Honda 20-F mentions of 'SES AI' = 3 hits (filings dated 2022-06-22, 2023-06-23, 2024-06-20); 'SolidEnergy' = 0; 'Apollo' = 0. Most recent Honda 20-F filed 2025-06-18 (covers FY ending March 2025) does NOT appear in 'SES AI' hits.",
+        "interpretation": "Calibration Heuristic 7: Honda IS a SEC-filer (HMC 20-F), so this is partially verifiable. Honda's FY2022-2024 20-Fs reference SES AI as a battery JDA counterparty (consistent with disclosed Honda A-sample JDA Dec 2021-June 2023). However the MOST RECENT pre-cutoff Honda 20-F (filed June 18, 2025, covering FY ending March 2025) does NOT mention SES AI. SES disclosed in this 10-K that Honda replaced the original JDA with a B-sample services agreement in January 2025 \u2014 Honda's contemporaneous 20-F omits this. That is a notable divergence: a JDA-style relationship being downgraded to a services agreement appears to no longer rise to the level of a 20-F item-level disclosure on Honda's side. Honda's next 20-F (FY ending March 2026) is due AFTER cutoff (~June 2026), so we cannot test the June 2026 contract expiry. Honda is the only remaining named US-filing OEM still in any contractual relationship with SES, and that relationship is structured to expire June 2026 with no announced extension. Score MODERATE rather than SEVERE because (a) the relationship still exists on paper through June 2026, and (b) the framework's threshold for pre-SOP JDA disclosure absence is MODERATE per Heuristic 7."
+      },
+      {
+        "claim_id": "C5",
+        "claim_text": "Acquired UZ Energy (China BESS manufacturer) on September 15, 2025 for ~$25.8M; UZ Energy contributed ~35% of FY2025 revenue.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": [
+          "10-K Item 7 MD&A",
+          "10-K Item 9A Controls (UZ Energy carve-out)"
+        ],
+        "M_check": "edgar_fts.query_fulltext('UZ Energy')",
+        "M_value": "20 EDGAR hits for 'UZ Energy', all from SES AI 8-Ks/10-Q/10-K filings starting July 2025 \u2014 no independent third-party SEC corroboration (consistent with UZ Energy being a private China company)",
+        "interpretation": "Calibration Heuristic 11 (revenue-recognition pattern): SES's $21.0M of FY2025 'revenue from customers' is essentially manufactured: $13.6M is service revenue from OEM JDA contracts that have now all concluded; the $7.4M of product revenue is driven almost entirely by UZ Energy ESS systems sales \u2014 a business model entirely unrelated to the original Li-Metal EV cell thesis, in a different country, in a different end-market (residential/commercial BESS in China). The Sept 15, 2025 close means UZ Energy contributed only ~3.5 months of FY2025 yet drove 35% of total revenue and is excluded from FY2025 internal-control attestation per Item 9A. Revenue 'growth' of 929% YoY is therefore a function of (a) full year of service-contract billings vs one quarter PY, and (b) an acquired company. Without the acquisition, organic product revenue would be ~$0.1M, the same as PY. MODERATE because the acquisition itself is disclosed and the dollar amounts are accurate, but the revenue-quality narrative materially overstates organic progress of the underlying battery business."
+      },
+      {
+        "claim_id": "C6",
+        "claim_text": "Plan to develop NDAA-compliant drone cell manufacturing capacity in Korean facility for U.S. government and defense-related customers as a future revenue driver.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": [
+          "10-K Item 1 Business",
+          "10-K Item 7 MD&A"
+        ],
+        "M_check": "usaspending.query_recipient_contracts (SES AI), usaspending.query_dod_contracts (SolidEnergy)",
+        "M_value": "0 federal contracts under 'SES AI' (any agency, 2022-2026). 0 DoD contracts under 'SolidEnergy' (2020-2026). Total federal award $: 0.",
+        "interpretation": "Calibration Heuristic 5 (source-jurisdiction): USAspending covers DoD contracts that would feed an NDAA-compliant drone-cell program. SES has ZERO federal contracts of any kind through cutoff. The claim is explicitly phrased as forward-planned ('we are planning to develop... uncertainty regarding the timing and magnitude of customer demand'), so it is not RED_FLAG for absence \u2014 but it is MODERATE because the company is signaling a defense-customer revenue thesis with no contracts, no MOUs, no SBIR/STTR awards, no DoD validation, and the Korean facility is not yet NDAA-compliant. Per Heuristic 3, this is a JDA-equivalent stage (pre-design-win) being floated alongside the original auto-OEM thesis (which is unwinding) and the AI thesis (which is nascent), as a third potential growth lever. The pattern of three concurrent unproven theses in one filing is itself a calibration signal."
+      }
+    ]
+  },
+  {
+    "ticker": "SLDP",
+    "cik": "0001844862",
+    "company": "Solid Power, Inc.",
+    "n_claims": 10,
+    "n_scores": 10,
+    "severity_counts": {
+      "PASS": 2,
+      "MODERATE_UNDERDELIVERY": 5,
+      "SEVERE_UNDERDELIVERY": 1,
+      "RED_FLAG_NEGATIVE": 1,
+      "UNVERIFIABLE": 1
+    },
+    "composite_score": 1.1111111111111112,
+    "filing": "0001104659-26-019435_10-K.txt",
+    "red_flag_claims": [
+      {
+        "claim_id": "C2_FORD_JDA_WINDDOWN",
+        "claim_text": "Ford JDA extended again Dec 31 2025 'in connection with winding up of cell development activities,' expected to expire March 31, 2026.",
+        "severity": "RED_FLAG_NEGATIVE",
+        "supports": "Self-disclosed -- the company itself acknowledges Ford is winding down. EDGAR fulltext on Ford CIK 0000037996 for 'Solid Power' shows only 1 hit, an 8-K from 2021-05-26 (the original announcement). No subsequent Ford 10-K mentions Solid Power.",
+        "M_check": "edgar_fts.query_fulltext search_term='Solid Power' cik='0000037996' = 1 hit (2021 8-K only).",
+        "M_value": "Ford EDGAR mentions of Solid Power: 1 (announcement 8-K 2021). Zero in Ford 10-K filings. Ford was previously a >5% holder; now winding down cell-development side of JDA.",
+        "interpretation": "This is a HARD CONTRADICTION to the original 2021 design-win narrative. Ford was one of two flagship OEM JDA partners (along with BMW). The cell-development JDA is being wound up; the company is left hoping to 'pursue opportunities to supply Ford with our electrolyte material' post-expiration -- aspirational, not contracted. Per Layer 3 Rule 7, Ford 10-K silence on the relationship after 2022 + explicit wind-down acknowledgment = RED_FLAG_NEGATIVE for the design-win thesis."
+      }
+    ],
+    "severe_claims": [
+      {
+        "claim_id": "C8_REVENUE_QUALITY_RELATED_PARTY",
+        "claim_text": "2025 revenue $21.7M = $6.0M government + $15.8M collaborative (primarily SK On milestone work); BMW related-party revenue collapsed $5.41M -> $0.189M (-96% YoY); $122.6M operating loss; $274.9M accumulated deficit.",
+        "severity": "SEVERE_UNDERDELIVERY",
+        "supports": "Audited financial statements -- not disputed. Calibration Heuristic 11 (battery-specific revenue recognition pattern): the entire 2025 revenue base is JDA / line-installation milestone revenue + DOE grant, NOT series-production commercial revenue. BMW related-party revenue down 96% YoY is a material negative signal.",
+        "M_check": "Audited financials cross-referenced against Note 'Related Party Transactions' for BMW. No M-source independent of company filings can corroborate revenue quality classification.",
+        "M_value": "$15.8M collaborative revenue, primarily SK On (foreign related party that holds equity); $6.0M government grant; $0.189M BMW related-party (collapsed from $5.41M). Accumulated deficit $274.9M against ~12-month cash burn ~$73M.",
+        "interpretation": "Calibration Heuristic 11 + Calibration Heuristic 4: revenue is overwhelmingly (a) milestone-based development services from OEM/Tier-1 partners that are ALSO equity investors (SK On invested $30M at de-SPAC; BMW holds >5% and board seat), and (b) DOE grant. There is essentially NO commercial-product revenue. The 96% YoY collapse in BMW revenue, combined with Ford wind-down (C2), suggests the JDA-monetization phase is contracting before commercial-supply phase has begun. SEVERE."
+      }
+    ],
+    "moderate_claims": [
+      {
+        "claim_id": "C1_BMW_JDA",
+        "claim_text": "Long-standing JDA with BMW (since 2016/2017); JDA was amended September 2024 to extend until certain development milestones, with BMW termination rights beginning Dec 31, 2025; BMW i7 test vehicle May 2025.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": "edgar_fts.query_fulltext (cik=BMW NA -- not a US filer; BMW Group files as foreign issuer with partial EDGAR coverage). Self-disclosed amendments show repeated extensions and a termination-rights clause active as of 2025-12-31. BMW related-party revenue collapsed from $5.41M (2024) to $0.189M (2025) per Note on Related Party Transactions.",
+        "M_check": "edgar_fts.query_fulltext search_term='Solid Power' (all 10-K/20-F since 2024) returned 48 hits, ALL of which are Solid Power's own filings -- zero external counterparty corroboration in EDGAR.",
+        "M_value": "48 EDGAR 10-K/20-F hits, 0 external; BMW is foreign filer (UNVERIFIABLE per Layer 3 Rule 7 caveat); related-party BMW revenue fell 96% YoY ($5.41M -> $0.189M).",
+        "interpretation": "JDA itself is real (signed 2017+) and BMW retains board seat + >5% stake. But Stage Ladder: still JDA / R&D-license stage, no SOP. Termination rights now active. 96% YoY collapse in BMW-related revenue + i7 'test vehicle' (demonstration, not production) signals deceleration. Apply Calibration Heuristic 3 with extra weight: this is a JDA, not a series-production deal -- and trending backwards. Foreign-issuer caveat tempers from RED to MODERATE."
+      },
+      {
+        "claim_id": "C4_SAMSUNG_BMW_JEA",
+        "claim_text": "October 2025 Joint Evaluation Agreement with Samsung SDI and BMW AG to develop a demonstration vehicle with all-solid-state batteries.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": "Both counterparties are foreign filers (Samsung SDI -- Korean; BMW AG -- German). EDGAR fulltext search for 'Samsung SDI' returns 50 hits in 10-K/10-Q/20-F since 2024 but cannot independently confirm Solid Power role. Press-release-style disclosure: 'Joint Evaluation Agreement' is below JDA in stage hierarchy.",
+        "M_check": "edgar_fts.query_fulltext search_term='Samsung SDI' = 50 hits since 2024 (broad); search for combined 'Solid Power' + 'Samsung SDI' shows only Solid Power's own filings.",
+        "M_value": "0 independent SEC corroboration -- but both counterparties are foreign filers (Korean / German), so absence is expected. Foreign-issuer caveat partially applies.",
+        "interpretation": "Stage ladder: 'Joint Evaluation Agreement' (Oct 2025) sits BELOW a JDA, BELOW A-sample / B-sample / C-sample, and far below SOP. Solid Power supplies electrolyte; Samsung SDI fabricates cells; BMW determines pass/fail. Demonstration vehicle, not SOP. Calibration Heuristic 3 (extra weight): conflating evaluation agreement with commercialization milestone = MODERATE. Marketing as 'meaningful progress on our path towards commercialization' is overstatement of stage."
+      },
+      {
+        "claim_id": "C7_CONTINUOUS_PILOT_LINE",
+        "claim_text": "Continuous electrolyte production pilot line to be commissioned by end of 2026; 75 MT/yr capacity; aspirational ROK partner facility up to 500 MT/yr.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": "EPA FRS confirms 3 EPA-registered SLDP facilities in Colorado (Louisville HQ pilot site; Thornton facility; Site II in Broomfield) -- physical pilot infrastructure exists. DOE grant ($50M) co-funds the continuous line.",
+        "M_check": "epa_frs.query_facilities facility_name='Solid Power' state_abbr='CO' -> 3 facilities (SOLID POWER - 486 S. PIERCE AVE Louisville; SOLID POWER - THORNTON FACILITY 14902 Grant St; SOLID POWER SITE II Broomfield 14902 Grant St Ste 140).",
+        "M_value": "3 EPA-regulated CO facilities (Louisville, Thornton, Broomfield) -- pilot infrastructure exists per EPA FRS. The 500 MT/yr Korean facility is explicitly 'pursue a potential partnership' -- no partner named, no site selected.",
+        "interpretation": "Pilot existence is verified by EPA FRS. However, two-stage claim: (a) 75 MT/yr continuous line by end-2026 = aspirational but supported by funded equipment ordering (PASS); (b) 500 MT/yr Korean facility = pure forward projection with no named partner, no permits, no site. Apply Calibration Heuristic 3 to (b): planned-vs-operational gap is wide. Net = MODERATE for the combined claim."
+      },
+      {
+        "claim_id": "C9_LIQUIDITY_AND_CAPITAL_RAISES",
+        "claim_text": "Total liquidity $336.5M at 12/31/2025; ATM $88.8M net in 2025 (avg $5.06/sh); $122.2M Registered Direct Offering Jan 2026; buyback at $1.05/sh avg in 2025.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": "Audited financials -- liquidity is substantively real. However, the $1.05/sh buyback average (2025) vs $5.06/sh ATM price (2025) is internally inconsistent: it implies the stock traded in a 5x+ range during the year, with the buyback happening at lows and the ATM at highs. This is highly unusual capital allocation.",
+        "M_check": "No external M-source check needed -- audited financials. Calibration Heuristic 10 (distress fingerprints): no Form 15-12G or going-concern, but ATM + Registered Direct + reverse-split-adjacent share count behavior would warrant monitoring.",
+        "M_value": "$336.5M liquidity + $122.2M post-cutoff raise = $458.7M cash runway against $73M annual cash burn ~= 6 years runway. NOT a near-term distress scenario.",
+        "interpretation": "Two competing signals: (a) liquidity is strong with multi-year runway (PASS-leaning), (b) buyback at $1.05 vs ATM at $5.06 is an opportunistic dilution-at-rallies pattern that, while not distress, is a signature of perceived-share-price-management at a pre-revenue speculative name. Net = MODERATE -- raising capital at every available window in advance of a 6+ year runway is more consistent with future dilution-at-need than confidence."
+      },
+      {
+        "claim_id": "C10_VEHICLE_INTEGRATION_BMW",
+        "claim_text": "BMW Group i7 test vehicle featuring Solid Power cells unveiled May 2025 -- 'significant achievement in our partnership.'",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": "Per Calibration Heuristic 5: NHTSA registers complete vehicles, not battery suppliers -- correct M-source choice would be the OEM's annual report (BMW AG, foreign filer with no SEC 20-F coverage). BMW's foreign-issuer status creates an unverifiability floor.",
+        "M_check": "NHTSA query for SLDP is non-applicable per catalog calibration guidance. EDGAR fulltext for 'Solid Power' in BMW filings: BMW AG is a German foreign issuer not filing with SEC EDGAR; no test-vehicle disclosure pathway via US filings.",
+        "M_value": "UNVERIFIABLE by US registry sources; demonstration / test vehicle stage is below SOP by 3-5 stages on the stage ladder.",
+        "interpretation": "A test vehicle is a demonstrator, NOT a production design-win. Stage ladder: test vehicle ~ B-sample / C-sample stage. Conflating test-vehicle reveal with commercialization progress is the central evasion pattern per Calibration Heuristic 3. Combined with the JDA's now-active termination rights (Dec 31, 2025) and 96% BMW-revenue collapse (C8), the test vehicle reads more as showcase than commitment. MODERATE."
+      }
+    ]
+  },
+  {
+    "ticker": "QS",
+    "cik": "0001811414",
+    "company": "QuantumScape Corp.",
+    "n_claims": 8,
+    "n_scores": 8,
+    "severity_counts": {
+      "PASS": 2,
+      "MODERATE_UNDERDELIVERY": 4,
+      "SEVERE_UNDERDELIVERY": 1,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 1
+    },
+    "composite_score": 0.8571428571428571,
+    "filing": "0001193125-26-071556_10-K.txt",
+    "red_flag_claims": [],
+    "severe_claims": [
+      {
+        "claim_id": "QS-003",
+        "claim_text": "Pre-revenue; FY2025 op loss $472.6M, net loss $435.1M, accumulated deficit $3.8B, ATM raises $264.2M FY25 + $128.5M FY24.",
+        "severity": "SEVERE_UNDERDELIVERY",
+        "supports": true,
+        "M_check": "edgar_fts.query_fulltext for 'ATM offering' CIK=QS (12 hits across FY23/24/25 10-Q and 10-K)",
+        "M_value": "Recurring ATM offering disclosures every quarter since 2023; FY2025 ATM raised $264.2M (29.5M shares), FY2024 $128.5M (24.9M shares), FY2023 $288.2M public offering. Cumulative dilution >91M shares from 2023-2025 alone. $970.8M cash on hand at YE2025 vs. ~$242M annual operating cash burn = ~4 years of runway absent further dilution.",
+        "interpretation": "Self-disclosure is fully corroborated by recurring EDGAR ATM filings. Calibration #10 (distress fingerprints) applies: ATM-driven cash funding model + listing transfer (NYSE->Nasdaq Dec 2025) + 16 years post-founding still pre-revenue (founded 2010) + 6 years post-deSPAC (2020) still pre-revenue. Accumulated deficit of $3.8B against ZERO commercial revenue is a hard signal of capital destruction. No going-concern qualifier (because of $970M cash) but the recurring ATM cadence implies indefinite repeated dilution. Calibration #10 elevates the severity of forward-revenue/SOP claims \u2014 score SEVERE_UNDERDELIVERY for the implied trajectory to commercialization."
+      }
+    ],
+    "moderate_claims": [
+      {
+        "claim_id": "QS-001",
+        "claim_text": "PowerCo SE (Volkswagen subsidiary) up to $130.7M collaboration; $130M IP-license royalty pre-pay contemplated. Goal: industrialize QSE-5.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": null,
+        "M_check": "edgar_fts.query_fulltext for 'PowerCo' (114 hits, dominated by QS's own 8-K/10-Q/10-K and NOVONIX 6-Ks); 'QuantumScape' in 20-F/6-K (9 hits, all unrelated foreign filers Largo / Arrival / NOVONIX / Wallbox, none from Volkswagen AG)",
+        "M_value": "0 mentions of QuantumScape in any Volkswagen / Volkswagen-affiliate filing on EDGAR. Foreign-filer caveat: VW does not file 20-F (German DAX-listed). No counterparty corroboration available via EDGAR.",
+        "interpretation": "Calibration #2 (foreign-issuer caveat) applies: Volkswagen Group is a German company that does NOT file SEC forms, so EDGAR cannot corroborate. Calibration #3 (stage ladder): QSE-5 is at B/B1 sample, NOT SOP. The amended Collaboration Agreement is a pre-SOP JDA. The PowerCo IP License Agreement and $130M pre-paid royalty have NOT yet been executed as of this filing \u2014 they remain conditional on milestone completion. Calibration #4: VW's $380M is largely equity investment, not a design-win. Calibration #11: the $19.5M received in 2025 was booked as APIC (capital contribution), not revenue, under ASC 730-20 \u2014 explicit acknowledgement of related-party R&D pattern. Pre-SOP stage + conditional milestones = MODERATE_UNDERDELIVERY relative to the marketing emphasis on the partnership."
+      },
+      {
+        "claim_id": "QS-002",
+        "claim_text": "QSE-5 B-samples achieve >800 Wh/L and 15-min 10-80% fast-charge; B1 demoed in Ducati V21L at IAA 2025.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": true,
+        "M_check": "uspto_odp.query_assignee 'QuantumScape' with categorize buckets {solid_state, lithium, battery}",
+        "M_value": "340 patent applications, 125 granted pre-cutoff. Category counts: solid_state=100, lithium=98, battery=55. Granted patents include garnet electrolytes, sintering equipment, ceramic separator, anode-free architectures \u2014 directly on the claimed technology stack.",
+        "interpretation": "Patent base is robust per Calibration Heuristic #8 (n_granted=125 >> 10 threshold, dominant in solid-state/lithium buckets) \u2014 PASS-quality on the IP-portfolio dimension. HOWEVER, Calibration Heuristic #9 (battery-specific energy-density disclosure quality) applies: the >800 Wh/L and 15-min fast-charge claims are stated WITHOUT explicit C-rate, temperature, depth-of-discharge in the disclosure excerpt. These remain B-sample numbers (not C-sample, not validation, not SOP). Stage-ladder discipline (Calibration #3) classifies this as a B-sample lab/cell-level claim, not a production cell claim. Net: MODERATE_UNDERDELIVERY on commercial-readiness implication despite verified IP."
+      },
+      {
+        "claim_id": "QS-004",
+        "claim_text": "Class A stock transferred from NYSE to Nasdaq effective Dec 23, 2025.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": true,
+        "M_check": "edgar_fts.query_fulltext for 'Nasdaq' CIK=QS, forms 8-K,25-NSE (26 hits, including 2025-12-10 8-K announcing the transfer)",
+        "M_value": "Listing transfer 8-K filed 2025-12-10, transfer effective 2025-12-23. No 25-NSE delisting form, no Form 15-12G \u2014 voluntary transfer, not forced delisting.",
+        "interpretation": "Per the filing's plain language and the 8-K trail, this is a voluntary listing transfer, NOT a non-compliance delisting. However, voluntary mid-life NYSE->Nasdaq transfers by deSPAC companies are commonly associated with cost-saving / compliance-flexibility motives. Calibration #10 (delisting/going-concern fingerprints) treats this as a partial distress fingerprint: not a Form 15 / 25-NSE, but a non-routine event for a 5-year NYSE incumbent. Combined with QS-003 dilution pattern, score MODERATE_UNDERDELIVERY (not RED \u2014 the transfer was orderly and disclosed)."
+      },
+      {
+        "claim_id": "QS-008",
+        "claim_text": "Volkswagen has cumulative equity investment of ~$380M in QS since 2012.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": true,
+        "M_check": "edgar_fts.query_fulltext 'Volkswagen' CIK=QS (94 hits across QS 10-K/10-Q/8-K/DEF 14A from 2020-2026)",
+        "M_value": "94 self-disclosures of Volkswagen by QS across all SEC forms; investment amount, share ownership (Volkswagen historically held large Class B/voting stake from pre-IPO), and ongoing relationship consistently re-disclosed. No 13D/13G in EDGAR for VW because as a strategic investor on the board, VW filed via QS proxy materials rather than separate Schedules.",
+        "interpretation": "Calibration #4 (investment vs operating) is the key heuristic: $380M equity is real and consistently re-disclosed in QS's own filings, but it is an INVESTMENT, NOT a design-win, NOT a series-production commitment. The pattern of disclosing the equity investment alongside the PowerCo JDA (QS-001) is exactly the 'amplify perceived progress' pattern the framework flags. The investment is genuine; the framing as commercial validation is what gets discounted. Score MODERATE_UNDERDELIVERY (not RED \u2014 the equity is real and disclosed; the misdirection risk is in conflation with operational progress)."
+      }
+    ]
+  },
+  {
+    "ticker": "ENVX",
+    "cik": "0001828318",
+    "company": "Enovix Corp.",
+    "n_claims": 8,
+    "n_scores": 8,
+    "severity_counts": {
+      "PASS": 1,
+      "MODERATE_UNDERDELIVERY": 5,
+      "SEVERE_UNDERDELIVERY": 0,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 2
+    },
+    "composite_score": 0.8333333333333334,
+    "filing": "0001828318-26-000006_10-K.txt",
+    "red_flag_claims": [],
+    "severe_claims": [],
+    "moderate_claims": [
+      {
+        "claim_id": "C1",
+        "claim_text": "Independent testing laboratory confirmed in December 2025 that the AI-1 smartphone battery delivered volumetric energy density of 935 Wh/L (+12% vs leading silicon-doped commercial smartphone battery).",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": [
+          "uspto_odp.query_assignee:Enovix"
+        ],
+        "M_check": "Patent-portfolio depth proxy + battery-specific Heuristic 9 (energy-density without test conditions).",
+        "M_value": {
+          "n_total_applications": 214,
+          "n_granted": 61,
+          "category_counts": {
+            "silicon_anode": 7,
+            "battery_cell": 155,
+            "lithium": 0,
+            "other": 52
+          }
+        },
+        "interpretation": "Patent depth (61 granted, mostly battery/electrode/cell, 7 silicon-anode in title) is fully consistent with a real silicon-anode platform company \u2014 PASS on patent corroboration. However the 935 Wh/L claim is reported WITHOUT test conditions (rate, temperature, depth-of-discharge) in the 10-K business section, despite Heuristic 9's explicit requirement. Comparison anchor ('leading silicon-doped commercially available battery tested by 12%') is unnamed. Independent-lab attestation is asserted but the lab is not identified. This is a disclosure-quality issue for what is the central technology marketing number, so MODERATE per Heuristic 9. Not SEVERE because conditions aren't actively contradicted elsewhere and the patent base supports the underlying architecture story."
+      },
+      {
+        "claim_id": "C2",
+        "claim_text": "Cell architecture designed to enable silicon anodes to achieve >=1,000 cycles to 80% remaining capacity.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": [
+          "uspto_odp.query_assignee:Enovix"
+        ],
+        "M_check": "Reuse of patent corroboration + Heuristic 9 (test-condition disclosure).",
+        "M_value": {
+          "n_granted": 61,
+          "silicon_anode_titled": 7
+        },
+        "interpretation": "Cycle-life number is also given without rate / DoD / temperature qualifications and is explicitly framed as a DESIGN TARGET ('designed to enable') rather than a measured value on AI-1 production cells. Smartphone applications typically test at 0.5C-1C with shallow DoD, where 1000 cycles is industry-baseline (not a differentiator). MODERATE due to unconditional framing and design-target hedge. The architecture itself is patent-supported \u2014 not SEVERE."
+      },
+      {
+        "claim_id": "C3",
+        "claim_text": "Partnered with a top-tier mobile OEM (unnamed) on AI-1 smartphone battery; delivered 1,000+ AI-1 packs to lead smart-eyewear customer + samples to 9 OEMs/ODMs.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": [
+          "edgar_fts.query_fulltext:Apple-CIK",
+          "edgar_fts.query_fulltext:Enovix-universe"
+        ],
+        "M_check": "Heuristic 7 counterparty-disclosure threshold + Heuristic 6 name-variant + Heuristic 3 stage-ladder.",
+        "M_value": {
+          "apple_10K_8K_DEF14A_hits_for_Enovix": 0,
+          "universe_hits_for_Enovix": 411,
+          "note": "411 universe hits appear dominated by Enovix's own filings"
+        },
+        "interpretation": "The mobile OEM is UNNAMED \u2014 the framework cannot do a counterparty-disclosure cross-check. Apple's filings contain ZERO mentions of Enovix as of cutoff, but Apple does not disclose suppliers individually so absence is not dispositive (UNVERIFIABLE for any specific OEM). On the stage ladder, 'partnered on development' is a JDA-equivalent, not a design-win for series production; the 1,000+ eyewear packs is real product shipment but to one lead customer + 9 ODMs is still sample-stage breadth. Performance obligations on the balance sheet are only $5.3M, supporting that no series-production OEM contract has been booked. MODERATE: the technology engagement is real but the disclosure conflates JDA / sample-shipment with future commercial revenue. Not SEVERE because production-line shipments to a named-lead eyewear customer ARE happening."
+      },
+      {
+        "claim_id": "C7",
+        "claim_text": "Distress markers: accumulated deficit $977.8M, working capital $477.2M, $60M buyback FY25, additional $75M subsequent buyback authorized, 2028 (3.00%) + 2030 (4.75%) Convertibles, ATM, warrant dividend issued July 2025 and early-expired August 2025.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": [
+          "10-K direct disclosure"
+        ],
+        "M_check": "Heuristic 10 (delisting / going-concern fingerprints) + Heuristic 4 (investment vs operating).",
+        "M_value": {
+          "working_capital_M": 477.2,
+          "accumulated_deficit_M": 977.8,
+          "FY25_buyback_M": 58.4,
+          "subsequent_authorization_M": 75.0,
+          "convertible_debt_outstanding": [
+            "2028 @ 3.00%",
+            "2030 @ 4.75%"
+          ],
+          "ATM_in_place": true,
+          "warrant_dividend_issued_2025": 29233276,
+          "warrant_status": "early-expired Aug 29 2025"
+        },
+        "interpretation": "Mixed signals. Going-concern language is present BUT the company has $477M working capital and is buying back its own shares \u2014 that is INCONSISTENT with classic Heuristic 10 distress fingerprint, suggesting more solvency than a typical SPAC-era battery name. However, the simultaneous mix is unusual: convertible debt at 4.75% (2030 issuance), ATM open, buyback executed near 52-week-low prices (avg $10.74), warrant dividend issued AND early-expired within 6 weeks \u2014 these are classic stock-price-management mechanics. Repeated capital-structure churn (Affiliate Notes from Chairman, warrant dividend tied to 30-day VWAP $10.50 condition) is a yellow-flag for managing optics of a stalled commercial ramp. Cumulative deficit ~$978M against effectively pre-revenue commercial ramp (performance obligations only $5.3M) signals burn vs commercial-traction gap. MODERATE."
+      },
+      {
+        "claim_id": "C8",
+        "claim_text": "Securities class action (N.D. Cal. 23-cv-00071-SI) alleges material misstatements about manufacturing scale-up / equipment testing; one statement remains active after Oct 2025 partial dismissal; class cert hearing March 2026.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": [
+          "10-K direct disclosure (Note 10 Commitments)"
+        ],
+        "M_check": "Direct filing disclosure; cross-reference to category of current claims (C1 / C2 / C4 are all in the same lineage \u2014 manufacturing & technology performance statements).",
+        "M_value": {
+          "case_no": "23-cv-00071-SI",
+          "class_period": "2021-08-10 to 2023-10-03",
+          "claim_count_at_issue": 1,
+          "class_cert_hearing": "March 2026"
+        },
+        "interpretation": "Active securities-fraud case targeting the EXACT category of claims the framework is scoring (manufacturing scale-up, equipment testing). One statement survived motion practice and is proceeding to class certification. The 10-K's own forward statements about Fab2 ramp (C4), AI-1 testing (C1), and cycle-life targets (C2) are in the same lineage as the litigated statements. The case is not a death-knell \u2014 partial dismissal granted Jul 2024 and Oct 2025 dismissed 2 of 3 surviving statements \u2014 but it elevates scrutiny on technology / manufacturing claims. MODERATE: a settled or dismissed case would be PASS; an in-progress case with surviving claims at class-cert stage on the same claim-category is a real signal but not catastrophic."
+      }
+    ]
+  },
+  {
+    "ticker": "LAC",
+    "cik": "0001440972",
+    "company": "Lithium Americas Corp.",
+    "n_claims": 7,
+    "n_scores": 7,
+    "severity_counts": {
+      "PASS": 5,
+      "MODERATE_UNDERDELIVERY": 2,
+      "SEVERE_UNDERDELIVERY": 0,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 0
+    },
+    "composite_score": 0.2857142857142857,
+    "filing": "0001193125-26-118478_20-F.txt",
+    "red_flag_claims": [],
+    "severe_claims": [],
+    "moderate_claims": [
+      {
+        "claim_id": "LAC-3",
+        "claim_text": "Material uncertainty / going-concern language: auditor flagged substantial doubt depending on ability to repatriate Cauchari-Olaroz cash flows to service current portion of long-term debt.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": [
+          "edgar_fts.query_fulltext"
+        ],
+        "M_check": "edgar_fts.query_fulltext(search_term='going concern', cik='0001440972')",
+        "M_value": {
+          "total_hits_for_filer": 24,
+          "current_20F_match": true,
+          "prior_20F-A_2025-06-27_match": true
+        },
+        "interpretation": "Heuristic 10 \u2014 going-concern qualifier IS a distress fingerprint, and per the claim's own source quote the language is at PCAOB 'substantial doubt' level. Recurring (also in the June-2025 20-F/A). However, this is honestly disclosed by the issuer rather than discovered through M-source contradiction, and there are mitigating facts in the same filing: operational plant producing lithium carbonate, $61.1M cash, $23.2M receivables, $130M Ganfeng debt facility signed subsequent-event, and convertible-notes principal of $261M not maturing 2026 (only $4.5M current cash interest in 2026, with the bulk in 2027+). Argentine cash-repatriation friction (Blue Chip Swap mechanism disclosed) is the real underlying risk. MODERATE: honest forensic flag, refinancing not yet completed at year-end, dependent on Argentine cash transfer that is conditional on a JV partner."
+      },
+      {
+        "claim_id": "LAC-7",
+        "claim_text": "Convertible Notes classified current as of Dec 31, 2025; total contractual financial liabilities of ~$297.7M (incl. $261M convertibles), against $61.1M cash and $23.2M receivables.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": [
+          "edgar_fts.query_fulltext"
+        ],
+        "M_check": "edgar_fts.query_fulltext(search_term='convertible notes', cik='0001440972')",
+        "M_value": {
+          "total_hits_for_filer": 13,
+          "current_20F_match": true,
+          "history": "Convertibles disclosed continuously since 2022 40-F"
+        },
+        "interpretation": "Convertible Notes are real (continuously disclosed since 2022 40-F). Issuer's own narrative explains that current-classification is technical (holder-option conversion conditions beyond the Company's control under IFRS), not a maturity event. Maturity schedule shows only $4.5M cash interest in 2026 with the $261M principal in 2027+. With the $130M Ganfeng debt facility now in place, liquidity to service 2026 is plausible. Layer onto going-concern (LAC-3): this is a related disclosure \u2014 the same underlying cash-flow dependency. Severity matches LAC-3: MODERATE_UNDERDELIVERY \u2014 material distress fingerprint per Heuristic 10, but transparently disclosed and partially backstopped by Ganfeng debt. Not RED because the underlying asset (Cauchari-Olaroz) is producing and Argentine cash transfers (Blue Chip Swap) are mechanically feasible if commercially expensive."
+      }
+    ]
+  },
+  {
+    "ticker": "ALB",
+    "cik": "0000915913",
+    "company": "Albemarle Corp.",
+    "n_claims": 8,
+    "n_scores": 8,
+    "severity_counts": {
+      "PASS": 7,
+      "MODERATE_UNDERDELIVERY": 1,
+      "SEVERE_UNDERDELIVERY": 0,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 0
+    },
+    "composite_score": 0.125,
+    "filing": "0000915913-26-000018_10-K.txt",
+    "red_flag_claims": [],
+    "severe_claims": [],
+    "moderate_claims": [
+      {
+        "claim_id": "ALB-3",
+        "claim_text": "Kemerton, Australia plant: Trains 3 and 4 construction stopped in 2024, Train 2 placed in care and maintenance in 2024, and Train 1 placed in care and maintenance on February 6, 2026 \u2014 all constructed trains now idled. Expected $150M-$225M cash charges in 2026.",
+        "severity": "MODERATE_UNDERDELIVERY",
+        "supports": [
+          "EDGAR FTS 'Kemerton' = 94 hits, predominantly Albemarle 8-Ks/10-Qs spanning 2019-2025 (construction announcement through care-and-maintenance announcements)"
+        ],
+        "M_check": "edgar_fts.query_fulltext('Kemerton')",
+        "M_value": "94 hits, all consistent with ALB's own disclosure trail",
+        "interpretation": "Disclosure is transparent and audit trail exists. However the substance is a HARD operational underdelivery: entire constructed Australian hydroxide conversion complex now idle within ~3 years of commissioning, $150-225M cash charges expected, $245.6M long-lived asset impairment, $510M consolidated net loss 2025 on top of $1.18B loss 2024, restructuring/impairment charges totaling >$1.4B over 2024-2025. Calibration Heuristic 3 (planned vs operational) \u2014 Kemerton was a flagship 'planned X tonnes by 20YY' lithium-hydroxide capacity claim from 2019-era investor materials; reality is full idling. MODERATE: company is being honest about the capacity rationalization, but the original capacity commitment underdelivered materially."
+      }
+    ]
+  }
+]

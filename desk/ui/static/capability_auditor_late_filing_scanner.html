@@ -1,0 +1,288 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>auditor_late_filing_scanner</title><style>
+body{margin:0;background:#0b0e12;color:#e8ebee;font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:26px 24px 90px}
+a{color:#8b7cf6} h1{font-size:23px;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:#7d858e;margin:0 0 20px;font-size:13px}
+h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:#7d858e;margin:24px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 10px;border-bottom:1px solid #242a31;text-align:left;vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#7d858e}
+.k{font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:20px}
+.k-generator{color:#c3b8fb;background:rgba(139,124,246,.15)}
+.k-detector{color:#eccb8a;background:rgba(217,164,65,.15)}
+.k-watcher{color:#8ee5c1;background:rgba(53,201,143,.15)}
+.k-evidence{color:#b3bcc6;background:rgba(138,147,158,.15)}
+.h-OK{color:#35c98f} .h-STALE{color:#d9a441} .h-ERROR{color:#e0736a} .h-NEVER_RUN{color:#8a939e}
+pre{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px;overflow-x:auto;font-size:12px;line-height:1.5}
+.panel{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px 18px;margin-bottom:12px}
+ul{margin:4px 0;padding-left:20px} li{margin-bottom:4px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+</style></head><body><div class="wrap"><h1>auditor_late_filing_scanner</h1><p class="sub">registered capability · auditor_late_filing_scanner</p><a href="signals.html">&larr; all signals</a><div class="panel" style="margin-top:10px"><span class="k k-generator">GENERATOR</span> &nbsp;<span class="h-NEVER_RUN"><b>NEVER_RUN</b></span> · last run <span class="mono">never</span></div><p>Stage 0b EXCLUSION generator: auditor-change x late-filing CONJUNCTION (EDGAR).</p><form method="POST" action="/signals/run" style="margin:10px 0"><input type="hidden" name="name" value="auditor_late_filing_scanner"><input name="symbol" placeholder="symbol (if applicable)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px"><input name="symbols" placeholder="universe, comma-sep (generators)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px;margin-left:6px"><button type="submit" style="background:#8b7cf6;color:#0b0e12;border:0;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;margin-left:6px">Run now</button></form><h2>Datasources</h2><ul><li>reference implementation: verticals/generators/auditor_late_filing_scanner.py (see the code section for the feeds it touches)</li></ul><h2>Applies to</h2><ul><li><b>strategies:</b> quality_value</li></ul><h2>The code</h2><pre>&quot;&quot;&quot;auditor_late_filing_scanner — Stage 0b EXCLUSION generator: auditor-change x late-filing CONJUNCTION (EDGAR).
+
+THE ANTI-PORTFOLIO. THESIS: an auditor resignation/change (8-K Item 4.01, &quot;Changes in Registrant&#x27;s
+Certifying Accountant&quot;) INTERSECTED with a late-filing notice (NT 10-K / NT 10-Q) within a short window is a
+high-precision distress/fraud precursor. The value is in NOT owning these names — the exclusion IS the product,
+and it complements the small-cap-honesty work (that strategy&#x27;s surviving claim is a catastrophe-exclusion overlay,
+not deployable alpha; this is the same discipline applied to a filings-forensic tell).
+
+WHY THE CONJUNCTION IS THE PRECISION GATE (recall-floor doctrine, inherited from the whole generators fleet):
+EITHER signal ALONE over-fires. Auditor changes happen for benign reasons — fee disputes, PCAOB rotation, an
+acquired accounting firm, a going-public housekeeping swap. Late filings happen for benign reasons too — an
+acquisition-driven restatement of comparatives, a new-ERP cutover, a first-year-public scramble. But a company
+that BOTH lost/changed its auditor AND missed a periodic-report deadline inside ~90 days is disproportionately a
+name where the auditor walked over something it wouldn&#x27;t sign and the numbers can&#x27;t be finalized on time. The
+distress_8k_scanner already surfaces each tell SEPARATELY (a long, noisy list); this scanner&#x27;s entire contribution
+is the INTERSECT — only names carrying BOTH legs are surfaced, and we report the (large) auditor-only and
+late-only counts precisely to SHOW the conjunction&#x27;s selectivity (the gate is working when the excluded set is a
+tiny fraction of either leg).
+
+  python3 verticals/generators/auditor_late_filing_scanner.py [--days 120] [--window 90] [--pages 6]
+Writes data/AUDITOR_LATE_FILING.json. Uses efts.sec.gov full-text search (free, SEC-compliant UA). READ-ONLY,
+never orders. NO fabricated tickers — real EDGAR only; unresolvable CIKs keep their SEC name and self-drop ticker.
+&quot;&quot;&quot;
+from __future__ import annotations
+
+import argparse
+import datetime
+import json
+import re
+import time
+import urllib.parse
+import urllib.request
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+OUT = HERE / &quot;data&quot; / &quot;AUDITOR_LATE_FILING.json&quot;
+HDRS = {&quot;User-Agent&quot;: &quot;signalos-research 4tripathy@gmail.com&quot;}
+
+EFTS = &quot;https://efts.sec.gov/LATEST/search-index&quot;
+TICKERS_URL = &quot;https://www.sec.gov/files/company_tickers.json&quot;
+
+# resign is materially worse than dismissal — an auditor RESIGNING (walking) is the stronger distress tell than
+# the registrant DISMISSING the auditor (which can be a routine cost/rotation decision).
+RESIGN_STEMS = re.compile(r&quot;\b(resign|declin\w+ to stand|withdr\w+|will not stand for re-?appoint)&quot;, re.I)
+DISMISS_STEMS = re.compile(r&quot;\b(dismiss|terminat\w+ the (?:engagement|relationship)|no longer (?:be )?engaged)&quot;, re.I)
+
+
+def _get(url: str, retries: int = 3, timeout: int = 40) -&gt; bytes | None:
+    &quot;&quot;&quot;Polite GET with backoff — EDGAR 429s aggressively on the EFTS index and the archives.&quot;&quot;&quot;
+    for i in range(retries + 1):
+        try:
+            req = urllib.request.Request(url, headers=HDRS)
+            with urllib.request.urlopen(req, timeout=timeout) as r:
+                return r.read()
+        except Exception:
+            time.sleep(1.0 + 0.8 * i)   # be polite / back off on 429/timeout
+    return None
+
+
+def _get_json(url: str) -&gt; dict:
+    raw = _get(url)
+    if not raw:
+        return {}
+    try:
+        return json.loads(raw)
+    except Exception:
+        return {}
+
+
+def _ticker_map() -&gt; dict:
+    &quot;&quot;&quot;CIK(int) -&gt; {&#x27;ticker&#x27;,&#x27;title&#x27;} from the SEC canonical map (real symbols only).&quot;&quot;&quot;
+    d = _get_json(TICKERS_URL)
+    out = {}
+    for _, row in (d or {}).items():
+        try:
+            out[int(row[&quot;cik_str&quot;])] = {&quot;ticker&quot;: row[&quot;ticker&quot;].upper(), &quot;title&quot;: row[&quot;title&quot;]}
+        except Exception:
+            continue
+    return out
+
+
+def _clean_name(display: str) -&gt; str:
+    &quot;&quot;&quot;&#x27;FOO CORP.  (FOO)  (CIK 0001234567)&#x27; -&gt; &#x27;FOO CORP.&#x27;&quot;&quot;&quot;
+    return re.sub(r&quot;\s*\(.*&quot;, &quot;&quot;, display or &quot;&quot;).strip()[:70]
+
+
+def _efts_all(params: dict, days: int, pages: int, want_item_401: bool = False) -&gt; list[dict]:
+    &quot;&quot;&quot;Paginate EFTS (100/page, bounded) over the dated window -&gt; list of normalized hit rows.
+
+    Each row: {cik(int), name, ticker_hint, date, form, adsh, items}. want_item_401 keeps only hits whose EFTS
+    &#x27;items&#x27; metadata actually contains 4.01 (a cheap confirmation that the full-text match is the accountant item,
+    not an incidental &#x27;Item 4.01&#x27; string elsewhere in the doc).&quot;&quot;&quot;
+    today = datetime.date.today()
+    base = dict(params)
+    base[&quot;startdt&quot;] = (today - datetime.timedelta(days=days)).isoformat()
+    base[&quot;enddt&quot;] = today.isoformat()
+    rows, seen = [], set()
+    for page in range(pages):
+        p = dict(base)
+        if page:
+            p[&quot;from&quot;] = page * 100
+        url = EFTS + &quot;?&quot; + urllib.parse.urlencode(p)
+        d = _get_json(url)
+        hits = (((d or {}).get(&quot;hits&quot;) or {}).get(&quot;hits&quot;)) or []
+        if not hits:
+            break
+        for h in hits:
+            adsh = (h.get(&quot;_source&quot;) or {}).get(&quot;adsh&quot;) or h.get(&quot;_id&quot;, &quot;&quot;)
+            if adsh in seen:
+                continue
+            seen.add(adsh)
+            s = h.get(&quot;_source&quot;) or {}
+            items = s.get(&quot;items&quot;) or []
+            if want_item_401 and &quot;4.01&quot; not in items:
+                continue
+            ciks = s.get(&quot;ciks&quot;) or []
+            if not ciks:
+                continue
+            names = s.get(&quot;display_names&quot;) or []
+            disp = names[0] if names else &quot;&quot;
+            th = re.search(r&quot;\(([A-Z][A-Z.\-]{0,5})\)&quot;, disp)  # ticker hint if EMMA-style embedded
+            rows.append({
+                &quot;cik&quot;: int(ciks[0]),
+                &quot;name&quot;: _clean_name(disp),
+                &quot;ticker_hint&quot;: th.group(1) if th else &quot;&quot;,
+                &quot;date&quot;: s.get(&quot;file_date&quot;, &quot;&quot;),
+                &quot;form&quot;: (s.get(&quot;root_forms&quot;) or [s.get(&quot;form&quot;, &quot;&quot;)])[0],
+                &quot;adsh&quot;: s.get(&quot;adsh&quot;, &quot;&quot;),
+                &quot;items&quot;: items,
+            })
+        time.sleep(0.4)
+    return rows
+
+
+def _resigned_vs_dismissed(cik: int, adsh: str) -&gt; tuple[bool | None, str]:
+    &quot;&quot;&quot;Fetch the 8-K primary text (intersected names only — a SMALL set) and classify resign vs dismiss.
+
+    Returns (resigned_bool, event_label). resigned_bool True = auditor RESIGNED (worse); False = dismissed by the
+    registrant; None = language ambiguous / fetch failed (reported honestly, never guessed).&quot;&quot;&quot;
+    if not adsh:
+        return None, &quot;auditor change (Item 4.01) — resign/dismiss undetermined&quot;
+    acc = adsh.replace(&quot;-&quot;, &quot;&quot;)
+    # fetch the full submission text (the complete .txt is the most robust single-GET path across old/new layouts)
+    body = _get(f&quot;https://www.sec.gov/Archives/edgar/data/{cik}/{acc}/{adsh}.txt&quot;)
+    txt = body.decode(&quot;latin-1&quot;, &quot;ignore&quot;) if body else &quot;&quot;
+    if not txt:
+        return None, &quot;auditor change (Item 4.01) — filing text unreachable (resign/dismiss undetermined)&quot;
+    # scope to the neighborhood of the 4.01 discussion to avoid boilerplate false hits
+    m = re.search(r&quot;Item\s*4\.01(.{0,2500})&quot;, txt, re.I | re.S)
+    scope = m.group(1) if m else txt[:4000]
+    resign = bool(RESIGN_STEMS.search(scope))
+    dismiss = bool(DISMISS_STEMS.search(scope))
+    if resign and not dismiss:
+        return True, &quot;AUDITOR RESIGNED (Item 4.01) — auditor walked; the stronger distress tell&quot;
+    if dismiss and not resign:
+        return False, &quot;auditor DISMISSED by registrant (Item 4.01) — routine-or-not, verify the reason&quot;
+    if resign and dismiss:
+        return True, &quot;Item 4.01 with BOTH resign+dismiss language — treat as resignation (verify in DD)&quot;
+    return None, &quot;auditor change (Item 4.01) — resign/dismiss language not isolated (verify in DD)&quot;
+
+
+def scan(days: int, window: int, pages: int) -&gt; dict:
+    today = datetime.date.today()
+    tmap = _ticker_map()
+
+    # LEG 1 — auditor changes: 8-K full-text &quot;Item 4.01&quot; confirmed by the EFTS items metadata.
+    auditor = _efts_all({&quot;q&quot;: &#x27;&quot;Item 4.01&quot;&#x27;, &quot;forms&quot;: &quot;8-K&quot;}, days, pages, want_item_401=True)
+    # collapse to latest 4.01 per CIK
+    aud_by_cik: dict[int, dict] = {}
+    for r in auditor:
+        cur = aud_by_cik.get(r[&quot;cik&quot;])
+        if not cur or (r[&quot;date&quot;] or &quot;&quot;) &gt; (cur[&quot;date&quot;] or &quot;&quot;):
+            aud_by_cik[r[&quot;cik&quot;]] = r
+
+    # LEG 2 — late filings: NT 10-K and NT 10-Q notices of late periodic reports.
+    late = (_efts_all({&quot;forms&quot;: &quot;NT 10-K&quot;}, days, pages)
+            + _efts_all({&quot;forms&quot;: &quot;NT 10-Q&quot;}, days, pages))
+    late_by_cik: dict[int, dict] = {}
+    for r in late:
+        cur = late_by_cik.get(r[&quot;cik&quot;])
+        if not cur or (r[&quot;date&quot;] or &quot;&quot;) &gt; (cur[&quot;date&quot;] or &quot;&quot;):
+            late_by_cik[r[&quot;cik&quot;]] = r
+
+    # INTERSECT by CIK within the window -&gt; the exclusion (anti-portfolio) list.
+    excluded = []
+    both_ciks = set(aud_by_cik) &amp; set(late_by_cik)
+    for cik in both_ciks:
+        a, l = aud_by_cik[cik], late_by_cik[cik]
+        try:
+            da = datetime.date.fromisoformat(a[&quot;date&quot;])
+            dl = datetime.date.fromisoformat(l[&quot;date&quot;])
+            days_apart = abs((da - dl).days)
+        except Exception:
+            days_apart = None
+        if days_apart is None or days_apart &gt; window:
+            continue
+        info = tmap.get(cik) or {}
+        ticker = info.get(&quot;ticker&quot;) or a.get(&quot;ticker_hint&quot;) or l.get(&quot;ticker_hint&quot;) or &quot;&quot;
+        resigned, event = _resigned_vs_dismissed(cik, a[&quot;adsh&quot;])
+        excluded.append({
+            &quot;ticker&quot;: ticker,               # &quot;&quot; if the CIK has no exchange-listed common (real, never fabricated)
+            &quot;cik&quot;: cik,
+            &quot;name&quot;: info.get(&quot;title&quot;) or a[&quot;name&quot;] or l[&quot;name&quot;],
+            &quot;auditor_event&quot;: event,
+            &quot;auditor_date&quot;: a[&quot;date&quot;],
+            &quot;resigned_bool&quot;: resigned,      # True=resigned(worse) / False=dismissed / None=undetermined
+            &quot;late_form&quot;: l[&quot;form&quot;],
+            &quot;late_date&quot;: l[&quot;date&quot;],
+            &quot;days_apart&quot;: days_apart,
+            &quot;note&quot;: (&quot;BOTH legs present within the window -&gt; EXCLUDE (do-not-own). &quot;
+                     + (&quot;Auditor RESIGNED — highest-priority avoid.&quot; if resigned else
+                        &quot;Verify the 8-K disagreement/reportable-events language + any going-concern in DD.&quot;)),
+        })
+        time.sleep(0.3)   # SEC-safe pace for the per-name text fetch
+    excluded.sort(key=lambda e: (e[&quot;resigned_bool&quot;] is not True, e[&quot;days_apart&quot;]))
+
+    return {
+        &quot;asof&quot;: today.isoformat(),
+        &quot;window_days&quot;: window,
+        &quot;lookback_days&quot;: days,
+        &quot;excluded&quot;: excluded,
+        &quot;n_excluded&quot;: len(excluded),
+        &quot;n_auditor_only&quot;: len(aud_by_cik) - len(both_ciks),   # auditor-change CIKs with NO late filing
+        &quot;n_late_only&quot;: len(late_by_cik) - len(both_ciks),     # late-filing CIKs with NO auditor change
+        &quot;n_auditor_total&quot;: len(aud_by_cik),
+        &quot;n_late_total&quot;: len(late_by_cik),
+        &quot;note&quot;: &quot;EXCLUSION list (ANTI-PORTFOLIO) — do NOT own these, NOT a buy list. THESIS: 8-K Item 4.01 &quot;
+                &quot;auditor change INTERSECTED with an NT 10-K/NT 10-Q late-filing notice within &quot;
+                f&quot;{window}d = a high-precision distress/fraud precursor. The CONJUNCTION is the precision gate: &quot;
+                &quot;either signal ALONE over-fires (n_auditor_only + n_late_only are large by design), so ONLY names &quot;
+                &quot;carrying BOTH legs are surfaced. resigned_bool: auditor RESIGNING (walking) is worse than being &quot;
+                &quot;dismissed. Complements the small-cap-honesty catastrophe-exclusion overlay. Recall-floor &quot;
+                &quot;discipline: precision over count. READ-ONLY; the scanner proposes an avoid, it never orders. &quot;
+                &quot;ticker=&#x27;&#x27; = the CIK has no exchange-listed common on the SEC map (kept honest, never fabricated).&quot;,
+    }
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument(&quot;--days&quot;, type=int, default=120, help=&quot;EDGAR lookback window (days) for both legs&quot;)
+    ap.add_argument(&quot;--window&quot;, type=int, default=90, help=&quot;max days between the two legs to intersect&quot;)
+    ap.add_argument(&quot;--pages&quot;, type=int, default=6, help=&quot;EFTS pages per query (100/page, bounded)&quot;)
+    a = ap.parse_args()
+    res = scan(a.days, a.window, a.pages)
+    print(f&quot;=== AUDITOR-CHANGE x LATE-FILING EXCLUSION SCANNER  {res[&#x27;asof&#x27;]}  &quot;
+          f&quot;(lookback {res[&#x27;lookback_days&#x27;]}d, intersect window {res[&#x27;window_days&#x27;]}d) ===&quot;)
+    print(f&quot;  LEG 1  auditor changes (8-K Item 4.01):     {res[&#x27;n_auditor_total&#x27;]:&gt;4} CIKs&quot;)
+    print(f&quot;  LEG 2  late filings (NT 10-K / NT 10-Q):     {res[&#x27;n_late_total&#x27;]:&gt;4} CIKs&quot;)
+    print(f&quot;  --- the conjunction&#x27;s SELECTIVITY (why either leg alone over-fires) ---&quot;)
+    print(f&quot;  auditor-only (NOT excluded): {res[&#x27;n_auditor_only&#x27;]:&gt;4}    late-only (NOT excluded): {res[&#x27;n_late_only&#x27;]:&gt;4}&quot;)
+    print(f&quot;  &gt;&gt;&gt; INTERSECTED -&gt; EXCLUDE (do-not-own anti-portfolio): {res[&#x27;n_excluded&#x27;]}&quot;)
+    if res[&quot;excluded&quot;]:
+        for e in res[&quot;excluded&quot;]:
+            tk = e[&quot;ticker&quot;] or &quot;(no-tkr)&quot;
+            flag = &quot;RESIGNED&quot; if e[&quot;resigned_bool&quot;] else (&quot;dismissed&quot; if e[&quot;resigned_bool&quot;] is False else &quot;chg?&quot;)
+            print(f&quot;    EXCLUDE {tk:&lt;8} {e[&#x27;name&#x27;][:34]:&lt;34} [{flag:&lt;9}] 4.01 {e[&#x27;auditor_date&#x27;]}  &quot;
+                  f&quot;{e[&#x27;late_form&#x27;]} {e[&#x27;late_date&#x27;]}  ({e[&#x27;days_apart&#x27;]}d apart)&quot;)
+    else:
+        print(&quot;    (no name carries BOTH legs in this window — the honest null; the precision gate is working, &quot;
+              &quot;not a failure)&quot;)
+    print(&quot;  DOCTRINE: this is an EXCLUSION / anti-portfolio list (do-not-own), NOT a buy list. Either signal alone&quot;)
+    print(&quot;  over-fires; only the CONJUNCTION is surfaced. Resigned auditors rank first. READ-ONLY — never orders.&quot;)
+    OUT.write_text(json.dumps(res, indent=1))
+    print(f&quot;[-&gt; {OUT.name}]&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</pre></div></body></html>

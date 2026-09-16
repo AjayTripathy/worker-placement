@@ -1,0 +1,132 @@
+{
+  "ticker": "LDOS",
+  "cik": "0001336920",
+  "cutoff": "2024-09-01",
+  "filing": "0001336920-24-000008_10-K.txt",
+  "scoring_notes": "LDOS is a diversified prime ($15B+ revenue, 47k employees, 56% Defense / 24% Civil / 20% Health). The 10-K does NOT name individual Program Elements (PE numbers) or quantify revenue from any single program — it describes broad capability areas (hypersonics, directed energy, JADC2, MHS GENESIS, FAA ERAM/ATOP, anti-submarine warfare). Per the J-Book rubric, this is exactly the case where the framework should NOT generate red flags: capability-area exposure is diversified, no single PE is load-bearing, and our 410-PE corpus does not cover non-DoD programs (FAA ERAM, MHS GENESIS, DoE Hanford, Frederick National Lab). Rubric rule 7: NOT_FOUND in corpus ≠ red flag → UNVERIFIABLE. The two PE-named capability hits (Hypersonic Defense PE 0604181C and Directed Energy Technology PE 0602605F) both return FUNDED_STEADY → PASS. Cross-check: usaspending shows 14,375 DoD awards totaling $9.4B obligated to Leidos pre-cutoff — confirms the 87%-U.S.-government-revenue baseline.",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Leidos generated 87% of FY2023 revenue from U.S. government contracts (prime or sub).",
+      "severity": "PASS",
+      "supports": "Cross-verified",
+      "M_check": "usaspending.query_dod_contracts(recipient_name='Leidos', cutoff_date='2024-09-01')",
+      "M_value": "n_awards=14,375 DoD awards; total $9.38B obligated; top awards include DISA DODIN/DISN sustainment ($776M), MHS GENESIS Stage 9 ($573M), and DODIN maintenance ($562M)",
+      "interpretation": "USAspending corroborates LDOS's massive DoD prime/sub footprint. The 87% government-revenue claim is plausible and verifiable. PASS."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "We deliver hypersonic offensive (boost-glide, air-breathing) and hypersonic defense systems.",
+      "severity": "PASS",
+      "supports": "J-Book confirms category is funded",
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Hypersonic Defense', cutoff_date='2024-09-01') AND program_name='Hypersonics Prototyping'",
+      "M_value": "Hypersonic Defense PE 0604181C (MDA, BA 4) → FUNDED_STEADY, FY24 $228.962M. Hypersonics Prototyping PE 0604033F (USAF) → FUNDED_STEADY. Hypersonics Prototyping - Hypersonic Attack Cruise Missile PE 0604183F (USAF) also matched.",
+      "interpretation": "LDOS doesn't name a specific PE, but the relevant capability-area PEs are all FUNDED_STEADY in the FY26 J-Book. No divergence. PASS."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "We have directed-energy capabilities (high-energy lasers, microwave systems).",
+      "severity": "PASS",
+      "supports": "J-Book confirms PE funded",
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Directed Energy', cutoff_date='2024-09-01') AND pe_number='0602605F'",
+      "M_value": "Directed Energy Technology PE 0602605F (USAF BA2 Applied Research) → FUNDED_STEADY, FY24 $111.169M. Directed Energy Prototyping PE 0604032F also matched.",
+      "interpretation": "Capability-area exposure to a FUNDED_STEADY PE. No divergence. PASS."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "We support the DoD's JADC2 imperative across multi-domain operations.",
+      "severity": "UNVERIFIABLE",
+      "supports": "Out of corpus",
+      "M_check": "pentagon_jbook.query_program_funding(program_name='JADC2') AND 'Joint All-Domain Command and Control'",
+      "M_value": "NOT_FOUND for both queries. JADC2 is a cross-service initiative funded across many PEs (CJADC2 in DoD CIO, Air Force ABMS, Army Project Convergence, Navy Project Overmatch) — none of those specific PEs are in our 410-PE corpus.",
+      "interpretation": "Rubric rule 7: NOT_FOUND ≠ red flag. JADC2 is a portfolio concept, not a single PE; claim is too generic to falsify. UNVERIFIABLE."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Market leader in submarine collection technologies and anti-submarine warfare; Gibbs & Cox naval architecture.",
+      "severity": "UNVERIFIABLE",
+      "supports": "Out of corpus",
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Anti-Submarine Warfare') AND contractor_name='Gibbs & Cox'",
+      "M_value": "NOT_FOUND for both. ASW funding is primarily Navy SCN procurement (P-8A, Virginia-class, DDG-51/DDG-1000) and Navy RDT&E PEs that are not in our 410-PE corpus. Gibbs & Cox is not indexed as a J-Book primary contractor.",
+      "interpretation": "Rubric rule 7: NOT_FOUND in our corpus is not a red flag — Navy SCN/RDT&E coverage is limited. UNVERIFIABLE."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Leidos delivers MHS GENESIS — DoD/VA common EHR.",
+      "severity": "PASS",
+      "supports": "Cross-verified via usaspending",
+      "M_check": "pentagon_jbook(MHS GENESIS) AND usaspending(Leidos)",
+      "M_value": "J-Book: NOT_FOUND (MHS GENESIS is a DHA O&M / DHP program, not an R-2 PE in our corpus). USAspending: top-2 Leidos contract is HT003823F0011 'ENTERPRISE ACTIVITIES FOR MHS GENESIS-STAGE 9' worth $572.997M.",
+      "interpretation": "USAspending confirms the MHS GENESIS prime work directly ($573M obligated). Claim is verified through orthogonal source. PASS."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Leidos received 10+ year extensions to FAA ERAM and ATOP air-traffic-automation contracts.",
+      "severity": "UNVERIFIABLE",
+      "supports": "Out of J-Book scope (FAA = DoT, not DoD)",
+      "M_check": "pentagon_jbook(ERAM) AND (En Route Automation Modernization)",
+      "M_value": "NOT_FOUND for both. ERAM/ATOP are FAA programs in the DoT budget, NOT in the Pentagon J-Book.",
+      "interpretation": "Scope mismatch: FAA programs are not covered by pentagon_jbook by design. Per rubric rule 7, NOT_FOUND → UNVERIFIABLE (not a negative signal). Would need DoT/FAA budget M-source to verify."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Counter-UAS, radar systems, kinetic weapon launchers for integrated force protection.",
+      "severity": "UNVERIFIABLE",
+      "supports": "Out of corpus (no specific C-UAS PE named)",
+      "M_check": "pentagon_jbook(Counter-UAS) AND (Counter Unmanned Aerial Systems)",
+      "M_value": "NOT_FOUND for both. C-UAS funding lives in JCO C-sUAS budget lines plus service-specific PEs not seeded in our corpus.",
+      "interpretation": "Generic capability-area claim. Rubric rule 7 applies. UNVERIFIABLE."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "Leidos delivers small satellite systems and space-based ISR payloads (EO/IR, multi/hyperspectral, EW/SIGINT, communications) for SDA, DoD, IC.",
+      "severity": "UNVERIFIABLE",
+      "supports": "Pre-cutoff timing",
+      "M_check": "pentagon_jbook(Tracking Layer) AND (Transport Layer)",
+      "M_value": "Tracking Layer (PE 1206410SF) and Transport Layer (PE 1206410SF) both match BUT return NOT_FOUND_IN_TIMERANGE for cutoff 2024-09-01: Tranche 3 wasn't awarded until December 2025. Pre-cutoff, only Tranche 0/1/2 were funded — and our corpus entry notes contractors were Lockheed, Northrop, L3Harris, Rocket Lab (not Leidos).",
+      "interpretation": "Pre-cutoff, SDA T3 hadn't been awarded. LDOS's SDA exposure pre-cutoff is in T0/T1/T2 (different PEs), which are out of our corpus scope. Rubric rule 7 + timerange caveat: UNVERIFIABLE."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "Defense Solutions = 56% FY23 / 57% FY22 / 58% FY21 of revenue (declining segment mix).",
+      "severity": "PASS",
+      "supports": "Cross-verified via usaspending",
+      "M_check": "usaspending.query_dod_contracts(recipient_name='Leidos', cutoff_date='2024-09-01')",
+      "M_value": "$9.38B obligated DoD awards across 14,375 contracts confirms the scale and pacing of the Defense segment.",
+      "interpretation": "Mix data is descriptive and consistent with publicly visible DoD contract pace. The mild downward drift in Defense % suggests Civil/Health are growing — not a J-Book divergence pattern. PASS."
+    },
+    {
+      "claim_id": "C11",
+      "claim_text": "Operations in 427 locations across 44 states + DC; 8.5M sq ft floor space.",
+      "severity": "UNVERIFIABLE",
+      "supports": "Wrong tool for facility-count verification",
+      "M_check": "epa_frs.query_facilities(facility_name='Leidos', state_abbr='VA')",
+      "M_value": "n_facilities=0 in VA EPA FRS (Leidos is a services/IT integrator, not an EPA-regulated emissions facility — they wouldn't show up).",
+      "interpretation": "Tool mismatch: EPA FRS only catches emissions-regulated industrial facilities. Services firms with leased offices won't register. Not a falsification. UNVERIFIABLE."
+    },
+    {
+      "claim_id": "C12",
+      "claim_text": "Steve Cook has served as President of Leidos Dynetics (formerly Dynetics Group) since April 2022.",
+      "severity": "UNVERIFIABLE",
+      "supports": "Counterparty disclosure check inconclusive",
+      "M_check": "edgar_fts.query_fulltext(search_term='Dynetics', cik='0000936468' [Lockheed]) AND search_term='Leidos'",
+      "M_value": "Dynetics @ LMT cik: 0 hits. Leidos @ LMT cik: 49 hits (LMT does mention Leidos as a peer/competitor). Dynetics is a Leidos subsidiary, not a Lockheed counterparty, so 0 hits is expected.",
+      "interpretation": "Org-chart claim — no straightforward counterparty disclosure test for an internal subsidiary leadership claim. UNVERIFIABLE."
+    }
+  ],
+  "summary": {
+    "n_claims": 12,
+    "n_queries": 21,
+    "severity_counts": {
+      "PASS": 5,
+      "MODERATE_UNDERDELIVERY": 0,
+      "SEVERE_UNDERDELIVERY": 0,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 7
+    },
+    "jbook_grounded_claims": 8,
+    "jbook_fired_claims": 2,
+    "jbook_hits_detail": "pentagon_jbook returned a concrete FUNDED status on C2 (Hypersonic Defense FUNDED_STEADY) and C3 (Directed Energy Technology FUNDED_STEADY). C4/C5/C8 returned NOT_FOUND (out of corpus). C6 returned NOT_FOUND but is verified via usaspending instead. C7 is out of J-Book scope (FAA). C9 returned NOT_FOUND_IN_TIMERANGE (SDA T3 post-cutoff).",
+    "framework_verdict": "NO J-BOOK DIVERGENCE PATTERN. LDOS is a diversified prime whose 10-K narrative does not depend on any single named PE for material revenue. Every J-Book PE we could match (Hypersonic Defense, Directed Energy) is FUNDED_STEADY. The MHS GENESIS prime work is independently verified at $573M via usaspending. There is no UNFUNDED / TERMINATED program that LDOS materially relies on detectable in our corpus."
+  }
+}

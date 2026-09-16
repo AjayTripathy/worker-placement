@@ -1,0 +1,18 @@
+### CHSCN (CHS Inc — farmer-owned ag/energy co-op; this ticker is its Class B **Series 2 perpetual preferred**, $25 liquidation preference) — screen mcap $235.2M / px 19.165 / P/B 0.021 / EY 224% / ROE 4.8% / carry-spread 2.145 — **SCREEN-MISCLASSIFIED** (instrument-class artifact; defect families 1+2)
+
+**KILL FACTS (all screen-metric kills, not business kills)**
+- Instrument class: CHSCN is "Class B Reset Rate Cumulative Redeemable Preferred Stock, Series 2," Nasdaq-listed, alongside CHSCP/CHSCO/CHSCM/CHSCL — per the 8-K cover of 2026-08-26 (pack excerpt; https://www.sec.gov/Archives/edgar/data/823277/000082327726000029/). Terms: $25.00 preference, 7.100% ($1.775/sh) to 3/31/2024, thereafter 3-mo LIBOR + 4.298%, **capped at 8.00%**, callable at CHS's option at $25 on/after 3/31/2024 (424B4: https://www.sec.gov/Archives/edgar/data/823277/000104746914001841/a2218734z424b4.htm).
+- P/B 0.021, EY 224%, ROE, COE 9.4%, carry-spread: all join one preferred class's market cap to the **whole co-op's** $11.06bn member equity and $526.6M net income — equity that belongs to farmer patrons and other preferred classes. Corrected frame: coverage, not P/B — CHS expects ~$168.7M of FY2026 preferred dividends against ~$2.3bn preferred outstanding at 5/31/2026 (10-Q: https://www.sec.gov/Archives/edgar/data/0000823277/000082327726000023/chscp-20260531.htm) → ~3.1x NI coverage.
+- Share-count join: mcap/px implies 12,272,003 shares; last primary count is **16,800,000** Series 2 shares ($420M redemption value) in the FY2022 10-K (https://www.sec.gov/Archives/edgar/data/823277/000082327722000050/chscp-20220831.htm). Corrected class cap ≈ $322M. Current count UNVERIFIED.
+- Tape is internally impossible: px 19.165 < lo52 24.0087. Price basis UNVERIFIED — no underwriting on this quote.
+- Pack OCF series (Nov-30 dates) is **Q1 interim** CFO for an Aug-31 FYE co-op — seasonal ag working-capital build, not annual melt (defect family 3). Revenue rows stop 2018-05-31: stale 8 years. Pack "next print: null" corrected — FY2026 10-K due ~Nov 2026, UNCONFIRMED (no PR names it).
+
+**LIVE FACTS**
+- Declared Series 2 dividends were $0.44/qtr in FY2026 and FY2025 (~7.10% of par) — i.e., unchanged **two years after** the 3/31/2024 reset date (10-Q: https://www.sec.gov/Archives/edgar/data/823277/000082327726000016/chscp-20260228.htm). Whether the post-LIBOR rate is frozen at 7.10% or resets toward the 8.00% cap is the central cash-flow question: **UNVERIFIED**.
+- Structural subordination is real: Omnibus Amendment No. 16 to the Cofina Funding/MUFG receivables facility (8-K above) sits ahead of all preferred. Related-party by design (CHS Capital originates member loans).
+- No-actor law: preferred holders have no governance; the board answers to patrons. Call at $25 is the only value-forcing act — and it's *accretive* if price is truly sub-par.
+- ADV and qualified-dividend/1099 treatment of co-op preferred dividends: UNVERIFIED. No PFIC (domestic MN filer).
+
+**RESOLVES ON:** (1) re-pull of price/52w from a second venue — immediate; (2) Series 2 rate determination language + current share count in FY2026 10-K, ~Nov 2026; (3) next dividend-declaration 8-K (pattern: early Dec 2026, payable 12/31) confirming $0.44 vs $0.50.
+
+**Disposition:** WATCH + tripwire — reopen as a *preferred-yield sleeve* name (not deep-value equity) only if a clean quote confirms sub-par pricing; tripwire at verified price ≤$22.50 with dividend maintained.

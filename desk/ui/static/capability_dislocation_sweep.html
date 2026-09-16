@@ -1,0 +1,263 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>dislocation_sweep</title><style>
+body{margin:0;background:#0b0e12;color:#e8ebee;font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:26px 24px 90px}
+a{color:#8b7cf6} h1{font-size:23px;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:#7d858e;margin:0 0 20px;font-size:13px}
+h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:#7d858e;margin:24px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 10px;border-bottom:1px solid #242a31;text-align:left;vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#7d858e}
+.k{font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:20px}
+.k-generator{color:#c3b8fb;background:rgba(139,124,246,.15)}
+.k-detector{color:#eccb8a;background:rgba(217,164,65,.15)}
+.k-watcher{color:#8ee5c1;background:rgba(53,201,143,.15)}
+.k-evidence{color:#b3bcc6;background:rgba(138,147,158,.15)}
+.h-OK{color:#35c98f} .h-STALE{color:#d9a441} .h-ERROR{color:#e0736a} .h-NEVER_RUN{color:#8a939e}
+pre{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px;overflow-x:auto;font-size:12px;line-height:1.5}
+.panel{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px 18px;margin-bottom:12px}
+ul{margin:4px 0;padding-left:20px} li{margin-bottom:4px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+</style></head><body><div class="wrap"><h1>dislocation_sweep</h1><p class="sub">registered capability · dislocation_sweep</p><a href="signals.html">&larr; all signals</a><div class="panel" style="margin-top:10px"><span class="k k-generator">GENERATOR</span> &nbsp;<span class="h-NEVER_RUN"><b>NEVER_RUN</b></span> · last run <span class="mono">never</span></div><p>year-round value-dislocation watch over the KNOWN universe (built 2026-07-28).</p><form method="POST" action="/signals/run" style="margin:10px 0"><input type="hidden" name="name" value="dislocation_sweep"><input name="symbol" placeholder="symbol (if applicable)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px"><input name="symbols" placeholder="universe, comma-sep (generators)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px;margin-left:6px"><button type="submit" style="background:#8b7cf6;color:#0b0e12;border:0;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;margin-left:6px">Run now</button></form><h2>Datasources</h2><ul><li>reference implementation: verticals/generators/dislocation_sweep.py (see the code section for the feeds it touches)</li></ul><h2>Applies to</h2><ul><li><b>strategies:</b> value_band_entry</li></ul><h2>The code</h2><pre>&quot;&quot;&quot;dislocation_sweep — year-round value-dislocation watch over the KNOWN universe (built 2026-07-28).
+
+THE GAP IT FILLS: december_dislocation only runs Oct-Dec (other people&#x27;s tax-loss selling);
+band_watch only fires on ledger names with explicit alert bands; the smallcap watch covers the
+8 verified basket names. Nothing watched the WHOLE researched universe for fresh idiosyncratic
+drops. This does: every name we have a verdict, a shortlist entry, or a position on, checked
+every weekday for a sharp fall the MARKET didn&#x27;t share.
+
+SIGNAL = idiosyncratic drawdown, not raw drawdown: excess return vs SPY over 5 and 21 sessions.
+A name falling with the tape is beta, not a dislocation (the Cosmecca lesson: beta-bleed staged
+on triage, court reversed it). Thresholds:
+    DISLOC:  excess_5d &lt;= -8%  or excess_21d &lt;= -15%   (HIGH at &lt;= -12% / &lt;= -20%)
+    held names fire earlier (excess_5d &lt;= -6%) — a held name dislocating is a re-underwrite.
+
+DOCTRINE GUARDS (printed on every fire, enforced downstream):
+  - PROPOSES ONLY. The pipeline is: cause-check (what actually happened?) -&gt; discovery_state
+    (is it crowded/degraded?) -&gt; independent court (v1.4) -&gt; thesis doc -&gt; THEN staging.
+    &quot;No cause found&quot; after a shallow look is NOT a mispricing — find the cause or stand down.
+  - Names on our own harvested list (wash-sale window) are tagged DO-NOT-BUY-31D.
+  - New fires only: a name alerts when it ENTERS dislocation, then stays quiet ~10 sessions
+    unless it deepens a tier (MED-&gt;HIGH).
+
+Emits DETFIRE|dislocation|&lt;ticker&gt;|&lt;SEV&gt;|&lt;evidence&gt; lines (the detector_scan extractor routes
+them into the desk feed with needs_verification=True). Writes data/DISLOCATION_SWEEP.json +
+data/dislocation_state.json. READ-ONLY; proposes, never sizes.
+
+  python3 verticals/generators/dislocation_sweep.py [--min-excess5 -8] [--quiet-sessions 10]
+&quot;&quot;&quot;
+from __future__ import annotations
+import json, re, sys, argparse, datetime
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[1]
+if str(ROOT) not in sys.path:                 # so the shared price-fallback ladder is importable
+    sys.path.insert(0, str(ROOT))
+DATA = HERE / &quot;data&quot;
+OUT_JSON = DATA / &quot;DISLOCATION_SWEEP.json&quot;
+STATE = DATA / &quot;dislocation_state.json&quot;
+LEDGER = ROOT / &quot;desk&quot; / &quot;data&quot; / &quot;research_ledger.json&quot;
+POSCACHE = ROOT / &quot;desk&quot; / &quot;ui&quot; / &quot;data&quot; / &quot;positions_cache.json&quot;
+HARVESTED = ROOT / &quot;desk&quot; / &quot;data&quot; / &quot;harvested_2026.json&quot;
+SHORTLISTS = [ROOT / &quot;verticals&quot; / &quot;deep_value&quot; / &quot;data&quot; / f for f in
+              (&quot;shortlist.json&quot;, &quot;quality_shortlist.json&quot;, &quot;financials_shortlist.json&quot;)]
+
+# verdict first-words that mean &quot;we decided NOT to own this&quot; — their dislocations are not our business
+DEAD_VERDICTS = (&quot;AVOID&quot;, &quot;PASS&quot;, &quot;DECLINE&quot;, &quot;KILL&quot;, &quot;SELL&quot;, &quot;EXIT&quot;, &quot;SOLD&quot;, &quot;REJECT&quot;, &quot;TRAP&quot;)
+
+
+def _yf_symbol(tk: str) -&gt; str | None:
+    &quot;&quot;&quot;Map a ledger/desk ticker to a yfinance symbol; None = not price-screenable here.&quot;&quot;&quot;
+    if not tk or not re.fullmatch(r&quot;[A-Za-z0-9.\-]{1,12}&quot;, tk):
+        return None
+    if tk.endswith((&quot;-STK&quot;, &quot;-OPS&quot;, &quot;-RXN&quot;)) or tk.upper() != tk and &quot;.&quot; not in tk:
+        return None
+    if re.fullmatch(r&quot;\d{4}&quot;, tk):
+        return tk + &quot;.T&quot;          # bare TSE code
+    if re.fullmatch(r&quot;\d{6}&quot;, tk):
+        return tk + &quot;.KS&quot;         # bare KRX code
+    if re.fullmatch(r&quot;\d+&quot;, tk):
+        return None
+    return tk
+
+
+def build_universe() -&gt; dict[str, dict]:
+    &quot;&quot;&quot;ticker -&gt; {source, held, verdict} across ledger + shortlists + held book.&quot;&quot;&quot;
+    uni: dict[str, dict] = {}
+    try:
+        for r in json.loads(LEDGER.read_text()).get(&quot;names&quot;, []):
+            tk, v = r.get(&quot;ticker&quot;), str(r.get(&quot;verdict&quot;) or &quot;&quot;).strip().upper()
+            if not tk or any(v.startswith(d) for d in DEAD_VERDICTS):
+                continue
+            uni[tk] = {&quot;source&quot;: &quot;ledger&quot;, &quot;held&quot;: False, &quot;verdict&quot;: (v.split(&quot; &quot;)[0][:24] or &quot;UNJUDGED&quot;)}
+    except Exception:
+        pass
+    for f in SHORTLISTS:
+        try:
+            data = json.loads(f.read_text())
+            rows = data if isinstance(data, list) else data.get(&quot;names&quot;) or data.get(&quot;rows&quot;) or []
+            for r in rows:
+                tk = r.get(&quot;ticker&quot;) if isinstance(r, dict) else (r if isinstance(r, str) else None)
+                if tk and tk not in uni:
+                    uni[tk] = {&quot;source&quot;: f.stem, &quot;held&quot;: False, &quot;verdict&quot;: &quot;SCREEN&quot;}
+        except Exception:
+            continue
+    try:
+        pos = json.loads(POSCACHE.read_text()).get(&quot;positions&quot;, {})
+        held = pos.keys() if isinstance(pos, dict) else [p.get(&quot;symbol&quot;) for p in pos]
+        for tk in held:
+            if not tk:
+                continue
+            uni.setdefault(tk, {&quot;source&quot;: &quot;book&quot;, &quot;verdict&quot;: &quot;HELD&quot;})
+            uni[tk][&quot;held&quot;] = True
+    except Exception:
+        pass
+    # LEDGER-ROT GUARD (the SLS lesson, 2026-07-28): a ledger verdict of HELD for a name the
+    # blotter does NOT hold is stale — eleven days after the SLS covered-call assignment the
+    # ledger still said HELD and a summary repeated it. Mark it so the fire line says so.
+    for tk, meta in uni.items():
+        if meta[&quot;verdict&quot;].startswith(&quot;HELD&quot;) and not meta[&quot;held&quot;]:
+            meta[&quot;verdict&quot;] = &quot;HELD?-STALE(not-on-blotter)&quot;
+    return uni
+
+
+def sweep(min_excess5: float, quiet_sessions: int) -&gt; list[dict]:
+    import yfinance as yf
+    uni = build_universe()
+    symmap = {tk: s for tk in uni if (s := _yf_symbol(tk))}
+    symbols = sorted(set(symmap.values()) | {&quot;SPY&quot;})
+    px = yf.download(symbols, period=&quot;3mo&quot;, progress=False, auto_adjust=True)[&quot;Close&quot;]
+
+    def series(sym):
+        try:
+            s = (px[sym] if sym in px.columns else px).dropna()
+            return s if len(s) &gt;= 22 else None
+        except Exception:
+            return None
+
+    spy = series(&quot;SPY&quot;)
+    if spy is None:
+        print(&quot;SWEEP ABORT: no SPY reference series&quot;)
+        return []
+
+    # FALLBACK LADDER + DEGRADED-LOUD (2026-08-11). Names yfinance refused used to scroll past as
+    # download noise and were then counted as &quot;not priced&quot; — indistinguishable from &quot;no dislocation&quot;.
+    # Ladder: (1) alternate suffix forms, (2) the local IBKR gateway as a LIVENESS check (it has no
+    # history, so it can only tell us the line is alive and Yahoo dropped it = INFRA failure, loud).
+    try:
+        from verticals.generators.intl_dislocation_sweep import alt_symbols, gw_probe
+    except Exception as e:                                   # ladder unavailable = say so, don&#x27;t die
+        print(f&quot;[dislocation_sweep] fallback ladder unavailable ({type(e).__name__}) — &quot;
+              f&quot;unpriced names will be reported without a retry&quot;)
+        alt_symbols, gw_probe = (lambda s: []), (lambda s, **k: ({}, &quot;NOT RUN (ladder unavailable)&quot;))
+    sermap = {tk: s for tk, sym in symmap.items() if (s := series(sym)) is not None}
+    missing = [tk for tk in symmap if tk not in sermap]
+    if missing:
+        alt_map = {a: tk for tk in missing for a in alt_symbols(symmap[tk])}
+        if alt_map:
+            try:
+                px2 = yf.download(sorted(alt_map), period=&quot;3mo&quot;, progress=False,
+                                  auto_adjust=True)[&quot;Close&quot;]
+                for a, tk in alt_map.items():
+                    if tk in sermap:
+                        continue
+                    try:
+                        s2 = (px2[a] if a in px2.columns else px2).dropna()
+                    except Exception:
+                        continue
+                    if len(s2) &gt;= 22:
+                        sermap[tk] = s2
+                        print(f&quot;[dislocation_sweep] symbol-fix: {tk} priced as {a}&quot;)
+            except Exception as e:
+                print(f&quot;[dislocation_sweep] alt-symbol retry failed: {type(e).__name__}&quot;)
+    unpriced = [tk for tk in symmap if tk not in sermap]
+    gw_alive, gw_status = (gw_probe(unpriced, default_venue=(&quot;SMART&quot;, &quot;USD&quot;)) if unpriced
+                           else ({}, &quot;not attempted&quot;))
+    spy5 = float(spy.iloc[-1] / spy.iloc[-6] - 1) * 100
+    spy21 = float(spy.iloc[-1] / spy.iloc[-22] - 1) * 100
+
+    try:
+        harvested = {h.get(&quot;ticker&quot;) for h in json.loads(HARVESTED.read_text()) if isinstance(h, dict)}
+    except Exception:
+        harvested = set()
+    state = {}
+    try:
+        state = json.loads(STATE.read_text())
+    except Exception:
+        pass
+
+    today = datetime.date.today().isoformat()
+    hits, scanned = [], 0
+    for tk, meta in sorted(uni.items()):
+        s = sermap.get(tk)
+        if s is None:
+            continue
+        scanned += 1
+        last = float(s.iloc[-1])
+        r5 = (last / float(s.iloc[-6]) - 1) * 100
+        r21 = (last / float(s.iloc[-22]) - 1) * 100
+        ex5, ex21 = r5 - spy5, r21 - spy21
+        if r21 &gt; 15:                                            # pullback after a moonshot is not cheapness
+            continue
+        floor5 = min_excess5 + (2 if meta[&quot;held&quot;] else 0)      # held names fire 2pp earlier
+        sev = None
+        if ex5 &lt;= -12 or ex21 &lt;= -20:
+            sev = &quot;HIGH&quot;
+        elif ex5 &lt;= floor5 or ex21 &lt;= -15:
+            sev = &quot;MED&quot;
+        prior = state.get(tk, {})
+        if sev is None:
+            if prior:
+                state.pop(tk, None)                             # recovered — re-arm
+            continue
+        # suppress repeats unless the tier deepened
+        if prior and prior.get(&quot;sev&quot;) == sev:
+            try:
+                age = (datetime.date.fromisoformat(today) -
+                       datetime.date.fromisoformat(prior.get(&quot;fired&quot;, today))).days
+                if age &lt; quiet_sessions * 1.5:                  # calendar-day approximation
+                    continue
+            except Exception:
+                pass
+        state[tk] = {&quot;sev&quot;: sev, &quot;fired&quot;: today, &quot;ex5&quot;: round(ex5, 1), &quot;ex21&quot;: round(ex21, 1)}
+        wash = &quot; DO-NOT-BUY-31D(wash-sale: our own harvest)&quot; if tk in harvested else &quot;&quot;
+        held = &quot; HELD-&gt;re-underwrite&quot; if meta[&quot;held&quot;] else &quot;&quot;
+        hit = {&quot;ticker&quot;: tk, &quot;severity&quot;: sev, &quot;px&quot;: round(last, 2),
+               &quot;r5_pct&quot;: round(r5, 1), &quot;r21_pct&quot;: round(r21, 1),
+               &quot;excess5_pct&quot;: round(ex5, 1), &quot;excess21_pct&quot;: round(ex21, 1),
+               &quot;source&quot;: meta[&quot;source&quot;], &quot;verdict&quot;: meta[&quot;verdict&quot;], &quot;held&quot;: meta[&quot;held&quot;],
+               &quot;wash_sale_blocked&quot;: tk in harvested, &quot;fired&quot;: today}
+        hits.append(hit)
+        print(f&quot;DETFIRE|dislocation|{tk}|{sev}|{meta[&#x27;verdict&#x27;]} ({meta[&#x27;source&#x27;]}) fell &quot;
+              f&quot;{r5:+.1f}%/5d {r21:+.1f}%/21d = {ex5:+.1f}/{ex21:+.1f}pp vs SPY @ {last:.2f}{held}{wash}&quot;
+              f&quot; — PROPOSES ONLY: cause-check -&gt; discovery_state -&gt; court (v1.4) before any staging;&quot;
+              f&quot; a shallow &#x27;no cause found&#x27; is beta, not a dislocation&quot;)
+
+    STATE.write_text(json.dumps(state, indent=1))
+    no_symbol = sorted(set(uni) - set(symmap))
+    OUT_JSON.write_text(json.dumps({&quot;asof&quot;: today, &quot;spy5_pct&quot;: round(spy5, 1), &quot;spy21_pct&quot;: round(spy21, 1),
+                                    &quot;universe&quot;: len(uni), &quot;priced&quot;: scanned, &quot;hits&quot;: hits,
+                                    &quot;unpriced_names&quot;: sorted(unpriced),
+                                    &quot;gw_alive_no_history&quot;: sorted(gw_alive),
+                                    &quot;not_price_screenable&quot;: no_symbol}, indent=1))
+    print(f&quot;[dislocation_sweep] {today}: universe {len(uni)} ({scanned} priced) · SPY {spy5:+.1f}%/5d &quot;
+          f&quot;{spy21:+.1f}%/21d · {len(hits)} new/deepened dislocations&quot;)
+    if unpriced:
+        gw = ((f&quot; | {len(gw_alive)} QUOTE LIVE at the IBKR gateway = a Yahoo history gap &quot;
+               f&quot;(INFRA failure, not an observation): {&#x27;, &#x27;.join(sorted(gw_alive))}&quot;) if gw_alive
+              else f&quot; | gateway liveness probe: {gw_status} — 0 alive&quot;)
+        print(f&quot;DEGRADED-LOUD: {scanned} of {len(symmap)} priced; {len(unpriced)} DEGRADED &quot;
+              f&quot;— {&#x27;, &#x27;.join(sorted(unpriced))}{gw}&quot;)
+    if no_symbol:
+        print(f&quot;NOT PRICE-SCREENABLE ({len(no_symbol)}, no yfinance symbol mapping): &quot;
+              f&quot;{&#x27;, &#x27;.join(no_symbol)}&quot;)
+    return hits
+
+
+if __name__ == &quot;__main__&quot;:
+    ap = argparse.ArgumentParser()
+    ap.add_argument(&quot;--min-excess5&quot;, type=float, default=-8.0)
+    ap.add_argument(&quot;--quiet-sessions&quot;, type=int, default=10)
+    a = ap.parse_args()
+    sweep(a.min_excess5, a.quiet_sessions)
+</pre></div></body></html>

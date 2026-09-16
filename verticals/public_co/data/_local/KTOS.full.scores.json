@@ -1,0 +1,95 @@
+{
+  "ticker": "KTOS",
+  "scores": [
+    {
+      "claim_id": "ktos_001_usgov_revenue_concentration",
+      "claim_text": "In fiscal 2025, 68% of total revenues were derived from contracts with the U.S. Government.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "usaspending.query_recipient_contracts (Mode A: 'Kratos Defense'; Mode B: 'Kratos Unmanned' subsidiary roll-up)",
+      "M_value": "Mode A: 494 awards, total_amount $1.672B obligated. Mode B: 'Kratos Unmanned' alone shows 174 awards / $1.123B; combined federal obligations across Kratos legal entities materially exceed 68% of FY25 total revenue of $1.347B (implied federal-revenue ~ $915M). Top contracts include BQM-177A SSAT full-rate production ($238.8M), CCS-C C2 production ($206M / $310M), and BQM-167 sub-scale aerial target.",
+      "interpretation": "PASS: Federal obligated $$ at multiple Kratos subsidiaries comfortably support the 68% federal revenue concentration claim. Mode B subsidiary resolution confirms the rollup."
+    },
+    {
+      "claim_id": "ktos_002_rpo_1573m",
+      "claim_text": "Remaining performance obligations of $1,573.4M as of Dec 28, 2025 (54% recognizable in 2026).",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "sec_filings.list_filings_by_form (Mode A: 10-K on file 2026-02-23); usaspending recipient federal obligations vs RPO scale (Mode B)",
+      "M_value": "Mode A: 10-K accession 0001069258-26-000013 filed 2026-02-23 confirms disclosure. Mode B: cumulative federal obligations across Kratos entities (~$1.67B-$2.04B in DoD contracts) are larger than the $1.57B RPO; the gap is in the right direction (obligations > RPO, since RPO measures unburned-down execution). No material divergence indicating phantom backlog.",
+      "interpretation": "PASS: RPO disclosure is plausibly supported by the federal-contract obligation base. Heuristic 10 (IDIQ ceilings vs obligated $$) not violated — federal obligated $$ comfortably exceed RPO."
+    },
+    {
+      "claim_id": "ktos_003_dod_contracts_existence",
+      "claim_text": "Kratos is a DoD prime with revenue across named programs (XQ-58 Valkyrie, Zeus SRM, Erinyes, Sentinel ICBM-related).",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": true,
+      "M_check": "usaspending.query_dod_contracts (Mode A); pentagon_jbook.query_program_funding for each named program (Mode B)",
+      "M_value": "Mode A: 579 DoD contracts to Kratos totaling $2.04B obligated — overwhelming PASS for general DoD-prime claim. Top awards confirm BQM-177A SSAT full-rate production ($238.8M), CCS-C ($310M), BQM-167 sub-scale aerial target. Mode B: Pentagon JBOOK shows Collaborative Combat Aircraft (PE 0207147F) FUNDED_SHRINKING — FY24=$0M, FY25=$711.7M, FY26=$111.4M (an 84% reduction in newest PB). XQ-58 Valkyrie, Zeus, Erinyes, Sentinel, BQM-167, BQM-177 returned NOT_FOUND in the J-Book corpus (program names may map to other PEs or are below corpus coverage).",
+      "interpretation": "MODERATE_UNDERDELIVERY: Mode A is a strong PASS (Kratos is clearly a DoD prime with billions in obligated DoD contracts on target-drone programs). However, Mode B surfaces a material forward-looking caveat: the CCA program (where Kratos pitches Valkyrie & GE-Aerospace engines) shows 84% funding reduction FY25-FY26 in the newest PB. An obligated past-year contract is NOT the same as forward-funded program; the CCA wind-down in PB26 is a SEVE-flavored Mode B finding even though existing target-drone obligations are robust."
+    },
+    {
+      "claim_id": "ktos_004_ge_aerospace_teaming",
+      "claim_text": "Formal teaming agreement with GE Aerospace for engines for next-gen unmanned aerial systems and CCA-type aircraft, including planned Oklahoma turbofan facility.",
+      "severity": "UNVERIFIABLE",
+      "supports": null,
+      "M_check": "sec_filings.list_filings_by_form 8-K (Mode A); edgar_fts.query_fulltext in GE CIK 0000040545 (Mode B)",
+      "M_value": "Mode A: 30+ Kratos 8-Ks on file across the window — disclosure cadence consistent with a material partnership announcement (specific 8-K identification deferred). Mode B: edgar_fts.query_fulltext for 'Kratos' inside GE Aerospace CIK 0000040545 returned n_hits=null (FTS endpoint returned no usable hits; cannot confirm or deny GE-side disclosure of Kratos via this index).",
+      "interpretation": "UNVERIFIABLE: edgar_fts returned no result rather than zero hits — appears to be an index coverage / endpoint issue rather than a true absence-of-disclosure finding. Per heuristic 7, counterparty-disclosure SEVE requires a clean zero-hit on a working query; we cannot conclude that here. Tag as UNVERIFIABLE rather than over-call SEVE."
+    },
+    {
+      "claim_id": "ktos_005_rafael_prometheus",
+      "claim_text": "Prometheus venture with Rafael, expected to ramp during 2026.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "sec_filings.list_filings_by_form 8-K (Mode A); claim_evolution Prometheus (Mode B)",
+      "M_value": "Mode A: 8-K cadence intact across the disclosure window. Mode B: claim_evolution for 'Prometheus' shows 12 subsequent mentions across 10-K, 10-Q, 8-K, DEF 14A — evolution_status REAFFIRMED_IN_STRUCTURED_DISCLOSURE. Prior-period 'Prometheus Rafael' joint search returned 0 hits, but standalone 'Prometheus' has dense recurrence.",
+      "interpretation": "PASS: The Prometheus venture is consistently re-disclosed in subsequent filings. Per Two-Mode DD Discipline, persistent multi-form reaffirmation is the PASS pattern."
+    },
+    {
+      "claim_id": "ktos_006_acq_norden_nomad",
+      "claim_text": "Multiple bolt-on acquisitions: Norden Millimeter (Feb 2025, $32.2M stock), Nomad Global Communications (Feb 2026, $88M stock + $23M earnouts), FTT/KTT Core 9.95% top-up (2024-2025).",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "sec_filings.list_filings_by_form 8-K (Mode A); acq_coherence.score_acquisition_coherence on aggregate rollup (Mode B)",
+      "M_value": "Mode A: 30+ 8-Ks on file across the relevant window, including 8-Ks at 2025-02-26 (Norden), 2026-02-23 (Nomad pre-closing window) and 2026-03-02 (post-closing offering registration). Mode B: acq_coherence.score_acquisition_coherence returned signal=COHERENT_ROLLUP, mean_coherence=0.85. Per-acquisition: Norden (0.85, high coherence - microwave electronics vertical integration); Nomad (0.75, high coherence - C5ISR/tactical comms extension); FTT/KTT Core (0.95, high coherence - drone propulsion).",
+      "interpretation": "PASS: Both modes confirm. Acquisitions are coherent extensions of stated Kratos thesis (microwave / C5ISR / propulsion). No Nikola-pattern rollup incoherence."
+    },
+    {
+      "claim_id": "ktos_007_facilities_62_locations",
+      "claim_text": "2.4M sqft across 62 locations primarily in the U.S., plus 7 international countries.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "epa_frs.query_facilities (Mode A); osha_establishments.query_establishments (Mode B)",
+      "M_value": "Mode A: EPA FRS shows 6 Kratos facilities in California alone (San Diego, McClellan, Sacramento×2+) including KRATOS DEFENSE & SECURITY SOLUTIONS HQ at 4820 Eastgate Mall (San Diego) and KRATOS UNMANNED AERIAL SYSTEMS manufacturing sites (McClellan, Sacramento). Florida search returned 0 (heuristic 1: light electronics often NOT in FRS — Florida Micro Systems / Fort Walton Beach probably under-coverage). Mode B: OSHA shows Micro Systems, Inc. (Kratos Defense subsidiary) at Fort Walton Beach FL — confirms the disclosed FL location separately from FRS.",
+      "interpretation": "PASS: Multi-state physical footprint confirmed via two independent registries. Per heuristic 1, FRS absence in some states is expected and not a red flag for defense electronics."
+    },
+    {
+      "claim_id": "ktos_008_icfr_clean",
+      "claim_text": "ICFR effective as of Dec 28, 2025; Deloitte & Touche unqualified opinion.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "sec_filings.list_filings_by_form 10-K (Mode A); claim_evolution 'material weakness' (Mode B)",
+      "M_value": "Mode A: Latest 10-K (2026-02-23) on file with auditor's report. Mode B: claim_evolution.query_claim_evolution for 'material weakness' returned 7 subsequent mentions across 10-K + 8-K (registration prospectus pages); evolution_status=REAFFIRMED_IN_STRUCTURED_DISCLOSURE; adverse_findings=[]; all snippets classified AFFIRMED (positive 'no material weakness' attestations in 8-K offering documents at 2024-02-27, 2025-06-27, 2026-03-02).",
+      "interpretation": "PASS: Both modes confirm clean ICFR. No adverse findings, no restatement language, no recurring material weakness. Heuristic-aligned PASS."
+    },
+    {
+      "claim_id": "ktos_009_israel_facility_expansion",
+      "claim_text": "Expanding existing Israel microwave electronics facility; establishing new space-qualified Israel microwave facility.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "sec_filings.list_filings_by_form 10-K (Mode A); claim_evolution 'Israel' / 'Orbit' (Mode B)",
+      "M_value": "Mode A: Latest 10-K names Israel as one of 7 international countries with Kratos operations; mentions Orbit (acquired Israeli subsidiary) and Israeli-Shekel FX risk. Mode B: claim_evolution for 'Israel' returned 38 subsequent mentions across 10-K/10-Q/8-K/DEF 14A (REAFFIRMED_IN_STRUCTURED_DISCLOSURE); 'Orbit' returned 16 mentions (REAFFIRMED).",
+      "interpretation": "PASS: Israel/Orbit footprint persistently disclosed in structured filings. The Israel facility expansion claim is consistent with the long-standing Orbit subsidiary and KGS-Israel revenue stream."
+    },
+    {
+      "claim_id": "ktos_010_insider_calendar_check",
+      "claim_text": "Material stock issuance for acquisitions and registered resales (Nomad Feb 2026 $88M+; Norden $32M); active acquirer with stock-as-consideration cadence.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": false,
+      "M_check": "sec_filings.list_filings_by_form S-3ASR / 424B5 (Mode A); insider_vs_calendar.query_insider_sales_near_budget_events (Mode B)",
+      "M_value": "Mode A: S-3ASR filings present (2026-02-26, 2024-02-21, 2023-10-04, 2021-02-10, 2021-02-09) and 424B5 prospectus filings 2026-02-27, 2026-02-26, 2025-06-27, 2025-06-25, 2024-02-23 — confirms repeated public/secondary offerings, including a 424B5 ONE DAY after the 2026 10-K filed. Mode B: insider_vs_calendar over 2024-01-01 to 2026-05-20 with window_days=14 returned 122 Form 4 filings, 373 total insider sales, $160.4M sale value, and **80 proximate sales worth $31.5M near budget events, of which 78 are DISCRETIONARY (non-10b5-1) across 9 unique insiders**. Matched events: 47 discretionary sales worth $27.5M in the 14-day window around the Jan 20, 2026 bipartisan budget signing (incl. CEO Eric DeMarco selling 189,824 shares @ $90.27 = $17.1M on Jan 6, 2026 — non-10b5-1, 14 days before budget signed); 16 discretionary sales worth $1.85M around fiscal-year-end 2025-09-30; 15 discretionary sales worth $2.23M around the FY27 J-Book release 2026-04-28. Per the Two-Mode DD Discipline framework: 'CLUSTERED_DISCRETIONARY signal: that is the highest-signal flag → SEVE or RED.'",
+      "interpretation": "SEVERE_UNDERDELIVERY: Discretionary insider selling is densely clustered to calendar-knowable Pentagon/budget catalysts. The Jan-2026 cluster ($27.5M, 9 insiders, 47 discretionary sales in a 14-day window) coincides with the bipartisan budget signing and pre-empts the CCA PB26 funding shrinkage (711.7M→111.4M) that is also visible in this run's Mode B. CEO DeMarco's $17.1M discretionary sale 14 days before the Jan-20 budget catalyst is the single highest-signal data point. Per framework rubric, this is a SEVE flag; would be RED with additional confirmation of explicit Pentagon-program disclosure asymmetry."
+    }
+  ]
+}

@@ -1,0 +1,538 @@
+{
+  "ticker": "LOOP",
+  "cutoff": "2020-09-01",
+  "filing": "0001654954-20-004887_10K.txt",
+  "plan_version": 1,
+  "claims": [
+    {
+      "claim_id": "LOOP-1",
+      "claim_text": "Loop Industries has a multi-year supply agreement with PepsiCo to purchase production capacity of Loop-branded PET resin from the planned Spartanburg JV facility.",
+      "source_quote": "Multi-year supply agreement with PepsiCo, one of the largest purchasers of recycled PET plastic, enabling them to purchase production capacity and incorporate Loop™ PET resin into its product packaging",
+      "subject": "Loop Industries",
+      "predicate": "has_multi_year_supply_agreement_with",
+      "object_value": "PepsiCo",
+      "category": "customer_pipeline",
+      "referent_type": "entity",
+      "m_source_status": "MAPPED",
+      "source_id": "megacap_namecheck.query_megacap_mentions",
+      "source_params": {
+        "small_cap_name": "Loop Industries",
+        "cutoff_date": "2020-09-01",
+        "megacap_subset": ["PepsiCo"],
+        "window_days": 3650,
+        "forms": "10-K,10-Q,8-K"
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "PepsiCo SEC filings full-text (CIK 0000077476)",
+          "endpoint_or_method": "edgar_fts: search_term='Loop Industries' cik='0000077476'",
+          "rationale": "If multi-year supply agreement with PepsiCo is real and material to PepsiCo's recycled-PET sourcing strategy, the 10-K Sustainability/ESG sections or 10-Q M&A discussion would name Loop Industries. PepsiCo's commitment to 25% rPET by 2025 is a public ESG commitment; named-supplier disclosure is plausible.",
+          "expected_observable": "count of filings mentioning 'Loop Industries'",
+          "signal_direction": "0 hits in 5y of PepsiCo filings while Loop claims multi-year supply agreement = INFLATION_SUSPECT for the materiality of the relationship",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "PepsiCo Sustainability Report / ESG disclosure (annual)",
+          "endpoint_or_method": "https://www.pepsico.com/our-impact/esg-topics-a-z; pull 2019 & 2020 sustainability reports as PDF, search for 'Loop Industries' or 'Loop branded PET'",
+          "rationale": "Named-supplier disclosure in PepsiCo's sustainability report is a higher-resolution test than 10-K, as ESG narratives routinely name technology partners.",
+          "expected_observable": "presence/absence of named-supplier mention",
+          "signal_direction": "absence + claim of multi-year purchasing-capacity supply agreement = inflation suspect",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "industrial_chemistry",
+      "claim_type_taxonomy": "commercial_customer",
+      "extraction_notes": "H7 over-fit guidance: PepsiCo (CIK 0000077476) is one of the named mega-caps. Use megacap_namecheck (canonical for commercial_customer claims; multi-megacap one-shot) + claim_evolution (LOOP-7) to test focal-side disclosure trajectory. Pre-commercial supply 'agreements' from a pre-revenue company against mega-caps with strong public ESG commitments are exactly the inflation-suspect pattern megacap_namecheck calibrates against."
+    },
+    {
+      "claim_id": "LOOP-2",
+      "claim_text": "Loop Industries has a multi-year supply framework with Coca-Cola's Cross Enterprise Procurement Group to supply 100% recycled Loop PET resin to authorized Coca-Cola bottlers.",
+      "source_quote": "Multi-year supply framework with the Coca-Cola system's Cross Enterprise Procurement Group to supply 100% recycled and sustainable Loop™ PET resin to authorized Coca-Cola bottlers who enter into supply agreements with us",
+      "subject": "Loop Industries",
+      "predicate": "has_multi_year_supply_framework_with",
+      "object_value": "Coca-Cola Cross Enterprise Procurement Group",
+      "category": "customer_pipeline",
+      "referent_type": "entity",
+      "m_source_status": "MAPPED",
+      "source_id": "megacap_namecheck.query_megacap_mentions",
+      "source_params": {
+        "small_cap_name": "Loop Industries",
+        "cutoff_date": "2020-09-01",
+        "megacap_subset": ["Coca-Cola"],
+        "window_days": 3650,
+        "forms": "10-K,10-Q,8-K"
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "Coca-Cola SEC filings full-text (CIK 0000021344)",
+          "endpoint_or_method": "edgar_fts: search_term='Loop Industries' cik='0000021344'",
+          "rationale": "If Coca-Cola system 'Cross Enterprise Procurement Group' framework is real and material to Coca-Cola's rPET sourcing for the 50%-by-2030 commitment, Coca-Cola's 10-K Sustainability/Risk-Factors sections may name technology partners.",
+          "expected_observable": "count of Coca-Cola filings mentioning 'Loop Industries'",
+          "signal_direction": "0 hits combined with named multi-year framework claim is INFLATION_SUSPECT",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Coca-Cola Business & Sustainability Report (annual)",
+          "endpoint_or_method": "https://www.coca-colacompany.com/sustainability; pull 2019 & 2020 sustainability reports; search 'Loop Industries' or 'Loop PET'",
+          "rationale": "Named-supplier disclosure in Coca-Cola's sustainability disclosures is the highest-resolution test for the framework partnership claim.",
+          "expected_observable": "presence/absence of Loop named-supplier mention",
+          "signal_direction": "absence at multi-year-framework claim level is inflation suspect",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "World Without Waste partner directory (Coca-Cola published partner list)",
+          "endpoint_or_method": "scrape Coca-Cola World Without Waste page + press releases; check named-partner lists for chemical-recycling/depolymerization tech partners",
+          "rationale": "Coca-Cola has named other recycling-tech partners publicly (e.g. Ioniqa via Indorama). A real Cross Enterprise Procurement Group 'framework' would plausibly produce at least one press-release co-mention.",
+          "expected_observable": "named-partner directory hits",
+          "signal_direction": "absence is moderate contradiction",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "industrial_chemistry",
+      "claim_type_taxonomy": "commercial_customer",
+      "extraction_notes": "H7 over-fit: Coca-Cola is on the suspicious-mega-cap list — small-cap commercial relationships almost never make Coca-Cola's 10-K customer table. megacap_namecheck is calibrated for sub-materiality. The 'authorized bottlers who enter into supply agreements with us' framing is conditional language that may indicate no executed underlying contracts."
+    },
+    {
+      "claim_id": "LOOP-3",
+      "claim_text": "Loop Industries has a multi-year supply agreement with Danone SA covering its evian brand bottled water.",
+      "source_quote": "Multi-year supply agreement with Danone SA, one of the world's leading global food and beverage companies. Danone will purchase 100% sustainable and upcycled Loop™ branded PET for use in brands across its portfolio including evian(R), Danone's iconic natural spring water",
+      "subject": "Loop Industries",
+      "predicate": "has_multi_year_supply_agreement_with",
+      "object_value": "Danone SA",
+      "category": "customer_pipeline",
+      "referent_type": "entity",
+      "m_source_status": "PROPOSED",
+      "source_id": null,
+      "source_params": {},
+      "proposed_connector": {
+        "name": "amf_filings.query_french_issuer",
+        "description": "AMF (Autorité des Marchés Financiers) French issuer filings full-text search. Danone is a French issuer with public Document d'enregistrement universel (URD) annual reports filed with the AMF. The framework currently has no test for foreign-issuer counterparty disclosure of a US small-cap supplier.",
+        "endpoint": "https://www.amf-france.org/en/recherche/resultats?formId=RIB",
+        "access_pattern": "scrape",
+        "auth_required": false,
+        "sample_invocation": "GET https://bdif.amf-france.org/recherche?TYPE_DOC=URD&EMETTEUR=DANONE then fulltext-grep PDFs for 'Loop Industries'",
+        "rationale": "Danone is French-listed (not US-listed), so SEC EDGAR full-text won't find it. Multi-year supply agreement with evian must appear in Danone's URD if material to its packaging-circularity commitment for a SOX-equivalent French issuer.",
+        "estimated_cost": "free",
+        "completeness": "AMF-listed French issuers only",
+        "referent_type": "filing",
+        "attribute": "supplier_mention"
+      },
+      "creative_extensions": [
+        {
+          "source_label": "Danone Universal Registration Document (URD) annual report",
+          "endpoint_or_method": "Danone investor relations site; pull 2019 & 2020 URD PDFs; fulltext-grep 'Loop Industries' / 'Loop PET'",
+          "rationale": "URD is the French equivalent of 10-K and contains supply-chain and ESG disclosure of named technology partners. If supply agreement with evian is real, URD should name Loop.",
+          "expected_observable": "presence/absence of Loop named-supplier mention in URD",
+          "signal_direction": "absence is moderate inflation signal",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Danone Integrated Annual Report (sustainability section)",
+          "endpoint_or_method": "https://www.danone.com/investor-relations/financial-information.html; integrated annual report PDFs",
+          "rationale": "Sustainability narrative typically names tech partners in evian's '100% recycled' roadmap.",
+          "expected_observable": "named-partner mention",
+          "signal_direction": "absence at multi-year-supply-agreement level is inflation suspect",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "evian press release / brand sustainability page",
+          "endpoint_or_method": "https://www.evian.com/sustainability; scrape press releases tagged 'recycled' or 'partners'",
+          "rationale": "evian publishes sustainability partners separately from Danone corp; any chemical-recycling partner for the iconic brand would be heavily PR-leveraged.",
+          "expected_observable": "press release hits",
+          "signal_direction": "if Loop is named partner with multi-year supply agreement, expect press releases; absence is moderate",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "industrial_chemistry",
+      "claim_type_taxonomy": "commercial_customer",
+      "extraction_notes": "Danone is foreign-listed; the catalog's megacap_namecheck queries US SEC filings only and won't find Danone. claim_evolution covers the focal side but not the counterparty side. PROPOSED is the honest classification given catalog gap; creative extensions point at the canonical adjudicating source (Danone URD)."
+    },
+    {
+      "claim_id": "LOOP-4",
+      "claim_text": "Loop Industries has a multi-year supply agreement with L'Oreal Group to incorporate Loop-branded PET resin into L'Oreal product packaging.",
+      "source_quote": "Multi-year supply agreement with L'Oreal Group, the global leader in the beauty industry, enabling them to purchase production capacity and incorporate Loop™ PET resin into its product packaging.",
+      "subject": "Loop Industries",
+      "predicate": "has_multi_year_supply_agreement_with",
+      "object_value": "L'Oreal Group",
+      "category": "customer_pipeline",
+      "referent_type": "entity",
+      "m_source_status": "PROPOSED",
+      "source_id": null,
+      "source_params": {},
+      "proposed_connector": {
+        "name": "amf_filings.query_french_issuer",
+        "description": "AMF French issuer filings full-text search for URD documents.",
+        "endpoint": "https://www.amf-france.org/en/recherche/resultats?formId=RIB",
+        "access_pattern": "scrape",
+        "auth_required": false,
+        "sample_invocation": "GET https://bdif.amf-france.org/recherche?TYPE_DOC=URD&EMETTEUR=L%27OREAL then fulltext-grep PDFs for 'Loop Industries'",
+        "rationale": "L'Oreal is French-listed; SEC EDGAR will not return its filings. A multi-year supply agreement for sustainable PET packaging would be disclosed in L'Oreal's URD sustainability section, particularly given L'Oreal's public commitment to 50% recycled/bio-sourced plastic by 2025.",
+        "estimated_cost": "free",
+        "completeness": "AMF-listed French issuers only",
+        "referent_type": "filing",
+        "attribute": "supplier_mention"
+      },
+      "creative_extensions": [
+        {
+          "source_label": "L'Oreal Universal Registration Document (URD)",
+          "endpoint_or_method": "https://www.loreal-finance.com/en/annual-report; pull 2019 & 2020 URD PDFs; grep for 'Loop Industries' / 'Loop PET'",
+          "rationale": "L'Oreal's URD includes named-supplier disclosures around the 50%-rPET-by-2025 commitment. Multi-year supply agreement with capacity-purchase rights should be named.",
+          "expected_observable": "supplier-mention count",
+          "signal_direction": "0 mentions while LOOP claims multi-year supply with capacity purchase = inflation suspect",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "L'Oreal Annual Sustainability Progress Report",
+          "endpoint_or_method": "https://www.loreal.com/en/commitments-and-responsibilities; pull progress reports for plastic-packaging commitments",
+          "rationale": "L'Oreal publishes detailed plastic-packaging KPIs and names tech/recycling partners (Carbios partnership is publicly named, for example).",
+          "expected_observable": "named-partner directory",
+          "signal_direction": "absence + claim of capacity-purchase rights = inflation suspect",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Wayback Machine snapshots of Loop's investor-day decks + L'Oreal press releases (2018-2020)",
+          "endpoint_or_method": "archive.org snapshots of loopindustries.com partners page + L'Oreal newsroom; cross-check whether L'Oreal independently announced the agreement",
+          "rationale": "Counterparty-side press release is the strongest single corroborator for a multi-year supply agreement. Absence on L'Oreal newsroom while present in Loop's IR materials = unilateral announcement red flag.",
+          "expected_observable": "L'Oreal press releases naming Loop",
+          "signal_direction": "absence indicates unilateral announcement; presence corroborates",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "industrial_chemistry",
+      "claim_type_taxonomy": "commercial_customer",
+      "extraction_notes": "Same foreign-issuer gap as Danone. L'Oreal is French-listed via AMF. SEC EDGAR / megacap_namecheck won't find it. Proposed connector for AMF + URD search; creative extensions point at the canonical adjudicating sources."
+    },
+    {
+      "claim_id": "LOOP-5",
+      "claim_text": "Loop Industries owns a 50% interest in a joint venture (Indorama Loop Technologies LLC) with Indorama Ventures Holdings LP to build and operate a 20,700 metric-tons-per-year (planned-expansion to 40,000 MT/yr) PET resin facility in Spartanburg, South Carolina, with commissioning expected in Q3 calendar 2021.",
+      "source_quote": "In September 2018, in connection with one of our business models, we announced a joint venture with Indorama to retrofit their existing PET manufacturing facilities. ... The joint venture agreement details the establishment of an initial 20,700 metric tons per year facility in Spartanburg, South Carolina, in the southeastern United States. Following the decision of the joint venture with Indorama to double the capacity of the planned Spartanburg plant due to customer demand to 40,000 metric tons per year as disclosed in our 10-Q for the period ended August 31, 2019 ... We announced that the commissioning of the plant is expected to take place in the third quarter of calendar 2021.",
+      "subject": "Indorama Loop Technologies LLC (50% JV)",
+      "predicate": "plans_to_build_facility_at",
+      "object_value": "Spartanburg, SC; 20,700-40,000 MT/yr; commissioning Q3 CY2021",
+      "category": "physical_facility",
+      "referent_type": "physical_object",
+      "m_source_status": "MAPPED",
+      "source_id": "epa_emissions.query_facility_emissions",
+      "source_params": {
+        "company_name": "Indorama Loop Technologies",
+        "state": "SC",
+        "claimed_locations": [{"city": "Spartanburg", "state": "SC"}]
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "South Carolina DHEC air-quality construction permit registry",
+          "endpoint_or_method": "https://scdhec.gov/BAQ/baq-permitting; search by applicant name 'Indorama' or 'Loop' in Spartanburg County",
+          "rationale": "A 20,700-40,000 MT/yr PET depolymerization + repolymerization facility requires SC DHEC Bureau of Air Quality construction-and-operate permits well before Q3 2021 commissioning. Permit-application existence (and date) is the canonical pre-commissioning operational-status proxy. EPA FRS won't fire until the facility is operational; state DHEC permit application would fire 18-24 months earlier.",
+          "expected_observable": "permit application docket, applicant name, NAICS, date filed",
+          "signal_direction": "0 permit applications in SC for Indorama/Loop in Spartanburg within 18 months of claimed Q3-2021 commissioning = SEVERE contradiction of operational readiness",
+          "severity_if_contradiction": "SEVERE"
+        },
+        {
+          "source_label": "Spartanburg County property tax / assessor records",
+          "endpoint_or_method": "https://www.spartanburgcounty.org/assessor; lookup by owner name 'Indorama' or 'Loop'",
+          "rationale": "Any planned 20,700-40,000 MT/yr facility being commissioned in 16 months from cutoff requires site control. Property-deed records would show Indorama or JV ownership/lease.",
+          "expected_observable": "deed-record presence, owner name, parcel size",
+          "signal_direction": "0 deed/lease records in Spartanburg County for Indorama or Loop = SEVERE contradiction",
+          "severity_if_contradiction": "SEVERE"
+        },
+        {
+          "source_label": "SC Department of Commerce / Spartanburg Economic Futures Group press releases",
+          "endpoint_or_method": "https://sccommerce.com/news; https://spartanburgsc.org/news; search 'Indorama' + 'Loop'",
+          "rationale": "Major manufacturing investments in SC are routinely announced by SC Department of Commerce + county economic development entities. A 40,000 MT/yr facility = >100 jobs and would draw mandatory incentive-related public announcements.",
+          "expected_observable": "named press release with investment amount + job count + site address",
+          "signal_direction": "absence is moderate; absence COMBINED with claim of Q3-2021 commissioning is severe",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Indorama Ventures (Thailand SET-listed) Form 56-1 annual report / sustainability report",
+          "endpoint_or_method": "https://www.indoramaventures.com/en/investors/financial-information; pull 2019 + 2020 56-1 + sustainability PDFs; grep 'Loop Industries' / 'Spartanburg' / 'depolymerization'",
+          "rationale": "Indorama is Thailand-listed (IVL on SET). A 50%-owned JV with a $100M+ capex commitment must appear in Indorama Ventures' 56-1 (Thai equivalent of 10-K) and project announcements. Counterparty-side disclosure is the strongest corroborator of the JV claim.",
+          "expected_observable": "JV name + counterparty + capacity in Indorama's filings",
+          "signal_direction": "absence in IVL 56-1 = SEVERE contradiction of JV materiality",
+          "severity_if_contradiction": "SEVERE"
+        },
+        {
+          "source_label": "Spartanburg County / SC building permit + utility-connection records",
+          "endpoint_or_method": "Spartanburg County Building Codes office records request; Duke Energy / Spartanburg Water industrial-service-connection records",
+          "rationale": "A facility being commissioned Q3 2021 must have utility service-connection applications filed by 2020. Absence of building permits and utility-connection applications is direct evidence the facility cannot meet stated commissioning date.",
+          "expected_observable": "permit filings + utility-tap applications",
+          "signal_direction": "absence implies stated commissioning is unattainable",
+          "severity_if_contradiction": "SEVERE"
+        }
+      ],
+      "domain": "industrial_chemistry",
+      "claim_type_taxonomy": "facility_scope",
+      "extraction_notes": "H1 over-fit caveat: the Spartanburg facility is PRE-COMMISSIONING (planned Q3 2021), so EPA FRS may not yet fire — absence is NOT a meaningful contradiction at the FRS level. BUT the canonical pre-commissioning test is SC state air-construction permits + county property records, which the catalog doesn't have. epa_emissions is mapped for the reverse-lookup audit (does ANY Indorama/Loop entity show in SC FRS, which it should as Indorama has existing US PET operations) but the strongest tests are creative extensions to state DHEC + county records + Indorama's Thailand 56-1 filings. This is the single most critical claim in the filing — pre-revenue company's entire commercialization narrative depends on it."
+    },
+    {
+      "claim_id": "LOOP-6",
+      "claim_text": "Loop Industries has contracted for the sale of the entire initial 20,700 MT expected output of the Spartanburg facility.",
+      "source_quote": "We have currently contracted for the sale of the initial 20,700 metric tons expected output of the Spartanburg facility and we continue discussions to contract the additional volume up to its planned increased capacity of 40,000 metric tons.",
+      "subject": "Loop Industries",
+      "predicate": "has_contracted_offtake_of",
+      "object_value": "20,700 MT (100% of initial Spartanburg capacity)",
+      "category": "production_volume",
+      "referent_type": "quantity",
+      "m_source_status": "MAPPED",
+      "source_id": "claim_evolution.query_claim_evolution",
+      "source_params": {
+        "cik": "0001504678",
+        "search_term": "20,700",
+        "base_filing_date": "2020-05-05",
+        "cutoff_date": "2020-09-01",
+        "forms": "10-K,10-Q,8-K,DEF 14A"
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "Cross-supplier supply-volume reconciliation (named customer commitments vs claimed contracted offtake)",
+          "endpoint_or_method": "manual reconciliation: sum of disclosed annual volume commitments across the 5 named customers (PepsiCo, Coca-Cola system, L'Oreal, Danone, L'OCCITANE) vs 20,700 MT/yr",
+          "rationale": "If 100% of 20,700 MT is contracted across the 5 named brands, each customer must have a disclosed minimum annual volume — yet none of the 5 supply-agreement disclosures mention a volume figure. The reconciliation gap (claimed total = 20,700 but disclosed individual volumes = unspecified) is itself a divergence flag.",
+          "expected_observable": "named volume per partner",
+          "signal_direction": "absence of per-partner volume figures alongside aggregate-fully-contracted claim is internal-consistency divergence",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Subsequent LOOP 10-Q / 8-K self-disclosure cadence on the 20,700 MT offtake claim",
+          "endpoint_or_method": "edgar_fts: search_term='20,700' cik='0001504678' start_date='2020-05-06'",
+          "rationale": "If the claim was real and material, subsequent 10-Q filings should re-disclose status; if it quietly disappears or gets re-stated to a smaller number, that's a soft signal of under-delivery.",
+          "expected_observable": "presence/absence of 20,700 in subsequent Loop filings",
+          "signal_direction": "silent post-claim = concern; reaffirmation = corroboration",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "industrial_chemistry",
+      "claim_type_taxonomy": "production_count",
+      "extraction_notes": "Operational-capacity test per planner-prompt guidance. Pairs with LOOP-1 through LOOP-4 (customer claims) and LOOP-5 (facility claim) to triangulate: if facility doesn't exist as permitted and individual customer agreements aren't externally corroborated, then 'fully contracted' claim is also suspect. claim_evolution is the right materiality-correct test per H7 — within the short pre-cutoff window, will mostly show base reaffirmation; expand window post-cutoff in Phase 2."
+    },
+    {
+      "claim_id": "LOOP-7",
+      "claim_text": "Loop Industries owns a patent portfolio comprising 2 issued US patents and 1 pending US application in the GEN I platform, plus 1 issued US patent and 1 pending US application in the GEN II depolymerization technology platform.",
+      "source_quote": "The GEN I portfolio has two issued U.S. patents and a pending U.S. application, all expected to expire on or around July 2035. ... The GEN II technology portfolio has an issued U.S. patent and a pending U.S. application, all expected to expire, if granted, on or around September 2037.",
+      "subject": "Loop Industries",
+      "predicate": "owns_patent_portfolio_of_size",
+      "object_value": "GEN I: 2 issued + 1 pending US; GEN II: 1 issued + 1 pending US (plus various international filings)",
+      "category": "technology",
+      "referent_type": "intangible",
+      "m_source_status": "MAPPED",
+      "source_id": "uspto_odp.query_assignee",
+      "source_params": {
+        "assignee_name": "Loop Industries",
+        "cutoff_date": "2020-09-01",
+        "categorize": {
+          "gen_i_depolymerization": ["depolymeriz", "PET", "polyester"],
+          "gen_ii_process": ["monomer", "BHET", "MEG", "purification"],
+          "polymerization": ["polymeriz", "resin"]
+        }
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "Google Patents (fallback to USPTO ODP)",
+          "endpoint_or_method": "google_patents.query_assignee with assignee_name='Loop Industries' OR 'Loop Holdings' OR 'Solomita'",
+          "rationale": "USPTO assignee search may miss patents filed under inventor (Solomita) or subsidiary (Loop Holdings, Loop Canada) names. Google Patents categorize+ multi-assignee is a redundant check.",
+          "expected_observable": "issued + pending counts by assignee variant",
+          "signal_direction": "if total US-issued count is <3 (claimed GEN I + GEN II issued) = contradiction; if total is >3 = corroboration",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "CIPO (Canadian Intellectual Property Office) patent database",
+          "endpoint_or_method": "https://ised-isde.canada.ca/cipo/client/search/patent/basicSearch; search assignee 'Loop' or 'Loop Canada' or 'Solomita'",
+          "rationale": "Loop is Quebec-based and the filing claims 'pending patent applications in ... Canada'. CIPO is the canonical Canadian patent registry. Catalog has no Canadian-patents connector.",
+          "expected_observable": "Canadian patent application count + status",
+          "signal_direction": "0 hits while filing names Canada among pending jurisdictions = contradiction",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "WIPO Patentscope (PCT applications)",
+          "endpoint_or_method": "https://patentscope.wipo.int/search/en/search.jsf; search applicant 'Loop Industries' / 'Loop Holdings'",
+          "rationale": "Filing names 'PCT application' for GEN II. WIPO Patentscope is canonical for PCT.",
+          "expected_observable": "PCT application count + filing dates + designated states",
+          "signal_direction": "PCT presence corroborates GEN II claim; absence = contradiction",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Scientific literature search (Google Scholar / Web of Science)",
+          "endpoint_or_method": "Google Scholar: '\"Loop Industries\" OR \"Solomita\" depolymerization'; also Reaxys/SciFinder via paid access",
+          "rationale": "Real chemistry breakthroughs in PET depolymerization (vs metal-catalyzed glycolysis or biocatalysis) leave a peer-reviewed publication trail. Absence of peer-reviewed publications for a 'breakthrough proprietary technology' that depolymerizes ocean plastic at low temperature is a high-resolution operational-capacity test.",
+          "expected_observable": "peer-reviewed publication count attributed to Loop / Solomita",
+          "signal_direction": "0 peer-reviewed papers while claiming breakthrough proprietary depolymerization tech = MODERATE technology-validity concern (peer-review absence is common for trade-secret-protected chemistry but rare for academically-derived breakthroughs)",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "industrial_chemistry",
+      "claim_type_taxonomy": "patents_ip",
+      "extraction_notes": "Patents_ip cell is CANONICAL. The categorize buckets test whether Loop's patents are concentrated in actual depolymerization chemistry vs adjacent areas. Heuristic: claimed 'GEN II low-temperature, low-pressure depolymerization' tech with very few issued patents (only 1 US for GEN II) is consistent with very early-stage commercialization — the operational-capacity question is whether 3 issued US patents constitutes enough technology depth for 20,700 MT/yr commercial production by Q3 2021."
+    },
+    {
+      "claim_id": "LOOP-8",
+      "claim_text": "Loop Industries operates a GEN II industrial pilot plant in Terrebonne, Quebec, Canada that produces Loop-branded PET resin at industrial pilot scale.",
+      "source_quote": "Concurrent with the GEN II development, in June 2018, the Company transitioned to its newly constructed GEN II industrial pilot plant. ... our pilot plant and corporate offices are located at 480 Fernand-Poitras, Terrebonne, Québec, Canada J6Y 1Y4.",
+      "subject": "Loop Industries",
+      "predicate": "operates_industrial_pilot_plant_at",
+      "object_value": "480 Fernand-Poitras, Terrebonne, Quebec, Canada",
+      "category": "physical_facility",
+      "referent_type": "physical_object",
+      "m_source_status": "PROPOSED",
+      "source_id": null,
+      "source_params": {},
+      "proposed_connector": {
+        "name": "eccc_npri.query_facility",
+        "description": "Environment and Climate Change Canada National Pollutant Release Inventory (NPRI). Canadian equivalent of US EPA TRI — every Canadian industrial facility that exceeds reporting thresholds (10t/yr of various pollutants, or 20k employee-hours, etc.) must file annual NPRI. The catalog currently has no Canadian environmental-facility test, which is a hard gap for Quebec-based industrial companies like LOOP.",
+        "endpoint": "https://pollution-waste.canada.ca/national-release-inventory/archives/index.cfm?lang=en",
+        "access_pattern": "api",
+        "auth_required": false,
+        "sample_invocation": "GET https://data-donnees.ec.gc.ca/data/substances/monitor/national-pollutant-release-inventory/ with facility_name='Loop' + province='QC'",
+        "rationale": "EPA FRS does not cover Canadian facilities. The Terrebonne pilot plant is the focal company's only operating facility and the entire technology-credibility claim depends on it being a real industrial-scale operation. NPRI registration is the canonical Canadian facility-existence + operational-scale test.",
+        "estimated_cost": "free",
+        "completeness": "Canadian industrial facilities exceeding NPRI reporting thresholds",
+        "referent_type": "facility",
+        "attribute": "registration_and_emissions"
+      },
+      "creative_extensions": [
+        {
+          "source_label": "Quebec Ministry of Environment (MELCC) certificate-of-authorization registry",
+          "endpoint_or_method": "https://www.environnement.gouv.qc.ca/registres/index.htm; search by company / address",
+          "rationale": "Quebec issues Certificats d'autorisation under the Environment Quality Act for any industrial facility handling chemicals. A real PET-depolymerization pilot plant must have a CA on file.",
+          "expected_observable": "CA registration + activities permitted",
+          "signal_direction": "0 CA in Quebec registry for Loop at 480 Fernand-Poitras = SEVERE contradiction",
+          "severity_if_contradiction": "SEVERE"
+        },
+        {
+          "source_label": "Ville de Terrebonne municipal property + tax records",
+          "endpoint_or_method": "https://www.ville.terrebonne.qc.ca/role-d-evaluation; lookup 480 Fernand-Poitras",
+          "rationale": "Municipal property records confirm building footprint, owner, and zoning. Catalog has no county/municipal-property connector for Canada.",
+          "expected_observable": "owner name, building square-footage, assessed value, zoning code",
+          "signal_direction": "if footprint at 480 Fernand-Poitras is sub-industrial-scale (e.g. <20k sq ft) for a claimed industrial pilot plant feeding 20,700 MT/yr commercial design = MODERATE operational-capacity concern",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Quebec corporate registry (Registraire des entreprises du Quebec)",
+          "endpoint_or_method": "https://www.registreentreprises.gouv.qc.ca; search 'Loop Canada Inc.' + 'Loop Innovations LLC' + Solomita",
+          "rationale": "Loop Canada Inc. is the operating subsidiary holding the pilot plant. Quebec REQ shows incorporation status, registered office, declared activities (NAICS-equivalent CAEQ codes).",
+          "expected_observable": "registration + declared activity codes",
+          "signal_direction": "if declared activity is not consistent with PET manufacturing/chemical processing = contradiction",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Investissement Quebec loan agreement public registry",
+          "endpoint_or_method": "https://www.investquebec.com/quebec/en/financial-products.html; the filing claims a CDN$4.6M loan facility from IQ — IQ publishes its loan portfolio",
+          "rationale": "The filing claims Loop received a $1.65M disbursement from a CDN$4.6M Investissement Quebec facility for pilot-plant expansion. IQ is a Quebec government investment arm and discloses major loans. Corroboration verifies the underlying physical-plant-expansion activity is real.",
+          "expected_observable": "loan amount + disbursement date + project description",
+          "signal_direction": "presence corroborates pilot plant expansion; absence is moderate contradiction",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "LinkedIn employee count + worksite check",
+          "endpoint_or_method": "LinkedIn company page 'Loop Industries'; check declared employees / Terrebonne worksite vs filing's claim of 53 employees in Terrebonne",
+          "rationale": "Filing claims 53 employees in Terrebonne. LinkedIn provides a cross-check for headcount + worksite + roles (engineering / chemistry vs admin/IR-only).",
+          "expected_observable": "LinkedIn employee count + role distribution",
+          "signal_direction": "if <20 engineering/chemistry-role employees on LinkedIn vs claimed 53 in Terrebonne = moderate operational-scale contradiction",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "industrial_chemistry",
+      "claim_type_taxonomy": "facility_scope",
+      "extraction_notes": "PROPOSED is the honest classification: the canonical industrial_chemistry facility_scope sources (EPA FRS, OSHA, SAM) are US-only registries. LOOP's only operating facility is in Canada. This is a real catalog gap. The proposed ECCC NPRI connector + Quebec MELCC + Quebec REQ creative extensions ARE the right adjudicating registries for this Canadian facility-existence claim."
+    },
+    {
+      "claim_id": "LOOP-9",
+      "claim_text": "Loop Industries is a development-stage company with no revenues, an accumulated deficit of $53.32 million as at February 29, 2020, and going-concern substantial doubt disclosed by management.",
+      "source_quote": "we are a development stage company, we have not yet begun commercial operations and we do not have any sources of revenue. During the year ended February 29, 2020, we incurred a net loss of $14.51 million, used cash in operations of $9.10 million and had an accumulated deficit as at February 29, 2020 of $53.32 million, all of these factors raise substantial doubt about our ability to continue as a going concern.",
+      "subject": "Loop Industries",
+      "predicate": "is_pre_revenue_with_going_concern_doubt",
+      "object_value": "$0 revenue; $14.51M net loss FY20; $53.32M accumulated deficit; going-concern disclosed",
+      "category": "financial_distress",
+      "referent_type": "amount",
+      "m_source_status": "MAPPED",
+      "source_id": "claim_evolution.query_claim_evolution",
+      "source_params": {
+        "cik": "0001504678",
+        "search_term": "going concern",
+        "base_filing_date": "2020-05-05",
+        "cutoff_date": "2020-09-01",
+        "forms": "10-K,10-Q,8-K"
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "SEC filings list — registration statements + ATM / S-3 cadence",
+          "endpoint_or_method": "sec_filings.list_filings_by_form with cik='0001504678', forms=['S-3','S-1','424B','8-K','DEF 14A']",
+          "rationale": "Pre-revenue distress signal is reinforced by capital-raise cadence. The filing already discloses two registered direct offerings raising $40.46M in FY20 alone, and an ongoing dilution pattern. List S-3 / 424B / 8-K Item 1.01 cadence in 24 months pre-cutoff to test distress-cluster intensity.",
+          "expected_observable": "form-filing counts + total raised",
+          "signal_direction": "high cadence (>3 dilutive raises in 24 months) for a pre-revenue company = distress-cluster confirmation; in Loop's case already established within the filing",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "ucc_proxy.query_ucc_exposure for secured-debt cluster",
+          "endpoint_or_method": "ucc_proxy.query_ucc_exposure with cik='0001504678', cutoff_date='2020-09-01', window_months=36",
+          "rationale": "H10 distress-cluster test — does Loop have UCC-detectable secured-debt activity beyond the disclosed Investissement Quebec + Canadian bank loans? The catalog connector tests via SEC 8-K Item 2.03 + 10-K secured-debt notes.",
+          "expected_observable": "HIGH_LIEN_EXPOSURE / ELEVATED / MODERATE / LOW_LIEN_EXPOSURE signal",
+          "signal_direction": "HIGH or ELEVATED reinforces distress-cluster; LOW is baseline for development-stage with disclosed bank debt only",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "industrial_chemistry",
+      "claim_type_taxonomy": "financial_distress",
+      "extraction_notes": "H10 calibration: this is a TRUE going-concern disclosure (management has disclosed substantial doubt). Not a heuristic-driven inference. The interesting question is not 'does going concern exist' but 'does the distress cluster intensify post-cutoff alongside continued grandiose customer claims' — which is exactly what claim_evolution + ucc_proxy adjudicate. financial_distress cell is CANONICAL in industrial_chemistry; primary sources fit cleanly."
+    },
+    {
+      "claim_id": "LOOP-10",
+      "claim_text": "Loop Industries had 53 employees as of April 30, 2020, all located in Terrebonne, Quebec, Canada, with 31 of those furloughed due to COVID-19.",
+      "source_quote": "As at April 30, 2020, we have 53 employees, all of which are located in Terrebonne, Québec, Canada. Due to the COVID-19 pandemic, we have furloughed 31 employees until government restrictions are lifted.",
+      "subject": "Loop Industries",
+      "predicate": "has_workforce_of_size_at",
+      "object_value": "53 employees in Terrebonne, QC (31 furloughed)",
+      "category": "physical_facility",
+      "referent_type": "quantity",
+      "m_source_status": "PROPOSED",
+      "source_id": null,
+      "source_params": {},
+      "proposed_connector": {
+        "name": "statcan_business_register.query_employer",
+        "description": "Statistics Canada Business Register / Canadian Employer Wage Database. Provides employment count by enterprise + province + NAICS, with comparable resolution to BLS QCEW. Catalog currently has only BLS QCEW (US-only), no Canadian-employment connector.",
+        "endpoint": "https://www150.statcan.gc.ca/n1/en/catalogue/33-10-0307-01",
+        "access_pattern": "api",
+        "auth_required": false,
+        "sample_invocation": "GET StatsCan Table 33-10-0307-01 with enterprise_name='Loop Canada' + province='QC'",
+        "rationale": "DOL H-1B + BLS QCEW + OSHA cover US workforces only. LOOP's entire 53-person workforce is in Quebec, Canada. Statistics Canada's Business Register is the canonical Canadian-employer registry equivalent.",
+        "estimated_cost": "free",
+        "completeness": "Canadian employers; aggregate counts may mask sub-50-employee detail",
+        "referent_type": "establishment",
+        "attribute": "employment_count"
+      },
+      "creative_extensions": [
+        {
+          "source_label": "LinkedIn 'Current employees at Loop Industries' search",
+          "endpoint_or_method": "LinkedIn people-search filtered by current company='Loop Industries' + location='Terrebonne OR Montreal area'",
+          "rationale": "LinkedIn is the canonical sub-OSHA-threshold workforce-verification source. Compare LinkedIn-declared current-employee count + role mix (chemistry/engineering vs investor-relations/admin) against claimed 53 in Terrebonne.",
+          "expected_observable": "LinkedIn employee count + role distribution",
+          "signal_direction": "if LinkedIn employee count is materially below 53 OR role mix is dominated by IR/admin rather than chemistry/engineering = MODERATE operational-capacity concern",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Quebec Commission des normes, de l'equite, de la sante et de la securite du travail (CNESST) workplace-injury / employer registry",
+          "endpoint_or_method": "https://www.cnesst.gouv.qc.ca/en; CNESST publishes registered employer + workplace-establishment counts",
+          "rationale": "CNESST is the Quebec equivalent of OSHA. Every Quebec employer with workers must register and file annually. Lookup gives canonical Quebec-side workforce existence test.",
+          "expected_observable": "registration status + worker count",
+          "signal_direction": "0 registration = SEVERE contradiction; registration corroborates",
+          "severity_if_contradiction": "SEVERE"
+        },
+        {
+          "source_label": "Glassdoor / Indeed Canada company-profile reviews",
+          "endpoint_or_method": "https://www.glassdoor.ca/Overview/Working-at-Loop-Industries; https://ca.indeed.com/cmp/Loop-Industries",
+          "rationale": "Insider-perspective sources may confirm or contradict declared headcount + worksite + role-mix. Useful sanity check on whether the Terrebonne operation has the engineering depth implied by a $40M-capex Spartanburg JV.",
+          "expected_observable": "review count + employee-role disclosures + perceived headcount",
+          "signal_direction": "very thin review base (e.g. <5 reviews ever) for a claimed 53-person engineering-heavy R&D operation = moderate concern",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "industrial_chemistry",
+      "claim_type_taxonomy": "workforce",
+      "extraction_notes": "Catalog gap: DOL H-1B + OSHA + BLS QCEW are all US-only. LOOP's workforce is entirely in Quebec. PROPOSED is honest; the canonical adjudicator is Statistics Canada Business Register / CNESST. Worth testing because a real 53-person R&D + pilot-plant operation should leave a CNESST + LinkedIn footprint."
+    }
+  ]
+}

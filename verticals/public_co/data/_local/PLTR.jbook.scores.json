@@ -1,0 +1,121 @@
+{
+  "ticker": "PLTR",
+  "cutoff": "2026-05-20",
+  "filing": "0001321655-26-000011_10-K.txt",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Gotham powers a wide array of allied defense/intel missions and is a durable, growing prime DoD/IC franchise.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending.query_recipient_contracts shows $275.96M award H9222216C0078 'PALANTIR GOTHAM MONTHLY TERM LICENSES' to Palantir Technologies Inc. — direct, named Gotham revenue confirmed.",
+        "Aggregate DoD obligations to Palantir entities total ~$2.6B across 275 awards (USAspending), confirming the DoD franchise is real.",
+        "pentagon_jbook NOT_FOUND for 'Gotham' as a PE — corpus coverage gap (Gotham is a commercial-license-style buy, typically not a standalone PE)."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Gotham') + usaspending.query_recipient_contracts(recipient_name='Palantir Technologies Inc.')",
+      "M_value": "pentagon_jbook=NOT_FOUND (UNVERIFIABLE per heuristic #7); usaspending=$275.96M Gotham license award + multi-award DoD franchise",
+      "interpretation": "Cross-check supports the claim. Per heuristic #7, NOT_FOUND in J-Book corpus is not a red flag — Gotham is bought via task orders and commercial license vehicles, not via a single named PE line. USAspending corroborates a real Gotham revenue stream."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Project Maven (Army intel/AI) — cohort-flagged as a named PLTR program; the 10-K's 'special forces personnel' and 'broader defense offerings' narrative is implicitly Maven-dependent.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending: $292.68M task order W911QX24F0053 'MAVEN SMART SYSTEM - USER INTERFACE/USER EXPERIENCE (UI/UX) PROTOTYPE' to Palantir USG.",
+        "usaspending: additional $70.67M W911QX24F0113 'TASK ORDER OFF A COMMERCIAL SOLUTIONS OPENING (CSO) FOR RESEARCH AND DEVELOPMENT FOR MAVEN SMART SYSTEM (MSS) PRODUCTION LICENSES.'",
+        "usaspending: $270.15M W9128Z26FA001 'CDAO MSS TASK ORDER OFF OF CONTRACT W519TC25D0039' (FY26 obligation to PLTR for the Maven Smart System under CDAO).",
+        "pentagon_jbook NOT_FOUND on 'Project Maven', 'Maven Smart System', 'Algorithmic Warfare Cross-Functional Team', 'CDAO', 'Chief Digital and Artificial Intelligence Office' — corpus gap (Maven funding is buried in CDAO O&M / RDT&E aggregate, not a standalone hand-extracted PE in the 410-PE corpus)."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding (5 variants) + usaspending.query_dod_contracts",
+      "M_value": "pentagon_jbook=NOT_FOUND across all variants; usaspending=$633M+ in Maven Smart System obligations across 3 task orders, including a FY26 obligation",
+      "interpretation": "Per heuristic #7 and #6: NOT_FOUND is UNVERIFIABLE on the J-Book axis, but USAspending shows the obligations are real AND a FY26 task order ($270.15M, W9128Z26FA001) has already hit — Maven money is flowing TOWARD the company at cutoff, not away. PASS. Note: corpus extension would let the framework score this as J-Book FUNDED_GROWING."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "TITAN (Army Tactical Intelligence Targeting Access Node) — cohort-flagged as a named PLTR program-of-record; load-bearing for forward Army/DoD revenue.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook NOT_FOUND on 'TITAN', 'Tactical Intelligence Targeting Access Node', 'Army TITAN', 'PE 0203802A', 'Army Vantage' — corpus gap.",
+        "usaspending: $103.43M W519TC25C0008 'SOFTWARE AS A SERVICE (SAAS) MODEL OF ARMY VANTAGE ON BEHALF OF PEO EIS, PDM ADP' and $68.92M W519TC26F0012 'ARMY VANTAGE DATA ANALYTICS PLATFORM' — these are Army Vantage, an adjacent PLTR Army platform, not TITAN per se. No award description in the top USAspending hits explicitly names 'TITAN' or 'Tactical Intelligence Targeting Access Node'.",
+        "10-K does not name TITAN; the cohort-metadata flag is the only signal that PLTR is the TITAN prime."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding (3 variants) + usaspending.query_dod_contracts",
+      "M_value": "pentagon_jbook=NOT_FOUND on every TITAN variant; usaspending=no TITAN-labeled award in top 15 PLTR DoD awards (Army Vantage hits instead)",
+      "interpretation": "Per heuristic #7: NOT_FOUND in 410-PE corpus is a coverage gap; the TITAN PE is plausibly in an Army RDT&E volume not yet ingested. The claim itself is not falsified — but neither verified. Mark UNVERIFIABLE pending corpus extension. Suggested ingest: Army RDT&E PE for 'TITAN' (Army intel modernization line, plausibly PE 0203802A 'Other Intel Programs')."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "MetaConstellation — cohort-flagged PLTR Space/IC product (multi-satellite tasking) pitched as forward growth.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook NOT_FOUND on 'MetaConstellation'.",
+        "Adjacent PE check: 'Tranche 3 Transport Layer' (PE 1206410SF, SDA) → UNFUNDED_TWO_PLUS_YEARS, with replacement being 'Space Data Network (SDN) Backbone' (PE 1203636SF) → FUNDED_GROWING but SOLE-SOURCED to SpaceX (Starshield). Primary contractors on the SDN replacement are SpaceX, not Palantir.",
+        "PLTR is NOT in primary_contractors for T3 Transport Layer (York, Lockheed, Northrop) nor for SDN (SpaceX). So the SDA reorg story is not directly a PLTR program risk — but it is a structural risk to the broader PWSA-tasking story that MetaConstellation would notionally plug into.",
+        "USAspending top awards show no 'MetaConstellation' or 'PWSA' line items."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding (MetaConstellation, T3 Transport, SDN)",
+      "M_value": "MetaConstellation=NOT_FOUND; T3 Transport=UNFUNDED_TWO_PLUS_YEARS; SDN=FUNDED_GROWING (sole-sourced to SpaceX, not PLTR)",
+      "interpretation": "Heuristic #3 (reorg caveat): T3 funding has folded into SDN, which is sole-sourced to SpaceX. If MetaConstellation's forward revenue thesis is tied to PWSA-class tasking opportunities, the addressable budget has CONSOLIDATED AWAY from a multi-vendor procurement toward a SpaceX sole-source — a structural headwind. However, MetaConstellation itself is NOT_FOUND, no PLTR program revenue is asserted in the filing, and there is no usaspending evidence of MetaConstellation obligations. Net: UNVERIFIABLE, with a flagged adjacent-PE divergence (Space tasking budgets consolidating to SpaceX is unfavorable to PLTR's Space pitch)."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Government segment = 54% of $4.5B FY25 revenue (~$2.43B); forward gov remaining-deal-value = $4.4B (+90% YoY); IDIQ ceiling = $12.3B unfunded.",
+      "severity": "PASS",
+      "supports": [
+        "USAspending corroborates: 275 awards to 'Palantir Technologies Inc.' (parent search) totaling $2.60B; 117 awards to the explicit parent name totaling $2.16B; DoD is the dominant agency (16 of 25 agency-level rollups).",
+        "Top award descriptions explicitly cite Maven Smart System, Gotham licenses, Army Vantage, ICE ICM, COVID-era platform — diversified government revenue.",
+        "IDIQ ceiling ($12.3B) is correctly framed as 'funding not yet determined or guaranteed' — that disclosure is conservative."
+      ],
+      "M_check": "usaspending.query_dod_contracts + usaspending.query_recipient_contracts",
+      "M_value": "USAspending=$2.16-2.60B confirmed federal/DoD obligations to PLTR over corpus window",
+      "interpretation": "Aggregate revenue concentration claim is corroborated by independent contract data. PASS. Per heuristic #6, past revenue is real; the J-Book divergence test depends on whether the FORWARD pipeline persists — which the C2/C3/C4 program-level UNVERIFIABLE results don't refute."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "PLTR forward thesis depends on capturing 'an even greater share of U.S. federal government spending on software systems.'",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook=NOT_FOUND for 'Palantir' as contractor across the corpus — meaning none of the 410 hand-extracted PEs list Palantir as primary contractor. This is a coverage gap, not a red flag (Palantir's DoD revenue is via task orders against IDIQs, SaaS contracts, and CDAO O&M, not standalone PE-level production lines).",
+        "earmark_detector NOT_EARMARK for 'Project Maven' — Maven is funded via regular Pentagon request, not a congressional earmark. So Maven's funding is structurally durable, not at risk of an earmark sunset (heuristic #5 does NOT apply unfavorably).",
+        "usaspending shows growing FY26 obligations (W9128Z26FA001 $270M, W519TC26F0012 $69M) — forward pipeline is materializing at cutoff."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(contractor_name='Palantir') + earmark_detector.query_earmark_status(program_name='Project Maven') + usaspending",
+      "M_value": "pentagon_jbook=NOT_FOUND (coverage gap); earmark=NOT_EARMARK (structurally durable); usaspending=FY26 obligations confirmed",
+      "interpretation": "PASS. The forward-spend thesis is consistent with observable contracting behavior (FY26 task orders already obligated). No earmark-sunset risk on Maven."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Control claim: PLTR leases principal properties in Denver, Palo Alto, NYC, DC, London.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "epa_frs.query_facilities returned 0 matches for Palantir Technologies in CO — EPA FRS only catalogs facilities that emit/discharge regulated substances, and a software company's office space typically isn't FRS-registered.",
+        "No epa_error; the absence is structural (software offices are not EPA facilities)."
+      ],
+      "M_check": "epa_frs.query_facilities(facility_name='Palantir Technologies', state_abbr='CO')",
+      "M_value": "n_facilities=0",
+      "interpretation": "Wrong M-source for this kind of claim — software-company office leases don't show in EPA FRS. UNVERIFIABLE. (A more apt verifier would be Loopnet / county assessor / SEC exhibit lease filings, none of which are in the catalog.)"
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Control claim: PLTR committed to spend at least $1.95B over 10 contract years through Sept 30, 2033 with one third-party cloud services provider; $79.2M of $170.2M satisfied for the FY26 contract year.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "edgar_fts.query_fulltext returned status_500 (transient backend error after one retry); no other independent verifier available in the catalog for an in-filing cloud-commitment statement.",
+        "The claim is internally consistent ($170.2M annual × 10 years tracks to ~$1.7B; $1.95B is approximate aggregate including step-ups)."
+      ],
+      "M_check": "edgar_fts.query_fulltext(search_term='Palantir cloud commitment $1.95 billion')",
+      "M_value": "status_500 (M-source error)",
+      "interpretation": "M-source failed; treat as UNVERIFIABLE rather than fail the claim. Plausible verifier would be the underlying AWS/Azure/GCP MSAs as filed exhibits, or comparison to FY24 10-K disclosure of the same commitment."
+    }
+  ],
+  "_summary": {
+    "n_claims": 8,
+    "n_queries_fired": 23,
+    "severity_counts": {"PASS": 4, "MODERATE_UNDERDELIVERY": 0, "SEVERE_UNDERDELIVERY": 0, "RED_FLAG_NEGATIVE": 0, "UNVERIFIABLE": 4},
+    "jbook_grounded_claims": ["C1","C2","C3","C4","C5","C6"],
+    "pentagon_jbook_fired_on": ["C1","C2","C3","C4","C6"],
+    "pentagon_jbook_hit_count": "5 of 6 J-Book-grounded claims (C5 used USAspending only as the aggregate concentration claim does not name a single PE)",
+    "headline_finding": "Cohort-flagged PLTR named programs (Maven, TITAN, MetaConstellation, Gotham) all return NOT_FOUND in the 410-PE J-Book corpus — a CORPUS COVERAGE GAP, not a red flag (heuristic #7). USAspending cross-check shows PLTR has $2.6B in real federal contracts including $633M+ in Maven Smart System obligations (with a $270M FY26 task order already on the books) and $276M in Gotham license revenue. Forward pipeline is materializing, not evaporating. No SEVERE/RED signal at cutoff 2026-05-20.",
+    "framework_gap_flagged": "Corpus extension needed for: Maven Smart System (CDAO O&M / RDT&E line), TITAN (Army Tactical Intel Targeting Access Node — Army RDT&E), MetaConstellation, Army Vantage. Adjacent finding: T3 Transport Layer UNFUNDED_TWO_PLUS_YEARS with replacement SDN sole-sourced to SpaceX is a structural headwind for any PLTR space-tasking pitch (MetaConstellation) but does not implicate PLTR directly as PLTR is not a primary contractor on either PE."
+  }
+}

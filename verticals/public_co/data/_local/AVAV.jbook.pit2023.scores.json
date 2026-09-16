@@ -1,0 +1,112 @@
+{
+  "ticker": "AVAV",
+  "cutoff": "2023-01-15",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "AVAV's TMS segment is anchored by the Switchblade tactical missile family, sold to U.S. DoD organizations including Army and SOCOM; forward growth narrative.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook.query_program_funding(program_name='Switchblade') -> NOT_FOUND (0 matches in corpus)",
+        "pentagon_jbook.query_program_funding(program_name='Lethal Miniature Aerial Missile System') -> NOT_FOUND",
+        "pentagon_jbook.query_program_funding(contractor_name='AeroVironment') -> NOT_FOUND (corpus does not index AVAV as a contractor on the 410 PEs covered)",
+        "usaspending.query_dod_contracts(recipient_name='AeroVironment', end_date='2023-01-15') -> 151 awards, $1.375B; top award is W31P4Q20C0024 'FY20-22 SWITCHBLADE HARDWARE PRODUCTION' for $406.5M; W31P4Q17C0193 'SWITCHBLADE HARDWARE' for $84.3M; W58RGZ23C0007 Ukraine RQ-20B/Puma for $323.5M"
+      ],
+      "M_check": "pentagon_jbook + usaspending cross-check",
+      "M_value": "USAspending confirms Switchblade is a real, large, recently-obligated production line ($406.5M FY20-22 base contract is the company's #1 DoD award). J-Book corpus does not contain Switchblade as a named PE because our 410-PE corpus is focused on RDT&E/Procurement line items extracted for other cohorts (DARPA / SDA / AF RDT&E / quantum etc.) and does not cover Army Other Procurement line items for sUAS/TMS. The Ukraine RQ-20B Puma award filed 2023 ($323M) shows a major forward demand pull through Ukraine FMS that AVAV does not even describe in the FY22 10-K -- this is upside relative to the disclosed narrative, not downside.",
+      "interpretation": "PASS. Heuristic 7 applies: NOT_FOUND in J-Book is not a red flag because the J-Book corpus is hand-curated for the defense-tech cohort and does not yet include Switchblade / Raven / Puma procurement lines (these live in Army Other Procurement and Army OPA P-40 exhibits that the corpus does not index). The orthogonal usaspending verifier confirms the Switchblade claim is materially TRUE -- it's the company's largest single DoD award. Calibration heuristic 7: treat NOT_FOUND as UNVERIFIABLE unless the company names a PE explicitly; AVAV does not name a PE. The independent positive evidence from usaspending (1) Switchblade is real, (2) >$400M obligated, (3) Ukraine pull is increasing demand, all support the claim. Coverage gap flagged."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "AVAV's small UAS product family (Raven, Puma, Wasp, Blackwing) is the leading small UAS line for U.S. military.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook.query_program_funding(program_name='Raven') -> NOT_FOUND",
+        "pentagon_jbook.query_program_funding(program_name='Puma') -> NOT_FOUND",
+        "pentagon_jbook.query_program_funding(program_name='Short Range Reconnaissance') -> NOT_FOUND",
+        "pentagon_jbook.query_program_funding(program_name='Family of Systems') -> NOT_FOUND_IN_TIMERANGE (matched 'Decontamination Family of Systems' - irrelevant)",
+        "usaspending: W58RGZ23C0007 Ukraine RQ-20B Puma/Raven $323M obligation; multiple FCS delivery-order awards visible"
+      ],
+      "M_check": "pentagon_jbook + usaspending cross-check",
+      "M_value": "USAspending confirms AVAV is the prime on Raven (RQ-11) and Puma (RQ-20) sUAS deliveries to the Army and FMS Ukraine. The 'Family of Systems' jbook hit is a spurious string match (Chemical/Biological Decontamination Family of Systems) and should be discarded. The Army Short Range Reconnaissance (SRR) competition -- where AVAV is one of several competitors -- is not in the corpus.",
+      "interpretation": "PASS. Same coverage-gap calibration as C1. The orthogonal verifier (usaspending) shows AVAV continues to win Puma/Raven production awards into the cutoff window. The most material forward risk for sUAS at this vintage is the SRR/FTUAS competitive procurement -- where AVAV has lost prior tranches to competitors -- but the FY22 10-K does not explicitly stake forward revenue on winning any specific named program of record, so there is no specific claim to falsify."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "AVAV's MUAS segment is anchored by Arcturus JUMP 20 and T-20 (acquired Feb 2021); growth pillar in U.S. and allied markets.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook.query_program_funding(program_name='Future Tactical UAS') -> NOT_FOUND",
+        "pentagon_jbook.query_program_funding(program_name='FTUAS') -> NOT_FOUND",
+        "pentagon_jbook.query_program_funding(program_name='JUMP 20') -> NOT_FOUND",
+        "usaspending.query_dod_contracts(recipient_name='Arcturus UAV') -> 27 awards, $332M total, including H9240819F0009 SOCOM Spartan 3 site $49.8M and H9240819F0010 ISR $48.4M"
+      ],
+      "M_check": "pentagon_jbook + usaspending",
+      "M_value": "USAspending confirms Arcturus UAV had real DoD revenue ($332M cumulative, mostly SOCOM ISR services) prior to acquisition. However, the FTUAS (Future Tactical UAS) Army program-of-record competition outcome -- which would be the existential signal for MUAS forward narrative -- is not in the J-Book corpus and cannot be checked here. AVAV's FTUAS bid (Arcturus JUMP 20) was one of several. The FY22 10-K does not name FTUAS or commit forward revenue to it, so there is no specific quantitative claim to score.",
+      "interpretation": "UNVERIFIABLE. Calibration heuristic 7: NOT_FOUND in J-Book is UNVERIFIABLE, not negative. The MUAS narrative is broad and segment-level; AVAV does not name a specific PE or program-of-record to verify against. Note coverage gap: FTUAS / Army Future Tactical UAS RDT&E PE is outside the 410-PE corpus."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Army 21%, DoD 55%, USG total 66% of FY22 revenue (concentration disclosure).",
+      "severity": "PASS",
+      "supports": [
+        "usaspending.query_dod_contracts(recipient_name='AeroVironment') -> 151 DoD awards, $1.375B total since 2020-01-01; top recipient is AEROVIRONMENT INC and AEROVIRONMENT, INC.",
+        "pentagon_jbook(contractor_name='AeroVironment') -> NOT_FOUND (no PE in 410-PE corpus is attributed to AVAV)"
+      ],
+      "M_check": "usaspending federal-presence cross-check",
+      "M_value": "USAspending obligations corroborate the scale of AVAV's DoD relationship (>$1.3B since 2020). Top award descriptions confirm Army contracting offices (W31P4Q = Army Contracting Command-Redstone; W58RGZ = Army Aviation and Missile Command; W911QY = Army Natick). Concentration disclosure is accurate.",
+      "interpretation": "PASS. This is a backward-looking concentration disclosure (not a forward J-Book bet). USAspending corroborates the magnitude and the Army-centric nature."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "HAPS / Sunglider with SoftBank produced $43.3M FY22 revenue (~10%) under MDDA that SoftBank can terminate at convenience.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook.query_program_funding(program_name='HAPS') -> NOT_FOUND (HAPS is commercial-customer revenue from SoftBank, not a DoD PE; not in corpus by design)"
+      ],
+      "M_check": "pentagon_jbook (negative confirmation that HAPS is not DoD-funded -- consistent with disclosure that revenue is from SoftBank)",
+      "M_value": "Claim's own disclosure language (SoftBank termination-at-convenience) is the dominant risk signal. AVAV honestly disclosed both the revenue magnitude and the termination optionality. The forward risk is counterparty-driven, not Pentagon-PE-driven, so the J-Book primary verifier is structurally inapplicable.",
+      "interpretation": "PASS on J-Book grounds (no DoD PE claim made). The HAPS/Sunglider counterparty risk with SoftBank is disclosed; this cohort's framework does not test counterparty-termination signals. Note: claim is honest -- not over-promising forward HAPS revenue."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Telerob UGV acquisition (May 2021) extends AVAV into EOD/CBRN remote ground robots; FY22 Telerob revenue $29.2M, loss $12.1M.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "acq_coherence.score_acquisition_coherence -> signal MIXED_COHERENCE; per-acquisition score 0.0 (LLM judged insufficient context to score, classified low_coherence)",
+        "usaspending.query_dod_contracts(recipient_name='Telerob') -> 0 awards, $0 total (Telerob has no direct DoD prime contracts; revenue is foreign/civil)"
+      ],
+      "M_check": "acq_coherence + usaspending",
+      "M_value": "Telerob generated $29.2M revenue but a $12.1M operating LOSS in FY22 -- a -42% operating margin in its first full year under AVAV ownership. USAspending shows zero direct DoD prime contracts for Telerob, meaning the 'expand into DoD EOD/CBRN' narrative had not yet materialized in obligations by the cutoff. The acquisition is technologically adjacent (robotics) but the operating-loss disclosure is itself a soft red flag on rollup execution.",
+      "interpretation": "MODERATE_UNDERDELIVERY. The acquisition coherence signal is not strongly negative on its face (robotics adjacency is real), but the disclosed $12.1M loss on $29.2M revenue plus zero USAspending direct DoD obligations indicates the integration is at minimum behind schedule. Per the rollup-thesis lens, FY22 Telerob is dilutive while the company narrates it as accretive growth. Materiality is moderate since Telerob is small relative to total revenue."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "AVAV holds U.S. trademarks for AeroVironment, AV, Switchblade, Raven, Wasp, Quantix, VAPOR, Arcturus UAV, Crysalis, Jump (control).",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "uspto_odp.query_assignee returned an error response (provider tooling did not return canonical patent/trademark counts in this call)"
+      ],
+      "M_check": "uspto_odp",
+      "M_value": "Control claim: trademark portfolio. Not load-bearing for the J-Book divergence pattern. No verifier disposition available.",
+      "interpretation": "UNVERIFIABLE. Control claim included for cohort calibration; not scored as positive or negative."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "AVAV operates facilities at Simi Valley/Moorpark CA, Huntsville AL, Lawrence KS, Wilmington MA, Minneapolis MN, Petaluma/Rohnert Park CA, Stuttgart Germany, Eerie PA (control).",
+      "severity": "PASS",
+      "supports": [
+        "epa_frs.query_facilities(facility_name='AeroVironment', state_abbr='CA') -> 3 facilities including Simi Valley 900 Innovators Way and 85 Moreland Rd (both Simi Valley), plus San Diego 7540 Metropolitan Dr -- consistent with disclosed Simi Valley footprint"
+      ],
+      "M_check": "epa_frs",
+      "M_value": "EPA FRS independently records the Simi Valley campus and additional San Diego facility (the San Diego facility is the legacy Pictavia / sensors site, not specifically called out in the segment-location list but consistent with the company's CA footprint).",
+      "interpretation": "PASS. Facility disclosure is corroborated by EPA FRS."
+    }
+  ],
+  "calibration_notes": {
+    "cohort_pattern_applicability": "LOW. The J-Book Exposure Divergence pattern is designed to flag companies that name specific Pentagon PEs (e.g., 'AFRL Quantum Networking', 'SDA Tracking Layer T3') in narrative, where the J-Book then shows those PEs going unfunded. AVAV's FY22 10-K does NOT name specific PEs or specific named DoD programs-of-record in that style. AVAV's pattern is product-line-and-customer disclosure (Switchblade / Puma / Raven sold to Army / SOCOM under Family of Systems IDIQs). The framework's primary verifier (pentagon_jbook) returns NOT_FOUND across the board not because programs are unfunded, but because the 410-PE corpus does not cover Army Other Procurement / Army OPA P-40 sUAS/TMS line items.",
+    "coverage_gap": "J-Book corpus does not currently index: (a) Army Other Procurement Switchblade / LMAMS line item, (b) Army Other Procurement Raven/Puma/sUAS Family of Systems line item, (c) Army RDT&E FTUAS / Future Tactical UAS PE, (d) Army Short Range Reconnaissance PE. To make this cohort productive against sUAS/TMS primes, these P-40 line items should be added to programs.json.",
+    "j_book_fires_on_jbook_grounded_claims": "0 of 5 J-Book-grounded claims (C1, C2, C3, C4, C5). All returned NOT_FOUND or spurious matches -- none returned an actionable FUNDED/UNFUNDED status.",
+    "orthogonal_verifier_signal": "usaspending was the load-bearing verifier on this filing. Net signal: AVAV's disclosed Switchblade / Puma / Raven / Arcturus narratives are corroborated as REAL by obligations. Telerob is the one weakness (zero direct DoD obligations + 42% operating loss in first full year)."
+  }
+}

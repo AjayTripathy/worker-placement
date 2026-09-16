@@ -1,0 +1,95 @@
+{
+  "ticker": "HXL",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "The F-35 Lightning II is Hexcel's largest defense program, representing less than 25% of revenues in the Defense, Space & Other market segment in 2025.",
+      "severity": "PASS",
+      "supports": ["pentagon_jbook.query_program_funding(program_name=F-35) → FUNDED_STEADY", "usaspending shows real Hexcel DoD obligations"],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": {"signal": "FUNDED_STEADY", "primary_match": "F-35 C2D2 (PE 0604840F, Air Force RDT&E Vol III)", "history": {"FY2024": 1236.71, "FY2025": 1134.207, "FY2026": 1182.094}, "secondary_match": "F-35 Squadrons (PE 0207142F)", "latest_funded_year": 2026},
+      "interpretation": "F-35 RDT&E and Squadron funding is steady through FY26 (~$1.18B FY26 vs $1.23B FY24). HXL's largest defense program is fully funded forward. No J-Book divergence. Materiality test: F-35 = <25% of 39% Defense = <9.75% of total revenue; even if F-35 wobbled it would not be existential. Severity = PASS."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Hexcel supplies advanced composites for the Sikorsky CH-53K King Stallion heavy-lift transport helicopter program, characterized as a growth program in 2025.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["pentagon_jbook returned NOT_FOUND for CH-53K, CH-53, King Stallion"],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": {"signal": "NOT_FOUND", "queries_tried": ["CH-53K", "CH-53", "King Stallion"]},
+      "interpretation": "CH-53K is a Navy aviation procurement line (Marine Corps heavy-lift). The corpus covers 410 PEs (DARPA/MDA/SOCOM/OSD/AF/SF RDT&E plus AF Procurement) but Navy aviation procurement P-40 line items are outside the seeded scope. NOT_FOUND here is a coverage gap, not a red flag. Coverage gap noted; severity = UNVERIFIABLE per heuristic #7. HXL also disclosed CH-53K growth alongside Black Hawk drove Engineered Products defense +13.4% YoY — consistent with public Sikorsky production momentum but cannot be J-Book verified."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Sikorsky UH-60 Black Hawk wide chord blade program was Hexcel's largest blade program in 2025 and 2024.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["pentagon_jbook returned NOT_FOUND for UH-60 Black Hawk and Black Hawk"],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": {"signal": "NOT_FOUND", "queries_tried": ["UH-60 Black Hawk", "Black Hawk"]},
+      "interpretation": "UH-60 Black Hawk is an Army aviation procurement / Multi-Year Procurement line item. J-Book corpus does not seed Army procurement P-40 lines. NOT_FOUND = coverage gap per heuristic #7. Severity = UNVERIFIABLE. Note: contextually the Army FY26 PB is the budget cycle in which UH-60M MYP-X is the relevant decision, and HXL's blade revenue is at risk if the Army caps Black Hawk procurement in FY27+ — but we cannot adjudicate that from the available J-Book slice."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Hexcel supplies advanced composites for the Bell-Boeing V-22 Osprey tilt-rotor aircraft program.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["pentagon_jbook.query_program_funding(program_name=V-22) → FUNDED_SHRINKING (CV-22)"],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": {"signal": "FUNDED_SHRINKING", "primary_match": "CV-22 (PE 0401318F, Air Force)", "trajectory_M": {"FY2024": 16.581, "FY2026": 0.653}, "latest_funded_year": 2026},
+      "interpretation": "CV-22 (AF Special Operations variant of V-22) line shows a steep drop from $16.6M (FY24) to $0.653M (FY26) — FUNDED_SHRINKING — the V-22 line is winding down (consistent with end-of-procurement and ground-and-investigate posture). HXL did not name V-22 as a quantified concentration, only as a qualified-platform line. Materiality test: V-22 listed among many programs, not concentrated. Per heuristic #1, FUNDED_SHRINKING → MODERATE_UNDERDELIVERY. The investor-relevant read: V-22 is a sunset program; any forward HXL composites revenue from V-22 is in run-out, but it is not load-bearing for HXL's narrative."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Hexcel sees strong demand in the defense and space market as global defense budgets continue to increase, with 2025 Defense, Space & Other sales of $747.0M growing 5.4% YoY driven by helicopters, military aircraft structures, launchers, and satellites.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["usaspending.query_dod_contracts → 83 awards, $8.6M total to Hexcel — real but small relative to claimed $747M Defense, Space & Other", "pentagon_jbook(contractor_name=Hexcel) → NOT_FOUND (Hexcel not listed as primary contractor in J-Book corpus)"],
+      "M_check": "usaspending.query_dod_contracts + pentagon_jbook.query_program_funding(contractor_name)",
+      "M_value": {"usaspending": {"n_awards": 83, "total_amount_usd": 8620635.48, "top_recipient_match": "HEXCEL CORPORATION / HEXCEL CORP"}, "pentagon_jbook_contractor": {"signal": "NOT_FOUND"}},
+      "interpretation": "HXL is a Tier-2 composites supplier — never a prime, so absence as primary_contractor in J-Book is expected (heuristic #7 — UNVERIFIABLE noise). The $8.6M direct DoD obligations confirms HXL has some direct prime work (carbon fiber raw material orders, DLA materials buys) but the bulk of HXL's $747M Defense revenue flows via Lockheed/Boeing/Sikorsky/RTX subcontracting and will not show up in usaspending under HXL's own name. The structural concern: HXL's 'global defense budgets continue to increase' narrative is partially exposed because two adjacent program lines we COULD test (V-22, NSSL) are SHRINKING, and several launcher/satellite programs are in flux. The defense growth claim is directionally consistent with broader budget tailwinds but is not corroborated at the program level by the J-Book lines we did hit — MODERATE_UNDERDELIVERY on rigor of disclosure (HXL does not name specific PEs it benefits from), not on the truth of the headline."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Hexcel composites are used on the Dassault Rafale fighter, Airbus A400M, and Embraer KC-390 military transport aircraft (a European fighter program contributed to 2025 Defense growth).",
+      "severity": "UNVERIFIABLE",
+      "supports": ["pentagon_jbook NOT_FOUND for A400M and Rafale — both are non-US programs and outside corpus"],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": {"signal": "NOT_FOUND", "queries_tried": ["A400M", "Rafale"]},
+      "interpretation": "Rafale (French), A400M (Airbus Defence multinational), KC-390 (Brazilian) are all foreign procurement programs not in the Pentagon J-Book corpus by construction — they appear in French LPM, German BMVg, UK MoD equivalents. NOT_FOUND is expected per heuristic #7. Severity = UNVERIFIABLE. The European-fighter growth tailwind is plausible given known Rafale export momentum but unfalsifiable in this corpus."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Space applications for Hexcel composites include solid rocket booster cases, fairings, and payload doors for launch vehicles, and satellite bus/solar arrays. Launchers and satellites contributed materially to 2025 Defense, Space & Other growth.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["pentagon_jbook.query_program_funding(program_name=National Security Space Launch) → FUNDED_SHRINKING"],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": {"signal": "FUNDED_SHRINKING", "primary_match": "National Security Space Launch Program (PE 1206853SF, Space Force)", "trajectory_M": {"FY2024": 156.968, "FY2026": 6.595}, "latest_funded_year": 2026},
+      "interpretation": "NSSL R&D line shows steep decline from $156.97M (FY24) to $6.6M (FY26) — FUNDED_SHRINKING — consistent with NSSL transitioning from R&D phase into procurement (Phase 3 LSA awarded; the RDT&E line is winding down while the procurement line scales). However, HXL claimed 'launchers' as a 2025 growth driver. If the R&D side of national security launch is going to near-zero in FY26 and procurement awards are concentrated among SpaceX/ULA primes (not HXL direct customers), the composite-content tailwind for HXL on launchers is concentrated in commercial launch (SpaceX Starship, Vulcan upper stage composites) more than in DoD-funded space-launch growth. Per heuristic #1, FUNDED_SHRINKING → MODERATE_UNDERDELIVERY. Caveat: this is one of multiple space programs; we did not query the full SBIRS/SDA Tracking/T2/T3 set."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Hexcel says no other defense program (apart from F-35) accounts for more than 10% of revenues in the Defense, Space & Other market.",
+      "severity": "PASS",
+      "supports": ["Statement is a negative/concentration disclosure not testable by pentagon_jbook directly; tested implicitly via F-35 being FUNDED_STEADY and no obvious second concentration"],
+      "M_check": "pentagon_jbook (composite check across queried programs)",
+      "M_value": {"F-35_funded_M_FY26": 1182.094, "V-22_funded_M_FY26": 0.653, "NSSL_funded_M_FY26": 6.595},
+      "interpretation": "Diversification claim is self-consistent with the program-by-program inquiry: F-35 dominates, other programs are individually small. No single shrinking program is large enough to violate the <10% concentration claim. Severity = PASS for the concentration disclosure itself."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "Hexcel's principal Defense customers include Boeing, Lockheed Martin, General Dynamics, RTX, Textron, GKN, GE as significant counterparties.",
+      "severity": "PASS",
+      "supports": ["Customer list is a long-standing public counterparty disclosure, consistent with HXL's role as Tier-2 advanced-composites supplier across primes. No basis to challenge in J-Book corpus."],
+      "M_check": "qualitative — counterparty disclosure",
+      "M_value": {"counterparties": ["Boeing", "Lockheed Martin", "General Dynamics", "RTX", "Textron", "GKN", "GE"]},
+      "interpretation": "Control claim. The customer list is consistent with HXL's manufacturing-facility-tied named customers (per ITEM 2 Properties). Severity = PASS."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "Hexcel operates a 1,365,000 sq ft Carbon Fibers / Prepregs facility in Salt Lake City, Utah, and an 819,863 sq ft PAN Precursor facility in Decatur, Alabama — anchor U.S. defense-supply assets.",
+      "severity": "PASS",
+      "supports": ["epa_frs.query_facilities(Hexcel, UT) returned 7 facilities including HEXCEL CORP at 6700 W 5400 S, Salt Lake City UT 84118", "epa_frs.query_facilities(Hexcel, AL) returned HEXCEL CORPORATION at 3300 Mallard Fox Dr, Decatur AL 35601"],
+      "M_check": "epa_frs.query_facilities",
+      "M_value": {"UT_n_facilities": 7, "AL_n_facilities": 1, "ut_address": "6700 W 5400 S, Salt Lake City UT", "al_address": "3300 Mallard Fox Dr, Decatur AL"},
+      "interpretation": "Both anchor U.S. carbon-fiber facilities are EPA-registered and at the addresses consistent with HXL's stated operations. Control claim verified. Severity = PASS."
+    }
+  ]
+}

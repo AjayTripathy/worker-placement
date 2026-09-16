@@ -1,0 +1,102 @@
+{
+  "ticker": "SAIC",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "In fiscal 2026, 2025 and 2024, 98% of SAIC's total revenues were attributable to prime contracts with the U.S. government or to subcontracts with other contractors engaged in work for the U.S. government.",
+      "severity": "PASS",
+      "supports": ["usaspending.query_dod_contracts shows 1,280,019 SAIC DoD awards totaling $10.79B — confirms SAIC is a real, durable USG prime"],
+      "M_check": "usaspending.query_dod_contracts(recipient_name='Science Applications International Corp')",
+      "M_value": "n_awards=1,280,019 total_amount=$10.79B",
+      "interpretation": "Macro USG-revenue concentration is corroborated. Top awards include large multi-year Army RDECOM software-engineering, simulation, and CCE follow-on contracts — diversified across DoW components, not single-program-dependent."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Approximately 52% of SAIC's total revenues were attributable to the Department of War (formerly DoD).",
+      "severity": "PASS",
+      "supports": ["usaspending confirms massive DoD prime footprint"],
+      "M_check": "pentagon_jbook.query_program_funding(contractor_name='SAIC')",
+      "M_value": "NOT_FOUND — corpus by_entity index has zero SAIC entries; SAIC is not a primary contractor on any of the 410 RDT&E/Procurement PEs seeded in the corpus",
+      "interpretation": "Coverage gap, not a red flag. SAIC's revenue is overwhelmingly services-and-IT-modernization (cost-reimbursable task orders against IDIQ vehicles like OASIS), which lives in O&M and unique PE families not in the 410-PE seeded corpus."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "SAIC's Defense and Intelligence segment provides a diverse portfolio of national security solutions to DoW and the IC, including IT modernization, digital engineering, AI, mission systems support, training-and-simulation, and ground vehicles support.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["SAIC names CAPABILITY CATEGORIES, not Program Elements — by design, the J-Book divergence pattern cannot fire because there is no named PE to test"],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='ground vehicles' | 'training and simulation')",
+      "M_value": "NOT_FOUND on both",
+      "interpretation": "META-OBSERVATION: SAIC's 10-K narrative is deliberately category-level rather than program-level. This is the OPPOSITE of the IonQ/Wolfpack short-thesis pattern — those targets named specific PEs that proved to be zeroed. SAIC's diversified, services-heavy mix means no single PE can sink the forward narrative."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Ground Vehicles Support: SAIC integrates, modifies, upgrades and sustains ground vehicles for U.S. armed forces.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["Major ground-vehicle programs (Bradley, Stryker, Abrams) NOT_FOUND in the seeded 410-PE corpus — these live in Army Procurement P-40 lines not currently in the J-Book index"],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Bradley'|'Stryker'|'Abrams')",
+      "M_value": "NOT_FOUND on all three",
+      "interpretation": "Coverage gap. SAIC's ground-vehicle work is broad sustainment, not concentrated on any single platform; even if PEs were covered, materiality would be diluted. Not load-bearing in the forward narrative."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Next Generation Space: SAIC integrates advanced solutions to enable rapid deployment of future space missions.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["pentagon_jbook hit on SDA Transport Layer family: T3 Transport Layer (PE 1206410SF) is UNFUNDED_TWO_PLUS_YEARS; SDA Transport T0-T2 is FUNDED_SHRINKING; SDA being dissolved with mission rolling into Starshield (SpaceX sole-source). Space Test Program (PE 1206864SF) FUNDED_STEADY."],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='SDA Transport Layer'); pentagon_jbook(program_name='Space Test Program')",
+      "M_value": "SDA Transport Layer → primary match UNFUNDED_TWO_PLUS_YEARS (T3), secondary FUNDED_SHRINKING (T0-T2); SDA Tracking Layer NOT_FOUND; Space Test Program FUNDED_STEADY ($28.8M FY26)",
+      "interpretation": "SDA programs are shrinking/being absorbed into a sole-sourced SpaceX backbone, and SDA itself is dissolving as a standalone agency. SAIC's 'Next Generation Space' offering is exposed to that pipeline at the integrator/services level. However: SAIC is NOT listed as a primary contractor on T3 Transport (primaries are York, LMT, NOC), and Space Test Program (where SAIC has historic exposure) is steady. Materiality is bounded — downgrade to MODERATE per heuristic 2 (subcontractor / pipeline narrative, not booked prime revenue)."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Spending packages (infrastructure bill, IRA, CHIPS) may provide additional opportunity in digital modernization, cyber, microelectronics support, and climate resiliency.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["earmark_detector returned NOT_EARMARK for CHIPS microelectronics — these are not single-sponsor earmarks but broad authorization programs"],
+      "M_check": "earmark_detector.query_earmark_status(program_name='CHIPS and Science Act microelectronics')",
+      "M_value": "NOT_EARMARK / n_matched_earmarks=0",
+      "interpretation": "Aspirational language (\"may provide additional opportunity\"). Non-binding. Cannot be verified or falsified via J-Book — these are authorization-act funds outside the RDT&E/Procurement J-Book lens."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "SAIC acquired SilverEdge Government Solutions on October 15, 2025 for ~$203M cash, advancing strategy to provide mission-focused solutions and commercial products.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["usaspending shows ZERO DoD contracts under the literal name 'SilverEdge Government Solutions' — likely doing-business-as subsidiaries; acq_coherence call failed on schema mismatch (needs parent_thesis/acquisitions)"],
+      "M_check": "usaspending.query_dod_contracts(recipient_name='SilverEdge Government Solutions'); acq_coherence.score_acquisition_coherence",
+      "M_value": "usaspending n_awards=0; acq_coherence schema error",
+      "interpretation": "Zero direct USAspending hit suggests SilverEdge operates under subsidiary names not entity-resolved in this run. Not necessarily a red flag for a small bolt-on (~$203M), but the lack of orthogonal contract footprint means we cannot independently confirm the acquired revenue base. Coherence test could not complete."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "SAIC serves customers through approximately 1,700 active contracts and task orders and employs approximately 23,000 individuals.",
+      "severity": "PASS",
+      "supports": ["1.28M historical USAspending records over the full lookback and >$10B in obligations is fully consistent with a 1,700-active-contract, 23K-employee prime — fragmentation ratio is plausible"],
+      "M_check": "usaspending.query_dod_contracts(recipient_name='Science Applications International Corp')",
+      "M_value": "n_awards=1,280,019; total=$10.79B (cumulative)",
+      "interpretation": "Operational-scale claim is corroborated. The very fragmentation that makes J-Book verification hard (no single PE concentration) is also what protects SAIC from the single-PE-zeroing failure mode."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "SAIC occupies approximately 3 million square feet of leased floor space.",
+      "severity": "UNVERIFIABLE",
+      "supports": [],
+      "M_check": "n/a — no facility query run; out of scope for J-Book cohort",
+      "M_value": "n/a",
+      "interpretation": "Control claim. Cannot be verified within the J-Book cohort scope; not load-bearing."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "Effective January 31, 2026, SAIC consolidated five business groups into three — second reorganization since fiscal 2025.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["Two reorganizations in 24 months may be a soft governance signal but is not testable via pentagon_jbook"],
+      "M_check": "n/a",
+      "M_value": "n/a",
+      "interpretation": "Note for narrative: repeated segment reshuffles can obscure year-over-year program-level comparability and can be a flag for organic-growth weakness, but no J-Book hook exists. Treat as context, not a J-Book divergence."
+    }
+  ],
+  "summary": {
+    "ticker": "SAIC",
+    "cutoff": "2026-05-20",
+    "framework_finding": "DIVERGENCE_PATTERN_DOES_NOT_FIT — SAIC's 10-K is deliberately category-level (IT modernization, digital engineering, AI, training-sim, ground vehicles, next-gen space) and names ZERO Program Elements or PE numbers. The J-Book divergence pattern requires named programs to test against, and SAIC's services-heavy, IDIQ-task-order revenue model (1.28M awards, $10.79B cumulative DoD) is structurally diversified.",
+    "best_signal": "Indirect: SAIC's 'Next Generation Space' narrative touches an area where the J-Book corpus shows SDA Transport Layer T3 UNFUNDED_TWO_PLUS_YEARS and SDA dissolving into Starshield sole-source. SAIC is not a primary on T3, so exposure is bounded (MODERATE).",
+    "coverage_gaps": "J-Book by_entity has zero SAIC entries. The 410-PE corpus is concentrated on RDT&E + select Space Force/Air Force lines; SAIC's revenue lives in O&M, intel-community services, and Army software-engineering task orders that the corpus does not index."
+  }
+}

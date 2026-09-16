@@ -1,0 +1,120 @@
+{
+  "ticker": "KMPR",
+  "company": "Kemper Corporation",
+  "cutoff": "2026-05-20",
+  "filing": "0000860748-26-000014_10-K.txt",
+  "filing_date": "2026-02-11",
+  "cik": "0000860748",
+  "sector": "Financial Services / P&C Insurance (Specialty Auto + Life)",
+  "drawdown_context": "-54.4% from 52w high, +2% above 52w low. 5-year cumulative return graph in 10-K shows KMPR at $59.06 vs $100 base (Dec 2020), a -41% absolute return while S&P Supercomposite Insurance Index sits at $206.61 (+107%) \u2014 i.e., KMPR underperformed sector by ~248 percentage points over 5 years. 2024->2025 alone: $94.49 -> $59.06 = -37%.",
+  "rfm_tuples": [
+    {
+      "claim_id": "C1",
+      "R": "Going concern is NOT an issue; auditor Deloitte & Touche issued an unqualified opinion 2026-02-11 with a single Critical Audit Matter limited to P&C reserve estimation. Management cites a stable liquidity profile.",
+      "f": "If true: (a) no 'substantial doubt' language in 10-K, (b) clean auditor relationship across multi-year tenure, (c) no covenant amendments or distress lien cluster, (d) financing capacity covers near-term obligations.",
+      "M_source": "going_concern_detector.query_going_concern (CIK 0000860748) + auditor_change_tracker.query_auditor_changes (5y lookback) + ucc_proxy.query_ucc_exposure (36mo window)",
+      "M_value": "GC detector: n_matches=0, signal=NO_GOING_CONCERN on accession 0000860748-26-000014. Auditor: CLEAN_AUDITOR_TENURE, 0 Item 4.01 8-Ks, 0 Big-4 resignations, 0 disagreements over 5y. Deloitte & Touche has served as auditor since 2002 (per audit report). UCC: signal=ELEVATED_LIEN_EXPOSURE \u2014 0 Item 2.03 8-Ks but 16 secured-term hits in 10-K/10-Q with 3 distress terms (lien=15, security agreement=3, all assets=3); cluster_in_6mo=false. Long-term debt at 12/31/25 = $943.5M, all maturities AFTER 2030 (no 12-month wall). $584.5M operating cash flow in 2025 (up from $382.9M).",
+      "severity": "PASS",
+      "interpretation": "Insurance holdco with regulated subsidiaries \u2014 going-concern framework is largely inapplicable. Auditor tenure clean. UCC ELEVATED signal is the standard P&C 'lien' verbiage on regulated trust/securities-lending arrangements, not distress liens; no cluster. No proximate liquidity crisis. PASS."
+    },
+    {
+      "claim_id": "C2",
+      "R": "The 10-K business narrative presents Kemper as a stable, ongoing leader (the family is one of the nation's leading specialized insurers, 16th-largest personal lines auto writer, top 6% by assets) with the implicit governance continuity that the standard Item 1 framing carries. Item 9 ('Changes in and Disagreements with Accountants') states 'Not Applicable'.",
+      "f": "If true: stable C-suite; no unannounced executive departures; if departures occurred they would be disclosed conspicuously in the 10-K narrative, not merely as the signature block change of a 'Principal Executive Officer'.",
+      "M_source": "sec_filings.list_filings_by_form (8-K, 2023-01-01 to 2026-05-20) + direct read of Item 5.02 8-Ks + claim_evolution on 'Interim Chief Executive'",
+      "M_value": "Three separate Item 5.02 departure 8-Ks in a 9-week window: (1) Oct 15, 2025 (accession 0000860748-25-000198) \u2014 CEO Joseph P. Lacher, Jr. terminated WITHOUT CAUSE effective Oct 14, 2025, with $5.72M cash severance (2x base + target bonus), plus accelerated equity vesting; resigned from Board same day; C. Thomas Evans, Jr. (66, General Counsel since 1992) appointed Interim CEO; Board still 'initiating' a search via 'a leading global executive search firm'. (2) Oct 24, 2025 \u2014 Chief Claims Officer P&C Duane A. Sanders terminated WITHOUT CAUSE effective Oct 22, 2025 ($2.025M severance disclosed Dec 19). (3) Nov 10, 2025 (acc 0000860748-25-000225) \u2014 $2.225M of retention RSUs granted to CFO Camden ($775K), CIO Boschelli ($675K), and Kemper Auto President Hunton ($775K), plus a separate retention award to the Interim CEO (8-K/A Nov 7), explicitly to retain executives 'following the recently announced leadership changes'. claim_evolution: 4/4 AFFIRMED \u2014 Interim CEO Evans still signing 10-Q certifications May 6, 2026, i.e., 7 months post-departure with no permanent CEO. The 10-K (filed Feb 11, 2026) Item 1 narrative makes ZERO mention of the CEO departure, the without-cause termination, or the open search. Item 9 says 'Not Applicable'. The only acknowledgment is the cover-page Principal Executive Officer signature by 'Interim' Evans.",
+      "severity": "RED_FLAG_NEGATIVE",
+      "interpretation": "Calibrated obscuring. The 10-K is filed 17 weeks AFTER the CEO termination-without-cause and 17 weeks AFTER the Chief Claims Officer termination-without-cause, yet the Item 1 business narrative reads as if leadership is stable. Two C-suite without-cause terminations in 8 days plus $5.72M + $2.025M severance plus $2.225M+ retention RSUs to remaining executives, plus a still-open CEO search seven months later, is a discontinuity that would normally be flagged in the MD&A 'Summary of Results' and 'Critical Accounting Estimates' sections. Burying it as a signature-block change while running a glossy 'leading specialized insurer' narrative is OBSCURING in the strict HONESTY-ALPHA sense. The without-cause framing (vs 'mutual agreement' / 'pursuing other opportunities') is itself revealing: the Board affirmatively chose the more litigation-protective path, then signed away $5.72M of severance to make it stick. This pattern is the classic 'Board lost confidence' signature."
+    },
+    {
+      "claim_id": "C3",
+      "R": "Kemper's Specialty P&C segment derives 90% of its premiums from California (63%), Florida (16%), Texas (11%) \u2014 but this geographic concentration is managed via 'geographic diversification, restrictions on the amount and location of new business production... and reinsurance'. The 2026 catastrophe reinsurance program provides coverage of $110M xs $50M.",
+      "f": "If true: catastrophe retention should be modest relative to underwriting profit; California-rate-restriction risk should be limited; reinsurance program adequate vs. realized cat experience (e.g., Jan 2025 LA wildfires).",
+      "M_source": "10-K Item 1A Risk Factors + filing text on California regulatory exposure + cat reinsurance terms",
+      "M_value": "63% California concentration in a non-standard auto book is extreme \u2014 and the 10-K explicitly admits 'Because of restrictions placed on the Company's ability to increase premium rates in certain states, including California, a pricing inadequacy may continue for a prolonged period. These pricing inadequacies have had a material impact on the Company's operating results in recent periods and may impact operating results in future periods.' (Item 1A). Cat reinsurance is $50M retention with only 95% coverage above \u2014 so a $200M cat event costs Kemper $50M + 5%*$110M + everything above $160M. Property & Casualty Insurance Reserves rose from $2,621.3M (12/31/24) to $2,940.3M (12/31/25), a $318.9M (+12%) increase; Personal Auto reserves alone rose $200.8M (+12.4%) and Commercial Auto reserves rose $220.7M (+30.6%) \u2014 disproportionate reserve build vs single-digit premium growth (P&C NWP $4,013M vs $3,837M, +4.6%). The Critical Audit Matter is precisely the P&C reserve estimation.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "interpretation": "The 'managed via diversification and reinsurance' framing is materially weak when 63% of segment premium is in one rate-restricted state with the company itself admitting the pricing inadequacy may persist. The 30.6% YoY Commercial Auto reserve build in a year where commercial auto NWP grew 22.7% ($797.7M -> $978.7M) is a tell: reserves growing faster than written premium in a long-tail line is the canonical reserve-strengthening fingerprint. The Critical Audit Matter on P&C reserves is Deloitte's tacit acknowledgement that the actuarial estimate is at high risk of adverse development. The CFO Camden signing as PEO at the Q1-2026 8-K and the Chief Claims Officer being terminated 12 weeks earlier (C2) connects to this: claims/reserve leadership turned over precisely when reserves are inflating."
+    },
+    {
+      "claim_id": "C4",
+      "R": "On August 5, 2025, the Board approved a NEW $500M share repurchase authorization, and on August 13, 2025, Kemper entered a $150M ASR with Goldman Sachs, repurchasing shares aggressively in Q3 and Q4 2025. As of 12/31/2025, $304.2M remains. This reflects management confidence and shareholder return discipline.",
+      "f": "If true: timing of capital return should not coincide with material undisclosed adverse information; subsequent quarters should show continued buyback execution; capital should be redeployed on a forward basis.",
+      "M_source": "10-K Item 5 repurchase table + 8-K Aug 5 (acc 0000860748-25-000187), 8-K Aug 14 (acc 0000860748-25-000194), 8-K Oct 15 CEO departure (acc 0000860748-25-000198), 8-K Nov 10 retention awards (acc 0000860748-25-000225) + cash flow statement",
+      "M_value": "Sequence: Aug 5 \u2014 Board approves $500M new buyback. Aug 13 \u2014 $150M ASR with GS; 2,279,203 initial shares delivered Aug 14 at implied price ~$66. Oct 2025 \u2014 additional 1,655,662 shares repurchased at avg $48.07 = $79.6M (10-K Item 5 table). Nov & Dec 2025 \u2014 ZERO shares repurchased ($304.2M authorization untouched). Then: Oct 14 \u2014 CEO Lacher terminated without cause. Oct 22 \u2014 Chief Claims Officer terminated without cause. Nov 4 \u2014 retention RSUs granted to remaining C-suite. Net Cash Used in Financing Activities = $860.1M in 2025 vs $137.2M in 2024 (+$722.9M), driven by buybacks + redemption of $450M 4.350% senior notes. Stock price fell from ~$66 (Aug ASR) to $48 (Oct repurchases) to ~$38 (Feb 2026 insider Form 4s) to $34.24 (Feb 6, 2026). The $150M ASR was effectively underwater by ~40% within 60 days.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "interpretation": "The timing pattern is sharply asymmetric to the company's narrative. A new $500M buyback announced Aug 5, then a $150M ASR raced into market Aug 13 \u2014 eight weeks before the Board terminates its CEO without cause. The Board does not terminate a CEO without cause without weeks of deliberation; the loss-of-confidence trajectory almost certainly predated the ASR. Buying back $230M of stock immediately before two without-cause C-suite terminations and a Q4 result that drove the stock to $38 means shareholders financed an ASR at $66 that was worth $38 four months later. The November/December zero-buyback gap inside the same 'aggressive' repurchase quarter is the giveaway: capital return discipline halted exactly when MNPI risk peaked. The 10-K narrative does not connect these dots."
+    },
+    {
+      "claim_id": "C5",
+      "R": "Insider transactions are de minimis and reflect routine equity vesting; no clustered discretionary insider selling around Q4 events suggests no information asymmetry.",
+      "f": "If true: insider sales should be small, broadly distributed across the 10b5-1 calendar, and not concentrated near material disclosure events.",
+      "M_source": "insider_vs_calendar.query_insider_sales_near_budget_events (CIK 0000860748, contractor_name='Kemper', lookback_days=730, window_days=30)",
+      "M_value": "99 Form 4 filings; 64 sales totaling $9.89M (vs $908K for FMC peer); 23 proximate sales near events totaling $5.02M; n_discretionary_proximate=1; n_unique_owners_proximate=10. The single largest sale: outgoing CEO Joseph P. Lacher, Jr. sold 85,608 shares for $4,533,799.68 at $52.96/share on 2025-09-10 \u2014 exactly 34 days before he was terminated without cause on Oct 14. Transaction code is 'F' (shares withheld to satisfy tax on vesting), not an open-market 'S', so it does not trigger CLUSTERED_DISCRETIONARY. But: the magnitude ($4.5M, 46% of all KMPR insider sale value in the 24-month window) and timing (5 weeks before being fired, when stock was at the local high before falling to $34 by Feb 2026) is a non-discretionary tax-event happening at a price that was structurally about to collapse. Eight other insiders (Camden CFO, Boschelli CIO, Hunton, Evans the Interim CEO, Allen, Flint, Rock, Director McKinney) had Form 4 sales clustered Feb 3-6, 2026, with stock at $34-38, immediately after the Feb 11 10-K filing.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Strictly by the deterministic CLUSTERED_DISCRETIONARY rule, this is a PASS \u2014 only 1 discretionary proximate sale across 24 months. But the Sept 10 Lacher F-coded vesting of $4.5M sitting 34 days before his without-cause termination at a price 30% above the next 90-day range is calibrated 'lucky' timing. The post-10-K Feb 3-6 cluster (8 insiders, all 'F' codes from annual RSU vesting) is structurally non-discretionary, but it does indicate that 2025 equity grants vested into a 2026 trough \u2014 suggesting the Board / Comp Committee front-loaded vesting before the bad-news cycle. MODERATE because the literal rule passes, but the implied-verification (timing of mandatory tax-vesting events) tilts adverse."
+    },
+    {
+      "claim_id": "C6",
+      "R": "The 10-K Item 9A Controls and Procedures, signed by Camden as Principal Financial Officer, asserts that disclosure controls and procedures are effective as of 12/31/2025. The audit report opines that internal control over financial reporting is effective. Item 9 ('Changes in and Disagreements with Accountants') = 'Not Applicable'.",
+      "f": "If true: no material weaknesses, no auditor concerns beyond CAM, no restatement risk on the discriminative reserve and goodwill accounts.",
+      "M_source": "10-K audit report + Critical Audit Matter section + auditor_change_tracker (above) + 10-K Note 22 quarterly disclosure",
+      "M_value": "Deloitte unqualified, ICFR effective. Critical Audit Matter is P&C insurance reserves \u2014 specifically calling out 'a high degree of auditor judgment and an increased extent of effort, including the need to involve our actuarial specialists', and that Deloitte developed an INDEPENDENT range of estimates and compared the prior-year estimates to actual to test for management bias. Auditor tenure since 2002 = 23 years (long tenure, but no rotation requirement for US issuers). Critical Accounting Estimates also list: valuation of investments (with $343.6M Level 3 fixed maturities, of which 92% are broker/dealer-quoted with 'lack of transparency'), life insurance reserves, goodwill ($1.0B+ implied), and DTA recoverability (NOLs $18.8M, valuation allowance $38.0M).",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "The audit opinion is clean and the controls assertion is standard. The flag here is the Critical Audit Matter wording: Deloitte explicitly developed an INDEPENDENT estimate range and tested for prior-year bias \u2014 that is the language auditors use when they have a documented disagreement on assumptions that was resolved within tolerance. Paired with C3 (12% reserve build vs 4.6% NWP growth, 30.6% commercial-auto reserve build) and C2 (Chief Claims Officer terminated without cause one month before audit completion), the CAM is doing more work than the boilerplate suggests. MODERATE because the opinion stands; the qualitative read of the CAM points to elevated restatement-adjacent risk."
+    },
+    {
+      "claim_id": "C7",
+      "R": "Kemper Reciprocal (Illinois-domiciled reciprocal insurance exchange established Q3 2023) is a routine policyholder-owned vehicle managed by a Kemper-owned attorney-in-fact (AIF), with the AIF entitled to up to 30% management fee on gross written premium. Net written premium reported through the Exchange was $50.3M in 2025 (vs $27.6M in 2024 and $0.6M in 2023).",
+      "f": "If true: the Exchange should function as a transparent, arm's-length structure with no off-balance-sheet risk concentration; growth should be measured and consistent with the disclosed reciprocal-exchange model; structure should not be used as a regulatory-arbitrage vehicle for distressed business.",
+      "M_source": "edgar_fts.query_fulltext ('Kemper Reciprocal', CIK 0000860748, 2023-01-01 to 2026-05-20) + claim_evolution + 10-K Item 1 / Note disclosures",
+      "M_value": "edgar_fts: 42 total hits, top filings dominated by Kemper's own quarterly earnings releases and 10-K/10-Q (no third-party validation). Reciprocal Exchange consolidated as a VIE per the 10-K. P&C reserves attributable to Kemper Reciprocal: $29.4M at 12/31/25 vs $9.4M at 12/31/24 (+213% YoY). Premium grew from $0.6M (2023) to $27.6M (2024) to $50.3M (2025) \u2014 83x in two years. AIF management fee is up to 30% of gross written premium, paid to a Kemper-owned subsidiary \u2014 i.e., Kemper extracts management economics regardless of the Exchange's underwriting profitability. The Exchange is the vehicle through which 'subscribers' (policyholders) absorb underwriting risk while Kemper books the fee. Bermuda subsidiary reports $66.9M pre-tax income vs $93.8M for the US \u2014 41% of pre-tax income is offshore.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "The Reciprocal Exchange is disclosed as required and the structure is legal and not uncommon in non-standard auto, but the 83x premium growth in 24 months in a segment where the parent company is having reserve adequacy concerns (C3) and just terminated its Chief Claims Officer (C2) deserves scrutiny. Reciprocal exchanges are a known mechanism for moving distressed personal lines premium off the holding company's loss-ratio-bearing balance sheet while retaining fee economics. The fee-extraction model means a Kemper subsidiary earns up to 30% of GWP whether or not subscribers ultimately lose money. The Bermuda 41% pre-tax-income share is a separate calibrated-disclosure point that the 10-K narrative does not foreground in MD&A. MODERATE because the structure is legal and disclosed in the notes; the framing in Item 1 understates the strategic importance of the vehicle as a risk-shifting tool."
+    },
+    {
+      "claim_id": "C8",
+      "R": "Kemper paid $1.28/share in dividends in 2025 (vs $1.24 in 2024), reflecting consistent shareholder returns; no dividend cut signaled.",
+      "f": "If true: dividend coverage from operating earnings should be ample; payout ratio sustainable; no covenant or rating-driven pressure on the dividend.",
+      "M_source": "10-K Item 5 dividend table + Note 17 dividend restriction commentary + sec_filings 8-K cadence for any post-cutoff dividend signal",
+      "M_value": "Dividend held flat at $0.32/quarter through all four quarters of 2025 (vs $0.31 in 2024) \u2014 i.e., a $0.01/quarter increase. Income (Loss) from Continuing Operations before Tax 2025 = $160.7M (down from $388.5M in 2024); Income Tax Expense = $28.1M; implied net income from continuing operations ~$132.6M. Total dividends paid \u2248 64M shares * $1.28 = ~$82M. So payout ratio on continuing ops ~62%. The cover-page Statement on regulated dividend capacity ('Kemper's insurance subsidiaries are subject to various state insurance laws that may restrict the ability of these insurance subsidiaries to pay dividends without prior regulatory approval') is the standard disclaimer. The 10-K Item 5 confirms no special dividend, no cut.",
+      "severity": "PASS",
+      "interpretation": "Dividend held / modestly raised; payout ratio elevated but covered. Not the discriminative issue at Kemper. PASS \u2014 this is one of the few claims where management said it and the data corroborates."
+    }
+  ],
+  "supplemental_signals": {
+    "stock_perf_5y": "KMPR $59.06 vs base $100 (Dec 2020); peer S&P Supercomposite Insurance Index $206.61. Underperformance of ~248 percentage points over 5 years, with -37% in CY2025 alone.",
+    "bermuda_pretax_share": "41% (Bermuda $66.9M / total $160.7M continuing-ops pre-tax)",
+    "p_c_reserve_growth_vs_premium_growth": "Reserves +12% YoY vs NWP +4.6% YoY; commercial-auto reserves +30.6% vs commercial-auto NWP +22.7%",
+    "ceo_search_status": "Open since Oct 14, 2025 \u2014 7+ months at cutoff; Interim CEO is the 66-year-old General Counsel"
+  },
+  "queries_run": [
+    "going_concern_detector.query_going_concern (CIK 0000860748, cutoff 2026-05-20)",
+    "auditor_change_tracker.query_auditor_changes (lookback 1825d)",
+    "ucc_proxy.query_ucc_exposure (36mo window)",
+    "sec_filings.list_filings_by_form (8-K, 2023-01-01 to 2026-05-20, limit 80)",
+    "edgar_fts.query_fulltext ('Kemper Reciprocal')",
+    "insider_vs_calendar.query_insider_sales_near_budget_events (contractor_name='Kemper', lookback 730d, window 30d)",
+    "claim_evolution.query_claim_evolution ('Interim Chief Executive', base 2026-02-11, cutoff 2026-05-20)",
+    "Direct HTTPX read of 4 Item 5.02 / 1.01 8-Ks (Oct 15, Oct 24, Nov 10, Aug 14, 2025)"
+  ],
+  "score_counts": {
+    "PASS": 2,
+    "MODERATE_UNDERDELIVERY": 3,
+    "SEVERE_UNDERDELIVERY": 2,
+    "RED_FLAG_NEGATIVE": 1,
+    "UNVERIFIABLE": 0
+  },
+  "composite": 1.25,
+  "composite_calc": "(0 + 3 + 2 + 2 + 1 + 1 + 1 + 0) / 8 non-UNVERIFIABLE claims = 11/8 = 1.375",
+  "summary": "KMPR presents as a stable, ongoing specialty auto + life insurer with clean GAAP, clean auditor, no going-concern issues, and a continuous dividend. The disclosed facts reveal a different picture: (a) the CEO was terminated WITHOUT CAUSE on Oct 14, 2025 (with $5.72M severance + accelerated equity), the Chief Claims Officer was terminated WITHOUT CAUSE on Oct 22, 2025 ($2.025M severance), and a 7-month-and-counting interim period followed \u2014 yet the 10-K Item 1 business narrative and Item 9 ('Not Applicable') do not flag this as a material discontinuity; (b) the Board approved a NEW $500M buyback Aug 5, then executed a $150M ASR Aug 13 (eight weeks before firing the CEO), with the stock then falling 42% by early Feb 2026 \u2014 the ASR was effectively underwater within 60 days; (c) Lacher's $4.5M tax-vesting sale on Sept 10, 2025 at $52.96 (vs $34 by Feb 6, 2026) was 34 days before his without-cause termination; (d) P&C reserves grew 12% on 4.6% premium growth, with commercial auto reserves up 30.6% \u2014 the Critical Audit Matter explicitly describes Deloitte building an independent reserve range and testing for management bias; (e) 63% of Specialty P&C premium is California, where the 10-K admits pricing inadequacy 'may continue for a prolonged period'; (f) Kemper Reciprocal grew 83x in 2 years to $50M NWP with up to 30% AIF fee extraction by a Kemper subsidiary \u2014 a fee-positive risk-shifting vehicle; (g) 41% of pre-tax income is booked through Bermuda. The HONESTY-ALPHA case is calibrated obscuring, not outright fraud: each individual fact is technically disclosed somewhere (Item 5.02 8-Ks, Note 22, Item 1A), but the 10-K's Item 1 narrative and the Item 9 'Not Applicable' representation paint a continuity story that the underlying disclosures contradict. This is a credit-event / reserve-strengthening / governance-vacuum LONG-from-the-trough screen, but not a clean rebound: the calibrated obscuring of the CEO transition is the dominant signal.",
+  "scoring": {
+    "PASS": 2,
+    "UNVERIFIABLE": 0,
+    "MODERATE_UNDERDELIVERY": 3,
+    "SEVERE_UNDERDELIVERY": 2,
+    "RED_FLAG_NEGATIVE": 1,
+    "verifiable_claims": 8,
+    "weighted_sum": "(0*2 + 1*3 + 2*2 + 3*1) / 8 = 10 / 8",
+    "composite": 1.25
+  }
+}

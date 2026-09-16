@@ -1,0 +1,112 @@
+{
+  "ticker": "BBAI",
+  "cutoff": "2023-01-15",
+  "filing": "0001628280-22-008031_10-K.txt",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "BigBear.ai was awarded one of two Global Force Information Management (GFIM) Phase 1 Prototype contracts by the U.S. Army.",
+      "category": "jbook_program_revenue",
+      "severity": "UNVERIFIABLE",
+      "supports": false,
+      "M_check": "pentagon_jbook.query_program_funding (program_name=Global Force Information Management / GFIM / contractor_name=BigBear.ai); usaspending.query_dod_contracts (end_date<=2023-01-15)",
+      "M_value": "pentagon_jbook signal=NOT_FOUND for all three queries (no GFIM-named PE in the 410-PE J-Book corpus, which is heavy on Air Force/Space Force RDT&E and lighter on Army G-2/G-3 information-management line items). usaspending PIT-honest (end_date=2023-01-15) shows zero discrete award to BigBear.ai Federal LLC tagged 'Global Force Information Management'. The W519TC24C0040 GFIM follow-on production contract appears only POST-cutoff (FY2024).",
+      "interpretation": "Per heuristic 7, NOT_FOUND in our J-Book corpus is UNVERIFIABLE, not RED. Materiality is moderate-to-high: GFIM is presented in the 10-K as a marquee anchor of the Army relationship and is one of only two named programs in the entire filing. Coverage gap to flag for corpus extension (Army information-management PEs). Worth tracking: BBAI claims 'one of two prototypes' — usaspending pre-cutoff shows the Army prototype obligation does not appear under BigBear.ai Federal LLC's UEI, only the POST-cutoff follow-on does. Could indicate the prototype was awarded to a predecessor entity (NuWave or PCI), or sub-contracted, or via an OTA vehicle not in usaspending."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "$466M backlog at FY-end 2021 -> 84% of 2022 projected revenue; $189M attributable to significant customers; completion dates 2022-2026.",
+      "category": "dod_customer_concentration",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": false,
+      "M_check": "usaspending.query_dod_contracts (BigBear.ai, NuWave, PCI Strategic, ProModel; end_date<=2023-01-15); usaspending.query_federal_presence(name_variants=[BigBear.ai, BigBear.ai Federal, BigBear.ai Federal, LLC])",
+      "M_value": "PIT-honest (start_date=2018-01-01, end_date=2023-01-15): BigBear.ai Federal LLC = 1 DoD award / $1,000; NuWave Solutions = 3 awards / $311K (NuWave-name awards are actually attributed to ProModel Government Solutions, a name-collision in the federal recipient index); PCI Strategic Management = 4 awards / $8.88M (dominated by HB000121C1002 'ENGINEERING SERVICES' = $8.85M); ProModel = 32 awards / $40.2M (dominated by W9124718C0020 'ARFORGEN SYNCHRONIZATION TOOL' = $13.6M and Joint Staff/J35 Orion support $7.8M). Aggregate verifiable DoD obligations under any BBAI sub at PIT: ~$49M. Backlog of $466M is 9.5x the verifiable DoD obligation footprint of the entire combined entity at PIT.",
+      "interpretation": "MODERATE_UNDERDELIVERY: usaspending corroborates that the SUBSIDIARIES had real DoD revenue trails before acquisition, so $466M backlog isn't fabricated. But the backlog/obligated ratio (~10:1) is high — backlog includes large unfunded out-years and option-period values. The 'significant customer' $189M slice is consistent with the ProModel (Joint Staff/ARFORGEN) + PCI (engineering services) trails. The risk is concentration: backlog comes overwhelmingly from a small set of legacy ProModel/PCI relationships rather than new BBAI-platform wins."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Two customers each >10% of consolidated revenues comprised 32% of FY2021 revenue (Customer A 22%, Customer B 10%).",
+      "category": "dod_customer_concentration",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "usaspending.query_dod_contracts (NuWave, PCI Strategic, ProModel; end_date<=2023-01-15)",
+      "M_value": "ProModel Govt Solutions has two pre-cutoff anchor obligations: W9124718C0020 'ARFORGEN SYNCHRONIZATION TOOL' = $13.6M (Army G-3/5/7) and 47QFMA20F0019 'J 3 5 OPERATIONS ORION SUPPORT' = $7.8M (Joint Staff). PCI Strategic has HB000121C1002 'ENGINEERING SERVICES' = $8.85M (Missile Defense Agency, awarding agency 1173). These three plausibly compose Customer A (22% = $31.7M) + Customer B (10% = $15.0M) of FY2021 revenue ($145.6M total). The 5+ year customer-tenure language is consistent (ProModel-Joint Staff/ARFORGEN relationship pre-dates the 2020 acquisition).",
+      "interpretation": "Disclosed customer concentration is corroborated by usaspending. Pre-cutoff obligations under ProModel + PCI provide a plausible revenue source for both Customer A and Customer B. No fabrication signal here; this is the cleanest claim in the filing."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Marquee customers Joint Staff, U.S. Army, U.S. Air Force, DHS with relationships >20 years old.",
+      "category": "dod_customer_concentration",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "usaspending.query_federal_presence (name_variants=[BigBear.ai, BigBear.ai Federal, BigBear.ai Federal, LLC])",
+      "M_value": "signal=RECURRING_FEDERAL; n_contracts=20; total $49.55M across DoD (10), GSA (2), Ex-Im (6), DHS (2). Joint Staff (J35 Orion), Army (ARFORGEN, W519TC), Air Force (FA8686 task order), DHS (HQ085) all show up across the recipient cluster (BigBear.ai Federal LLC + ProModel Govt Solutions + PCI). The 20-year tenure claim is structurally plausible via PCI (founded as a long-tenured defense-services firm) and ProModel (ARFORGEN/Joint Staff dating to W9124718C0020 in 2018+).",
+      "interpretation": "Customer-roster claim is verified. Joint Staff, Army, Air Force, DHS obligations all appear under BBAI-family UEIs. The 'more than 20 years' language is asserted of acquired subs, not BBAI itself (which only consolidated in 2020-2021), so the disclosure is fair."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Rollup thesis: NuWave (Jun 2020) + PCI (Oct 2020) + ProModel (Dec 2020) under BBAI Ultimate Holdings; AE Industrial Partners-formed AI/ML decision-support platform.",
+      "category": "rollup_thesis",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": false,
+      "M_check": "acq_coherence.score_acquisition_coherence (parent_thesis + 3 acquisitions); usaspending PIT trace",
+      "M_value": "acq_coherence signal=INCOHERENT_ROLLUP; mean_coherence=0.0; n_low_coherence=2 (NuWave, ProModel scored low_coherence; PCI errored on numeric coerce). LLM rationale: 'Cannot assess technology coherence' — but interpreting it normatively, NuWave (data analytics & cloud), PCI (cybersecurity & IT infra), ProModel (discrete-event simulation) are three substantially different technical stacks rolled into a single 'AI/ML decision-support' marketing wrapper. usaspending cross-check confirms each sub had a distinct, vertical-specific federal trail (DHS for one, MDA for another, Joint Staff/Army G-3 for the third).",
+      "interpretation": "SEVERE_UNDERDELIVERY: the 'BigBear.ai is one AI/ML platform' narrative is, at PIT, three stitched-together federal-services books with limited technical overlap. AE Industrial Partners' pattern (PE rollup of niche defense-IT shops under an AI brand) is itself a yellow flag. Note the 10-K does NOT name any Pentagon Program Element a BBAI-native product is on — the only program named is GFIM, which is an Army prototype line, not a BBAI-platform line of business."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "BigBear.ai products 'widely used by government agencies in the United States to support many of the nation's most critical defense and intelligence capabilities.'",
+      "category": "counterparty_disclosure",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": false,
+      "M_check": "usaspending.query_federal_presence(name_variants=[BigBear.ai, BigBear.ai Federal, BigBear.ai Federal, LLC])",
+      "M_value": "BigBear.ai Federal, LLC = a single UEI (HAVJMX6JABV5), recipient_level P, FY snapshot $2.25M. Of 20 total contracts in the federal-presence sweep, 17 are under predecessor entities (ProModel Govt Solutions, PCI Strategic Management) rather than the BigBear.ai-branded entity. PIT-honest (cutoff 2023-01-15), BigBear.ai Federal LLC's OWN direct DoD obligation = $1,000 (an IDIQ minimum guarantee on FA8686). All scale comes from the acquired subs.",
+      "interpretation": "MODERATE: the 'widely used' language is technically defensible via the acquired subs but materially misleading without disclosure that the BBAI-branded entity itself was a brand-new federal contracting LLC at PIT. The marketing frame ('our products are widely used') glosses over the fact that those products were developed under three different banners and the BBAI-brand consolidation was less than 18 months old."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "665 employees, >80% cleared, HQ Columbia MD + 11 offices.",
+      "category": "facility",
+      "severity": "UNVERIFIABLE",
+      "supports": null,
+      "M_check": "epa_frs.query_facilities (BigBear.ai, MD); dol_h1b_lca.query_lca_filings (BigBear.ai)",
+      "M_value": "epa_frs: 0 facilities (EPA-FRS doesn't register cleared-defense-contractor offices — coverage gap, expected). dol_h1b_lca: signal=NO_LCA_FOOTPRINT; data_min_date=2024-07-01, which is POST-cutoff — the LCA corpus simply doesn't cover the PIT window.",
+      "interpretation": "UNVERIFIABLE due to source-coverage gaps unrelated to the claim. Defense-IT firms with cleared workforces tend not to file H-1B LCAs at scale (cleared roles are typically U.S.-citizen-only), and EPA-FRS doesn't track office leases. No information value here."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "93% win rate on new contract opportunities, 100% recompete win rate with existing customers.",
+      "category": "other",
+      "severity": "UNVERIFIABLE",
+      "supports": null,
+      "M_check": "usaspending.query_dod_contracts (BigBear.ai, end_date<=2023-01-15)",
+      "M_value": "BigBear.ai Federal LLC direct = 1 award PIT, total $1K. Recompetes against this baseline are not measurable from usaspending (which records awards, not bid/loss outcomes). Underlying subs' recompete behavior cannot be derived from public award data.",
+      "interpretation": "UNVERIFIABLE: 'win rate' is management-defined and not externally checkable. Note for downstream investigators: any company claiming '100% recompete win rate' on a sub-$50M revenue base is a soft red flag for boilerplate. Flag for narrative load."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "~49% of revenue from software solutions in 2021 (up from ~1% in 2016 across acquired subs); targeting 80%+ SaaS gross margins.",
+      "category": "rollup_thesis",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": false,
+      "M_check": "sec_filings.list_filings_by_form (cik=0001836981, form_type=10-K) — track gross-margin trajectory in subsequent filings",
+      "M_value": "6 future 10-Ks visible in the index (through bbai-20251231.htm filed 2026-03-02), but this scorer is BLINDED and may not read them. The PIT claim itself is forward-looking: '80% gross margins on a pure SaaS model.' usaspending shows actual revenue source is concentrated in T&M / cost-plus / engineering-services contracts (ProModel's ARFORGEN tool, PCI's engineering services, Joint Staff Orion support) — these are services-style contracts with typical 40-50% margins, not SaaS-style 80% margins. The 49% 'software' claim is plausibly inflated by counting bundled software-license line items inside services contracts.",
+      "interpretation": "MODERATE: the SaaS-pivot narrative is structurally inconsistent with the verifiable revenue mix at PIT. ARFORGEN-tool / engineering-services contracts do not yield 80% gross margins regardless of marketing labels. This is a forward-load claim worth tagging for follow-up; the 'pivot to SaaS' framing recurs across PE-backed defense-IT rollups."
+    }
+  ],
+  "summary": {
+    "n_claims": 9,
+    "n_queries_run": 24,
+    "severity_counts": {
+      "PASS": 2,
+      "MODERATE_UNDERDELIVERY": 3,
+      "SEVERE_UNDERDELIVERY": 1,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 3
+    },
+    "jbook_grounded_claims": ["C1"],
+    "n_jbook_grounded": 1,
+    "n_jbook_pentagon_hits": 0,
+    "headline": "The BBAI 10-K is conspicuously LIGHT on named DoD programs / PE numbers — the only named program in the entire filing is the U.S. Army GFIM Phase 1 Prototype, and that program is not in our J-Book corpus (UNVERIFIABLE). The strongest signal is acq_coherence=INCOHERENT_ROLLUP (SEVERE) on the AE Industrial Partners-assembled NuWave+PCI+ProModel federation, combined with MODERATE flags on the 9.5x backlog/obligated ratio, the BigBear.ai-branded entity having only $1K in direct DoD obligations PIT, and the structurally inconsistent SaaS-margin narrative."
+  }
+}

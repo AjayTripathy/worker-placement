@@ -1,0 +1,123 @@
+<title>Postmortem — the Kering miss (2026-07-29)</title>
+<style>
+:root{
+  --bg:#F6F7F5; --surface:#FFFFFF; --ink:#1A2320; --muted:#5B6862; --line:#DCE2DD;
+  --accent:#0F6B58; --accent-soft:#E3EFEA; --crit:#A63A2E; --crit-soft:#F6E4E1; --gold:#8A5F14; --gold-soft:#F4EAD4;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#111715; --surface:#18201D; --ink:#DEE7E2; --muted:#93A29B; --line:#2A3530;
+    --accent:#46B999; --accent-soft:#1B2C27; --crit:#D97B6C; --crit-soft:#33201C; --gold:#D9A84E; --gold-soft:#2E2718;}
+}
+:root[data-theme="dark"]{ --bg:#111715; --surface:#18201D; --ink:#DEE7E2; --muted:#93A29B; --line:#2A3530;
+  --accent:#46B999; --accent-soft:#1B2C27; --crit:#D97B6C; --crit-soft:#33201C; --gold:#D9A84E; --gold-soft:#2E2718;}
+:root[data-theme="light"]{ --bg:#F6F7F5; --surface:#FFFFFF; --ink:#1A2320; --muted:#5B6862; --line:#DCE2DD;
+  --accent:#0F6B58; --accent-soft:#E3EFEA; --crit:#A63A2E; --crit-soft:#F6E4E1; --gold:#8A5F14; --gold-soft:#F4EAD4;}
+html{background:var(--bg)}
+body{font:16px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:var(--bg);margin:0;padding:2.5rem 1.25rem 4rem}
+main{max-width:840px;margin:0 auto}
+h1,h2{font-family:"Iowan Old Style","Palatino Linotype",Georgia,serif;line-height:1.2;text-wrap:balance}
+h1{font-size:1.9rem;margin:.25rem 0 .5rem}
+h2{font-size:1.3rem;margin:2.2rem 0 .7rem;padding-top:1.4rem;border-top:1px solid var(--line)}
+p{margin:.6rem 0;max-width:74ch}
+.eyebrow{font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--crit);font-weight:600}
+.sub{color:var(--muted);max-width:76ch}
+.tldr{background:var(--crit-soft);border-left:4px solid var(--crit);border-radius:6px;padding:1rem 1.3rem;margin:1.2rem 0}
+.num,td.n,code{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-variant-numeric:tabular-nums;font-size:.92em}
+table{border-collapse:collapse;width:100%;font-size:.88rem}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:6px;background:var(--surface);margin:1rem 0}
+th{font-size:.7rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);text-align:left;font-weight:600}
+th,td{padding:.5rem .7rem;border-bottom:1px solid var(--line);vertical-align:top}
+tr:last-child td{border-bottom:none}
+ul{margin:.5rem 0;padding-left:1.2rem}
+li{margin:.35rem 0;max-width:74ch}
+.rc{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--crit);border-radius:6px;padding:1rem 1.3rem;margin:1rem 0}
+.rc h3{margin:0 0 .35rem;font-size:1.02rem;font-family:inherit}
+.chip{display:inline-block;font-size:.7rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:.12rem .5rem;border-radius:3px;white-space:nowrap}
+.chip.done{background:var(--accent-soft);color:var(--accent)}
+.chip.owed{background:var(--gold-soft);color:var(--gold)}
+.right{border-left-color:var(--accent)}
+.foot{margin-top:3rem;padding-top:1.25rem;border-top:1px solid var(--line);font-size:.85rem;color:var(--muted)}
+</style>
+<main>
+<p class="eyebrow">Postmortem · missed entry · classification: WRONG (the ledger's strictest class)</p>
+<h1>The Kering miss: we were right about the business and still weren't there</h1>
+<p class="sub">KER.PA (Kering / Gucci), 2026-06-28 → 2026-07-29. Written the day of the H1 print. All figures from our own ledger records, the missed-entry ledger, and the live IBKR tape; print figures from the H1 release coverage.</p>
+
+<div class="tldr"><b>Summary.</b> Kering reported H1-2026 on July 29 and rose <span class="num">+16.2%</span> to €291.10 in a session, clearing its 26-week high. We had the name under active coverage for a month with a correct thesis ("broken engine, watch the Gucci inflection under Demna"), a correct operating forecast (we predicted the comp would narrow to −3/−6%; it printed −2%), a price gate that <em>fired twice</em> — €268 crashed through at €248, then our exact €225 level touched at €225.10 — and zero shares. The forecast was right; the machinery converted it into no action. That is a process defect, not variance, and it is the strictest failure class in our own missed-entry doctrine: unfilled, no bear materialized, much higher, thesis <em>confirmed</em>.</div>
+
+<h2>Timeline</h2>
+<div class="tablewrap"><table>
+<tr><th>Date</th><th>Event</th><th>Price</th></tr>
+<tr><td class="n">2026-06-28</td><td>Luxury two-stage sourcing court: KER.PA = the broken-luxury leg. WATCH, entry gate <b>sub-€268</b>, flip-trigger framed on the Gucci comp inflection.</td><td class="n">~€270s</td></tr>
+<tr><td class="n">~May 2026</td><td>(In hindsight) the structural low prints at <b>€225.10</b> — the exact level a later record would name as "the numeric buy level."</td><td class="n">€225.10</td></tr>
+<tr><td class="n">2026-07-05</td><td>Watcher's <em>first</em> run finds price already through the gate — the €268 fire was discovered late because nothing had been listening. Disposition: instead of filling or grading the fired gate, <b>re-band to €230</b> and pair entry with <b>Oct-21 Q3 comp evidence</b>. Record price €265.65 (it had already bounced off the low).</td><td class="n">€248 → €265.65</td></tr>
+<tr><td class="n">2026-07-05</td><td>The frozen prediction record for the Oct-21 flip explicitly notes: <i>"Watch the 7/29 Q2 print — it largely pre-determines this binary and is where to size/position before the Oct catalyst."</i> No calendar row, pack, or nowcast pass is created for 7/29. Frozen p on the flat-or-positive inflection: 0.20 (with "narrowing −3% to −6%" as the likely path).</td><td class="n">—</td></tr>
+<tr><td class="n">2026-07-29</td><td>H1 prints: group comp +1%; <b>Gucci Q2 comp −2%</b> vs −8% Q1 and −19% prior year; first Demna product in stores from July, early read encouraging (US especially); de Meo cost program deepened. Stock +16.2% to €291.10, through the 26-week high.</td><td class="n">€250.50 → €291.10</td></tr>
+</table></div>
+
+<h2>Impact</h2>
+<p>Dollar impact is modest by construction — the taxonomy-correct position was a small starter: 0.5–1.0% (~$5–10k) at the fired €248 gate is roughly <b>+$900–1,700 forgone</b> (+17.4%), more with the €225 touch. The real impact is the class: the same gate grammar (price bands, evidence triggers, WATCH dispositions) governs the entire 400-name watch book. A gate design that cannot fill, applied at book scale, is a systematic under-deployment engine — and this one produced a miss on a name where every layer of the system had done its job correctly except the last one.</p>
+
+<h2>Root causes</h2>
+<div class="rc"><h3>1 · A fired gate was re-banded instead of filled or graded</h3>
+<p>The €268 gate was a legitimate valuation gate from the June court. When price crashed through it to €248, the gate had fired — the only two doctrine-legal outcomes were a fill or a same-day missed-entry row. Instead the disposition moved the gate lower and made it harder. Gate-moving after a fire destroys the graded feedback loop that makes gates honest: a gate that can be re-banded when it fires is not a gate, it is a mood. Contributing: the fire was discovered late because the watcher started <em>after</em> the level broke, so it never presented as a live decision.</p></div>
+
+<div class="rc"><h3>2 · A business-risk finding was answered with a price instrument — and made conjunctive</h3>
+<p>"The turnaround demands evidence, not price" is a business-risk finding. Our response taxonomy — written into the missed-entry ledger itself — maps business risk to a <b>size cut with tripwires</b>, and reserves price gates for valuation findings alone. The July-5 disposition instead deepened the price gate and conjoined it with an evidence requirement: <span class="num">€225 AND the Oct-21 comp confirmation</span>. Those legs are anticorrelated by construction: evidence arriving re-rates the price away from the band, and price sitting in the band means the evidence hasn't printed. The market ran the experiment for us — the stock touched €225.10, our exact number, with no evidence in hand, and the conjunction correctly (and uselessly) refused the fill. <b>The gate was unfillable the day it was written.</b></p></div>
+
+<div class="rc"><h3>3 · The decisive date lived in prose, and prose doesn't fire</h3>
+<p>The system <em>knew</em> July 29 was the decisive print. The sentence is in our own frozen record, verbatim: "it largely pre-determines this binary and is where to size/position before the Oct catalyst." But the catalyst calendar carried only Oct-21, so no pack was armed, no pre-print nowcast ran, and print day arrived with nothing listening. This is the catalyst-action-loop failure on the entry side: an insight that isn't a calendar row, a pack, or a watch is a sentence, and sentences don't trade.</p></div>
+
+<div class="rc"><h3>4 · The tradeable bar was mis-specified (the forecast was right and it didn't matter)</h3>
+<p>We froze "flat-or-positive Gucci comps" as the flip bar and forecast a narrowing decline instead — <b>correctly</b> (−2% actual vs our −3/−6% prediction). The stock's bar was different: rate of change, plus the first external evidence on Demna sell-through, plus the cost program. A +16% day happened <em>inside</em> our predicted operating scenario. This is the known reaction-driver lesson (the stock trades on the driver, not the operating bar) — enforced since 07-27 for reaction-class <em>calibration calls</em>, but never applied to <em>entry triggers</em>, which is where it cost money.</p></div>
+
+<div class="rc"><h3>5 · (Addendum, from the re-court) The fair value itself was stale — ~€50/share of "miss" was bookkeeping</h3>
+<p>The July-5 record's €272 base FV carried ~€9.5bn of net financial debt. Kering's balance sheet had already transformed: the €4.0bn Beauté sale closed <b>March 31</b>, real-estate proceeds and FCF followed, and H1 net debt printed <b>€3.3bn</b>. Re-running the old court's own arithmetic (16.5× on €2.6bn normalized EBIT) with the actual balance sheet gives ~€320 — meaning the stock's "expensive-looking" €265 in early July was actually <em>below</em> a correctly-marked fair value, and part of the +16% day was the market repricing a disclosure our record had never absorbed. Remediation: FV inputs carry dates, and any court sitting re-marks net debt from the latest balance-sheet event, not the prior record. (Full re-court: KER_PA.json, 2026-07-29 — verdict now OWNABLE-small, band €175/€310/€430, split entry structure.)</p></div>
+
+<div class="rc right"><h3>What went right</h3>
+<p>The sourcing layer put the right name on watch a month early with the right mechanism (Demna sell-through). The operating forecast was accurate. The band watcher, once running, caught the level breach on its first pass and said so plainly ("the alert never fired because nothing was listening"). The frozen record contained the correct decisive date. And the discipline held in one important negative sense: nothing was bought <em>after</em> the print — a +16% day is not an entry signal, and the no-chase rule is functioning. Every layer worked except the joints between them.</p></div>
+
+<h2>Remediations</h2>
+<div class="tablewrap"><table>
+<tr><th>Item</th><th>Status</th><th>Detail</th></tr>
+<tr><td>Missed-entry row, classification WRONG, counterfactuals recorded</td><td><span class="chip done">Done</span></td><td>missed_entry_ledger.json — graded against the fired €268 gate (+17.4%) and the touched €225.10 (+29.3%)</td></tr>
+<tr><td>Ledger record rewritten; no-chase at €291 explicit</td><td><span class="chip done">Done</span></td><td>KER.PA verdict WATCH/ADJUDICATED with the autopsy; old flip-trigger framing retired</td></tr>
+<tr><td>Doctrine lesson to persistent memory</td><td><span class="chip done">Done</span></td><td>"Evidence-paired price gates are unfillable" — split every cheap-AND-confirmed intent into (a) a taxonomy-sized small position at the price gate now, plus (b) a pre-committed pack that buys the evidence at whatever price; fired gates fill or grade, same day; freeze-time prose naming an earlier decisive print must create that print's calendar row</td></tr>
+<tr><td>Band rail hardened: hourly cadence + a clear email on every touch</td><td><span class="chip done">Done</span></td><td>band_watch moved onto the hourly heartbeat (was 6:15/7:45 only — intraday touches could fire unseen); every fire now sends an "ENTRY BAND HIT" email whose body is the decision brief (record verdict + entry note + dossier link + the fired-gates-fill-or-grade rule); bands armed for all four staged tranche-3 names (their unapproved IBKR instructions are NOT resting orders); stale FRO/STNG exclusions dropped; KER's retired 230 band cleared. Verified live on first run: KALMAR.HE fired at €37.84 through its €38.50 band — with instruction 104 unapproved, this email is currently the only thing listening.</td></tr>
+<tr><td>Re-court KER.PA with H1 actuals</td><td><span class="chip owed">Owed</span></td><td>Re-strike normalized EBIT and the multiple post-inflection (the €272 base FV was struck pre-inflection and is likely low on both terms); set an honest post-print band; Oct-21 Q3 now grades against a −2% base</td></tr>
+<tr><td>Calendar guard: next-print-before-trigger check</td><td><span class="chip owed">Owed</span></td><td>For every catalyst-watch row, resolve the ticker's actual next earnings date; any decisive print sitting before the trigger date emits a NEEDS-PACK flag. Would have caught this one mechanically.</td></tr>
+<tr><td>Reaction-driver requirement extended to entry triggers</td><td><span class="chip owed">Owed</span></td><td>Flip-triggers must name what the stock trades on, not only the operating bar — the freeze-gate enforcement exists for reaction-class calls since 07-27; extend the same requirement to entry/flip trigger specs</td></tr>
+</table></div>
+
+<h2>How the remediations work</h2>
+
+<p class="sub">Each remediation is a mechanism, not a resolution to try harder. The done ones are already wired into running machinery; the owed ones have a concrete design and a named enforcement point.</p>
+
+<div class="rc right"><h3>The missed-entry row → the gate-grading loop <span class="chip done">live</span></h3>
+<p>The missed-entry ledger is the anti-book for entries. Every row records a gate, its type per the response taxonomy, the spot when it fired, and what happened next; the weekly <code>missed_entry</code> watch re-scores open rows against the live tape and assigns the verdict (JUSTIFIED / PREMATURE / WRONG) as the counterfactual path resolves. The mechanism is empirical feedback on gate <em>design</em>: when a future court proposes a WAIT verdict or a price gate, the blue-team pass reads this ledger — so the KER row now sits as standing evidence against evidence-paired gates, with a −29% counterfactual attached. Gates stop being opinions and become a graded track record.</p></div>
+
+<div class="rc right"><h3>The ledger rewrite → machine-routable state <span class="chip done">live</span></h3>
+<p>The KER.PA record now carries structured state (<code>WATCH/ADJUDICATED</code>) — the field machines route on — with the autopsy and the no-chase ruling in the note. Two consumers act on it: the <code>dislocation_sweep</code> watch includes every non-dead ledger name in its ~400-name universe, so if the +16% day retraces idiosyncratically, KER.PA fires through the sweep as a needs-verification candidate rather than depending on anyone remembering it; and the re-court trigger in the note governs the next court sitting on the name. The record is the memory; sessions are just views of it.</p></div>
+
+<div class="rc right"><h3>The doctrine lesson → session-level recall <span class="chip done">live</span></h3>
+<p>The lesson file ("evidence-paired price gates are unfillable") lives in persistent memory with a one-line index entry that loads into every future session. When any future court reaches for a "cheap AND confirmed" entry structure, the recalled rule prescribes the split: a small, taxonomy-sized position at the price gate <em>now</em>, plus a pre-committed pack that buys the evidence at whatever price when it prints. Honest caveat: this layer is advisory — it shapes judgment but nothing enforces it. That is exactly why the two code-level remediations below exist; memory persuades, validators refuse.</p></div>
+
+<div class="rc"><h3>The KER.PA re-court <span class="chip owed">owed</span></h3>
+<p>A fresh two-mode court sits on the name with the H1 actuals: Mode A re-strikes normalized EBIT from the printed trajectory (Gucci −2% and narrowing, the deepened cost program, jewellery/eyewear carrying group growth) and re-derives the multiple against the post-inflection comp set; Mode B attacks the new bull case (is +16% already the re-rate? is Demna sell-through one good month?). Output: a new FV band replacing the stale €272, and an entry structure written under the new doctrine — either a small position at fair if it verifies as ownable risk, or a pack on the Oct-21 print with pre-committed branches, never a conjunction. The Oct-21 calibration call then grades against the −2% base.</p></div>
+
+<div class="rc"><h3>The calendar guard <span class="chip owed">owed</span></h3>
+<p>Design: on each heartbeat run, the catalyst watch takes every row's (ticker, trigger_date), resolves the ticker's <em>actual next earnings date</em> from the print calendar source, and compares. If a print lands before the trigger date, the watch emits a <code>NEEDS-PACK</code> flag naming the earlier date — which routes into the feed like any other fire and demands a resolution pack be armed for that print (the pre-committed what-we-do-on-each-outcome). A missing earnings date reports DATA MISSING, never silence. This is the mechanical version of the sentence that failed here: "the 7/29 print pre-determines this binary" becomes a flag the system raises itself, on every watch row, every run — it would have caught this miss with three weeks to spare.</p></div>
+
+<div class="rc"><h3>Reaction-driver on entry triggers <span class="chip owed">owed</span></h3>
+<p>Since 07-27, freezing a reaction-class calibration call <em>refuses</em> to complete unless it names the <code>reaction_driver</code> — what the stock actually trades on, never "the quarter." The remediation extends the same refusal to entry machinery: any flip-trigger or event-keyed entry gate in an edge classification must carry a <code>trades_on</code> field distinct from the operating bar, enforced by a consistency-check rule that flags triggers missing it. Applied here, the July record could not have shipped with "flat-or-positive comps" as the bar without also answering "what does the stock re-rate on?" — and the honest answer (rate-of-change plus first Demna evidence) was a bar the July print could clear.</p></div>
+
+<p><b>How they compose.</b> The layers form one loop with no step resting on discipline alone: memory shapes the court's entry design (advisory) → the trigger validator refuses mis-specified gates (enforced) → the calendar guard catches decisive dates the court under-weighted (enforced) → packs pre-commit the action so print day executes a decision made calmly in advance (enforced) → the missed-entry ledger grades every gate that fires without filling (empirical) → the grades feed back into memory and the next court. The KER miss happened because the first and last layers existed while the middle three did not; two of the three are now specified and one name-level instance (the re-court) is queued.</p>
+
+<h2>The one-sentence version</h2>
+<p>We built a system that found the right name, predicted the right quarter, named the right date — and then wrote itself a gate that could not fill and a calendar that was not listening; the fix is not better forecasting, it is refusing conjunctive gates, grading every fire, and never letting a decisive date live only in prose.</p>
+
+<div class="foot">
+<p><b>Position disclosure.</b> The author holds no position in KER.PA and had none during the events described; the missed-entry row exists precisely because no fill occurred. The portfolio holds other securities named in adjacent records (BRBY.L among luxury names) and may trade any security without notice.</p>
+<p><b>Disclaimer.</b> This document is personal research, prepared for informational and educational purposes only. It is not financial, investment, tax, or legal advice, and it is not an offer or a solicitation to buy or sell any security. The author is not a financial advisor, registered investment adviser, or broker-dealer. Every figure reflects a good-faith effort at verification against primary sources, but errors are possible and numbers go stale; nothing here is a guarantee of accuracy or of future results. Do your own research and consult a licensed professional before making any investment decision.</p>
+</div>
+</main>

@@ -1,0 +1,102 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>plume_cluster_scanner</title><style>
+body{margin:0;background:#0b0e12;color:#e8ebee;font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:26px 24px 90px}
+a{color:#8b7cf6} h1{font-size:23px;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:#7d858e;margin:0 0 20px;font-size:13px}
+h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:#7d858e;margin:24px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 10px;border-bottom:1px solid #242a31;text-align:left;vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#7d858e}
+.k{font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:20px}
+.k-generator{color:#c3b8fb;background:rgba(139,124,246,.15)}
+.k-detector{color:#eccb8a;background:rgba(217,164,65,.15)}
+.k-watcher{color:#8ee5c1;background:rgba(53,201,143,.15)}
+.k-evidence{color:#b3bcc6;background:rgba(138,147,158,.15)}
+.h-OK{color:#35c98f} .h-STALE{color:#d9a441} .h-ERROR{color:#e0736a} .h-NEVER_RUN{color:#8a939e}
+pre{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px;overflow-x:auto;font-size:12px;line-height:1.5}
+.panel{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px 18px;margin-bottom:12px}
+ul{margin:4px 0;padding-left:20px} li{margin-bottom:4px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+</style></head><body><div class="wrap"><h1>plume_cluster_scanner</h1><p class="sub">registered capability · plume_cluster_scanner</p><a href="signals.html">&larr; all signals</a><div class="panel" style="margin-top:10px"><span class="k k-generator">GENERATOR</span> &nbsp;<span class="h-NEVER_RUN"><b>NEVER_RUN</b></span> · last run <span class="mono">never</span></div><p>Stage 0b generator: METHANE SUPER-EMITTER clusters (Carbon Mapper, instrument truth).</p><form method="POST" action="/signals/run" style="margin:10px 0"><input type="hidden" name="name" value="plume_cluster_scanner"><input name="symbol" placeholder="symbol (if applicable)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px"><input name="symbols" placeholder="universe, comma-sep (generators)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px;margin-left:6px"><button type="submit" style="background:#8b7cf6;color:#0b0e12;border:0;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;margin-left:6px">Run now</button></form><h2>Datasources</h2><ul><li>reference implementation: verticals/generators/plume_cluster_scanner.py (see the code section for the feeds it touches)</li></ul><h2>Applies to</h2><ul><li><b>strategies:</b> quality_value</li></ul><h2>The code</h2><pre>&quot;&quot;&quot;plume_cluster_scanner — Stage 0b generator: METHANE SUPER-EMITTER clusters (Carbon Mapper, instrument truth).
+
+Inverts the carbon_mapper verifier: instead of checking a named facility&#x27;s claim, pull ALL recent annotated
+plumes and cluster them geographically (0.5-degree cells ~ basin resolution). A dense new cluster = operators
+with environmental-liability/enforcement exposure (short/avoid seeds) or, inverted, evidence of activity levels.
+Operator attribution is the SignalOS mapping step (facility -&gt; operator via state well registries); the
+deterministic layer reports WHERE and HOW MUCH.
+
+  python3 verticals/generators/plume_cluster_scanner.py [--days 60]
+Writes data/PLUME_CLUSTERS.json. Free non-commercial API. READ-ONLY.
+&quot;&quot;&quot;
+from __future__ import annotations
+import json, datetime, argparse, urllib.parse, urllib.request
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+OUT = HERE / &quot;data&quot; / &quot;PLUME_CLUSTERS.json&quot;
+API = &quot;https://api.carbonmapper.org/api/v1/catalog/plumes/annotated&quot;
+HDRS = {&quot;User-Agent&quot;: &quot;signalos-research 4tripathy@gmail.com&quot;}
+
+
+def _fetch(days: int) -&gt; list[dict]:
+    since = (datetime.date.today() - datetime.timedelta(days=days)).isoformat()
+    out, offset = [], 0
+    while offset &lt; 4000:
+        q = urllib.parse.urlencode({&quot;limit&quot;: 500, &quot;offset&quot;: offset, &quot;datetime&quot;: f&quot;{since}T00:00:00Z/..&quot;})
+        try:
+            req = urllib.request.Request(f&quot;{API}?{q}&quot;, headers=HDRS)
+            with urllib.request.urlopen(req, timeout=60) as r:
+                d = json.load(r)
+        except Exception:
+            break
+        items = d.get(&quot;items&quot;, d.get(&quot;features&quot;, []))
+        if not items:
+            break
+        out.extend(items)
+        offset += 500
+        if len(items) &lt; 500:
+            break
+    return out
+
+
+def scan(days: int) -&gt; dict:
+    plumes = _fetch(days)
+    cells = {}
+    for p in plumes:
+        geom = p.get(&quot;geometry_json&quot;) or p.get(&quot;geometry&quot;) or {}
+        coords = geom.get(&quot;coordinates&quot;) or [None, None]
+        lon, lat = (coords + [None, None])[:2]
+        if lon is None:
+            continue
+        emis = p.get(&quot;emission_auto&quot;) or p.get(&quot;emission&quot;) or 0
+        sector = (p.get(&quot;sector&quot;) or &quot;&quot;)[:20]
+        cell = f&quot;{round(lat * 2) / 2:.1f},{round(lon * 2) / 2:.1f}&quot;
+        c = cells.setdefault(cell, {&quot;lat&quot;: round(lat, 1), &quot;lon&quot;: round(lon, 1), &quot;n&quot;: 0, &quot;kghr&quot;: 0.0, &quot;sectors&quot;: {}})
+        c[&quot;n&quot;] += 1
+        c[&quot;kghr&quot;] += emis or 0
+        c[&quot;sectors&quot;][sector] = c[&quot;sectors&quot;].get(sector, 0) + 1
+    rows = [{&quot;cell&quot;: k, &quot;lat&quot;: v[&quot;lat&quot;], &quot;lon&quot;: v[&quot;lon&quot;], &quot;plumes&quot;: v[&quot;n&quot;], &quot;total_kg_hr&quot;: round(v[&quot;kghr&quot;]),
+             &quot;top_sector&quot;: max(v[&quot;sectors&quot;], key=v[&quot;sectors&quot;].get) if v[&quot;sectors&quot;] else &quot;&quot;}
+            for k, v in cells.items() if v[&quot;n&quot;] &gt;= 3]
+    rows.sort(key=lambda r: -r[&quot;total_kg_hr&quot;])
+    return {&quot;asof&quot;: datetime.date.today().isoformat(), &quot;window_days&quot;: days, &quot;n_plumes&quot;: len(plumes),
+            &quot;n_clusters&quot;: len(rows), &quot;clusters&quot;: rows[:20],
+            &quot;note&quot;: &quot;operator attribution = SignalOS mapping step (state well registries / facility DBs); free tier non-commercial&quot;}
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument(&quot;--days&quot;, type=int, default=60)
+    a = ap.parse_args()
+    res = scan(a.days)
+    print(f&quot;=== METHANE PLUME-CLUSTER SCANNER  {res[&#x27;asof&#x27;]}  ({res[&#x27;n_plumes&#x27;]} plumes, {res[&#x27;n_clusters&#x27;]} clusters &gt;=3 plumes, {res[&#x27;window_days&#x27;]}d) ===&quot;)
+    for r in res[&quot;clusters&quot;][:12]:
+        print(f&quot;   {r[&#x27;cell&#x27;]:&lt;14} {r[&#x27;plumes&#x27;]:&gt;3} plumes  {r[&#x27;total_kg_hr&#x27;]:&gt;8,} kg/hr  {r[&#x27;top_sector&#x27;]}&quot;)
+    print(&quot;  PROMOTE: SignalOS attributes dense NEW clusters to operators -&gt; enforcement/liability seeds.&quot;)
+    OUT.write_text(json.dumps(res, indent=1))
+    print(f&quot;[-&gt; {OUT.name}]&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</pre></div></body></html>

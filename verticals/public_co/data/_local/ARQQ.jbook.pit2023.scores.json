@@ -1,0 +1,129 @@
+{
+  "ticker": "ARQQ",
+  "cutoff": "2023-01-15",
+  "filing": "0001558370-22-018615_20-F.txt",
+  "cohort": "jbook_exposure_divergence",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Arqit names 'government and defense customers' as the initial enterprise-license target market for its QuantumCloud symmetric-key product.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook contractor_name='Arqit' -> NOT_FOUND (no matching program in corpus)",
+        "pentagon_jbook program_name='Quantum Networking' -> 2 AFRL programs matched but primary_contractors are IonQ / Qubitekk (NOT Arqit)",
+        "usaspending DoD recipient_name='Arqit' -> n_awards=0, total_amount=$0 — no DoD obligations to Arqit on record",
+        "usaspending all-agency recipient_name='Arqit' -> 1 hit, a false-positive name collision (CLYDE-HANCOCK, MARQITA / VA kitchen exhaust cleaning)"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding + usaspending.query_dod_contracts",
+      "M_value": "NOT_FOUND / ZERO_OBLIGATIONS",
+      "interpretation": "The claim is generic ('defense customers') with no named PE, no named DoD program, and no quantified contribution. The J-Book corpus + USAspending show NO US-DoD revenue trace to Arqit through cutoff. This is consistent with Arqit's actual posture (UK-domiciled, ESA + UK Gov customers, US channel partners only). Not a J-Book falsification — falsifying it would need usaspending to also show real US-DoD obligations Arqit relies on. Per heuristic #7 (NOT_FOUND is not a red flag when out-of-corpus is expected): UNVERIFIABLE at the J-Book level. Caveat: the strategic pivot AWAY from defense customers toward 'large global technology vendors' (C4) is itself a soft underdelivery flag against the original IPO defense-narrative, but it is disclosed in the filing, not concealed."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Arqit lists the UK Government as a current customer of QuantumCloud.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook contractor_name='Arqit Quantum' -> NOT_FOUND",
+        "UK Government / UK MoD spend does NOT appear in the US Pentagon J-Book corpus by design; corpus is US RDT&E + Procurement PEs only",
+        "usaspending shows no qualifying US contracts"
+      ],
+      "M_check": "pentagon_jbook (out-of-jurisdiction) + usaspending (US-only)",
+      "M_value": "OUT_OF_CORPUS",
+      "interpretation": "UK Government customer relationships are outside the J-Book corpus jurisdiction. Per heuristic #7 we score UNVERIFIABLE rather than RED. There is no evidence the customer claim is fabricated, but there is also no public US-budget-data way to falsify it at this cutoff. This is a coverage gap, not a finding."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Arqit names ESA's ARTES 33-11 / QKDSat as a customer-revenue contract line.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook program_name='ARTES 33-11' -> NOT_FOUND",
+        "pentagon_jbook program_name='QKDSat' -> NOT_FOUND",
+        "pentagon_jbook program_name='Quantum Key Distribution' -> NOT_FOUND",
+        "ESA programs are out-of-corpus for the US Pentagon J-Book by definition"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "NOT_FOUND (out-of-corpus jurisdiction)",
+      "interpretation": "ESA ARTES is European, not US Pentagon. The J-Book cannot rule this in or out. However, the filing's own narrative (C7) discloses that Arqit has REMOVED the satellite component from QuantumCloud — strongly implying the QKDSat / ARTES program of record is being de-prioritized by Arqit itself. That is a soft self-disclosed pipeline shrinkage but it is not a J-Book divergence. UNVERIFIABLE per heuristic #7."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Arqit has signed channel partnerships with Fortinet, AWS, Dell, TraxPay for direct/indirect end-customer sales.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "edgar_fts 'Arqit' -> 51 hits, most from Arqit's own 20-F / F-1 filings and the Centricus SPAC; no third-party 10-K disclosures from Fortinet/Dell/AWS naming Arqit as a material counterparty surfaced in the top hits",
+        "The named partners (Fortinet/Dell/AWS) typically would not name a small-cap SaaS partner unless materially load-bearing, so absence is not strong evidence"
+      ],
+      "M_check": "edgar_fts.query_fulltext",
+      "M_value": "ABSENCE OF COUNTERPARTY DISCLOSURE",
+      "interpretation": "Channel-partner press-release-style customers without counterparty acknowledgement in the partners' own 10-Ks is a yellow flag in the standard playbook, but it is NOT a J-Book divergence. Score UNVERIFIABLE within the cohort's J-Book scope; would be flagged 'soft counterparty-asymmetry' in a generic DD pass."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Arqit's symmetric-key product was independently reviewed by the University of Surrey in May 2022 (UK NCSC Centre of Excellence).",
+      "severity": "PASS",
+      "supports": [
+        "Claim is specific (named institution, named month, named credentialing body); not load-bearing on Pentagon funding"
+      ],
+      "M_check": "edgar_fts.query_fulltext",
+      "M_value": "NOT_APPLICABLE (academic validation, not DoD pipeline)",
+      "interpretation": "Outside the J-Book divergence frame. Control claim — passes for the purposes of the cohort."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Arqit subcontracts QKD satellite delivery to Qinetiq Space NV (firm-fixed-price; Jan 27, 2020; May 2022 delivery + July 2022 launch-readiness review).",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "Filing self-discloses the satellite component has been REMOVED from QuantumCloud (C7), implying the Qinetiq deliverable timeline (May 2022 delivery / July 2022 LRR) was not met or was abandoned",
+        "edgar_fts 'Arqit Qinetiq' -> 0 hits (no counterparty 10-K disclosure surfaced through fulltext at this cutoff)",
+        "pentagon_jbook for QKDSat -> NOT_FOUND (out of US corpus)"
+      ],
+      "M_check": "internal-cross-check (C6 vs C7) + edgar_fts",
+      "M_value": "INTERNAL_DIVERGENCE",
+      "interpretation": "This is a Mode B implied-verification catch (per the entity-resolution / two-modes investigator pattern): the filing names a fixed-price 2020 satellite contract due May 2022 (C6) AND, on the same filing, discloses that satellites have been removed from the tech stack (C7). The two claims are internally inconsistent if read at face value. Not a J-Book hit (the Pentagon corpus has no jurisdiction over Qinetiq Space NV / ESA), but a documented underdelivery against a previously disclosed defense-adjacent program-of-record. MODERATE."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Arqit pivoted away from the satellite-delivery component of its tech stack during 2022.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "Self-disclosed by Arqit; orphans the original QKDSat / ARTES 33-11 / Qinetiq narrative (C3, C6) that the IPO / F-1 had used as a defense-adjacent revenue anchor"
+      ],
+      "M_check": "internal-narrative-shift",
+      "M_value": "DISCLOSED_PIVOT",
+      "interpretation": "Disclosed but represents a forward-pipeline shrinkage relative to the original SPAC-deck thesis. This is the closest analog to the J-Book divergence pattern available in the filing: a program-of-record-adjacent storyline is being unwound — but the program was European, not US Pentagon. MODERATE under heuristic #2 materiality (narrative-load-bearing pivot)."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Arqit booked $65.575M FY22 net profit driven by $93.187M non-cash warrant fair-value adjustments while burning $26.916M cash from operations.",
+      "severity": "PASS",
+      "supports": ["Self-disclosed reconciliation; non-J-Book claim"],
+      "M_check": "filing-internal-reconciliation",
+      "M_value": "DISCLOSED",
+      "interpretation": "Out-of-frame for J-Book cohort. Control claim — neutral. (Would be flagged 'warrant-driven optical profit' in a Beneish / DD pass.)"
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "Arqit asserts $261.7B Gartner TAM (entire global infosec market) by 2026, with government / IoT explicitly excluded from the estimate.",
+      "severity": "PASS",
+      "supports": ["TAM assertion; out of J-Book scope"],
+      "M_check": "not_applicable",
+      "M_value": "DISCLOSED",
+      "interpretation": "TAM puff is standard for SPAC-era growth narratives; not a J-Book divergence. Control claim — PASS for cohort purposes."
+    }
+  ],
+  "summary": {
+    "n_claims": 9,
+    "n_queries_run": 17,
+    "severity_counts": {"PASS": 3, "MODERATE_UNDERDELIVERY": 2, "SEVERE_UNDERDELIVERY": 0, "RED_FLAG_NEGATIVE": 0, "UNVERIFIABLE": 4},
+    "jbook_grounded_claims": ["C1", "C2", "C3", "C7"],
+    "jbook_hits": {
+      "fired_on_claims": ["C1", "C2", "C3", "C7"],
+      "n_jbook_grounded_claims": 4,
+      "n_pentagon_jbook_fired": 4,
+      "all_returned_NOT_FOUND_or_NOT_FOUND_in_jurisdiction": true
+    },
+    "cohort_verdict": "NULL_TEST_FOR_JBOOK_DIVERGENCE",
+    "cohort_verdict_rationale": "ARQQ's 20-F (FY22, cutoff 2023-01-15) does not name any specific US Pentagon Program Element, named DoD program, or quantified US-DoD revenue concentration. The strongest implied defense pipeline (ESA ARTES 33-11 / QKDSat, with Qinetiq subcontractor) is European and out-of-corpus; the filing itself discloses that this pipeline has been abandoned in favor of channel-partner-led SaaS. The J-Book divergence pattern (named PE going unfunded while the company claims revenue from it) cannot be triggered because the company never names a US PE. The framework's correct call at this cutoff: the J-Book hammer is not the right tool for this nail. The right tools would be counterparty disclosure on Fortinet/Dell/AWS (channel-partner asymmetry) and a UK Companies House / ESA milestone tracker (out of current catalog). Mode B catch (C6 vs C7 internal inconsistency on the Qinetiq / satellite program) is the strongest finding inside the J-Book frame.",
+    "blinding_discipline": "No WebSearch/WebFetch used. No post-cutoff outcome files referenced. All conclusions derive from the filing text + pentagon_jbook corpus + usaspending + edgar_fts queries with cutoff_date=2023-01-15."
+  }
+}

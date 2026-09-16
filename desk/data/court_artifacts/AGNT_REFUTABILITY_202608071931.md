@@ -1,0 +1,34 @@
+## Context
+
+AGNT = eXp World Holdings, renamed June 2026 after the NextHome acquisition and the EXPI→AGNT ticker change (May 8, 2026). This is not a cohort event — sector median dd52 is ~−0.07, so the −66.2% is idiosyncratic. **The Q2 print already landed (Aug 4, 2026), two trading days before the sweep**, and it directly tests the narrative. Note: repo access, Bash, and the IBKR MCP were all permission-denied this session, and sec.gov returned 403 on every path, so figures below come from the company-issued GlobeNewswire release and the Q2 call transcript, not from the 10-Q; price is stockanalysis.com, not IBKR.
+
+| ticker | class | refuting metric | current value/trend (cited) | next print date | note |
+|---|---|---|---|---|---|
+| AGNT | **DAMAGE-ABSENT** (loud leg) / damage-arriving on the quiet leg | **Real-estate sales transactions** (and transactions-per-agent) — the direct test of "AI/Zillow disintermediates the agent" | Q2'26 transactions **132,497, +12% YoY**; volume **$60.5B, +15%**; transactions/agent **1.52 vs 1.44, +5.6%**; adj EBITDA **$25.7M vs $11.2M (+129%)** on opex flat (+2%); H1 adj EBITDA $29.8M already ≈ all of FY2025's $33.2M ([GlobeNewswire 2026-08-04](https://www.globenewswire.com/news-release/2026/08/04/3338844/0/en/AGNT-Inc-Reports-Q2-2026-Results.html)) | **Q3'26, ~early Nov 2026** (Q3'25 was Nov 6, 2025) | Headline "+6% agent count" is **~99% acquired**: YoY adds ≈4,944, NextHome contributed **~4,900**; organic eXp Realty growth was "slightly above 100 agents in the quarter" ([Q2 call transcript](https://m.in.investing.com/news/transcripts/earnings-call-transcript-agnt-posts-record-q2-2026-revenue-stock-stays-flat-93CH-5534797)). Organic is **flat, not growing** — but it inflected from Q1's −728 QoQ. |
+
+**The three things the print did NOT refute** (these are the court's real work, not the AI narrative):
+1. **Take-rate compression is live.** Revenue/volume 2.395% vs 2.489% (−3.8%); gross margin 6.8% vs 7.1%. Mechanically self-inflicted at eXp — higher agent productivity means more agents hit the commission cap — so the bull's productivity win partially cannibalises the take rate.
+2. **Dilution, not disintermediation, is where per-share value leaks.** SBC TTM **$140.4M** against buybacks TTM of only **$26.3M** (vs $141.1M in FY2024, $56.2M in FY2025) — buybacks were **zero in H1'26** while the $0.05 dividend (~$33.4M/yr) was maintained. Shares outstanding 161.0M (Dec-25) → **167.1M (Jun-26), +3.8% in six months (~7.6% annualised)**.
+3. **The guide is unambitious.** Q3'26 adj EBITDA $17–22M vs Q3'25's ~$17.7M (derived: FY25 $33.2M − H1'25 $13.4M − Q4'25 $2.1M) — roughly flat YoY immediately after a +129% quarter. Agent NPS **69, down from 77**.
+
+Valuation: $4.35 × 167.1M = **$727M mcap**, less $111.2M cash, zero debt → **EV ~$616M**, or ~11x the FY26 adj EBITDA guide midpoint. Adjusted operating cash flow was $15.7M in Q2 vs $38.8M GAAP — the gap is customer escrow float, so headline "TTM FCF $92.9M" overstates real cash generation by roughly 2x.
+
+## COURT-WORTHY (damage-absent, ranked):
+
+1. **AGNT** — The market marked this as a structurally dying agent model, yet the company took ~10% of US existing-home transactions while growing units +12% against a market up mid-single-digits, and more than doubled EBITDA on flat opex; a +129% EBITDA quarter produced only a ~+3% stock move (closed $4.22 on Aug 4, flat after hours), which is exactly the dispersion-ignored setup — but the court must first resolve whether $140M/yr of SBC is a permanent cap on per-share compounding or a lever management is already pulling down (it has fallen $209M → $141M since 2022).
+
+**PRINT PROXIMITY: NONE within 5 trading days — Q2 2026 printed Aug 4, 2026 (2 trading days BEFORE this sweep), verified via the company's GlobeNewswire release dated 2026-08-04 and the Q2 earnings call transcript; next print is Q3 2026, ~early Nov 2026, verified against the Q3 2025 print date of Nov 6, 2025.**
+
+The catalyst has run, so the court is not racing one — which is the favourable case. Retrospectively, the decisive pre-print reconstruction was available and *did* resolve the loudest bear claim: DA Davidson cut its target $10.25 → $6.50 on July 2 explicitly on agent-count decline, and the Q1 datum (−728 agents QoQ) was public — but so was the May 7 NextHome close, which guaranteed a ~4,900-agent step-up in the Q2 headline. Anyone who did that arithmetic knew the agent-count print would look good and would be nearly all acquired. **PRE-PRINT POSITION (now post-print): STARTER.** The disintermediation narrative that produced the −66% is refuted by units and volume, and the balance sheet (debt-free, 15% of mcap in cash) bounds the tail — but ~7.6%/yr dilution against a maintained dividend and halted buyback caps this below full size until the court prices the SBC leak.
+
+**COURT-WORTHINESS AGNT: 7/10 — the loud AI-disintermediation narrative is refuted by +12% transactions and +129% EBITDA, but the residual bear (SBC $140M vs $26M buybacks, ~7.6% annual dilution, −3.8% take rate) is a genuine coin-flip on whether $616M EV is cheap or fair, and that flip decides starter-vs-full sizing.**
+
+Sources:
+- [AGNT, Inc. Reports Q2 2026 Results — GlobeNewswire, 2026-08-04](https://www.globenewswire.com/news-release/2026/08/04/3338844/0/en/AGNT-Inc-Reports-Q2-2026-Results.html)
+- [AGNT Q2 2026 earnings call transcript — Investing.com](https://m.in.investing.com/news/transcripts/earnings-call-transcript-agnt-posts-record-q2-2026-revenue-stock-stays-flat-93CH-5534797)
+- [AGNT stock quote & cash-flow statement — StockAnalysis.com](https://stockanalysis.com/stocks/agnt/financials/cash-flow-statement/)
+- [eXp World Holdings Reports Q4 and Full-Year 2025 Results](https://expworldholdings.com/press-releases/exp-world-holdings-reports-q4-2025-results/)
+- [eXp World Holdings Changes Ticker to AGNT, Acquires NextHome](https://expworldholdings.com/press-releases/exp-world-holdings-agnt-ticker-nexthome-acquisition/)
+- [DA Davidson cuts eXp World Holdings price target on agent count decline — Investing.com](https://www.investing.com/news/analyst-ratings/da-davidson-cuts-exp-world-holdings-stock-price-target-on-agent-count-decline-93CH-4680979)
+
+Two caveats on this triage: the 10-Q is unverified from primary (sec.gov 403'd on every path this session), so the Q2 SBC line, NextHome purchase accounting, segment revenue split, and current buyback authorization status are all reconstructed rather than read — a court should pull the 10-Q first. And one secondary source (StockStory) headlined a "+16.7%" post-print pop that I could not reconcile with the transcript's "closed up 2.93% at $4.22"; I used the latter.

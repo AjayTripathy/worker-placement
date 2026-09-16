@@ -1,0 +1,53 @@
+# USNA — ADJUDICATION — 2026-08-26
+**Verdict: FLAT today; dated post-print gate to a 0.25% starter. Red's REJECT not earned (its two load-bearing kills broke at primaries); blue's gated starter converted to WAIT under the 0-for-7 earnings-dislocation cohort kill (AAP precedent). Adjudicated on Fable; every decisive number below re-pulled from a primary this session. Tape: $13.78 close 8/25 (IBKR conid 6746327; 52w low 12.61, +9.3% off low; ADV $2.07M/day — clip liquidity fine; benches were permission-denied and used $13.98/$14.37).**
+
+## Decisive verifications (what settled the bench disputes)
+1. **Trapped-cash kill (red F4) — DEAD AT THE PRIMARY, permanently.** FY2025 10-K (filed 3/16/26) discloses the cash table verbatim: **China $89.3M / US $28.5M / other $40.6M = $158.4M** at 1/3/26 (vs 101.2/43.0/37.6 at 12/28/24 — China cash FELL $11.9M, i.e., repatriation is happening); SAFE compliance makes remittance "delayed," not blocked; and the tax note states **undistributed foreign earnings held for indefinite reinvestment ≈ $4,000k with incremental repatriation tax ≈ $400k**. The exit toll on the entire pile is de minimis — the chronic ~45% ETR is an operating-mix cost already inside earnings, not an extra door charge. Blue's overturn CONFIRMED and strengthened; red's single-phrase EDGAR search ("held by our foreign subsidiaries" → zero hits → "no disclosure exists") inverted a load-bearing kill — the disclosure is a TABLE.
+2. **Rise "arithmetically unreachable" (red F1, Rise leg) — REFUTED; base-effect verified verbatim.** FY25 release (2/17/26): *"…supported by the launch of Protein Pop at a large club retailer in the first quarter."* Q1'26 Rise $13.7M contained a club pipeline fill; the $3.4M Q2 is nearer the base rate. Residual truth: FY $35M needs H2 $17.9M ≈ $9M/qtr vs a $3.4M exit — club reorders must resume; lumpy, unknowable, 4% of guide. Not a forced second cut.
+3. **The guide bridge, run on ALL segments (blue's audit method, my recompute):** segment guide verified at the 8-K exhibit — **Core $750M (RAISED from $720–765 range), Hiya $125M (cut from $140–155), Rise $35M (cut from $65–80)**. Core Q2 $192M (−4% YoY, −6% seq) needs only normal seasonality for its H2; the whole cut is Hiya+Rise. Hiya is the live leg: H2 $65M vs $28.3M exit quarter with subs 200.4k→166k monotonic — needs the retail/international channels to outgrow the DTC melt. Guide = TIGHT, not unreachable; a small miss is the base case, a forced second cut is not established.
+4. **Tax asymmetry (red F3) — verbatim confirmed, severity stays SIZING:** Note L: tax expense **$17,557k on pretax loss $(3,435)k** H1'26; prior-year ETR 44%+ (chronic, not new); Q2 release itself: "Income tax expense of $9 million added to a pretax loss of $(19) million." Owner earnings ≈ $26–40M after ~$35M/yr cash tax. At mcap $254.6M (18,476,534 sh × 13.78) − cash $168.6M (10-Q, 7/4/26): **EV ex-NCI $86.0M → 2.2–3.3× owner earnings; incl. $44.7M redeemable NCI ≈ $130.7M → 3.3–5.0×.** Cheap-to-fair → PRICE gate, never a kill (response taxonomy).
+5. **Buyback silence — verified, reinterpreted:** 10-Q verbatim: **zero repurchases H1'26; $33,965k authorization live**; H1'25 $27,738k at ~$30. With trapped-cash dead, the honest reading is caution into a deteriorating year (plus a $14M LOC paydown), not immobile cash. It stays what it is: management not underwriting its own floor. Corollary: **any open-market repurchase below $18 becomes a standalone re-court trigger** (red's mind-changer 3, adopted).
+6. **Control:** DEF 14A (4/7/26): **Gull Global, Ltd. 7,408,345 sh = 40.1%** (not red's unverified ~45%). Takeout/activist path dead; float ~$152M.
+
+## Kills census (§CONSENSUS-KILL)
+- **NOVEL-1 (the named kill for FLAT): secular actives decline with zero stabilization datapoint.** Core actives 418k→384k (−8.1% YoY, −5.0% QoQ), Hiya subs −17.2% YoY — the refutability bench itself ruled damage-PRESENT ("listing it as damage-absent would be dishonest"), and the company's own framing ("transformation from a single-channel direct sales business") concedes the channel is melting. No public reading on the refuting metric before the print.
+- **NOVEL-2 (blue's type-II find, adopted): China ≈48% of net sales holds the profit pool AND the majority of the cash.** The tax note proves the US is structurally loss-making (valuation allowance $178.7M, +$22.0M in 2025). One Chinese direct-selling regulatory event ends the thesis. This is the tail that no cheapness cures.
+- **NOVEL-3: OCF quality** — H1 OCF "improvement" is a $22.4M inventory swing; ex-inventory −42% YoY (both benches agree). FY25 full-year OCF was only $22.3M.
+- **CONSENSUS: guide credibility** (reaffirmed 5/5 → cut 8/4; permanent discount to management numbers) and **book is not a floor** ($233.8M goodwill+intangibles = 88% of mcap, one impairment already taken).
+
+## Why WAIT and not blue's immediate starter
+Blue's gate (verbatim cash-table read) is now SATISFIED — but the adjudication layer owes the cohort overlay: this is a **−33% post-print dislocation buy in the 0-for-7 earnings-dislocation template**, with the MLM leading indicator (actives) deteriorating monotonically into an unconfirmed ~10/21 print. Same shape as AAP yesterday: bench arithmetic favored entry, the cohort kill and the deteriorating operating metric overruled it to a dated post-print gate. §CLEAN-COURT is respected — FLAT carries named kills (NOVEL-1/-2).
+
+## The gate (all legs, at the Q3 print ~10/21 UNCONFIRMED)
+0.25% starter (≈$2.6k/185 sh at current NAV) ONLY on: **(a) Core actives ≥384k (flat-or-up sequentially)** — the refuting metric named at refutability; **(b) consolidated guide held** (no further cut to $910M); **(c) tape ≤$16** (keeps entry below E[fv] mid). Intraquarter standalone trigger: **any disclosed open-market repurchase <$18 → immediate re-court** (mobile cash + $34M authorization turning into bought stock refutes the caution story). Second guide cut or actives <380k → **file closes**. No resting orders into the print (undated catalyst = NATR rule). Ceiling 0.5% forever (China tail).
+
+## Prob-weighted FV
+Bear $10 (≈ cash/share alone; melt accelerates or China event) p=0.30 · Base $16.5 (melt slows, cash accrues, no re-rate) p=0.50 · Bull $24 (actives stabilize + buyback resumes, 5–6× OE + cash) p=0.20 → **E[fv] ≈ $16.1**; tape $13.78 = 14% below, implied p_bull ≈ 0.12 vs our 0.20 — mildly cheap, not dislocated. Consistent with WAIT: the gap pays only if the gate datapoint arrives.
+
+## What could go wrong (v1.7)
+1. **The gate passes and we buy the value trap anyway** — actives print flat once on a recruitment push (the search-velocity contradiction shows the machine is spending), then resume melting; tripwire: heat>75 concurrent with the flat print = treat stabilization as unverified.
+2. **China regulatory shock while we hold** — no tripwire exists on Chinese direct-selling policy (tripwire-less unknown, unknown-unknown class: foreign-policy/regulatory; a human-observer channel item, not a feed).
+3. **Reflexive leg:** the cheaper the stock gets, the more the Hiya put (priced off Hiya EBITDA × multiple, 2028/2030) and NCI mechanics dominate the stub — the equity becomes a levered claim on the weakest segment precisely as the cash case peaks.
+**If this position loses money, the most likely reason will be** that we bought a melting MLM for its mobile cash pile and the melt outran the pile — actives never stabilized, the China profit pool met a single-jurisdiction shock, and the 45% tax mix meant the owner earnings we capitalized were half what the EBITDA suggested.
+
+## KG rulings
+- red `segment_guide_run_rate_gap` — **ACCEPT-AMENDED**: fires_on must add (i) a disclosed-channel-fill cause-check on the base quarter (the club-fill artifact it tripped here) and (ii) the all-segment bridge (blue's audit) before any "hole" is reportable.
+- red `tax_expense_on_pretax_loss_jurisdiction_tell` — **ACCEPT-AMENDED**: verified verbatim and genuinely locates the profit pool; AMENDMENT: it may price the ETR into owner earnings but must NOT conclude "trapped cash" — that leap died on a $400k incremental-tax disclosure.
+- red `mlm_search_velocity_inverts_active_count` — **ACCEPT** (both benches concur; suppress/invert consumer_product_heat on direct-selling cohort; heat 90.4 vs actives −8.1% verified).
+- blue `asymmetric_run_rate_bridge_audit` — **ACCEPT PRIORITY** (bench-audit class; it flipped the decisive finding: −$21M "hole" → +$8M net using the same method on all segments).
+- blue `single_phrase_absence_inference` — **ACCEPT PRIORITY** (a zero-hit single-phrase EDGAR search is never proof of non-disclosure; the USNA cash disclosure is a table — red's load-bearing kill inverted; generalizes to every opacity claim).
+
+## Calibration rows (parent to freeze)
+- **USNA-Q3ACTIVES**: "Core Nutritional Active Customers ≥384,000 (flat-or-up sequentially) at the Q3 print" — **p=0.25**, cat 2026-10-21 (UNCONFIRMED — no company-announced date; verify at ir.usana.com before arming), px 13.78. Reasoning: monotonic −5.0%/qtr trend; one-quarter stabilizations are the exception, and the guide does not require one.
+- **USNA-Q3GUIDE**: "FY26 consolidated guide held at ≥$910M at the Q3 print" — **p=0.55**, same date, px 13.78. Reasoning: the 8/4 cut was segment-detailed and Core was raised — evidence of a scrubbed number — against Hiya's monotonic sub decline; slight edge to hold.
+
+## Unverified-ledger rows owed (drain-scoped: FLAT with dated gate)
+- **Hiya channel split** (DTC subscription vs retail/international revenue share) — decides whether $125M is reachable with subs −10.8% QoQ; resolver: 10-K segment discussion + consumer_product_reviews SECOND cohort snapshot before 10/21 (the benches' named missing evidence).
+- **Q3 print date** — resolver: ir.usana.com events page (both benches inherited an unconfirmed yfinance date).
+
+## Infra notes
+- cohorts.json permission-denied to the refutability triage again (known runner ticket).
+- The pack tape ($13.98) and red's tape ($14.37) were both stale against the $13.78 close — third tape-divergence instance this docket; supports wiring blue-CTEV's `cross_bench_tape_divergence_audit` into runner preflight.
+- Benches IBKR-denied again (known MCP-grant ticket); adjudication pulled live quote + ADV.
+
+*Primary sources: FY2025 10-K acc 0000896264-26-000021 (cash table, indefinite-reinvestment note, valuation allowance); Q2'26 8-K Ex-99.1 acc -000050 (segment guide table, actives, tax-on-loss sentence); 10-Q acc -000056 (Note L tax, Note J buyback, $33,965k authorization, LOC); FY25 release acc -000014 (Protein Pop club-fill verbatim); DEF 14A acc -000026 (Gull Global 40.1%); IBKR live (tape/ADV/52w).*

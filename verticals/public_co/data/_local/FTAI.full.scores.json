@@ -1,0 +1,99 @@
+{
+  "ticker": "FTAI",
+  "cutoff": "2026-05-20",
+  "filing": "0001628280-26-012940_10-K.txt",
+  "filing_date": "2026-02-27",
+  "filing_age_days": 82,
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "FTAI owns 290 aviation assets as of Dec 31 2025 (47 aircraft + 243 engines) with 8 aircraft + 17 engines stranded in Russia.",
+      "severity": "PASS",
+      "supports": ["sec_filings"],
+      "M_check": "sec_filings.list_filings_by_form (cik=0001590364, form=10-K) returns 9 historical 10-Ks; current 10-K accession 0001628280-26-012940 confirmed on file. Asset roll-forward narrative internally consistent (purchases 28 aircraft + 113 engines; sales 47 + 221 with widebody/narrowbody breakdown).",
+      "M_value": {"n_total_10K": 9, "current_10K_present": true},
+      "interpretation": "Fleet count is internal narrative; SEC has the filing on record. No registry contradicts; engines/aircraft counts are operational and not externally registry-verifiable. Russia-stranded sub-claim consistent with 2022 impairment charge of $120M reported in same filing."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "2025 Partnership completed Oct 2025 fundraise with $2.0B equity commitments; agreed to acquire 45 narrowbody aircraft from FTAI for $549M.",
+      "severity": "PASS",
+      "supports": ["sec_filings", "insider_vs_calendar"],
+      "M_check": "Mode A: 50 total 8-Ks on file, including 2025-10-27 (accession 0001590364-25-000038) consistent with timing of 2025 Partnership fundraise close. Mode B: insider_vs_calendar.query_insider_sales_near_budget_events for cik 0001590364 returns 43 Form 4 filings, $69.4M total sales, with $63.6M of proximate sales near FY27 J-Book release (NOT around fundraise close in Oct 2025).",
+      "M_value": {"n_8K_total": 50, "8K_2025_10_27_present": true, "n_form4": 43, "proximate_value_usd": 63629781, "event_anchored": "fy27_jbook_release_2026-04-28"},
+      "interpretation": "Mode A registry confirms 8-K activity around partnership close. Mode B insider sales cluster does not anchor to Strategic Capital Initiative fundraise (no sales in Oct 2025 window per timing data); cluster is May 2026 — well after the fundraise. Claim PASSes; insider behavior noted but not diagnostic for this claim."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "FTAI declared $128.2M ordinary + $17.2M preferred dividends in 2025; $0.40/share dividend declared Feb 24 2026.",
+      "severity": "PASS",
+      "supports": ["sec_filings"],
+      "M_check": "sec_filings shows 8-K 2026-02-25 (accession 0001628280-26-011685) — exactly the day after declared dividend per the 10-K's subsequent events, consistent with dividend declaration disclosure.",
+      "M_value": {"feb2026_8K_present": true, "accession": "0001628280-26-011685"},
+      "interpretation": "8-K timing aligns with declared dividend. PASS."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "FTAI has $3.5B principal debt outstanding; in 2024 issued $700M (2031), $800M (2032), $500M (2033) senior notes.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["sec_filings", "insider_vs_calendar"],
+      "M_check": "Mode A: 50 8-Ks on file — multiple 2024 8-Ks (e.g., 0001140361-24-027545, -28133, -28356, -28455, -28549, -30343, -33916) consistent with senior notes issuances across 2024. Mode B: insider_vs_calendar shows $63.6M of director-level discretionary insider sales (TUCHMAN $61M of 12 sales) clustered May 2026 — within 3-13 days of FY27 JBook release. Director-level discretionary sales of this magnitude during a leveraged-rollup narrative warrant noting.",
+      "M_value": {"insider_proximate_value_usd": 63629781, "n_discretionary_proximate": 3, "top_seller": "TUCHMAN MARTIN", "top_seller_value_usd": 61534493, "share_price": 242},
+      "interpretation": "Debt issuance is confirmed registry-wise. However Mode B (insider behavior) shows $61M of discretionary sales by a director (TUCHMAN MARTIN) at ~$242/share in early May 2026 — i.e., within 4-10 weeks before this scoring's cutoff. Selling at the top is normal for a director with long tenure, but the magnitude relative to the dividend yield and the high leverage ($3.5B debt vs $334M equity, ~10.5x debt/equity) is a moderate yellow flag. Not a hard contradiction of debt claim, but a signal worth surfacing."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "FTAI Power launched Dec 30 2025 to convert CFM56 engines to power turbines.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["uspto_odp"],
+      "M_check": "Mode A: uspto_odp.query_assignee(assignee_name='FTAI Aviation', cutoff_date='2026-05-20') returns 0 granted patents, 0 applications. Mode B: uspto_odp.query_assignee(assignee_name='FTAI Power') also 0/0.",
+      "M_value": {"ftai_aviation_n_granted": 0, "ftai_power_n_granted": 0, "ftai_aviation_n_apps": 0, "ftai_power_n_apps": 0},
+      "interpretation": "Zero patent footprint under either FTAI Aviation or FTAI Power. Calibration heuristic 8 says SEVERE only on Nikola pattern (>=20 granted, 0 in claimed areas). Here total IS zero. CFM56-to-power-turbine conversion is a significant aero-derivative engineering claim. Platform launched Dec 30 2025 (only ~5 months before cutoff) so patent absence is partially explainable by recency, AND core CFM56 IP would be owned by CFM International (GE/Safran JV) not FTAI. MOD-SEVE: claim is real (announcement) but technological IP base appears thin/external; FTAI is positioning as a service/integrator rather than IP-owner. MOD."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "FTAI maintains maintenance facilities in Florida, California, Canada, and Portugal.",
+      "severity": "PASS",
+      "supports": ["epa_frs"],
+      "M_check": "Mode A: epa_frs.query_facilities(facility_name='FTAI', state_abbr='CA') returns 1 facility: FTAI AVIATION PACIFIC, 2390 N AMERICAN WAY, ORANGE, CA 92865 (registry_id 110072121624). FL returned 0; NY returned 0. Mode B: osha_establishments returns 0 matches.",
+      "M_value": {"ca_facilities": 1, "fl_facilities": 0, "ny_facilities": 0, "facility_name_confirmed": "FTAI AVIATION PACIFIC"},
+      "interpretation": "California maintenance facility (Orange, CA) confirmed in EPA FRS. FL absence is consistent with engine MRO not always triggering EPA major-source thresholds (heuristic 1). OSHA absence is consistent with small US footprint (most operators are in Canada per claim C10). PASS."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Customer concentration: one customer = 23% of AR; two unnamed Aerospace Products customers = 13% and 10% of revenue.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["usaspending"],
+      "M_check": "Mode A: usaspending.query_recipient_contracts(recipient_name='FTAI Aviation') returns 0 federal awards, total $0. Mode B: usaspending.query_federal_presence with name variants ['FTAI Aviation', 'FTAI Aviation Ltd', 'Fortress Transportation', 'FTAI'] returns 0 UEIs, 0 contracts, 0 grants.",
+      "M_value": {"federal_contracts": 0, "federal_total_usd": 0, "ueis_resolved": 0},
+      "interpretation": "Customers are clearly NOT federal government (zero federal presence). Likely commercial airlines or aircraft lessors (FTAI lists customers as 'global operators of transportation networks'). Subject notes mentioned 'military adjacency via leasing structures', but no federal trace. Identity of unnamed Customer A unidentifiable via federal channels (per heuristic 7, threshold for SEVERE not met because the missing channel — federal — isn't where airline-revenue would show). UNVERIFIABLE rather than RED."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "KPMG LLP issued clean ICFR opinion; ICFR effective as of Dec 31, 2025.",
+      "severity": "PASS",
+      "supports": ["edgar_fts"],
+      "M_check": "Mode A: 10-K narrative confirms KPMG clean ICFR opinion and management's effective conclusion. Mode B: edgar_fts.query_fulltext('material weakness', cik=0001590364, cutoff=2026-05-20) returns 44 hits total; filtered to 2024-2026: only 1 hit (10-Q 2024-04-26 ftai-20240331.htm — discusses 'material weakness' in standard ICFR risk-factor language, not as an active finding). Older 2018-2019 hits are from the pre-Aviation Fortress era. Also edgar_fts for 'restatement' returns 19 hits, dominated by routine items (Exhibit 97.1 clawback policy filings, severance agreements, share-designation language).",
+      "M_value": {"n_recent_mw_hits_2024_plus": 1, "n_restatement_hits": 19, "any_mw_in_FY2025_10K": false},
+      "interpretation": "No active material weakness language in FY2025 10-K; recent hits are generic risk-factor or policy text. KPMG opinion is consistent. PASS."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "FTAI completed Internalization of Management on May 28, 2024 for $300M total ($150M cash + 1,866,949 shares at $80.34 = $150M).",
+      "severity": "PASS",
+      "supports": ["sec_filings", "acq_coherence"],
+      "M_check": "Mode A: sec_filings.list_filings_by_form (cik 0001590364, form 8-K) shows multiple May/June 2024 8-Ks: 0001140361-24-017145, -17310, -19374, -22044 — consistent with Internalization Agreement disclosure. Mode B: acq_coherence.score_acquisition_coherence(parent_thesis='Independent aircraft engine MRO platform...', acquisitions=[Internalization, SCI 2025 Partnership, FTAI Power]) returns mean_coherence=0.0 with 'INCOHERENT_ROLLUP' signal, BUT the underlying reasoning notes 'cannot assess technology coherence' because Internalization, SCI, and FTAI Power are not classical acquisitions with target tech stacks. The scorer's output is methodologically limited — these are management/capital-structure/product-launch events, not technology M&A.",
+      "M_value": {"may_jun_2024_8K_count": 4, "acq_coherence_mean": 0.0, "acq_coherence_signal_methodologically_limited": true},
+      "interpretation": "Mode A registry confirms Internalization disclosure. Mode B acq_coherence signal is INCOHERENT_ROLLUP=0.0 mean but interpretation is unreliable because the three items aren't proper acquisitions; the scorer cannot evaluate management-internalization or product launches against a tech thesis. PASS for Mode A; Mode B is non-diagnostic noise."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "985 FTEs+contractors as of Dec 31 2025; 494 in Canada with ~71% unionized.",
+      "severity": "PASS",
+      "supports": ["dol_h1b_lca"],
+      "M_check": "Mode A: dol_h1b_lca.query_lca_filings(employer_name='FTAI Aviation') returns 1 certified LCA (Data Scientist, $111k-$141k, NYC, 415 W 13th St — adjacent to HQ at 405 W 13th St) in 2024-08. Mode B: osha_establishments returns 0 (heuristic 1: skilled-trades MRO not always in OSHA establishment sample).",
+      "M_value": {"n_lca_filings": 1, "lca_location": "New York, NY", "lca_naics": "336412 (Aircraft Engine Mfg)", "osha_matches": 0},
+      "interpretation": "Small H1B footprint is consistent with FTAI being Canada-heavy (494/985 = 50% Canadian, mostly unionized blue-collar engine techs). NAICS 336412 confirms aircraft engine manufacturing classification — congruent with MRO operations. PASS."
+    }
+  ]
+}

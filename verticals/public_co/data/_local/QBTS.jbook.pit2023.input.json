@@ -1,0 +1,112 @@
+{
+  "ticker": "QBTS",
+  "cutoff": "2023-01-15",
+  "filing": "0001907982-22-000014_10-Q.txt",
+  "filing_form": "10-Q",
+  "filing_date": "2022-11-10",
+  "fallback_note": "10-K not yet filed at cutoff (D-Wave became public via SPAC Aug 5 2022); using the FY2022 Q3 10-Q as the most recent pre-cutoff filing.",
+  "extraction_note": "This 10-Q is dominated by SPAC-business-combination mechanics, going-concern, warrants and Canadian SIF government-loan accounting. It contains NO disclosure of named Pentagon Program Elements, named DoD programs, named DoD customers, or quantified federal-program revenue. Customers are anonymized (Customer A/B/C). The phrase 'D-Wave Government Inc.' (the federal-contracting subsidiary named in the cohort metadata) does NOT appear in the filing. The strongest J-Book-grounded claim we can extract is the implicit one: D-Wave's only disclosed government revenue is Canadian SIF (a research-and-development grant program), not DoD. We extract the few revenue-concentration / customer / federal-presence claims that exist, plus control claims (patents, facilities, counterparty), and use the framework's verifiers to test whether D-Wave has ANY DoD presence at the cutoff date.",
+  "claims": [
+    {
+      "claim_id": "C1",
+      "claim_text": "D-Wave Quantum derives the majority of its revenue from the United States; for nine months ended Sept 30 2022 US revenue was $2.461M of $4.778M total (51.5%).",
+      "subject": "D-Wave Quantum Inc.",
+      "predicate": "geographic_revenue_concentration",
+      "object_value": "US 51.5% of nine-month revenue; total nine-month revenue $4.778M",
+      "source_quote": "United States $ 2,461 $ 2,100 Japan 1,008 1,197 Germany 757 197 Other 552 359 Total revenue $ 4,778 $ 3,853",
+      "category": "dod_customer_concentration",
+      "queries": [
+        {"source": "usaspending.query_federal_presence", "kwargs": {"name_variants": ["D-Wave Quantum", "D-Wave Systems", "D-Wave Government", "D-Wave Commercial"], "start_date": "2018-01-01", "end_date": "2023-01-15"}}
+      ]
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Three significant customers accounted for 15%, 11% and 10% of three-month-ended Sept 30 2022 revenue (anonymized as Customer A/B/C). Total Q3 revenue $1.695M, so the top customer was ~$254K — too small to be a named Pentagon Program Element.",
+      "subject": "D-Wave Quantum Inc.",
+      "predicate": "customer_concentration_unnamed",
+      "object_value": "top customer ~$254K Q3 2022; no DoD program is named",
+      "source_quote": "During the three month period ended September 30, 2022, the Company earned 15%, 11% and 10% of its total revenue from three customers.",
+      "category": "dod_customer_concentration",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "D-Wave", "cutoff_date": "2023-01-15"}},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "D-Wave Quantum", "cutoff_date": "2023-01-15"}},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "D-Wave Government", "cutoff_date": "2023-01-15"}}
+      ]
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "D-Wave's only disclosed material government funding is the Canadian Strategic Innovation Fund (SIF): a C$40M repayable contribution from the Canadian (not US) government. There is no disclosure of any US DoD program revenue.",
+      "subject": "D-Wave Quantum Inc.",
+      "predicate": "government_funding_source",
+      "object_value": "Canadian SIF (C$40M repayable), $29.5M loan balance Sept 30 2022; no DoD program disclosed",
+      "source_quote": "On November 20, 2020, the Company entered into an agreement with the Strategic Innovation Fund (\"SIF\"), whereby SIF agreed to make a repayable contribution to the Company of up to C$ 40.0 million",
+      "category": "jbook_program_revenue",
+      "queries": [
+        {"source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "D-Wave", "start_date": "2018-01-01", "end_date": "2023-01-15"}},
+        {"source": "usaspending.query_recipient_contracts", "kwargs": {"recipient_name": "D-Wave Government", "start_date": "2018-01-01", "end_date": "2023-01-15"}}
+      ]
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "D-Wave names QCaaS (Quantum Computing as a Service) and professional services as its principal revenue streams; no DoD program-of-record is named as a revenue contributor or pipeline.",
+      "subject": "D-Wave Quantum Inc.",
+      "predicate": "revenue_stream_composition",
+      "object_value": "QCaaS + professional services; no named DoD program",
+      "source_quote": "Until such time as we can generate significant revenue from sales of our QCaaS offering and our professional services, we expect to finance our cash needs through public and/or private equity",
+      "category": "jbook_program_pipeline",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"program_name": "quantum", "cutoff_date": "2023-01-15"}},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"program_name": "AFRL Quantum Networking", "cutoff_date": "2023-01-15"}}
+      ]
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "D-Wave Quantum has substantial doubt about its ability to continue as a going concern; trust-account redemptions reduced SPAC cash to ~$9M of ~$300M, and FY2022 revenue forecast in transaction projections will not be met.",
+      "subject": "D-Wave Quantum Inc.",
+      "predicate": "going_concern_disclosure",
+      "object_value": "material uncertainty re: 12-month liquidity",
+      "source_quote": "These conditions give rise to material uncertainties that may cast substantial doubt on our ability to continue as a going concern.",
+      "category": "rollup_thesis",
+      "queries": [
+        {"source": "ucc_proxy.query_ucc_exposure", "kwargs": {"cik": "0001907982", "cutoff_date": "2023-01-15", "window_months": 24}}
+      ]
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "D-Wave's quantum computing technology is protected by patents; the company has invested heavily in R&D (control claim — patents are not a J-Book channel).",
+      "subject": "D-Wave Quantum Inc.",
+      "predicate": "patent_portfolio_existence",
+      "object_value": "patent portfolio exists",
+      "source_quote": "we expect to incur additional losses and higher operating expenses for the foreseeable future as we continue to invest in research and development",
+      "category": "patent",
+      "queries": [
+        {"source": "uspto_odp.query_assignee", "kwargs": {"assignee_name": "D-Wave Systems", "cutoff_date": "2023-01-15"}}
+      ]
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Long-lived assets are substantially located in Canada and the United States (Canada $10.1M, US $0.5M as of Sept 30, 2022). This pins the principal operating facility in Canada — control claim that D-Wave is not a US-defense industrial-base contractor.",
+      "subject": "D-Wave Quantum Inc.",
+      "predicate": "facility_location",
+      "object_value": "Canada ~95% of long-lived assets",
+      "source_quote": "Canada $ 10,106 $ 11,251 United States 497 576 Total long-lived assets $ 10,603 $ 11,827",
+      "category": "facility",
+      "queries": [
+        {"source": "epa_frs.query_facilities", "kwargs": {"facility_name": "D-Wave", "state_abbr": "CA"}}
+      ]
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "D-Wave has no significant counterparty disclosure naming federal customers; customers are anonymized A/B/C with no industry or agency identifier. Control test: does any DoD prime mention 'D-Wave' in their own SEC filings?",
+      "subject": "D-Wave Quantum Inc.",
+      "predicate": "counterparty_disclosure_check",
+      "object_value": "anonymized customers; need megacap/prime-side corroboration",
+      "source_quote": "Customer A 15 % 15 % Customer B 11 % 11 % Customer C 10 %",
+      "category": "counterparty_disclosure",
+      "queries": [
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "D-Wave", "cutoff_date": "2023-01-15", "cik": "0000936468"}},
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "D-Wave", "cutoff_date": "2023-01-15"}}
+      ]
+    }
+  ]
+}

@@ -1,0 +1,315 @@
+{
+  "_meta": {
+    "name": "ETF K-12 USD Holdings — COE Fiscal Certification Scoring",
+    "vertical": "muni_credit",
+    "compiled_on": "2026-05-28",
+    "purpose": "Per-K-12-holding COE (County Office of Education) AB 1200 fiscal-certification scoring for the proposed ETF basket. Detector: coe_fiscal_certification.py.",
+    "data_sources": {
+      "primary": "California Department of Education — Interim Status Reports (https://www.cde.ca.gov/fg/fi/ir/interimstatus.asp). The CDE publishes a consolidated list of all LEAs receiving Qualified (Q) or Negative (N) certifications each interim cycle. Districts NOT appearing on the Q/N list are presumed Positive by COE.",
+      "fcmat": "FCMAT report archive (https://www.fcmat.org/fcmat-reports) cross-referenced for active fiscal-distress engagements (FHRA, AB 139 audit, management review).",
+      "state_receiver": "CDE Emergency Apportionment Loan list (Ed Code §41320 et seq.); LAO state-emergency-loan tracker."
+    },
+    "coverage_window": "FY 2024-25 First Interim (cycle ended 2024-10-31, certified Dec 2024) through FY 2025-26 Second Interim (cycle ended 2026-01-31, certified May 26, 2026 — published 2 days ago by CDE).",
+    "_methodology_notes": [
+      "Trailing 4 interim cycles reviewed per district: 2024-25-Q1 (First Interim), 2024-25-Q2 (Second Interim), 2025-26-Q1 (First Interim), 2025-26-Q2 (Second Interim).",
+      "For districts not appearing on any CDE Q/N list across these 4 cycles, status is recorded as 'Positive' by implication. This is the standard convention — CDE publishes only Q and N; absence from Q/N list = COE certified Positive.",
+      "Source URLs cite the CDE consolidated cycle PDF (authoritative). Individual district COE board agenda URLs are noted where the district is on the Q/N list and a deeper trace was needed.",
+      "FCMAT 'active' = report published 2024-2025 with fiscal-distress engagement type. Old reports (transportation reviews, special-ed audits) are not 'fiscal distress' and do not trigger the FCMAT flag."
+    ]
+  },
+  "detector_run_summary": {
+    "n_holdings_scored": 6,
+    "n_fired": 1,
+    "n_clean": 5,
+    "fired_holdings": ["River Delta Joint Unified"],
+    "fire_rate": 0.167,
+    "severity_distribution": {"RED": 0, "HIGH": 1, "MEDIUM": 0},
+    "_interpretation": "1-of-6 fire rate (16.7%) is within the narrow-high-precision discipline (target <15-20% per detector_composition memory). River Delta is the only ETF holding with COE fiscal-certification concerns; the back-to-back Qualified status on the 2 most recent cycles triggers HIGH severity."
+  },
+  "scored_holdings": [
+    {
+      "district_name": "River Delta Joint Unified",
+      "obligor_type": "k12_unified_district",
+      "counties": ["Sacramento", "Yolo", "Solano"],
+      "coe_primary": "Sacramento County Office of Education",
+      "_note_multi_county": "River Delta is a tri-county district along the Sacramento River; SCOE is the administrative COE for AB 1200 certification per CDE district-detail (CDS code 34674130000000).",
+      "detector_input": {
+        "district_name": "River Delta Joint Unified",
+        "coe": "Sacramento County Office of Education",
+        "certifications_trailing_8q": [
+          {
+            "period": "2025-26-Q2",
+            "status": "Qualified",
+            "source_url": "https://www.cde.ca.gov/fg/fi/ir/second2526.asp",
+            "source_note": "CDE Second Interim FY 2025-26 (published 2026-05-26) lists River Delta Joint Unified (Sacramento) on the Qualified list."
+          },
+          {
+            "period": "2025-26-Q1",
+            "status": "Qualified",
+            "source_url": "https://www.cde.ca.gov/fg/fi/ir/first2526.asp",
+            "source_note": "CDE First Interim FY 2025-26 lists River Delta Joint Unified (Sacramento) on the Qualified list with budget $40.9M."
+          },
+          {
+            "period": "2024-25-Q2",
+            "status": "Positive",
+            "source_url": "https://www.cde.ca.gov/fg/fi/ir/second2425.asp",
+            "source_note": "Not on Second Interim FY 2024-25 Q/N list → Positive by implication."
+          },
+          {
+            "period": "2024-25-Q1",
+            "status": "Positive",
+            "source_url": "https://www.cde.ca.gov/fg/fi/ir/first2425.asp",
+            "source_note": "Not on First Interim FY 2024-25 Q/N list → Positive by implication."
+          }
+        ],
+        "fcmat_involvement_active": false,
+        "fcmat_engagement_type": null,
+        "_fcmat_note": "Only FCMAT report on file is a 2010 Transportation Review (https://www.fcmat.org/PublicationsReports/FCMATRiverDeltareportfinal79.pdf) — pre-dates the current fiscal-distress cycle; not an active engagement.",
+        "state_receiver_active": false,
+        "as_of_date": "2026-05-28",
+        "confidence": "HIGH"
+      },
+      "detector_result": {
+        "fires": true,
+        "reason": "BACK_TO_BACK_QUALIFIED",
+        "severity": "HIGH",
+        "_predictive_meaning": "Back-to-back Q on the two most recent cycles (2025-26 Q1 and Q2) puts River Delta on the pre-receivership trajectory analog to Sacramento City USD 2024 → 2026 path. The fact that the qualified status emerged FRESH this fiscal year (clean for 2024-25) suggests a structural deficit that materialized at FY 2025-26 budget adoption."
+      },
+      "verdict_etf_impact": "EXCLUDE from ETF basket pending review. The dedicated-tax GO masking framework would normally hold the bond rating well above the IDR even at extreme distress (per SCUSD anchor: BBB+ dedicated-tax GO at BB- IDR). HOWEVER: (1) River Delta is a small district ($40.9M budget — ~1/30th of LAUSD) so the AV-base depth to support 5-notch uplift is thinner; (2) the OS language on River Delta's GO series has NOT been confirmed to include the explicit pledged-special-revenue language Fitch requires for max uplift; (3) Sacramento County Office of Education itself is now overseeing two distressed obligors (SCUSD + River Delta), raising COE-bandwidth concerns. Recommend: hold-only if dedicated-tax GO OS language confirmed AND par exposure <2% of basket; otherwise exclude."
+    },
+    {
+      "district_name": "Alpine County Unified",
+      "obligor_type": "k12_unified_district",
+      "counties": ["Alpine"],
+      "coe_primary": "Alpine County Office of Education",
+      "_note_alpine_coe": "Alpine County HAS its own COE despite tiny size (Alpine COE and Alpine County USD are co-located at the Markleeville office; CDS 02613330000000 / 02100250000000). Co-located COE+District is a structural conflict-of-interest concern for AB 1200 self-certification, but not flagged by this detector.",
+      "detector_input": {
+        "district_name": "Alpine County Unified",
+        "coe": "Alpine County Office of Education",
+        "certifications_trailing_8q": [
+          {
+            "period": "2025-26-Q2",
+            "status": "Positive",
+            "source_url": "https://www.cde.ca.gov/fg/fi/ir/second2526.asp",
+            "source_note": "Not on Second Interim FY 2025-26 Q/N list → Positive by implication."
+          },
+          {
+            "period": "2025-26-Q1",
+            "status": "Positive",
+            "source_url": "https://www.cde.ca.gov/fg/fi/ir/first2526.asp",
+            "source_note": "Not on First Interim FY 2025-26 Q/N list → Positive by implication."
+          },
+          {
+            "period": "2024-25-Q2",
+            "status": "Positive",
+            "source_url": "https://www.cde.ca.gov/fg/fi/ir/second2425.asp",
+            "source_note": "Not on Second Interim FY 2024-25 Q/N list → Positive."
+          },
+          {
+            "period": "2024-25-Q1",
+            "status": "Positive",
+            "source_url": "https://www.cde.ca.gov/fg/fi/ir/first2425.asp",
+            "source_note": "Not on First Interim FY 2024-25 Q/N list → Positive."
+          }
+        ],
+        "fcmat_involvement_active": false,
+        "fcmat_engagement_type": null,
+        "state_receiver_active": false,
+        "as_of_date": "2026-05-28",
+        "confidence": "MEDIUM",
+        "_confidence_note": "MEDIUM (not HIGH) because Alpine County USD is so small it may file basic aid / unique-status reports outside the standard AB 1200 cycle, but the CDE consolidated lists are authoritative for Q/N — if Alpine were Q or N, it would appear."
+      },
+      "detector_result": {
+        "fires": false,
+        "reason": "ALL_POSITIVE_TRAILING_4Q"
+      },
+      "verdict_etf_impact": "RETAIN. Independent risk note: Alpine USD is a tiny rural district (~80 students) — separate concern is whether the district has scale for meaningful GO issuance to support an ETF holding at all. AB 1200 detector is clean."
+    },
+    {
+      "district_name": "Clovis Unified",
+      "obligor_type": "k12_unified_district",
+      "counties": ["Fresno"],
+      "coe_primary": "Fresno County Superintendent of Schools (FCSS)",
+      "detector_input": {
+        "district_name": "Clovis Unified",
+        "coe": "Fresno County Superintendent of Schools",
+        "certifications_trailing_8q": [
+          {
+            "period": "2025-26-Q2",
+            "status": "Positive",
+            "source_url": "https://www.cde.ca.gov/fg/fi/ir/second2526.asp"
+          },
+          {
+            "period": "2025-26-Q1",
+            "status": "Positive",
+            "source_url": "https://www.cde.ca.gov/fg/fi/ir/first2526.asp"
+          },
+          {
+            "period": "2024-25-Q2",
+            "status": "Positive",
+            "source_url": "https://www.cde.ca.gov/fg/fi/ir/second2425.asp"
+          },
+          {
+            "period": "2024-25-Q1",
+            "status": "Positive",
+            "source_url": "https://www.cde.ca.gov/fg/fi/ir/first2425.asp"
+          }
+        ],
+        "fcmat_involvement_active": false,
+        "fcmat_engagement_type": null,
+        "_fcmat_note": "Past FCMAT engagements: 2021 organizational/staffing review, 2022 HR department review. Neither is fiscal-distress; both are operational consulting. Not an active fiscal flag.",
+        "state_receiver_active": false,
+        "as_of_date": "2026-05-28",
+        "confidence": "HIGH"
+      },
+      "detector_result": {
+        "fires": false,
+        "reason": "ALL_POSITIVE_TRAILING_4Q"
+      },
+      "verdict_etf_impact": "RETAIN. Clovis is one of the strongest CA suburban districts (Fresno-area, stable enrollment, no Q/N in 4 trailing cycles, no fiscal FCMAT)."
+    },
+    {
+      "district_name": "Downey Unified",
+      "obligor_type": "k12_unified_district",
+      "counties": ["Los Angeles"],
+      "coe_primary": "Los Angeles County Office of Education (LACOE)",
+      "detector_input": {
+        "district_name": "Downey Unified",
+        "coe": "Los Angeles County Office of Education",
+        "certifications_trailing_8q": [
+          {
+            "period": "2025-26-Q2",
+            "status": "Positive",
+            "source_url": "https://www.cde.ca.gov/fg/fi/ir/second2526.asp"
+          },
+          {
+            "period": "2025-26-Q1",
+            "status": "Positive",
+            "source_url": "https://www.cde.ca.gov/fg/fi/ir/first2526.asp"
+          },
+          {
+            "period": "2024-25-Q2",
+            "status": "Positive",
+            "source_url": "https://www.cde.ca.gov/fg/fi/ir/second2425.asp"
+          },
+          {
+            "period": "2024-25-Q1",
+            "status": "Positive",
+            "source_url": "https://www.cde.ca.gov/fg/fi/ir/first2425.asp"
+          }
+        ],
+        "fcmat_involvement_active": false,
+        "fcmat_engagement_type": null,
+        "_fcmat_note": "Past FCMAT engagements: 2015 and 2018 special-education program reviews. Operational consulting, not fiscal distress. Not an active flag.",
+        "state_receiver_active": false,
+        "as_of_date": "2026-05-28",
+        "confidence": "HIGH"
+      },
+      "detector_result": {
+        "fires": false,
+        "reason": "ALL_POSITIVE_TRAILING_4Q"
+      },
+      "verdict_etf_impact": "RETAIN. Downey is LA-County mid-size urban-suburban with stable demographics and no AB 1200 concerns."
+    },
+    {
+      "district_name": "Sanger Unified",
+      "obligor_type": "k12_unified_district",
+      "counties": ["Fresno"],
+      "coe_primary": "Fresno County Superintendent of Schools (FCSS)",
+      "detector_input": {
+        "district_name": "Sanger Unified",
+        "coe": "Fresno County Superintendent of Schools",
+        "certifications_trailing_8q": [
+          {
+            "period": "2025-26-Q2",
+            "status": "Positive",
+            "source_url": "https://www.cde.ca.gov/fg/fi/ir/second2526.asp"
+          },
+          {
+            "period": "2025-26-Q1",
+            "status": "Positive",
+            "source_url": "https://www.cde.ca.gov/fg/fi/ir/first2526.asp"
+          },
+          {
+            "period": "2024-25-Q2",
+            "status": "Positive",
+            "source_url": "https://www.cde.ca.gov/fg/fi/ir/second2425.asp"
+          },
+          {
+            "period": "2024-25-Q1",
+            "status": "Positive",
+            "source_url": "https://www.cde.ca.gov/fg/fi/ir/first2425.asp"
+          }
+        ],
+        "fcmat_involvement_active": false,
+        "fcmat_engagement_type": null,
+        "_fcmat_note": "Past FCMAT engagements: 2011 transportation review, 2012 technology review, 2013 organizational/staffing review. All operational, none fiscal distress. Not an active flag.",
+        "state_receiver_active": false,
+        "as_of_date": "2026-05-28",
+        "confidence": "HIGH"
+      },
+      "detector_result": {
+        "fires": false,
+        "reason": "ALL_POSITIVE_TRAILING_4Q"
+      },
+      "verdict_etf_impact": "RETAIN. Sanger is a stable Central Valley district with no fiscal-distress signals."
+    },
+    {
+      "district_name": "Pomona Unified",
+      "obligor_type": "k12_unified_district",
+      "counties": ["Los Angeles"],
+      "coe_primary": "Los Angeles County Office of Education (LACOE)",
+      "detector_input": {
+        "district_name": "Pomona Unified",
+        "coe": "Los Angeles County Office of Education",
+        "certifications_trailing_8q": [
+          {
+            "period": "2025-26-Q2",
+            "status": "Positive",
+            "source_url": "https://www.cde.ca.gov/fg/fi/ir/second2526.asp"
+          },
+          {
+            "period": "2025-26-Q1",
+            "status": "Positive",
+            "source_url": "https://www.cde.ca.gov/fg/fi/ir/first2526.asp"
+          },
+          {
+            "period": "2024-25-Q2",
+            "status": "Positive",
+            "source_url": "https://www.cde.ca.gov/fg/fi/ir/second2425.asp"
+          },
+          {
+            "period": "2024-25-Q1",
+            "status": "Positive",
+            "source_url": "https://www.cde.ca.gov/fg/fi/ir/first2425.asp"
+          }
+        ],
+        "fcmat_involvement_active": false,
+        "fcmat_engagement_type": null,
+        "_fcmat_note": "No FCMAT reports on file in the public archive search. LCAP approved by LACOE 2025-09-05 — routine approval cycle.",
+        "state_receiver_active": false,
+        "as_of_date": "2026-05-28",
+        "confidence": "HIGH"
+      },
+      "detector_result": {
+        "fires": false,
+        "reason": "ALL_POSITIVE_TRAILING_4Q"
+      },
+      "verdict_etf_impact": "RETAIN. Pomona is LA-County eastern, AB 1200 clean; enrollment-decline risk exists (immigration enforcement / Inland Empire demographics) but not yet manifesting in fiscal-cert distress."
+    }
+  ],
+  "context_calibration": {
+    "_universe_baseline_q_n_rate": {
+      "fy_2024_25_first_interim": {"n_negative": 7, "n_qualified": 32, "total_q_n": 39, "approx_district_universe": 939, "fire_rate_pct": 4.2},
+      "fy_2024_25_second_interim": {"n_negative": 4, "n_qualified": 20, "total_q_n": 24, "approx_district_universe": 939, "fire_rate_pct": 2.6},
+      "fy_2025_26_first_interim": {"n_negative": 8, "n_qualified_approx": 45, "total_q_n": 53, "approx_district_universe": 939, "fire_rate_pct": 5.6},
+      "fy_2025_26_second_interim": {"n_negative": 5, "n_qualified": 28, "total_q_n": 33, "approx_district_universe": 939, "fire_rate_pct": 3.5},
+      "_interpretation": "Baseline Q/N rate ~3-6% per cycle. Our ETF basket fire rate of 16.7% (1-of-6) is ELEVATED vs universe baseline — consistent with the basket containing a non-trivial small/mid-cap rural exposure (River Delta = small tri-county rural). The single River Delta fire is structurally explainable; not noise."
+    },
+    "_load_bearing_anchors": [
+      "SCUSD progression: 2024-25 Q1 Positive → 2024-25 Q2 Qualified → 2025-26 Q1 Negative + Fitch IDR cut from A+ to BB- on 2026-04-28. Approx 12-18 month lead time from first Q to BB- rating action. Dedicated-tax GO held BBB+ (5-notch uplift confirmed). This is the canonical fact pattern River Delta now resembles.",
+      "Pleasanton USD progression: 2024-25 Q1 Positive → 2025-26 Q1 Negative → 2025-26 Q2 Negative. Faster deterioration than SCUSD — Pleasanton went straight to N within one cycle. Suggests Q→N transition can be 6 months rather than 12-18.",
+      "Plumas USD: Q since 2023 → FCMAT engagement Dec 2024 → projected cash insolvency Aug 2025 → state receivership. ~24 month timeline from first Q to receivership in a small rural district."
+    ]
+  }
+}

@@ -1,0 +1,113 @@
+{
+  "ticker": "TDG",
+  "cutoff": "2026-05-20",
+  "filing": "0001260221-25-000081_10-K.txt",
+  "filing_date": "2025-11-12",
+  "filing_age_days": 189,
+  "claims": [
+    {
+      "claim_id": "TDG-1",
+      "claim_text": "TransDigm's defense business accounts for approximately 35-40% of net sales (FY2025 defense net sales = $3,761M out of $8,831M total = ~43%), supplying U.S. armed forces and friendly foreign governments via defense OEMs and direct military buying agencies.",
+      "subject": "TransDigm Group Incorporated (and its operating subsidiaries)",
+      "predicate": "is_federal_defense_supplier",
+      "object_value": "$3,761M FY2025 defense net sales / 35-40% of revenue from defense market",
+      "source_quote": "the defense market (which includes defense OEMs and aftermarket sales to the U.S. and friendly foreign governments), which generally account for approximately 35% to 40% of our annual net sales ... Defense 2,273 1,488 ... 3,761",
+      "category": "customer_pipeline",
+      "queries": [
+        {"mode": "A", "source": "usaspending.query_recipient_contracts", "args": {"recipient_name": "TRANSDIGM"}, "rationale": "Confirm TransDigm receives DoD prime contracts as direct seller"},
+        {"mode": "B", "source": "usaspending.query_dod_contracts", "args": {"recipient_name": "TRANSDIGM"}, "rationale": "Compare obligated DoD $$ to disclosed $3.76B defense revenue — most defense revenue likely flows through primes (sub-tier), so direct DoD obligations should be a fraction of $3.76B but should still be material"}
+      ]
+    },
+    {
+      "claim_id": "TDG-2",
+      "claim_text": "TransDigm operates approximately 120 manufacturing facilities across 25 U.S. states and 14 other countries.",
+      "subject": "TransDigm Group Incorporated",
+      "predicate": "operates_facilities",
+      "object_value": "~120 manufacturing facilities in 25 U.S. states + 14 foreign countries",
+      "source_quote": "We maintain approximately 120 manufacturing facilities ... situated in 25 states within the United States and in 14 other countries.",
+      "category": "physical_facility",
+      "queries": [
+        {"mode": "A", "source": "epa_frs.query_facilities", "args": {"company_name": "TransDigm"}, "rationale": "Manufacturing for aerospace typically involves machining/plating/coating — many such facilities are EPA-regulated; expect dozens of FRS hits"},
+        {"mode": "B", "source": "osha_establishments.query_establishments", "args": {"company_name": "TransDigm"}, "rationale": "OSHA establishment registry should show many U.S. manufacturing sites for a ~120-facility footprint"}
+      ]
+    },
+    {
+      "claim_id": "TDG-3",
+      "claim_text": "TransDigm completed approximately $413M in acquisitions during fiscal 2025 (including Servotronics for $133M) and acquired Simmonds Precision Products from RTX Corporation for ~$757M on October 6, 2025.",
+      "subject": "TransDigm",
+      "predicate": "completed_acquisitions",
+      "object_value": "$413M FY2025 acquisitions including Servotronics ($133M); $757M Simmonds acquisition from RTX subsequent event",
+      "source_quote": "During fiscal 2025, the Company completed approximately $413 million in acquisitions ... including the acquisition of Servotronics, Inc. ... for approximately $133 million in cash ... On October 6, 2025, the Company completed the acquisition of all the outstanding stock of the Simmonds Precision Products, Inc. Business ... from RTX Corporation for approximately $757 million in cash.",
+      "category": "rollup_thesis",
+      "queries": [
+        {"mode": "A", "source": "edgar_fts.query_fulltext", "args": {"search_term": "Simmonds Precision Products", "cik": "0000101829"}, "rationale": "Mode A: confirm divestiture appears in RTX (formerly Raytheon Technologies) filings"},
+        {"mode": "B", "source": "acq_coherence.score_acquisition_coherence", "args": {"parent_thesis": "Proprietary aerospace components with significant aftermarket content and clear path to value via TransDigm's three core value drivers (profitable new business, lean cost structure, highly engineered value-added products)", "acquisitions": ["Servotronics (precision servo valves for aerospace/defense)", "Simmonds Precision Products (RTX/Goodrich aerospace sensors & fuel management)"]}, "rationale": "Mode B: aggregate roll-up coherence vs stated thesis — both targets are aerospace components with aftermarket"}
+      ]
+    },
+    {
+      "claim_id": "TDG-4",
+      "claim_text": "TransDigm declared and paid a $90.00 per-share special cash dividend on August 20, 2025, funded by $5,000M in new senior secured and unsecured debt plus cash on hand; total cash payment ~$5,232M in September 2025. The company has stockholders' deficit of $(9,686)M as of Sep 30, 2025.",
+      "subject": "TransDigm Group Incorporated",
+      "predicate": "completed_levered_special_dividend",
+      "object_value": "$90/share special dividend + $5,000M new debt + ~$(9,686)M stockholders' deficit",
+      "source_quote": "On August 20, 2025, the Company's Board of Directors authorized and declared a special cash dividend of $90.00 on each outstanding share of common stock ... The total cash payment, funded by a combination of $5,000 million in new senior secured and unsecured debt and existing cash on hand, related to the special dividend and dividend equivalents was approximately $5,232 million in September 2025 ... TD Group stockholders deficit (9,686) (6,290)",
+      "category": "financial_distress",
+      "queries": [
+        {"mode": "A", "source": "sec_filings.list_filings_by_form", "args": {"cik": "0001260221", "form_type": "8-K"}, "rationale": "Mode A: confirm 8-K filings around Aug 19-20, 2025 announcing debt issuance and dividend"},
+        {"mode": "B", "source": "insider_vs_calendar.query_insider_sales_near_budget_events", "args": {"cik": "0001260221", "horizon_days": 60}, "rationale": "Mode B: discretionary insider sales clustered to special-dividend / debt-issuance dates would be SEVE — execs benefit from cash dividend equivalents on options"}
+      ]
+    },
+    {
+      "claim_id": "TDG-5",
+      "claim_text": "TransDigm manufactures specialized equipment for NASA's space telescopes, aiding in space exploration and scientific advancement.",
+      "subject": "TransDigm operating units",
+      "predicate": "supplies_NASA_space_telescopes",
+      "object_value": "specialized equipment for NASA space telescopes",
+      "source_quote": "specialized equipment for the National Aeronautics and Space Administration's ( NASA ) space telescopes, aiding in space exploration and scientific advancement.",
+      "category": "counterparty_disclosure",
+      "queries": [
+        {"mode": "A", "source": "usaspending.query_recipient_contracts", "args": {"recipient_name": "TRANSDIGM", "awarding_agency": "NASA"}, "rationale": "Mode A: confirm TransDigm or subsidiaries hold NASA contracts (direct or sub-tier)"},
+        {"mode": "B", "source": "nasa_ntrs.query_ntrs", "args": {"query": "TransDigm"}, "rationale": "Mode B: NASA technical reports / Heico-style contractor mentions"}
+      ]
+    },
+    {
+      "claim_id": "TDG-6",
+      "claim_text": "Total debt of $30,015M as of September 30, 2025 (up from $24,880M FY2024), with approximately $11,000M in debt financing transactions completed during fiscal 2025 (issuances + refinancings).",
+      "subject": "TransDigm",
+      "predicate": "carries_total_debt",
+      "object_value": "$30,015M total debt; $11,000M FY2025 debt financing activity",
+      "source_quote": "Total debt (1) 30,015 24,880 ... During fiscal 2025, the Company completed approximately $11,000 million in debt financing transactions, inclusive of new issuances and refinancing of existing debt.",
+      "category": "financial_distress",
+      "queries": [
+        {"mode": "A", "source": "sec_filings.list_filings_by_form", "args": {"cik": "0001260221", "form_type": "8-K"}, "rationale": "Mode A: 8-K filings for indenture / new notes during FY2025 corroborate debt issuance"},
+        {"mode": "B", "source": "claim_evolution.query_claim_evolution", "args": {"cik": "0001260221", "claim_keyword": "going concern"}, "rationale": "Mode B: with negative stockholders' equity and $30B debt, check whether any going-concern / material weakness language emerges over time"}
+      ]
+    },
+    {
+      "claim_id": "TDG-7",
+      "claim_text": "Approximately 90% of TransDigm's FY2025 net sales were generated by proprietary products, with ~55% from aftermarket. None of TransDigm's customers individually accounted for greater than 10% of FY2025 net sales; top 10 customers accounted for ~40%.",
+      "subject": "TransDigm",
+      "predicate": "customer_concentration",
+      "object_value": "Top 10 = ~40%; no single customer >10%; ~90% proprietary; ~55% aftermarket",
+      "source_quote": "We estimate that approximately 90% of our net sales for fiscal year 2025 were generated by proprietary products ... approximately 55% of our net sales in fiscal year 2025 were generated from the aftermarket ... Our top ten customers for fiscal year 2025 accounted for approximately 40% of our net sales ... None of our customers individually accounted for greater than 10% of our net sales for fiscal year 2025.",
+      "category": "customer_concentration",
+      "queries": [
+        {"mode": "A", "source": "edgar_fts.query_fulltext", "args": {"search_term": "TransDigm", "cik": "0000012927"}, "rationale": "Mode A: Boeing's filings — TransDigm products are on virtually every Boeing aircraft, so presence is expected but small (sub-tier supplier)"},
+        {"mode": "B", "source": "usaspending.query_recipient_contracts", "args": {"recipient_name": "TRANSDIGM"}, "rationale": "Mode B: identify what fraction of $3.76B defense revenue ties to direct DoD contracts to constrain the unnamed customer mix — top buyer is likely the U.S. government via DLA/Defense Logistics for spare parts"}
+      ]
+    },
+    {
+      "claim_id": "TDG-8",
+      "claim_text": "TransDigm has acquired 95 businesses and various product lines since inception in 1993, with a selective acquisition strategy focused on proprietary commercial aerospace components with significant aftermarket content.",
+      "subject": "TransDigm",
+      "predicate": "completed_serial_acquisitions",
+      "object_value": "95 acquisitions since 1993",
+      "source_quote": "Since the inception of our company in 1993, we have acquired 95 businesses and various product lines.",
+      "category": "rollup_thesis",
+      "queries": [
+        {"mode": "A", "source": "sec_filings.list_filings_by_form", "args": {"cik": "0001260221", "form_type": "8-K"}, "rationale": "Mode A: confirm long history of acquisition-disclosure 8-Ks"},
+        {"mode": "B", "source": "uspto_odp.query_assignee", "args": {"assignee_name": "TransDigm"}, "rationale": "Mode B: a 95-acquisition serial rollup of proprietary aerospace IP should produce a sizable patent portfolio across acquired subsidiaries; check granted assignees including subsidiary names"}
+      ]
+    }
+  ]
+}

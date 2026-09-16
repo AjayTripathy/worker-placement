@@ -1,0 +1,117 @@
+{
+  "ticker": "PL",
+  "cutoff": "2023-01-15",
+  "cohort": "j_book_exposure_divergence",
+  "scores": [
+    {
+      "claim_id": "PL-001",
+      "claim_text": "Planet operates Planet Labs Federal, Inc., a subsidiary headquartered in a 3,000 sq ft Washington, D.C. office, serving as the corporate headquarters for U.S. federal/defense engagement.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "usaspending.query_federal_presence + sam_entity.query_entity_by_uei",
+      "M_value": {
+        "usaspending_signal": "RECURRING_FEDERAL",
+        "n_ueis_resolved": 4,
+        "primary_uei": "TFCJCMKNHT74",
+        "primary_uei_name": "PLANET LABS FEDERAL, INC.",
+        "primary_uei_address": "2101 Wilson Blvd Ste 1201, Arlington, VA 22201",
+        "primary_uei_dba": "PLANET FEDERAL",
+        "n_contracts": 61,
+        "contracts_amount_M": 82.33,
+        "agencies": {"DoD": 7, "NASA": 18, "Interior": 7, "Commerce": 5, "Agriculture": 4}
+      },
+      "interpretation": "Planet Labs Federal, Inc. is a real federally-registered entity (UEI TFCJCMKNHT74). Filing says 'Washington, D.C.' but registered physical address is Arlington, VA — cosmetic, immaterial. usaspending confirms RECURRING_FEDERAL with $82.3M lifetime federal awards across 61 contracts. Federal channel is real."
+    },
+    {
+      "claim_id": "PL-002",
+      "claim_text": "Planet expects 'Defense & Intelligence' to be a significant market driver via sharable, unclassified subscription products — forward narrative without naming a specific Pentagon program.",
+      "severity": "UNVERIFIABLE",
+      "supports": null,
+      "M_check": "pentagon_jbook.query_program_funding(contractor_name=Planet Labs Federal); pentagon_jbook.query_program_funding(program_name=Electro-Optical Commercial Layer)",
+      "M_value": {
+        "pentagon_jbook_contractor_search": "NOT_FOUND (n_matches=0)",
+        "pentagon_jbook_program_search_EOCL": "NOT_FOUND (n_matches=0)",
+        "by_entity_corpus_hits": "Planet Labs is NOT among the 58 J-Book entities mapped in by_entity.json"
+      },
+      "interpretation": "Forward-looking and DELIBERATELY VAGUE — Planet names no Program Element, no PE number, no named program (Maven/EOCL/TCPED/Tactical GEOINT), no contract vehicle. Per heuristic 7 (NOT_FOUND != red flag), the J-Book divergence pattern cannot trigger because the company never gave a specific program to verify. Itself a finding: the J-Book Exposure Divergence pattern requires named-program-revenue claims; PL's FY22 10-K is structurally immune because defense exposure is sold as a category, not as named programs. ABSENCE OF DISCLOSURE rather than UNDERDELIVERY."
+    },
+    {
+      "claim_id": "PL-003",
+      "claim_text": "Planet operates a fleet of ~200 satellites including 21 SkySat high-resolution agile-tasking satellites, providing the backbone for tasking-based revenue (including federal tasking).",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "usaspending.query_federal_presence top_awards (descriptions); pentagon_jbook (NOT_FOUND)",
+      "M_value": {
+        "usaspending_top_award_descriptions": ["EARTH OBSERVATIONS FROM PRIVATE SECTOR SMALL SATELITE CONSTELLATIONS PILOT ($7.0M)", "PRIVATE SECTOR SMALL CONSTELLATION SATELLITE DATA PRODUCT PILOT ($6.7M)", "COMMERCIAL SMALLSAT DATA ACQUISITION PROGRAM - PLANETSCOPE AND RAPIDEYE DATA PURCHASE ($6.2M x2)"],
+        "pentagon_jbook_commercial_satellite_imagery": "NOT_FOUND"
+      },
+      "interpretation": "Fleet existence (SkySat + Dove constellation) is independently corroborated by NASA's CSDAP and SmallSat constellation pilots, which contract for PlanetScope/RapidEye/SkySat data. Satellite-fleet claim verifies; J-Book corpus lacks the underlying Commercial Satellite Imagery / EOCL line item but this is corpus-coverage gap, not a divergence."
+    },
+    {
+      "claim_id": "PL-004",
+      "claim_text": "Planet's forward strategy depends on continuing to capture 'certain high-value government procurement contracts'.",
+      "severity": "UNVERIFIABLE",
+      "supports": null,
+      "M_check": "pentagon_jbook.query_program_funding(contractor_name=Planet) + usaspending lifetime trajectory",
+      "M_value": {
+        "pentagon_jbook_contractor_Planet": "NOT_FOUND (n_matches=0)",
+        "usaspending_n_contracts": 61,
+        "usaspending_amount_M_to_2023_01_15": 82.33,
+        "dod_count": 7,
+        "named_dod_program": null
+      },
+      "interpretation": "Past federal presence is real ($82M, 61 awards). But 'high-value government procurement contracts' is unspecified — no PE, no program of record, no named contract vehicle (e.g., EOCL/Tactical GEOINT/TPED). Forward dependency cannot be verified or falsified at the program level. Note: heaviest agency by count is NASA (18 contracts), not DoD (7) — narrative emphasis on 'Defense & Intelligence' overweights actual DoD share of the federal book at cutoff."
+    },
+    {
+      "claim_id": "PL-005",
+      "claim_text": "Planet partnered with Carbon Mapper non-profit and NASA JPL to build two hyperspectral satellites for emissions tracking.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "edgar_fts.query_fulltext(Carbon Mapper); usaspending (NASA contracts)",
+      "M_value": {
+        "edgar_fts_total_hits": 5,
+        "edgar_fts_unique_filers": "Planet Labs PBC only (5 of 5 hits)",
+        "usaspending_NASA_contracts_count": 18
+      },
+      "interpretation": "Carbon Mapper appears only in Planet's own filings (no third-party SEC corroboration), which is expected because Carbon Mapper is a private non-profit. NASA channel is real (18 contracts including CSDAP). Hyperspectral partnership claim is internally consistent and not contradicted; PASS."
+    },
+    {
+      "claim_id": "PL-006",
+      "claim_text": "Planet serves over 700 customers with >90% on annual or multi-year contracts (~2-year avg length).",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "usaspending.query_federal_presence (corroborates federal slice of customer base)",
+      "M_value": {
+        "usaspending_n_contracts_total": 61,
+        "usaspending_unique_recipient_UEIs": 4,
+        "agencies_count": 9
+      },
+      "interpretation": "Customer-count claim is largely commercial and cannot be falsified by federal sources. The federal slice corroborates breadth (9 distinct federal agencies, 61 contracts), consistent with a multi-vertical customer base. No contradiction."
+    },
+    {
+      "claim_id": "PL-007",
+      "claim_text": "Planet positions itself as differentiated from legacy EO providers who 'prioritized serving national defense and intelligence customers' — narrative claim about broad addressable defense/intel market.",
+      "severity": "UNVERIFIABLE",
+      "supports": null,
+      "M_check": "pentagon_jbook.query_program_funding(EOCL); edgar_fts.query_fulltext(Planet Labs, cik=Maxar 0001750729)",
+      "M_value": {
+        "pentagon_jbook_EOCL": "NOT_FOUND (corpus gap)",
+        "edgar_fts_Planet_Labs_Maxar": "not run (Maxar CIK uncertain; competitor cross-citation low prior)"
+      },
+      "interpretation": "Narrative-only positioning claim. The relevant verifier — Pentagon NRO/NGA commercial-imagery line item (EOCL was awarded May 2022) — is not in the J-Book corpus, so the forward trajectory of NRO/NGA commercial imagery spend is UNVERIFIABLE here. Without a named PE, the divergence pattern cannot fire."
+    },
+    {
+      "claim_id": "PL-008",
+      "claim_text": "Planet operates facilities in San Francisco, Washington DC, with foreign subsidiaries in Canada, Germany, Luxembourg, Singapore, and Netherlands.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "sam_entity.query_entity_by_uei (HQ address)",
+      "M_value": {
+        "primary_uei_address": "2101 Wilson Blvd Ste 1201, Arlington, VA 22201",
+        "primary_uei_dba": "PLANET FEDERAL",
+        "naics_codes": ["518210", "541330", "541360", "541370", "541490"]
+      },
+      "interpretation": "Facilities footprint and federal subsidiary presence corroborated. NAICS profile (computing infrastructure + engineering + surveying/mapping) is fully aligned with the stated EO/geospatial-data business model — no NAICS-vs-claim divergence."
+    }
+  ]
+}

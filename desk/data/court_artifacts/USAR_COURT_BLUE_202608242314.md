@@ -1,0 +1,51 @@
+## BLUE BENCH — USAR — RED CASE: PARTIALLY OVERTURNED
+
+**PACK: acknowledged.** Superseded: the brief's "6,400 t nameplate" as the EBITDA denominator — the deck's own basis is **~4,400 mt TREO *after lanthanum removal*** at **~$190/kg** (Argus, Dec-2025), producing $550–650M run-rate by end-2027; 6,400 t is gross Phase 1 output ([4/20/26 deal PR](https://www.nasdaq.com/press-release/usa-rare-earth-announces-definitive-agreement-acquire-serra-verde-group-28-billion)). Red used the right denominator. **COVERAGE GAP: IBKR MCP permission-denied to me as well** (`search_contracts` refused) — I sustain red's band/short-interest/discovery_state gap and could not run a peer-beta control. Deck PDF timed out twice.
+
+**PRINT PROXIMITY: 2026-08-28 special meeting — 2 trading days. Sustained on primary text** ([8-K 8/24/26, PROXY-FETCHED](https://r.jina.ai/https://www.sec.gov/Archives/edgar/data/1970622/000121390026092810/ea0302924-8k_usarare.htm)).
+
+**1. Condition amended down** | red: "$1.55B completed" is inverted | my check: re-read the same 8-K | result: **CONFIRMED on the debt leg** — "The Senior Debt Facility has not been documented, closed or funded, and will not be funded on or prior to the closing of the Merger." But the same text confirms "the U.S. government has provided funding to the Counterparty of **$750 million**" — *funded*, and up from $500M. | **SUSTAINED as a venue-divergence finding; REDUCED from FATAL.** The brief's classifying metric (government money went up) survives intact; what dies is the word "completed." Tag NOVEL upheld.
+
+**2. Prize table** | red: $16.96 at the deck vs $18.29 | my check: recompute; audit each input | **arithmetic CONFIRMED** (4,400 × $190 = $836M; ×0.70 = $585M; ×8 + $0.5B + $1.12B ÷ 371.6M = $16.95). But red's claim that "every disputed input is already resolved in the bull's favor" is **REFUTED**: (a) the magnet/Round Top/LCM/Carester/Lacq leg is carried at **$0.5B** while the market prices that same leg at **~$3.3B standalone EV** ($4.48B cap − $1.53B cash + $0.364B warrant liability); (b) Phase II — "could double run-of-mine production before 2030" ([Serra Verde PR](https://svpm.com.br/en/serra-verde-agreedusarareearth/)) — is excluded. Move the magnet leg to even half the market's own carry and the deck row prints **$19.2**, above tape. | **SUSTAINED that the deck does not clear +50%; OVERTURNED as "management's own arithmetic."** It is red's arithmetic on one unsourced input worth **±$7.50/share** — larger than the entire disputed gap. This is the III artifact: the killer number is an artifact of a carry nobody sourced.
+
+**3. Basket doesn't decompose** | my check: the deck basis | **REDUCED.** Red's bottom-up spreads $836M across a mass that **includes lanthanum**; the deck's 4,400 t is explicitly *after lanthanum removal*, so the payable basket is materially richer than red modeled. Red's own change-my-mind #1 ("payable, not full TREO") is **partially satisfied against him.** Separately: **the 8-K contains no offtake pricing terms at all** (verified), and Serra Verde's PR says only "share the benefits of received prices above the agreed floor prices" — **no percentage**. Red's load-bearing "70% upside participation" is **UNVERIFIED**; the brief's cap-vs-participation question is *still open*, not resolved for bulls.
+
+**4. SVRE material weaknesses + CEO succession** | re-read 8-K | **CONFIRMED verbatim, both years. SUSTAINED, FATAL, NOVEL.** Red's strongest and cleanest finding. Strengthen it: the author of the projection becomes CEO of the combined company nine days post-close.
+
+**5. Counterparty credit** | **SUSTAINED, SIZING, NOVEL.**
+
+**6. Cap structure** | **SUSTAINED as DATA** — but red used 371.6M in its own table while calling it a floor; correcting it moves the kill *further* in red's favor. Self-inconsistent, immaterially.
+
+**7. "Cash 4× is the PIPE"** | **OVERTURNED on attribution.** The 26-week window opens ~**2026-02-23**, entirely *after* the January PIPE closed. A drawdown measured from a high set inside that window cannot be PIPE-dilution repricing. Downgrade to: cause unidentified (IBKR path denied).
+
+**8. Priced-in / −5.04%** | **REDUCED to PLAUSIBLE.** No cohort control was run — the pack's own source is a *sector* piece ("USA Rare Earth falls 5%"). Under the evidence rule a PLAUSIBLE cannot carry a verdict. CONSENSUS tag upheld.
+
+**Selection:** red attacked the strongest legs, not the easiest, and cleared the divergence bar properly — street's $550–650M / ~$1.8B-by-2030 vs ours, with a named mechanism. No coverage-count kill; no orphan mispricing. Credit where due.
+
+**NEW FINDINGS RED MISSED:**
+- **(pro-bear) The bridge omits the spend.** $190/kg assumes 100% *separated oxide*; Serra Verde sells MREC. No separation-plant capex appears in red's $1.12B net cash, nor ~5 quarters of burn to end-2027 (~$550M at $56.9M op + ~$54M capex/qtr). Red's table is generous here.
+- **(pro-bull) Phase II and the magnet leg are zeroed.** See §2.
+- **(process, decisive) Vote binary.** Majority-of-votes-cast, only ~9% under voting agreements, no collar, 2 days out. Vote-fail leaves a $13.2M-TTM-revenue company at ~$3.3B EV. Unpriced in both directions.
+- **Two atlas entries red skipped** (validator exposure): `pe_dividend_recap_pre_ipo` — NOT-FIRED (no PE special dividend; Denham/Vision Blue exit via merger consideration, not recap). `upc_tra_value_extraction` — NOT-FIRED (Delaware C-corp, no Up-C/TRA).
+
+**NET POSITION AFTER BOTH BENCHES: FLAT into 8/28 and FLAT after — sustained, but as a NO-ENTRY, not the permanent avoid red asked for.** What survives is finding 4 (projection authored under two audited material weaknesses by the incoming CEO) and finding 1's debt leg — those are integrity findings and they bind regardless of the valuation fight. What does *not* survive is red's "roof below the floor" precision: the −7% at deck is swamped by a $7.50/share unsourced magnet-leg carry and an unverified upside-share term. Neither bench priced the non-Serra-Verde leg, and that — not the basket — is the desk's real coverage gap. Re-court triggers: red's ≤$11, **or** a per-element price×tonnage table in the technical report, **or** the offtake sharing percentage in primary text. Do not bid the close. **Kills after audit: 4 novel / 1 consensus.**
+
+**Conviction that FLAT-with-no-permanent-avoid is right: 8/10.**
+
+### DETECTORS CONSULTED
+- **plant_thermal** — **DOWNGRADE red's FIRED → PLAUSIBLE.** 1.7 °C excess is near Landsat parcel-scale noise and the −1.63 °C/yr trend runs off a 2023-11 baseline predating commissioning. The hard evidence for the same conclusion is $5.8M Q2 revenue, not the LST.
+- **sentinel2_buildout** — **DOWNGRADE red's FIRED → UNCHECKABLE.** Recent scene **2025-10-10** predates ~all of the $108.4M H1-26 capex. The instrument cannot see the period in dispute. Missing: a 2026-Q2/Q3 scene pair.
+- **customer_id** — **NOT-FIRED (uninformative).** `customs_consignees=[]`, zero BOL rows. Concur with red's refusal to score.
+- **carbon_mapper** — **UNCHECKABLE.** No Brazil/Goiás plume coverage for Pela Ema; ionic-clay leaching isn't a super-emitter process.
+- **common_control_merger_accounting** — **NOT-FIRED.** Third-party (Denham/Vision Blue) sale; separate SVRE audits exist. The finding is their *quality* (§4).
+- **lockup_expiration_calendar** — **FIRED, concur.** Jan-26 PIPE + 126.849M merger shares + DOC 16.1M/17.6M warrant → registration step-down inside 90–180d of close. SIZING/TIMING; argues against bidding the close.
+- **pe_dividend_recap_pre_ipo** — **NOT-FIRED.** No debt-financed special dividend pre-transaction.
+- **upc_tra_value_extraction** — **NOT-FIRED.** Delaware C-corp; no Up-C/TRA structure.
+- **albuquerque_permits / austin_permits / bozeman_permits** — **UNCHECKABLE / not applicable.** Facilities are Stillwater OK, Sierra Blanca TX (Hudspeth), Wheat Ridge CO, Cheshire UK, Lacq FR. Missing: Payne County OK and Hudspeth County TX permit feeds.
+- **app_review_velocity / beauty_velocity_poll / beauty_virality / consumer_product_heat** — **NOT-FIRED, all false matches** on an industrial issuer. Concur with red's dispatch note: narrow `consumer_virality_claim` and `real_estate_development` by SIC.
+
+```kg_candidate
+{"name": "prize_table_residual_leg_carry", "kind": "detector", "one_line": "A magic-funding prize table whose verdict flips on an unsourced carry for the non-target legacy leg — the residual is larger than the disputed gap.", "fires_on": "A PRIZE-TABLE valuation where (a) the issuer has a pre-deal standalone business, (b) the bench assigns it a round-number carry with no cited basis, and (c) |carry - market-implied standalone EV| / shares exceeds the |implied FV - tape| gap the verdict rests on. Compute market-implied standalone EV = pre-deal mkt cap - cash + warrant/pref liabilities.", "evidence_here": "USAR red bench carried the magnet/Round Top/LCM/Carester/Lacq leg at $0.5B while the tape implies ~$3.3B ($4.48B cap - $1.53B cash + $0.364B warrant liab). Swing = $7.53/sh on an $18.29 stock; the kill rested on a $1.33/sh (-7%) gap. Verdict flips at any carry above ~$1.0B.", "applies_to_guess": {"issuer_features": ["transformational_acquisition", "pre_revenue_project_developer", "sotp_valuation", "management_projection_in_proxy"], "sic_prefixes": ["10", "13", "28", "36"]}}
+```
+
+**Primary citations:** [8-K 2026-08-24 Item 8.01 (PROXY-FETCHED)](https://r.jina.ai/https://www.sec.gov/Archives/edgar/data/1970622/000121390026092810/ea0302924-8k_usarare.htm) · [4/20/26 deal PR — 4,400 mt after-lanthanum-removal / $190/kg basis](https://www.nasdaq.com/press-release/usa-rare-earth-announces-definitive-agreement-acquire-serra-verde-group-28-billion) · [Serra Verde PR — 15-yr offtake, 100% Phase I, "share the benefits… above the agreed floor prices," Phase II doubling](https://svpm.com.br/en/serra-verde-agreedusarareearth/) · [live tape / cap structure](https://stockanalysis.com/stocks/usar/) · [investor deck (fetch timed out — UNVERIFIED)](https://investors.usare.com/static-files/51392825-c0d8-41cb-a604-0842d6a5dfa1)

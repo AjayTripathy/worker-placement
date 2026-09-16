@@ -1,0 +1,124 @@
+{
+  "ticker": "ASTS",
+  "cutoff": "2024-09-01",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "We have entered into an agreement with a prime contractor for the U.S. government to perform certain tasks.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook returned NOT_FOUND for contractor_name in {AST SpaceMobile, AST, AST Defense} (cutoff 2024-09-01)",
+        "usaspending.query_dod_contracts returned 0 awards for recipient_name in {AST SpaceMobile, AST & Science}",
+        "Company does not disclose the prime contractor name, the PE number, the program name, or the contract value"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": {"signal":"NOT_FOUND","n_matches":0,"queries_tried":["contractor_name=AST SpaceMobile","contractor_name=AST","contractor_name=AST Defense"]},
+      "interpretation": "Per J-Book heuristic #7: NOT_FOUND is UNVERIFIABLE, not a red flag — the corpus may not cover this specific prime/PE. However, the inability to verify is itself a discoverability signal: the company's intentional disclosure-vagueness (no PE, no program name, no prime name, no value) is structurally non-falsifiable. Without specificity the framework cannot distinguish a real DoD program from a low-value advisory engagement. Not the YSS/IONQ pattern (which requires a named, J-Book-listed PE going dark)."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "$900K of Q2 2024 revenue from performance obligations under an agreement with a prime contractor for a U.S. Government contract (100% of 2024 revenue).",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "Q2 2024 revenue = $900K total; 100% concentration on a single unnamed DoD-adjacent prime contract",
+        "usaspending shows 0 direct awards to AST SpaceMobile / AST & Science — consistent with sub-tier flow-through but unverifiable",
+        "pentagon_jbook NOT_FOUND on contractor and adjacent program names",
+        "Materiality test (J-Book heuristic #2): the dollar concentration is 100% of revenue but absolute scale is immaterial ($900K) relative to the company's $210.8M cash and $115M Block-1 capex"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding + usaspending.query_dod_contracts",
+      "M_value": {
+        "pentagon_jbook": {"signal":"NOT_FOUND","n_matches":0},
+        "usaspending_dod": {"n_awards": 0, "total_amount": 0.0}
+      },
+      "interpretation": "MODERATE rather than SEVERE because (a) the absolute dollar exposure is tiny ($900K), (b) ASTS narrative does not load on this revenue line (the company's thesis rests on the commercial MNO business with Vodafone/Rakuten/AT&T, not on DoD), and (c) we cannot J-Book-verify the underlying program. The 100%-of-revenue framing is technically true but cosmetically inflated — pre-revenue companies often describe immaterial first dollars as a milestone. Watch-item, not existential."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Intend to leverage patented technology for a variety of applications in the government sector.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "Forward-looking, no specific program named",
+        "pentagon_jbook NOT_FOUND for plausible adjacent programs (direct-to-cell, tactical SATCOM, SpaceMobile)",
+        "Narrative-load is low: the 10-K classifies government as one of multiple monetization paths, not the primary thesis"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": {"signal":"NOT_FOUND","n_matches":0},
+      "interpretation": "Aspirational/forward-pipeline language with no concrete PE attachment. Cannot be J-Book-verified by construction (heuristic #7). Score UNVERIFIABLE without escalation; would be RED_FLAG if the company were monetizing this narrative for a specific cap raise tied to government revenue, which is not the case here."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Successfully completed initial in-orbit and ground testing for non-communication government applications.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "No specific program/PE/customer named for 'non-communication government applications'",
+        "pentagon_jbook NOT_FOUND for adjacent ISR / SDA Tracking Layer programs",
+        "Plausibly genuine BW3 test-payload work, but not externally corroborable from the disclosure"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": {"signal":"NOT_FOUND","n_matches":0},
+      "interpretation": "Capability claim is plausible (BW3 has been on-orbit since Sept 2022) but unanchored to any J-Book line item. The phrase 'non-communication government applications' likely refers to ISR/EW signal-collection use of the phased array — a real DoD interest area but un-named here. UNVERIFIABLE under heuristic #7."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Expect to continue to recognize revenue under this [prime contractor] agreement throughout 2024.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "Forward-revenue expectation through 2024, but no contract value, no PE, no prime named",
+        "usaspending shows zero direct awards to AST entities (consistent with sub-tier role, but unverifiable forward look)",
+        "pentagon_jbook NOT_FOUND for adjacent programs"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding + usaspending.query_dod_contracts",
+      "M_value": {
+        "pentagon_jbook": {"signal":"NOT_FOUND","n_matches":0},
+        "usaspending_dod": {"n_awards": 0}
+      },
+      "interpretation": "Forward expectation tied to an unverifiable program. Moderate (not severe) because the dollar scale established so far ($900K Q2) is immaterial and the broader investment thesis does not depend on this revenue line. Materiality test downgrades severity per heuristic #2."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Partnerships with Vodafone, Rakuten, AT&T, Google, American Tower.",
+      "severity": "PASS",
+      "supports": [
+        "edgar_fts confirms AT&T disclosed 'AST SpaceMobile' in two 8-K exhibits (2023-07-26, 2023-10-19)",
+        "edgar_fts shows 297 total hits for 'AST SpaceMobile' across SEC corpus — consistent with mutual disclosure",
+        "Vodafone and AT&T have prepaid commercial commitments ($25M and $20M respectively) per the 10-K"
+      ],
+      "M_check": "edgar_fts.query_fulltext",
+      "M_value": {"total_hits":297,"att_mentions":2,"forms":["8-K"]},
+      "interpretation": "Counterparty disclosure check passes for AT&T at least. Partnerships are real and bilaterally referenced in SEC filings. Caveat: mutual mentions appear in 8-K exhibits/press-release stylized communications rather than 10-K risk factors, but this is normal for early-stage commercial MOUs."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Patent portfolio of 3,350 patent and patent-pending claims.",
+      "severity": "PASS",
+      "supports": [
+        "uspto_odp returned 112 total applications under assignee 'AST & Science, LLC' with 56 granted as of 2024-09-01",
+        "Filings cover satellite/phased-array/SATCOM technology consistent with disclosed business",
+        "Claim is counted by 'patent and patent pending claims' (a per-claim count is much higher than per-patent count — 56 patents x ~30 claims each ≈ 1,680 claims; 112 apps x ~30 claims ≈ 3,360 claims — order-of-magnitude consistent with the 3,350 figure)"
+      ],
+      "M_check": "uspto_odp.query_assignee",
+      "M_value": {"n_total_applications":112,"n_granted_pre_cutoff":56,"assignee":"AST & Science, LLC"},
+      "interpretation": "Patent portfolio is real and the claim count (3,350) is plausible if the company is counting individual claims across its 112 applications. Standard 'claims, not patents' framing — flagging this as the kind of count that retail readers misinterpret as 'granted patents', but technically supported."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "185,000 sq ft Texas assembly, integration and testing facility.",
+      "severity": "PASS",
+      "supports": [
+        "epa_frs returned facility 'AST SPACEMOBILE SITE 2', 13600 W INTERSTATE 20, ODESSA TX (county: Midland)",
+        "Registry ID 110071516306; lat/lon 31.887/-102.262 — Midland, TX as disclosed"
+      ],
+      "M_check": "epa_frs.query_facilities",
+      "M_value": {"n_facilities":1,"name":"AST SPACEMOBILE SITE 2","city":"ODESSA","state":"TX","county":"MIDLAND"},
+      "interpretation": "Facility presence in Texas is corroborated. EPA FRS confirms an AST-registered facility on I-20 in Odessa/Midland TX. Does not directly verify the 185,000 sq ft figure but presence claim passes."
+    }
+  ],
+  "_summary": {
+    "n_claims": 8,
+    "n_queries_executed": 17,
+    "severity_counts": {"PASS":3,"MODERATE_UNDERDELIVERY":2,"SEVERE_UNDERDELIVERY":0,"RED_FLAG_NEGATIVE":0,"UNVERIFIABLE":3},
+    "jbook_grounded_claims": ["C1","C2","C3","C4","C5"],
+    "jbook_hits_with_signal": 0,
+    "framework_diagnostic": "ASTS does NOT exhibit the YSS/IONQ J-Book divergence pattern. The company structures its DoD exposure as 'an agreement with a prime contractor for the U.S. government' without naming the program, the PE, the prime, or the contract value — making J-Book verification impossible by construction. The Pentagon J-Book corpus has no contractor match for AST. The disclosure-vagueness itself is a different pattern (non-falsifiable government-narrative scaffolding), but at the cutoff date this is immaterial ($900K Q2 revenue, no narrative-load on DoD) and not actionable. Two MODERATE flags reflect the materiality-vs-vagueness tension. The framework correctly returns UNVERIFIABLE rather than fabricating a J-Book hit."
+  }
+}

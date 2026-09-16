@@ -1,0 +1,221 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>kalshi_divergence_scanner</title><style>
+body{margin:0;background:#0b0e12;color:#e8ebee;font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:26px 24px 90px}
+a{color:#8b7cf6} h1{font-size:23px;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:#7d858e;margin:0 0 20px;font-size:13px}
+h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:#7d858e;margin:24px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 10px;border-bottom:1px solid #242a31;text-align:left;vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#7d858e}
+.k{font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:20px}
+.k-generator{color:#c3b8fb;background:rgba(139,124,246,.15)}
+.k-detector{color:#eccb8a;background:rgba(217,164,65,.15)}
+.k-watcher{color:#8ee5c1;background:rgba(53,201,143,.15)}
+.k-evidence{color:#b3bcc6;background:rgba(138,147,158,.15)}
+.h-OK{color:#35c98f} .h-STALE{color:#d9a441} .h-ERROR{color:#e0736a} .h-NEVER_RUN{color:#8a939e}
+pre{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px;overflow-x:auto;font-size:12px;line-height:1.5}
+.panel{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px 18px;margin-bottom:12px}
+ul{margin:4px 0;padding-left:20px} li{margin-bottom:4px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+</style></head><body><div class="wrap"><h1>kalshi_divergence_scanner</h1><p class="sub">registered capability · kalshi_divergence_scanner</p><a href="signals.html">&larr; all signals</a><div class="panel" style="margin-top:10px"><span class="k k-generator">GENERATOR</span> &nbsp;<span class="h-NEVER_RUN"><b>NEVER_RUN</b></span> · last run <span class="mono">never</span></div><p>Stage 0b INFO/FLOW: prediction-market vs equity-implied divergence.  [index-only: prediction-market divergences feed frozen CALLS, not a holdings strategy]</p><form method="POST" action="/signals/run" style="margin:10px 0"><input type="hidden" name="name" value="kalshi_divergence_scanner"><input name="symbol" placeholder="symbol (if applicable)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px"><input name="symbols" placeholder="universe, comma-sep (generators)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px;margin-left:6px"><button type="submit" style="background:#8b7cf6;color:#0b0e12;border:0;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;margin-left:6px">Run now</button></form><h2>Datasources</h2><ul><li>reference implementation: verticals/generators/kalshi_divergence_scanner.py (see the code section for the feeds it touches)</li></ul><h2>Applies to</h2><ul></ul><h2>The code</h2><pre>&quot;&quot;&quot;kalshi_divergence_scanner — Stage 0b INFO/FLOW: prediction-market vs equity-implied divergence.
+
+Kalshi prices dated, equity-linked events. Two kinds are tradeable divergences against the stock:
+
+  1. PRICE markets (index/stock level): &quot;Will the Nasdaq-100 be above K at EOD?&quot; — the crowd&#x27;s
+     P(S&gt;K) is DIRECTLY comparable to the equity-implied P(S&gt;K) (a lognormal from spot + realized
+     vol). edge = kalshi_P − model_P. A gap = the crowd leads/lags the tape (caveat: model uses
+     REALIZED vol, so a rich options IV vs HV explains part of any gap — the DD step).
+
+  2. KPI markets (company print): &quot;Will Chipotle report Above $4170M revenue?&quot; laddered across
+     strikes — a crowd-sourced probability DISTRIBUTION over the next print. The 50%-crossover strike
+     = the crowd-implied MEDIAN for the metric. This is a prediction-market NOWCAST of the print:
+     compare it to Street consensus / our own MFT nowcast. And for any OPEN earnings/monthly call we
+     already froze, the ladder is the EXACT market_p we&#x27;ve lacked (Brier-vs-market, not RELATED).
+
+v1 seeds the resolvable equity-linked series; EXPAND. Kalshi read API is keyless.
+    python3 verticals/generators/kalshi_divergence_scanner.py
+Writes data/KALSHI_DIVERGENCE.json. READ-ONLY. (A SIGNAL/nowcast generator — never an order.)
+&quot;&quot;&quot;
+from __future__ import annotations
+
+import datetime
+import json
+import math
+import urllib.request
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parents[0]
+OUT = HERE / &quot;data&quot; / &quot;KALSHI_DIVERGENCE.json&quot;
+CALIB = HERE.parents[1] / &quot;desk&quot; / &quot;data&quot; / &quot;calibration_ledger.jsonl&quot;
+B = &quot;https://api.elections.kalshi.com/trade-api/v2&quot;
+HDRS = {&quot;User-Agent&quot;: &quot;signalos-research 4tripathy@gmail.com&quot;}
+
+# resolvable equity-linked Kalshi series. type: price (lognormal edge) | kpi (print-nowcast) | event (surface)
+SERIES = {
+    &quot;KXNASDAQ100&quot;: {&quot;ticker&quot;: &quot;^NDX&quot;, &quot;yf&quot;: &quot;^NDX&quot;, &quot;type&quot;: &quot;price&quot;, &quot;label&quot;: &quot;Nasdaq-100 EOD level&quot;},
+    &quot;KXINXE&quot;:      {&quot;ticker&quot;: &quot;^GSPC&quot;, &quot;yf&quot;: &quot;^GSPC&quot;, &quot;type&quot;: &quot;price&quot;, &quot;label&quot;: &quot;S&amp;P 500 EOD level&quot;},
+    &quot;KXCMG&quot;:  {&quot;ticker&quot;: &quot;CMG&quot;, &quot;type&quot;: &quot;kpi&quot;, &quot;label&quot;: &quot;Chipotle print&quot;},
+    &quot;KXURBN&quot;: {&quot;ticker&quot;: &quot;URBN&quot;, &quot;type&quot;: &quot;kpi&quot;, &quot;label&quot;: &quot;Urban Outfitters print&quot;},
+    &quot;KXLULUA&quot;: {&quot;ticker&quot;: &quot;LULU&quot;, &quot;type&quot;: &quot;kpi&quot;, &quot;label&quot;: &quot;Lululemon print&quot;},
+    &quot;KXSCHW&quot;: {&quot;ticker&quot;: &quot;SCHW&quot;, &quot;type&quot;: &quot;kpi&quot;, &quot;label&quot;: &quot;Schwab print&quot;},
+    &quot;KXCCL&quot;:  {&quot;ticker&quot;: &quot;CCL&quot;, &quot;type&quot;: &quot;kpi&quot;, &quot;label&quot;: &quot;Carnival print&quot;},
+    &quot;KXAMZNA&quot;: {&quot;ticker&quot;: &quot;AMZN&quot;, &quot;type&quot;: &quot;kpi&quot;, &quot;label&quot;: &quot;Amazon print&quot;},
+    &quot;KXMOA&quot;:  {&quot;ticker&quot;: &quot;MO&quot;, &quot;type&quot;: &quot;kpi&quot;, &quot;label&quot;: &quot;Altria print&quot;},
+    &quot;KXCOINBASE&quot;: {&quot;ticker&quot;: &quot;COIN&quot;, &quot;type&quot;: &quot;kpi&quot;, &quot;label&quot;: &quot;Coinbase print&quot;},
+    &quot;KXFDAAPPROVALDATELLY&quot;: {&quot;ticker&quot;: &quot;LLY&quot;, &quot;type&quot;: &quot;event&quot;, &quot;label&quot;: &quot;Eli Lilly FDA approval date&quot;},
+}
+EDGE_FLOOR = 0.08          # |kalshi − model| &gt;= 8pp on a price market = a divergence worth flagging
+
+
+def _get(url):
+    try:
+        with urllib.request.urlopen(urllib.request.Request(url, headers=HDRS), timeout=25) as r:
+            return json.load(r)
+    except Exception:
+        return {}
+
+
+def _markets(series_ticker):
+    d = _get(f&quot;{B}/markets?series_ticker={series_ticker}&amp;status=open&amp;limit=200&quot;)
+    return d.get(&quot;markets&quot;, []) if isinstance(d, dict) else []
+
+
+def _hist_vol(yf_ticker):
+    &quot;&quot;&quot;Annualized realized vol from ~60 trading days (the equity-implied-P input).&quot;&quot;&quot;
+    import yfinance as yf
+    try:
+        px = yf.download(yf_ticker, period=&quot;3mo&quot;, progress=False, auto_adjust=True)[&quot;Close&quot;].dropna()
+        if len(px) &lt; 20:
+            return None, None
+        rets = (px / px.shift(1)).apply(lambda x: math.log(x) if x and x &gt; 0 else 0).dropna()
+        import statistics
+        sd = statistics.pstdev(list(rets)[-60:])
+        return float(px.iloc[-1]), float(sd * math.sqrt(252))
+    except Exception:
+        return None, None
+
+
+def _p_above(spot, strike, vol_ann, days):
+    if not (spot and strike and vol_ann and days and days &gt; 0 and spot &gt; 0 and strike &gt; 0):
+        return None
+    T = days / 365.0
+    d2 = (math.log(spot / strike) - 0.5 * vol_ann ** 2 * T) / (vol_ann * math.sqrt(T))
+    return 0.5 * (1 + math.erf(d2 / math.sqrt(2)))
+
+
+def _open_calls():
+    calls = {}
+    if CALIB.exists():
+        for l in CALIB.read_text().splitlines():
+            l = l.strip()
+            if not l:
+                continue
+            try:
+                r = json.loads(l)
+            except Exception:
+                continue
+            if (r.get(&quot;status&quot;) or &quot;&quot;).upper() == &quot;OPEN&quot;:
+                calls.setdefault(r.get(&quot;ticker&quot;), []).append(r.get(&quot;cat_date&quot;))
+    return calls
+
+
+def scan() -&gt; dict:
+    today = datetime.date.today()
+    open_calls = _open_calls()
+    price_div, kpi_now, events, empty = [], [], [], []
+    for st, cfg in SERIES.items():
+        ms = _markets(st)
+        if not ms:
+            empty.append(st)
+            continue
+        tk = cfg[&quot;ticker&quot;]
+        if cfg[&quot;type&quot;] == &quot;price&quot;:
+            spot, vol = _hist_vol(cfg[&quot;yf&quot;])
+            for m in ms:
+                k = m.get(&quot;floor_strike&quot;)
+                yes = m.get(&quot;last_price_dollars&quot;)
+                close = (m.get(&quot;close_time&quot;) or &quot;&quot;)[:10]
+                if k is None or yes in (None, 0, 0.0):    # skip un-priced / non-floor legs
+                    continue
+                try:
+                    days = (datetime.date.fromisoformat(close) - today).days
+                except Exception:
+                    continue
+                mp = _p_above(spot, float(k), vol, days)
+                if mp is None:
+                    continue
+                edge = float(yes) - mp
+                if abs(edge) &gt;= EDGE_FLOOR:
+                    price_div.append({&quot;series&quot;: st, &quot;ticker&quot;: tk, &quot;label&quot;: cfg[&quot;label&quot;],
+                                      &quot;strike&quot;: float(k), &quot;close&quot;: close, &quot;days&quot;: days,
+                                      &quot;kalshi_p&quot;: round(float(yes), 3), &quot;model_p&quot;: round(mp, 3),
+                                      &quot;edge_pp&quot;: round(edge * 100, 1),
+                                      &quot;read&quot;: &quot;crowd HIGHER than vol-model&quot; if edge &gt; 0 else &quot;crowd LOWER than vol-model&quot;})
+        elif cfg[&quot;type&quot;] == &quot;kpi&quot;:
+            # a company series carries SEPARATE metric ladders (revenue / comps / EPS). Group by the
+            # metric (the title text after the strike number) so each gets its own crowd-implied median.
+            import re
+            by_metric = {}
+            for m in ms:
+                k, yes, title = m.get(&quot;floor_strike&quot;), m.get(&quot;last_price_dollars&quot;), (m.get(&quot;title&quot;) or &quot;&quot;)
+                if k is None or yes is None:
+                    continue
+                mm = re.search(r&quot;[Aa]bove\s+[-\d.,%]+\s*(.+)$&quot;, title)      # metric = phrase after &quot;Above &lt;num&gt;&quot;
+                metric = (mm.group(1).strip() if mm else &quot;level&quot;)[:32].rstrip(&quot;.&quot;) or &quot;level&quot;
+                by_metric.setdefault(metric, []).append((float(k), float(yes)))
+            close = (ms[0].get(&quot;close_time&quot;) or &quot;&quot;)[:10]
+            metrics = []
+            for metric, ladder in by_metric.items():
+                ladder.sort(key=lambda x: x[0])
+                if len(ladder) &lt; 2:
+                    continue
+                median = None
+                for i in range(len(ladder) - 1):     # YES falls as strike rises -&gt; find the 0.50 crossing
+                    (k1, p1), (k2, p2) = ladder[i], ladder[i + 1]
+                    if (p1 - 0.5) * (p2 - 0.5) &lt;= 0 and p1 != p2:
+                        median = k1 + (k2 - k1) * (p1 - 0.5) / (p1 - p2)
+                        break
+                metrics.append({&quot;metric&quot;: metric, &quot;n_strikes&quot;: len(ladder),
+                                &quot;crowd_implied_median&quot;: round(median, 2) if median is not None else None})
+            metrics.sort(key=lambda x: -x[&quot;n_strikes&quot;])
+            kpi_now.append({&quot;series&quot;: st, &quot;ticker&quot;: tk, &quot;label&quot;: cfg[&quot;label&quot;], &quot;close&quot;: close,
+                            &quot;metrics&quot;: metrics, &quot;feeds_market_p&quot;: open_calls.get(tk) if tk in open_calls else None})
+        else:
+            top = sorted(ms, key=lambda m: -(m.get(&quot;last_price_dollars&quot;) or 0))[:3]
+            events.append({&quot;series&quot;: st, &quot;ticker&quot;: tk, &quot;label&quot;: cfg[&quot;label&quot;],
+                           &quot;top&quot;: [{&quot;title&quot;: (m.get(&quot;title&quot;) or &quot;&quot;)[:60], &quot;yes&quot;: m.get(&quot;last_price_dollars&quot;),
+                                    &quot;close&quot;: (m.get(&quot;close_time&quot;) or &quot;&quot;)[:10]} for m in top]})
+    price_div.sort(key=lambda r: -abs(r[&quot;edge_pp&quot;]))
+    return {&quot;asof&quot;: today.isoformat(), &quot;series_scanned&quot;: len(SERIES), &quot;empty&quot;: empty,
+            &quot;price_divergences&quot;: price_div, &quot;kpi_nowcasts&quot;: kpi_now, &quot;event_markets&quot;: events,
+            &quot;note&quot;: &quot;PRICE divergences: kalshi P(S&gt;K) vs a REALIZED-vol lognormal model — a gap is a lead/lag OR the &quot;
+                    &quot;options vol-risk-premium (IV&gt;HV); DD decomposes. KPI nowcasts: the crowd-implied print distribution &quot;
+                    &quot;(50%-crossover = implied median) — compare to consensus/our MFT nowcast; feeds_market_p flags the &quot;
+                    &quot;EXACT crowd read for an OPEN call we froze (the Brier-vs-market input we&#x27;ve lacked). Seed series — EXPAND.&quot;}
+
+
+def main():
+    res = scan()
+    print(f&quot;=== KALSHI DIVERGENCE  {res[&#x27;asof&#x27;]}  ({res[&#x27;series_scanned&#x27;]} series, &quot;
+          f&quot;{len(res[&#x27;price_divergences&#x27;])} price-div, {len(res[&#x27;kpi_nowcasts&#x27;])} KPI-nowcasts) ===&quot;)
+    if res[&quot;price_divergences&quot;]:
+        print(&quot;  PRICE DIVERGENCES (crowd vs vol-model P(S&gt;K)):&quot;)
+        for r in res[&quot;price_divergences&quot;][:8]:
+            print(f&quot;    {r[&#x27;ticker&#x27;]:6} &gt;{r[&#x27;strike&#x27;]:.0f} by {r[&#x27;close&#x27;]} ({r[&#x27;days&#x27;]}d): kalshi {r[&#x27;kalshi_p&#x27;]:.2f} vs model {r[&#x27;model_p&#x27;]:.2f}  edge {r[&#x27;edge_pp&#x27;]:+.0f}pp  {r[&#x27;read&#x27;]}&quot;)
+    if res[&quot;kpi_nowcasts&quot;]:
+        print(&quot;  KPI PRINT-NOWCASTS (crowd-implied median per metric, native Kalshi units):&quot;)
+        for r in res[&quot;kpi_nowcasts&quot;]:
+            fm = f&quot;  ⚡feeds market_p for {r[&#x27;feeds_market_p&#x27;]}&quot; if r[&quot;feeds_market_p&quot;] else &quot;&quot;
+            print(f&quot;    {r[&#x27;ticker&#x27;]:6} print {r[&#x27;close&#x27;]}{fm}&quot;)
+            for mt in r[&quot;metrics&quot;][:4]:
+                med = f&quot;~{mt[&#x27;crowd_implied_median&#x27;]}&quot; if mt[&quot;crowd_implied_median&quot;] is not None else &quot;n/a (no 0.5 crossing)&quot;
+                print(f&quot;        {mt[&#x27;metric&#x27;][:34]:34} median {med}  ({mt[&#x27;n_strikes&#x27;]} strikes)&quot;)
+    if res[&quot;empty&quot;]:
+        print(f&quot;  (no open markets: {res[&#x27;empty&#x27;]})&quot;)
+    OUT.write_text(json.dumps(res, indent=1))
+    print(f&quot;[-&gt; {OUT.name}]&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</pre></div></body></html>

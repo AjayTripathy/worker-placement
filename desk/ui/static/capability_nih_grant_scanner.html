@@ -1,0 +1,92 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>nih_grant_scanner</title><style>
+body{margin:0;background:#0b0e12;color:#e8ebee;font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:26px 24px 90px}
+a{color:#8b7cf6} h1{font-size:23px;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:#7d858e;margin:0 0 20px;font-size:13px}
+h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:#7d858e;margin:24px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 10px;border-bottom:1px solid #242a31;text-align:left;vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#7d858e}
+.k{font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:20px}
+.k-generator{color:#c3b8fb;background:rgba(139,124,246,.15)}
+.k-detector{color:#eccb8a;background:rgba(217,164,65,.15)}
+.k-watcher{color:#8ee5c1;background:rgba(53,201,143,.15)}
+.k-evidence{color:#b3bcc6;background:rgba(138,147,158,.15)}
+.h-OK{color:#35c98f} .h-STALE{color:#d9a441} .h-ERROR{color:#e0736a} .h-NEVER_RUN{color:#8a939e}
+pre{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px;overflow-x:auto;font-size:12px;line-height:1.5}
+.panel{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px 18px;margin-bottom:12px}
+ul{margin:4px 0;padding-left:20px} li{margin-bottom:4px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+</style></head><body><div class="wrap"><h1>nih_grant_scanner</h1><p class="sub">registered capability · nih_grant_scanner</p><a href="signals.html">&larr; all signals</a><div class="panel" style="margin-top:10px"><span class="k k-generator">GENERATOR</span> &nbsp;<span class="h-NEVER_RUN"><b>NEVER_RUN</b></span> · last run <span class="mono">never</span></div><p>Stage 0b generator: NIH SBIR/STTR grant flow to COMPANIES (RePORTER).</p><form method="POST" action="/signals/run" style="margin:10px 0"><input type="hidden" name="name" value="nih_grant_scanner"><input name="symbol" placeholder="symbol (if applicable)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px"><input name="symbols" placeholder="universe, comma-sep (generators)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px;margin-left:6px"><button type="submit" style="background:#8b7cf6;color:#0b0e12;border:0;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;margin-left:6px">Run now</button></form><h2>Datasources</h2><ul><li>reference implementation: verticals/generators/nih_grant_scanner.py (see the code section for the feeds it touches)</li></ul><h2>Applies to</h2><ul><li><b>strategies:</b> quality_value</li></ul><h2>The code</h2><pre>&quot;&quot;&quot;nih_grant_scanner — Stage 0b generator: NIH SBIR/STTR grant flow to COMPANIES (RePORTER).
+
+Non-dilutive funding to small biotechs = runway + scientific validation, disclosed months before any filing
+mentions it. Scan SBIR/STTR awards (activity codes R43/R44/U43/U44/R41/R42) by organization, trailing fiscal
+year vs prior, rank the movers. Org-&gt;ticker = SignalOS step (most are private — the PUBLIC ones are the seeds;
+private clusters = watchlist for IPOs, the beauty-radar pattern).
+
+  python3 verticals/generators/nih_grant_scanner.py
+Writes data/NIH_GRANT_FLOW.json. Free API. READ-ONLY.
+&quot;&quot;&quot;
+from __future__ import annotations
+import json, datetime, urllib.request
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+OUT = HERE / &quot;data&quot; / &quot;NIH_GRANT_FLOW.json&quot;
+API = &quot;https://api.reporter.nih.gov/v2/projects/search&quot;
+CODES = [&quot;R43&quot;, &quot;R44&quot;, &quot;U43&quot;, &quot;U44&quot;, &quot;R41&quot;, &quot;R42&quot;]
+
+
+def _year(fy: int) -&gt; dict:
+    &quot;&quot;&quot;{org: total_$} for SBIR/STTR awards in fiscal year fy.&quot;&quot;&quot;
+    out, offset = {}, 0
+    while offset &lt; 14500:
+        body = {&quot;criteria&quot;: {&quot;fiscal_years&quot;: [fy], &quot;activity_codes&quot;: CODES},
+                &quot;include_fields&quot;: [&quot;Organization&quot;, &quot;AwardAmount&quot;], &quot;limit&quot;: 500, &quot;offset&quot;: offset}
+        req = urllib.request.Request(API, data=json.dumps(body).encode(),
+                                     headers={&quot;Content-Type&quot;: &quot;application/json&quot;,
+                                              &quot;User-Agent&quot;: &quot;signalos-research 4tripathy@gmail.com&quot;})
+        try:
+            with urllib.request.urlopen(req, timeout=60) as r:
+                d = json.load(r)
+        except Exception:
+            break
+        res = d.get(&quot;results&quot;, [])
+        for p in res:
+            org = ((p.get(&quot;organization&quot;) or {}).get(&quot;org_name&quot;) or &quot;&quot;).upper()[:60]
+            if org:
+                out[org] = out.get(org, 0) + (p.get(&quot;award_amount&quot;) or 0)
+        if len(res) &lt; 500:
+            break
+        offset += 500
+    return out
+
+
+def scan() -&gt; dict:
+    fy = datetime.date.today().year          # federal FY (Oct-Sep); current-year partial vs full prior is noted
+    cur, prv = _year(fy), _year(fy - 1)
+    rows = []
+    for org, v in cur.items():
+        if v &lt; 1e6:
+            continue
+        rows.append({&quot;org&quot;: org.title(), &quot;cur_usd_m&quot;: round(v / 1e6, 1),
+                     &quot;prior_usd_m&quot;: round(prv.get(org, 0) / 1e6, 1)})
+    rows.sort(key=lambda r: -(r[&quot;cur_usd_m&quot;] - r[&quot;prior_usd_m&quot;]))
+    return {&quot;asof&quot;: datetime.date.today().isoformat(), &quot;fy&quot;: fy,
+            &quot;note&quot;: f&quot;FY{fy} is PARTIAL (Oct-{datetime.date.today():%b}) vs full FY{fy-1} — deltas understate; org-&gt;ticker = SignalOS; private clusters = IPO watchlist&quot;,
+            &quot;n_orgs&quot;: len(rows), &quot;movers&quot;: rows[:20]}
+
+
+def main():
+    res = scan()
+    print(f&quot;=== NIH SBIR/STTR GRANT-FLOW SCANNER  {res[&#x27;asof&#x27;]}  (FY{res[&#x27;fy&#x27;]} partial, {res[&#x27;n_orgs&#x27;]} orgs &gt;= $1M) ===&quot;)
+    for r in res[&quot;movers&quot;][:14]:
+        print(f&quot;   {r[&#x27;org&#x27;]:&lt;56} ${r[&#x27;cur_usd_m&#x27;]:&gt;6}M  (prior ${r[&#x27;prior_usd_m&#x27;]}M)&quot;)
+    print(f&quot;  {res[&#x27;note&#x27;]}&quot;)
+    OUT.write_text(json.dumps(res, indent=1))
+    print(f&quot;[-&gt; {OUT.name}]&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</pre></div></body></html>

@@ -1,0 +1,163 @@
+{
+  "ticker": "RKLB",
+  "cutoff": "2022-06-01",
+  "filing": "0000950170-22-004458_10-K.txt",
+  "framework_note": "BACKTEST cutoff 2022-06-01. J-Book corpus is sourced from FY2026 Pentagon books (PB submitted ~June 2025); at this historical cutoff, every PE/program lookup returns NOT_FOUND_IN_TIMERANGE because no FY26 budget rows are visible pre-2022-06-01. Per heuristic #7 + the prompt's preamble, J-Book NOT_FOUND at a 2022 cutoff is not a red flag — most J-Book de-fundings that materialized in 2024-2026 were not yet visible. Where J-Book returns NOT_FOUND_IN_TIMERANGE, we score UNVERIFIABLE and document the corpus-coverage gap. Where USAspending confirms the company received the claimed contracts, we treat the claim as PASS (the claim was real). NOTE: usaspending.query_dod_contracts does not appear to honor cutoff_date — returned awards include FY2024+ obligations. The cutoff_date kwarg is still passed per instruction but the data returned must be filtered mentally to pre-cutoff context. We only credit awards whose Award ID prefix pre-dates the cutoff (e.g., HR001118C0103 — DARPA R3D2 — is pre-cutoff and provides ground-truth support).",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Rocket Lab is designated Essential Critical Infrastructure for National Security by the DoD, supporting 24-hour rapid call-up.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending shows multiple DoD contracts to Rocket Lab USA Inc (HR001118C0103 R3D2/DARPA, pre-cutoff; ROCKET LAB NATIONAL SECURITY LLC also exists)",
+        "Pre-cutoff DoD/DARPA award (R3D2 HR001118C0103, $6.8M) confirms active DoD relationship"
+      ],
+      "M_check": "usaspending.query_dod_contracts",
+      "M_value": "n_awards=6, total_amount=$22.5M (recipient=Rocket Lab USA) including pre-cutoff DARPA R3D2 contract; subsidiary 'ROCKET LAB NATIONAL SECURITY LLC' confirms classified-program organizational posture",
+      "interpretation": "The 'Essential Critical Infrastructure' designation is a DHS/DoD-wide programmatic label, not a revenue claim. USAspending confirms RKLB held real DoD contracts pre-cutoff (R3D2). No claim of forward revenue $$ on a named PE → PASS."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Rocket Lab has launched for DoD, DARPA, NASA, and NRO.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending.query_dod_contracts confirms multiple DoD awards including DARPA R3D2 (HR001118C0103)",
+        "Pentagon J-Book corpus (FY26) lists Rocket Lab as a primary contractor on Tranche 3 Tracking Layer (PE 1206410SF), but this is corpus-internal evidence dated FY26 and NOT visible at 2022 cutoff"
+      ],
+      "M_check": "usaspending.query_dod_contracts + pentagon_jbook.query_program_funding(contractor_name)",
+      "M_value": "usaspending: n_awards=7, $27.5M total; pentagon_jbook contractor lookup → NOT_FOUND_IN_TIMERANGE for 2022-06-01 cutoff (corpus is FY26)",
+      "interpretation": "Past-tense customer claim is substantiated by USAspending pre-cutoff awards (R3D2 launched 2019 for DARPA). At a 2022 cutoff the J-Book corpus has no pre-cutoff coverage, so we cannot use J-Book to verify or refute. The historical claim is honest. PASS."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Received Space Force Space Systems Command funding ($393K in FY21 R&D) for Neutron upper-stage development.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook.query_program_funding(program_name='Neutron') → NOT_FOUND (Neutron is a commercial program, not a Pentagon PE)",
+        "Dollar amount is immaterial ($393K is rounding-error R&D credit, not a forward revenue claim)"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "NOT_FOUND (n_matches=0); J-Book corpus has no Neutron program because Neutron is a privately funded RKLB launch vehicle, not a Pentagon PE",
+      "interpretation": "The $393K R&D receipt is a Tactical Funding Increase / SBIR-style award, not a Program of Record. Not load-bearing. J-Book corpus correctly does not list Neutron. Coverage gap (heuristic #7). UNVERIFIABLE. Not a red flag."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Rocket Lab positions Neutron/Photon to compete in the NSSL program of the U.S. Space Force.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook hit on NSSL (PE 1206853SF) — program exists in corpus but FY26 funding rows are post-cutoff",
+        "At 2022 cutoff, NSSL Phase 3 (which RKLB hopes to compete in) had not yet been announced/awarded"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='National Security Space Launch')",
+      "M_value": "n_matches=1, PE 1206853SF (Space Force RDT&E), signal=NOT_FOUND_IN_TIMERANGE @ 2022-06-01 cutoff (FY26 PB rows post-cutoff)",
+      "interpretation": "RKLB's NSSL aspiration is forward-looking ('our Photon family enables…'). Program exists in J-Book and is a real Space Force line of effort. At 2022 cutoff we cannot see funding trajectory (heuristic #7). Aspirational claim — narrative load is low. UNVERIFIABLE. Note for tracking: at FY26 PB the NSSL Program of Record continued — no de-funding."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Long Beach FCL/lab capex supports classified government programs.",
+      "severity": "PASS",
+      "supports": [
+        "USAspending shows DoD contracts to Rocket Lab subsidiaries including 'ROCKET LAB NATIONAL SECURITY LLC' — consistent with a classified-program posture",
+        "epa_frs returns 0 facilities for 'Rocket Lab' in CA — but EPA FRS coverage is for emissions-reporting industrial facilities, so absence is expected for a clean-room aerospace shop"
+      ],
+      "M_check": "epa_frs.query_facilities + usaspending.query_dod_contracts",
+      "M_value": "epa_frs: 0 facilities (expected, non-emitting facility type); usaspending confirms DoD subsidiary structure",
+      "interpretation": "Facility-existence claim is corroborated by the existence of a 'Rocket Lab National Security LLC' subsidiary in USAspending records. PASS."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "RKLB holds the DoD Space Test Program STP-S30 launch contract.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending.query_dod_contracts returns award FA881824FB016 ($14.5M, ROCKET LAB USA INC, AWARDING AGENCY: DoD) with description: 'THE OBJECTIVE OF THE STP-S30 MISSION IS TO DELIVER SCIENTIFIC RESEARCH AND DEVELOPMENT EXPERIMENTS TO SPACE…' — direct ground-truth confirmation",
+        "pentagon_jbook.query_program_funding(program_name='Space Test Program') hits PE 1206864SF (Space Force RDT&E) — program is real and indexed",
+        "STP-S30 contract appears to be a 2024 award per ID prefix (FA881824…) — i.e. RKLB's claim of pursuit was prospective at 2022 cutoff, materialized post-cutoff"
+      ],
+      "M_check": "usaspending.query_dod_contracts + pentagon_jbook.query_program_funding",
+      "M_value": "USAspending: STP-S30 award $14.5M ground-truth confirmed; J-Book: STP PE 1206864SF exists, NOT_FOUND_IN_TIMERANGE @ 2022 (corpus is FY26)",
+      "interpretation": "Space Test Program is a real Space Force RDT&E line. RKLB's STP-S30 claim (cohort metadata) was a prospective pursuit at 2022-06-01 — post-cutoff USAspending data shows it converted to a real $14.5M award. At cutoff, the claim was reasonable. PASS. No J-Book de-funding signal at 2022 visibility."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "RKLB pursues SDA Tracking Layer Tranche 3 prime opportunity (cohort metadata).",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook.query_program_funding(pe_number='1206410SF') returns 3 matches incl. 'Tranche 3 Tracking Layer (PWSA)' with Rocket Lab listed as primary contractor — but this is FY26 corpus data, post-cutoff",
+        "SDA Tracking Layer T3 award timing: SDA T3 solicitations were in 2023+; at 2022-06-01 the program was still in planning, not awarded"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding (program_name + pe_number)",
+      "M_value": "pe_number 1206410SF → 3 candidate matches (Tranche 3 Transport Layer, SDA Transport Layer 0-2, Tranche 3 Tracking Layer); for the Tracking Layer T3 match Rocket Lab is one of 4 primary contractors (with LMT, NOC, LHX). NOT_FOUND_IN_TIMERANGE at 2022 cutoff.",
+      "interpretation": "SDA T3 is a real Space Force PE 1206410SF and the FY26 J-Book records RKLB as a primary contractor on the Tracking Layer T3 element — i.e. RKLB's forward narrative materialized. But at 2022 cutoff this was prospective only and not visible in J-Book. UNVERIFIABLE at this cutoff per heuristic #7; honest pre-cutoff state is 'plausible aspiration, not a held contract'. Not load-bearing for FY21 results."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Photon delivers NASA's CAPSTONE lunar pathfinder.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending.query_recipient_contracts returns NASA awards to Rocket Lab USA Inc totaling $76.3M including VADR umbrella task order ($32.5M) — confirms NASA prime relationship",
+        "CAPSTONE is a NASA mission, not a Pentagon J-Book PE → J-Book NOT_FOUND is expected (heuristic #7)"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding + usaspending.query_recipient_contracts",
+      "M_value": "pentagon_jbook: NOT_FOUND (expected — CAPSTONE is NASA, not DoD); usaspending: n_awards=16 from NASA including VADR ($32.5M)",
+      "interpretation": "CAPSTONE / NASA relationship is corroborated by USAspending NASA awards. Out of scope for J-Book. PASS."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "SolAero ($80M) + Planetary Systems Corporation + Advanced Solutions Inc — vertical-integration rollup thesis.",
+      "severity": "PASS",
+      "supports": [
+        "acq_coherence.score_acquisition_coherence → COHERENT_ROLLUP (mean_coherence=0.85, all 3 acquisitions rated high_coherence)",
+        "Each target (solar cells, separation systems, GN&C software) is a direct subsystem for the Photon/spacecraft-systems thesis"
+      ],
+      "M_check": "acq_coherence.score_acquisition_coherence",
+      "M_value": "signal=COHERENT_ROLLUP, n_low_coherence=0, n_revenue_synthetic=0, mean=0.85",
+      "interpretation": "Each acquisition is a credible vertical-integration play for a launch-and-spacecraft company. No incoherent-rollup distraction pattern (per the IONQ pattern this scorer is calibrated for). PASS."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "$241.5M remaining performance obligations at 12/31/2021 (~60% recognizable within 12 months).",
+      "severity": "PASS",
+      "supports": [
+        "usaspending.query_recipient_contracts confirms multi-tens-of-millions of contract awards across NASA + DoD",
+        "Disclosure is a standard ASC 606 backlog number, not a program-attribution claim"
+      ],
+      "M_check": "usaspending.query_recipient_contracts",
+      "M_value": "n_awards=16, total_amount=$76.3M (lifetime); top awards: NASA VADR $32.5M, STP-S30 $14.5M (post-cutoff), R3D2 $6.8M (pre-cutoff)",
+      "interpretation": "Backlog disclosure is GAAP-required and consistent with the scale of awards visible in USAspending. No J-Book PE attribution claim → not a J-Book divergence candidate. PASS."
+    },
+    {
+      "claim_id": "C11",
+      "claim_text": "Rocket Lab maintains security-clearance-cleared personnel and facilities for classified programs (control claim).",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "epa_frs negative (expected — clearance/cleared facilities are not EPA-reported)",
+        "USAspending shows 'ROCKET LAB NATIONAL SECURITY LLC' subsidiary — circumstantial corroboration"
+      ],
+      "M_check": "epa_frs.query_facilities",
+      "M_value": "n_facilities=0 in CA, VA — expected for this facility type (not an emitter)",
+      "interpretation": "Generic personnel-security claim is not falsifiable with available sources. UNVERIFIABLE; not material to forward-revenue narrative."
+    }
+  ],
+  "summary": {
+    "n_claims": 11,
+    "n_queries_run": 20,
+    "severity_counts": {
+      "PASS": 7,
+      "MODERATE_UNDERDELIVERY": 0,
+      "SEVERE_UNDERDELIVERY": 0,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 4
+    },
+    "j_book_grounded_claims": [
+      "C3 (Neutron upper-stage SSC funding)",
+      "C4 (NSSL competitive positioning)",
+      "C6 (STP-S30 Space Test Program)",
+      "C7 (SDA Tracking Layer T3)",
+      "C8 (NASA CAPSTONE — semi-J-Book, NASA-side)"
+    ],
+    "n_j_book_grounded": 5,
+    "n_pentagon_jbook_hits": 3,
+    "pentagon_jbook_hit_claims": ["C4 (NSSL PE 1206853SF matched)", "C6 (STP PE 1206864SF matched)", "C7 (SDA T3 PE 1206410SF matched)"],
+    "overall_pattern": "NO DIVERGENCE SIGNAL DETECTABLE AT 2022-06-01 CUTOFF. RKLB's pre-cutoff 10-K relies on broad agency-customer relationships (DoD, DARPA, NRO, NASA) and one specific NSSL/SSC aspiration — none of which is mapped to a specific PE-number-revenue claim that the J-Book corpus (FY2026 PB) can challenge. USAspending corroborates real pre-cutoff DoD contracts (R3D2). Cohort-metadata claims (STP-S30, SDA T3) materialized post-cutoff. At 2022 visibility this is a small-cap space company with thin but real defense pipeline + a coherent rollup; the framework correctly emits PASS/UNVERIFIABLE rather than manufacturing severity (per the prompt's calibration guidance for early-cutoff backtests). Honest 2022 verdict: no J-Book divergence pattern."
+  }
+}

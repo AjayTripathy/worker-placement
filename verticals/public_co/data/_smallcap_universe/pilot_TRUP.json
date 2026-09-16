@@ -1,0 +1,84 @@
+{
+  "ticker": "TRUP",
+  "company": "Trupanion, Inc.",
+  "cutoff": "2026-05-20",
+  "filing": "0001371285-26-000018_10-K.txt",
+  "filing_date": "2026-02-13",
+  "rfm_tuples": [
+    {
+      "claim_id": "C1",
+      "R": "'We believe our operating cash flow is sufficient to fund our operations and capital requirements for the next 12 months.' Backed by '$370.7 million in cash, cash equivalents and short-term investments, of which $320.7 million was held by our insurance entities. Outside of insurance entities, we held $50.0 million in cash, cash equivalents and short-term investments with an additional $5.0 million available under our PNC Facility.' Operating cash flow $89.5M FY25 vs $48.3M FY24.",
+      "f": "If the 12-month liquidity narrative is genuine, the going-concern detector should be NEGATIVE and the auditor relationship should be stable (no Item 4.01 8-K).",
+      "M_source": "going_concern_detector.query_going_concern + auditor_change_tracker.query_auditor_changes",
+      "M_value": "going_concern: 0 matches in 10-K, signal=NO_GOING_CONCERN. auditor: 0 Item 4.01 8-Ks in 5-year lookback (2021-05-21 to 2026-05-20), signal=CLEAN_AUDITOR_TENURE.",
+      "severity": "PASS",
+      "interpretation": "Liquidity narrative verified. No going-concern language and a clean 5-year auditor tenure. The headline $370.7M cash position is large but a CRITICAL caveat the 10-K accurately discloses (this is not obscured): $320.7M of the $370.7M is trapped in insurance entities (APIC/ZPIC/GPIC) and cannot be used for parent operating expenses without regulatory approval. Holding-company-level liquidity is only $50.0M cash + $5.0M revolver = $55.0M, which is materially tighter than the headline suggests. But the company discloses this honestly in the same paragraph, so no obscuring penalty."
+    },
+    {
+      "claim_id": "C2",
+      "R": "PNC Facility entered November 4, 2025: $120M total ($100M term loan funded at closing + $20M revolver with $15M drawn). Used to repay $116.2M Prior Credit Facility (Piper Sandler) in full. Quarterly $2.5M principal amortization; SOFR + 2.75% (~6.42% at year-end). The Company also recognized a $1.6M loss on extinguishment of the Prior Credit Facility (unamortized debt-issuance cost write-off).",
+      "f": "If a $120M credit-facility refinancing actually closed in November 2025, it should be contemporaneously disclosed via 8-K Item 1.01 / 2.03 around November 4-6, 2025 referencing PNC Bank as counterparty.",
+      "M_source": "edgar_fts.query_fulltext (search_term='PNC Bank', cik=0001371285, forms=8-K, 2025-10-01 to 2026-05-20) + sec_filings.list_filings_by_form",
+      "M_value": "2 hits on 'PNC Bank' in 8-K filings, both in accession 0001371285-25-000247 filed 2025-11-06 (event date 2025-11-04). sec_filings cross-check: 10 8-K filings in 2025-01-01 to 2026-05-20 window, including the 2025-11-06 8-K matching the PNC closing date. Body and Q3 earnings exhibit both confirm PNC counterparty.",
+      "severity": "PASS",
+      "interpretation": "Refinancing event verified end-to-end. 8-K timing (Nov 6 filing for Nov 4 closing) matches the 10-K narrative exactly, including the disclosed counterparty name. No discrepancy in facility size, structure, or timing between the 10-K and the contemporaneous 8-K. The $1.6M extinguishment loss is honestly disclosed as a current-year interest-expense charge."
+    },
+    {
+      "claim_id": "C3",
+      "R": "'Pets Best (a third-party insurance provider we have worked with since 2015) ... We expect that enrollment from Pets Best will continue to decline as it engages other third-party underwriters.' This is a deteriorating-counterparty disclosure that, if material, should reappear in subsequent quarterly filings as a quantified runoff.",
+      "f": "If the Pets Best runoff is being managed honestly (not quietly disappeared in later filings), claim_evolution should show REAFFIRMED status in 10-Q filings post-cutoff.",
+      "M_source": "claim_evolution.query_claim_evolution (cik=0001371285, search_term='Pets Best', base_filing_date=2026-02-13, cutoff=2026-05-20)",
+      "M_value": "1 subsequent mention in Q1 2026 10-Q (filed 2026-04-30). Classification AFFIRMED. evolution_status=REAFFIRMED_IN_STRUCTURED_DISCLOSURE. LLM reasoning: snippet confirms long-standing contractual relationship since 2015, notes enrollment expected to decline as Pets Best engages other underwriters \u2014 language indicating the relationship continues but is expected to diminish, not terminated.",
+      "severity": "PASS",
+      "interpretation": "Pets Best runoff disclosure is reaffirmed in the next 10-Q with consistent framing \u2014 no silent disappearance. The 10-K is forthright that the largest revenue stream in the Other Business segment is shrinking. This is honest disclosure of bad news (declining counterparty), so under HONESTY-ALPHA framework it scores PASS \u2014 the question is whether the disclosure is consistent, and it is."
+    },
+    {
+      "claim_id": "C4",
+      "R": "Goodwill impairment charges: '$1.1 million and $5.3 million during the years ended December 31, 2025 and 2024, respectively, and no goodwill impairment charges during the year ended December 31, 2023.' Recurring (2 consecutive years) goodwill impairments \u2014 typically a signal of declining acquired-business fair value.",
+      "f": "If the company is recurringly impairing goodwill, the disclosure cadence across earnings 8-Ks and DEF 14A should reflect this consistently; subsequent filings should not omit or minimize it.",
+      "M_source": "edgar_fts.query_fulltext (search_term='goodwill impairment', cik=0001371285, 2023-01-01 to 2026-05-20)",
+      "M_value": "10 hits across 8-K earnings releases (2025-02-19 Q4'24, 2025-05-01 Q1'25, 2025-08-07 Q2'25, 2025-11-06 Q3'25, 2026-02-12 Q4'25, 2026-04-30 Q1'26), the FY24 and FY25 10-Ks, and both DEF 14As (2025, 2026). Recurring disclosure across cadence \u2014 not a one-off footnote.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Goodwill impairments are disclosed (not hidden) and the cadence is consistent across 8-Ks, 10-Ks, and proxies \u2014 so no obscuring penalty for the disclosure itself. HOWEVER the underlying economics merit a moderate flag: two consecutive years of goodwill impairment ($5.3M in 2024 + $1.1M in 2025) in a company that publicly emphasizes 'data-driven vertically-integrated approach' and 'industry-leading retention rates' indicates that prior M&A (likely the Continental Europe acquisitions and/or Furkin/PHI Direct) is underperforming the original purchase-price assumptions. The MD&A excerpt does not explain WHICH acquisitions are being impaired or why \u2014 that lack of granularity is the moderate under-delivery."
+    },
+    {
+      "claim_id": "C5",
+      "R": "Operating lease right-of-use assets jumped from $362K (2024) to $14,688K (2025) \u2014 a 40x increase. Driver disclosed in Note 10: 'During the year ended December 31, 2025, we entered into a lease for a building to use as a manufacturing facility for our pet food initiative.' This is a brand-new strategic vertical (pet food manufacturing) for a pet-insurance company, disclosed only in a lease-table footnote.",
+      "f": "If a 'pet food manufacturing' initiative is a material strategic pivot, it should be searchable and recur across other filings (8-K, earnings releases, proxy strategy discussion). If the only mention is a single footnote, it is being under-disclosed relative to its strategic importance.",
+      "M_source": "edgar_fts.query_fulltext (search_term='pet food manufacturing facility', cik=0001371285, 2024-01-01 to 2026-05-20)",
+      "M_value": "0 hits across all TRUP filings on the phrase 'pet food manufacturing facility'. The 10-K Note 10 lease disclosure is the SOLE searchable reference in the EDGAR fulltext corpus for this initiative.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "This is a textbook 'buried in a footnote' obscuring pattern. Trupanion has signed a long-dated (9.9-year weighted avg remaining term) lease that increases right-of-use lease liability from $362K to $14.2M \u2014 a 39x liability expansion \u2014 for a wholly new business line (pet food) that is NOT mentioned in (a) Item 1 Business Overview, (b) Item 1A Risk Factors, (c) Item 7 MD&A Overview, (d) the company mission statement, or (e) any 8-K. Pet food is a structurally different business from insurance with different working capital, gross margin, regulatory regime, and capital intensity. A pet-insurance company quietly entering pet food via a back-of-Notes lease footnote, with $14.4M of newly-committed long-term lease obligations and no MD&A explanation, is the kind of strategic-pivot non-disclosure that honesty-alpha is designed to catch. MODERATE because the lease itself is disclosed (technically compliant), but the strategic context is obscured."
+    },
+    {
+      "claim_id": "C6",
+      "R": "Insider transaction activity: implicit claim that there is no MNPI-style clustered insider selling. The 10-K does not directly make this claim, but absence of unusual selling is the testable null hypothesis for any small-cap that has dropped 61% to a 52-week low trough.",
+      "f": "If insider selling is routine (10b5-1 only, not discretionary clustering), insider_vs_calendar should return ROUTINE_10B5_1 or similar; if there is discretionary clustering near material events, it would flag CLUSTERED_DISCRETIONARY.",
+      "M_source": "insider_vs_calendar.query_insider_sales_near_budget_events (cik=0001371285, lookback_days=365, contractor_name='Trupanion')",
+      "M_value": "98 Form 4 filings in 365-day window, 188 sales aggregating $9.48M, only 5 proximate sales totaling $525K \u2014 ALL 10b5-1 plan executions (n_discretionary_proximate=0). Signal=ROUTINE_10B5_1. Validators 1+2 N/A (Trupanion has no budget-program exposure, expected).",
+      "severity": "PASS",
+      "interpretation": "Insider activity is routine for a sub-$1B-cap public company. $9.5M aggregate sales over 12 months across 2 named insiders (Tooth Margaret, Gallagher John R), all under pre-arranged 10b5-1 plans, no discretionary clustering. The matched 'budget event' coincidences are spurious (Trupanion has no federal-budget exposure, as the validators correctly identify). No MNPI-style timing pattern. The -61% drawdown is NOT being front-run by insiders."
+    },
+    {
+      "claim_id": "C7",
+      "R": "'$281.9 million and $252.0 million accounts receivable associated with underwriting these policies as of December 31, 2025 and 2024, respectively' (other business segment annual-pay policies). Accounts receivable grew $29.9M YoY (+11.9%) while Other Business segment revenue is described as having 'slowed' and expected to continue declining (per the APIC discussion of capital requirements falling as 'other business segment growth has slowed').",
+      "f": "If Other Business revenue is genuinely slowing while AR is growing 11.9%, the AR/revenue ratio is deteriorating \u2014 a working-capital quality flag. The 10-K should disclose this trend; subsequent 10-Q filings should reveal whether the trend continues.",
+      "M_source": "Filing cross-read (Item 7 MD&A Liquidity + Note 1 Accounts Receivable + Note 9 Other Business reserves)",
+      "M_value": "Note 9 shows Other Business veterinary invoice expense was effectively flat YoY: $328.8M FY25 vs $324.7M FY24 (+1.3%). Yet annual-policy AR grew +11.9% ($252.0M \u2192 $281.9M). AR/expense ratio expanded from 77.6% to 85.7% \u2014 i.e. policy receivables grew ~6x faster than the underlying loss volume. This is consistent with either (a) longer collection cycles, (b) a mix shift toward larger annual-pay policies with longer DSO, or (c) declining collection quality. The 10-K does not explicitly explain the AR growth driver.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Working-capital quality is deteriorating in a segment management says is shrinking. Receivables growing ~9x faster than associated loss volume in a 'declining' segment is a quiet quality flag. Not fraud, not going-concern, but a real cash-conversion drag. The 10-K discloses the absolute numbers but does not narratively address why AR is growing in a declining segment \u2014 the under-delivery is the missing explanation, not missing data."
+    }
+  ],
+  "composite": 0.4286,
+  "summary": "TRUP is a genuinely cash-positioned ($370.7M consolidated, but ONLY $50.0M at the holding company outside trapped insurance-entity capital) pet-insurance underwriter with clean auditor tenure (CLEAN_AUDITOR_TENURE), no going-concern language (NO_GOING_CONCERN), verified PNC refinancing (Nov 2025 8-K matches 10-K narrative), routine 10b5-1 insider activity, and consistent Pets Best runoff disclosure across the 10-K and Q1'26 10-Q. The -61% drawdown is NOT a fraud/solvency story. The two honesty-alpha catches are: (1) a brand-new 'pet food manufacturing' initiative committed via a 9.9-year, $14.4M operating lease disclosed ONLY in Note 10 with ZERO Item 1 / 1A / 7 / 8-K coverage \u2014 classic footnote-buried strategic pivot for a pet-insurance company; and (2) Other Business segment accounts receivable growing +11.9% YoY while underlying loss volume was flat (+1.3%), in a segment management says is shrinking \u2014 an unexplained working-capital quality deterioration. Composite 0.429 across 7 verifiable claims (4 PASS / 3 MODERATE / 0 SEVERE / 0 RED FLAG / 0 UNVERIFIABLE).",
+  "scoring": {
+    "PASS": 4,
+    "UNVERIFIABLE": 0,
+    "MODERATE_UNDERDELIVERY": 3,
+    "SEVERE_UNDERDELIVERY": 0,
+    "RED_FLAG_NEGATIVE": 0,
+    "verifiable_claims": 7,
+    "weighted_sum": "(0*4 + 1*3 + 2*0 + 3*0) / 7 = 3 / 7",
+    "composite": 0.4286
+  }
+}

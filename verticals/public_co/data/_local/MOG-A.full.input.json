@@ -1,0 +1,144 @@
+{
+  "ticker": "MOG-A",
+  "cutoff": "2026-05-20",
+  "filing": "0001628280-25-054103_10-K.txt",
+  "filing_date": "2025-11-26",
+  "filing_age_days": 175,
+  "company_name": "Moog Inc.",
+  "cik": "0000067887",
+  "claims": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Sales under U.S. Government contracts represented 38% of Moog total sales in 2025, primarily within Space and Defense and Military Aircraft segments.",
+      "subject": "Moog Inc.",
+      "predicate": "U.S. Government contract revenue share",
+      "object_value": "38% of 2025 sales",
+      "source_quote": "In 2025, sales under U.S. Government contracts represented 38% of total sales and were primarily within our Space and Defense and Military Aircraft segments.",
+      "category": "customer_pipeline",
+      "queries": [
+        {"mode": "A", "source": "usaspending.query_recipient_contracts", "kwargs": {"recipient_name": "Moog"}},
+        {"mode": "A", "source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "Moog"}},
+        {"mode": "B", "source": "sam_entity.query_entity_by_uei", "kwargs": {"company_name": "Moog Inc"}}
+      ]
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Moog's twelve-month backlog as of September 27, 2025 was $3.0 billion, an increase of 20% YoY.",
+      "subject": "Moog Inc.",
+      "predicate": "12-month backlog",
+      "object_value": "$3.0B (+20% YoY)",
+      "source_quote": "Our twelve-month backlog as of September 27, 2025 was $3.0 billion, an increase of 20% compared to September 28, 2024.",
+      "category": "customer_pipeline",
+      "queries": [
+        {"mode": "A", "source": "usaspending.query_recipient_contracts", "kwargs": {"recipient_name": "Moog"}},
+        {"mode": "B_RPO_vs_obligations", "source": "usaspending.query_federal_presence", "kwargs": {"recipient_name": "Moog Inc"}}
+      ]
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Moog completed acquisition of COTSWORKS in 2025 ($41M) and DCL in 2024 ($6M); long-term rollup/acquisition strategy across precision motion controls.",
+      "subject": "Moog Inc.",
+      "predicate": "M&A rollup",
+      "object_value": "COTSWORKS (2025, $41M); DCL (2024, $6M)",
+      "source_quote": "Net cash used by investing activities in 2025 included ... $41 million associated with the acquisition of COTSWORKS ... Net cash used by investing activities in 2024 also included $6 million associated with the acquisition of DCL.",
+      "category": "rollup_thesis",
+      "queries": [
+        {"mode": "A", "source": "sec_filings.list_filings_by_form", "kwargs": {"cik": "0000067887", "form_type": "8-K"}},
+        {"mode": "B", "source": "acq_coherence.score_acquisition_coherence", "kwargs": {"parent_thesis": "Precision motion control / fluid controls supplier across aerospace, defense and industrial markets.", "acquisitions": ["COTSWORKS (fiber-optic interconnects for aerospace and defense)", "DCL (industrial automation product line)"]}}
+      ]
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Moog occupies 5,702,000 sq ft globally with principal Space and Defense facilities in U.S., Ireland, UK and Australia; corporate HQ in East Aurora, New York; 13,500+ employees across 20+ countries.",
+      "subject": "Moog Inc.",
+      "predicate": "physical facility footprint",
+      "object_value": "5.7M sq ft / HQ East Aurora NY / 13,500 employees",
+      "source_quote": "On September 27, 2025, we occupied 5,702,000 square feet of space ... Our corporate headquarters is located in East Aurora, New York ... our more than 13,500 employees in over 20 countries",
+      "category": "physical_facility",
+      "queries": [
+        {"mode": "A", "source": "epa_frs.query_facilities", "kwargs": {"facility_name": "Moog", "state_abbr": "NY"}},
+        {"mode": "A_aux", "source": "osha_establishments.query_establishments", "kwargs": {"company_name": "Moog", "state_abbr": "NY"}}
+      ]
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Moog maintains a worldwide patent portfolio (U.S., Europe, China, Japan, India) on electrohydraulic, electromechanical, electronics, hydraulics, motion control and actuation systems, plus wind turbines, robotics, vibration control and medical devices.",
+      "subject": "Moog Inc.",
+      "predicate": "granted patent portfolio in motion control / actuation",
+      "object_value": "global multi-jurisdiction patent portfolio",
+      "source_quote": "We maintain a patent portfolio of issued or pending patents and patent applications worldwide that generally includes the United States ('U.S.'), Europe, China, Japan and India. The portfolio includes patents that relate to electrohydraulic, electromechanical, electronics, hydraulics, components and methods of operation and manufacture as related to motion control and actuation systems.",
+      "category": "patent",
+      "queries": [
+        {"mode": "A", "source": "uspto_odp.query_assignee", "kwargs": {"assignee_name": "Moog Inc"}},
+        {"mode": "B_subsidiary", "source": "uspto_odp.query_assignee", "kwargs": {"assignee_name": "Moog"}}
+      ]
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "On May 30, 2025 Moog amended/restated its loan agreement to include a $250M term loan; in 2025 used $100M on share buybacks and paid $36M dividends; SECT and ESPP active. Insider/equity activity around amended-debt + buyback + dividend events.",
+      "subject": "Moog Inc.",
+      "predicate": "equity raise / buyback / dilution timing",
+      "object_value": "$250M term loan May 2025; $100M buyback; $36M dividend",
+      "source_quote": "On May 30, 2025, we amended and restated our loan agreement to include a $250 million term loan ... Net cash used by financing activities in 2025 included a use of cash of $100 million for shares under the repurchase program ... and $36 million for dividend payments.",
+      "category": "financial_distress",
+      "queries": [
+        {"mode": "A", "source": "sec_filings.list_filings_by_form", "kwargs": {"cik": "0000067887", "form_type": "8-K"}},
+        {"mode": "B", "source": "insider_vs_calendar.query_insider_sales_near_budget_events", "kwargs": {"cik": "0000067887", "window_days": 14, "start_date": "2024-01-01", "end_date": "2026-05-20"}}
+      ]
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Net sales to Moog's five largest customers represented approximately 31% of 2025 sales; aerospace and defense OEM customers collectively represented 61% of 2025 sales. Major customers include tier-1 large U.S. Government contractors / system integrators.",
+      "subject": "Moog Inc.",
+      "predicate": "customer concentration (top 5 = 31%)",
+      "object_value": "31% top-5 customer concentration; 61% A&D OEM",
+      "source_quote": "Net sales to our five largest customers represented approximately 31% of our 2025 sales ... Aerospace and defense OEM customers collectively represented 61% of 2025 sales.",
+      "category": "counterparty_disclosure",
+      "queries": [
+        {"mode": "A", "source": "usaspending.query_recipient_contracts", "kwargs": {"recipient_name": "Moog"}},
+        {"mode": "B_counterparty_lockheed", "source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Moog", "cik": "0000936468"}},
+        {"mode": "B_counterparty_boeing", "source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Moog", "cik": "0000012927"}},
+        {"mode": "B_counterparty_rtx", "source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Moog", "cik": "0000101829"}}
+      ]
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Moog identified misstatements in its consolidated financial statements for 2023, 2024 and 2025 and revised annual financials for 2023 and 2024 and quarterly financials for 2024 and 2025 (Note 25 - Revision of Previously Issued Consolidated Financial Statements).",
+      "subject": "Moog Inc.",
+      "predicate": "ICFR / restatement of prior periods",
+      "object_value": "Revisions to FY23 and FY24 financials + multiple quarterly periods",
+      "source_quote": "Note 25 - Revision of Previously Issued Consolidated Financial Statements ... we identified misstatements in our consolidated financial statements for 2023, 2024 and 2025. As a result, we revised our annual consolidated financial statements for 2023 and 2024 and our quarterly consolidated condensed financial statements for 2024 and 2025.",
+      "category": "icfr_material_weakness",
+      "queries": [
+        {"mode": "A", "source": "claim_evolution.query_claim_evolution", "kwargs": {"cik": "0000067887", "claim_keyword": "material weakness"}},
+        {"mode": "B", "source": "claim_evolution.query_claim_evolution", "kwargs": {"cik": "0000067887", "claim_keyword": "restatement"}}
+      ]
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "Moog Space and Defense segment supplies tactical and strategic missile steering controls, defense ground vehicle systems including turreted weapon systems, satellite avionics, propulsion and positioning controls, and launcher thrust vector controls.",
+      "subject": "Moog Inc.",
+      "predicate": "named DoD product lines",
+      "object_value": "missile steering, turreted weapons, thrust vector controls, satellite avionics",
+      "source_quote": "Defense market - primary and secondary flight controls and components for military aircraft, tactical and strategic missile steering controls, defense ground vehicle systems including turreted weapon systems ... Space market - satellite avionics, propulsion and positioning controls and components, launcher thrust vector controls and components",
+      "category": "customer_pipeline",
+      "queries": [
+        {"mode": "A", "source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "Moog Inc"}},
+        {"mode": "B_jbook_missile", "source": "pentagon_jbook.query_program_funding", "kwargs": {"program_name": "thrust vector control"}}
+      ]
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "Moog reports purchase commitments outstanding at September 27, 2025 of $1,250,355 thousand ($1.25B) including $78,207 thousand for property, plant and equipment, supporting heavy production / capex plans for defense backlog.",
+      "subject": "Moog Inc.",
+      "predicate": "purchase commitments / capex visibility",
+      "object_value": "$1.25B purchase commitments (incl. $78M PP&E)",
+      "source_quote": "Purchase commitments outstanding at September 27, 2025 are $ 1,250,355 including $ 78,207 for property, plant and equipment.",
+      "category": "production_volume",
+      "queries": [
+        {"mode": "A", "source": "dol_h1b_lca.query_lca_filings", "kwargs": {"employer_name": "Moog"}},
+        {"mode": "B_capex_vs_facilities", "source": "epa_frs.query_facilities", "kwargs": {"facility_name": "Moog", "state_abbr": "NY"}}
+      ]
+    }
+  ]
+}

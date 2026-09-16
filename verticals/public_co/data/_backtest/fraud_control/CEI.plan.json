@@ -1,0 +1,353 @@
+{
+  "ticker": "CEI",
+  "cutoff": "2021-09-01",
+  "filing": "0001580695-20-000260_10K.txt",
+  "plan_version": 1,
+  "claims": [
+    {
+      "claim_id": "CEI-1",
+      "claim_text": "Camber's auditor Marcum LLP issued a going-concern qualification; the Company has a working capital deficit of $0.9M and an accumulated deficit of $158.1M as of March 31, 2020, and states it will not have sufficient liquidity for the next twelve months unless the Viking Merger closes.",
+      "source_quote": "These factors raise substantial doubt about its ability to continue as a going concern. ... The Company believes that it will not have sufficient liquidity to operate as a going concern for the next twelve months following the issuance of the financial statements included herein unless it can close the Viking Merger ... As of March 31, 2020, the Company had a working capital deficit of approximately $0.9 million ... Accumulated Deficit (158,074,768).",
+      "subject": "Camber Energy, Inc.",
+      "predicate": "discloses_auditor_going_concern_qualification_with",
+      "object_value": "working_capital_deficit_$0.9M_accum_deficit_$158M_dependent_on_Viking_Merger",
+      "category": "financial_distress",
+      "referent_type": "event",
+      "m_source_status": "MAPPED",
+      "source_id": "claim_evolution.query_claim_evolution",
+      "source_params": {
+        "cik": "0001309082",
+        "search_term": "going concern",
+        "base_filing_date": "2020-06-29",
+        "cutoff_date": "2021-09-01",
+        "forms": "10-K,10-Q,8-K,DEF 14A"
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "NYSE American listing-compliance notices (8-K Item 3.01)",
+          "endpoint_or_method": "SEC EDGAR submissions filter 8-K Item 3.01 (Notice of Delisting / Failure to Satisfy a Continued Listing Rule) for CIK 0001309082",
+          "rationale": "Going-concern + sub-$1 share price + repeated reverse splits is the canonical NYSE-American Section 1003 trajectory; an Item 3.01 8-K in the cutoff window would corroborate the distress claim.",
+          "expected_observable": "presence/absence of Item 3.01 8-K disclosures and dates",
+          "signal_direction": "presence corroborates distress; absence would WEAKEN (i.e. continuing-listing notices missing despite stated going-concern is contradiction-of-omission)",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "PCAOB inspection / disciplinary database for Marcum LLP",
+          "endpoint_or_method": "https://pcaobus.org/oversight/inspections — Marcum LLP inspection reports + Form AP issuer-level audit assignments",
+          "rationale": "Marcum's small-cap reverse-merger audit practice has been a recurring PCAOB inspection target; pattern of going-concern qualifications across Marcum-audited microcaps would frame whether CEI's qualification is typical-late vs. typical-early.",
+          "expected_observable": "Marcum issuer-level inspection findings + comparable going-concern issuance rates",
+          "signal_direction": "CORROBORATES distress; not a contradiction test",
+          "severity_if_contradiction": "UNVERIFIABLE"
+        }
+      ],
+      "domain": "energy_utilities",
+      "claim_type_taxonomy": "financial_distress",
+      "extraction_notes": "H10 distress-cluster fingerprint: this claim is the anchor of multiple distress markers; supplemented by CEI-2 (reverse splits) and CEI-3 (toxic convertibles)."
+    },
+    {
+      "claim_id": "CEI-2",
+      "claim_text": "Camber executed three reverse stock splits in a 10-month window (1-for-25 effective Dec 24 2018; 1-for-25 effective July 8 2019; 1-for-50 effective Oct 29 2019), with the Oct 2019 split reducing share count from ~74.5M to ~1.5M; authorized common-stock count was then re-expanded from 5M to 25M effective April 16, 2020.",
+      "source_quote": "On December 20, 2018, the Company filed a Certificate of Change ... to affect another 1-for-25 reverse stock split ... On July 3, 2019, the Company filed a Certificate of Amendment ... to affect another 1-for-25 reverse stock split ... On October 28, 2019, the Company filed a Certificate of Change ... to affect a 1-for-50 reverse stock split ... reduce the number of common stock shares outstanding ... from approximately 74.5 million shares to approximately 1.5 million shares ... Effective on April 16, 2020 ... the Company filed a Certificate of Amendment to its Articles of Incorporation to increase its authorized shares of common stock to 25 million shares.",
+      "subject": "Camber Energy, Inc.",
+      "predicate": "executed_serial_reverse_splits_and_authorized_share_re-expansion",
+      "object_value": "3_reverse_splits_in_10_months_then_5x_authorized_expansion",
+      "category": "financial_distress",
+      "referent_type": "event",
+      "m_source_status": "MAPPED",
+      "source_id": "sec_filings.list_filings_by_form",
+      "source_params": {
+        "cik": "0001309082",
+        "forms": ["DEF 14A", "PRE 14A", "8-K"],
+        "start_date": "2018-01-01",
+        "cutoff_date": "2021-09-01",
+        "limit": 100
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "NYSE American Section 1003(f)(v) / sub-$0.20 share-price compliance letters",
+          "endpoint_or_method": "Cross-reference NYSE American listing-compliance press releases + CEI 8-K Item 3.01 filings in EDGAR; correlate split effective dates with proximate compliance triggers",
+          "rationale": "Serial reverse splits at the cadence described are mechanically explained by listing-compliance triggers, not by share-price recovery; the pattern is a documented microcap death-spiral signature (Kerrisdale 'mind your t-bills' template).",
+          "expected_observable": "list of dated compliance letters timestamping each split",
+          "signal_direction": "presence corroborates death-spiral pattern; absence undermines the cadence interpretation",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Nevada Secretary of State business-entity filings (Certificate of Amendment / Certificate of Change)",
+          "endpoint_or_method": "https://www.nvsos.gov/sosentitysearch/ — entity number lookup for Camber Energy, Inc. + amendment-history list",
+          "rationale": "Each reverse split and authorized-share expansion was filed with the Nevada SOS; the registry is the primary recorder of the events the filing summarizes.",
+          "expected_observable": "filing dates + amendment types matching the 10-K narrative",
+          "signal_direction": "CORROBORATES the chronology; absence/inconsistency would contradict",
+          "severity_if_contradiction": "SEVERE"
+        }
+      ],
+      "domain": "energy_utilities",
+      "claim_type_taxonomy": "financial_distress",
+      "extraction_notes": "H10 cluster: 3 reverse splits in 10 months CLEARLY clears the >=2-3 markers within 6mo threshold and is a textbook microcap death-spiral fingerprint."
+    },
+    {
+      "claim_id": "CEI-3",
+      "claim_text": "Between April 1, 2020 and June 24, 2020, Discover Growth Fund (holder of Series C Redeemable Convertible Preferred Stock) converted 498 shares of Series C Preferred into approximately 13,033,208 shares of common stock; the 2,951 outstanding shares of Series C still could convert into approximately 77,243,823 shares — versus only ~25M authorized shares.",
+      "source_quote": "Since April 1, 2020, and through June 24, 2020, Discover has converted 498 shares of Series C Preferred Stock into approximately 13,033,208 shares of common stock ... As of June 24, 2020, the 2,951 outstanding shares of Series C Preferred Stock can convert, pursuant to their terms, into 77,243,823 shares of our common stock.",
+      "subject": "Discover Growth Fund / Discover (holder of Series C Preferred)",
+      "predicate": "holds_convertible_preferred_with_overhang_exceeding_authorized_shares",
+      "object_value": "77.2M_potential_conversion_vs_25M_authorized",
+      "category": "financial_distress",
+      "referent_type": "intangible",
+      "m_source_status": "MAPPED",
+      "source_id": "ucc_proxy.query_ucc_exposure",
+      "source_params": {
+        "cik": "0001309082",
+        "cutoff_date": "2021-09-01",
+        "window_months": 36
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "SEC EDGAR Form 4 / Schedule 13D-13G filings by Discover Growth Fund",
+          "endpoint_or_method": "EDGAR insider/owner filings search for 'Discover Growth Fund' as reporting person against CIK 0001309082",
+          "rationale": "Discover's conversion-and-sale cadence should leave a beneficial-ownership footprint via Schedule 13G amendments tracking its sliding stake under the 9.99% cap; absence of such filings while large conversions occur would be a disclosure gap.",
+          "expected_observable": "Schedule 13G/A or Form 4 filings dated April-July 2020 by Discover entities re Camber Energy",
+          "signal_direction": "presence corroborates the conversion narrative; absence raises a beneficial-ownership-reporting question",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "EDGAR fulltext: prior CEI / Discover Series C agreements + S-3 / S-1 registration statements",
+          "endpoint_or_method": "edgar_fts on terms 'Discover Growth Fund' and 'Series C Preferred' restricted to CIK 0001309082, all forms",
+          "rationale": "The reset/true-up conversion mechanic in the Series C designation determines how many common shares 2,951 Series C shares can convert into; the registration statements + original certificate of designations would corroborate the 77.2M figure derivation.",
+          "expected_observable": "prospectus filings registering resale of common shares issued upon Series C conversion",
+          "signal_direction": "CORROBORATES the dilution mechanic; missing S-1/S-3 registrations would be a separate compliance gap",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Toxic-convertible / 'death spiral' financier blacklist (Yorkville / GHS / Discover / Geneva Roth) cross-reference",
+          "endpoint_or_method": "EDGAR fulltext aggregate — count of distinct microcap issuers naming 'Discover Growth Fund' as Series C/D preferred counterparty over 2017-2021",
+          "rationale": "Cohort-level signal: if Discover Growth Fund appears as Series-C-style preferred holder across N other microcap issuers that went on to terminal-dilution outcomes, the pattern itself is high-signal for CEI.",
+          "expected_observable": "count of distinct CIKs naming 'Discover Growth Fund' as preferred holder",
+          "signal_direction": "high recurrence = high distress correlation; severity if Discover_partner_count >= 5",
+          "severity_if_contradiction": "SEVERE"
+        }
+      ],
+      "domain": "energy_utilities",
+      "claim_type_taxonomy": "financial_distress",
+      "extraction_notes": "Classic toxic-convertible structure (reset/true-up conversion, no floor); ucc_proxy will pick up SEC Item 2.03 / 8-K disclosures of secured-debt / preferred-finance pacing. The 77.2M vs 25M authorized = unsustainable overhang."
+    },
+    {
+      "claim_id": "CEI-4",
+      "claim_text": "Camber agreed to a merger with Viking Energy Group whereby Viking common-stock holders receive 80% of Camber's post-effective-time capitalization, contingent on closing by Sept 30, 2020 (extendable to Dec 31, 2020); Camber's near-term going-concern viability is explicitly conditioned on this merger closing.",
+      "source_quote": "each share of common stock of Viking issued and outstanding immediately prior to the effective time ... will be converted into the right to receive the pro rata share of 80% of Camber s post-effective time capitalization ... The Company believes that it will not have sufficient liquidity to operate as a going concern for the next twelve months following the issuance of the financial statements included herein unless it can close the Viking Merger.",
+      "subject": "Viking Energy Group, Inc.",
+      "predicate": "is_to_merge_with_Camber_taking_80pct_of_post_merger_capitalization",
+      "object_value": "80%_post_merger_cap_due_Sept30_2020_extendable_to_Dec31_2020",
+      "category": "partnership",
+      "referent_type": "entity",
+      "m_source_status": "MAPPED",
+      "source_id": "claim_evolution.query_claim_evolution",
+      "source_params": {
+        "cik": "0001309082",
+        "search_term": "Viking",
+        "base_filing_date": "2020-06-29",
+        "cutoff_date": "2021-09-01",
+        "forms": "10-K,10-Q,8-K,DEF 14A"
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "SEC EDGAR submissions API — Viking Energy Group's own filings (separate CIK)",
+          "endpoint_or_method": "edgar_fts and sec_filings.list_filings_by_form for Viking Energy Group's CIK; cross-check Viking's own going-concern + secured-note disclosures",
+          "rationale": "Viking is the merger target and the disclosed source of repayment for the $9.2M of Camber-to-Viking secured notes. Viking's own financial health + secured-note covenants determines whether the merger is mechanically realizable.",
+          "expected_observable": "Viking's 10-K/Q going-concern language; Viking's convertible-note holders' override consent status",
+          "signal_direction": "Viking distress = compound risk on Camber's only stated liquidity bridge; if Viking also discloses going concern, contradiction risk amplifies",
+          "severity_if_contradiction": "SEVERE"
+        },
+        {
+          "source_label": "SEC EDGAR S-4 / proxy-statement filings for the CEI-Viking merger",
+          "endpoint_or_method": "Filter CIK 0001309082 forms='S-4,S-4/A,PREM14A,DEFM14A' between 2020-02-03 and 2021-09-01",
+          "rationale": "An 80%-of-post-merger-cap acquisition by a SEC-registered acquirer requires S-4 or merger-proxy; cadence + amendment trail tracks whether the deal is moving toward close or stalling.",
+          "expected_observable": "count of S-4/A amendments; gap between Form filings as a proxy for SEC-staff comment cycles",
+          "signal_direction": "extended amendment cycle = stalled; absence of an S-4 entirely = announced-but-not-actually-progressed merger",
+          "severity_if_contradiction": "SEVERE"
+        }
+      ],
+      "domain": "energy_utilities",
+      "claim_type_taxonomy": "partnership",
+      "extraction_notes": "claim_evolution tests whether the Viking storyline persists / reaffirms in subsequent filings or whether terms deteriorate (e.g. multiple amendments, missed deadlines, restated exchange ratios — all of which preceded the 2021 close per Kerrisdale's later report; the framework should pick this cadence up via SILENT-or-AMENDED signals without us referencing post-cutoff news)."
+    },
+    {
+      "claim_id": "CEI-5",
+      "claim_text": "Camber produced 13,084 BOE total for fiscal year ended March 31, 2020 (5,399 Bbls crude oil + 18,892 Mcf natural gas + 190,503 gallons NGL) from 25 non-operated wells in Glasscock County, Texas — a 88% collapse from 113,685 BOE in FY2019.",
+      "source_quote": "The Company produced oil, natural gas and NGLs from 25 non-operated wells in Glasscock County, Texas during the year ended March 31, 2020 ... Crude oil (Bbls) 5,399 ... Natural gas (Mcf) 18,892 ... NGL (Gallons) 190,503 ... Total (barrels oil equivalent or Boe) 13,084 ... [FY2019] 113,685.",
+      "subject": "Camber Energy oil & gas production",
+      "predicate": "produced_at_scale_in_county",
+      "object_value": "13084_BOE_FY2020_25_wells_Glasscock_County_TX",
+      "category": "production_volume",
+      "referent_type": "quantity",
+      "m_source_status": "PROPOSED",
+      "source_id": null,
+      "source_params": {},
+      "proposed_connector": {
+        "name": "rrc_texas.query_operator_production",
+        "description": "Texas Railroad Commission Production Data Query — monthly per-operator per-lease oil/gas production",
+        "endpoint": "https://www.rrc.texas.gov/oil-and-gas/research-and-statistics/production-data/production-data-query-pdq/",
+        "access_pattern": "scrape",
+        "auth_required": false,
+        "sample_invocation": "POST PDQ search by Operator Name='CAMBER ENERGY' + County='GLASSCOCK' + date range",
+        "rationale": "TRRC is the canonical regulator of every TX oil/gas well; the operator-level monthly production by lease is the definitive cross-check on the 13,084 BOE figure and the 25-well count. EPA FRS does NOT capture E&P production volume.",
+        "estimated_cost": "free",
+        "completeness": "all Texas wells with active permits",
+        "referent_type": "well_production_record",
+        "attribute": "monthly_barrels_oil_mcf_gas_per_lease"
+      },
+      "creative_extensions": [
+        {
+          "source_label": "Texas Railroad Commission (RRC) operator + lease lookup",
+          "endpoint_or_method": "https://webapps.rrc.texas.gov/PDQ/home.do — search Operator Name 'CAMBER ENERGY' or 'CE OPERATING' in Glasscock + Hutchinson Counties",
+          "rationale": "TRRC's PDQ system reports monthly oil/gas/NGL volumes by operator and lease; this is the authoritative production cross-check. Glasscock County 25 non-operated wells means CEI is NOT operator-of-record — operator-of-record lookup at TRRC tests whether the working-interest claim ties to real producing leases.",
+          "expected_observable": "list of leases naming CEI as working-interest holder; monthly production summing to ~13,084 BOE for FY2020",
+          "signal_direction": "if TRRC PDQ shows zero leases with CEI working interest, or production << claimed = contradiction; matching volumes within ~10% = corroboration",
+          "severity_if_contradiction": "SEVERE"
+        },
+        {
+          "source_label": "Texas RRC Severance Order docket (Form W-3X / severance enforcement actions)",
+          "endpoint_or_method": "TRRC Public GIS Viewer + 'Severance' filing search by operator",
+          "rationale": "The 10-K explicitly references a May 30, 2019 TRRC Severance Order blocking sales from CEI's 11 Hutchinson County Panhandle wells; the existence + duration + scope of that severance order is a direct registry verification.",
+          "expected_observable": "severance-order docket entry with date 2019-05-30 + well-list",
+          "signal_direction": "presence corroborates the regulatory-enforcement narrative; absence = the claim is inflated",
+          "severity_if_contradiction": "SEVERE"
+        },
+        {
+          "source_label": "EIA Form 23 / state-level production roll-up (FY-comparable)",
+          "endpoint_or_method": "EIA Texas production data + Glasscock County roll-up",
+          "rationale": "Cross-check whether a 88% YoY production collapse at a single small operator is consistent with county/basin trends or is operator-idiosyncratic; idiosyncratic collapse against a flat county baseline = operational failure signal beyond COVID alone.",
+          "expected_observable": "Glasscock County production trend FY2018-FY2020",
+          "signal_direction": "if county production is stable but CEI's drops 88%, the explanation is operator-specific, not COVID/macro",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "energy_utilities",
+      "claim_type_taxonomy": "production_count",
+      "extraction_notes": "EPA emissions is a weak natural fit for E&P production volume (oil wells emit but TRI/GHGRP thresholds rarely fire at 25-well scale); PROPOSING rrc_texas.query_operator_production as the canonical missing source. Mapped epa_emissions as best-available catalog source for facility-existence cross-check only."
+    },
+    {
+      "claim_id": "CEI-6",
+      "claim_text": "Camber engaged Sylva International LLC d/b/a SylvaCap Media as a non-exclusive digital marketing services provider on February 15, 2020 in consideration for 100,000 fully-earned shares of restricted common stock plus $50,000 per month, extended on May 12, 2020 through October 19, 2020.",
+      "source_quote": "On February 15, 2020, the Company entered into a letter agreement with Sylva International LLC d/b/a SylvaCap Media (SylvaCap), pursuant to which SylvaCap agreed to act as the Company s non-exclusive digital marketing service provider in consideration for an aggregate of 100,000 shares of restricted common stock ... and $50,000 per month ... On May 12, 2020, the Company entered into the first amendment to the SylvaCap agreement. Pursuant to the amendment, the Company and SylvaCap extended the term ... to October 19, 2020.",
+      "subject": "SylvaCap Media (Sylva International LLC)",
+      "predicate": "paid_in_stock_for_digital_marketing_services",
+      "object_value": "100000_shares_restricted_common_plus_$50K_per_month",
+      "category": "vendor_relationship",
+      "referent_type": "entity",
+      "m_source_status": "MAPPED",
+      "source_id": "edgar_fts.query_fulltext",
+      "source_params": {
+        "search_term": "SylvaCap",
+        "cutoff_date": "2021-09-01",
+        "start_date": "2019-01-01"
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "EDGAR fulltext: count of distinct microcap issuers naming 'SylvaCap' or 'Sylva International' as a paid promoter",
+          "endpoint_or_method": "edgar_fts with search_term='SylvaCap' across all CIKs",
+          "rationale": "Stock-for-services digital-marketing engagement is a documented retail-pump-and-dump precondition; cohort-level frequency of the same vendor across multiple microcap issuers is a real signal independent of CEI specifically.",
+          "expected_observable": "count of distinct CIKs naming SylvaCap; cluster of microcap issuers using same paid promoter",
+          "signal_direction": "high recurrence among penny-stock issuers => promoter-driven price action is the genre, not investment-thesis-driven retail demand",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "SEC paid-promoter disclaimer crawl + state-level securities-stop-orders against retail-promotion firms",
+          "endpoint_or_method": "SEC.gov litigation releases + investor.gov bulletin search 'paid stock promoter'; state securities-admin enforcement actions against named promoters",
+          "rationale": "SEC and state securities regulators occasionally pursue paid promoters; an enforcement record against SylvaCap or its principals materially elevates the inflation-suspect framing of the relationship.",
+          "expected_observable": "SEC/state enforcement actions or cease-and-desist orders naming SylvaCap / Sylva International / its principals",
+          "signal_direction": "presence = severe corroboration of pump-and-dump pattern; absence = neutral",
+          "severity_if_contradiction": "SEVERE"
+        }
+      ],
+      "domain": "energy_utilities",
+      "claim_type_taxonomy": "financial_distress",
+      "extraction_notes": "Stock-for-services to digital-marketing vendor = canonical retail-promotion fingerprint; the 100K shares earned upfront and $50K/mo recurring is small in absolute dollars but high-signal as a fraud-cluster indicator (H10)."
+    },
+    {
+      "claim_id": "CEI-7",
+      "claim_text": "Camber sold 525 shares of Series C Preferred Stock to Discover for $5M in FY2020 and an additional 630 shares for $6M in June 2020; these proceeds funded a $5M and a $4.2M secured promissory note to Viking, accruing 10.5% interest, due February 3, 2022, secured by Viking's 70% ownership of Elysium and 100% of Ichor Energy Holdings, LLC.",
+      "source_quote": "On February 3, 2020, the Company and Discover entered into a Stock Purchase Agreement pursuant to which Discover purchased 525 shares of Series C Preferred Stock ... for $5 million ... On February 3, 2020, we advanced the $5.0 million raised from the sale of Series C Preferred Stock to Discover to Viking, and Viking provided us, among other things, a $5 million, 10.5% Secured Promissory Note ... On June 25, 2020, we advanced an additional $4.2 million to Viking in consideration for, among other things, an additional 10.5% Secured Promissory Note in the principal amount of $4.2 million.",
+      "subject": "Camber-Discover-Viking pass-through financing chain",
+      "predicate": "raised_preferred_proceeds_and_passed_to_merger_target_as_secured_notes",
+      "object_value": "$11M_preferred_proceeds_$9.2M_secured_notes_to_Viking_pre_merger",
+      "category": "financial_distress",
+      "referent_type": "intangible",
+      "m_source_status": "MAPPED",
+      "source_id": "sec_filings.list_filings_by_form",
+      "source_params": {
+        "cik": "0001309082",
+        "forms": ["8-K"],
+        "start_date": "2020-02-01",
+        "cutoff_date": "2021-09-01",
+        "limit": 100
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "Viking Energy Group SEC filings cross-reference (Item 2.03 Creation of Direct Financial Obligation)",
+          "endpoint_or_method": "EDGAR submissions filter for Viking Energy Group CIK, forms 8-K, Item 2.03 entries between 2020-02-03 and 2020-06-25",
+          "rationale": "The $5M + $4.2M secured notes are mirror-image obligations on Viking's side; both should appear in Viking's own 8-K Item 2.03 disclosures with matching dates and principals, and Viking's secured-note disclosures should show the same Elysium/Ichor security interest.",
+          "expected_observable": "Viking's 8-K Item 2.03 filings dated 2020-02-03 and ~2020-06-25 naming Camber as lender + same security package",
+          "signal_direction": "matching = corroborates; missing or inconsistent terms = disclosure asymmetry / accounting issue",
+          "severity_if_contradiction": "SEVERE"
+        },
+        {
+          "source_label": "TX/NV/OK state UCC-1 secured-debt registry (Elysium + Ichor pledge filings)",
+          "endpoint_or_method": "State UCC-1 lookup at Nevada SOS / TX SOS for debtor=Viking Energy Group / Elysium / Ichor; secured-party=Camber Energy",
+          "rationale": "A real $9.2M secured note backed by membership interests in Elysium + Ichor should be reflected in UCC-1 filings naming Camber as secured party; absence = the security interest is theoretical / unperfected.",
+          "expected_observable": "UCC-1 financing statement(s) naming Camber Energy as secured party",
+          "signal_direction": "presence corroborates perfected security; absence = security interest may be unperfected and the receivable less credit-worthy than stated",
+          "severity_if_contradiction": "SEVERE"
+        }
+      ],
+      "domain": "energy_utilities",
+      "claim_type_taxonomy": "financial_distress",
+      "extraction_notes": "The pass-through structure (Discover -> CEI preferred -> CEI secured note to Viking) is the financial architecture that ties CEI's distress to Viking's distress; sec_filings.list_filings_by_form will count the 8-K cadence around these events as a distress-marker proxy."
+    },
+    {
+      "claim_id": "CEI-8",
+      "claim_text": "Camber Energy is a federally-registered SEC reporter with NYSE American-listed common stock and is required to file periodic reports; recent operations were entirely crude oil and natural gas exploration and production related (oil & gas E&P, NAICS 2111xx).",
+      "source_quote": "Our operations during the year ended March 31, 2019 were all crude oil and natural gas exploration and production related. For the year ended March 31, 2020, our operations were all crude oil and natural gas exploration and production related.",
+      "subject": "Camber Energy, Inc.",
+      "predicate": "operates_as_oil_and_gas_E_and_P_company",
+      "object_value": "crude_oil_natural_gas_E&P_TX",
+      "category": "physical_facility",
+      "referent_type": "entity",
+      "m_source_status": "MAPPED",
+      "source_id": "usaspending.query_federal_presence",
+      "source_params": {
+        "name_variants": ["Camber Energy", "Camber Energy, Inc.", "CE Operating", "CE Operating, LLC", "Lineal Industries"],
+        "start_date": "2018-01-01",
+        "end_date": "2021-09-01",
+        "include_grants": true
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "BLM oil & gas lease database + federal-mineral lease counterparty lookup",
+          "endpoint_or_method": "Bureau of Land Management AFMSS / LR2000 — federal oil-and-gas lease holder lookup by lessee name",
+          "rationale": "CEI's leases are explicitly described as TX (state and private mineral) not federal — BLM absence is EXPECTED and not informative as a contradiction; instead this confirms the company is NOT a federal-lease E&P which is consistent with the claim. Catalog usaspending presence test will fire as INFLATION_SUSPECT but should be interpreted as 'no claim made' rather than 'claim contradicted'.",
+          "expected_observable": "zero matching BLM leases for Camber Energy as lessee",
+          "signal_direction": "absence is EXPECTED (not a contradiction) for a non-federal-lease TX E&P",
+          "severity_if_contradiction": "UNVERIFIABLE"
+        },
+        {
+          "source_label": "SAM.gov UEI lookup by entity name (federal eligibility check)",
+          "endpoint_or_method": "sam_entity if a UEI can be resolved via usaspending output; declared primary NAICS and registration status",
+          "rationale": "Confirms the company's self-declared NAICS at the federal registry matches the filing's stated industry (oil & gas E&P, NAICS 2111xx). NAICS mismatch (e.g. SAM declares 541990 Other Professional Services) would be a strong scope contradiction.",
+          "expected_observable": "SAM primary NAICS = 211111 or 211112; registration status; CAGE code",
+          "signal_direction": "match corroborates; mismatch or no SAM registration is a real scope-claim signal",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "energy_utilities",
+      "claim_type_taxonomy": "existence",
+      "extraction_notes": "CEI does not claim federal customers, federal contracts, or federal grants — usaspending result will likely be INFLATION_SUSPECT but this should be interpreted as 'expected absence' (H5 over-fit guard) NOT as fraud signal. The query is run for completeness (entity-existence corroboration via UEI resolution) but the claim does NOT predict positive federal presence."
+    }
+  ]
+}

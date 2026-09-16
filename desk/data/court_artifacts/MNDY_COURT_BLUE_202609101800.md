@@ -1,0 +1,51 @@
+## BLUE BENCH — MNDY — RED CASE: PARTIALLY OVERTURNED
+
+**PACK: acknowledged.** Pack tape (84.46 / dd52 −0.617 / pct_off_low 0.469) supersedes the brief's 82.65 and red's rounded "84.5." Pack XBRL block empty — COVERAGE GAP confirmed; all fundamentals below are from the pack's fingerprinted EX-99.1 ([6-K 2026-08-10](https://www.sec.gov/Archives/edgar/data/0001845338/000117891326003971/exhibit_99-1.htm)) plus Q2 call summaries (secondary, labeled).
+**PRINT PROXIMITY:** 2026-11-09, yfinance-derived, **UNCONFIRMED** (no date-notice 6-K after 8/10; issuer's pattern is a PR ~3 weeks prior). ~41 trading days out → NOT print-proximate. Agree with red.
+**PRIZE-TABLE MANDATE: N/A** — $1.47B-revenue cash-generative operator, not a pre-revenue project developer. Stated, not skipped.
+
+### PER-FINDING RULINGS
+
+**1. "Cause is dated, filed, quantified (Q3 guide + 20% RIF in the 8/10 filing)" | web check of Q2 call + pack filing dates | REFUTED IN PART | REDUCED (FATAL→SIZING).** Guide is real and CONFIRMED (Q3 $368–370M, +16–17%; FY26 $1,466–1,474M). But the RIF was **announced July 22** — "20% global headcount reduction announced on July 22 to reposition the company for AI-led growth" — matching the pack's 7/22 6-K, i.e. 27 days *before* the window opens, not "same filing." And the market's 12-day verdict on the 8/10 filing was **up**: a 16% surge in August after Q2 results, with cautious Q3 guidance driving only the recent declines. A catalyst that produced +16% cannot be the cause of the subsequent −15.8%. Red re-attributed a digested, oppositely-signed event. The brief's literal claim (no company filing between 8/10 and 9/10) is **true**; its error is inferring mispricing from that silence during a −6.5% sector move.
+
+**2. Null-form test (FPI files 6-K, never 8-K) | pack inventory | CONFIRMED | SUSTAINED, strengthened.** Best finding in the red case; the brief's exculpatory test has zero information content. **REDUCED on the Form 144 rider**: red admits the 144 and the 9/2–9/3 Form 4 codes are unread — a 144 is a routine 10b5-1 notice. UNVERIFIED, and it carries no weight as filed.
+
+**3. Window is a selection artifact | recomputation | CONFIRMED arithmetic, one bad datum | SUSTAINED (REDUCED on evidence).** Implied 8/28 anchor = 100.30; off pack 84.46 the move is **−15.79%** (~2.4x factor), red correct. But **2026-09-07 was Labor Day — US markets closed**; red's "traded $89–97 on 9/7" is a quote-widget range, not a session. The real leg is 9/4 close 91.12 → 84.46 = −7.3%. Substance (round-trip of an August rally to the post-print $84.12) SUSTAINED.
+
+**4. "12.3x forward earnings is non-GAAP" | 6-K + FY26 guide | CONFIRMED on basis, mechanism REFUTED | REDUCED.** GAAP op loss $1.5M / GAAP EPS $0.08 vs non-GAAP $1.48 — basis gap real. But red's wedge explanation is wrong: **non-GAAP operating income already excludes SBC**, so FCF > op income is interest income (~$45M on $1.07B+ securities) plus deferred-revenue float, not an SBC add-back. And the brief's $285M FCF is not its invention — it is the company's guide: FY26 adjusted free cash flow of $280–290 million (19–20% margin), assuming 100–200bp negative FX. At red's own EV that is ~9.9x EV/FCF.
+
+**5. "Net cash / buyback support refuted" | 6-K | PARTLY CONFIRMED | REDUCED.** Authorization exhaustion is genuinely novel and SUSTAINED — the price-insensitive bid is gone. But net cash is *not* refuted ($1.07B ≈ 27% of cap; no debt disclosed — UNVERIFIED absent the balance sheet), and red's "EV 10% above the brief" does not move the conclusion: 45.9M × 84.46 − 1.07B = **$2.81B → EV/S 1.91x**, which is the brief's "1.9x sales" exactly. Buyback avg ~$76 vs tape 84.46 is accretive to date.
+
+**6. "Mid-range, not a re-test" + EV ≈+7% | pack + arithmetic | REFUTED as computed | REDUCED.** 84.46 sits at the **16.5th percentile of the 52-week range**, not mid-range. Prize-table EV = 0.28·55 + 0.44·95 + 0.28·135 = **95.0 → +12.5%** vs tape, not +7%. Red's sizing conclusion (thin for this beta, bear anchored 4.3% *below* the actual low) survives on corrected numbers.
+
+**7. Seasonality-adjusted deceleration | recomputed | CONFIRMED | SUSTAINED, strengthened.** Q1→Q2 +3.79% vs +5.84% on the identical FY25 comp; implied H2 $750–758M vs H2-25 ≈$644M = **+17% vs H1 +23%**; Q2 revenue carried +110bp FX tailwind, so organic is worse. desk/seasonality.py unavailable — arithmetic substitute, flagged.
+
+**8. "Venue-divergent: Q2 exhibit omits gross retention" | venue comparison | REFUTED | OVERTURNED (III-precedent artifact).** Gross retention was never a press-release metric; the prior court sourced it from the **Q1 call transcript**. Comparing a Q2 *PR* to a Q1 *call* is an unlike-venue comp, not suppression. The like venue (Q2 call, 8/10) was never checked → COVERAGE GAP. Red also omitted its own pack's decisive row: **>$100k NDR 115% (flat vs Q1), >$100k customers 1,844→2,019, >$500k 68→114 (+68%)** — the prior court's ≤110% refutation trigger did **not** trip.
+
+**9. cRPO counter-finding | 6-K | CONFIRMED | SUSTAINED.** Duration caveat is right; add that cRPO $750M against ~$1.5B ARR means only ~half of forward revenue is contractually committed.
+
+### NEW FINDINGS RED MISSED
+**A (bearish, material). Q2 adjusted FCF margin 14.3%** (52.3/364.6) vs **21.4%** a year ago; H1 FCF $155.1M vs $173.6M = **−10.7% YoY on +23% revenue**. The $280–290M FY26 guide requires **H2 $125–135M** while restructuring cash lands in H2. The 11% FCF yield — the entire cheapness leg — is a back-half-loaded guide, not a run-rate. CONFIRMED, arithmetic from disclosed quarters.
+**B (bearish).** The ~$100M of RIF savings is mostly reinvested in AI and products, with management flagging temporary disruption and lower NDR — the cut does not rescue the FCF line. CONFIRMED (call summary, secondary).
+**C (procedural).** Red skipped **five required atlas entries** and substituted permit/beauty connectors not in the dispatch list — validator exposure.
+**D (method).** Red's findings 1 and 3 are mutually inconsistent: the decline cannot be both "explained by the 8/10 filing" and "a round-trip of a post-filing rally." Only 3 survives.
+
+### DETECTORS CONSULTED
+- **app_review_velocity** — NOT-FIRED: measures low-ACV self-serve; the disclosed soft spot (>10-user customers +6% YoY) is directionally adjacent but review counts cannot separate release cadence from churn.
+- **cybercom_budget / doe_budget / ic_contracting_proxy / pentagon_jbook** — UNCHECKABLE (N/A): SIC-7372 false positives; no federal/defense/DOE program line exists for this issuer.
+- **revenue_concentration** — NOT-FIRED: no federal prime exposure; disclosed cohort concentration (>$100k = 30% of ARR) is rising and diversified.
+- **rpo_drift** — CHECKED, NOT-FIRED: cRPO +27%, RPO +34% vs revenue +22%. Missing piece = duration-adjusted cRPO.
+- **runway_calculator** — NOT-FIRED: $1.07B cash+securities, positive FCF, no going-concern channel.
+- **chinese_smallcap_ramp_dump_archetype** — NOT-FIRED: Israel-domiciled FPI, $1.47B revenue, Big-4-audited NASDAQ large-mid; feature match (asia_operating_jurisdiction) is a dispatch false positive.
+- **clinicaltrials_lookup / competitor_trial_omission** — UNCHECKABLE (N/A): no clinical program; feature match erroneous.
+- **common_control_merger_accounting** — UNCHECKABLE: no common-control absorption in the 15-filing inventory; would need the 20-F business-combination note.
+- **jobs_act_disclosure_exemption_audit** — NOT-FIRED: MNDY IPO'd 2021 and is past EGC status; full FPI disclosure, no exemption stack.
+- **lockup_expiration_calendar** — UNCHECKABLE: no follow-on. Missing evidence = the 8/31 Form 144 share count and the 9/2–9/3 Form 4 transaction codes (S vs M/F). Red flagged this and then leaned on it anyway; I do not.
+
+```kg_candidate
+{"name": "stale_catalyst_reattribution", "kind": "detector", "one_line": "Flags a bench (bull or bear) that explains a price window with a filing whose own initial market reaction was the opposite sign, i.e. a catalyst already digested before the window opened.", "fires_on": "Cited causal filing date precedes window start by >5 trading days AND the cumulative return from filing date to window start is positive (for a decline window) by >5%.", "evidence_here": "Red attributes the 8/28-9/10 -15.8% to the 8/10 6-K guide and a 20% RIF that was actually announced 7/22; MNDY rallied ~16% in August after that filing to ~100 before the window's decline, so the filed record cannot identify the September move.", "applies_to_guess": {"issuer_features": ["post_print_window", "guidance_event", "foreign_private_issuer"], "sic_prefixes": []}}
+```
+
+**NET POSITION AFTER BOTH BENCHES:** The thesis dies as an *identification* claim — findings 2, 3, 7 are clean kills: the "no 8-K" test cannot fire for a 6-K filer, the −17.6%/3x-factor figure is a window artifact (−15.8% off pack, anchored on a late-August local high, ending flat to the post-print $84.12), and the deceleration is real and seasonality-confirmed (+17% H2 vs +23% H1). But red's *valuation* rebuttal fails audit: EV/S is 1.91x as the brief said, the $285M FCF is the company's own guide, and the SBC-wedge mechanism is analytically wrong. The genuine bear leg is the one red under-weighted and I supply: Q2 FCF margin 14.3% and H1 FCF down 10.7% YoY, with the FY26 FCF guide back-half loaded into restructuring outflows, while the buyback authorization that absorbed 9.6M shares is exhausted. Verdict: **HOLD the existing 105 shares (unrealized +$866), NO ADD, no short.** Gates for an add: Q3 print 11/09 with revenue ≥$372M, adj-FCF guide reaffirmed at ≥$280M with H2 margin ≥18%, overall NDR ≥109%, >$100k NDR ≥114%, **and** a new authorization ≥$300M filed by 6-K. Any of: FCF guide cut, >$100k NDR <110%, or FY26 revenue below $1,466M → exit. Kills after audit: **3 novel (2, 3, 5-partial) / 3 consensus (1-reduced, 4-reduced, 7), 1 overturned (8), 1 counter-finding carried (9)**.
+
+**Conviction that this net position is right: 8/10.** Docked for two unresolved items: the balance sheet was never pulled (no debt confirmation, no SBC series — pack XBRL empty), and the Form 144/Form 4 codes remain unread, so insider-supply is UNVERIFIED on both benches.

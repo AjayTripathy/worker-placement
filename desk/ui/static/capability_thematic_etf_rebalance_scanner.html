@@ -1,0 +1,358 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>thematic_etf_rebalance_scanner</title><style>
+body{margin:0;background:#0b0e12;color:#e8ebee;font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:26px 24px 90px}
+a{color:#8b7cf6} h1{font-size:23px;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:#7d858e;margin:0 0 20px;font-size:13px}
+h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:#7d858e;margin:24px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 10px;border-bottom:1px solid #242a31;text-align:left;vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#7d858e}
+.k{font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:20px}
+.k-generator{color:#c3b8fb;background:rgba(139,124,246,.15)}
+.k-detector{color:#eccb8a;background:rgba(217,164,65,.15)}
+.k-watcher{color:#8ee5c1;background:rgba(53,201,143,.15)}
+.k-evidence{color:#b3bcc6;background:rgba(138,147,158,.15)}
+.h-OK{color:#35c98f} .h-STALE{color:#d9a441} .h-ERROR{color:#e0736a} .h-NEVER_RUN{color:#8a939e}
+pre{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px;overflow-x:auto;font-size:12px;line-height:1.5}
+.panel{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px 18px;margin-bottom:12px}
+ul{margin:4px 0;padding-left:20px} li{margin-bottom:4px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+</style></head><body><div class="wrap"><h1>thematic_etf_rebalance_scanner</h1><p class="sub">registered capability · thematic_etf_rebalance_scanner</p><a href="signals.html">&larr; all signals</a><div class="panel" style="margin-top:10px"><span class="k k-generator">GENERATOR</span> &nbsp;<span class="h-NEVER_RUN"><b>NEVER_RUN</b></span> · last run <span class="mono">never</span></div><p>Stage 0b FLOW: thematic-ETF (ARK) rebalance forced-flow.</p><form method="POST" action="/signals/run" style="margin:10px 0"><input type="hidden" name="name" value="thematic_etf_rebalance_scanner"><input name="symbol" placeholder="symbol (if applicable)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px"><input name="symbols" placeholder="universe, comma-sep (generators)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px;margin-left:6px"><button type="submit" style="background:#8b7cf6;color:#0b0e12;border:0;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;margin-left:6px">Run now</button></form><h2>Datasources</h2><ul><li>reference implementation: verticals/generators/thematic_etf_rebalance_scanner.py (see the code section for the feeds it touches)</li></ul><h2>Applies to</h2><ul><li><b>strategies:</b> value_band_entry</li></ul><h2>The code</h2><pre>&quot;&quot;&quot;thematic_etf_rebalance_scanner — Stage 0b FLOW: thematic-ETF (ARK) rebalance forced-flow.
+
+THE CAPACITY EDGE. When a thematic fund (ARK et al.) adds or drops a $1-3B name it forces DAYS of
+concentrated, price-INSENSITIVE flow into a float too small for anyone big to arbitrage — the exact
+opposite of S&amp;P/Russell recon, where the whole street front-runs a large-cap add. Here the underlying
+names are small enough that ONLY WE care: ARK often owns a double-digit % of a small name&#x27;s public
+float, so an ARK trim = a tradeable air-pocket (the drop) and an ARK add = a pop, and neither is
+crowded because the ticket is beneath institutional attention. FLOW/MFP class.
+
+DATA (free, keyless): ARK publishes DAILY holdings CSVs. Each row is
+    date,fund,company,ticker,cusip,shares,market value ($),weight (%)
+We pull TODAY&#x27;s holdings for ARKK/ARKG/ARKW/ARKF/ARKQ/ARKX.
+
+SIGNAL 1 — rebalance-flow RISK (ownership concentration, always computable):
+  For every holding we estimate ARK&#x27;s position as a share of the name&#x27;s PUBLIC FLOAT (ark_shares /
+  float via yfinance) and as DAYS-OF-ADV (ark_shares / average daily volume). A high float-share or
+  high days-of-ADV = a name where any ARK add/trim moves the tape for days (the tradeable event).
+  We flag the top names by concentration. float% is an ESTIMATE (yfinance floatShares); days-of-ADV
+  is the harder, cleaner number (a trim of N ARK-days of ADV must clear against the market).
+
+SIGNAL 2 — day-over-day DELTA (accumulates over runs):
+  ARK&#x27;s CSV URL is same-day only — there is NO stable historical URL, so a same-run delta is NOT
+  possible on a cold start. We therefore PERSIST today&#x27;s holdings to a state file; every subsequent
+  run diffs today&#x27;s shares vs the stored prior day and emits share/weight deltas (an ADD = pop setup,
+  a DROP/trim = air-pocket setup). The cron accumulates the history the URL won&#x27;t give us. First run
+  reports deltas: [] and says so.
+
+    python3 verticals/generators/thematic_etf_rebalance_scanner.py
+Writes data/THEMATIC_ETF_REBALANCE.json  +  data/thematic_etf_state.json. READ-ONLY, never orders.
+&quot;&quot;&quot;
+from __future__ import annotations
+
+import csv
+import datetime
+import io
+import json
+import urllib.request
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+OUT = HERE / &quot;data&quot; / &quot;THEMATIC_ETF_REBALANCE.json&quot;
+STATE = HERE / &quot;data&quot; / &quot;thematic_etf_state.json&quot;
+HDRS = {&quot;User-Agent&quot;: &quot;signalos-research 4tripathy@gmail.com&quot;}
+
+_BASE = &quot;https://assets.ark-funds.com/fund-documents/funds-etf-csv&quot;
+# fund -&gt; exact CSV URL (the &#x27;&amp;&#x27; funds are URL-encoded as %26; verified live).
+FUNDS = {
+    &quot;ARKK&quot;: f&quot;{_BASE}/ARK_INNOVATION_ETF_ARKK_HOLDINGS.csv&quot;,
+    &quot;ARKG&quot;: f&quot;{_BASE}/ARK_GENOMIC_REVOLUTION_ETF_ARKG_HOLDINGS.csv&quot;,
+    &quot;ARKW&quot;: f&quot;{_BASE}/ARK_NEXT_GENERATION_INTERNET_ETF_ARKW_HOLDINGS.csv&quot;,
+    &quot;ARKF&quot;: f&quot;{_BASE}/ARK_FINTECH_INNOVATION_ETF_ARKF_HOLDINGS.csv&quot;,
+    &quot;ARKQ&quot;: f&quot;{_BASE}/ARK_AUTONOMOUS_TECH._%26_ROBOTICS_ETF_ARKQ_HOLDINGS.csv&quot;,
+    &quot;ARKX&quot;: f&quot;{_BASE}/ARK_SPACE_EXPLORATION_%26_INNOVATION_ETF_ARKX_HOLDINGS.csv&quot;,
+}
+
+# concentration flag thresholds (a name clears if it trips EITHER — both are FLOW-forcing).
+ADV_DAYS_FLOOR = 3.0      # ARK holds &gt;=3 days of the name&#x27;s ADV -&gt; a trim/add takes days to clear
+FLOAT_PCT_FLOOR = 5.0     # ARK holds &gt;=5% of estimated public float -&gt; outsized single-holder pressure
+TOP_N = 30                # cap the flagged list
+
+
+def _get(url: str) -&gt; str | None:
+    try:
+        with urllib.request.urlopen(urllib.request.Request(url, headers=HDRS), timeout=30) as r:
+            return r.read().decode(&quot;utf-8&quot;, &quot;replace&quot;)
+    except Exception:
+        return None
+
+
+def _num(s):
+    &quot;&quot;&quot;&#x27;2,192,620&#x27; or &#x27;$894,062,731.20&#x27; or &#x27;10.54%&#x27; -&gt; float; None on junk.&quot;&quot;&quot;
+    if s is None:
+        return None
+    s = str(s).replace(&quot;,&quot;, &quot;&quot;).replace(&quot;$&quot;, &quot;&quot;).replace(&quot;%&quot;, &quot;&quot;).strip()
+    try:
+        return float(s)
+    except Exception:
+        return None
+
+
+def _clean_ticker(t: str) -&gt; str:
+    &quot;&quot;&quot;ARK tickers sometimes carry an exchange suffix (e.g. &#x27;RKLB UQ&#x27;, &#x27;RKLB.US&#x27;) — strip to root.&quot;&quot;&quot;
+    t = (t or &quot;&quot;).strip().upper()
+    if not t:
+        return &quot;&quot;
+    t = t.split(&quot; &quot;)[0]          # &#x27;RKLB UQ&#x27; -&gt; &#x27;RKLB&#x27;
+    t = t.split(&quot;.&quot;)[0]          # &#x27;RKLB.US&#x27; -&gt; &#x27;RKLB&#x27;
+    return t
+
+
+def _fetch_fund(fund: str, url: str) -&gt; tuple[list[dict], str | None]:
+    &quot;&quot;&quot;Return (rows, asof_date). Each row: fund, ticker, company, shares, mv, weight. Bad rows dropped.&quot;&quot;&quot;
+    raw = _get(url)
+    if not raw:
+        return [], None
+    rows, asof = [], None
+    reader = csv.DictReader(io.StringIO(raw))
+    for r in reader:
+        # ARK appends a legal-disclaimer paragraph as a final pseudo-row; it has no numeric shares -&gt; drops.
+        tk = _clean_ticker(r.get(&quot;ticker&quot;, &quot;&quot;))
+        shares = _num(r.get(&quot;shares&quot;))
+        if not tk or not shares or shares &lt;= 0:
+            continue        # cash / GS treasury sweep / warrants-w/o-ticker / disclaimer line -&gt; prune
+        if asof is None:
+            d = (r.get(&quot;date&quot;) or &quot;&quot;).strip()
+            try:                # ARK prints MM/DD/YYYY
+                asof = datetime.datetime.strptime(d, &quot;%m/%d/%Y&quot;).date().isoformat()
+            except Exception:
+                asof = d or None
+        rows.append({
+            &quot;fund&quot;: fund,
+            &quot;ticker&quot;: tk,
+            &quot;company&quot;: (r.get(&quot;company&quot;) or &quot;&quot;).strip(),
+            &quot;shares&quot;: shares,
+            &quot;market_value&quot;: _num(r.get(&quot;market value ($)&quot;)),
+            &quot;weight&quot;: _num(r.get(&quot;weight (%)&quot;)),
+        })
+    return rows, asof
+
+
+def _float_and_adv(tickers: list[str]) -&gt; dict:
+    &quot;&quot;&quot;floatShares + ADV + quoteType/marketCap per ticker via yfinance. Missing -&gt; absent (self-prune).
+    yfinance logs 404/500s to stderr for foreign/unit tickers; we silence it (those simply self-prune).&quot;&quot;&quot;
+    import logging
+    import os
+    import sys
+    import warnings
+    warnings.filterwarnings(&quot;ignore&quot;)
+    logging.getLogger(&quot;yfinance&quot;).disabled = True
+    import yfinance as yf
+    out = {}
+    _devnull = open(os.devnull, &quot;w&quot;)
+    _real_err = sys.stderr
+    for t in tickers:
+        try:
+            tk = yf.Ticker(t)
+            sys.stderr = _devnull          # mute yfinance&#x27;s per-ticker HTTP-error prints
+            try:
+                info = tk.info or {}
+            except Exception:
+                info = {}
+            finally:
+                sys.stderr = _real_err
+            flt = info.get(&quot;floatShares&quot;) or info.get(&quot;sharesOutstanding&quot;)
+            adv = (info.get(&quot;averageDailyVolume3Month&quot;) or info.get(&quot;averageVolume&quot;)
+                   or info.get(&quot;averageDailyVolume10Day&quot;))
+            out[t] = {
+                &quot;float&quot;: float(flt) if flt else None,
+                &quot;adv&quot;: float(adv) if adv else None,
+                &quot;quote_type&quot;: (info.get(&quot;quoteType&quot;) or &quot;&quot;).upper(),
+                &quot;market_cap&quot;: info.get(&quot;marketCap&quot;),
+            }
+        except Exception:
+            sys.stderr = _real_err
+            continue
+    try:
+        _devnull.close()
+    except Exception:
+        pass
+    return out
+
+
+def _load_state() -&gt; dict:
+    if STATE.exists():
+        try:
+            return json.loads(STATE.read_text())
+        except Exception:
+            return {}
+    return {}
+
+
+def _compute_deltas(prior: dict, today_holdings: dict, today_asof: str | None) -&gt; list[dict]:
+    &quot;&quot;&quot;Diff today&#x27;s per-(fund,ticker) shares vs the persisted prior run. ADD/NEW = pop; DROP/EXIT = air-pocket.&quot;&quot;&quot;
+    if not prior or not prior.get(&quot;holdings&quot;):
+        return []
+    prior_date = prior.get(&quot;asof&quot;)
+    if prior_date and today_asof and prior_date == today_asof:
+        return []       # same publish date (weekend / stale) -&gt; no new delta
+    prev = prior[&quot;holdings&quot;]
+    deltas = []
+    keys = set(prev) | set(today_holdings)
+    for k in keys:
+        p = prev.get(k, {}).get(&quot;shares&quot;, 0.0)
+        c = today_holdings.get(k, {}).get(&quot;shares&quot;, 0.0)
+        if p == c:
+            continue
+        meta = today_holdings.get(k) or prev.get(k) or {}
+        fund, ticker = k.split(&quot;|&quot;, 1) if &quot;|&quot; in k else (&quot;?&quot;, k)
+        if p == 0 and c &gt; 0:
+            kind, dir_ = &quot;NEW&quot;, &quot;pop&quot;
+        elif c == 0 and p &gt; 0:
+            kind, dir_ = &quot;EXIT&quot;, &quot;air-pocket&quot;
+        else:
+            kind = &quot;ADD&quot; if c &gt; p else &quot;TRIM&quot;
+            dir_ = &quot;pop&quot; if c &gt; p else &quot;air-pocket&quot;
+        dpct = ((c - p) / p * 100) if p else None
+        deltas.append({
+            &quot;fund&quot;: fund, &quot;ticker&quot;: ticker, &quot;company&quot;: meta.get(&quot;company&quot;, &quot;&quot;),
+            &quot;kind&quot;: kind, &quot;direction&quot;: dir_,
+            &quot;prior_shares&quot;: round(p), &quot;today_shares&quot;: round(c),
+            &quot;delta_shares&quot;: round(c - p), &quot;delta_pct&quot;: round(dpct, 1) if dpct is not None else None,
+        })
+    # biggest moves first (by |delta shares|)
+    deltas.sort(key=lambda d: -abs(d[&quot;delta_shares&quot;]))
+    return deltas
+
+
+def scan() -&gt; dict:
+    today = datetime.date.today().isoformat()
+    all_rows, funds_scanned, funds_failed, asof_seen = [], [], [], []
+    for fund, url in FUNDS.items():
+        rows, asof = _fetch_fund(fund, url)
+        if rows:
+            funds_scanned.append(fund)
+            if asof:
+                asof_seen.append(asof)
+            all_rows.extend(rows)
+        else:
+            funds_failed.append(fund)
+
+    # aggregate ARK&#x27;s TOTAL shares per ticker across all funds (float/ADV pressure is family-wide).
+    by_ticker = {}
+    for r in all_rows:
+        t = r[&quot;ticker&quot;]
+        agg = by_ticker.setdefault(t, {&quot;ticker&quot;: t, &quot;company&quot;: r[&quot;company&quot;], &quot;ark_shares&quot;: 0.0,
+                                       &quot;funds&quot;: set(), &quot;weight_max&quot;: 0.0, &quot;mv&quot;: 0.0})
+        agg[&quot;ark_shares&quot;] += r[&quot;shares&quot;]
+        agg[&quot;funds&quot;].add(r[&quot;fund&quot;])
+        agg[&quot;weight_max&quot;] = max(agg[&quot;weight_max&quot;], r[&quot;weight&quot;] or 0.0)
+        agg[&quot;mv&quot;] += r[&quot;market_value&quot;] or 0.0
+
+    fa = _float_and_adv(sorted(by_ticker)) if by_ticker else {}
+
+    high_conc = []
+    for t, agg in by_ticker.items():
+        d = fa.get(t) or {}
+        flt, adv, qt, mcap = d.get(&quot;float&quot;), d.get(&quot;adv&quot;), d.get(&quot;quote_type&quot;), d.get(&quot;market_cap&quot;)
+        # fund-of-fund holdings (ARK holds other ETFs, e.g. PRNT/3D-printing) are NOT the small-cap
+        # capacity-edge thesis — a thin US-ADV read on an ETF is noise, not forced single-name flow.
+        if qt == &quot;ETF&quot;:
+            continue
+        pct_float = (agg[&quot;ark_shares&quot;] / flt * 100) if flt else None
+        adv_days = (agg[&quot;ark_shares&quot;] / adv) if adv else None
+        # days-of-ADV on a US line is only a valid flow proxy for genuinely small names; a thin US ADV on a
+        # mega-cap foreign ADR (primary liquidity abroad) overstates it, so the pure-ADV flag needs the name
+        # to be small (float% known OR market cap under the ceiling). float% alone always qualifies.
+        SMALLCAP_MCAP_CEIL = 15e9
+        adv_valid = adv_days is not None and (pct_float is not None or (mcap is not None and mcap &lt;= SMALLCAP_MCAP_CEIL))
+        flag = ((adv_valid and adv_days &gt;= ADV_DAYS_FLOOR) or
+                (pct_float is not None and pct_float &gt;= FLOAT_PCT_FLOOR))
+        if not flag:
+            continue
+        note = []
+        if adv_valid and adv_days &gt;= ADV_DAYS_FLOOR:
+            note.append(f&quot;ARK holds ~{adv_days:.1f} days of ADV -&gt; a full exit takes days to clear&quot;)
+        if pct_float is not None and pct_float &gt;= FLOAT_PCT_FLOOR:
+            note.append(f&quot;~{pct_float:.1f}% of est. public float in one holder&quot;)
+        high_conc.append({
+            &quot;ticker&quot;: t, &quot;name&quot;: agg[&quot;company&quot;], &quot;fund&quot;: &quot;+&quot;.join(sorted(agg[&quot;funds&quot;])),
+            &quot;ark_shares&quot;: round(agg[&quot;ark_shares&quot;]),
+            &quot;pct_of_adv&quot;: round(adv_days, 1) if adv_valid else None,
+            &quot;pct_of_float_est&quot;: round(pct_float, 1) if pct_float is not None else None,
+            &quot;weight&quot;: round(agg[&quot;weight_max&quot;], 2),
+            &quot;ark_market_value&quot;: round(agg[&quot;mv&quot;]),
+            &quot;note&quot;: &quot;; &quot;.join(note),
+        })
+    # rank by the flow-forcing severity: days-of-ADV first (the cleaner number), then float%
+    high_conc.sort(key=lambda r: (-(r[&quot;pct_of_adv&quot;] or 0), -(r[&quot;pct_of_float_est&quot;] or 0)))
+    high_conc = high_conc[:TOP_N]
+
+    # ---- delta vs persisted prior run ----
+    asof = sorted(asof_seen)[-1] if asof_seen else today   # most recent publish date across funds
+    prior = _load_state()
+    today_holdings = {f&quot;{r[&#x27;fund&#x27;]}|{r[&#x27;ticker&#x27;]}&quot;: {&quot;shares&quot;: r[&quot;shares&quot;], &quot;company&quot;: r[&quot;company&quot;]}
+                      for r in all_rows}
+    deltas = _compute_deltas(prior, today_holdings, asof)
+
+    # persist today&#x27;s holdings for the NEXT run&#x27;s delta
+    try:
+        STATE.write_text(json.dumps({&quot;asof&quot;: asof, &quot;saved_at&quot;: today, &quot;holdings&quot;: today_holdings}, indent=0))
+    except Exception:
+        pass
+
+    first_run = not prior or not prior.get(&quot;holdings&quot;)
+    caveats = [
+        &quot;float% is an ESTIMATE (yfinance floatShares/sharesOutstanding) — treat as an order-of-magnitude &quot;
+        &quot;ownership read, not a filing-grade number; days-of-ADV is the cleaner flow metric.&quot;,
+        &quot;ARK&#x27;s CSV URL is same-day only with NO stable history URL, so a same-RUN delta is impossible; &quot;
+        &quot;deltas ACCUMULATE across cron runs from the persisted state file. First run has deltas: [].&quot;,
+        &quot;concentration is the RISK setup (a name where ARK flow moves the tape), NOT a live event — the &quot;
+        &quot;tradeable trigger is an actual ARK add/trim, which Signal-2 deltas catch once history builds.&quot;,
+        &quot;yfinance-unresolved tickers get no float/ADV and simply don&#x27;t flag (self-prune, never fabricated).&quot;,
+    ]
+    return {
+        &quot;asof&quot;: asof,
+        &quot;funds_scanned&quot;: funds_scanned,
+        &quot;funds_failed&quot;: funds_failed,
+        &quot;holdings_count&quot;: len(all_rows),
+        &quot;unique_tickers&quot;: len(by_ticker),
+        &quot;high_concentration&quot;: high_conc,
+        &quot;deltas&quot;: deltas,
+        &quot;first_run&quot;: first_run,
+        &quot;note&quot;: &quot;FLOW class — thematic-ETF (ARK) rebalance forced-flow, the CAPACITY edge: ARK adds/drops &quot;
+                &quot;$1-3B names whose float is too small for anyone big to arbitrage, so an add = a pop and a &quot;
+                &quot;trim = an air-pocket that ISN&#x27;T crowded (unlike S&amp;P/Russell recon). Signal-1 = ownership &quot;
+                &quot;concentration (days-of-ADV + est. float%) flags names where ARK flow forces days of trade. &quot;
+                &quot;Signal-2 = day-over-day share deltas, which ACCUMULATE across cron runs (the CSV URL keeps &quot;
+                &quot;no history, so the state file is the history). Verify direction/timing on the actual rebalance.&quot;,
+        &quot;caveats&quot;: caveats,
+    }
+
+
+def main():
+    res = scan()
+    print(f&quot;=== THEMATIC-ETF (ARK) REBALANCE FLOW  {res[&#x27;asof&#x27;]}  &quot;
+          f&quot;({len(res[&#x27;funds_scanned&#x27;])}/{len(FUNDS)} funds, {res[&#x27;unique_tickers&#x27;]} names) ===&quot;)
+    print(f&quot;  funds: {&#x27;, &#x27;.join(res[&#x27;funds_scanned&#x27;])}&quot;
+          + (f&quot;   FAILED: {res[&#x27;funds_failed&#x27;]}&quot; if res[&quot;funds_failed&quot;] else &quot;&quot;))
+    print(f&quot;  HIGH OWNERSHIP-CONCENTRATION (an ARK add/trim forces days of flow — the tradeable air-pocket/pop):&quot;)
+    for r in res[&quot;high_concentration&quot;][:20]:
+        adv = f&quot;{r[&#x27;pct_of_adv&#x27;]:5.1f}d ADV&quot; if r[&quot;pct_of_adv&quot;] is not None else &quot;  ?d ADV&quot;
+        flt = f&quot;{r[&#x27;pct_of_float_est&#x27;]:4.1f}% float&quot; if r[&quot;pct_of_float_est&quot;] is not None else &quot;  ?% float&quot;
+        print(f&quot;    {r[&#x27;ticker&#x27;]:7} {r[&#x27;name&#x27;][:26]:26} {r[&#x27;fund&#x27;]:14} {adv}  {flt}  wt {r[&#x27;weight&#x27;]:.2f}%&quot;)
+    if res[&quot;deltas&quot;]:
+        print(f&quot;  DAY-OVER-DAY DELTAS (ADD=pop / TRIM=air-pocket):&quot;)
+        for d in res[&quot;deltas&quot;][:12]:
+            dp = f&quot;{d[&#x27;delta_pct&#x27;]:+.0f}%&quot; if d[&quot;delta_pct&quot;] is not None else &quot;  new/exit&quot;
+            print(f&quot;    {d[&#x27;kind&#x27;]:5} {d[&#x27;ticker&#x27;]:7} {d[&#x27;fund&#x27;]:6} {d[&#x27;delta_shares&#x27;]:+,} sh ({dp})  -&gt; {d[&#x27;direction&#x27;]}&quot;)
+    elif res[&quot;first_run&quot;]:
+        print(&quot;  DELTAS: none — FIRST RUN (no prior state). Next run will diff against today&#x27;s persisted holdings.&quot;)
+    else:
+        print(&quot;  DELTAS: none (no share changes since prior run, or same publish date).&quot;)
+    OUT.write_text(json.dumps(res, indent=1))
+    print(f&quot;[-&gt; {OUT.name}  +  {STATE.name}]&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</pre></div></body></html>

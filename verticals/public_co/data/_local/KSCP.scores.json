@@ -1,0 +1,92 @@
+{
+  "ticker": "KSCP",
+  "scores": [
+    {
+      "claim_id": "KSCP-C1",
+      "claim_text": "Total revenue of $11.3M in FY2025, up 5% YoY from $10.8M in FY2024.",
+      "severity": "PASS",
+      "supports": "Audited financial statements (BPM LLP, March 27 2026) confirm $11.335M FY2025 vs $10.805M FY2024 in Statements of Operations.",
+      "M_check": "internal_audited_financials",
+      "M_value": {"FY2025_rev": 11335, "FY2024_rev": 10805, "growth_pct": 4.9},
+      "interpretation": "Revenue figure is internally consistent and audited. The 5% growth on an $11M base is microcap-scale and contextually weak vs the ASR commercialization narrative the company markets."
+    },
+    {
+      "claim_id": "KSCP-C2",
+      "claim_text": "Going concern: $227.0M accumulated deficit, $33.8M net loss, $30.3M cash used in operating activities for FY2025; auditor issued substantial-doubt going-concern qualifier.",
+      "severity": "RED_FLAG_NEGATIVE",
+      "supports": "BPM LLP explicit going-concern paragraph (\"raise substantial doubt about the Company's ability to continue as a going concern\"). Q1 2026 10-Q (filed 2026-05-15) reconfirms substantial doubt: cash dropped from $20.6M (YE2025) to $11.4M (Mar 31 2026), with Q1 op cash burn $11.6M. At that burn rate, runway without additional financing is under 3 quarters.",
+      "M_check": "edgar_fts.query_fulltext (KSCP own filings) + 10-K/10-Q text",
+      "M_value": {"accumulated_deficit_M": 227.0, "FY2025_op_cash_burn_M": 30.3, "YE2025_cash_M": 20.6, "Q1_2026_op_burn_M": 11.6, "Mar31_2026_cash_M": 11.4, "implied_runway_quarters": "<3 without new ATM issuance"},
+      "interpretation": "Going-concern qualifier is explicit and reaffirmed in Q1 2026. Cash burn accelerated QoQ (from ~$7.6M/quarter FY2025 avg to $11.6M in Q1 2026, partly due to KSF acquisition cash outflow of $6.1M). Company is structurally dependent on ATM equity issuance — see C8."
+    },
+    {
+      "claim_id": "KSCP-C3",
+      "claim_text": "One client = 19% of FY2025 revenue (zero such clients in 2024); two clients = 28% and 11% of AR at YE2025.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": "10-K Note on Concentrations of Credit Risk discloses customer concentration. The CLIENT IS NOT NAMED in the filing. Per Layer 3 Rule 7, an unnamed 19% customer prevents counterparty cross-check; we cannot verify in any counterparty 10-K. EDGAR FTS shows zero non-KSCP filers reference 'Knightscope' in 10-K results, but absence is expected for a $2.2M annual revenue contribution (well below any counterparty's materiality threshold).",
+      "M_check": "edgar_fts.query_fulltext(search_term='Knightscope', forms='10-K')",
+      "M_value": {"total_10K_hits": 57, "non_KSCP_filers_in_top_results": 0, "concentrated_client_revenue_est_M": 2.15, "ar_concentration_pct": [28, 11]},
+      "interpretation": "Per Calibration 7, absence of counterparty disclosure for a $2M customer is NOT a hard contradiction — too immaterial to trigger 10-K mention on the customer side. Score MODERATE because the named-customer transparency is missing and the new concentration risk (zero to 19% YoY) suggests a single-deal lift rather than broad commercial scaling."
+    },
+    {
+      "claim_id": "KSCP-C4",
+      "claim_text": "K7 ASR remains in development; commercial production not expected until late 2026 or early 2027; K7 contributed zero revenue in 2025.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": "10-K MD&A explicitly states K7 contributed zero revenue in 2025 and that commercial production targets late-2026/early-2027 'subject to development milestones and supply chain readiness'. USPTO confirms 11 granted patents — robotics IP exists (see C7).",
+      "M_check": "uspto_odp.query_assignee + filing text",
+      "M_value": {"K7_FY2025_revenue": 0, "commercial_production_target": "late 2026 / early 2027", "uspto_granted_pre_cutoff": 11},
+      "interpretation": "Per Calibration 3 (planned vs operational): K7 is still at pre-commercial stage. The repeated push of commercial production timeline (now 'late 2026 or early 2027') is a soft-deferral pattern consistent with pilots-as-PR risk. Not a hard fabrication — the company is transparent that K7 has $0 revenue. Score MODERATE: company is honest about the gap but the new-platform optionality is being relied on to justify the R&D spike (R&D +77% YoY to $12.5M, 110% of revenue)."
+    },
+    {
+      "claim_id": "KSCP-C5",
+      "claim_text": "Total order backlog of approximately $3.1M as of March 24, 2026 ($0.6M ASR + $2.5M ECD).",
+      "severity": "RED_FLAG_NEGATIVE",
+      "supports": "Self-disclosed backlog in 10-K Risk Factors. $0.6M of ASR backlog is the binding signal: ASR (the autonomous-robot core product) has under $1M of forward orders against $33.8M annual operating loss. Backlog is 27% of FY2025 revenue and falling vs. company narrative of commercial scaling.",
+      "M_check": "internal_disclosure + cross-check via Q1 2026 10-Q (no backlog uplift disclosed)",
+      "M_value": {"total_backlog_M": 3.1, "ASR_backlog_M": 0.6, "ECD_backlog_M": 2.5, "backlog_to_FY2025_revenue_pct": 27},
+      "interpretation": "Tiny $0.6M ASR backlog is direct quantitative contradiction of the 'building the nation's first Autonomous Security Force' positioning. With ASR depreciation alone at $2.0M/yr and ASR-related service revenue ~$8.0M total, $0.6M of new ASR orders implies the install-base lift is decelerating. Combined with the going-concern overhang, this is a HARD signal of forward-revenue weakness in the core platform."
+    },
+    {
+      "claim_id": "KSCP-C6",
+      "claim_text": "Acquired Event Risk LLC (KSF) on Feb 27, 2026 for ~$18M total consideration; recorded $7.7M goodwill + $15.5M customer-relationships intangible.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": "EDGAR FTS confirms the deal: 9 KSCP filings reference 'Event Risk' (8-K 2026-03-03, 8-K/A 2026-05-15 with Reg S-X financials, 10-K 2026-03-27, 10-Q 2026-05-15). Counterparty (Event Risk LLC) is a private Indiana LLC so no SEC corroboration is possible — by construction.",
+      "M_check": "edgar_fts.query_fulltext(search_term='Event Risk', cik=KSCP)",
+      "M_value": {"KSCP_filings_referencing_Event_Risk": 9, "total_consideration_M": 18.0, "goodwill_M": 7.7, "customer_relationships_intangible_M": 15.5, "deferred_cash_M": 4.0, "shares_issued": 1724418},
+      "interpretation": "Acquisition is verified via 8-K/A with full Reg S-X financial statements (filed 2026-05-15). However, two cautions per Calibration 4: (a) for a $30M-burn microcap with going-concern qualifier to pay ~$11M cash+debt-repay+deferred (plus shares) for a security-guarding services business is a pivot away from the autonomous-robot pure-play, with $15.5M of intangibles (customer relationships) representing ~86% of purchase price — high reliance on retention of acquired customer book. Score MODERATE: real transaction but quality / strategic-fit risk is elevated."
+    },
+    {
+      "claim_id": "KSCP-C7",
+      "claim_text": "Knightscope holds robotics-related IP supporting ASR platform including lidar, imaging, and AI-based detection.",
+      "severity": "PASS",
+      "supports": "USPTO ODP returns 11 granted patents (17 total applications) pre-cutoff under 'Knightscope, Inc.' assignee. Granted titles include 'AUTONOMOUS DATA MACHINES AND SYSTEMS', 'AUTONOMOUS PARKING MONITOR', 'SYSTEMS AND METHODS FOR SECURITY DATA ANALYSIS AND DISPLAY' — directly on-topic for ASR / autonomy / security-data analytics.",
+      "M_check": "uspto_odp.query_assignee(assignee='Knightscope', cutoff=2026-05-16)",
+      "M_value": {"n_total_applications": 17, "n_granted": 11, "on_topic_titles": ["AUTONOMOUS DATA MACHINES AND SYSTEMS", "AUTONOMOUS PARKING MONITOR", "SYSTEMS AND METHODS FOR SECURITY DATA ANALYSIS AND DISPLAY"]},
+      "interpretation": "Per Calibration 8: n_granted = 11 with claimed-tech-area hits >= 1 = PASS. Patent portfolio is genuine and on-topic; not a Nikola-pattern false-IP company."
+    },
+    {
+      "claim_id": "KSCP-C8",
+      "claim_text": "ATM offering program produced $42.8M FY2025 + $9.0M Q1 2026 + $3.3M April-May 8 2026 ($55M+ net in 16 months); $18.3M remaining on shelf at May 8 2026. Class A shares grew from 4.07M (YE2024) to 12.19M (YE2025) and ~14.9M+ post Event Risk issuance.",
+      "severity": "RED_FLAG_NEGATIVE",
+      "supports": "Self-disclosed in 10-K MD&A and Q1 2026 10-Q Subsequent Events. Magnitudes verifiable in cash flow statement ($42.2M FY2025 financing inflow). Share count trajectory in equity rollforward.",
+      "M_check": "internal_filings + edgar_fts (KSCP S-3, 424B5, 8-K)",
+      "M_value": {"ATM_net_FY2025_M": 42.8, "ATM_net_Q1_2026_M": 9.0, "ATM_net_AprMay8_2026_M": 3.3, "shelf_remaining_M_May8": 18.3, "share_count_YE2024_M": 4.07, "share_count_YE2025_M": 12.19, "share_count_post_KSF_M_est": 14.91, "dilution_multiplier_15mo": "~3.7x"},
+      "interpretation": "~3.7x share-count expansion in 15 months funded almost entirely by ATM dilution — this IS the going-concern remediation. Combined with multiple historical reverse-splits (per cohort metadata and the 'fractional share adjustment due to reverse stock split' line in FY2024 equity rollforward), the structural dependence on ATM issuance against a declining ASR backlog is a classic distress fingerprint per Calibration 10. Listed price reference ($10.00 Nov-2024 offering) implies ATM issuance well above $10/share now, but each issuance is highly dilutive given the low share count base."
+    },
+    {
+      "claim_id": "KSCP-C9",
+      "claim_text": "Knightscope serves government clients (per cohort metadata, municipal/private-security customers).",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": "USAspending returns 5 federal contract awards 2020-2026 totaling only $241,512: VA ($88.8K, $36.4K), DoD/Air Force ($73.4K, $23.4K), DoI ($19.6K). Descriptions are dominated by 'EMERGENCY CALL BOX SYSTEM', 'AUTONOMOUS PUBLIC SAFETY SOLUTIONS FOR US AIR FORCE INSTALLATION SECURITY NEEDS', and call-box repairs. Total federal contract dollars over 5+ years = ~2.1% of FY2025 revenue alone.",
+      "M_check": "usaspending.query_recipient_contracts(recipient='Knightscope', 2020-2026)",
+      "M_value": {"n_awards": 5, "total_amount_USD": 241512, "agencies": {"VA": 2, "DoD": 2, "DoI": 1}, "largest_award_USD": 88760, "share_of_FY2025_revenue_pct": 2.1},
+      "interpretation": "Per Calibration 5 + 7: USAspending captures federal contracts. There IS one DoD/Air Force ASR contract ($73K — directly on-mission), which validates the existence of federal ASR pilot activity — score is NOT RED. However, $241K cumulative over 5+ years vs. company emphasis on 'government' as a market segment shows federal channel is sub-material. Municipal/private-security customers (the bulk of the cohort metadata's named segment) would not appear in USAspending; this is a true UNVERIFIABLE for municipal, but the federal slice is verifiably tiny. Score MODERATE: claim is technically true but quantitatively trivial relative to positioning."
+    }
+  ],
+  "summary": {
+    "n_claims": 9,
+    "n_queries": 5,
+    "severity_counts": {"PASS": 2, "MODERATE_UNDERDELIVERY": 4, "SEVERE_UNDERDELIVERY": 0, "RED_FLAG_NEGATIVE": 3, "UNVERIFIABLE": 0},
+    "overall_thesis": "KSCP is a microcap robotics company with a real but tiny ($11M) revenue base, on-topic patent portfolio (11 granted), explicit going-concern qualifier reaffirmed in Q1 2026, $0.6M ASR backlog vs an autonomous-security-force narrative, and an aggressive ATM-dilution funding model that has 3.7x-ed share count in 15 months. February 2026 Event Risk acquisition pivots toward security-guarding services (away from the autonomy pure-play). Forward-test signal: structural distress + product-deferral pattern."
+  }
+}

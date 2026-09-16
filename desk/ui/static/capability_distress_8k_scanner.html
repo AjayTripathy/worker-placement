@@ -1,0 +1,99 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>distress_8k_scanner</title><style>
+body{margin:0;background:#0b0e12;color:#e8ebee;font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:26px 24px 90px}
+a{color:#8b7cf6} h1{font-size:23px;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:#7d858e;margin:0 0 20px;font-size:13px}
+h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:#7d858e;margin:24px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 10px;border-bottom:1px solid #242a31;text-align:left;vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#7d858e}
+.k{font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:20px}
+.k-generator{color:#c3b8fb;background:rgba(139,124,246,.15)}
+.k-detector{color:#eccb8a;background:rgba(217,164,65,.15)}
+.k-watcher{color:#8ee5c1;background:rgba(53,201,143,.15)}
+.k-evidence{color:#b3bcc6;background:rgba(138,147,158,.15)}
+.h-OK{color:#35c98f} .h-STALE{color:#d9a441} .h-ERROR{color:#e0736a} .h-NEVER_RUN{color:#8a939e}
+pre{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px;overflow-x:auto;font-size:12px;line-height:1.5}
+.panel{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px 18px;margin-bottom:12px}
+ul{margin:4px 0;padding-left:20px} li{margin-bottom:4px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+</style></head><body><div class="wrap"><h1>distress_8k_scanner</h1><p class="sub">registered capability · distress_8k_scanner</p><a href="signals.html">&larr; all signals</a><div class="panel" style="margin-top:10px"><span class="k k-generator">GENERATOR</span> &nbsp;<span class="h-NEVER_RUN"><b>NEVER_RUN</b></span> · last run <span class="mono">never</span></div><p>Stage 0b generator: DISTRESS-TELL filings, whole market (EDGAR full-text search).</p><form method="POST" action="/signals/run" style="margin:10px 0"><input type="hidden" name="name" value="distress_8k_scanner"><input name="symbol" placeholder="symbol (if applicable)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px"><input name="symbols" placeholder="universe, comma-sep (generators)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px;margin-left:6px"><button type="submit" style="background:#8b7cf6;color:#0b0e12;border:0;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;margin-left:6px">Run now</button></form><h2>Datasources</h2><ul><li>reference implementation: verticals/generators/distress_8k_scanner.py (see the code section for the feeds it touches)</li></ul><h2>Applies to</h2><ul><li><b>strategies:</b> value_band_entry</li></ul><h2>The code</h2><pre>&quot;&quot;&quot;distress_8k_scanner — Stage 0b generator: DISTRESS-TELL filings, whole market (EDGAR full-text search).
+
+Scans the last N days for the classic tells: Item 4.01 auditor changes, NT 10-K/NT 10-Q late filings,
+credit-agreement amendments/waivers, and going-concern language in 8-Ks. Each hit is an avoid/short seed or a
+dislocation-buy candidate (a headline that DOESN&#x27;T reach the asset — the muni-dislocation pattern, equities
+edition). Exclusion is the product.
+
+  python3 verticals/generators/distress_8k_scanner.py [--days 7]
+Writes data/DISTRESS_8K.json. Uses efts.sec.gov full-text search (free, SEC-compliant UA). READ-ONLY.
+&quot;&quot;&quot;
+from __future__ import annotations
+import json, datetime, argparse, urllib.parse, urllib.request
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+OUT = HERE / &quot;data&quot; / &quot;DISTRESS_8K.json&quot;
+EFTS = &quot;https://efts.sec.gov/LATEST/search-index?&quot;
+HDRS = {&quot;User-Agent&quot;: &quot;signalos-research 4tripathy@gmail.com&quot;}
+QUERIES = [
+    (&quot;auditor_change&quot;, {&quot;q&quot;: &#x27;&quot;Item 4.01&quot;&#x27;, &quot;forms&quot;: &quot;8-K&quot;}),
+    (&quot;late_10K&quot;, {&quot;q&quot;: &quot;&quot;, &quot;forms&quot;: &quot;NT 10-K&quot;}),
+    (&quot;late_10Q&quot;, {&quot;q&quot;: &quot;&quot;, &quot;forms&quot;: &quot;NT 10-Q&quot;}),
+    (&quot;covenant_waiver&quot;, {&quot;q&quot;: &#x27;&quot;waiver&quot; &quot;credit agreement&quot;&#x27;, &quot;forms&quot;: &quot;8-K&quot;}),
+    (&quot;going_concern_8k&quot;, {&quot;q&quot;: &#x27;&quot;substantial doubt&quot; &quot;going concern&quot;&#x27;, &quot;forms&quot;: &quot;8-K&quot;}),
+]
+
+
+def _search(q: dict, since: str) -&gt; list[dict]:
+    params = {&quot;dateRange&quot;: &quot;custom&quot;, &quot;startdt&quot;: since, &quot;enddt&quot;: datetime.date.today().isoformat(),
+              &quot;forms&quot;: q[&quot;forms&quot;]}
+    if q[&quot;q&quot;]:
+        params[&quot;q&quot;] = q[&quot;q&quot;]
+    url = EFTS + urllib.parse.urlencode(params)
+    try:
+        req = urllib.request.Request(url, headers=HDRS)
+        with urllib.request.urlopen(req, timeout=40) as r:
+            d = json.load(r)
+    except Exception:
+        return []
+    out = []
+    for hit in d.get(&quot;hits&quot;, {}).get(&quot;hits&quot;, [])[:40]:
+        s = hit.get(&quot;_source&quot;, {})
+        names = s.get(&quot;display_names&quot;) or []
+        out.append({&quot;filed&quot;: s.get(&quot;file_date&quot;), &quot;company&quot;: (names[0] if names else &quot;&quot;)[:70],
+                    &quot;form&quot;: s.get(&quot;file_type&quot;) or s.get(&quot;root_forms&quot;, [&quot;&quot;])[0],
+                    &quot;accession&quot;: s.get(&quot;_id&quot;, hit.get(&quot;_id&quot;, &quot;&quot;))[:30]})
+    return out
+
+
+def scan(days: int) -&gt; dict:
+    since = (datetime.date.today() - datetime.timedelta(days=days)).isoformat()
+    res = {}
+    for label, q in QUERIES:
+        res[label] = _search(q, since)
+    total = sum(len(v) for v in res.values())
+    return {&quot;asof&quot;: datetime.date.today().isoformat(), &quot;since&quot;: since, &quot;n_hits&quot;: total, &quot;by_tell&quot;: res}
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument(&quot;--days&quot;, type=int, default=7)
+    a = ap.parse_args()
+    res = scan(a.days)
+    print(f&quot;=== 8-K DISTRESS SCANNER  {res[&#x27;asof&#x27;]}  ({res[&#x27;n_hits&#x27;]} tells since {res[&#x27;since&#x27;]}) ===&quot;)
+    for label, hits in res[&quot;by_tell&quot;].items():
+        if not hits:
+            continue
+        print(f&quot;  {label} ({len(hits)}):&quot;)
+        for h in hits[:6]:
+            print(f&quot;   {h[&#x27;filed&#x27;]}  {h[&#x27;company&#x27;][:56]:&lt;56} {h[&#x27;form&#x27;]}&quot;)
+        if len(hits) &gt; 6:
+            print(f&quot;   ... +{len(hits)-6} more&quot;)
+    print(&quot;  PROMOTE: avoid/short seeds; ALSO check each vs the dislocation-buy pattern (headline that doesn&#x27;t reach the asset).&quot;)
+    OUT.write_text(json.dumps(res, indent=1))
+    print(f&quot;[-&gt; {OUT.name}]&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</pre></div></body></html>

@@ -1,0 +1,93 @@
+{
+  "ticker": "SRPT",
+  "company": "Sarepta Therapeutics, Inc.",
+  "cutoff": "2026-05-20",
+  "filing": "0001193125-26-084144_10-K.txt",
+  "filing_date": "2026-03-02",
+  "rfm_tuples": [
+    {
+      "claim_id": "C1",
+      "R": "10-K discloses three FDA-approved PMO products (EXONDYS 51 eteplirsen, VYONDYS 53 golodirsen, AMONDYS 45 casimersen) plus ELEVIDYS gene therapy approved June 2023 (accelerated) / June 2024 (traditional, ambulatory).",
+      "f": "openFDA Drugs@FDA registry should list Sarepta as sponsor on all three PMO NDAs; ELEVIDYS is a BLA so it may appear in Purple Book rather than Drugs@FDA NDA registry.",
+      "M_source": "openfda.query_approved_drugs(manufacturer_name='Sarepta')",
+      "M_value": "n_approved_applications=3, brand_names=['AMONDYS 45','EXONDYS 51','VYONDYS 53'], all sponsor 'SAREPTA THERAPS INC'. ELEVIDYS not in Drugs@FDA NDA registry (expected \u2014 it is a BLA gene therapy).",
+      "severity": "PASS",
+      "interpretation": "Three PMO approvals fully corroborated. Approved-product claim is real, not inflated."
+    },
+    {
+      "claim_id": "C2",
+      "R": "10-K Risk Factors and MD&A explicitly disclose THREE deaths from acute liver failure (March 2025 Elevidys non-ambulatory, June 2025 Elevidys non-ambulatory, July 2025 SRP-9004 LGMD trial), the July 22, 2025 voluntary U.S. shipment suspension, partial resumption to ambulatory July 31, the November 2025 FDA-mandated boxed warning for ALI/ALF, removal of non-ambulatory population from Indication, FDA revocation of AAVrh74 platform technology designation, EU Commission refusal Sept 24, 2025, and the paused ENVISION study.",
+      "f": "Subsequent 10-Q, 8-K, DEF 14A should REAFFIRM (not retract/expand) safety narrative. No undisclosed deaths or hidden severity should surface in openFDA labeling or claim-evolution.",
+      "M_source": "claim_evolution.query_claim_evolution(search_term='acute liver failure', base_filing_date='2026-03-02')",
+      "M_value": "n_subsequent_mentions=3 across 10-Q/8-K/DEF 14A. Q1 2026 10-Q (filed 2026-05-06) reaffirms FDA-mandated boxed warning for ALI; DEF 14A confirms June 2025 pause of non-ambulatory shipments. evolution_status=REAFFIRMED_IN_STRUCTURED_DISCLOSURE. adverse_findings=[].",
+      "severity": "PASS",
+      "interpretation": "This is the alpha question and the 10-K passes. Disclosure is unusually candid: deaths, boxed warning, indication-removal, platform designation revocation, EU rejection, and a securities class action (filed June 26, 2025) are all named. No safety-narrative drift in post-filing disclosures. The business is impaired; the disclosure is not."
+    },
+    {
+      "claim_id": "C3",
+      "R": "10-K (Item 1A) discloses Nov 3, 2025 ESSENCE confirmatory trial FAILURE \u2014 primary endpoint did not meet statistical significance, with explicit risk that FDA could withdraw accelerated approvals for VYONDYS 53 and AMONDYS 45.",
+      "f": "ClinicalTrials.gov should list the ESSENCE trial; subsequent filings should re-affirm result and outline regulatory engagement; no quiet walk-back.",
+      "M_source": "clinical_trials.query_by_lead_sponsor + claim_evolution.query_claim_evolution(search_term='ESSENCE')",
+      "M_value": "50 trials in registry (28 P1, 17 P2, 9 P3, 1 P4) \u2014 14 TERMINATED including SRP-9004 LGMD trial NCT06747273. Claim evolution: ESSENCE re-affirmed in 10-Q and DEF 14A. 10-Q discloses amended class action lawsuit complaint (Jan 22, 2026 filing) alleging false statements re: trial status.",
+      "severity": "PASS",
+      "interpretation": "ESSENCE failure and PMO accelerated-approval revocation risk are directly disclosed. The Phase 1/2 SRP-9004 trial that killed an LGMD patient is correctly shown as TERMINATED on clinicaltrials.gov. Honest disclosure of negative data."
+    },
+    {
+      "claim_id": "C4",
+      "R": "10-K liquidity: $953.8M total cash/investments at Dec 31 2025 (down 37% YoY from $1,503M), $828.9M convertible debt outstanding, $600M undrawn Revolving Credit Facility, management asserts >12 months runway. Aug+Dec 2025 debt exchanges reduced principal by $98M and pushed $893.4M to 2030. Plus $250M Arrowhead guaranteed payments ($50M/yr starting Feb 2026) and $300M DM1 milestones ($200M paid Jan 2026).",
+      "f": "No going-concern language expected (cash is healthy on absolute basis); auditor (KPMG, since 2002) should issue clean opinion.",
+      "M_source": "going_concern_detector.query_going_concern + auditor_change_tracker.query_auditor_changes",
+      "M_value": "going_concern: signal=NO_GOING_CONCERN, n_matches=0. auditor_change: signal=CLEAN_AUDITOR_TENURE, no changes in 5-yr lookback, n_big4_resignations=0, n_disagreements=0. KPMG since 2002 (per audit report).",
+      "severity": "PASS",
+      "interpretation": "Runway claim is supportable. Cash burn is severe ($550M consumed in 2025) but absolute position is workable; debt schedule has been actively managed. Auditor relationship is stable. Going-concern silence is appropriate."
+    },
+    {
+      "claim_id": "C5",
+      "R": "10-K describes Roche as ex-U.S. partner for ELEVIDYS contributing to 2025 liquidity (collaboration revenue) \u2014 implies a real, material, ongoing commercial relationship; Roche has obtained certain ex-U.S. approvals for ELEVIDYS.",
+      "f": "Roche (foreign private issuer, files 20-F/6-K) should be discoverable in EDGAR FTS naming Sarepta; clinical_trials.gov should list Hoffmann-La Roche as collaborator on Sarepta trials.",
+      "M_source": "megacap_namecheck.query_megacap_mentions + clinical_trials.query_by_lead_sponsor (collaborator field)",
+      "M_value": "megacap_namecheck: signal=INFLATION_SUSPECT (0 hits) \u2014 BUT validator is biased: Roche is a Swiss megacap that does not file 10-K/10-Q/8-K with SEC (foreign private issuer files 20-F/6-K), so the megacap_namecheck universe excludes them. clinical_trials.gov DOES list 'Hoffmann-La Roche' as a Sarepta collaborator \u2014 corroborating the partnership. 10-K Commitments note also references Roche reimbursement of Thermo termination costs ($36.5M offset) and Roche supply via Catalent.",
+      "severity": "PASS",
+      "interpretation": "Roche partnership is real (clinicaltrials.gov + 10-K cross-references confirm). The megacap_namecheck INFLATION_SUSPECT signal is a known false-positive on foreign-private-issuer counterparties and is dismissed."
+    },
+    {
+      "claim_id": "C6",
+      "R": "10-K Commitments: $656.8M manufacturing obligations (Catalent take-or-pay 4 \u2192 2 clean-room suites with Oct 2026 release, Aldevron plasmid supply, Euroapi PMO API now SUSPENDED, Brammer/Thermo terminated with $13M settlement July 2025). Aug 18, 2025 Letter Agreement with Catalent reflects $61.8M+$62.6M raw-material reimbursement, $23M failed-batch reimbursement, $17M impairment.",
+      "f": "Manufacturing-capacity rationalization is consistent with the post-suspension demand contraction; should not be evidence of CMO breakdown beyond what's disclosed.",
+      "M_source": "10-K narrative cross-read (no external M-source has CMO contract registry)",
+      "M_value": "10-K disclosure is exceptionally granular: every CMO modification, deferred batches to 2027, dedicated-suite release, Euroapi $25.5M cost-of-sales hit are itemized. Brammer/Thermo arbitration \u2192 $13M settlement disclosed.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Disclosure is honest, but the underlying reality is severe: $507M of manufacturing obligations come due in 2026 against $102M of Q1 ELEVIDYS revenue (Q1 2026 8-K). The take-or-pay obligations could meaningfully drag margins through 2027 even if dosing resumes. Disclosed but operationally heavy."
+    },
+    {
+      "claim_id": "C7",
+      "R": "10-K references substantial IP estate for AAV gene therapy + PMO chemistry (Regenx/U-Penn 617 Patent litigation ongoing; Sarepta defending and counterclaiming).",
+      "f": "USPTO assignee search should show a meaningful granted-patent count consistent with a 25-year-old biotech with two distinct platform technologies.",
+      "M_source": "uspto_odp.query_assignee(assignee_name='Sarepta')",
+      "M_value": "n_total_applications=396, n_granted=87. Recent applications include 'DYSTROPHIN AND MICRO-DYSTROPHIN ANTIBODIES', 'MUSCLE TROPIC RAAV', 'TREATMENT OF GENETIC NEUROLOGICAL CONDITIONS WITH GENOMIC EDITING' \u2014 coherent with stated platform.",
+      "severity": "PASS",
+      "interpretation": "Patent estate is real and on-thesis. 87 granted patents is meaningful for a focused rare-disease biotech."
+    },
+    {
+      "claim_id": "C8",
+      "R": "10-K implies insider behavior is routine (10b5-1 plans referenced; e.g., Ms. Rothfuss plan adopted Dec 16, 2025). No insider 'cluster sell' tells claimed.",
+      "f": "Form 4 cadence should show typical exec withholdings and pre-set plans, not discretionary dumps clustered around the major safety/regulatory disclosures (March death, June pause, Nov boxed warning, Nov ESSENCE fail).",
+      "M_source": "insider_vs_calendar.query_insider_sales_near_budget_events(cik='0000873303', contractor_name='Sarepta')",
+      "M_value": "n_form4_filings=32, n_total_sales=27 (total $1.08M, small notional). Only 2 proximate sales \u2014 both code 'F' (tax-withholding on vesting), is_10b5_1=false but matched only to an unrelated 'bipartisan_budget_signed' event. Signal=ROUTINE_10B5_1. Validators V1+V2 both FALSE (Sarepta has no DoD/program exposure).",
+      "severity": "PASS",
+      "interpretation": "No anomalous insider behavior detected. Total insider sale volume is tiny ($1.08M across 27 transactions) \u2014 consistent with routine equity-comp tax-withholding, not informed selling."
+    }
+  ],
+  "composite": 0.125,
+  "summary": "SRPT 10-K is a textbook example of a clean-disclosure / impaired-business setup: three patient deaths from Elevidys/SRP-9004, a Nov 2025 boxed warning + non-ambulatory indication removal, the Nov 3 2025 ESSENCE confirmatory trial failure (PMO accelerated-approval at risk), EU rejection, AAVrh74 platform-designation revocation, and a securities class action are ALL named in the filing. Cross-checks (openFDA, clinicaltrials.gov, claim-evolution into Q1 2026, going-concern, auditor, USPTO) corroborate every key disclosure with no post-filing safety-narrative drift. The business is severely impaired but the framework finds essentially no disclosure-quality alpha to short \u2014 composite 0.125 (one MODERATE on the take-or-pay manufacturing overhang vs. shrunken Elevidys revenue) reflects honest disclosure of bad news.",
+  "scoring": {
+    "PASS": 7,
+    "UNVERIFIABLE": 0,
+    "MODERATE_UNDERDELIVERY": 1,
+    "SEVERE_UNDERDELIVERY": 0,
+    "RED_FLAG_NEGATIVE": 0,
+    "verifiable_claims": 8,
+    "weighted_sum": "(0*7 + 1*1 + 2*0 + 3*0) / 8 = 1 / 8",
+    "composite": 0.125
+  }
+}

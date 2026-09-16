@@ -1,0 +1,1134 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>spinoff_orphans</title><style>
+body{margin:0;background:#0b0e12;color:#e8ebee;font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:26px 24px 90px}
+a{color:#8b7cf6} h1{font-size:23px;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:#7d858e;margin:0 0 20px;font-size:13px}
+h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:#7d858e;margin:24px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 10px;border-bottom:1px solid #242a31;text-align:left;vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#7d858e}
+.k{font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:20px}
+.k-generator{color:#c3b8fb;background:rgba(139,124,246,.15)}
+.k-detector{color:#eccb8a;background:rgba(217,164,65,.15)}
+.k-watcher{color:#8ee5c1;background:rgba(53,201,143,.15)}
+.k-evidence{color:#b3bcc6;background:rgba(138,147,158,.15)}
+.h-OK{color:#35c98f} .h-STALE{color:#d9a441} .h-ERROR{color:#e0736a} .h-NEVER_RUN{color:#8a939e}
+pre{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px;overflow-x:auto;font-size:12px;line-height:1.5}
+.panel{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px 18px;margin-bottom:12px}
+ul{margin:4px 0;padding-left:20px} li{margin-bottom:4px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+</style></head><body><div class="wrap"><h1>spinoff_orphans</h1><p class="sub">registered capability · spinoff_orphans</p><a href="signals.html">&larr; all signals</a><div class="panel" style="margin-top:10px"><span class="k k-generator">GENERATOR</span> &nbsp;<span class="h-NEVER_RUN"><b>NEVER_RUN</b></span> · last run <span class="mono">never</span></div><p>Stage-0b FLOW generator: the SPIN-OFF ORPHAN coverage-vacuum trade.</p><form method="POST" action="/signals/run" style="margin:10px 0"><input type="hidden" name="name" value="spinoff_orphans"><input name="symbol" placeholder="symbol (if applicable)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px"><input name="symbols" placeholder="universe, comma-sep (generators)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px;margin-left:6px"><button type="submit" style="background:#8b7cf6;color:#0b0e12;border:0;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;margin-left:6px">Run now</button></form><h2>Datasources</h2><ul><li>reference implementation: verticals/generators/spinoff_orphans.py (see the code section for the feeds it touches)</li></ul><h2>Applies to</h2><ul><li><b>strategies:</b> quality_value</li></ul><h2>The code</h2><pre>&quot;&quot;&quot;spinoff_orphans — Stage-0b FLOW generator: the SPIN-OFF ORPHAN coverage-vacuum trade.
+
+THE CLASSIC SETUP. A parent registers a spinco on Form 10-12B weeks-to-months before the
+distribution. At distribution, holders of the parent are handed shares in a company they did not
+choose, that no sell-side analyst covers, that is absent from their benchmark, and that is often
+below their mandate&#x27;s size/liquidity floor. They sell mechanically, on a calendar, with no view on
+price. A filings-reader who has already read the information statement is trading against a
+price-INSENSITIVE seller. The window is typically the first 30-90 days after distribution.
+
+WHAT THE JULY-2026 ONE-SHOT (THEME_SPINOFF_FLOW_2026_07_04.json) ESTABLISHED — the correction this
+generator is built around, because the naive version of the trade is WRONG in the US today:
+
+    THE INDEX-FLOW MECHANISM IS VENUE-CONDITIONAL AND, FOR S&amp;P 500 PARENTS, INVERTED.
+    S&amp;P DJI now makes SAME-CYCLE index placement decisions for qualifying spincos of S&amp;P 500
+    parents — the spinco is ADDED to an S&amp;P index at (or within days of) distribution. When the
+    spinco lands back in the S&amp;P 500 (SOLS, Q, FDXF), index funds are forced BUYERS, not sellers,
+    and the &quot;orphan washout&quot; never happens. Backtesting the whole 10-12B cohort therefore
+    manufactures false alpha off the index-INCLUDED winners.
+
+    The washout fires only on the DOWNGRADE / NO-PLACEMENT sub-cohort:
+      (a) S&amp;P 500 parent -&gt; spinco placed in MidCap 400 or SmallCap 600 (the sole genuine net
+          forced-SELL: every S&amp;P 500 fund must sell a line it can never hold — MBGL),
+      (b) spinco given NO index placement at all (the purest orphan), and
+      (c) non-US venues with no auto-placement rule (DAX -&gt; MDAX void, ~3 months — the Aumovio
+          channel; that leg is out of scope for an EDGAR-sourced scanner and stays a manual watch).
+
+    Corollaries encoded below: RMT (Reverse Morris Trust) deals produce ZERO holder flow — the
+    spinco merges into an acquirer and parent holders get acquirer stock — so they are excluded,
+    not scored. And the INVERTED trade is real and is a DIFFERENT playbook (long the forced BUY
+    ahead of an index-inclusion announcement); this scanner LABELS it rather than pretending it is
+    the orphan trade.
+
+HOW IT WORKS (all free, no keys):
+  1. DISCOVERY: the EDGAR full-index (Archives/edgar/full-index/YYYY/QTRn/form.idx), form type
+     10-12B and 10-12B/A, over the trailing BACKFILL_DAYS (12mo+) — the registration stream for
+     exchange-listed spin vehicles. Deduped by CIK (issuers rename mid-registration: Middleby Food
+     Processing -&gt; Midera, Cyprium -&gt; Versigent — same CIK throughout). 10-12G is DELIBERATELY
+     excluded: verified over 12 months, that stream is ~95% BDCs / private credit and PE feeder
+     funds / OTC shells, not spins.
+     The full-index is used INSTEAD OF the EFTS full-text API on purpose: EFTS answers a request
+     burst with a blanket 403 that lasts minutes and returns an empty result set indistinguishable
+     from &quot;no spins were registered&quot; — a silent-zero this scanner must not have. form.idx is
+     authoritative, complete, ~5 requests per year of history, current through the prior business
+     day, and carries the accession number inline.
+  2. PARSE the information statement (Exhibit 99.1 — reliably the largest .htm in the filing):
+     parent name, parent ticker (&quot;...will continue to trade ... under the symbol DD&quot;), spinco
+     ticker (&quot;we intend to list ... under the symbol Q&quot;), record date, expected distribution date,
+     distribution ratio, when-issued language. Late amendments carry filled-in dates; early ones
+     carry blanks — an unparsed date is emitted as null, never guessed. Parent name is the MODAL
+     candidate across every pattern, not the first hit (first-hit captured &#x27;Honeywell that will
+     hold the assets&#x27;), and the parent ticker falls back to an exact normalized-name lookup in
+     EDGAR&#x27;s company_tickers.json when the filing never restates the symbol.
+  3. TRAP FILTER (positive evidence only, mirroring the lock-up scanner&#x27;s IPO-eligibility gate).
+     A 10-12B is also the form for an OTC-to-exchange UPLISTING, a holdco REORG and a foreign
+     REDOMICILIATION — none of which is a spin. Rejects, each with a reason:
+       - the ticker&#x27;s price history STARTS BEFORE the Form 10          -&gt; &#x27;holdco_reorg /
+         already_trading&#x27; (Enviri II Corp resolving to NVRI with bars back to 2024; BioStem and
+         Private Bancorp are OTC issuers uplisting, trading for years)
+       - a UK/Irish scheme-of-arrangement move to a US holdco          -&gt; &#x27;redomiciliation_no_flow&#x27;
+         (Ashtead -&gt; Sunbelt Rentals Holdings: every holder simply exchanges into the new parent,
+         so there is no orphan and no forced flow)
+       - Reverse Morris Trust                                          -&gt; &#x27;rmt_no_flow&#x27;
+       - too little distribution language to be a spin at all          -&gt; &#x27;not_a_spin&#x27;
+     The spin test does NOT key on the word &quot;spin-off&quot; (Mobility Global uses it twice against 269
+     uses of &quot;the distribution&quot;) nor on the capitalized defined term (that rejected Honeywell
+     Aerospace, 15 capitalized vs 504 case-insensitive). It keys on case-insensitive &quot;the
+     distribution&quot; density plus &quot;information statement&quot;: across a full 12-month cohort real spins
+     run 45-588 and 64-166, every non-spin tops out at 8 and 0.
+  4. FORCED-SELLING SETUP: parent and spinco checked against the live S&amp;P 500 / 400 / 600
+     constituent lists and classified on the TIER MOVE (500 &gt; 400 &gt; 600 &gt; none) — signing the flow
+     off the S&amp;P 500 alone missed Middleby (400) -&gt; Midera (600), which is just as much a forced
+     sell for 400 funds:
+       FORCED_SELL_DOWNGRADE    spinco placed a tier DOWN -&gt; the genuine mechanical sell
+       ORPHAN_NO_PLACEMENT      spinco in NO S&amp;P index -&gt; the purest orphan
+       FORCED_BUY_INVERTED      500 parent + 500 spinco -&gt; index funds BUY; a different playbook
+       INDEX_PLACEMENT_MATCHED  same tier -&gt; funds keep the line, no mechanical flow
+       ORPHAN_UNINDEXED_PARENT  parent not in a US index (foreign/OTC) -&gt; coverage vacuum may be
+                                real but the mechanical leg needs a manual home-index check
+       PENDING_DISTRIBUTION     not yet distributed -&gt; placement unknowable, watch
+     Membership is read AS OF TODAY. For a live cohort that is what matters; a BACKTEST must pin
+     membership to the distribution date, because S&amp;P migrates names at later rebalances.
+  5. TRACKING (already-trading spins): yfinance, measured FROM THE DISTRIBUTION, not from the first
+     bar. Two distortions are removed:
+       - leading zero-volume bars (MFP&#x27;s 2026-06-26 phantom: volume 0, high 200, low 21, close
+         110.50 against a real regular-way open of 35.00 next session — a fabricated -57% dump);
+       - WHEN-ISSUED sessions, which open up to ~2 weeks early on a separate thin line and which
+         Yahoo staples onto the front of the series. Measuring from bar 1 charged HONA a -27.4%
+         drawdown off a $269.95 when-issued print against its $200 regular-way open. Where the
+         filing gives a distribution date we cut to it (HONA&#x27;s true drawdown: -20.7%); where it
+         does not, metrics_from says &#x27;first traded bar&#x27; and regular_way_start_unverified is set.
+     Pattern classified as DUMPING / DUMP_THEN_BASE / BASING / NO_DUMP / RIPPING, alongside
+     days_since_distribution and the forced-selling-window status (0-30 ACTIVE / 31-90 LATE /
+     &gt;90 CLOSED).
+
+DEGRADATION IS LOUD, NEVER SILENT. Both upstreams throttle: EDGAR answers a burst with a blanket
+403, Yahoo with a rate-limit error, and in both cases the naive result is an empty/None value that
+is indistinguishable from a real &quot;nothing here&quot;. So: an empty EDGAR discovery aborts WITHOUT
+writing; a per-ticker Yahoo failure leaves stage/setup/window as None so the MERGE keeps the last
+good classification (rather than demoting a live orphan to &#x27;not yet distributed&#x27;); and every
+unresolved name is printed in its own report section.
+
+Output: data/SPINOFF_ORPHANS.json, MERGE semantics — keyed by CIK, new names appended, existing
+names updated field-by-field, and any hand-added keys (desk_note, disposition, prior_art) are
+PRESERVED. The store is never rewritten from scratch.
+
+    python3 verticals/generators/spinoff_orphans.py
+    python3 verticals/generators/spinoff_orphans.py --no-parse    # discovery + tracking only
+READ-ONLY. Times and sizes the trade; never places one.
+&quot;&quot;&quot;
+from __future__ import annotations
+
+import argparse
+import datetime
+import json
+import re
+import sys
+import time
+import urllib.request
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+OUT = HERE / &quot;data&quot; / &quot;SPINOFF_ORPHANS.json&quot;
+IDX_CACHE = HERE / &quot;data&quot; / &quot;_sp_constituents.json&quot;
+PRIOR_ART = HERE / &quot;data&quot; / &quot;THEME_SPINOFF_FLOW_2026_07_04.json&quot;
+HDRS = {&quot;User-Agent&quot;: &quot;signalos-research 4tripathy@gmail.com&quot;}
+
+BACKFILL_DAYS = 400        # &gt;12mo: seeds the current orphan cohort and one full index-cycle of history
+MAX_PARSE = 32             # information statements are up to ~4MB — cap fetches, newest first
+DOC_BYTES = 6_000_000      # hard read cap per document
+IDX_CACHE_DAYS = 7         # S&amp;P constituent lists refreshed weekly
+WINDOW_ACTIVE = 30         # 0-30d post-distribution = forced selling ACTIVE
+WINDOW_LATE = 90           # 31-90d = LATE window (discretionary orphan drift)
+DUMP_PCT = 0.10            # &gt;=10% drawdown off the first-week high = a dump worth naming
+BASE_RECOVERY = 0.04       # &gt;=4% up off the trough (and trough not today) = it has based
+SLEEP = 0.12               # SEC fair-access pacing (limit is 10 req/s; we run ~8)
+
+# S&amp;P index float-cap floors, as published by S&amp;P DJI in the 2026 methodology. HEURISTIC USE ONLY —
+# they are used to explain a placement, never to assert one. Actual placement is read from the live
+# constituent lists.
+SP_FLOOR_NOTE = &quot;S&amp;P 500 &gt;=~$22.7B, MidCap 400 ~$7.4-22.7B, SmallCap 600 ~$1.1-7.4B (2026 methodology)&quot;
+
+
+# ----------------------------------------------------------------------------- fetch helpers
+BACKOFF = (5, 15, 45, 90)   # SEC answers a burst with a temporary 403 block; it clears in ~1-2 min
+FETCH_ERRORS = []           # every give-up is recorded, so a degraded run reports DEGRADED not &quot;clean&quot;
+
+
+def _get(url: str, timeout: int = 60) -&gt; bytes:
+    &quot;&quot;&quot;GET with SEC-fair-access pacing and 403/429-aware backoff.
+
+    EDGAR does not rate-limit with a 429 — it answers a burst with a blanket 403 for ~1-2 minutes.
+    Swallowing that returns an EMPTY cohort that looks identical to &#x27;no spins registered&#x27;, which is
+    the worst possible failure mode for a scanner. So: retry with backoff, and on final failure
+    record the URL in FETCH_ERRORS so the run is labelled DEGRADED.
+    &quot;&quot;&quot;
+    last = None
+    for i, wait in enumerate((0,) + BACKOFF):
+        if wait:
+            time.sleep(wait)
+        try:
+            time.sleep(SLEEP)
+            req = urllib.request.Request(url, headers=HDRS)
+            with urllib.request.urlopen(req, timeout=timeout) as r:
+                return r.read(DOC_BYTES)
+        except urllib.error.HTTPError as e:
+            last = e
+            if e.code not in (403, 429, 500, 502, 503, 504):
+                break
+        except Exception as e:
+            last = e
+    FETCH_ERRORS.append(f&quot;{type(last).__name__}: {url[:120]}&quot;)
+    raise last if last else RuntimeError(url)
+
+
+def _gj(url: str, timeout: int = 40):
+    &quot;&quot;&quot;JSON GET; {} on any failure after backoff (the caller checks FETCH_ERRORS for degradation).&quot;&quot;&quot;
+    try:
+        return json.loads(_get(url, timeout))
+    except Exception:
+        return {}
+
+
+def _gt(url: str, timeout: int = 90) -&gt; str:
+    &quot;&quot;&quot;Fetch a filing document and strip tags/entities to flat text. &#x27;&#x27; on failure.&quot;&quot;&quot;
+    try:
+        h = _get(url, timeout).decode(&quot;utf-8&quot;, &quot;ignore&quot;)
+    except Exception:
+        return &quot;&quot;
+    h = re.sub(r&quot;(?is)&lt;(script|style)[^&gt;]*&gt;.*?&lt;/\1&gt;&quot;, &quot; &quot;, h)
+    t = re.sub(r&quot;&lt;[^&gt;]+&gt;&quot;, &quot; &quot;, h)
+    # Decode the entities that carry MEANING before blanking the rest: &#x27;&amp;amp;&#x27; blanked to a space
+    # turned &quot;S&amp;P Global&quot; into &quot;S P Global&quot; in every parsed parent name.
+    for ent, ch in ((&quot;&amp;amp;&quot;, &quot;&amp;&quot;), (&quot;&amp;#38;&quot;, &quot;&amp;&quot;), (&quot;&amp;apos;&quot;, &quot;&#x27;&quot;), (&quot;&amp;#39;&quot;, &quot;&#x27;&quot;),
+                    (&quot;&amp;quot;&quot;, &#x27;&quot;&#x27;), (&quot;&amp;nbsp;&quot;, &quot; &quot;), (&quot;&amp;#8217;&quot;, &quot;&#x27;&quot;), (&quot;&amp;rsquo;&quot;, &quot;&#x27;&quot;)):
+        t = t.replace(ent, ch)
+    t = re.sub(r&quot;&amp;(?:#\d+|#x[0-9a-fA-F]+|[a-zA-Z]+);&quot;, &quot; &quot;, t)
+    return re.sub(r&quot;\s+&quot;, &quot; &quot;, t)
+
+
+# ----------------------------------------------------------------------------- 1. discovery
+def _quarters(days: int):
+    &quot;&quot;&quot;The EDGAR full-index quarters spanning [today-days, today], newest first.&quot;&quot;&quot;
+    end = datetime.date.today()
+    start = end - datetime.timedelta(days=days)
+    qs, y, q = [], start.year, (start.month - 1) // 3 + 1
+    while (y, q) &lt;= (end.year, (end.month - 1) // 3 + 1):
+        qs.append(f&quot;{y}/QTR{q}&quot;)
+        q += 1
+        if q &gt; 4:
+            y, q = y + 1, 1
+    return list(reversed(qs))
+
+
+def discover_form10(days: int = BACKFILL_DAYS):
+    &quot;&quot;&quot;Every 10-12B / 10-12B/A filing in the window, from the EDGAR full-index. Newest first.
+
+    WHY full-index AND NOT the EFTS full-text API: EFTS answers a request burst with a blanket
+    403 that lasts minutes and returns an EMPTY result set that is indistinguishable from &quot;no
+    spins were registered&quot; — a silent-zero failure mode this scanner must not have. form.idx is a
+    complete, authoritative, ~5-request-per-year enumeration on www.sec.gov, is current through
+    the prior business day, and carries the accession number directly (no second lookup). EFTS
+    remains useful for text search; it is not needed for a form-type enumeration.
+
+    10-12G is DELIBERATELY excluded: verified over 12 months, that stream is ~95% BDCs, private
+    credit/PE feeder funds and OTC shells, not exchange-listed spin vehicles.
+    &quot;&quot;&quot;
+    cutoff = (datetime.date.today() - datetime.timedelta(days=days)).isoformat()
+    rows = []
+    for qtr in _quarters(days):
+        try:
+            txt = _get(f&quot;https://www.sec.gov/Archives/edgar/full-index/{qtr}/form.idx&quot;, 90).decode(&quot;latin-1&quot;)
+        except Exception:
+            continue
+        for line in txt.split(&quot;\n&quot;):
+            if not line.startswith(&quot;10-12B&quot;):
+                continue
+            # fixed-width-ish: form | company | cik | date | edgar/data/&lt;cik&gt;/&lt;accession&gt;.txt
+            m = re.match(r&quot;^(10-12B(?:/A)?)\s+(.+?)\s{2,}(\d+)\s+(\d{4}-\d{2}-\d{2})\s+(\S+)&quot;, line)
+            if not m:
+                continue
+            form, name, cik, fdate, path = m.groups()
+            if fdate &lt; cutoff:
+                continue
+            adsh = Path(path).stem
+            rows.append({&quot;form&quot;: form, &quot;name&quot;: name.strip(), &quot;cik&quot;: str(cik).zfill(10),
+                         &quot;file_date&quot;: fdate, &quot;adsh&quot;: adsh})
+    rows.sort(key=lambda r: r[&quot;file_date&quot;], reverse=True)
+    return rows
+
+
+def group_by_cik(rows):
+    &quot;&quot;&quot;Collapse the filing stream into one registrant per CIK.
+
+    Issuers RENAME mid-registration (Middleby Food Processing -&gt; Midera; Cyprium -&gt; Versigent;
+    Solstice Advanced Materials LLC -&gt; Inc.) — same CIK throughout, so CIK is the only stable key.
+    The newest filing&#x27;s name wins.
+    &quot;&quot;&quot;
+    reg = {}
+    for row in rows:
+        cik = row[&quot;cik&quot;]
+        name = re.sub(r&quot;\s*/\s*[A-Z]{2}\s*$&quot;, &quot;&quot;, row[&quot;name&quot;]).strip()   # &#x27;Corp / IN&#x27; state suffix
+        r = reg.setdefault(cik, {
+            &quot;cik&quot;: cik, &quot;registrant&quot;: name, &quot;filings&quot;: [], &quot;_adsh&quot;: {},
+        })
+        key = f&quot;{row[&#x27;file_date&#x27;]} {row[&#x27;form&#x27;]}&quot;
+        if key not in r[&quot;filings&quot;]:
+            r[&quot;filings&quot;].append(key)
+        r[&quot;_adsh&quot;][row[&quot;file_date&quot;]] = row[&quot;adsh&quot;]
+    for r in reg.values():
+        r[&quot;filings&quot;].sort(reverse=True)
+        r[&quot;first_registered&quot;] = r[&quot;filings&quot;][-1].split()[0]
+        r[&quot;latest_filing&quot;] = r[&quot;filings&quot;][0].split()[0]
+        r[&quot;n_amendments&quot;] = max(0, len(r[&quot;filings&quot;]) - 1)
+    return reg
+
+
+def submissions(cik10: str):
+    return _gj(f&quot;https://data.sec.gov/submissions/CIK{cik10}.json&quot;)
+
+
+# ----------------------------------------------------------------------------- 2/3. parse
+def largest_doc(cik10: str, adsh: str):
+    &quot;&quot;&quot;Filename of the biggest .htm in the accession = the Exhibit 99.1 information statement.
+
+    Verified across the cohort: the Form 10 cover itself is ~20-30KB while the information
+    statement (which carries the parent, the dates, the tickers and the capitalization) is
+    0.5-4MB, so &#x27;largest .htm&#x27; resolves it without parsing the exhibit index.
+    &quot;&quot;&quot;
+    if not adsh:
+        return None
+    u = f&quot;https://www.sec.gov/Archives/edgar/data/{int(cik10)}/{adsh.replace(&#x27;-&#x27;, &#x27;&#x27;)}/index.json&quot;
+    js = _gj(u)
+    items = ((js.get(&quot;directory&quot;) or {}).get(&quot;item&quot;) or []) if isinstance(js, dict) else []
+    htm = [(int(i.get(&quot;size&quot;) or 0), i[&quot;name&quot;]) for i in items
+           if str(i.get(&quot;name&quot;, &quot;&quot;)).lower().endswith((&quot;.htm&quot;, &quot;.html&quot;))]
+    if not htm:
+        return None
+    size, name = max(htm)
+    return f&quot;https://www.sec.gov/Archives/edgar/data/{int(cik10)}/{adsh.replace(&#x27;-&#x27;, &#x27;&#x27;)}/{name}&quot;
+
+
+_JUNK_PARENT = re.compile(r&quot;^(future|fellow|our|valued|new)\b&quot;, re.I)
+
+
+def _clean_co(name: str) -&gt; str:
+    name = re.sub(r&quot;\s+&quot;, &quot; &quot;, (name or &quot;&quot;)).strip(&quot; ,.:;-&quot;)
+    return re.sub(r&quot;\s*\(.*?\)\s*&quot;, &quot; &quot;, name).strip()
+
+
+def parse_info_statement(text: str, registrant: str) -&gt; dict:
+    &quot;&quot;&quot;Pull the spin facts out of the information statement. Every field is None if unparsed.
+
+    Nothing here is inferred: an early 10-12B/A literally leaves the distribution date blank
+    (&#x27;expected to be completed on , 2025&#x27;), and a blank is reported as a blank.
+    &quot;&quot;&quot;
+    out = {
+        &quot;is_spin&quot;: False, &quot;spin_evidence&quot;: None, &quot;rmt&quot;: False, &quot;redomiciliation&quot;: False,
+        &quot;parent_name&quot;: None, &quot;parent_ticker&quot;: None, &quot;spinco_ticker_filed&quot;: None,
+        &quot;record_date&quot;: None, &quot;distribution_date_expected&quot;: None,
+        &quot;distribution_ratio&quot;: None, &quot;when_issued_language&quot;: False,
+        &quot;leverage_to_parent_flag&quot;: False,
+    }
+    if not text:
+        return out
+
+    # --- is this actually a spin?
+    # DO NOT key on the word &quot;spin-off&quot;: several real spins barely use it and run instead on the
+    # defined terms &quot;the Distribution&quot; / &quot;the Separation&quot; (Mobility Global: 2 uses of &#x27;spin-off&#x27;
+    # against 269 of &#x27;the distribution&#x27;; Versant: 2 against 279). Nor on the CASE-SENSITIVE defined
+    # term — capitalization is inconsistent across filers and agents, and keying on it rejected
+    # Honeywell Aerospace (15 capitalized vs 504 case-insensitive). Measured over a full 12-month
+    # cohort the clean discriminator is case-INSENSITIVE density plus the information statement:
+    # real spins run 45-588 &#x27;the distribution&#x27; with 64-166 &#x27;information statement&#x27;, while every
+    # non-spin (uplisting, shell, redomiciliation) tops out at 8 and 0.
+    n_dist = len(re.findall(r&quot;\bthe\s+distribution\b&quot;, text, re.I))
+    n_is = len(re.findall(r&quot;information\s+statement&quot;, text, re.I))
+    n_spin = len(re.findall(r&quot;spin-?off&quot;, text, re.I))
+    n_sda = len(re.findall(r&quot;separation\s+and\s+distribution\s+agreement&quot;, text, re.I))
+    out[&quot;is_spin&quot;] = (n_dist &gt;= 30 and n_is &gt;= 20) or n_sda &gt;= 5
+    out[&quot;spin_evidence&quot;] = (f&quot;&#x27;the distribution&#x27; x{n_dist}, &#x27;information statement&#x27; x{n_is}, &quot;
+                            f&quot;&#x27;spin-off&#x27; x{n_spin}, separation-and-distribution-agreement x{n_sda}&quot;)
+    out[&quot;rmt&quot;] = bool(re.search(r&quot;Reverse\s+Morris\s+Trust&quot;, text, re.I))
+    # A UK/Irish scheme-of-arrangement REDOMICILIATION also files a Form 10 and also creates a new
+    # listed holdco — but every holder simply exchanges into the new parent, so there is no orphan
+    # and no forced flow. Ashtead -&gt; Sunbelt Rentals Holdings is the type specimen (92 uses).
+    n_redom = len(re.findall(r&quot;redomicil&quot;, text, re.I))
+    out[&quot;redomiciliation&quot;] = n_redom &gt;= 5 and not out[&quot;is_spin&quot;]
+    if out[&quot;redomiciliation&quot;]:
+        out[&quot;spin_evidence&quot;] += f&quot;; REDOMICILIATION (&#x27;redomicil&#x27; x{n_redom}, scheme of arrangement)&quot;
+
+    # --- parent: the information statement is addressed to the PARENT&#x27;s holders.
+    # Candidates are pooled across every pattern and the MODAL one wins — taking the first match
+    # captured a relative clause on Honeywell (&#x27;Honeywell that will hold the assets&#x27;) where the
+    # modal answer across 4 hits was plainly &#x27;Honeywell&#x27;. &#x27;Shareowner&#x27; is Honeywell&#x27;s house term.
+    cands = []
+    for p, w in ((r&quot;Dear\s+([A-Z][A-Za-z0-9&amp;.,&#x27;\- ]{2,55}?)\s+(?:Stockholder|Shareholder|Shareowner)&quot;, 5),
+                 (r&quot;wholly[\s-]owned\s+subsidiary\s+of\s+([A-Z][A-Za-z0-9&amp;.,&#x27;\- ]{2,55}?)(?:\s*[,(.]|\s+and\b|\s+that\b|\s+which\b)&quot;, 1),
+                 (r&quot;separation\s+from\s+([A-Z][A-Za-z0-9&amp;.,&#x27;\- ]{2,55}?)(?:\s*[,(.]|\s+and\b|\s+that\b|\s+which\b)&quot;, 1),
+                 (r&quot;stockholders?\s+of\s+([A-Z][A-Za-z0-9&amp;.,&#x27;\- ]{2,55}?)\s+(?:will\s+receive|of\s+record)&quot;, 1)):
+        for m in re.finditer(p, text):
+            cand = _clean_co(m.group(1))
+            cand = re.split(r&quot;\s+(?:that|which|will|and\s+its)\s+&quot;, cand)[0].strip(&quot; ,.&quot;)
+            if cand and not _JUNK_PARENT.match(cand) and 2 &lt; len(cand) &lt;= 45:
+                cands.extend([cand] * w)
+    if cands:
+        out[&quot;parent_name&quot;] = max(set(cands), key=cands.count)
+
+    # --- parent ticker: only the PARENT &quot;continues to trade&quot; under its existing symbol
+    m = re.search(r&quot;(?:will\s+)?continues?\s+to\s+(?:be\s+)?trade[sd]?[^.]{0,240}?&quot;
+                  r&quot;symbol\s+[\&quot;“]?([A-Z]{1,5})\b&quot;, text)
+    if m:
+        out[&quot;parent_ticker&quot;] = m.group(1)
+
+    # --- spinco ticker: the SPINCO is being listed for the first time
+    for p in (r&quot;(?:intend\s+to\s+(?:have\s+)?(?:apply\s+to\s+)?list|expect\s+to\s+list|&quot;
+              r&quot;has\s+been\s+approved\s+for\s+listing|will\s+be\s+listed|applied\s+to\s+list)&quot;
+              r&quot;[^.]{0,260}?under\s+the\s+symbol\s+[\&quot;“]?([A-Z]{1,5})\b&quot;,
+              r&quot;under\s+the\s+symbol\s+[\&quot;“]?([A-Z]{1,5})[\&quot;”]?[^.]{0,80}?(?:following|after)\s+the\s+&quot;
+              r&quot;(?:distribution|spin-?off)&quot;):
+        for m in re.finditer(p, text):
+            sym = m.group(1)
+            if sym != out[&quot;parent_ticker&quot;]:
+                out[&quot;spinco_ticker_filed&quot;] = sym
+                break
+        if out[&quot;spinco_ticker_filed&quot;]:
+            break
+
+    # --- dates (a blank in the filing stays a blank here)
+    D = r&quot;([A-Z][a-z]{2,8}\s+\d{1,2},\s+\d{4})&quot;
+    m = re.search(r&quot;on\s+&quot; + D + r&quot;\s*,?\s*(?:the\s+)?record\s+date&quot;, text) or \
+        re.search(r&quot;record\s+date[^.]{0,60}?\b(?:is|will\s+be)\s+&quot; + D, text)
+    if m:
+        out[&quot;record_date&quot;] = _isodate(m.group(1))
+    for p in (r&quot;distribution\s+date[^.]{0,80}?(?:is|will\s+be|is\s+expected\s+to\s+be)\s+&quot; + D,
+              r&quot;on\s+&quot; + D + r&quot;\s*,?\s*(?:the\s+)?distribution\s+date&quot;,
+              r&quot;expected\s+to\s+be\s+completed\s+on\s+&quot; + D,
+              r&quot;distribution\s+(?:is\s+)?expected\s+to\s+occur\s+on\s+&quot; + D,
+              # Honeywell&#x27;s cover letter carries the only filled-in date in the whole document:
+              # &quot;we expect to distribute all of the outstanding shares ... on June 29, 2026&quot;
+              r&quot;expect\s+to\s+distribute[^.]{0,200}?\bon\s+&quot; + D,
+              r&quot;distribut(?:e|ion\s+of)[^.]{0,160}?\bon\s+&quot; + D + r&quot;[^.]{0,40}?(?:to\s+(?:our\s+)?(?:stockholders|shareholders|shareowners))&quot;):
+        m = re.search(p, text, re.I)
+        if m:
+            out[&quot;distribution_date_expected&quot;] = _isodate(m.group(1))
+            break
+
+    m = re.search(r&quot;[Ff]or\s+ever(?:y)\s+([\d,.]+)\s+shares?\s+of[^.]{0,120}?receive\s+([\d,.]+)\s+shares?&quot;, text)
+    if m:
+        out[&quot;distribution_ratio&quot;] = f&quot;{m.group(2)} spinco per {m.group(1)} parent&quot;
+
+    out[&quot;when_issued_language&quot;] = bool(re.search(r&quot;when-?issued&quot;, text, re.I))
+
+    # --- the ADIG informed-seller tell: spinco levers up and pushes the cash to the parent
+    out[&quot;leverage_to_parent_flag&quot;] = bool(
+        re.search(r&quot;(?:pay|distribute|transfer)[^.]{0,120}?(?:cash\s+)?(?:dividend|distribution)&quot;
+                  r&quot;[^.]{0,80}?to\s+(?:our\s+)?(?:parent|&quot; + re.escape((out[&quot;parent_name&quot;] or &quot; &quot;)[:24]) + r&quot;)&quot;,
+                  text, re.I)
+        and re.search(r&quot;expect[^.]{0,120}?incur[^.]{0,120}?indebtedness&quot;, text, re.I))
+    return out
+
+
+def _isodate(s: str):
+    for fmt in (&quot;%B %d, %Y&quot;, &quot;%b %d, %Y&quot;):
+        try:
+            return datetime.datetime.strptime(re.sub(r&quot;\s+&quot;, &quot; &quot;, s).strip(), fmt).date().isoformat()
+        except Exception:
+            continue
+    return None
+
+
+# ----------------------------------------------------------------------------- 4. index membership
+def sp_constituents(force: bool = False) -&gt; dict:
+    &quot;&quot;&quot;{&#x27;500&#x27;: [...], &#x27;400&#x27;: [...], &#x27;600&#x27;: [...]} — cached weekly on disk.
+
+    Source is the Wikipedia constituent tables (the only free, no-key, machine-readable S&amp;P
+    membership list). Selection picks, among the wikitables on the page, the one whose distinct
+    ticker count is CLOSEST to the index&#x27;s nominal size — the pages also carry a &#x27;recent changes&#x27;
+    table whose tickers would otherwise pollute the set (the S&amp;P 400 page&#x27;s changes table yields
+    589 symbols against the constituents table&#x27;s 400).
+    &quot;&quot;&quot;
+    if IDX_CACHE.exists() and not force:
+        try:
+            js = json.loads(IDX_CACHE.read_text())
+            age = (datetime.date.today() - datetime.date.fromisoformat(js[&quot;asof&quot;])).days
+            if age &lt;= IDX_CACHE_DAYS and all(js.get(&quot;indices&quot;, {}).get(k) for k in (&quot;500&quot;, &quot;400&quot;, &quot;600&quot;)):
+                return js[&quot;indices&quot;]
+        except Exception:
+            pass
+    pages = {&quot;500&quot;: (&quot;https://en.wikipedia.org/wiki/List_of_S%26P_500_companies&quot;, 500),
+             &quot;400&quot;: (&quot;https://en.wikipedia.org/wiki/List_of_S%26P_400_companies&quot;, 400),
+             &quot;600&quot;: (&quot;https://en.wikipedia.org/wiki/List_of_S%26P_600_companies&quot;, 600)}
+    idx = {}
+    for k, (u, expect) in pages.items():
+        try:
+            time.sleep(SLEEP)
+            h = _get(u, 60).decode(&quot;utf-8&quot;, &quot;ignore&quot;)
+        except Exception:
+            FETCH_ERRORS.append(f&quot;sp_constituents:{k}&quot;)
+            idx[k] = []
+            continue
+        cands = []
+        for tbl in re.findall(r&quot;&lt;table[^&gt;]*wikitable[^&gt;]*&gt;(.*?)&lt;/table&gt;&quot;, h, re.S):
+            got = []
+            for row in re.findall(r&quot;&lt;tr[^&gt;]*&gt;(.*?)&lt;/tr&gt;&quot;, tbl, re.S):
+                cells = re.findall(r&quot;&lt;t[dh][^&gt;]*&gt;(.*?)&lt;/t[dh]&gt;&quot;, row, re.S)
+                if len(cells) &lt; 2:
+                    continue
+                for c in cells[:2]:
+                    c0 = re.sub(r&quot;&lt;[^&gt;]+&gt;&quot;, &quot;&quot;, c).strip()
+                    if re.fullmatch(r&quot;[A-Z][A-Z.\-]{0,5}&quot;, c0):
+                        got.append(c0)
+                        break
+            if got:
+                cands.append(sorted(set(got)))
+        idx[k] = min(cands, key=lambda t: abs(len(t) - expect)) if cands else []
+    # never overwrite a good cache with a degraded fetch
+    if IDX_CACHE.exists():
+        try:
+            old = json.loads(IDX_CACHE.read_text()).get(&quot;indices&quot;, {})
+            for k in (&quot;500&quot;, &quot;400&quot;, &quot;600&quot;):
+                if len(idx.get(k) or []) &lt; 0.5 * len(old.get(k) or []):
+                    idx[k] = old[k]
+        except Exception:
+            pass
+    IDX_CACHE.write_text(json.dumps(
+        {&quot;asof&quot;: datetime.date.today().isoformat(),
+         &quot;source&quot;: &quot;en.wikipedia.org constituent tables (largest-table-nearest-nominal-size selection)&quot;,
+         &quot;indices&quot;: idx}, indent=1))
+    return idx
+
+
+_CT_CACHE = {}
+
+
+def company_tickers():
+    &quot;&quot;&quot;{normalized company name: ticker} from EDGAR&#x27;s company_tickers.json.
+
+    Used only as a FALLBACK when the information statement never says &quot;will continue to trade
+    under the symbol X&quot; — several filers name the parent in prose but never restate its ticker,
+    which left the parent index unresolved and the setup UNCLASSIFIED.
+    &quot;&quot;&quot;
+    if _CT_CACHE:
+        return _CT_CACHE
+    js = _gj(&quot;https://www.sec.gov/files/company_tickers.json&quot;)
+    if isinstance(js, dict):
+        for v in js.values():
+            try:
+                _CT_CACHE[_norm_co(v[&quot;title&quot;])] = v[&quot;ticker&quot;]
+            except Exception:
+                continue
+    return _CT_CACHE
+
+
+def _norm_co(n: str) -&gt; str:
+    n = re.sub(r&quot;[^a-z0-9 ]&quot;, &quot; &quot;, (n or &quot;&quot;).lower())
+    n = re.sub(r&quot;\b(inc|corp|corporation|ltd|limited|llc|lp|plc|co|holdings?|company|&quot;
+               r&quot;group|the|de|nemours|nv|sa|ag|ab|se)\b&quot;, &quot; &quot;, n)
+    return re.sub(r&quot;\s+&quot;, &quot; &quot;, n).strip()
+
+
+def resolve_parent_ticker(parent_name: str):
+    &quot;&quot;&quot;Exact-normalized-name match only. An ambiguous or partial match returns None rather than a
+    guess — a wrong parent ticker would silently mis-sign the whole forced-flow classification.&quot;&quot;&quot;
+    if not parent_name:
+        return None
+    key = _norm_co(parent_name)
+    if not key or len(key) &lt; 3:
+        return None
+    return company_tickers().get(key)
+
+
+def index_of(ticker, idx) -&gt; str:
+    if not ticker:
+        return &quot;UNKNOWN&quot;
+    t = ticker.upper().replace(&quot;.&quot;, &quot;-&quot;)
+    for k in (&quot;500&quot;, &quot;400&quot;, &quot;600&quot;):
+        pool = {x.upper().replace(&quot;.&quot;, &quot;-&quot;) for x in (idx.get(k) or [])}
+        if t in pool:
+            return f&quot;SP{k}&quot;
+    return &quot;NONE&quot;
+
+
+_TIER = {&quot;SP500&quot;: 3, &quot;SP400&quot;: 2, &quot;SP600&quot;: 1, &quot;NONE&quot;: 0}
+IDX_ASOF_CAVEAT = (&quot;index membership is read AS OF TODAY, not as of the distribution — S&amp;P DJI &quot;
+                   &quot;migrates names between the 500/400/600 at later rebalances, so for a spin more &quot;
+                   &quot;than ~90d old the class describes where it SITS, not necessarily where it was &quot;
+                   &quot;PLACED. Fine for live cohort work; a backtest must pin membership to the &quot;
+                   &quot;distribution date&quot;)
+
+
+def classify_setup(parent_idx: str, spinco_idx: str, trading: bool) -&gt; tuple:
+    &quot;&quot;&quot;(setup_class, is_our_trade, rationale) — the July-2026 doctrine, mechanized.
+
+    The flow is signed by the TIER MOVE, not by the S&amp;P 500 alone: an index fund that receives a
+    spinco it cannot hold must sell it, and that is equally true of an S&amp;P 400 parent whose spinco
+    lands in the 600 (Middleby -&gt; Midera). Ranking the tiers rather than special-casing the 500
+    is what catches that; treating 400-&gt;600 as a &#x27;same tier&#x27; placement understated it.
+    &quot;&quot;&quot;
+    if not trading:
+        return (&quot;PENDING_DISTRIBUTION&quot;, None,
+                &quot;not yet distributed — S&amp;P placement is decided at/near distribution, so the &quot;
+                &quot;forced-flow SIGN is unknowable today; read the information statement now, size later&quot;)
+    if parent_idx in (&quot;UNKNOWN&quot;, &quot;NONE&quot;):
+        return (&quot;ORPHAN_UNINDEXED_PARENT&quot;, None,
+                &quot;the parent is not in an S&amp;P US index (foreign primary listing, OTC, or the ticker &quot;
+                &quot;did not resolve) — so there is no measurable US index flow to sign. The COVERAGE &quot;
+                &quot;vacuum can still be real and is often deeper for a cross-border orphan (the &quot;
+                &quot;DAX-&gt;MDAX / LSE-primary channel), but the mechanical leg must be checked by hand &quot;
+                &quot;against the parent&#x27;s actual home index. Not auto-sized&quot;)
+    p, s = _TIER.get(parent_idx, 0), _TIER.get(spinco_idx, 0)
+    if s == 0:
+        return (&quot;ORPHAN_NO_PLACEMENT&quot;, True,
+                f&quot;{parent_idx} parent, spinco in NO S&amp;P index — the purest orphan: 100% of the &quot;
+                f&quot;parent&#x27;s index ownership is a forced seller with no offsetting index bid. &quot;
+                f&quot;CAVEAT: {IDX_ASOF_CAVEAT}&quot;)
+    if s &lt; p:
+        return (&quot;FORCED_SELL_DOWNGRADE&quot;, True,
+                f&quot;{parent_idx} parent, spinco placed DOWN into {spinco_idx} — every {parent_idx} &quot;
+                f&quot;fund must sell a line it can never hold. The genuine net forced-SELL sub-cohort &quot;
+                f&quot;(MBGL is the type specimen). The flow is PARTLY OFFSET by {spinco_idx} funds &quot;
+                f&quot;buying and is commonly front-run, so the edge is the discretionary orphan drift &quot;
+                f&quot;AFTER the mechanical print, not the print itself. CAVEAT: {IDX_ASOF_CAVEAT}&quot;)
+    if s == p == 3:
+        return (&quot;FORCED_BUY_INVERTED&quot;, False,
+                &quot;S&amp;P DJI placed the spinco back in the S&amp;P 500 same-cycle — index funds are forced &quot;
+                &quot;BUYERS, not sellers. This is the INVERTED trade (a different playbook), NOT the &quot;
+                &quot;orphan washout; including it in an orphan basket manufactures false alpha&quot;)
+    if s == p:
+        return (&quot;INDEX_PLACEMENT_MATCHED&quot;, False,
+                f&quot;parent and spinco both in {spinco_idx} — the placement matches, so index funds &quot;
+                f&quot;keep the line and there is no mechanical sell. No clean flow edge&quot;)
+    return (&quot;FORCED_BUY_UPGRADE&quot;, False,
+            f&quot;spinco placed UP ({parent_idx} parent -&gt; {spinco_idx} spinco) — a forced BUY, the &quot;
+            f&quot;inverted playbook, not the orphan washout&quot;)
+
+
+# ----------------------------------------------------------------------------- 5. tracking
+YF_BACKOFF = (15, 45, 120, 240)   # Yahoo throttles hard; a daily cron can afford to wait it out
+
+
+def yf_batch(tickers):
+    &quot;&quot;&quot;{ticker: DataFrame|None} for every ticker, in ONE yfinance session, with rate-limit backoff.
+
+    Returns None for a ticker with genuinely no data (not yet trading) and OMITS a ticker whose
+    fetch FAILED. That distinction is load-bearing: Yahoo rate-limits aggressively, and a swallowed
+    rate-limit makes every already-trading spinco look pre-distribution — which silently empties
+    the orphan cohort while the scanner reports success. Failures go to FETCH_ERRORS instead.
+    &quot;&quot;&quot;
+    tickers = sorted({t for t in tickers if t})
+    if not tickers:
+        return {}
+    try:
+        import yfinance as yf
+    except Exception:
+        FETCH_ERRORS.append(&quot;yfinance not importable — tracking leg unavailable&quot;)
+        return {}
+    out, pending, last = {}, list(tickers), None
+    for wait in (0,) + YF_BACKOFF:
+        if not pending:
+            break
+        if wait:
+            time.sleep(wait)
+        try:
+            df = yf.download(pending, period=&quot;2y&quot;, auto_adjust=False, group_by=&quot;ticker&quot;,
+                             progress=False, threads=False, actions=False)
+        except Exception as e:
+            last = e
+            continue
+        # yfinance reports PER-TICKER failures inside a partially-successful frame. A rate-limited
+        # ticker and a genuinely-not-yet-trading ticker both come back as all-NaN columns, so the
+        # only way to tell them apart is yfinance&#x27;s own error map. Conflating them is what makes a
+        # throttled run silently report every trading spinco as &#x27;not yet distributed&#x27;.
+        try:
+            from yfinance import shared as _yfshared
+            errs = dict(getattr(_yfshared, &quot;_ERRORS&quot;, {}) or {})
+        except Exception:
+            errs = {}
+        still = []
+        for t in list(pending):
+            transient = &quot;ratelimit&quot; in str(errs.get(t, &quot;&quot;)).lower().replace(&quot; &quot;, &quot;&quot;)
+            if transient:
+                still.append(t)
+                last = errs.get(t)
+                continue
+            try:
+                sub = df[t] if (df is not None and len(pending) &gt; 1) else df
+                sub = sub.dropna(how=&quot;all&quot;) if sub is not None else None
+            except Exception:
+                sub = None
+            out[t] = sub if (sub is not None and not sub.empty) else None
+        pending = still
+    for t in pending:
+        FETCH_ERRORS.append(f&quot;yfinance rate-limited after {len(YF_BACKOFF)} retries: {t}&quot;)
+    return out
+
+
+def price_track(h, form10_date: str, dist_date: str = None, wi_language: bool = False):
+    &quot;&quot;&quot;Post-distribution price behaviour from a price frame, or None if the name is not trading.
+
+    Two guards that matter:
+      - LEADING ZERO-VOLUME BARS ARE DROPPED. Yahoo emits a phantom opening/when-issued bar for
+        fresh spins (MFP 2026-06-26: volume 0, high 200, low 21, close 110.50 against a real
+        regular-way open of 35.00 next session). Keeping it fabricates a -57% dump.
+      - HISTORY PREDATING THE FORM 10 means the ticker is NOT a fresh distribution — it is the
+        surviving parent of a holdco reorg or an already-listed issuer (Enviri II -&gt; NVRI, bars to
+        2024). Returned with reorg=True so the caller can reject rather than score it.
+    &quot;&quot;&quot;
+    if h is None or getattr(h, &quot;empty&quot;, True):
+        return None
+    try:
+        vol = h[&quot;Volume&quot;].fillna(0)
+        keep = [i for i, v in enumerate(vol) if v &gt; 0]
+        if not keep:
+            return None
+        h = h.iloc[keep[0]:]
+        first_dt = h.index[0].date()
+        if form10_date and first_dt &lt; datetime.date.fromisoformat(form10_date):
+            return {&quot;reorg&quot;: True, &quot;first_bar&quot;: first_dt.isoformat(),
+                    &quot;note&quot;: f&quot;price history starts {first_dt} — BEFORE the Form 10 ({form10_date}); &quot;
+                            f&quot;not a fresh distribution&quot;}
+        # METRICS ARE MEASURED FROM THE DISTRIBUTION, NOT FROM THE FIRST BAR. When-issued trading
+        # opens up to ~2 weeks early on a separate, thin line, and Yahoo staples those bars onto
+        # the front of the series. Measuring from bar 1 charged HONA a -27.4% &quot;dump&quot; off a $269.95
+        # when-issued print against a $200 regular-way open — an air-pocket that never happened to
+        # anyone who received the distribution. When the filing gives us the date, we cut to it.
+        rw_from = first_dt
+        metrics_from = &quot;first traded bar&quot;
+        if dist_date:
+            try:
+                d0 = datetime.date.fromisoformat(dist_date)
+                if d0 &gt; first_dt:
+                    cut = h[h.index.map(lambda x: x.date() &gt;= d0)]
+                    if len(cut) &gt;= 2:
+                        h, rw_from, metrics_from = cut, d0, &quot;filed distribution date&quot;
+            except Exception:
+                pass
+        close = h[&quot;Close&quot;].astype(float)
+        first_close = float(close.iloc[0])
+        last_close = float(close.iloc[-1])
+        early = close.iloc[:5]
+        early_high = float(early.max())
+        trough = float(close.min())
+        trough_dt = close.idxmin().date()
+        n = len(close)
+        dd = (trough - early_high) / early_high if early_high else 0.0
+        rec = (last_close - trough) / trough if trough else 0.0
+        days_since_trough = (h.index[-1].date() - trough_dt).days
+        tot = (last_close - first_close) / first_close if first_close else 0.0
+
+        if dd &lt;= -DUMP_PCT and rec &gt;= BASE_RECOVERY and days_since_trough &gt;= 5:
+            pattern = &quot;DUMP_THEN_BASE&quot;
+        elif dd &lt;= -DUMP_PCT and days_since_trough &lt;= 5:
+            pattern = &quot;DUMPING&quot;
+        elif dd &lt;= -DUMP_PCT:
+            pattern = &quot;BASING&quot;
+        elif tot &gt;= 0.15:
+            pattern = &quot;RIPPING&quot;
+        else:
+            pattern = &quot;NO_DUMP&quot;
+        return {
+            &quot;reorg&quot;: False,
+            &quot;first_bar_date&quot;: first_dt.isoformat(),
+            &quot;metrics_from&quot;: metrics_from,
+            &quot;metrics_start&quot;: rw_from.isoformat(),
+            # Without a filed date we cannot tell a when-issued bar from a regular-way one, so the
+            # drawdown may be overstated. Say so rather than let the number stand unqualified.
+            &quot;regular_way_start_unverified&quot;: (metrics_from == &quot;first traded bar&quot; and bool(wi_language)),
+            &quot;n_sessions&quot;: n,
+            &quot;first_close&quot;: round(first_close, 2),
+            &quot;early_high&quot;: round(early_high, 2),
+            &quot;trough&quot;: round(trough, 2), &quot;trough_date&quot;: trough_dt.isoformat(),
+            &quot;last_close&quot;: round(last_close, 2),
+            &quot;drawdown_from_early_high_pct&quot;: round(dd * 100, 1),
+            &quot;recovery_off_trough_pct&quot;: round(rec * 100, 1),
+            &quot;total_since_distribution_pct&quot;: round(tot * 100, 1),
+            &quot;pattern&quot;: pattern,
+        }
+    except Exception:
+        return None
+
+
+def window_status(dist_date: str):
+    if not dist_date:
+        return None, None
+    d = (datetime.date.today() - datetime.date.fromisoformat(dist_date)).days
+    if d &lt; 0:
+        return d, &quot;PRE_DISTRIBUTION&quot;
+    if d &lt;= WINDOW_ACTIVE:
+        return d, &quot;FORCED_SELLING_ACTIVE&quot;
+    if d &lt;= WINDOW_LATE:
+        return d, &quot;LATE_WINDOW&quot;
+    return d, &quot;WINDOW_CLOSED&quot;
+
+
+# ----------------------------------------------------------------------------- merge + main
+_DERIVED = {  # fields this scanner owns and may overwrite; anything else in the store is preserved
+    &quot;registrant&quot;, &quot;sic&quot;, &quot;sic_description&quot;, &quot;biz_location&quot;, &quot;filings&quot;, &quot;n_amendments&quot;,
+    &quot;first_registered&quot;, &quot;latest_filing&quot;, &quot;parent_name&quot;, &quot;parent_ticker&quot;, &quot;parent_index&quot;,
+    &quot;spinco_ticker&quot;, &quot;spinco_ticker_filed&quot;, &quot;spinco_index&quot;, &quot;when_issued_ticker&quot;, &quot;exchange&quot;,
+    &quot;record_date&quot;, &quot;distribution_date_expected&quot;, &quot;distribution_date&quot;, &quot;distribution_date_source&quot;,
+    &quot;distribution_ratio&quot;, &quot;when_issued_language&quot;, &quot;leverage_to_parent_flag&quot;, &quot;is_spin&quot;,
+    &quot;spin_evidence&quot;, &quot;rmt&quot;, &quot;stage&quot;, &quot;setup_class&quot;, &quot;is_orphan_trade&quot;, &quot;setup_rationale&quot;,
+    &quot;days_since_distribution&quot;, &quot;window_status&quot;, &quot;track&quot;, &quot;reject_reason&quot;, &quot;last_scanned&quot;,
+    &quot;price_status&quot;, &quot;redomiciliation&quot;, &quot;first_traded_bar&quot;, &quot;when_issued_bars_suspected&quot;,
+    &quot;parent_ticker_source&quot;,
+}
+
+
+# Fields whose absence is itself the fact: once a name stops being rejected (or stops having
+# when-issued bars), the old value must be CLEARED, not preserved by the stale-value guard.
+_CLEARABLE = {&quot;reject_reason&quot;, &quot;when_issued_bars_suspected&quot;}
+
+
+def merge_write(records: dict, meta: dict) -&gt; dict:
+    &quot;&quot;&quot;MERGE by CIK. Never clobbers: hand-added keys survive, and a degraded field (None) never
+    overwrites a previously-good value.&quot;&quot;&quot;
+    store = {}
+    if OUT.exists():
+        try:
+            store = json.loads(OUT.read_text())
+        except Exception:
+            store = {}
+    spins = store.get(&quot;spins&quot;) or {}
+    if isinstance(spins, list):  # tolerate an older list-shaped store
+        spins = {r.get(&quot;cik&quot;): r for r in spins if r.get(&quot;cik&quot;)}
+    n_new = 0
+    for cik, rec in records.items():
+        cur = spins.get(cik)
+        if cur is None:
+            rec.setdefault(&quot;first_seen&quot;, datetime.date.today().isoformat())
+            spins[cik] = rec
+            n_new += 1
+            continue
+        for k, v in rec.items():
+            if k in _DERIVED and k not in _CLEARABLE and v is None and cur.get(k) is not None:
+                continue          # a failed fetch must not erase a good prior value
+            cur[k] = v
+    store[&quot;spins&quot;] = spins
+    store[&quot;asof&quot;] = meta[&quot;asof&quot;]
+    store[&quot;n_tracked&quot;] = len(spins)
+    store[&quot;n_new_this_run&quot;] = n_new
+    for k in (&quot;doctrine&quot;, &quot;method&quot;, &quot;note&quot;, &quot;sp_index_asof&quot;, &quot;backfill_days&quot;,
+              &quot;price_leg&quot;, &quot;degraded&quot;, &quot;fetch_errors&quot;):
+        if k in meta:
+            store[k] = meta[k]
+    OUT.write_text(json.dumps(store, indent=1))
+    return store
+
+
+DOCTRINE = (
+    &quot;SPIN-OFF ORPHAN = the coverage-vacuum trade: at distribution, parent holders are handed a &quot;
+    &quot;stock no analyst covers, that is not in their benchmark, and that is often below their &quot;
+    &quot;mandate floor — they sell on a calendar, price-insensitively, for ~30-90 days. BUT the US &quot;
+    &quot;index leg is INVERTED for S&amp;P 500 parents: S&amp;P DJI now places qualifying spincos back into &quot;
+    &quot;an S&amp;P index SAME-CYCLE, so index funds are forced BUYERS (SOLS, Q, FDXF) and no washout &quot;
+    &quot;occurs. The real forced-SELL cohort is (a) S&amp;P 500 parent -&gt; spinco DOWNGRADED into 400/600 &quot;
+    &quot;(MBGL), (b) spinco given NO index placement, and (c) non-US no-auto-placement venues &quot;
+    &quot;(DAX-&gt;MDAX, the Aumovio channel — out of scope for an EDGAR scanner, manual watch). RMT &quot;
+    &quot;deals are EXCLUDED: parent holders receive acquirer stock, so there is zero orphan flow. Any &quot;
+    &quot;backtest must isolate the downgrade/no-placement sub-cohort or the index-INCLUDED winners &quot;
+    &quot;manufacture false alpha. Even inside the true cohort, the MECHANICAL print is front-run and &quot;
+    &quot;partly offset — the durable edge is the DISCRETIONARY orphan drift over the following 4-8 &quot;
+    &quot;weeks, into a name we have already read the information statement on.&quot;
+)
+
+
+def scan(parse: bool = True, track: bool = True, backfill_days: int = BACKFILL_DAYS) -&gt; dict:
+    today = datetime.date.today()
+    rows = discover_form10(backfill_days)
+    reg = group_by_cik(rows)
+    idx = sp_constituents()
+    prior = {}
+    if PRIOR_ART.exists():
+        try:
+            prior = (json.loads(PRIOR_ART.read_text()).get(&quot;dispositions&quot;) or {})
+        except Exception:
+            prior = {}
+
+    # PASS 1 — EDGAR facts (registration, ticker assignment, information statement).
+    staged, parsed = [], 0
+    for cik, r in sorted(reg.items(), key=lambda kv: kv[1][&quot;latest_filing&quot;], reverse=True):
+        sub = submissions(cik)
+        tickers = sub.get(&quot;tickers&quot;) or []
+        exchanges = sub.get(&quot;exchanges&quot;) or []
+        wi = next((t for t in tickers if t.endswith(&quot;-WI&quot;) or re.fullmatch(r&quot;[A-Z]{4}V{1,2}&quot;, t)), None)
+        live = [t for t in tickers if t != wi]
+        ticker = live[0] if live else None
+        exch = next((e for t, e in zip(tickers, exchanges) if t == ticker and e), None)
+
+        addr = ((sub.get(&quot;addresses&quot;) or {}).get(&quot;business&quot;) or {})
+        rec = {
+            &quot;cik&quot;: cik, &quot;registrant&quot;: r[&quot;registrant&quot;], &quot;sic&quot;: sub.get(&quot;sic&quot;),
+            &quot;sic_description&quot;: sub.get(&quot;sicDescription&quot;),
+            &quot;biz_location&quot;: &quot;, &quot;.join(x for x in (addr.get(&quot;city&quot;), addr.get(&quot;stateOrCountry&quot;)) if x) or None,
+            &quot;filings&quot;: r[&quot;filings&quot;],
+            &quot;n_amendments&quot;: r[&quot;n_amendments&quot;], &quot;first_registered&quot;: r[&quot;first_registered&quot;],
+            &quot;latest_filing&quot;: r[&quot;latest_filing&quot;],
+            &quot;spinco_ticker&quot;: ticker, &quot;when_issued_ticker&quot;: wi, &quot;exchange&quot;: exch,
+            &quot;last_scanned&quot;: today.isoformat(),
+        }
+
+        # ---- parse the newest information statement
+        p = {}
+        if parse and parsed &lt; MAX_PARSE:
+            adsh = r[&quot;_adsh&quot;].get(max(r[&quot;_adsh&quot;])) if r[&quot;_adsh&quot;] else None
+            url = largest_doc(cik, adsh)
+            if url:
+                p = parse_info_statement(_gt(url), r[&quot;registrant&quot;])
+                parsed += 1
+        rec.update({k: p.get(k) for k in (
+            &quot;is_spin&quot;, &quot;spin_evidence&quot;, &quot;rmt&quot;, &quot;redomiciliation&quot;, &quot;parent_name&quot;, &quot;parent_ticker&quot;,
+            &quot;spinco_ticker_filed&quot;, &quot;record_date&quot;, &quot;distribution_date_expected&quot;,
+            &quot;distribution_ratio&quot;, &quot;when_issued_language&quot;, &quot;leverage_to_parent_flag&quot;)})
+        if not rec[&quot;spinco_ticker&quot;] and rec[&quot;spinco_ticker_filed&quot;]:
+            rec[&quot;spinco_ticker&quot;] = rec[&quot;spinco_ticker_filed&quot;]
+        staged.append((cik, r, rec, p))
+
+    # PASS 2 — one batched price fetch for the whole cohort (Yahoo rate-limits per-ticker loops,
+    # and a swallowed rate-limit would report every trading spinco as &#x27;not yet distributed&#x27;).
+    px = yf_batch([rec[&quot;spinco_ticker&quot;] for _, _, rec, _ in staged]) if track else {}
+    px_ok = bool(px) or not track
+
+    records = {}
+    for cik, r, rec, p in staged:
+        tkr = rec[&quot;spinco_ticker&quot;]
+        tr = (price_track(px.get(tkr), r[&quot;first_registered&quot;], p.get(&quot;distribution_date_expected&quot;),
+                          bool(p.get(&quot;when_issued_language&quot;)))
+              if (track and tkr and tkr in px) else None)
+        # a ticker the batch could not resolve at all is UNKNOWN, not &#x27;not trading&#x27;
+        price_status = (&quot;OK&quot; if (track and tkr and tkr in px) else
+                        (&quot;NO_TICKER&quot; if not tkr else (&quot;FETCH_FAILED&quot; if track else &quot;SKIPPED&quot;)))
+        rec[&quot;price_status&quot;] = price_status
+
+        # ---- trap filter (positive evidence only)
+        reject = None
+        if tr and tr.get(&quot;reorg&quot;):
+            reject = f&quot;holdco_reorg / already_trading ({tr[&#x27;note&#x27;]})&quot;
+        elif p and p.get(&quot;rmt&quot;):
+            reject = &quot;rmt_no_flow (Reverse Morris Trust — parent holders receive ACQUIRER stock; zero orphan flow)&quot;
+        elif p and p.get(&quot;redomiciliation&quot;):
+            reject = (f&quot;redomiciliation_no_flow (a UK/Irish scheme-of-arrangement move to a US holdco — &quot;
+                      f&quot;every holder exchanges into the new parent, so there is no orphan and no forced &quot;
+                      f&quot;flow; Ashtead -&gt; Sunbelt Rentals is the type specimen. {p.get(&#x27;spin_evidence&#x27;)})&quot;)
+        elif p and not p.get(&quot;is_spin&quot;):
+            reject = (f&quot;not_a_spin (10-12B filed for an uplisting, shell or holdco registration, not a &quot;
+                      f&quot;distribution; {p.get(&#x27;spin_evidence&#x27;)})&quot;)
+        elif parse and not p:
+            reject = None  # unparsed (budget/fetch) — do NOT reject on missing evidence
+
+        if reject:
+            rec.update({&quot;stage&quot;: &quot;REJECTED&quot;, &quot;reject_reason&quot;: reject, &quot;track&quot;: None,
+                        &quot;setup_class&quot;: None, &quot;is_orphan_trade&quot;: False, &quot;setup_rationale&quot;: None,
+                        &quot;days_since_distribution&quot;: None, &quot;window_status&quot;: None,
+                        &quot;distribution_date&quot;: None, &quot;distribution_date_source&quot;: None})
+            records[cik] = rec
+            continue
+
+        # ---- stage + distribution date
+        if tr:
+            filed, first_bar = p.get(&quot;distribution_date_expected&quot;), tr[&quot;first_bar_date&quot;]
+            # The FILED date wins when we have it: the first traded bar can be a WHEN-ISSUED
+            # session, which runs up to ~2 weeks before the distribution (HONA printed bars from
+            # Jun-15 against a filed distribution of Jun-29). Using the bar would age the
+            # forced-selling window by that gap and close it early.
+            if filed:
+                rec[&quot;distribution_date&quot;] = filed
+                rec[&quot;distribution_date_source&quot;] = &quot;information statement (filed)&quot;
+            else:
+                rec[&quot;distribution_date&quot;] = first_bar
+                rec[&quot;distribution_date_source&quot;] = &quot;first traded bar (zero-volume leading bars dropped)&quot;
+            rec[&quot;first_traded_bar&quot;] = first_bar
+            if filed and abs((datetime.date.fromisoformat(filed)
+                              - datetime.date.fromisoformat(first_bar)).days) &gt; 3:
+                rec[&quot;when_issued_bars_suspected&quot;] = (
+                    f&quot;first bar {first_bar} vs filed distribution {filed} — the earlier bars are &quot;
+                    f&quot;when-issued; window dated off the FILED date&quot;)
+            rec[&quot;stage&quot;] = &quot;TRADING&quot;
+        else:
+            rec[&quot;distribution_date&quot;] = p.get(&quot;distribution_date_expected&quot;)
+            rec[&quot;distribution_date_source&quot;] = &quot;information statement (expected)&quot; if rec[&quot;distribution_date&quot;] else None
+            if price_status == &quot;FETCH_FAILED&quot;:
+                # DO NOT claim &#x27;not yet distributed&#x27; off a failed price fetch — that is exactly how
+                # a rate-limited run would silently empty the orphan cohort. stage is left None so
+                # the MERGE preserves whatever the last good run established.
+                rec[&quot;stage&quot;] = None
+            elif rec[&quot;when_issued_ticker&quot;]:
+                rec[&quot;stage&quot;] = &quot;WHEN_ISSUED&quot;
+            else:
+                rec[&quot;stage&quot;] = &quot;REGISTERED&quot; if r[&quot;n_amendments&quot;] &lt; 2 else &quot;LATE_STAGE_REGISTRATION&quot;
+
+        rec[&quot;reject_reason&quot;] = None      # accepted this run — clear any stale rejection
+        rec[&quot;track&quot;] = tr
+        if not rec.get(&quot;parent_ticker&quot;):
+            rec[&quot;parent_ticker&quot;] = resolve_parent_ticker(rec.get(&quot;parent_name&quot;))
+            if rec[&quot;parent_ticker&quot;]:
+                rec[&quot;parent_ticker_source&quot;] = &quot;EDGAR company_tickers.json, exact normalized name match&quot;
+        rec[&quot;parent_index&quot;] = index_of(rec.get(&quot;parent_ticker&quot;), idx)
+
+        if price_status == &quot;FETCH_FAILED&quot;:
+            # Everything downstream of the price leg is UNKNOWN this run, not FALSE. Emitting None
+            # (rather than &#x27;UNKNOWN&#x27;/&#x27;PENDING_DISTRIBUTION&#x27;) lets the MERGE keep the last good
+            # classification — otherwise one rate-limited run would silently demote MBGL from
+            # FORCED_SELL_DOWNGRADE to &#x27;not yet distributed&#x27;.
+            for k in (&quot;spinco_index&quot;, &quot;setup_class&quot;, &quot;is_orphan_trade&quot;, &quot;setup_rationale&quot;,
+                      &quot;days_since_distribution&quot;, &quot;window_status&quot;, &quot;distribution_date&quot;,
+                      &quot;distribution_date_source&quot;):
+                rec[k] = None
+        else:
+            rec[&quot;spinco_index&quot;] = index_of(rec.get(&quot;spinco_ticker&quot;), idx) if tr else &quot;UNKNOWN&quot;
+            cls, ours, why = classify_setup(rec[&quot;parent_index&quot;], rec[&quot;spinco_index&quot;], bool(tr))
+            rec[&quot;setup_class&quot;], rec[&quot;is_orphan_trade&quot;], rec[&quot;setup_rationale&quot;] = cls, ours, why
+            d, ws = window_status(rec[&quot;distribution_date&quot;])
+            rec[&quot;days_since_distribution&quot;], rec[&quot;window_status&quot;] = d, ws
+
+        if tkr and tkr in prior and &quot;prior_art&quot; not in rec:
+            rec[&quot;prior_art&quot;] = f&quot;2026-07-04 one-shot: {prior[tkr]}&quot;
+        records[cik] = rec
+
+    meta = {
+        &quot;asof&quot;: today.isoformat(), &quot;backfill_days&quot;: backfill_days,
+        &quot;sp_index_asof&quot;: (json.loads(IDX_CACHE.read_text()).get(&quot;asof&quot;) if IDX_CACHE.exists() else None),
+        &quot;doctrine&quot;: DOCTRINE,
+        &quot;method&quot;: (&quot;EDGAR full-index form.idx 10-12B/10-12B/A stream (12mo backfill) -&gt; dedupe by CIK -&gt; parse the &quot;
+                   &quot;Exhibit-99.1 information statement (largest .htm) for parent / tickers / record + &quot;
+                   &quot;distribution dates / ratio -&gt; trap-filter uplistings, holdco reorgs and RMTs -&gt; &quot;
+                   &quot;S&amp;P 500/400/600 membership for parent and spinco -&gt; setup classification -&gt; &quot;
+                   &quot;yfinance post-distribution track measured from the FILED distribution date where available &quot;
+                   &quot;(leading zero-volume and when-issued bars dropped). &quot;
+                   f&quot;Index floors for context only: {SP_FLOOR_NOTE}.&quot;),
+        &quot;note&quot;: (&quot;MERGE store, keyed by CIK. Unparsed fields are null, never guessed — early &quot;
+                 &quot;10-12B/As literally leave the distribution date blank. Forced-selling window: &quot;
+                 f&quot;0-{WINDOW_ACTIVE}d ACTIVE / {WINDOW_ACTIVE + 1}-{WINDOW_LATE}d LATE / &gt;{WINDOW_LATE}d CLOSED. &quot;
+                 &quot;READ-ONLY; never places an order.&quot;),
+        &quot;price_leg&quot;: &quot;OK&quot; if px_ok else &quot;FAILED (yfinance rate-limited or unreachable — stages left UNRESOLVED, not downgraded)&quot;,
+        &quot;degraded&quot;: bool(FETCH_ERRORS),
+        &quot;fetch_errors&quot;: FETCH_ERRORS[:20] or None,
+    }
+    return {&quot;records&quot;: records, &quot;meta&quot;: meta, &quot;n_registrants&quot;: len(reg), &quot;n_parsed&quot;: parsed}
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument(&quot;--no-parse&quot;, action=&quot;store_true&quot;, help=&quot;skip information-statement fetches&quot;)
+    ap.add_argument(&quot;--no-track&quot;, action=&quot;store_true&quot;, help=&quot;skip yfinance price tracking&quot;)
+    ap.add_argument(&quot;--days&quot;, type=int, default=BACKFILL_DAYS)
+    a = ap.parse_args()
+
+    res = scan(parse=not a.no_parse, track=not a.no_track, backfill_days=a.days)
+    if res[&quot;n_registrants&quot;] == 0:
+        # An empty EDGAR discovery is almost never real (the 10-12B stream runs ~50 filings/yr) —
+        # it means EFTS threw a blanket 403 at us. Do NOT write: a silent empty run would advance
+        # `asof` and make a throttled fetch read as &quot;no spins registered&quot;.
+        print(&quot;=== SPIN-OFF ORPHAN GENERATOR — DEGRADED, NOT WRITTEN ===&quot;)
+        print(&quot;  EDGAR returned 0 10-12B registrants. That is a fetch failure, not an empty cohort.&quot;)
+        for e in FETCH_ERRORS[:10]:
+            print(f&quot;    {e}&quot;)
+        print(f&quot;  store left untouched at {OUT}&quot;)
+        sys.exit(2)
+    store = merge_write(res[&quot;records&quot;], res[&quot;meta&quot;])
+    if res[&quot;meta&quot;][&quot;degraded&quot;]:
+        print(f&quot;!! DEGRADED RUN — {len(FETCH_ERRORS)} fetch failure(s); some fields may be stale/null:&quot;)
+        for e in FETCH_ERRORS[:8]:
+            print(f&quot;     {e}&quot;)
+    rows = list(store[&quot;spins&quot;].values())
+
+    print(f&quot;=== SPIN-OFF ORPHAN GENERATOR  {res[&#x27;meta&#x27;][&#x27;asof&#x27;]}  &quot;
+          f&quot;({res[&#x27;n_registrants&#x27;]} 10-12B registrants over {a.days}d, {res[&#x27;n_parsed&#x27;]} information &quot;
+          f&quot;statements parsed, {store[&#x27;n_new_this_run&#x27;]} new, {store[&#x27;n_tracked&#x27;]} tracked) ===&quot;)
+
+    live = [r for r in rows if r.get(&quot;stage&quot;) == &quot;TRADING&quot; and r.get(&quot;window_status&quot;) != &quot;WINDOW_CLOSED&quot;]
+    live.sort(key=lambda r: r.get(&quot;days_since_distribution&quot;) or 999)
+    print(f&quot;\n  ORPHAN COHORT — trading, forced-selling window still open (&lt;= {WINDOW_LATE}d):&quot;)
+    if not live:
+        print(&quot;    (none)&quot;)
+    for r in live:
+        t = r.get(&quot;track&quot;) or {}
+        flag = &quot;**&quot; if r.get(&quot;is_orphan_trade&quot;) else &quot;  &quot;
+        print(f&quot;  {flag}{(r.get(&#x27;spinco_ticker&#x27;) or &#x27;?&#x27;):6} {r[&#x27;registrant&#x27;][:30]:30} &quot;
+              f&quot;ex-{(r.get(&#x27;parent_ticker&#x27;) or r.get(&#x27;parent_name&#x27;) or &#x27;?&#x27;)[:14]:14} &quot;
+              f&quot;dist {r.get(&#x27;distribution_date&#x27;)} ({r.get(&#x27;days_since_distribution&#x27;)}d, {r.get(&#x27;window_status&#x27;)})&quot;)
+        print(f&quot;        {r.get(&#x27;setup_class&#x27;)}  parent={r.get(&#x27;parent_index&#x27;)} spinco={r.get(&#x27;spinco_index&#x27;)}  &quot;
+              f&quot;| {t.get(&#x27;pattern&#x27;)}: first ${t.get(&#x27;first_close&#x27;)} -&gt; trough ${t.get(&#x27;trough&#x27;)} &quot;
+              f&quot;({t.get(&#x27;drawdown_from_early_high_pct&#x27;)}%) -&gt; ${t.get(&#x27;last_close&#x27;)} &quot;
+              f&quot;({t.get(&#x27;recovery_off_trough_pct&#x27;):+}% off low)&quot; if t else &quot;&quot;)
+
+    pend = [r for r in rows if r.get(&quot;stage&quot;) in (&quot;WHEN_ISSUED&quot;, &quot;LATE_STAGE_REGISTRATION&quot;, &quot;REGISTERED&quot;)]
+    pend.sort(key=lambda r: (r.get(&quot;stage&quot;) != &quot;WHEN_ISSUED&quot;, r.get(&quot;latest_filing&quot;) or &quot;&quot;), reverse=False)
+    print(f&quot;\n  PIPELINE — registered, not yet distributed (read the information statement NOW):&quot;)
+    for r in pend:
+        wi = f&quot; WI:{r[&#x27;when_issued_ticker&#x27;]}&quot; if r.get(&quot;when_issued_ticker&quot;) else &quot;&quot;
+        lev = &quot;  ** LEVERAGE-TO-PARENT (informed-seller tell)&quot; if r.get(&quot;leverage_to_parent_flag&quot;) else &quot;&quot;
+        print(f&quot;    {(r.get(&#x27;spinco_ticker&#x27;) or &#x27;?&#x27;):6} {r[&#x27;registrant&#x27;][:34]:34} &quot;
+              f&quot;ex-{(r.get(&#x27;parent_name&#x27;) or &#x27;?&#x27;)[:22]:22} {r.get(&#x27;stage&#x27;):26} &quot;
+              f&quot;{r[&#x27;n_amendments&#x27;]}A last {r.get(&#x27;latest_filing&#x27;)}{wi}{lev}&quot;)
+
+    closed = [r for r in rows if r.get(&quot;stage&quot;) == &quot;TRADING&quot; and r.get(&quot;window_status&quot;) == &quot;WINDOW_CLOSED&quot;]
+    print(f&quot;\n  WINDOW CLOSED ({len(closed)}) — history, for backtesting the sub-cohorts:&quot;)
+    for r in sorted(closed, key=lambda r: r.get(&quot;days_since_distribution&quot;) or 0):
+        t = r.get(&quot;track&quot;) or {}
+        print(f&quot;    {(r.get(&#x27;spinco_ticker&#x27;) or &#x27;?&#x27;):6} {r[&#x27;registrant&#x27;][:26]:26} {r.get(&#x27;setup_class&#x27;):22} &quot;
+              f&quot;{r.get(&#x27;days_since_distribution&#x27;)}d  {t.get(&#x27;pattern&#x27;)}  &quot;
+              f&quot;tot {t.get(&#x27;total_since_distribution_pct&#x27;)}%&quot;)
+
+    rej = [r for r in rows if r.get(&quot;stage&quot;) == &quot;REJECTED&quot;]
+    print(f&quot;\n  REJECTED (not a spin-off orphan — {len(rej)}):&quot;)
+    for r in rej:
+        print(f&quot;    {(r.get(&#x27;spinco_ticker&#x27;) or &#x27;?&#x27;):6} {r[&#x27;registrant&#x27;][:34]:34} &lt;- {(r.get(&#x27;reject_reason&#x27;) or &#x27;&#x27;)[:96]}&quot;)
+
+    # Anything the price leg could not resolve THIS run. It must be printed: without this section a
+    # rate-limited name simply disappears from every bucket, and a shorter report reads like a
+    # cleaner one.
+    shown = {id(x) for x in live + pend + closed + rej}
+    stale = [r for r in rows if id(r) not in shown]
+    if stale:
+        print(f&quot;\n  UNRESOLVED THIS RUN ({len(stale)}) — price leg failed; values below are from the &quot;
+              f&quot;last good run, NOT today:&quot;)
+        for r in stale:
+            print(f&quot;    {(r.get(&#x27;spinco_ticker&#x27;) or &#x27;?&#x27;):6} {r[&#x27;registrant&#x27;][:34]:34} &quot;
+                  f&quot;stage={r.get(&#x27;stage&#x27;)} setup={r.get(&#x27;setup_class&#x27;)} &quot;
+                  f&quot;(price_status={r.get(&#x27;price_status&#x27;)}, last_scanned={r.get(&#x27;last_scanned&#x27;)})&quot;)
+    print(f&quot;\n[-&gt; {OUT.name}]&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+
+
+# ---------------------------------------------------------------------------------------------
+# REGISTRY SNIPPET — for the main session to paste into desk/registry.py (NOT edited from here).
+#
+#     {&quot;name&quot;: &quot;gen_spinoff_orphans&quot;, &quot;cmd&quot;: [&quot;python3&quot;, &quot;verticals/generators/spinoff_orphans.py&quot;],
+#      &quot;cadence&quot;: &quot;daily&quot;, &quot;log&quot;: &quot;verticals/generators/data/spinoff_orphans_cron.out&quot;,
+#      &quot;asset_class&quot;: &quot;equities&quot;, &quot;extractor&quot;: &quot;generic&quot;, &quot;enabled&quot;: True,
+#      &quot;note&quot;: &quot;Stage-0b FLOW generator: the SPIN-OFF ORPHAN coverage-vacuum trade. Polls the EDGAR &quot;
+#              &quot;10-12B registration stream via the full-index form.idx (12mo backfill), parses each &quot;
+#              &quot;Exhibit-99.1 information &quot;
+#              &quot;statement for parent / tickers / record + distribution dates / ratio, trap-filters &quot;
+#              &quot;uplistings + holdco reorgs + RMTs, then classifies the forced-flow SIGN off live S&amp;P &quot;
+#              &quot;500/400/600 membership. CRITICAL doctrine (from the 2026-07-04 one-shot): the US &quot;
+#              &quot;index leg is INVERTED for S&amp;P 500 parents — S&amp;P DJI places qualifying spincos back &quot;
+#              &quot;into an S&amp;P index SAME-CYCLE, so funds are forced BUYERS (SOLS/Q/FDXF) and no &quot;
+#              &quot;washout occurs. The true forced-SELL cohort is (a) S&amp;P500 parent -&gt; spinco &quot;
+#              &quot;DOWNGRADED to 400/600 (MBGL) and (b) spinco with NO index placement; RMTs are &quot;
+#              &quot;excluded (zero holder flow). Tracks post-distribution price with leading &quot;
+#              &quot;zero-volume Yahoo bars dropped (the MFP phantom bar fabricates a -57% dump) and &quot;
+#              &quot;buckets the window 0-30d ACTIVE / 31-90d LATE / &gt;90d CLOSED. Daily because the &quot;
+#              &quot;actionable state changes on single filings (an 8-A12B / a final amendment with the &quot;
+#              &quot;distribution date filled in) and the window is short. MERGE store by CIK. EXPAND: &quot;
+#              &quot;non-US no-auto-placement venues (DAX-&gt;MDAX, the Aumovio channel) + spin-debt / &quot;
+#              &quot;dividend-to-parent quality screen + the INVERTED pre-inclusion long&quot;},
+#
+# Daily is the right cadence: a single 10-12B/A can flip a name from &#x27;date blank&#x27; to &#x27;distributing
+# in 9 days&#x27;, and the whole edge is being read-up BEFORE the window opens.
+# ---------------------------------------------------------------------------------------------
+</pre></div></body></html>

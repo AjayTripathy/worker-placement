@@ -1,0 +1,105 @@
+{
+  "ticker": "DFIN",
+  "company": "Donnelley Financial Solutions, Inc.",
+  "cutoff": "2026-05-20",
+  "filing": "0001193125-26-054586_10-K.txt",
+  "filing_date": "2026-02-17",
+  "cik": "0001669811",
+  "sector": "Technology (financial-reporting/disclosure software incl. ActiveDisclosure SaaS)",
+  "drawdown": "-40.5% (52w-trough +2%)",
+  "rfm_tuples": [
+    {
+      "claim_id": "C1",
+      "R": "'The Company believes it has sufficient liquidity to support its ongoing operations and to invest in future growth to create value for its investors.' Liquidity backstop: $24.5M cash (only $3.5M U.S., $21.0M international), $237.6M available under $300.0M Revolving Facility, $262.1M Net Available Liquidity. Term Loan A $110.7M + Revolver borrowings $61.0M = $171.3M total debt at YE25 (up from $124.7M YE24). 2025 operating cash flow $164.9M (vs $171.1M FY24).",
+      "f": "If the liquidity narrative is genuine and the SaaS-transition story is intact, the going-concern detector should return NEGATIVE and the auditor relationship should be stable (no Item 4.01 8-K, no material weakness disclosure).",
+      "M_source": "going_concern_detector.query_going_concern(cik=0001669811, cutoff=2026-05-20) + auditor_change_tracker.query_auditor_changes(lookback_days=1825, cutoff=2026-05-20) + edgar_fts.query_fulltext('material weakness')",
+      "M_value": "going_concern: 0 matches, signal=NO_GOING_CONCERN. auditor: 0 Item 4.01 8-Ks in 5yr lookback, signal=CLEAN_AUDITOR_TENURE (Deloitte & Touche LLP signed unqualified opinion 2026-02-17). material weakness: 3 hits all routine auditor-boilerplate sentences ('assessing the risk that a material weakness exists'), not a flagged finding. ICFR conclusion = effective as of 2025-12-31.",
+      "severity": "PASS",
+      "interpretation": "Liquidity + auditor + ICFR all clean. $262.1M Net Available Liquidity is large vs $171.3M debt and ~$140M of 2026 contractual obligations. The headline cash position ($24.5M) looks tight but is a deliberate choice \u2014 DFIN funded $185M of share repurchases in 2025 (vs $81.6M in 2024) by drawing the revolver, so 'low cash' here is a buyback-driven choice, not distress. Quote-to-cash process implementation 'substantially completed' with no ICFR exception. No obscuring."
+    },
+    {
+      "claim_id": "C2",
+      "R": "Credit Agreement refinancing: On March 13, 2025, the Company amended and restated the credit agreement to provide $115.0M Term Loan A Facility + $300.0M Revolving Facility (extended to March 13, 2030 maturity), with JPMorgan Chase Bank, N.A. as administrative agent. Used proceeds to retire $125.0M Delayed Draw Term Loan A Facility in Q1 2025.",
+      "f": "If a $415M+ credit facility refinancing actually closed in March 2025, it should be contemporaneously disclosed via 8-K Item 1.01/2.03 around March 13-14, 2025 referencing JPMorgan as counterparty.",
+      "M_source": "edgar_fts.query_fulltext(search_term='JPMorgan', cik=0001669811, forms=8-K, 2025-01-01 to 2026-05-20) + sec_filings.list_filings_by_form",
+      "M_value": "2 hits on 'JPMorgan' in 8-K filings, both in accession 0000950170-25-039470 filed 2025-03-14 (event date 2025-03-13). sec_filings cross-check confirms a 2025-03-14 8-K matches the Amended & Restated Credit Agreement closing date exactly. Counterparty (JPMorgan), structure (Term Loan A + Revolver), and date all reconcile end-to-end.",
+      "severity": "PASS",
+      "interpretation": "Refinancing event verified. 8-K timing matches 10-K narrative exactly. JPMorgan counterparty, $115M Term Loan, $300M Revolver, March 13, 2030 maturity \u2014 all consistent. Interest rate (SOFR + 2.00%-2.50% based on Consolidated Net Leverage Ratio) and covenants (Interest Coverage + Consolidated Net Leverage Ratio) are honestly disclosed. The Company also notes 'in compliance with its debt covenants as of December 31, 2025' and the Revolver is backed by 13 international financial institutions. No discrepancy."
+    },
+    {
+      "claim_id": "C3",
+      "R": "SaaS-transition narrative: Software solutions net sales $358.4M FY25 (+8.7% YoY, growing share of mix), of which ActiveDisclosure +$12.7M, Arc Suite +$12.3M, Venue +$3.7M. Software was 44% of CM net sales in 2025 (vs 40% in 2024) and 53% of IC net sales (vs 47% in 2024). The framing is that DFIN is mid-transition from a 'former-print-co' to a SaaS company anchored on ActiveDisclosure / Arc Suite / Venue.",
+      "f": "If the SaaS-transition narrative is genuine (not just a story), the most recent post-cutoff filing (Q1'26 10-Q + earnings 8-K) should REAFFIRM software solutions outgrowing tech-enabled / print \u2014 particularly ActiveDisclosure growth.",
+      "M_source": "claim_evolution.query_claim_evolution(cik=0001669811, search_term='transactional', base_filing_date=2026-02-17, cutoff=2026-05-20) + edgar_fts.query_fulltext('ActiveDisclosure', post-10K)",
+      "M_value": "Q1'26 earnings 8-K (filed 2026-05-05) verbatim snippet: 'consolidated net sales growth, an increase in Adjusted EBITDA, and Adjusted EBITDA margin expansion compared to the first quarter of 2025. Software solutions net sales increased 8.4% versus the first quarter of 2025, driven by the performance of ActiveDisclosure, a component of our compliance platform, which grew approximately 21%. Software solutions net sales accounted for 44.6% of total first-quarter net sales, up approximately 250 basis points.' Q1'26 10-Q + 8-K both mention 'transactional' and AD in the same growth framing. AD post-10K: 2 hits in 10-Q + 8-K.",
+      "severity": "PASS",
+      "interpretation": "SaaS-transition narrative is REAFFIRMED with a stronger Q1 print than the FY25 number itself: ActiveDisclosure +21% YoY in Q1'26 vs +12.7M (~8.7%) for full-year 2025; software-mix expansion of 250bps in a single quarter. The 10-K narrative is not just intact post-cutoff \u2014 it accelerated. This is the most important honesty signal in a -40% drawdown name: management's growth-engine claim is verifiable in the next quarter, and beats."
+    },
+    {
+      "claim_id": "C4",
+      "R": "Customer concentration disclosure: 'For each of the years ended December 31, 2025, 2024 and 2023, no customer accounted for 10% or more of the Company's net sales.' Reinforced in Item 7A Market Risk: 'No single customer comprised more than 10% of the Company's net sales for the years ended December 31, 2025 and 2024.' This is the standard absence-of-concentration disclosure.",
+      "f": "If management is genuinely diversified, the CECL allowance + write-off cadence should be stable or improving, not lumpy from any single customer collapse; and the provision for expected losses should track sales volume, not spike.",
+      "M_source": "Filing cross-read (Note 1 CECL Allowance roll-forward + Cash Flow Statement Provision for expected losses + MD&A bad-debt commentary) + edgar_fts.query_fulltext('bad debt')",
+      "M_value": "CECL allowance roll-forward: Beginning $25.0M (2024) -> Provisions $11.1M (2025) -> Write-offs $15.2M (2025) -> Ending $20.9M (2025). FY24 provision was $17.6M; FY23 was $13.7M. Provision DECLINED $6.5M YoY in 2025 (matches MD&A 'lower bad debt expense of $6.5M'). However, write-offs INCREASED 32% YoY ($11.5M -> $15.2M) \u2014 i.e., the prior-year bad-debt provision over-built was now being burned off. Net AR balance $143.0M FY25 vs $138.0M FY24 (+3.6%) on $767M revenue down 1.9% \u2014 DSO ~68 days FY25 vs ~64 days FY24, a ~4-day deterioration. 11 'bad debt' hits across 10-K/10-Q/8-K consistent cadence (2024-05-01 onward).",
+      "severity": "PASS",
+      "interpretation": "No-single-customer claim is consistent with the absence of any concentration footnote and with the cadence/size of bad-debt activity (no spike). Write-off increase is consistent with reserve release (good news, not bad), and the modest DSO drift (~4 days) is honestly disclosed in MD&A as 'timing of collections' driving the $10.8M YoY operating-cash-flow drag on receivables. No obscuring."
+    },
+    {
+      "claim_id": "C5",
+      "R": "Buyback acceleration at trough: $172.6M repurchases under program in 2025 (3.56M shares @ $48.36 avg) vs $58.5M in 2024 (947K shares @ $61.97 avg) vs $22.6M in 2023 (469K shares @ $48.20 avg). On May 15, 2025 the Board authorized a NEW $150M repurchase program (replacing prior $150M). Q4'25 alone: 1,255,108 shares at $48.38 avg \u2014 including December at $47.13 (right at the trough). Outstanding share count fell from 28.7M (2024) to 25.6M (2026-02-12 cover) \u2014 an 11% reduction.",
+      "f": "If management has genuine conviction in the SaaS-transition story, the buyback should ACCELERATE at the trough (per the SPSC pattern from the cohort methodology), not decelerate (per the UPWK pattern). The new May 2025 authorization should be material relative to market cap.",
+      "M_source": "Filing cross-read (Item 5 Issuer Purchases table + Note 13 Capital Stock + Cash Flow Statement Treasury share repurchases) + sec_filings.list_filings_by_form (8-K 2025-05-19 for Board authorization)",
+      "M_value": "Per cash flow statement: Treasury share repurchases $(185.0M) FY25 vs $(81.6M) FY24 vs $(40.3M) FY23 \u2014 4.6x increase over 2 years. Per Note 13: 3.56M shares repurchased at $48.36 avg in 2025 \u2014 buying STILL at $47-$48 in Q4 2025 even as the stock approached its 52-week low. Repurchase program runway as of 2025-12-31 = $53.8M remaining out of new $150M program (expires 2026-12-31). 8-K dated 2025-05-19 confirms Board authorization of new $150M program. Outstanding shares contracted from 28.7M -> 25.6M (-11% in 12 months).",
+      "severity": "PASS",
+      "interpretation": "STRONG honesty-alpha-POSITIVE signal: this is the SPSC pattern, not the UPWK pattern. Management is putting $185M of cash AT the trough into share repurchases \u2014 4.6x the 2023 pace \u2014 at $47-48/share. They re-upped the authorization in May 2025 ($150M new program) and continued buying through year-end. With a current market cap implied by 25.6M shares (down from 28.7M), the 11% YoY share-count contraction at trough valuations is a credible disclosed-revealed-preference signal. Not lying; revealing high conviction at low prices. No obscuring penalty; this is the positive find."
+    },
+    {
+      "claim_id": "C6",
+      "R": "Insider transaction activity: implicit claim of no MNPI-style discretionary clustering. Not directly stated, but the absence of clustered selling is the testable null for a small-cap that just dropped 40% to within 2% of its 52-week low.",
+      "f": "If insider selling is routine, insider_vs_calendar should return NO_PROXIMATE_SALES or ROUTINE_10B5_1; if there's discretionary clustering near material events (earnings warning, debt amendment), it would flag CLUSTERED_DISCRETIONARY.",
+      "M_source": "insider_vs_calendar.query_insider_sales_near_budget_events(cik=0001669811, lookback_days=365, contractor_name='Donnelley Financial', cutoff=2026-05-20)",
+      "M_value": "22 Form 4 filings in 365-day window, 33 sales aggregating $13.43M, 0 proximate sales to federal-budget events (DFIN has no federal-budget exposure, as expected). Signal=NO_PROXIMATE_SALES. n_discretionary_proximate=0. Validator 1 (program exposure)=false; Validator 2 (event content)=false (DFIN is a financial-reporting SaaS, not a defense/budget recipient).",
+      "severity": "PASS",
+      "interpretation": "Insider selling pattern shows no MNPI-style clustering near material events. $13.4M aggregate sales over 12 months is normal for a sub-$1.5B-cap public company with a multi-year RSU/PSU vesting cadence (DFIN proxy DEF 14A 2026-04-01 confirms broad PSU grant program). No proximate-to-budget hits expected for a financial-software company. The framework's federal-budget validators don't apply here, but the baseline 'no clustered discretionary selling' signal is the relevant one and is clean. -40% drawdown is NOT being front-run by insiders."
+    },
+    {
+      "claim_id": "C7",
+      "R": "Q4 2025 U.S. federal government shutdown disclosure: 'Recently, U.S. capital markets transactions, especially IPO and M&A transactions were disrupted by the U.S. federal government shutdown that occurred during the fourth quarter of 2025. Future government shutdowns or other factors impacting the attractiveness of U.S. capital markets could result in additional volatility.' This is disclosed in Item 1 Business AND the Q3'25 10-Q (10/29/25).",
+      "f": "If the shutdown impact is being honestly framed (a one-off Q4 disruption), the post-cutoff Q1'26 10-Q should EITHER (a) show transactional volumes recovering (consistent with a one-off), OR (b) explicitly reaffirm continued disruption. If neither, the disclosure may have been understated.",
+      "M_source": "claim_evolution.query_claim_evolution(cik=0001669811, search_term='government shutdown', base_filing_date=2026-02-17, cutoff=2026-05-20) + Q1'26 earnings commentary",
+      "M_value": "0 mentions of 'government shutdown' in any DFIN post-10-K filing (Q1'26 10-Q filed 2026-05-05 and Q1'26 earnings 8-K filed 2026-05-05). evolution_status=SILENT_POST_CLAIM. HOWEVER, Q1'26 earnings 8-K snippet (from C3 above) confirms: 'consolidated net sales growth, an increase in Adjusted EBITDA, and Adjusted EBITDA margin expansion compared to Q1 2025' \u2014 i.e., the IPO/M&A market recovered enough in Q1'26 to drive net sales growth. ActiveDisclosure +21% Q1'26.",
+      "severity": "PASS",
+      "interpretation": "Shutdown disclosure is appropriately framed as a Q4-specific one-off and the post-cutoff Q1'26 data substantiates the framing \u2014 net sales actually GREW in Q1'26 (not just software, the consolidated number). The shutdown was real, was honestly disclosed at the time (Q3'25 10-Q + 10-K), and the next-period data confirms recovery. The SILENT_POST_CLAIM signal here is NOT a red flag because the underlying claim was about a finite event; absence of repeat mention is consistent with the event having ended. No obscuring."
+    },
+    {
+      "claim_id": "C8",
+      "R": "Print-and-distribution legacy run-off: Print & distribution net sales $110.3M FY25 (-16.1% YoY) vs $131.4M FY24 (-9.0% YoY off 2023 base) vs estimated $144M+ FY23. Cost of P&D fell 19.6% (faster than revenue), so segment margins are stable. The company describes itself as 'continues to strategically reduce its in-house print and distribution capabilities... closing all but one print manufacturing facility' and characterizes raw-material risk as immaterial. Restructuring charges of $10.4M FY25 (vs $6.6M FY24) including $6.1M of employee termination (~90 employees) and $3.9M software impairment \u2014 broadly consistent with continued downsizing of the legacy.",
+      "f": "If the print run-off is being managed honestly (cost-out keeping pace with revenue decline) rather than masking distress, the segment-level Adjusted EBITDA margins should hold or improve, and the restructuring cadence should appear consistently across 10-K + DEF 14A + 8-K \u2014 not appear as a one-off at the trough.",
+      "M_source": "Filing cross-read (Item 7 Segment Information + Note 6 Restructuring) + edgar_fts.query_fulltext('print and distribution') + sec_filings.list_filings_by_form(DEF 14A)",
+      "M_value": "FTS: 8 hits on 'print and distribution' across 10-K filings (consistent cadence FY23, FY24, FY25 10-Ks). Segment Adjusted EBITDA margins INCREASED YoY in 2025 in all 4 segments despite revenue declines: CM-SS 29.7% -> 32.6% (+290bps), CM-CCM 34.5% -> 38.4% (+390bps), IC-SS 34.2% -> 39.2% (+500bps), IC-CCM 31.8% -> 35.2% (+340bps). Consolidated Adjusted EBITDA $239.8M FY25 vs $217.3M FY24 (+10.4%) on revenue down 1.9% \u2014 operating leverage from cost-out is REAL. DEF 14A 2026-04-01 references 'long-term plan of the Company and the multi-year transformation' tied to executive incentives.",
+      "severity": "PASS",
+      "interpretation": "Print-runoff disclosure is honestly framed AND mathematically corroborated. All four segment margins expanded by 290-500bps in a year when consolidated revenue declined 1.9% \u2014 that is genuine operating-leverage execution, not financial-engineering. Restructuring charges ($10.4M FY25) sized appropriately to deliver $13.0M of SG&A savings and $17.5M of COGS reductions \u2014 i.e., positive return on restructuring spend within the year. Adjusted EBITDA growing 10.4% on declining revenue is a positive honesty signal for a former-print-co mid-transition. No obscuring."
+    }
+  ],
+  "claims_count": 8,
+  "queries_count": 14,
+  "severity_tally": {
+    "PASS": 8,
+    "MODERATE_UNDERDELIVERY": 0,
+    "SEVERE_UNDERDELIVERY": 0,
+    "RED_FLAG": 0,
+    "UNVERIFIABLE": 0
+  },
+  "composite": 0.0,
+  "summary": "DFIN is a former-print Donnelley spinoff (Oct 2016) mid-transition to a SaaS company anchored on ActiveDisclosure (8.7%/12.7M growth FY25, +21% Q1'26 post-cutoff), Arc Suite (+12.3M FY25), and Venue (+3.7M FY25). All 8 verifiable claims clear with PASS \u2014 NO obscuring, NO under-delivery. Headline -40.5% drawdown is NOT driven by lying or distress. Specifically: (1) NO_GOING_CONCERN + CLEAN_AUDITOR_TENURE (Deloitte unqualified 2026-02-17) + ICFR effective + no material weakness; (2) March 2025 JPMorgan credit-facility refi verified end-to-end via contemporaneous 8-K; (3) SaaS-transition narrative REAFFIRMED stronger in post-cutoff Q1'26 10-Q + 8-K (AD +21% Q1, software-mix +250bps QoQ, consolidated net sales growth); (4) no-customer-concentration claim consistent with stable CECL roll-forward (provision DECLINED $6.5M YoY); (5) STRONG buyback acceleration at trough \u2014 $185M FY25 repurchases (4.6x 2023 pace), 11% share-count contraction in 12 months, $48.36 avg price right at the trough, new $150M Board authorization May 2025 \u2014 this is the SPSC pattern, not the UPWK pattern; (6) NO_PROXIMATE_SALES on insider activity (no discretionary clustering); (7) Q4'25 government-shutdown disclosure honestly framed as one-off and corroborated by Q1'26 net-sales growth; (8) print run-off mathematically corroborated by 290-500bps segment-margin expansion across ALL 4 segments while consolidated revenue declined 1.9% \u2014 Adjusted EBITDA +10.4% on -1.9% revenue is real operating leverage. Composite 0.000 (8 PASS / 0 MOD / 0 SEV / 0 RED / 0 UNV). DFIN passes the honesty-alpha filter cleanly and exhibits the SPSC-style 'high-conviction buyback at trough' positive signal. The -40% drawdown looks like market sentiment overshoot on a (a) Q4 shutdown-disrupted IPO/M&A print, (b) $82.8M non-cash pension settlement that depressed GAAP earnings 65% (cosmetic, not cash), and (c) general small-cap risk-off \u2014 none of which is the company being dishonest. Strong candidate for the Strategy A long-index. Honesty-alpha framework correctly distinguishes 'down 40% because the story is wrong' vs 'down 40% because the tape is wrong, and management is buying back stock.'",
+  "scoring": {
+    "PASS": 8,
+    "UNVERIFIABLE": 0,
+    "MODERATE_UNDERDELIVERY": 0,
+    "SEVERE_UNDERDELIVERY": 0,
+    "RED_FLAG_NEGATIVE": 0,
+    "verifiable_claims": 8,
+    "weighted_sum": "(0*8 + 1*0 + 2*0 + 3*0) / 8 = 0 / 8",
+    "composite": 0.0
+  }
+}

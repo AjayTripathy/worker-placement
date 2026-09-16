@@ -1,0 +1,16 @@
+### BOOK-WIDE (not a business — a macro rate series row: US 30-year Treasury constant-maturity yield, weekly avg) — screen z4v13 2.42 / yoy +6.12% — **SCREEN-MISCLASSIFIED**
+
+**KILL FACTS**
+- Claim: "BOOK-WIDE (US)" is a screen-surfaced *name*. Authority: the pack itself — ENTITY None, CIK None, TAPE `{"error":"no tape source reachable"}`, RECENT FILINGS empty, XBRL QUARTERLY empty; BOOK held="NO POSITION". Finding: there is no issuer, no share count, no 10-K/10-Q. **Every trap-catalog test in the brief is undefined here** (TTM one-offs, prefunded warrants/converts/preferreds-by-class, SBC-vs-dilution, split-adjusted sharecounts, related-party/pledge, PFIC/withholding, ADV vs a $5–10k starter). Correction to the briefing (first-class output): defect class = **series-row leaked into the equity lane** (ticker slot populated with a cohort label, `series: us30y_yield`), a sixth family beyond the five confirmed ones.
+- Claim: the underlying datum is an equity metric. Authority: FRED WGS30YR — H.15 release, "Percent, Not Seasonally Adjusted", "Weekly, Ending Friday" (https://fred.stlouisfed.org/series/WGS30YR); daily twin DGS30 runs to 2026-09-03 (https://fred.stlouisfed.org/series/DGS30); primary source is the Board's H.15 (https://www.federalreserve.gov/releases/h15/). Finding: it is a **price of money**, not a security — no fair-value computation, no tails, no sleeve. The FAIR-CARRY rule cannot apply: there is nothing to carry.
+- Claim: z4v13 = 2.42 and yoy = 6.12% are facts. Authority: none reachable from this bench (no series pull in the pack). Finding: **UNVERIFIED**, and unit-ambiguous — 6.12% on a *yield level* is a relative change (≈ +30bp off ~4.9%), not 612bp; a 4v13 z-score on a trending non-stationary level overstates signal vs the same z on weekly *changes*. File as measurement defect, not a signal.
+
+**LIVE FACTS**
+- Regime direction corroborated (secondary, flagged): the long end has been at multi-decade highs into September 2026 — "worst stretch since 2006" for the 30-year (https://www.advisorperspectives.com/articles/2026/09/01/us-30-year-enters-september-worst-stretch); a 5.19% 30-year print is cited post-buyback-upsizing (https://www.weforum.org/stories/financial-and-monetary-systems/why-global-bond-market-treasury-yields/). No primary-source level asserted here.
+
+**RESOLVES ON:**
+- 2026-09-11 (Fri) — WGS30YR weekly print via H.15; recompute z on *weekly changes* (primary: federalreserve.gov/releases/h15/).
+- 2026-09-15/16 — FOMC decision + SEP (calendar primary: https://www.federalreserve.gov/monetarypolicy/fomccalendars.htm; the 15–16 dating is secondary-sourced, verify against that page).
+- Next 30-year auction/refunding tail: https://home.treasury.gov/system/files/221/Tentative-Auction-Schedule.pdf.
+
+**Disposition:** AVOID/DECLINE + reopen-condition — decline *as a name* (no entity to verify); route the row to the macro-overlay lane (rotation stress + hedge re-freeze gates) where those dated gates bind. Reopen only when a row arrives with ticker + CIK + a reachable tape.

@@ -1,0 +1,117 @@
+{
+  "ticker": "IONQ",
+  "cutoff": "2023-01-15",
+  "filing": "0001193125-22-086738_10-K.txt",
+  "investigator_summary": "POINT-IN-TIME (2023-01-15) reading of IONQ's 2021 10-K (filed March 2022). The framework's J-Book divergence test does NOT fire at this cutoff because: (a) the company has not yet narratively positioned itself as a DoD prime — the 10-K does not name AFRL, the FA8750 contract vehicle, or any Pentagon Program Element; (b) pentagon_jbook with cutoff_date=2023-01-15 shows AFRL Quantum Networking FUNDED_GROWING ($13M FY22 → $26M FY23) at the cutoff; the unfunded years (FY25/FY26) are POST-CUTOFF and not knowable. The strongest at-cutoff signal is MODE B (implied-verification): the 10-K omits material disclosure of an active $13.4M DoD direct contract (FA875022C1022, 'TRAPPED ION QUANTUM COMPUTER', confirmed via usaspending pre-cutoff) — a non-trivial chunk of the company's commercial profile when total 2021 revenue was only $2.1M. C2 (the DERIVED AFRL claim) is scored as PASS-at-cutoff but flagged for a known-fragility caveat: the entire AFRL line is an unrequested-by-Pentagon, congressional-earmark add — a structural fragility that the J-Book divergence pattern would catch in future periods if/when sponsors lose power.",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "IonQ entered a multiyear $14M / 3-year deal with UMD National Quantum Lab (Sept 2021).",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook(contractor=IonQ) returned a matched program 'University of Maryland Quantum (IONQ subcontractor)' with at-cutoff status FUNDED_STEADY (FY22 enacted $6M flowing to IONQ via UMD)",
+        "Filing's $14M / 3yr disclosure aligns with the J-Book-recognized funding stream"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "FUNDED_STEADY at cutoff 2023-01-15 (latest_funded_year=2022, latest_funded_M=$6M, 0 consecutive unfunded years)",
+      "interpretation": "Disclosure is consistent with at-cutoff Pentagon flow-through. No J-Book divergence. PASS."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "IonQ contracted on AFRL Quantum Networking (FA8750) — DERIVED claim; not actually disclosed in the 2021 10-K.",
+      "severity": "RED_FLAG_NEGATIVE",
+      "supports": [
+        "MODE B FINDING (the most important catch at this cutoff): usaspending.query_dod_contracts shows a confirmed $13.4M direct DoD award FA875022C1022 ('TRAPPED ION QUANTUM COMPUTER') to IONQ, INC. with award presence prior to 2023-01-15. The 2021 10-K does NOT disclose this contract, the FA8750 vehicle, AFRL, or any DoD customer concentration anywhere in Items 1, 1A, 7, or the financial-statement footnotes.",
+        "pentagon_jbook(program_name='AFRL Quantum Networking') matches the 'afrl-quantum-networking-ionq' program; at-cutoff 2023-01-15 status is FUNDED_GROWING (FY22 $13M → FY23 $26M).",
+        "earmark_detector(program_name='AFRL Quantum Networking') confirms this is a non-disclosed congressional add (Pentagon never requested it; entirely a Senate Approps Defense Subcommittee add). At-cutoff (Jan 2023) sponsors WERE in power (Cardin, Van Hollen, Hoyer, Tester all sitting and on relevant committees). The 'sponsors_currently_in_power=false' is a FY26-vintage state, not a 2023-01-15 state."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding + usaspending.query_dod_contracts + earmark_detector.query_earmark_status",
+      "M_value": "pentagon_jbook=FUNDED_GROWING@cutoff; usaspending=$13.4M obligated under FA875022C1022 to IONQ INC; earmark_detector=non-disclosed-add, sponsors-in-power-at-cutoff=YES",
+      "interpretation": "Two distinct findings: (1) The cohort thesis (J-Book unfunding) does NOT yet fire at this cutoff — the line was growing, not shrinking. Future periods would catch divergence if sponsors lose power. (2) MODE B — Implied Verification: the 10-K materially under-discloses an active $13.4M direct DoD contract that, against $2.1M total reported revenue, represents an outsized concentration risk. By the J-Book calibration rule #6 ('USAspending shows company received the contracts they claim') inverted: usaspending shows IonQ received DoD contracts the company DID NOT claim. This is a forensic-disclosure red flag — RED_FLAG_NEGATIVE on the disclosure-quality axis even though the at-cutoff J-Book funding axis is GREEN."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "IonQ generated $2.099M FY21 revenue via three commercial-cloud-mediated QCaaS channels (AWS Braket, Azure Quantum, Google Cloud Marketplace).",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "Filing claims commercial-cloud-mediated revenue; usaspending shows IonQ already had a $13.4M DoD direct contract by the cutoff that the filing omits.",
+        "The implied GTM narrative (three commercial hyperscalers as 'major' channels) understates federal-customer concentration. edgar_fts(Amazon CIK) returned only two filings mentioning IonQ (both 8-K product-launch press releases from 2020); edgar_fts(Microsoft CIK) returned zero. Neither hyperscaler discloses IonQ as a material counterparty — confirming the commercial-cloud channel is press-release-grade, not contractual-material — while the omitted federal channel is materially larger."
+      ],
+      "M_check": "edgar_fts.query_fulltext + usaspending.query_dod_contracts",
+      "M_value": "Amazon FTS hits=2 (both 2020 press releases); Microsoft FTS hits=0; usaspending DoD direct=$13.4M pre-cutoff",
+      "interpretation": "Narrative-vs-reality mismatch. The company foregrounds commercial cloud and backgrounds (omits) federal. MODERATE_UNDERDELIVERY on disclosure framing — sizable enough that an investor relying on this 10-K would mis-model the customer mix."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Core technology exclusively licensed from UMD and Duke; some licensed IP is Bayh-Dole-encumbered.",
+      "severity": "PASS",
+      "supports": [
+        "uspto_odp.query_assignee(IonQ, cutoff=2023-01-15) returned 98 granted patents pre-cutoff and 236 total applications — confirms IonQ has a substantial in-house and in-licensed patent portfolio.",
+        "Bayh-Dole encumbrance is disclosed; this is a structural feature, not a divergence signal."
+      ],
+      "M_check": "uspto_odp.query_assignee",
+      "M_value": "236 applications, 98 granted patents pre-cutoff 2023-01-15",
+      "interpretation": "Patent count is consistent with claimed IP portfolio. PASS (control claim)."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "32,000 sq ft College Park MD headquarters is the ONLY facility (UMD-leased through 2030).",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "epa_frs.query_facilities(facility_name='IonQ', state_abbr='MD') returned 0 facilities — IonQ has no EPA-regulated emissions footprint, which is consistent with a small lab-scale R&D operation but not a discriminating signal."
+      ],
+      "M_check": "epa_frs.query_facilities",
+      "M_value": "0 EPA FRS facilities for IonQ in MD",
+      "interpretation": "EPA absence is consistent with a small quantum-research operation but cannot independently verify the 32,000 sq ft claim. Note: a single 32,000 sq ft research footprint is structurally inconsistent with eventually scaling to defense-prime production volumes — flag as a long-term capacity tension."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "GTM dependency on three commercial cloud hyperscalers (AWS, Azure, Google); one holds a milestone-vesting 8.3M-share warrant.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "edgar_fts(Amazon CIK 0001018724) → 2 hits, both 2020 Amazon 8-K press-release exhibits naming IonQ.",
+        "edgar_fts(Microsoft CIK 0000789019) → 0 hits.",
+        "Neither hyperscaler files material counterparty disclosure naming IonQ — i.e., from their side IonQ is not material. This makes the warrant-tied milestone vesting and the 'three major cloud platforms' framing optimistic without the counterparties' confirmation."
+      ],
+      "M_check": "edgar_fts.query_fulltext × (Amazon, Microsoft)",
+      "M_value": "Amazon FTS=2 press-release exhibits; Microsoft FTS=0",
+      "interpretation": "Counterparty corroboration is weak. The cloud-channel narrative is structurally one-sided — the hyperscalers list IonQ but don't disclose it as material. MODERATE on disclosure-framing axis."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "32-qubit system 'not yet available ... may never be available'; significant production not before 2025.",
+      "severity": "PASS",
+      "supports": [
+        "Self-disclosed conservative forward language. pentagon_jbook(contractor=IonQ, cutoff=2023-01-15) shows at-cutoff status FUNDED_STEADY/GROWING — meaning even with the 'may never ship' caveat, near-term federal funding is in place."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "FUNDED_STEADY (UMD line) / FUNDED_GROWING (AFRL line) at cutoff",
+      "interpretation": "The cautious language is consistent with at-cutoff J-Book reality. No divergence; PASS."
+    }
+  ],
+  "severity_counts": {
+    "PASS": 3,
+    "MODERATE_UNDERDELIVERY": 2,
+    "SEVERE_UNDERDELIVERY": 0,
+    "RED_FLAG_NEGATIVE": 1,
+    "UNVERIFIABLE": 1
+  },
+  "jbook_hit_summary": {
+    "n_jbook_grounded_claims": 3,
+    "n_pentagon_jbook_fired": 3,
+    "jbook_grounded_claim_ids": ["C1", "C2", "C7"],
+    "note": "pentagon_jbook fired (returned matches) on all 3 J-Book-grounded claims. At-cutoff statuses were FUNDED_STEADY (C1, C7) and FUNDED_GROWING (C2). The cohort's primary divergence signal (UNFUNDED_*) does NOT fire at this cutoff; that pattern only emerges in FY25-FY26 budgets after sponsoring lawmakers lost majority — entirely post-cutoff."
+  },
+  "mode_b_findings": [
+    {
+      "finding": "Material under-disclosure of $13.4M direct DoD contract (FA875022C1022).",
+      "evidence": "usaspending.query_dod_contracts returned the contract with award visibility prior to 2023-01-15; the 2021 10-K (filed March 2022) does not disclose this contract, the customer (AFRL), or any DoD customer concentration in MD&A, Risk Factors, or footnotes — despite total 2021 revenue being only $2.1M.",
+      "framework_signal": "The framework correctly catches this via the implied-verification (Mode B) path even though the explicit (Mode A) J-Book divergence pattern does not fire at the cutoff."
+    },
+    {
+      "finding": "AFRL revenue stream is structurally fragile (congressional non-disclosed-add).",
+      "evidence": "earmark_detector reports the AFRL Quantum Networking line is entirely a Senate Approps Defense Subcommittee add; the Pentagon's requested amount has been $0 across every fiscal year. At cutoff sponsors remain in power, but the fragility is structural and would amplify on any majority change.",
+      "framework_signal": "The framework flags an at-cutoff PASS-with-known-fragility — useful forward-test calibration for what the divergence detector will see in subsequent periods."
+    }
+  ]
+}

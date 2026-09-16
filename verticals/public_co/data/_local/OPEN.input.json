@@ -1,0 +1,89 @@
+{
+  "ticker": "OPEN",
+  "cutoff": "2026-05-16",
+  "filing": "0001801169-26-000010_10-K.txt",
+  "filing_type": "10-K",
+  "filing_period": "FY2025 (year ended December 31, 2025)",
+  "company": "Opendoor Technologies Inc.",
+  "cik": "0001801169",
+  "claims": [
+    {
+      "claim_id": "OPEN-1",
+      "category": "production_volume",
+      "claim_text": "In 2025, Opendoor sold 11,791 homes and generated $4.371 billion in revenue. Since founding in 2014, customers have completed over 294,000 homes bought and sold by Opendoor.",
+      "extract_rubric": "HIGH — quantified production/transaction volume and revenue with multi-year cumulative figure.",
+      "queries": [
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Opendoor", "cutoff_date": "2026-05-16", "forms": "10-K,10-Q"}},
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "iBuyer", "cutoff_date": "2026-05-16"}}
+      ],
+      "rationale": "External validation test that Opendoor is materially discussed and the iBuyer category exists in counterparty/peer SEC corpus. Volume itself is internal-disclosure; only divergence is in framing as an active market."
+    },
+    {
+      "claim_id": "OPEN-2",
+      "category": "financial_distress",
+      "claim_text": "Net loss of $1.300 billion in 2025 (vs $392 million in 2024 and $275 million in 2023); $923 million loss on extinguishment of debt recognized at parent in connection with the November 2025 Convertible Notes Repurchase; inventory carrying-cost financing dependence with $1.1B outstanding ABS debt; going-concern risk language present in risk factors.",
+      "extract_rubric": "HIGH — quantified financial distress signal (1.3B loss, 923M debt-extinguishment loss). Cohort flag #10 (going-concern markers) is salient: ATM dilution + Warrant Dividend + Convertible Notes Repurchase + PIPE in same fiscal year is the textbook distress sequence.",
+      "queries": [
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Opendoor", "cutoff_date": "2026-05-16", "cik": "0001801169", "forms": "8-K"}}
+      ],
+      "rationale": "Verify count of 8-Ks (Item 1.01, 3.02, 8.01) consistent with multi-pronged liquidity/capital structure events disclosed in the 10-K narrative."
+    },
+    {
+      "claim_id": "OPEN-3",
+      "category": "partnership",
+      "claim_text": "Opendoor operates a wholly-owned mortgage subsidiary that originates loans and 'substantially all mortgage loans we originate will be sold into the secondary market'; it 'depend[s], in part, on having access to sufficient capital' and on relationships with 'third-party financial institutions to purchase its loans.'",
+      "extract_rubric": "MEDIUM — categorical (counterparty-type, not named partner). Framework cohort note: named bank-partner relationships should appear in the bank's regulatory filings or 10-K, but Opendoor names NO bank counterparties for the mortgage subsidiary in this disclosure. Origination-channel quantification is also absent.",
+      "queries": [
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Opendoor Home Loans", "cutoff_date": "2026-05-16"}},
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "OD Homes", "cutoff_date": "2026-05-16"}}
+      ],
+      "rationale": "Asymmetric mention test of mortgage-subsidiary branding across the EDGAR corpus."
+    },
+    {
+      "claim_id": "OPEN-4",
+      "category": "production_volume",
+      "claim_text": "In late 2025, Opendoor 'began expanding our buybox from a limited set of geographies to effectively nationwide coverage across the contiguous United States, with the ability to make offers in substantially all residential zip codes,' having previously 'operated in 50 markets going into 2025.'",
+      "extract_rubric": "MEDIUM — geographic-footprint expansion claim. Stage-ladder concern (Calibration #3): making-offers capability is not the same as actually-transacting volume; book-value of inventory shrank from $2.159B to $0.925B in 2025 and homes purchased fell from 14,684 to 8,241, which is the opposite direction of an operational nationwide expansion.",
+      "queries": [],
+      "rationale": "Internal-consistency check from the same filing; no external M-source for a self-defined 'buybox.' UNVERIFIABLE on external corroboration but observable contradiction in the same 10-K MD&A."
+    },
+    {
+      "claim_id": "OPEN-5",
+      "category": "regulatory_milestone",
+      "claim_text": "Securities class action 'In re Opendoor Technologies Inc. Securities Litigation' (alleging materially false or misleading statements related to the effectiveness of the Company's pricing algorithm) was finally settled with court approval entered January 6, 2026 'for an amount within the limits of insurance coverage'; derivative actions finally settled November 25, 2025.",
+      "extract_rubric": "HIGH — named, dated, materially specific litigation outcome. Verifiable through filing record.",
+      "queries": [
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Opendoor", "cutoff_date": "2026-05-16", "forms": "8-K"}}
+      ],
+      "rationale": "Litigation settlements of this materiality typically trigger 8-K disclosures. Count check (re-used for OPEN-2)."
+    },
+    {
+      "claim_id": "OPEN-6",
+      "category": "technology",
+      "claim_text": "Opendoor markets itself as 'leveraging artificial intelligence, data science and purpose-built software' to power its pricing/iBuying platform, with claims to be 'the largest U.S. iBuyer.'",
+      "extract_rubric": "LOW for AI-language (marketing). MEDIUM for 'largest U.S. iBuyer' (verifiable categorical claim post-Zillow/Redfin iBuyer wind-downs). Patent-count check is the cleanest IP test.",
+      "queries": [
+        {"source": "uspto_odp.query_assignee", "kwargs": {"assignee_name": "Opendoor", "cutoff_date": "2026-05-16"}}
+      ],
+      "rationale": "Per calibration heuristic #8 (fintech patent counts typically low), check whether AI/pricing-model claims are backed by any meaningful patent activity. SEVERE only on Nikola pattern; expect low single-digit n_granted."
+    },
+    {
+      "claim_id": "OPEN-7",
+      "category": "financial_distress",
+      "claim_text": "Inventory aging deteriorated materially: 33% of homes on the market for greater than 120 days at YE 2025 vs 18% at YE 2023 (and 46% at YE 2024). Inventory valuation adjustments of $57M in 2025 (same as $57M in 2024 and $65M in 2023).",
+      "extract_rubric": "HIGH — quantified slow-moving-inventory trajectory paired with flat valuation adjustment is the iBuyer analog of 'charge-off rate widening that isn't reflected in forward-loss-reserve commentary' (Calibration #11). Stale-inventory ratio nearly doubled vs 2023 while writedowns held flat in absolute dollars.",
+      "queries": [],
+      "rationale": "Internal disclosure-quality observation; no external M-source. UNVERIFIABLE externally but a high-signal disclosure tension worth flagging."
+    },
+    {
+      "claim_id": "OPEN-8",
+      "category": "other",
+      "claim_text": "November 2025 special Warrant Dividend (three series of warrants per 30 shares of common stock) was declared, and concurrently the Company executed a $264M repurchase of 2030 Notes using $1.184B of common-stock issuance proceeds at $6.56/share (Registered Direct Offering of 180,580,200 shares).",
+      "extract_rubric": "HIGH — quantified capital-structure transaction with shareholder count of record (49 holders of record of common stock) suggesting heavily retail-held float; combined ATM ($198M, 21.6M shares @ $9.26), PIPE ($41M), and Reg Direct ($1.184B at $6.56) implies ~37% dilution at the parent (719.99M to 957.25M shares outstanding).",
+      "queries": [
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "OPENW", "cutoff_date": "2026-05-16"}}
+      ],
+      "rationale": "Verify external mentions of the new warrant tickers (OPENW/OPENL/OPENZ) — should appear in derivative dealer filings / 13F notices if institutionally held."
+    }
+  ]
+}

@@ -1,0 +1,174 @@
+{
+  "ticker": "UPST",
+  "cutoff": "2024-05-17",
+  "filing": "0001647639-24-000009_10K.txt",
+  "plan_version": 1,
+  "claims": [
+    {
+      "claim_id": "UPST-1",
+      "claim_text": "As of December 31, 2023, Upstart had more than 100 lending partners (banks and credit unions) on its marketplace.",
+      "source_quote": "As of December 31, 2023, we had more than 100 lending partners.",
+      "subject": "Upstart Holdings, Inc.",
+      "predicate": "has lending-partner relationships with more than",
+      "object_value": "100 banks and credit unions",
+      "category": "partnership",
+      "referent_type": "entity",
+      "m_source_status": "PROPOSED",
+      "source_id": null,
+      "source_params": {},
+      "proposed_connector": {
+        "name": "fdic_call_reports.upstart_partner_aggregate",
+        "description": "Aggregate count of FDIC-insured banks and NCUA-insured credit unions reporting an active personal-lending program against an Upstart-like partner indicator (e.g., references in regulator filings, call-report partner-program flags, FFIEC partner-bank disclosures).",
+        "endpoint": "https://banks.data.fdic.gov/api/financials and https://mapping.ncua.gov/ResearchCreditUnion.aspx",
+        "access_pattern": "api",
+        "auth_required": false,
+        "sample_invocation": "Combine FDIC BankFind + NCUA credit-union registry queries filtered to banks publicly disclosed as Upstart partners (no consolidated registry exists); we'd verify only the floor (named partners) since no single source enumerates 'all Upstart partner banks'.",
+        "rationale": "The 100+ partner count is a marketing aggregate, not a registered relationship. No registry directly enumerates 'Upstart partner banks'; we can only verify named partners via FDIC BankFind / NCUA, so a custom roll-up connector is required to attempt floor adjudication.",
+        "estimated_cost": "free",
+        "completeness": "Only counts named/publicly-disclosed partners; cannot certify the full >100 count.",
+        "referent_type": "entity",
+        "attribute": "partner_bank_count"
+      },
+      "extraction_notes": "Headline partner count is a marketing aggregate without a clean registry analog; likely UNVERIFIABLE in scoring. Cohort calibration note flags exactly this kind of claim as expected-unverifiable."
+    },
+    {
+      "claim_id": "UPST-2",
+      "claim_text": "In the year ended December 31, 2023, Upstart's top three lending partners collectively originated 80% of loans and accounted for 63% of total revenue.",
+      "source_quote": "In the year ended December 31, 2023, our top three lending partners originated 80% of the loans facilitated through our marketplace and fees received from these lending partners accounted for 63% of our total revenue.",
+      "subject": "Upstart top three lending partners",
+      "predicate": "originated share of marketplace loans / share of revenue",
+      "object_value": "80% of loans / 63% of revenue",
+      "category": "partnership",
+      "referent_type": "quantity",
+      "m_source_status": "MAPPED",
+      "source_id": "fdic_call_reports.consumer_loan_originations",
+      "source_params": {
+        "bank_names": ["Cross River Bank", "FinWise Bank", "Customers Bank"],
+        "quarters": 8
+      },
+      "proposed_connector": null,
+      "extraction_notes": "10-K does not name the top three partners; UPST's historically publicly-known partners are Cross River, FinWise, and Customers. Call Reports' LNCONOTH (other consumer loans) lets us sanity-check that aggregate consumer-loan portfolios across these three are large enough to plausibly carry 80% of UPST's 2023 originations. This is a soft consistency check, not strict adjudication: UPST share within each bank's book is not separable."
+    },
+    {
+      "claim_id": "UPST-3",
+      "claim_text": "Upstart completed an asset-backed securitization transaction in July 2023 that was consolidated in its financial statements, contributing 4% of 2023 originations as collateral.",
+      "source_quote": "the remaining 4% were contributed as collateral to the securitization transaction completed in July 2023, which we have consolidated in our financial statements.",
+      "subject": "Upstart Holdings, Inc.",
+      "predicate": "completed asset-backed securitization in",
+      "object_value": "July 2023 (consolidated)",
+      "category": "regulatory_milestone",
+      "referent_type": "event",
+      "m_source_status": "MAPPED",
+      "source_id": "sec_filings.list_filings_by_form",
+      "source_params": {
+        "cik": "0001647639",
+        "forms": ["ABS-15G", "ABS-EE", "10-D", "424B2", "424B5"],
+        "cutoff_date": "2024-05-17",
+        "start_date": "2023-01-01"
+      },
+      "proposed_connector": null,
+      "extraction_notes": "ABS-15G / 10-D filings from UPST or its securitization-issuing subsidiary in mid-2023 corroborate the issuance. If no ABS filings cluster in summer 2023 under UPST's CIK, the securitization may have been issued by an affiliated SPV under a different CIK; absence at UPST's CIK is therefore not necessarily contradictory."
+    },
+    {
+      "claim_id": "UPST-4",
+      "claim_text": "Upstart had two issued patents and three patent applications pending as of the 10-K date.",
+      "source_quote": "While we have two patents issued and three patent applications pending, we have limited patent protection and our patent application may not be successful.",
+      "subject": "Upstart Holdings, Inc.",
+      "predicate": "has granted patents and pending applications",
+      "object_value": "2 granted, 3 pending",
+      "category": "technology",
+      "referent_type": "intangible",
+      "m_source_status": "MAPPED",
+      "source_id": "uspto_odp.query_assignee",
+      "source_params": {
+        "assignee_name": "Upstart",
+        "cutoff_date": "2024-05-17",
+        "categorize": {
+          "credit_underwriting": ["credit", "underwriting", "loan", "scoring", "default", "risk"],
+          "ml_modeling": ["machine learning", "neural", "model", "AI"]
+        }
+      },
+      "proposed_connector": null,
+      "extraction_notes": "USPTO ODP n_granted should be approximately 2 and n_total_applications approximately 5 (2 granted + 3 pending). Note: company is Upstart Holdings / Upstart Network; broad firstApplicantName match may include unrelated 'Upstart' entities."
+    },
+    {
+      "claim_id": "UPST-5",
+      "claim_text": "Upstart launched a new HELOC (home equity line of credit) product in 2023.",
+      "source_quote": "We continue to invest in expansion of our product offerings and launched a new HELOC product in 2023.",
+      "subject": "Upstart Holdings, Inc.",
+      "predicate": "launched product",
+      "object_value": "HELOC, 2023",
+      "category": "production_volume",
+      "referent_type": "intangible",
+      "m_source_status": "MAPPED",
+      "source_id": "edgar_fts.query_fulltext",
+      "source_params": {
+        "search_term": "Upstart HELOC",
+        "cutoff_date": "2024-05-17",
+        "start_date": "2023-01-01",
+        "forms": "10-K,10-Q,8-K"
+      },
+      "proposed_connector": null,
+      "extraction_notes": "Counts SEC filings (likely UPST's own 10-Q/8-Ks plus partner-bank filings) mentioning 'Upstart HELOC'. Multiple pre-cutoff hits indicates external corroboration; zero would be suspicious but not dispositive (HELOC may be too small to mention in partner filings)."
+    },
+    {
+      "claim_id": "UPST-6",
+      "claim_text": "Upstart has convertible senior notes with a principal balance of $661.3 million bearing 0.25% interest, maturing August 15, 2026.",
+      "source_quote": "Our convertible senior notes have a principal balance of $661.3 million and bear interest at a rate of 0.25% per year, payable semiannually in arrears on February 15 and August 15 of each year. The Notes mature on August 15, 2026 unless earlier converted, redeemed, or repurchased in accordance with their terms.",
+      "subject": "Upstart Holdings, Inc.",
+      "predicate": "has outstanding convertible senior notes of",
+      "object_value": "$661.3M principal at 0.25%, due 2026-08-15",
+      "category": "financial_distress",
+      "referent_type": "amount",
+      "m_source_status": "MAPPED",
+      "source_id": "sec_filings.list_filings_by_form",
+      "source_params": {
+        "cik": "0001647639",
+        "forms": ["8-K", "10-Q", "10-K"],
+        "cutoff_date": "2024-05-17",
+        "start_date": "2021-08-01"
+      },
+      "proposed_connector": null,
+      "extraction_notes": "The original 8-K announcing the notes (Aug 2021 issuance) and subsequent 10-Q/10-K disclosures should be locatable in UPST's filing history. Adjudication is structural existence-of-debt, not arithmetic to-the-dollar."
+    },
+    {
+      "claim_id": "UPST-7",
+      "claim_text": "Upstart hosts its AI lending platform on Amazon Web Services (AWS) as its cloud infrastructure provider.",
+      "source_quote": "We host our AI lending platform using Amazon Web Services, or AWS, a provider of cloud infrastructure services.",
+      "subject": "Upstart Holdings, Inc.",
+      "predicate": "uses cloud-infrastructure vendor",
+      "object_value": "Amazon Web Services",
+      "category": "vendor_relationship",
+      "referent_type": "entity",
+      "m_source_status": "MAPPED",
+      "source_id": "edgar_fts.query_fulltext",
+      "source_params": {
+        "search_term": "Upstart",
+        "cutoff_date": "2024-05-17",
+        "start_date": "2020-12-01",
+        "cik": "0001018724",
+        "forms": "10-K,10-Q,8-K"
+      },
+      "proposed_connector": null,
+      "extraction_notes": "AWS customer relationship is unlikely to be material enough for Amazon to disclose Upstart by name (Layer 3 Rule 7 high bar). Expected to score UNVERIFIABLE / weak corroboration; we test the registry side anyway."
+    },
+    {
+      "claim_id": "UPST-8",
+      "claim_text": "Upstart originates loans on bank-partner balance sheets where 32% of 2023 originations were retained by lending partners, and 16% were held on Upstart's own balance sheet ($1,156.4M total) as of Dec 31, 2023.",
+      "source_quote": "out of the total principal of loan originations facilitated on our marketplace in 2023, 48% were purchased by institutional investors, 32% were retained by our lending partners, 16% were held on our balance sheet, and the remaining 4% were contributed as collateral to the securitization transaction completed in July 2023... As of December 31, 2023, we held $1,156.4 million of loans on our consolidated balance sheet.",
+      "subject": "Upstart Holdings, Inc.",
+      "predicate": "split 2023 originations and held on-balance-sheet loans of",
+      "object_value": "48/32/16/4 funding split; $1,156.4M on balance sheet",
+      "category": "production_volume",
+      "referent_type": "quantity",
+      "m_source_status": "MAPPED",
+      "source_id": "fdic_call_reports.consumer_loan_originations",
+      "source_params": {
+        "bank_names": ["Cross River Bank", "FinWise Bank", "Customers Bank"],
+        "quarters": 8
+      },
+      "proposed_connector": null,
+      "extraction_notes": "Calibration Heuristic 3: 'originated' volume sits on bank-partner balance sheets, not UPST's. Adjudication is cohort-level: do the named partner banks' LNCONOTH portfolios trend in a direction consistent with UPST's reported 2023 origination drop and stated credit-stress narrative? Bank-specific UPST share is not separable; this is a directional consistency check."
+    }
+  ]
+}

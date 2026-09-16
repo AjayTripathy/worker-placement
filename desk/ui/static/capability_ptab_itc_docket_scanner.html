@@ -1,0 +1,476 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ptab_itc_docket_scanner</title><style>
+body{margin:0;background:#0b0e12;color:#e8ebee;font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:26px 24px 90px}
+a{color:#8b7cf6} h1{font-size:23px;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:#7d858e;margin:0 0 20px;font-size:13px}
+h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:#7d858e;margin:24px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 10px;border-bottom:1px solid #242a31;text-align:left;vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#7d858e}
+.k{font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:20px}
+.k-generator{color:#c3b8fb;background:rgba(139,124,246,.15)}
+.k-detector{color:#eccb8a;background:rgba(217,164,65,.15)}
+.k-watcher{color:#8ee5c1;background:rgba(53,201,143,.15)}
+.k-evidence{color:#b3bcc6;background:rgba(138,147,158,.15)}
+.h-OK{color:#35c98f} .h-STALE{color:#d9a441} .h-ERROR{color:#e0736a} .h-NEVER_RUN{color:#8a939e}
+pre{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px;overflow-x:auto;font-size:12px;line-height:1.5}
+.panel{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px 18px;margin-bottom:12px}
+ul{margin:4px 0;padding-left:20px} li{margin-bottom:4px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+</style></head><body><div class="wrap"><h1>ptab_itc_docket_scanner</h1><p class="sub">registered capability · ptab_itc_docket_scanner</p><a href="signals.html">&larr; all signals</a><div class="panel" style="margin-top:10px"><span class="k k-generator">GENERATOR</span> &nbsp;<span class="h-NEVER_RUN"><b>NEVER_RUN</b></span> · last run <span class="mono">never</span></div><p>Stage 0b INFO/LATENCY: the patent-validity &amp; tariff-ruling docket nowcast.</p><form method="POST" action="/signals/run" style="margin:10px 0"><input type="hidden" name="name" value="ptab_itc_docket_scanner"><input name="symbol" placeholder="symbol (if applicable)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px"><input name="symbols" placeholder="universe, comma-sep (generators)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px;margin-left:6px"><button type="submit" style="background:#8b7cf6;color:#0b0e12;border:0;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;margin-left:6px">Run now</button></form><h2>Datasources</h2><ul><li>reference implementation: verticals/generators/ptab_itc_docket_scanner.py (see the code section for the feeds it touches)</li></ul><h2>Applies to</h2><ul><li><b>strategies:</b> quality_value</li></ul><h2>The code</h2><pre>&quot;&quot;&quot;ptab_itc_docket_scanner — Stage 0b INFO/LATENCY: the patent-validity &amp; tariff-ruling docket nowcast.
+
+THESIS (INFO-class, latency edge): two administrative dockets move single small caps on a PUBLISHED
+calendar the market doesn&#x27;t price until the press release — because nobody reads PTAB / ITC.
+
+  LEG 1 — PTAB (patent VALIDITY).  A petitioner files an inter-partes / post-grant review (IPR/PGR)
+     against a patent. When the Board INSTITUTES, the statute (35 U.S.C. §316(a)(11)) requires a
+     FINAL WRITTEN DECISION within ~12 months of institution (18 months max for good cause). That FWD
+     confirms or kills the patent&#x27;s claims — a binary that re-rates a one-patent small cap. The
+     institution date is public; the FWD-due window is therefore a KNOWN forward date the tape ignores.
+
+  LEG 2 — ITC Section 337 (tariff / import EXCLUSION).  A complainant alleges infringing imports under
+     §337 of the Tariff Act of 1930. Institution starts a ~16-18 month clock to a final determination;
+     a violation finding yields a Limited Exclusion Order / cease-and-desist that can bar a respondent&#x27;s
+     product from the U.S. — again a binary on a published docket. Institution notices (docket 337-TA-XXXX,
+     complainant, patents, sometimes respondents) are published in the Federal Register.
+
+The edge is LATENCY, not prediction: the docket DATE is public and un-priced. Outcomes are ~coin-flip,
+so this is an INFO generator that TIMES the catalyst and NAMES the tradeable party — sizing is a
+convexity/defined-risk decision downstream, never a directional call here.
+
+CATALYST-IDENTITY DISCIPLINE: every row binds to the SPECIFIC docket number (337-TA-#### or the PTAB
+IPR/PGR trial number). We do NOT mis-bind a ruling to a company&#x27;s &quot;flagship&quot; case — the party names come
+straight from the docket record.
+
+DATA SOURCES (all keyless except PTAB, see caveats):
+  · ITC  — Federal Register API (federalregister.gov, keyless, reliable). Real 337-TA institution notices.
+  · PTAB — USPTO Open Data Portal PTAB Trials API (api.uspto.gov). As of 2026-06 the ODP requires a (free,
+           self-serve) API key; set env USPTO_ODP_KEY to enable this leg. Without it the PTAB leg reports
+           UNAVAILABLE honestly — the legacy keyless developer.uspto.gov PTAB API was decommissioned.
+
+    python3 verticals/generators/ptab_itc_docket_scanner.py
+Writes data/PTAB_ITC_DOCKET.json. READ-ONLY — never an order. NO fabricated dockets/dates (real API data
+only; anything the API can&#x27;t confirm is marked UNVERIFIABLE / estimated-window).
+&quot;&quot;&quot;
+from __future__ import annotations
+
+import datetime
+import json
+import os
+import re
+import urllib.parse
+import urllib.request
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+OUT = HERE / &quot;data&quot; / &quot;PTAB_ITC_DOCKET.json&quot;
+HDRS = {&quot;User-Agent&quot;: &quot;signalos-research 4tripathy@gmail.com&quot;, &quot;Accept&quot;: &quot;application/json&quot;}
+
+FR_API = &quot;https://www.federalregister.gov/api/v1/documents.json&quot;
+SEC_TICKERS = &quot;https://www.sec.gov/files/company_tickers.json&quot;
+ODP_PTAB = &quot;https://api.uspto.gov/api/v1/patent/trials/proceedings/search&quot;
+ODP_KEY = os.environ.get(&quot;USPTO_ODP_KEY&quot;, &quot;&quot;).strip()
+
+# statutory clocks (days). PTAB: FWD due ~12mo from institution, 18mo hard cap.
+PTAB_FWD_DAYS = 365
+PTAB_FWD_MAX_DAYS = 548
+# ITC §337: median time-to-final-determination historically ~16-18mo from institution; the ALJ sets the
+# exact &quot;target date&quot; ~45d post-institution. We estimate a WINDOW and mark the exact date UNVERIFIABLE.
+ITC_TARGET_DAYS_LO = 480   # ~16mo
+ITC_TARGET_DAYS_HI = 550   # ~18mo
+
+IMMINENT_DAYS = 45         # 0-45d = imminent bucket
+UPCOMING_DAYS = 180        # 46-180d = upcoming bucket
+
+
+# ------------------------------------------------------------------ http
+def _get(url, headers=None, timeout=30):
+    try:
+        req = urllib.request.Request(url, headers=headers or HDRS)
+        with urllib.request.urlopen(req, timeout=timeout) as r:
+            return json.load(r)
+    except Exception as e:
+        return {&quot;_error&quot;: repr(e)[:200]}
+
+
+# ------------------------------------------------------------------ ticker map (fuzzy party -&gt; listed ticker)
+_STOP = {&quot;inc&quot;, &quot;incorporated&quot;, &quot;corp&quot;, &quot;corporation&quot;, &quot;co&quot;, &quot;company&quot;, &quot;llc&quot;, &quot;lp&quot;, &quot;ltd&quot;,
+         &quot;limited&quot;, &quot;plc&quot;, &quot;holdings&quot;, &quot;holding&quot;, &quot;group&quot;, &quot;technologies&quot;, &quot;technology&quot;,
+         &quot;the&quot;, &quot;of&quot;, &quot;and&quot;, &quot;systems&quot;, &quot;labs&quot;, &quot;laboratories&quot;, &quot;sa&quot;, &quot;ag&quot;, &quot;nv&quot;, &quot;gmbh&quot;,
+         &quot;international&quot;, &quot;industries&quot;, &quot;industry&quot;, &quot;usa&quot;, &quot;america&quot;, &quot;solutions&quot;, &quot;networks&quot;,
+         &quot;communications&quot;, &quot;semiconductor&quot;, &quot;pharmaceuticals&quot;, &quot;pharma&quot;, &quot;therapeutics&quot;, &quot;bio&quot;}
+
+
+def _norm(name: str) -&gt; str:
+    n = re.sub(r&quot;[^a-z0-9 ]&quot;, &quot; &quot;, (name or &quot;&quot;).lower())
+    n = re.sub(r&quot;\s+&quot;, &quot; &quot;, n).strip()
+    return n
+
+
+def _tokens(name: str) -&gt; set:
+    return {t for t in _norm(name).split() if t and t not in _STOP and len(t) &gt; 1}
+
+
+def _load_ticker_index():
+    &quot;&quot;&quot;Build {norm_title -&gt; {ticker,title}} and a token index for fuzzy party matching.&quot;&quot;&quot;
+    d = _get(SEC_TICKERS)
+    idx, tok_idx = {}, {}
+    if not isinstance(d, dict) or d.get(&quot;_error&quot;):
+        return idx, tok_idx, (d.get(&quot;_error&quot;) if isinstance(d, dict) else &quot;load failed&quot;)
+    for row in d.values():
+        try:
+            tk, title = row[&quot;ticker&quot;], row[&quot;title&quot;]
+        except Exception:
+            continue
+        idx[_norm(title)] = {&quot;ticker&quot;: tk, &quot;title&quot;: title}
+        for t in _tokens(title):
+            tok_idx.setdefault(t, []).append({&quot;ticker&quot;: tk, &quot;title&quot;: title})
+    return idx, tok_idx, None
+
+
+def _match_ticker(party: str, idx: dict, tok_idx: dict):
+    &quot;&quot;&quot;Fuzzy-resolve a party name to a LISTED ticker. CATALYST-IDENTITY DISCIPLINE: a false map (e.g. the
+    private &#x27;337 complainant &quot;Aardvark Medical&quot; -&gt; public &quot;Aardvark Therapeutics&quot;) mis-binds the ruling to
+    the wrong company, so we are deliberately conservative. A match must cover a strong fraction of BOTH the
+    party name and the company name; a lone shared distinctive token is returned only as LOW-confidence
+    (surfaced but flagged for verification, never treated as a clean bind). Returns dict|None.&quot;&quot;&quot;
+    if not party:
+        return None
+    ptoks = _tokens(party)
+    if not ptoks:
+        return None
+    pn = _norm(party)
+    # exact match on the full normalized title = the only &quot;clean&quot; bind
+    if pn in idx:
+        m = dict(idx[pn]); m[&quot;match&quot;] = &quot;exact&quot;; m[&quot;confidence&quot;] = &quot;high&quot;; return m
+    # candidate companies sharing distinctive tokens
+    cand = {}
+    for t in ptoks:
+        for c in tok_idx.get(t, []):
+            cand.setdefault(c[&quot;ticker&quot;], c)
+    best, best_key = None, (-1.0, -1.0)
+    for c in cand.values():
+        ctoks = _tokens(c[&quot;title&quot;])
+        if not ctoks:
+            continue
+        inter = ptoks &amp; ctoks
+        if not inter:
+            continue
+        pcover = len(inter) / len(ptoks)   # how much of the PARTY name is explained
+        ccover = len(inter) / len(ctoks)   # how much of the COMPANY name is explained
+        key = (min(pcover, ccover), len(inter))
+        if key &gt; best_key:
+            best, best_key = c, key
+    if not best:
+        return None
+    inter = _tokens(party) &amp; _tokens(best[&quot;title&quot;])
+    pcover = len(inter) / len(ptoks)
+    ccover = len(inter) / max(1, len(_tokens(best[&quot;title&quot;])))
+    m = dict(best)
+    # HIGH: multi-token overlap that covers most of both names. LOW: a single shared token (mis-bind risk).
+    if len(inter) &gt;= 2 and min(pcover, ccover) &gt;= 0.6:
+        m[&quot;match&quot;] = f&quot;fuzzy(p{pcover:.2f}/c{ccover:.2f})&quot;; m[&quot;confidence&quot;] = &quot;high&quot;
+    elif len(inter) &gt;= 2 or (pcover &gt;= 0.99 and ccover &gt;= 0.99):
+        m[&quot;match&quot;] = f&quot;fuzzy(p{pcover:.2f}/c{ccover:.2f})&quot;; m[&quot;confidence&quot;] = &quot;medium&quot;
+    else:
+        m[&quot;match&quot;] = f&quot;single-token:{sorted(inter)[0] if inter else &#x27;?&#x27;}&quot;; m[&quot;confidence&quot;] = &quot;low&quot;
+    return m
+
+
+# ------------------------------------------------------------------ LEG 2: ITC §337 (Federal Register)
+def _parse_complainants(abstract: str):
+    &quot;&quot;&quot;Extract complainant(s) from &#x27;on behalf of X (and Y) of &lt;place&gt;&#x27;.&quot;&quot;&quot;
+    if not abstract:
+        return []
+    m = re.search(r&quot;on behalf of (.+?)(?:\.\s|\.$|(?:\s(?:The|An|A|Supplements?|A supplement)\s))&quot;, abstract)
+    if not m:
+        m = re.search(r&quot;on behalf of (.+?) of [A-Z]&quot;, abstract)
+    if not m:
+        return []
+    seg = m.group(1)
+    # cut at the first &quot; of &lt;Place&gt;&quot; that ends an entity, then split conjunctions
+    seg = re.split(r&quot;\balleges\b&quot;, seg)[0]
+    parts = re.split(r&quot;,? and |; &quot;, seg)
+    out = []
+    for p in parts:
+        p = re.sub(r&quot;\s+of\s+[A-Z][A-Za-z.\- ]+(?:,\s*[A-Za-z ]+)?$&quot;, &quot;&quot;, p).strip(&quot; .,&quot;)
+        if p and len(p) &gt; 2:
+            out.append(p)
+    return out[:5]
+
+
+def _parse_respondents(abstract: str):
+    &quot;&quot;&quot;Best-effort respondent extraction. The FR abstract for a fresh institution notice usually does NOT
+    enumerate respondents (they are in the notice body); amendment/ID notices sometimes do. Pull the
+    quoted short-names when a respondent list is present, else return [].&quot;&quot;&quot;
+    if not abstract or &quot;respondent&quot; not in abstract.lower():
+        return []
+    names = []
+    # entities followed by a quoted short-name: Foo Bar Co. LTD (&quot;Foo&quot;)
+    for m in re.finditer(r&quot;([A-Z][A-Za-z0-9&amp;.\-]+(?:\s+[A-Z][A-Za-z0-9&amp;.\-]+){0,5})\s*\(\&quot;([^\&quot;]+)\&quot;\)&quot;, abstract):
+        full = m.group(1).strip()
+        if len(full) &gt; 3:
+            names.append(full)
+    # dedupe, keep order
+    seen, out = set(), []
+    for n in names:
+        k = _norm(n)
+        if k and k not in seen:
+            seen.add(k); out.append(n)
+    return out[:25]
+
+
+def _itc_docket(docket_ids):
+    for d in docket_ids or []:
+        m = re.search(r&quot;(337-TA-\d+)&quot;, d)
+        if m:
+            return m.group(1)
+    return None
+
+
+def scan_itc(idx, tok_idx):
+    &quot;&quot;&quot;Pull recent ITC §337 institution notices from the Federal Register; map parties to tickers.&quot;&quot;&quot;
+    params = {
+        &quot;conditions[agencies][]&quot;: &quot;international-trade-commission&quot;,
+        &quot;conditions[term]&quot;: &quot;section 337 notice of institution of investigation&quot;,
+        &quot;conditions[publication_date][gte]&quot;: (datetime.date.today() - datetime.timedelta(days=540)).isoformat(),
+        &quot;per_page&quot;: &quot;80&quot;, &quot;order&quot;: &quot;newest&quot;,
+        &quot;fields[]&quot;: [&quot;title&quot;, &quot;publication_date&quot;, &quot;abstract&quot;, &quot;docket_ids&quot;, &quot;html_url&quot;],
+    }
+    # build query with repeated fields[] keys
+    q = urllib.parse.urlencode([(k, v) for k, vs in params.items() for v in ([vs] if isinstance(vs, str) else vs)])
+    d = _get(f&quot;{FR_API}?{q}&quot;)
+    rows, err = [], None
+    if isinstance(d, dict) and d.get(&quot;_error&quot;):
+        return [], d[&quot;_error&quot;]
+    today = datetime.date.today()
+    for x in (d.get(&quot;results&quot;, []) if isinstance(d, dict) else []):
+        docket = _itc_docket(x.get(&quot;docket_ids&quot;))
+        title = x.get(&quot;title&quot;) or &quot;&quot;
+        abstract = x.get(&quot;abstract&quot;) or &quot;&quot;
+        # keep only genuine §337 INSTITUTION notices (not 701/731 AD/CVD, not later procedural notices)
+        if not docket:
+            continue
+        if &quot;institution of investigation&quot; not in title.lower() and &quot;institution of investigation&quot; not in abstract.lower():
+            continue
+        try:
+            inst = datetime.date.fromisoformat(x.get(&quot;publication_date&quot;))
+        except Exception:
+            inst = None
+        complainants = _parse_complainants(abstract)
+        respondents = _parse_respondents(abstract)
+        # map parties -&gt; tickers
+        hits = []
+        for role, names in ((&quot;complainant&quot;, complainants), (&quot;respondent&quot;, respondents)):
+            for nm in names:
+                mt = _match_ticker(nm, idx, tok_idx)
+                if mt:
+                    hits.append({&quot;role&quot;: role, &quot;party&quot;: nm, &quot;ticker&quot;: mt[&quot;ticker&quot;],
+                                 &quot;listed_as&quot;: mt[&quot;title&quot;], &quot;match&quot;: mt[&quot;match&quot;],
+                                 &quot;confidence&quot;: mt.get(&quot;confidence&quot;, &quot;medium&quot;)})
+        # dedupe hits by (ticker, role) — a party can appear twice (e.g. &quot;Nokia Technologies&quot; + &quot;Nokia Corp&quot;)
+        _seen, _h = set(), []
+        for h in hits:
+            k = (h[&quot;ticker&quot;], h[&quot;role&quot;])
+            if k not in _seen:
+                _seen.add(k); _h.append(h)
+        hits = _h
+        if inst:
+            tgt_lo = inst + datetime.timedelta(days=ITC_TARGET_DAYS_LO)
+            tgt_hi = inst + datetime.timedelta(days=ITC_TARGET_DAYS_HI)
+            days_lo = (tgt_lo - today).days
+            days_hi = (tgt_hi - today).days
+        else:
+            tgt_lo = tgt_hi = None
+            days_lo = days_hi = None
+        rows.append({
+            &quot;inv_no&quot;: docket,
+            &quot;title&quot;: re.sub(r&quot;;.*$&quot;, &quot;&quot;, title).strip(),
+            &quot;institution_date&quot;: inst.isoformat() if inst else &quot;UNVERIFIABLE&quot;,
+            &quot;complainants&quot;: complainants,
+            &quot;respondents&quot;: respondents or &quot;see notice body (not in FR abstract)&quot;,
+            &quot;ticker_hits&quot;: hits,
+            &quot;target_date_est_window&quot;: (f&quot;{tgt_lo.isoformat()} .. {tgt_hi.isoformat()}&quot; if tgt_lo else &quot;UNVERIFIABLE&quot;),
+            &quot;target_date_exact&quot;: &quot;UNVERIFIABLE (ALJ sets ~45d post-institution)&quot;,
+            &quot;days_to_est&quot;: days_lo if days_lo is not None else None,   # to the near edge of the window
+            &quot;days_to_window&quot;: [days_lo, days_hi] if days_lo is not None else None,
+            &quot;url&quot;: x.get(&quot;html_url&quot;),
+        })
+    return rows, err
+
+
+# ------------------------------------------------------------------ LEG 1: PTAB (USPTO ODP, key-optional)
+def scan_ptab(idx, tok_idx):
+    &quot;&quot;&quot;Pull recent instituted IPR/PGR proceedings and compute the FWD-due window. Requires USPTO_ODP_KEY;
+    without it, returns [] with an honest reason (the keyless legacy PTAB API was decommissioned 2026-06).&quot;&quot;&quot;
+    if not ODP_KEY:
+        return [], (&quot;PTAB leg DISABLED: USPTO Open Data Portal now requires an API key (as of 2026-06 the &quot;
+                    &quot;legacy keyless developer.uspto.gov PTAB API was decommissioned). Set env USPTO_ODP_KEY &quot;
+                    &quot;(free, self-serve at data.uspto.gov) to enable. No fabricated PTAB data is emitted.&quot;)
+    today = datetime.date.today()
+    since = (today - datetime.timedelta(days=395)).isoformat()   # institutions in the last ~13mo -&gt; FWD ahead
+    # ODP PTAB Trials search. Field names per data.uspto.gov/apis/ptab-trials/search-proceedings.
+    params = {&quot;q&quot;: f&quot;proceedingTypeCategory:\&quot;AIA Trial\&quot; AND institutionDecisionDate:[{since} TO *]&quot;,
+              &quot;rows&quot;: &quot;100&quot;, &quot;sort&quot;: &quot;institutionDecisionDate desc&quot;}
+    q = urllib.parse.urlencode(params)
+    hdrs = dict(HDRS); hdrs[&quot;X-API-KEY&quot;] = ODP_KEY
+    d = _get(f&quot;{ODP_PTAB}?{q}&quot;, headers=hdrs)
+    if isinstance(d, dict) and d.get(&quot;_error&quot;):
+        return [], f&quot;PTAB ODP error: {d[&#x27;_error&#x27;]}&quot;
+    recs = []
+    if isinstance(d, dict):
+        recs = d.get(&quot;results&quot;) or d.get(&quot;proceedings&quot;) or d.get(&quot;patentTrialProceedingDataBag&quot;) or []
+    rows = []
+    for r in recs:
+        # be liberal about field spellings across ODP schema versions
+        def g(*keys):
+            for k in keys:
+                if isinstance(r, dict) and r.get(k) not in (None, &quot;&quot;):
+                    return r.get(k)
+            return None
+        num = g(&quot;proceedingNumber&quot;, &quot;trialNumber&quot;, &quot;proceedingIdentifier&quot;)
+        inst_s = g(&quot;institutionDecisionDate&quot;, &quot;institutionDecisionMailedDate&quot;)
+        subtype = g(&quot;proceedingTypeCategory&quot;, &quot;subproceedingTypeCategory&quot;, &quot;proceedingType&quot;) or &quot;&quot;
+        owner = g(&quot;patentOwnerName&quot;, &quot;respondentPartyName&quot;, &quot;patentOwner&quot;)
+        petitioner = g(&quot;petitionerPartyName&quot;, &quot;petitionerName&quot;, &quot;firstNamedPetitioner&quot;)
+        if not (num and inst_s):
+            continue
+        try:
+            inst = datetime.date.fromisoformat(str(inst_s)[:10])
+        except Exception:
+            continue
+        fwd_due = inst + datetime.timedelta(days=PTAB_FWD_DAYS)
+        fwd_max = inst + datetime.timedelta(days=PTAB_FWD_MAX_DAYS)
+        days_to = (fwd_due - today).days
+        hits = []
+        for role, nm in ((&quot;patent_owner&quot;, owner), (&quot;petitioner&quot;, petitioner)):
+            mt = _match_ticker(nm, idx, tok_idx) if nm else None
+            if mt:
+                hits.append({&quot;role&quot;: role, &quot;party&quot;: nm, &quot;ticker&quot;: mt[&quot;ticker&quot;],
+                             &quot;listed_as&quot;: mt[&quot;title&quot;], &quot;match&quot;: mt[&quot;match&quot;],
+                             &quot;confidence&quot;: mt.get(&quot;confidence&quot;, &quot;medium&quot;)})
+        rows.append({
+            &quot;proceeding&quot;: num,
+            &quot;type&quot;: subtype,
+            &quot;patent_owner&quot;: owner or &quot;UNVERIFIABLE&quot;,
+            &quot;petitioner&quot;: petitioner or &quot;UNVERIFIABLE&quot;,
+            &quot;institution_date&quot;: inst.isoformat(),
+            &quot;fwd_due_est&quot;: fwd_due.isoformat(),
+            &quot;fwd_due_max&quot;: fwd_max.isoformat(),
+            &quot;days_to&quot;: days_to,
+            &quot;ticker_hits&quot;: hits,
+        })
+    return rows, None
+
+
+# ------------------------------------------------------------------ bucketing
+def _bucket(days):
+    if days is None:
+        return &quot;unknown&quot;
+    if days &lt; 0:
+        return &quot;past&quot;
+    if days &lt;= IMMINENT_DAYS:
+        return &quot;imminent&quot;
+    if days &lt;= UPCOMING_DAYS:
+        return &quot;upcoming&quot;
+    return &quot;distant&quot;
+
+
+def scan() -&gt; dict:
+    today = datetime.date.today()
+    idx, tok_idx, tk_err = _load_ticker_index()
+    ptab, ptab_err = scan_ptab(idx, tok_idx)
+    itc, itc_err = scan_itc(idx, tok_idx)
+
+    for r in ptab:
+        r[&quot;bucket&quot;] = _bucket(r.get(&quot;days_to&quot;))
+    for r in itc:
+        r[&quot;bucket&quot;] = _bucket(r.get(&quot;days_to_est&quot;))
+
+    def _has_verified(r):
+        return any(h.get(&quot;confidence&quot;) in (&quot;high&quot;, &quot;medium&quot;) for h in r[&quot;ticker_hits&quot;])
+
+    # sort: rows with a VERIFIED ticker hit first, then any hit, then soonest decision within
+    ptab.sort(key=lambda r: (0 if _has_verified(r) else (1 if r[&quot;ticker_hits&quot;] else 2),
+                             r.get(&quot;days_to&quot;) if r.get(&quot;days_to&quot;) is not None else 9999))
+    itc.sort(key=lambda r: (0 if _has_verified(r) else (1 if r[&quot;ticker_hits&quot;] else 2),
+                            r.get(&quot;days_to_est&quot;) if r.get(&quot;days_to_est&quot;) is not None else 9999))
+
+    caveats = []
+    if tk_err:
+        caveats.append(f&quot;SEC ticker map failed to load ({tk_err}) — party-&gt;ticker mapping unavailable this run.&quot;)
+    if ptab_err:
+        caveats.append(ptab_err)
+    if itc_err:
+        caveats.append(f&quot;ITC/Federal-Register pull error: {itc_err}&quot;)
+    caveats.append(&quot;ITC target-determination dates are ESTIMATED windows (statutory ~16-18mo from institution); &quot;
+                   &quot;the ALJ&#x27;s exact target date is set ~45d post-institution and is marked UNVERIFIABLE here.&quot;)
+    caveats.append(&quot;Respondent lists are best-effort from the Federal Register abstract; fresh institution notices &quot;
+                   &quot;usually list respondents only in the notice BODY, so respondent-side ticker hits under-count.&quot;)
+    caveats.append(&quot;PTAB FWD-due is the §316(a)(11) statutory estimate (12mo, 18mo cap) from the institution date — &quot;
+                   &quot;a real forward date, but the Board can settle/terminate early; treat as the OUTER catalyst window.&quot;)
+
+    n_ptab_hits = sum(1 for r in ptab if _has_verified(r))
+    n_itc_hits = sum(1 for r in itc if _has_verified(r))
+
+    return {
+        &quot;asof&quot;: today.isoformat(),
+        &quot;ptab&quot;: ptab,
+        &quot;itc&quot;: itc,
+        &quot;counts&quot;: {&quot;ptab_rows&quot;: len(ptab), &quot;ptab_verified_ticker_hits&quot;: n_ptab_hits,
+                   &quot;itc_rows&quot;: len(itc), &quot;itc_verified_ticker_hits&quot;: n_itc_hits,
+                   &quot;itc_any_ticker_hits&quot;: sum(1 for r in itc if r[&quot;ticker_hits&quot;])},
+        &quot;note&quot;: (&quot;INFO/LATENCY class. Patent-validity (PTAB IPR/PGR -&gt; Final Written Decision ~12mo post-institution) &quot;
+                 &quot;and tariff (ITC §337 -&gt; exclusion-order determination ~16-18mo post-institution) rulings hit single &quot;
+                 &quot;small caps on a PUBLISHED docket the market doesn&#x27;t price until the press release — the edge is &quot;
+                 &quot;reading the calendar nobody reads. Each row binds to the SPECIFIC docket (337-TA-#### / PTAB trial &quot;
+                 &quot;number) and NAMES the tradeable party (complainant/patent-owner win = pop; respondent exclusion / &quot;
+                 &quot;petitioner-win-kills-patent = drop). Outcomes are ~coin-flip: this TIMES the catalyst and names the &quot;
+                 &quot;instrument — sizing is a downstream convexity/defined-risk decision, never a directional call here.&quot;),
+        &quot;caveats&quot;: caveats,
+    }
+
+
+def main():
+    res = scan()
+    c = res[&quot;counts&quot;]
+    print(f&quot;=== PTAB / ITC §337 DOCKET NOWCAST  {res[&#x27;asof&#x27;]} ===&quot;)
+    print(f&quot;  PTAB: {c[&#x27;ptab_rows&#x27;]} instituted proceedings ({c[&#x27;ptab_verified_ticker_hits&#x27;]} w/ verified listed party)&quot;)
+    print(f&quot;  ITC : {c[&#x27;itc_rows&#x27;]} §337 investigations   ({c[&#x27;itc_verified_ticker_hits&#x27;]} verified, &quot;
+          f&quot;{c[&#x27;itc_any_ticker_hits&#x27;]} incl. low-confidence single-token maps)&quot;)
+
+    def _fmt_hits(hits):
+        out = []
+        for h in hits:
+            mark = &quot;&quot; if h.get(&quot;confidence&quot;) in (&quot;high&quot;, &quot;medium&quot;) else &quot;?&quot;   # ? = low-conf, verify identity
+            out.append(f&quot;{h[&#x27;ticker&#x27;]}{mark}({h[&#x27;role&#x27;]})&quot;)
+        return &quot;, &quot;.join(out) or &quot;-&quot;
+
+    print(&quot;\n  -- ITC §337 (verified-ticker rows first; ? = low-confidence single-token map, verify) --&quot;)
+    shown = [r for r in res[&quot;itc&quot;] if r[&quot;ticker_hits&quot;]] or res[&quot;itc&quot;]
+    for r in shown[:12]:
+        comp = &quot;; &quot;.join(r[&quot;complainants&quot;][:2]) or &quot;?&quot;
+        dw = r.get(&quot;days_to_window&quot;)
+        win = f&quot;{dw[0]}..{dw[1]}d&quot; if dw else &quot;date?&quot;
+        print(f&quot;    {r[&#x27;inv_no&#x27;]:14} [{r[&#x27;bucket&#x27;]:8}] tgt~{win:12} {_fmt_hits(r[&#x27;ticker_hits&#x27;]):22} &lt;- {comp[:44]}&quot;)
+
+    print(&quot;\n  -- PTAB IPR/PGR (FWD-due, ticker-mapped first) --&quot;)
+    if res[&quot;ptab&quot;]:
+        pshown = [r for r in res[&quot;ptab&quot;] if r[&quot;ticker_hits&quot;]] or res[&quot;ptab&quot;]
+        for r in pshown[:12]:
+            print(f&quot;    {r[&#x27;proceeding&#x27;]:16} [{r[&#x27;bucket&#x27;]:8}] FWD~{r[&#x27;fwd_due_est&#x27;]} ({r[&#x27;days_to&#x27;]:+d}d) &quot;
+                  f&quot;{_fmt_hits(r[&#x27;ticker_hits&#x27;]):22} owner={str(r[&#x27;patent_owner&#x27;])[:26]}&quot;)
+    else:
+        print(&quot;    (none — PTAB leg unavailable; see caveats)&quot;)
+
+    print(&quot;\n  CAVEATS:&quot;)
+    for cv in res[&quot;caveats&quot;]:
+        print(f&quot;    - {cv}&quot;)
+
+    OUT.write_text(json.dumps(res, indent=1))
+    print(f&quot;\n[-&gt; {OUT.relative_to(HERE.parent)}]&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</pre></div></body></html>

@@ -1,0 +1,571 @@
+{
+  "ticker": "NKLA",
+  "cutoff": "2020-08-01",
+  "filing": "0001047469-20-004147_S1.txt",
+  "plan_version": 1,
+  "claims": [
+    {
+      "claim_id": "NKLA-1",
+      "claim_text": "Nikola has a Master Agreement with Anheuser-Busch LLC to lease up to 800 Nikola Two FCEV trucks.",
+      "source_quote": "While we currently have a contract with Anheuser-Busch LLC (\"AB\"), to lease up to 800 Nikola Two FCEV trucks, if we are unable to deliver our trucks according to the vehicle specifications and delivery timelines set forth in the contract, AB has the right to cancel its order for trucks.",
+      "subject": "Nikola Corporation",
+      "predicate": "has_lease_contract_with_for_units",
+      "object_value": "Anheuser-Busch LLC, up to 800 Nikola Two FCEV trucks",
+      "category": "customer_pipeline",
+      "referent_type": "entity",
+      "m_source_status": "MAPPED",
+      "source_id": "megacap_namecheck.query_megacap_mentions",
+      "source_params": {
+        "small_cap_name": "Nikola",
+        "cutoff_date": "2020-08-01",
+        "megacap_subset": ["Anheuser-Busch"],
+        "window_days": 3650,
+        "forms": "10-K,10-Q,8-K"
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "Anheuser-Busch InBev (BUD) parent-side filing disclosure scan",
+          "endpoint_or_method": "edgar_fts.query_fulltext with search_term='Nikola' and cik=0001668717 (Anheuser-Busch InBev) over 2018-01-01 to 2020-08-01",
+          "rationale": "An 800-truck FCEV lease commitment with embedded delivery + lease + hydrogen-fueling obligations is a material supplier/CAPEX-relevant disclosure that an investment-grade global brewer with sustainability-marketing incentive would surface in its 20-F sustainability narrative. Zero mentions across BUD's pre-cutoff 20-F filings is a soft inflation signal (BUD is foreign-private-issuer, files 20-F).",
+          "expected_observable": "count of BUD/AB filings mentioning 'Nikola'",
+          "signal_direction": "0 mentions in BUD 20-F sustainability sections over 18-month window post-contract = consistent with marketing-only relationship",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Anheuser-Busch fleet operational footprint via FMCSA SAFER",
+          "endpoint_or_method": "https://safer.fmcsa.dot.gov/CompanySnapshot.aspx — lookup Anheuser-Busch / AB InBev US carrier subsidiaries (Metro Logistics, Anheuser-Busch Logistics) and confirm power-unit and tractor-trailer footprint",
+          "rationale": "800-truck FCEV order represents ~8-15% of AB's claimed US Class-8 dedicated fleet. Reverse-checks whether AB has an in-house captive fleet of the size needed to absorb the order vs. relying on outsourced for-hire carriers.",
+          "expected_observable": "AB Logistics power-unit count, driver count, operating status",
+          "signal_direction": "AB captive fleet of <1000 tractors makes an 800-FCEV substitution implausibly large for a single OEM-supplier relationship in a short window",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Anheuser-Busch sustainability report (public PDF)",
+          "endpoint_or_method": "AB InBev annual sustainability / ESG reports filed 2018-2020 — text-search 'Nikola', 'hydrogen', 'fuel cell truck', 'zero emission truck'",
+          "rationale": "Brewer sustainability reporting commonly cites named OEM partnerships (Tesla Semi, Daimler, Volvo). Multi-year omission of Nikola from AB's own sustainability narrative despite 800-unit Master Agreement = inflation signal.",
+          "expected_observable": "named mentions of Nikola in AB sustainability reports",
+          "signal_direction": "0-1 mentions across 2018-2020 sustainability reports contradicts a material 800-unit fleet conversion",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "autos_vehicles",
+      "claim_type_taxonomy": "commercial_customer",
+      "extraction_notes": "AB is a megacap-class counterparty (BUD, FPI). H7 applies: counterparty-side disclosure is rare for sub-material orders. megacap_namecheck is the catalog tool for testing whether the named counterparty has any cross-filing mentions of Nikola. The Anheuser-Busch CIK provided in the prompt (0001668717) is actually AB InBev parent (FPI), so megacap subset is the cleanest test. Source-of-truth fallback is BUD's own 20-F."
+    },
+    {
+      "claim_id": "NKLA-2",
+      "claim_text": "Nikola has approximately 14,000 reservations for FCEV trucks representing approximately $10 billion in projected revenues if all are sold or leased.",
+      "source_quote": "As of March 31, 2020, Legacy Nikola had approximately 14,000 reservations for FCEV trucks... we have indicated that if we are able to sell or lease every truck which has been reserved, we would have $10 billion in projected revenues. Because all of our reservations are cancellable, it is possible that a significant number of customers who submitted reservations for our trucks may cancel those reservations.",
+      "subject": "Nikola Corporation",
+      "predicate": "reports_reservation_book_size",
+      "object_value": "~14,000 FCEV truck reservations / $10 billion projected revenue",
+      "category": "customer_pipeline",
+      "referent_type": "quantity",
+      "m_source_status": "MAPPED",
+      "source_id": "claim_evolution.query_claim_evolution",
+      "source_params": {
+        "cik": "0001731289",
+        "search_term": "reservations",
+        "base_filing_date": "2020-07-17",
+        "cutoff_date": "2020-08-01",
+        "forms": "10-K,10-Q,8-K,DEF 14A"
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "Reservation-book counterparty identity audit (S-1 vs subsequent 10-Q/10-K)",
+          "endpoint_or_method": "claim_evolution.query_claim_evolution + edgar_fts.query_fulltext over time for whether Nikola ever names the 14,000-unit reservation-book counterparties; large named customers (>100 trucks) per the filing represent identifiable fleet operators",
+          "rationale": "The S-1 states 'majority of order book represents large corporate customers with over 100 or more trucks reserved.' That implies <140 named counterparties hold the book. Real material counterparties surface in 10-K customer-concentration tables once revenue starts. SILENT_POST_CLAIM on the 14,000 number through multiple subsequent 10-Q filings = inflation signal.",
+          "expected_observable": "count of post-S-1 filings re-disclosing 14,000 or naming reservation-book customers",
+          "signal_direction": "freeze of reservation book + decay or quiet drop of the 14,000 number = soft inflation signal",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "FMCSA SAFER reverse-check on plausible US Class-8 reservation pool size",
+          "endpoint_or_method": "FMCSA SAFER aggregate stats for US Class-8 power-units by carrier; calculate what fraction of the US Class-8 fleet 14,000 trucks represents",
+          "rationale": "Total US Class-8 tractor population is ~3.5M; 14,000 units = ~0.4% of fleet. Per-carrier breakdown: only ~50 US carriers have >1000 tractors. The reservation book at face value would require essentially every multi-thousand-unit Class-8 operator to commit a substantial fleet share to a pre-revenue OEM. Operational-capacity divergence.",
+          "expected_observable": "distribution of US Class-8 carriers by power-unit count",
+          "signal_direction": "very few carriers have the operational fleet to absorb hundreds of FCEVs apiece in 2024-2026 production window",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Hydrogen-fueling-station NREL existence check for routes implied by 14,000 truck reservation book",
+          "endpoint_or_method": "nrel_fuel.query_alt_fuel_stations with fuel_type='HY' and name_filter='Nikola' or just total US hydrogen station count pre-cutoff",
+          "rationale": "14,000 FCEV trucks require a national hydrogen-fueling network with hundreds of operational H2 stations. Pre-cutoff (2020-08-01) total US public H2 station count is ~45 (per DOE), all concentrated in California. Operational-capacity divergence: the fueling infrastructure required by the implied truck reservation book does not exist and is not under construction.",
+          "expected_observable": "total US public H2 stations and Nikola-operated H2 stations pre-cutoff",
+          "signal_direction": "0 Nikola-operated H2 stations + <50 total US H2 stations = severe operational-capacity gap vs the implied 14,000-truck fueling network",
+          "severity_if_contradiction": "SEVERE"
+        }
+      ],
+      "domain": "autos_vehicles",
+      "claim_type_taxonomy": "commercial_customer",
+      "extraction_notes": "Quintessential SPAC EV reservation-book claim. Filing itself disclaims as non-binding. Pre-cutoff cleanest test is the focal company's own subsequent disclosure cadence (claim_evolution). Cross-checks via NREL hydrogen stations (operational-capacity precondition test) and FMCSA carrier composition are creative extensions."
+    },
+    {
+      "claim_id": "NKLA-3",
+      "claim_text": "Nikola intends to produce the hydrogen needed for its planned hydrogen fueling stations on-site through electrolysis.",
+      "source_quote": "We intend to produce the hydrogen needed for these stations on site through electrolysis. To the extent we are unable to produce the hydrogen, we may be unable to establish these fueling stations and severely limit the usefulness of our trucks, or, if we are still able to establish these stations, we may be forced to sell hydrogen at a loss in order to maintain our commitments.",
+      "subject": "Nikola Corporation",
+      "predicate": "intends_to_produce_hydrogen_via",
+      "object_value": "on-site electrolysis at hydrogen fueling stations",
+      "category": "technology",
+      "referent_type": "intangible",
+      "m_source_status": "MAPPED",
+      "source_id": "nrel_fuel.query_alt_fuel_stations",
+      "source_params": {
+        "fuel_type": "HY",
+        "cutoff_date": "2020-08-01",
+        "name_filter": "Nikola"
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "EPA Facility Registry Service (FRS) lookup for any Nikola-permitted hydrogen production facility",
+          "endpoint_or_method": "epa_emissions.query_facility_emissions with company_name='Nikola' and claimed_locations=[{'city':'Coolidge','state':'AZ'},{'city':'Phoenix','state':'AZ'}]",
+          "rationale": "Industrial-scale electrolysis (multi-MW) is an EPA-permitted activity. If Nikola has any operating hydrogen-production facility or has begun construction at a permitted site, EPA FRS records the facility. Absence + the on-site-electrolysis claim is consistent with vaporware status.",
+          "expected_observable": "Nikola-registered EPA facilities and reverse-lookup for permitted operators at Coolidge AZ / Phoenix AZ",
+          "signal_direction": "0 Nikola-named EPA facilities + no permitted entity at the Coolidge claimed location = scope contradiction vs the on-site-production claim",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "DOE Hydrogen Program annual progress reports + IEA Hydrogen TCP database",
+          "endpoint_or_method": "DOE Hydrogen and Fuel Cell Technologies Office Annual Progress Reports + IEA Hydrogen Technology Collaboration Programme database — search for Nikola-operated electrolyzer projects 2018-2020",
+          "rationale": "Multi-MW electrolyzer deployments are publicly tracked in DOE annual progress reports and IEA's H2-deployment database. Real industrial-scale electrolyzer commissioning leaves a trail in industry trade press + DOE-funded site reports. Absence cross-checks the operational-capacity precondition.",
+          "expected_observable": "Nikola appearances in DOE H2 progress reports + IEA H2 deployment registry",
+          "signal_direction": "0 mentions = consistent with pre-construction / vaporware status of the on-site-production capability",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "EIA Form 860 large-load interconnection registry",
+          "endpoint_or_method": "EIA Form 860 large-load (industrial customer) registry + state PSC interconnection filings for Pinal County AZ — multi-MW electrolyzer is an EIA-reportable industrial load",
+          "rationale": "A 100+ MW solar-to-electrolyzer site at Coolidge AZ would require utility-scale interconnection filings with APS or SRP and would show up in EIA Form 860. Operational-capacity test on the implied electricity load.",
+          "expected_observable": "Pinal County AZ industrial load growth + Nikola/JV interconnection request status",
+          "signal_direction": "no Pinal County industrial-scale interconnection request pre-cutoff = operational-capacity gap",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "energy_utilities",
+      "claim_type_taxonomy": "production_count_generation",
+      "extraction_notes": "GAP cell — no canonical hydrogen-production-capacity connector in catalog. NREL alt-fuel-stations is the closest catalog source (counts operating H2 stations), used here as fallback. The on-site-electrolysis claim is forward-looking; the testable precondition is whether Nikola has any operating H2 station today (which NREL can check). Creative extensions invited on EPA FRS, DOE progress reports, EIA Form 860 — all operational-capacity tests for industrial-scale electrolyzer deployment."
+    },
+    {
+      "claim_id": "NKLA-4",
+      "claim_text": "Nikola plans to begin construction in Q3 2020 of an approximately 1 million square foot battery-electric and hydrogen fuel cell electric truck manufacturing plant in Coolidge, Arizona, with Phase 1 to be completed by end of 2021 (capacity 5,000 units/year).",
+      "source_quote": "In the third quarter of 2020, we plan to begin construction of the initial phase of its approximately 1 million square foot battery-electric and hydrogen fuel cell electric truck manufacturing plant in Coolidge, Arizona... Phase 1—Low Volume Production—up to 5,000 units per year... Phase 1 of the greenfield manufacturing facility will be completed by the end of 2021, and we expect to start BEV production at the facility in 2022 and FCEV production in 2023.",
+      "subject": "Nikola Corporation",
+      "predicate": "plans_to_construct_facility_at_location",
+      "object_value": "1 million sq ft truck mfg plant, Coolidge AZ, 5,000 units/year Phase 1",
+      "category": "physical_facility",
+      "referent_type": "geographic_area",
+      "m_source_status": "MAPPED",
+      "source_id": "osha_establishments.query_establishments",
+      "source_params": {
+        "company_name": "Nikola",
+        "state": "AZ",
+        "naics_prefix": "3361",
+        "match_mode": "word_boundary"
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "Pinal County AZ building permits + Coolidge city construction permits",
+          "endpoint_or_method": "Pinal County Building Safety Department permit search + City of Coolidge planning department permit registry — search 'Nikola' or parcel addresses near I-10 / I-8 interchange",
+          "rationale": "Construction of a 1M-sq-ft greenfield plant requires county and city building permits, ADEQ stormwater permits, and AZ ROC contractor permits. Pre-cutoff (2020-08-01) absence of any permit applications for the 1M-sq-ft Phase 1 construction would contradict the Q3 2020 construction-start claim.",
+          "expected_observable": "permits filed by Nikola or its contractors for Coolidge AZ industrial parcel",
+          "signal_direction": "0 permits filed Q1-Q2 2020 contradicts a Q3 2020 construction start; some grading/foundation permits = on-track",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "BLS QCEW Pinal County AZ NAICS 3361/3363 employment trajectory",
+          "endpoint_or_method": "bls_qcew.query_county_naics with fips5='04021' (Pinal County AZ), naics_prefix='3361', quarters spanning 2019-2020",
+          "rationale": "A 1M-sq-ft truck mfg facility implies hundreds-to-thousands of employees over 2021-2022. Pre-construction QCEW won't yet show employment yet but provides the denominator for later operational-scale plausibility checks.",
+          "expected_observable": "Pinal County 3361 employment base + establishment count",
+          "signal_direction": "baseline for post-cutoff operational verification of claimed 5,000 unit/yr capacity (1,000+ employee equivalent)",
+          "severity_if_contradiction": "UNVERIFIABLE"
+        },
+        {
+          "source_label": "ADEQ (Arizona Department of Environmental Quality) air permit registry",
+          "endpoint_or_method": "ADEQ Air Quality Permits database — search for Nikola at Coolidge AZ parcel; truck paint shop is a stationary source requiring an air permit before construction",
+          "rationale": "Paint/coating operations at vehicle mfg plants are regulated stationary air sources. ADEQ permit application must precede facility commissioning. Pre-cutoff lack of pending Nikola ADEQ application for Coolidge = construction-timeline divergence.",
+          "expected_observable": "Nikola Coolidge AZ ADEQ permit filings + status",
+          "signal_direction": "no pending air permit application by mid-2020 = behind schedule for 2022 BEV production",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Pinal County Assessor parcel record + parcel-purchase recording",
+          "endpoint_or_method": "Pinal County AZ Assessor parcel search for the 'parcel near I-10 / I-8 / rail spur' — confirm Nikola is owner of record",
+          "rationale": "Recorded ownership of the claimed parcel is the most direct test that Nikola actually controls a 1M-sq-ft buildable parcel at the stated location. Title-of-record discrepancies (e.g. parcel still owned by Pinal County or a developer optioned but not closed) reveal the actual stage.",
+          "expected_observable": "parcel APN, owner of record, deed date, parcel size",
+          "signal_direction": "Nikola not on title pre-cutoff = scope contradiction; recent purchase = on-track",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "autos_vehicles",
+      "claim_type_taxonomy": "facility_scope",
+      "extraction_notes": "Forward-looking facility claim. Q3 2020 construction start is just inside the cutoff window. OSHA is the canonical (taxonomy-cell) check for industrial-scale facility-scope but won't yet fire because pre-construction has no employees. Real diagnostic tests are county/state permits and parcel ownership — both PROPOSED creative extensions. Heuristic H1 caution: pre-revenue planned facility won't be in EPA FRS regardless of legitimacy, so EPA absence is not informative."
+    },
+    {
+      "claim_id": "NKLA-5",
+      "claim_text": "Nikola formed a joint venture, Nikola Iveco Europe B.V., with Iveco S.p.A. and CNH Industrial N.V. to jointly develop and manufacture cab-over BEV and FCEV trucks for sale in the European market.",
+      "source_quote": "In September 2019, Legacy Nikola partnered with Iveco S.p.A (\"Iveco\"), a subsidiary of CNH Industrial N.V. (\"CNHI\"), a leading European industrial vehicle manufacturing company. Together, we and Iveco are jointly developing cab over BEV and FCEV trucks for sale in the European market, which will be manufactured through a 50/50 owned joint venture in Europe. In April 2020, Legacy Nikola and Iveco entered into a series of agreements which established the joint venture, Nikola Iveco Europe B.V. The joint venture with Iveco provides us with the manufacturing infrastructure to build BEV trucks for the North American market prior to the completion of our planned greenfield manufacturing facility in Coolidge, Arizona.",
+      "subject": "Nikola Corporation",
+      "predicate": "formed_joint_venture_with",
+      "object_value": "Iveco S.p.A. / CNH Industrial N.V., 50/50 JV named 'Nikola Iveco Europe B.V.'",
+      "category": "partnership",
+      "referent_type": "entity",
+      "m_source_status": "MAPPED",
+      "source_id": "edgar_fts.query_fulltext",
+      "source_params": {
+        "search_term": "Nikola",
+        "cutoff_date": "2020-08-01",
+        "start_date": "2019-01-01",
+        "forms": "10-K,10-Q,8-K,20-F,40-F"
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "CNH Industrial N.V. 20-F filings disclosure of the Nikola JV",
+          "endpoint_or_method": "edgar_fts.query_fulltext search_term='Nikola' restricted to CNH Industrial's CIK (CIK 0001483643) over 2019-2020 + Iveco S.p.A. disclosures",
+          "rationale": "CNHI is a foreign private issuer that filed 20-F with SEC pre-cutoff. A 50/50 JV with $250M+ committed contribution (Iveco contributed $100M in services + the Ulm plant) is material to CNHI and would be in 20-F segment disclosures. Cross-check whether CNHI's own filings confirm the JV terms and contribution magnitudes the S-1 asserts.",
+          "expected_observable": "count of CNHI 20-F / 6-K filings mentioning Nikola + the JV; specific contribution figures",
+          "signal_direction": "0 mentions across CNHI's 2019-2020 filings would contradict the JV claim; matching contribution figures = corroborates",
+          "severity_if_contradiction": "SEVERE"
+        },
+        {
+          "source_label": "Netherlands KVK (Kamer van Koophandel) Chamber of Commerce registry",
+          "endpoint_or_method": "KVK Netherlands business register search for 'Nikola Iveco Europe B.V.' — confirm entity formation, registered address, shareholders, formation date",
+          "rationale": "The JV is incorporated as a Dutch B.V. KVK is the Netherlands national business registry; any real B.V. registers there with public formation date and shareholding structure. A claimed April 2020 JV formation must show up in KVK by mid-2020.",
+          "expected_observable": "KVK entity record with name 'Nikola Iveco Europe B.V.', formation date, ultimate beneficial owners",
+          "signal_direction": "no KVK record = severe entity-existence contradiction; KVK record with April 2020 formation date = corroborates",
+          "severity_if_contradiction": "SEVERE"
+        },
+        {
+          "source_label": "Iveco / CNHI Ulm plant + Nikola Tre prototype trade-press appearances",
+          "endpoint_or_method": "Trade-press archive search (Trucking Info, FleetOwner, Transport Topics, Heavy Duty Trucking, IVECO press releases) for 'Nikola Tre' + Ulm Germany 2019-2020",
+          "rationale": "A real European JV manufacturing Nikola Tre at Ulm would have associated trade-press coverage (factory tours, prototype reveals, IVECO IAA-show announcements). Multi-month silence in industry trade press contradicts the JV scope.",
+          "expected_observable": "count of trade-press mentions of Nikola Tre + Ulm 2019-2020",
+          "signal_direction": "rich trade-press footprint = real JV; sparse footprint = soft contradiction",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "autos_vehicles",
+      "claim_type_taxonomy": "commercial_customer",
+      "extraction_notes": "Iveco/CNHI is a real European industrial group (not a US megacap) and CNHI is SEC-registered as a foreign private issuer (20-F). Edgar fulltext with the CNHI CIK is the cleanest catalog test for counterparty corroboration. Heuristic H7 does NOT strongly apply because CNHI is the kind of size-appropriate JV partner whose 20-F would disclose a 50/50 JV. CNHI 20-F silence on the JV would be a hard contradiction. KVK Dutch business register is the cleanest entity-existence test for the JV entity itself (creative extension, no catalog connector)."
+    },
+    {
+      "claim_id": "NKLA-6",
+      "claim_text": "Nikola has supplier and development agreements with the Bosch Entities (Robert Bosch LLC, Robert Bosch Battery Systems LLC, Robert Bosch Automotive Steering LLC) covering e-Axle, battery pack, steering and vehicle-level support for Nikola's Truck and UTV platforms. Bosch's affiliate Nimbus Holdings is a >5% shareholder.",
+      "source_quote": "Battery\") and Robert Bosch Automotive Steering, LLC (\"Bosch Steering\") (collectively with Bosch and Bosch Battery, the \"Bosch Entities\"). Robert Bosch GmbH is... parent company of the Bosch Entities, and Nimbus is an affiliate of Robert Bosch GmbH. Since 2017, Legacy Nikola entered into the following agreements with the Bosch Entities... for both Legacy Nikola's UTV and Truck vehicle platforms... System for Legacy Nikola's Alpha Nikola Two FCEV truck... battery pack for the Alpha Nikola Two FCEV truck... Electro-Hydraulic Steering Pump System (\"EHPS\")... and provide vehicle level support in numerous areas, including functional safety, electrical architecture, body control module, cybersecurity, tank control unit, central gateway unit, anti-lock braking, and highly automated driving studies. Nimbus Holdings LLC is 100% owned by Robert Bosch LLC.",
+      "subject": "Nikola Corporation",
+      "predicate": "has_supplier_and_investor_relationship_with",
+      "object_value": "Robert Bosch (multiple subsidiaries), Nimbus Holdings >5% shareholder",
+      "category": "partnership",
+      "referent_type": "entity",
+      "m_source_status": "MAPPED",
+      "source_id": "sec_filings.list_filings_by_form",
+      "source_params": {
+        "cik": "0001731289",
+        "forms": ["SC 13D", "SC 13G", "SC 13D/A", "SC 13G/A"],
+        "cutoff_date": "2020-08-01",
+        "start_date": "2020-06-01",
+        "limit": 25
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "Bosch GmbH annual report + Bosch sustainability report named-partnership scan",
+          "endpoint_or_method": "Bosch Group public annual reports (Bosch.com investor relations) + corporate fact-book — text-search for 'Nikola' across 2018-2020 annual reports",
+          "rationale": "Bosch's public annual report typically names major customer and joint-development partners by name when material. Bosch is private (not SEC-registered), but its annual report is a public document. Multi-year omission of Nikola from Bosch's corporate report despite a >5% equity stake and multi-program supplier engagement = soft inflation signal.",
+          "expected_observable": "mentions of Nikola in Bosch annual report 2018-2020",
+          "signal_direction": "0 mentions across 3 annual reports = soft inflation; named mentions = corroborate",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "USPTO patent co-assignment search Bosch + Nikola",
+          "endpoint_or_method": "uspto_odp.query_assignee with assignee_name='Nikola Corp' cross-referenced with Bosch-assigned patents 2017-2020 — look for co-assignment or co-inventorship",
+          "rationale": "Multi-year deep-engineering collaborations (e.g. e-Axle development) typically leave a patent-IP trail of jointly-filed inventions. Absence of joint patent filings despite the claimed depth of Bosch's vehicle-level engineering support is a soft signal.",
+          "expected_observable": "count of joint Bosch-Nikola patent applications + co-inventorship records",
+          "signal_direction": "0 joint patents = soft signal that engineering collaboration is shallower than claimed",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Robert Bosch LLC EPA / OSHA inspection records at Farmington Hills MI",
+          "endpoint_or_method": "osha_establishments.query_establishments with company_name='Robert Bosch' state='MI' — confirm Bosch operational presence",
+          "rationale": "This is a corroboration that the Bosch counterparty is a real US operating company (it is), not a fabricated counterparty. Bosch's Farmington Hills MI HQ is in OSHA's establishment registry. This is a baseline counterparty-existence check.",
+          "expected_observable": "Bosch establishment record at 38000 Hills Tech Dr, Farmington Hills MI",
+          "signal_direction": "Bosch in OSHA registry = baseline counterparty-existence verified",
+          "severity_if_contradiction": "UNVERIFIABLE"
+        }
+      ],
+      "domain": "autos_vehicles",
+      "claim_type_taxonomy": "supply_chain",
+      "extraction_notes": "Bosch is a private company (not SEC-registered), so counterparty 10-K disclosure check is unavailable. However, Nimbus Holdings LLC (Bosch affiliate) holds >5% of Nikola, which triggers SEC Schedule 13G filing requirements. sec_filings.list_filings_by_form is mapped to verify the 13G/D filings exist and corroborate the >5% stake disclosed in the S-1. The supplier/development scope itself is harder to test pre-cutoff — joint patents (USPTO) and Bosch annual report mentions are the cleanest creative extensions."
+    },
+    {
+      "claim_id": "NKLA-7",
+      "claim_text": "Hanwha Q Cells is Nikola's exclusive solar panel provider (to third-party solar farm developers), generating clean electricity for renewable hydrogen production. Hanwha-affiliated Green Nikola Holdings is a >5% shareholder.",
+      "source_quote": "Hanwha Q Cells is Nikola's exclusive solar panel provider (to third-party solar farm developers), which will help generate the clean electricity that is critical to the production of renewable hydrogen... Green Nikola Holdings LLC has two members, Hanwha General Chemical USA Corp. and Hanwha Energy USA Holdings Corp., which also share voting and investment power over the shares.",
+      "subject": "Nikola Corporation",
+      "predicate": "has_exclusive_supplier_relationship_with",
+      "object_value": "Hanwha Q Cells (solar panels); Green Nikola Holdings (Hanwha affiliate) >5% shareholder",
+      "category": "partnership",
+      "referent_type": "entity",
+      "m_source_status": "MAPPED",
+      "source_id": "sec_filings.list_filings_by_form",
+      "source_params": {
+        "cik": "0001731289",
+        "forms": ["SC 13D", "SC 13G", "SC 13D/A", "SC 13G/A"],
+        "cutoff_date": "2020-08-01",
+        "start_date": "2020-06-01",
+        "limit": 25
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "Hanwha Solutions / Hanwha Q Cells annual sustainability report partnership disclosures",
+          "endpoint_or_method": "Hanwha Solutions Korean stock-exchange (KOSPI) public disclosures + Hanwha Q Cells America corporate communications — text-search for 'Nikola' 2018-2020",
+          "rationale": "An exclusive solar-supply relationship is a marketing-material assertion that Hanwha would normally cite in its own product launch / investor communications. Korean Hanwha Group disclosures (DART system) would surface a material supply relationship.",
+          "expected_observable": "Hanwha disclosures mentioning Nikola as customer or partner",
+          "signal_direction": "0 mentions = soft inflation; named mention = corroborates",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "EIA Form 860 / EPA solar-installation registry for Nikola-affiliated solar farm projects",
+          "endpoint_or_method": "EIA Form 860 solar generator registry + state PSC interconnection queue for any Nikola or Nikola-customer-affiliated solar farm using Hanwha Q Cells modules",
+          "rationale": "If 'third-party solar farm developers' have actually deployed Hanwha Q Cells solar panels to power Nikola hydrogen stations, those installations should appear in EIA Form 860 or state interconnection queues. Operational-capacity test for the renewable-electricity supply chain.",
+          "expected_observable": "list of utility-scale solar installations using Hanwha modules tied to Nikola fueling infrastructure",
+          "signal_direction": "0 Nikola-tied solar installations using Hanwha modules pre-cutoff = aspirational only",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "DART (Korean Financial Supervisory Service) Hanwha Solutions disclosure filings",
+          "endpoint_or_method": "DART Korea search for Hanwha Solutions / Hanwha Energy USA — material US partnership disclosures 2018-2020",
+          "rationale": "Korean Hanwha Group entities file material-event disclosures with DART. An exclusive global solar-supply deal with a publicly-listed US OEM would normally appear. Korean-regulator absence + SEC-side absence = soft inflation signal.",
+          "expected_observable": "DART filings mentioning Nikola",
+          "signal_direction": "0 DART filings cross-referencing Nikola = soft inflation",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "autos_vehicles",
+      "claim_type_taxonomy": "supply_chain",
+      "extraction_notes": "Hanwha is private (in the US) but Hanwha Solutions is publicly-traded on KOSPI; primary disclosure registry is DART (Korean FSS), not EDGAR. SEC-side test is limited to the Schedule 13G filings for the >5% Green Nikola stake. Creative extensions on DART + EIA Form 860 invited for foreign-counterparty cross-check. Heuristic H9 caution: foreign-jurisdiction counterparty's domestic disclosure cadence is not in catalog and the absence inference is weaker."
+    },
+    {
+      "claim_id": "NKLA-8",
+      "claim_text": "Nikola intends to start BEV production at the Coolidge AZ greenfield facility in 2022 and FCEV production in 2023, with significant Nikola Two FCEV deliveries not expected to begin until 2023.",
+      "source_quote": "We believe that we will continue to incur operating and net losses each quarter until at least the time we begin significant deliveries of our trucks, which is not expected to begin until 2021 for our Nikola Tre BEV and 2023 for our Nikola Two FCEV, and may occur later... Phase 1 of the greenfield manufacturing facility will be completed by the end of 2021, and we expect to start BEV production at the facility in 2022 and FCEV production in 2023.",
+      "subject": "Nikola Corporation",
+      "predicate": "targets_production_start",
+      "object_value": "2021 Nikola Tre BEV (at Iveco Ulm), 2022 BEV Coolidge, 2023 FCEV Coolidge / Nikola Two FCEV deliveries",
+      "category": "regulatory_milestone",
+      "referent_type": "time_period",
+      "m_source_status": "MAPPED",
+      "source_id": "nhtsa.query_manufacturer",
+      "source_params": {
+        "name": "Nikola"
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "EPA Vehicle Certification + CARB Engine Family Listings (heavy-duty vehicle CoC)",
+          "endpoint_or_method": "EPA Vehicle and Engine Certification database for heavy-duty engine families + CARB executive orders for zero-emission powertrain certifications — search 'Nikola' as applicant 2019-2020",
+          "rationale": "Class-8 truck sales in the US require an EPA CoC for the engine family/powertrain (heavy-duty rule) and CARB EO for zero-emission credit. A 2021 BEV production start would require pending CoC and EO applications at least 12-18 months prior (i.e. by mid-2020). Absence pre-cutoff = behind schedule.",
+          "expected_observable": "Nikola EPA CoC and CARB EO filings 2019-2020",
+          "signal_direction": "no CoC or EO application by mid-2020 = behind 2021 production schedule",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Iveco Ulm Germany factory trade-press + plant tour coverage",
+          "endpoint_or_method": "European trade press (Automobilwoche, KFZ-Anzeiger, Eurotransport.de) for Nikola Tre prototype Ulm-plant tours 2019-2020",
+          "rationale": "A 2021 production-start at Iveco's Ulm facility would normally be preceded by plant tours, line installations, and supplier-day events in 2020. Trade-press silence on Nikola Tre at Ulm = behind schedule.",
+          "expected_observable": "count of trade-press articles citing Nikola Tre + Ulm 2020",
+          "signal_direction": "very sparse trade-press footprint = behind schedule",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "autos_vehicles",
+      "claim_type_taxonomy": "production_count",
+      "extraction_notes": "NHTSA vPIC base-brand manufacturer registration (just 'Nikola') is the canonical OEM-existence check. Production-count itself is inherently a post-cutoff measurement. Pre-cutoff diagnostic tests are NHTSA registration + EPA / CARB engine-certification preparedness (creative extension, no catalog connector for EPA HD CoC). Heuristic H3 caution: filing accurately describes itself as pre-production, so don't fire H3 — but operational-capacity preconditions (CoC, plant tooling) can still be probed."
+    },
+    {
+      "claim_id": "NKLA-9",
+      "claim_text": "Nikola has core technology and intellectual property protected by a combination of patents, trade secrets, employee/third-party NDAs, copyrights, trademarks, and IP licenses; multiple patent applications are pending.",
+      "source_quote": "Our success depends, at least in part, on our ability to protect our core technology and intellectual property. To accomplish this, we will rely on a combination of patents, trade secrets (including know-how), employee and third-party nondisclosure agreements, copyright, trademarks, intellectual property licenses and other contractual rights to establish and protect our rights in our technology... Our patent applications may not issue as patents...",
+      "subject": "Nikola Corporation",
+      "predicate": "holds_or_has_pending",
+      "object_value": "patents, patent applications, trade secrets, IP licenses",
+      "category": "technology",
+      "referent_type": "intangible",
+      "m_source_status": "MAPPED",
+      "source_id": "uspto_odp.query_assignee",
+      "source_params": {
+        "assignee_name": "Nikola",
+        "cutoff_date": "2020-08-01",
+        "categorize": {
+          "hydrogen_fuel_cell": ["hydrogen", "fuel cell", "electrolyz"],
+          "battery_powertrain": ["battery", "powertrain", "e-axle", "drivetrain"],
+          "vehicle_systems": ["vehicle", "truck", "chassis"]
+        }
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "USPTO trademark registry for Nikola Two / Nikola Tre / Nikola Badger / Nikola Powersports",
+          "endpoint_or_method": "USPTO TESS trademark search for the brand names Nikola asserts: 'Nikola Two', 'Nikola Tre', 'Nikola Badger', 'Nikola Powersports'",
+          "rationale": "Trademark registration cadence is a complementary operational-stage check. A legitimate multi-product OEM should hold registered or pending US trademarks for its named product lines. Absence is suggestive of marketing-only product names.",
+          "expected_observable": "count of registered and pending trademarks per product line",
+          "signal_direction": "no pending trademarks for the named product lines = soft inflation signal on the product portfolio",
+          "severity_if_contradiction": "UNVERIFIABLE"
+        },
+        {
+          "source_label": "European Patent Office (EPO) and WIPO PCT patent filings",
+          "endpoint_or_method": "Espacenet / WIPO Patentscope assignee search for Nikola Corp and Bluegentech LLC (pre-conversion name) 2015-2020",
+          "rationale": "A real US-EU OEM with claimed deep engineering would file PCT/EPO applications for its core hydrogen and electrification IP. Cross-jurisdiction patent filings are a cleaner proxy for R&D depth than USPTO-only count.",
+          "expected_observable": "EPO / WIPO PCT applications by Nikola Corp and Bluegentech LLC",
+          "signal_direction": "very sparse EPO/PCT footprint = R&D depth shallower than claimed",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "autos_vehicles",
+      "claim_type_taxonomy": "patents_ip",
+      "extraction_notes": "Boilerplate IP claim, but the categorize buckets directly test whether Nikola's patent portfolio supports the specific hydrogen + powertrain technology claims it markets. Asymmetric: presence of multi-bucket patents = strong, absence is weakly suggestive (patents can be filed under inventor names or trade secret).",
+      "operational_capacity_check": "Patent portfolio depth is a corroborative R&D-fingerprint test. A pre-revenue truck OEM claiming deep proprietary technology with <10 granted patents at this stage diverges from the implied technology footprint."
+    },
+    {
+      "claim_id": "NKLA-10",
+      "claim_text": "Nikola has key supplier and development partners including AVL, Meritor, WABCO, EDAG, Mahle, and Nel (in addition to Iveco and Bosch).",
+      "source_quote": "leverage. Nikola's key partners include Iveco, AVL, Meritor, Bosch, WABCO, EDAG, Mahle, Nel, and others. Nikola believes the expertise and know-how of these partners broaden Nikola's executional capability, reduce time to market, and solidify Nikola's technological leadership.",
+      "subject": "Nikola Corporation",
+      "predicate": "has_supplier_partnerships_with",
+      "object_value": "AVL, Meritor, WABCO, EDAG, Mahle, Nel (and Iveco, Bosch)",
+      "category": "partnership",
+      "referent_type": "entity",
+      "m_source_status": "PROPOSED",
+      "source_id": null,
+      "source_params": {},
+      "proposed_connector": {
+        "name": "edgar_fts.counterparty_partnership_scan",
+        "description": "Multi-counterparty edgar fulltext partnership-scan helper that takes a list of named counterparties and runs an edgar_fts query against each public counterparty's filings looking for the focal company name; consolidates results into a per-counterparty hit table.",
+        "endpoint": "wrapper over edgar_fts.query_fulltext + a name-to-CIK resolver",
+        "access_pattern": "api",
+        "auth_required": false,
+        "sample_invocation": "scan(focal='Nikola', counterparties=['Meritor','Mahle','WABCO','Nel ASA'], cutoff='2020-08-01')",
+        "rationale": "Multi-partner supplier-name lists are common in pre-revenue SPAC filings. Existing edgar_fts requires one call per CIK; a multi-counterparty wrapper would scale this test efficiently. Public counterparties (Meritor MTOR, Nel ASA on Oslo Bors, AVL private) get cross-checked for any mention of the focal company.",
+        "estimated_cost": "free",
+        "completeness": "SEC EDGAR-registered counterparties only; private counterparties (AVL, EDAG, Mahle) need other registries",
+        "referent_type": "filing",
+        "attribute": "counterparty_partnership_mention"
+      },
+      "creative_extensions": [
+        {
+          "source_label": "Meritor (MTOR) 10-K customer disclosure scan",
+          "endpoint_or_method": "edgar_fts.query_fulltext with search_term='Nikola' cik=0001113256 (Meritor) over 2018-2020",
+          "rationale": "Meritor is SEC-registered (MTOR, before its 2022 Cummins acquisition). A material supplier relationship with a publicly-listed OEM customer should surface in Meritor's customer-segment commentary. Absence of any Nikola mention in MTOR pre-cutoff 10-K = soft inflation signal on the depth of the relationship.",
+          "expected_observable": "count of MTOR filings mentioning Nikola",
+          "signal_direction": "0 mentions = soft inflation; named mention = corroborates",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Nel ASA (Oslo Bors) public disclosures for Nikola hydrogen-electrolyzer orders",
+          "endpoint_or_method": "Oslo Bors / Newsweb search for Nel ASA 2018-2020 press releases / quarterly reports — text-search for 'Nikola'",
+          "rationale": "Nel ASA is the publicly-listed Norwegian hydrogen-electrolyzer manufacturer. A real electrolyzer-supply relationship for Nikola's hydrogen-production claims would surface in Nel's regulatory disclosures and order-book press releases.",
+          "expected_observable": "Nel ASA press releases mentioning Nikola + order values",
+          "signal_direction": "named orders = strong corroboration; 0 mentions = soft inflation on the supplier list",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "USPTO patent co-assignment search for the named supplier list",
+          "endpoint_or_method": "uspto_odp.query_assignee cross-tab Nikola + each named supplier",
+          "rationale": "Deep development partnerships often produce joint patent applications. Sparse joint-assignment footprint with claimed deep-engineering partners is a soft signal.",
+          "expected_observable": "joint patents Nikola + each named supplier",
+          "signal_direction": "0 joint patents across the entire claimed supplier list = soft inflation",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "autos_vehicles",
+      "claim_type_taxonomy": "supply_chain",
+      "extraction_notes": "Multi-counterparty supplier list. Most supplier counterparties (AVL, EDAG, Mahle) are private and not SEC-registered. Meritor and Nel ASA are publicly-listed and individually testable. A dedicated 'multi-counterparty partnership-scan' wrapper would streamline the per-counterparty fulltext cross-check. Marked PROPOSED + extensive creative extensions to capture the most testable individual counterparties."
+    },
+    {
+      "claim_id": "NKLA-11",
+      "claim_text": "Trevor R. Milton (Executive Chairman / former CEO) beneficially owns 91,602,734 shares (25.4%) of Nikola Common Stock through M&M Residual, LLC.",
+      "source_quote": "Trevor R. Milton(1)(2)(3) 91,602,734 25.4 ... M&M Residual, LLC(1) 91,602,734 25.4 ... Consists of 91,602,734 shares held by M&M Residual, LLC, which includes 3,158,949 shares subject to options held by certain employees pursuant to the Founder Stock Option Plan. M&M Residual, LLC is wholly-owned by Trevor A. Milton.",
+      "subject": "Trevor R. Milton",
+      "predicate": "beneficially_owns_share_count",
+      "object_value": "91,602,734 shares (25.4%) via M&M Residual LLC",
+      "category": "vendor_relationship",
+      "referent_type": "person",
+      "m_source_status": "MAPPED",
+      "source_id": "sec_filings.list_filings_by_form",
+      "source_params": {
+        "cik": "0001731289",
+        "forms": ["3", "4", "5", "SC 13D", "SC 13G", "SC 13D/A", "SC 13G/A"],
+        "cutoff_date": "2020-08-01",
+        "start_date": "2020-06-01",
+        "limit": 50
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "Form 4 insider transaction cadence + Form 144 sale notices (post-cutoff watch)",
+          "endpoint_or_method": "sec_filings.list_filings_by_form with forms=['4','144'] for CIK 0001731289 in a post-cutoff window",
+          "rationale": "Concentrated insider ownership (25.4% with sole voting + dispositive power) is a baseline structural fact. Forward-looking risk is whether the insider begins selling immediately on lock-up expiration or under 10b5-1 plans — a Form 4/144 cadence test would surface this.",
+          "expected_observable": "Milton Form 4/144 filing cadence",
+          "signal_direction": "abnormally rapid insider selling on lock-up expiration = governance risk signal",
+          "severity_if_contradiction": "UNVERIFIABLE"
+        },
+        {
+          "source_label": "Related-party transaction disclosure scan in subsequent 10-Q / DEF 14A",
+          "endpoint_or_method": "claim_evolution.query_claim_evolution with search_term='Milton' for CIK 0001731289 over 2020-2021",
+          "rationale": "Related-party transactions involving Milton (the S-1 disclosed solar installation services and reimbursements to Zero Emission Expedition LLC) should continue to be disclosed in subsequent 10-Q / DEF 14A. Disappearance or amendment is a soft governance signal.",
+          "expected_observable": "subsequent filing mentions of Milton-related transactions",
+          "signal_direction": "SILENT_POST_CLAIM = potential undisclosed restatement; REAFFIRMED = on-track disclosure",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "autos_vehicles",
+      "claim_type_taxonomy": "financial_distress",
+      "extraction_notes": "Founder/insider 25.4% ownership is a real beneficial-ownership fact directly verifiable from the company's own Schedule 13G / DEF 14A / Form 3 filings. SEC filings list is the canonical verification path. The claim is a structural-ownership disclosure; the framework's role is to confirm via Schedule 13G/Form 3 corroboration and watch for divergent Form 4 cadence post-cutoff. Note: pre-cutoff, no fraud allegation exists — claim is treated as a neutral disclosure to be corroborated, not adjudicated as fraudulent."
+    },
+    {
+      "claim_id": "NKLA-12",
+      "claim_text": "Nikola has accumulated $188.5 million in operating losses through December 31, 2019 and has not generated material revenues from operations; cash flow from operations will not turn positive until significant truck deliveries begin (not expected until 2021 for Tre BEV / 2023 for Two FCEV).",
+      "source_quote": "$188.5 million from our inception through December 31, 2019. We believe that we will continue to incur operating and net losses each quarter until at least the time we begin significant deliveries of our trucks, which is not expected to begin until 2021 for our Nikola Tre BEV and 2023 for our Nikola Two FCEV, and may occur later.",
+      "subject": "Nikola Corporation",
+      "predicate": "reports_accumulated_loss_pre_revenue",
+      "object_value": "$188.5M accumulated loss through 12/31/2019; pre-revenue until 2021+",
+      "category": "financial_distress",
+      "referent_type": "amount",
+      "m_source_status": "MAPPED",
+      "source_id": "ucc_proxy.query_ucc_exposure",
+      "source_params": {
+        "cik": "0001731289",
+        "cutoff_date": "2020-08-01",
+        "window_months": 36
+      },
+      "proposed_connector": null,
+      "creative_extensions": [
+        {
+          "source_label": "Post-PIPE cash runway watch via claim_evolution",
+          "endpoint_or_method": "claim_evolution.query_claim_evolution with search_term='going concern' for CIK 0001731289 over 2020-2023",
+          "rationale": "Pre-revenue OEM with $188.5M accumulated losses and Q1-2020 burn rate of ~$22M/quarter, even post-PIPE $710.9M net proceeds, has ~12 quarters of runway. Subsequent filings tracking going-concern language are the direct forward indicator. SILENT vs REAFFIRMED on going-concern cadence is the diagnostic.",
+          "expected_observable": "going-concern mentions in subsequent 10-Q / 10-K filings",
+          "signal_direction": "early reappearance of going-concern qualifier = distress signal",
+          "severity_if_contradiction": "MODERATE"
+        },
+        {
+          "source_label": "Issuance cadence on ATM, follow-on, convertible note filings",
+          "endpoint_or_method": "sec_filings.list_filings_by_form with forms=['424B','S-3','S-3ASR'] for CIK 0001731289 over 2020-2023",
+          "rationale": "Pre-revenue burn typically leads to repeated equity issuance after the SPAC PIPE is exhausted. Multiple S-3 ATM filings + 424B5 supplements after 2020 = distress fingerprint.",
+          "expected_observable": "count of S-3 / 424B issuance filings post-2020",
+          "signal_direction": "high cadence = distress fingerprint",
+          "severity_if_contradiction": "MODERATE"
+        }
+      ],
+      "domain": "autos_vehicles",
+      "claim_type_taxonomy": "financial_distress",
+      "extraction_notes": "Pre-PIPE $188.5M accumulated loss + $710.9M PIPE proceeds = financial-stage baseline. ucc_proxy.query_ucc_exposure is the canonical-cell test for distress-cluster fingerprint via SEC 8-K Item 2.03 + 10-K secured-debt mentions. Pre-cutoff (2020-08-01), Nikola just closed PIPE and has ~$800M cash — distress fingerprint is at LOW level pre-cutoff. The test is whether multi-quarter forward issuance + going-concern language cluster fires (Heuristic H10). Single 8-K events should NOT fire H10 in isolation."
+    }
+  ]
+}

@@ -1,0 +1,105 @@
+{
+  "ticker": "OKLO",
+  "cutoff": "2026-05-16",
+  "filing": "0001628280-26-018698_10-K.txt",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Jan 2026 Prepayment Agreement with Meta Platforms to develop a 1.2 GW power campus in Pike County, OH.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["edgar_fts.query_fulltext(cik=Meta 0001326801, term=Oklo, start=2025-01-01) -> total_hits=0"],
+      "M_check": "Meta SEC filings search for 'Oklo' yields 0 hits since 2025-01-01 (Heuristic 7 — counterparty-disclosure threshold).",
+      "M_value": {"meta_filings_mentioning_oklo": 0, "agreement_signed_date": "2026-01-05", "filing_date": "2026-03-17"},
+      "interpretation": "The Prepayment Agreement is dated Jan 5, 2026. Meta has filed multiple 10-K/10-Q since then but does not yet mention Oklo by name. Under Heuristic 7, a real prepayment from a hyperscaler for 1.2 GW of nuclear power would likely be material to Meta. However, the deal is recent and the prepayment mechanism may not yet have triggered any disclosed cash flow on Meta's side, so MODE rather than RED. Watch list — counterparty corroboration absent. Also note: this is a 'prepayment / mechanism to advance powerhouse deployment', NOT a binding long-term PPA at fixed price. Classic Heuristic 3 (planned vs operational) stage gap — no powerhouse yet built or NRC-licensed."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Dec 2024 12 GW Master Power Agreement with Switch, Ltd., 'one of the largest corporate PPAs in history'.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["Switch is privately held (acquired by IFM/DigitalBridge 2022) - no SEC filings to corroborate, so Heuristic 7 limited", "Heuristic 3 - 'Master Power Agreement' framework deal, not firm PPA with delivery schedule"],
+      "M_check": "Counterparty-disclosure check unavailable (private). Apply Heuristic 3 with extra weight: 12 GW vs Oklo's installed base = 0 MW and no NRC license. 12 GW equals ~160 Aurora powerhouses; even Oklo's first-of-kind powerhouse is not yet built.",
+      "M_value": {"switch_public_filer": false, "magnitude_GW": 12, "oklo_installed_MW": 0, "nrc_licensed_units": 0},
+      "interpretation": "'Master Power Agreement' is a framework — not a binding PPA with specific MW/date/price commitments per the Heuristic 3 stage ladder. Magnitude (12 GW = ~160 reactors) is implausibly large versus Oklo's actual stage (no licensed unit; first INL Aurora not yet built). Marketing language ('one of the largest corporate PPAs in history') is hyperbolic relative to legal substance. Counterparty corroboration unavailable because Switch is private — UNVERIFIABLE on M-side, but framework discipline (planned vs operational) flags as MODE."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Non-binding LOIs with Equinix, Diamondback Energy, Prometheus Hyperscale.",
+      "severity": "PASS",
+      "supports": [
+        "edgar_fts.query_fulltext(cik=Equinix 0001101239, term=Oklo, start=2024-01-01) -> 0 hits",
+        "edgar_fts.query_fulltext(cik=Diamondback 0001539838, term=Oklo, start=2024-01-01) -> 0 hits",
+        "Filing self-discloses LOIs as 'non-binding'"
+      ],
+      "M_check": "Counterparty disclosure check: Equinix and Diamondback have not mentioned Oklo. Filing characterizes the LOIs as 'non-binding letters of intent' — disclosure is accurate to the stated stage.",
+      "M_value": {"equinix_oklo_mentions": 0, "diamondback_oklo_mentions": 0, "prometheus_hyperscale_public": false, "claim_disclosed_as_non_binding": true},
+      "interpretation": "Although counterparties don't corroborate, the claim itself is accurately staged as non-binding LOIs. Non-binding LOIs are below the materiality threshold for counterparty 10-K disclosure (Heuristic 7 calibration — only firm PPAs/offtake are material). The honest 'non-binding' framing differentiates from the puffier Switch MPA framing. PASS on accurate stage labeling."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Tentatively selected by U.S. Air Force for Eielson AFB Alaska.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending.query_dod_contracts(recipient='Oklo') -> 1 award, but to 'TOKLO TECHNOLOGIES, LLC' (cryptography) — substring collision, not Oklo Inc.",
+        "Effectively 0 DoD contracts to Oklo Inc.",
+        "Filing self-discloses as 'tentatively selected' and 'not finalized'"
+      ],
+      "M_check": "USAspending DoD search returns zero genuine Oklo Inc. awards. But the claim itself is accurately staged — 'tentatively selected, not finalized'. A 'tentative selection' is a pre-award notification and would not appear as a contract obligation in USAspending until finalized.",
+      "M_value": {"oklo_dod_contracts": 0, "false_positive_recipient": "TOKLO TECHNOLOGIES LLC (cryptography)", "claim_stage": "tentatively selected, not finalized"},
+      "interpretation": "Accurate staging. Eielson was a 2021-era Air Force notice of intent; no contract has materialized. Filing accurately captures status. Heuristic 10 analog — stage discipline preserved. PASS."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "DOE site use permit at INL secured; fuel award of 5 metric tons HALEU from recovered EBR-II uranium for first Aurora.",
+      "severity": "PASS",
+      "supports": [
+        "DOE site use permits are administrative actions at INL and would not appear in USAspending as contracts/grants — gap not failure (Heuristic 5).",
+        "DOE fuel allocations are in-kind transfers from the national lab system, not USAspending awards.",
+        "ARPA-E grants ($2.7M to Oklo Technologies) confirm an active DOE relationship.",
+        "Filing accurately stages as 'site use permit' (NOT NRC license) and 'fuel award' (NOT delivered fuel)."
+      ],
+      "M_check": "USAspending coverage gap on DOE intra-lab transfers and site permits noted (Heuristic 5). Filing carefully distinguishes DOE pathway (site use permit, fuel award) from NRC pathway (not yet licensed).",
+      "M_value": {"oklo_doe_grants_total": 2700000, "oklo_doe_contracts": 0, "ARPA_E_award_ids": ["DE-AR0001606", "DE-AR0001619", "DE-AR0001696"]},
+      "interpretation": "DOE INL site use permit and HALEU fuel allocation are standard DOE-program activities for advanced reactor partners; USAspending does not index these. PASS — claim stage is accurately disclosed."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Original NRC COLA filed March 2020 was denied without prejudice in 2022; updated COLA NOT yet resubmitted as of March 2026; only Phase I pre-app readiness completed July 2025.",
+      "severity": "PASS",
+      "supports": ["Filing self-discloses adverse facts honestly: prior denial, no resubmission, only Phase I readiness completed."],
+      "M_check": "ADAMS docket queries not in M-source catalog (Heuristic 5 — note as gap). Self-disclosure is fully candid about regulatory setback.",
+      "M_value": {"nrc_cola_filed_2020": true, "nrc_cola_denied_2022": true, "updated_cola_resubmitted": false, "phase_i_readiness_complete": "2025-07"},
+      "interpretation": "This is a textbook example of honest stage disclosure (Heuristic 3 / 10). The Aurora is at 'pre-application readiness' on the NRC ladder — many steps from 'license issued'. The 10-K does not claim NRC progress it does not have. PASS — disciplined disclosure of an adverse fact."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Aug 13, 2025: Oklo+Atomic Alchemy awarded 3 of 11 DOE Reactor Pilot Program (RPP) projects; Aurora-INL approved under DOE authorization pathway.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending.query_recipient_contracts(Atomic Alchemy) -> 0 awards",
+        "DOE RPP is a 2025-new program; OTA (Other Transaction Authority) awards often do not flow through USAspending in real time.",
+        "Filing distinguishes DOE pathway (authorization) from NRC pathway."
+      ],
+      "M_check": "USAspending shows 0 RPP contracts to either Oklo or Atomic Alchemy as of cutoff. However: (a) RPP is brand-new (announced June 2025), (b) DOE OTA / authorization vehicles often bypass the standard contract-tracking system, (c) filing characterizes as 'selected' and 'OTA executed' — not as cash flow. Gap rather than contradiction (Heuristic 5 + DOE-OTA wrinkle).",
+      "M_value": {"oklo_rpp_visible_in_usaspending": false, "atomic_alchemy_rpp_visible": false, "program_announcement_recency_months": 9},
+      "interpretation": "Selection under a newly-launched DOE pilot program with OTA mechanism is not expected to be visible in USAspending within 9 months. Existing ARPA-E hits confirm Oklo has real DOE-system relationships. PASS, with a note to revisit if a 10-K next year still shows no USAspending trace."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Multiple ARPA-E and DOE Technology Commercialization Fund (TCF) cost-share awards for recycling R&D.",
+      "severity": "PASS",
+      "supports": ["usaspending.query_recipient_grants(Oklo) -> 3 awards, all DE-AR* (ARPA-E prefix), total $2.7M to OKLO TECHNOLOGIES, INC."],
+      "M_check": "USAspending corroborates 3 ARPA-E grants to Oklo Technologies (DE-AR0001606 $140k, DE-AR0001619 $660k, DE-AR0001696 $1.9M).",
+      "M_value": {"arpa_e_awards_count": 3, "arpa_e_total_amount": 2700000, "award_ids": ["DE-AR0001606", "DE-AR0001619", "DE-AR0001696"]},
+      "interpretation": "Hard-corroborated. ARPA-E claim is true and consistent with USAspending. PASS."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "Holds US patents and pending applications across reactor / fuel / radioisotope technology areas.",
+      "severity": "PASS",
+      "supports": ["uspto_odp.query_assignee(Oklo) -> 28 total applications, 6 granted, all G21C (nuclear reactor) class"],
+      "M_check": "Per Heuristic 8: n_granted=6 >= 5 with on-topic CPC class (G21C — nuclear reactors) — PASS threshold met.",
+      "M_value": {"n_total_applications": 28, "n_granted": 6, "cpc_classes": ["G21C/15", "G21C/3", "G21C/19", "G21C/1", "G21C/7", "G21C/11", "G21C/21"], "all_nuclear_reactor_related": true},
+      "interpretation": "Six granted patents, all in G21C (nuclear reactors / fuel handling). Application count of 28 is consistent with a serious R&D effort. PASS."
+    }
+  ]
+}

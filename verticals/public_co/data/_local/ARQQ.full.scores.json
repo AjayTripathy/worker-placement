@@ -1,0 +1,77 @@
+{
+  "ticker": "ARQQ",
+  "scores": [
+    {
+      "claim_id": "ARQQ-1",
+      "claim_text": "Arqit's first U.S. Department of War contract is in partnership with a large, leading U.S. IT vendor.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": false,
+      "M_check": "Mode A: usaspending.query_dod_contracts(recipient='Arqit') returned n_awards=0, total=$0; query_federal_presence with name_variants ['Arqit','Arqit Limited','Arqit Quantum'] returned n_ueis_resolved=0, n_contracts=0, n_grants=0 with signal=INFLATION_SUSPECT. Mode B: edgar_fts(cik=Cisco/Juniper/Fortinet) all returned 0 hits; megacap_namecheck across 15 megacaps returned 0 hits anywhere.",
+      "M_value": {"usaspending_dod_awards": 0, "usaspending_dod_dollars": 0, "ueis_resolved": 0, "edgar_fts_cisco_hits": 0, "edgar_fts_juniper_hits": 0, "edgar_fts_fortinet_hits": 0, "megacap_hits_total": 0, "signal": "INFLATION_SUSPECT"},
+      "interpretation": "Foreign-issuer caveat (heuristic 2): a UK 20-F filer may legitimately route DoD work via a US prime, so 0 direct obligations under Arqit's name is not by itself RED. However, the claimed prime is unnamed AND no counterparty disclosure surfaces in any major US IT vendor (Cisco/Juniper/Fortinet) or megacap filing through cutoff — material name-suppression on a 'first DoD contract' is SEVE per heuristic 7."
+    },
+    {
+      "claim_id": "ARQQ-2",
+      "claim_text": "Arqit's largest license contract is multi-year through an IT vendor partner in the Middle East to government agencies of a major ME country.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": false,
+      "M_check": "Mode A: edgar_fts global search for 'Arqit' returns only Arqit's own 20-F/F-1/6-K and its SPAC Centricus — no counterparty filings reference the ME license. Mode B: usaspending.query_recipient_contracts returns 0 genuine awards (single hit is a name false-positive on 'CLYDE-HANCOCK, MARQITA'); ME license counterparty is unnamed and unverifiable from US registries.",
+      "M_value": {"edgar_fts_counterparty_named": null, "usaspending_arqit_awards": 0, "false_positive_only": true},
+      "interpretation": "ME government contract through a private IT-vendor channel is not generally visible in US federal registries — partial UNVERIFIABLE coverage gap. However the company also declines to name the IT vendor (which they could without breaching customer confidentiality) — MOD per heuristic 4/7."
+    },
+    {
+      "claim_id": "ARQQ-3",
+      "claim_text": "Arqit's encryption solution is patented and security-proof validated by GCHQ Centre at U. Surrey and PA Consulting.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "Mode A: uspto_odp.query_assignee('Arqit') returned n_total_applications=31, n_granted=17 pre-cutoff. Patents cover quantum key distribution, group key sharing, key distribution to proxy server, multi-algorithm bootstrapping, quantum cloud verification, single-photon transmission — directly on-thesis for symmetric-key / quantum-safe encryption. Mode B: 'Arqit Limited' variant returns the same 31/17 (so the UK subsidiary IS the canonical assignee — no hidden patent estate, no Nikola-style off-thesis pattern).",
+      "M_value": {"n_total_applications": 31, "n_granted": 17, "on_thesis": true, "uk_subsidiary_is_assignee": true},
+      "interpretation": "Patent claim CONFIRMED. 17 granted patents with claims directly in the quantum-key-distribution / symmetric-key area passes the heuristic-8 threshold (>=5 granted with claimed-category hit)."
+    },
+    {
+      "claim_id": "ARQQ-4",
+      "claim_text": "Arqit raised ~$37.18M FY2025 via ATM; F-3 ATM up to $75M filed Jan 2025.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "Mode A: sec_filings.list_filings_by_form returned 28 hits including F-3 (2026-01-12), multiple 424B5 (2026-01-26, 2025-09-15), and a steady cadence of 6-Ks. ATM mechanics confirmed on file. Mode B is captured under ARQQ-8 (insider behavior around raise/budget events).",
+      "M_value": {"n_capital_filings": 28, "F3_filed": true, "424B5_filed": true, "first_424B5_filing_date": "2025-09-15", "recent_F3_date": "2026-01-12"},
+      "interpretation": "Equity raise mechanics fully corroborated by EDGAR. Materiality/dilution is real but disclosure is clean."
+    },
+    {
+      "claim_id": "ARQQ-5",
+      "claim_text": "Prior-period error in IFRS 2 share-based payment accounting required retrospective restatement of FY2024 (+$2.237M) and FY2023 (+$4.134M) administrative expenses.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": true,
+      "M_check": "Mode A: claim_evolution(cik=ARQQ, search_term='restatement IFRS 2 material weakness', base_filing_date=2025-12-09) returns evolution_status=SILENT_POST_CLAIM with 0 subsequent mentions — restatement is acknowledged in the current 20-F but not echoed in subsequent filings (which is typical IFRS handling). Mode B: sec_filings.list_filings_by_form for ['20-F/A','NT 20-F'] from 2022 returned 0 — no amended filings or notifications of late filing. Restatement was handled in-line in the current 20-F rather than via a 20-F/A.",
+      "M_value": {"restatement_text_in_filing": true, "fy24_adjustment_M": 2.237, "fy23_adjustment_M": 4.134, "n_20FA": 0, "n_NT20F": 0, "claim_evolution_subsequent": 0},
+      "interpretation": "Restatement is real and material to retained earnings ($6.371M cumulative through FY24). As an IFRS filer there is no PCAOB-style ICFR opinion, but a $6M+ stock-based-payment understatement that persisted through multiple prior 20-Fs is a meaningful control-weakness signal. MOD rather than SEVE because it's been corrected in-line and is non-cash."
+    },
+    {
+      "claim_id": "ARQQ-6",
+      "claim_text": "NetworkSecure integrates with OEM platforms from Juniper, Fortinet, and Cisco.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": false,
+      "M_check": "Mode A: edgar_fts.query_fulltext(search_term='Arqit', cik=0000858877 Cisco) returned 0 hits; cik=0001043604 (Juniper) 0 hits; cik=0001262039 (Fortinet) 0 hits. Mode B: megacap_namecheck across 15 megacaps including all major US tech returned 0 hits anywhere.",
+      "M_value": {"cisco_hits": 0, "juniper_hits": 0, "fortinet_hits": 0, "megacap_hits": 0},
+      "interpretation": "Three named OEM integration partners (large public US tech companies) have ZERO disclosure of Arqit through cutoff. Per heuristic 7, when counterparty is large and claim is material this is SEVE. Note: 'integration with' could be one-way (Arqit builds to their published APIs), in which case the OEM has no obligation to disclose — that's why we don't escalate to RED."
+    },
+    {
+      "claim_id": "ARQQ-7",
+      "claim_text": "Compliant with NSA Commercial Solutions for Classified (CSfC) Symmetric Key Management Annex 3.0.",
+      "severity": "UNVERIFIABLE",
+      "supports": null,
+      "M_check": "Mode A: usaspending.query_dod_contracts('Arqit') = 0 (no DoD obligations that would reflect CSfC-aligned deployment). Mode B: sam_entity lookup requires explicit UEI which is not knowable from the filing; usaspending name-variant resolution yielded 0 UEIs (signal=INFLATION_SUSPECT).",
+      "M_value": {"dod_awards": 0, "ueis_resolved": 0},
+      "interpretation": "CSfC compliance is a product-architecture conformance claim, not an awarded certification of the company; absence in DoD obligations does not by itself disprove it. Genuine coverage gap — the NSA CSfC component list is not in the M-source catalog. Marked UNVERIFIABLE per heuristic 5 (source-jurisdiction mismatch)."
+    },
+    {
+      "claim_id": "ARQQ-8",
+      "claim_text": "Insider behavior around equity-raise and budget-event windows — CEO Leaver, CFO Pointon, CRO Feenan, COO Wilder, GC Willcocks transactions.",
+      "severity": "RED_FLAG_NEGATIVE",
+      "supports": false,
+      "M_check": "Mode A: sec_filings confirms heavy capital-raise cadence (F-3 Jan-2026, 424B5 Sep-2025 + Jan-2026, multiple 6-Ks). Mode B (CRITICAL): insider_vs_calendar.query_insider_sales_near_budget_events(cik='0001859690', window_days=14, start_date='2024-01-01', end_date='2026-05-20') returned signal=PROXIMATE_DISCRETIONARY with CFO Pointon selling 8 days before FY27 J-Book release 2026-04-28. Widening to window_days=30 returns signal=CLUSTERED_DISCRETIONARY: 7 discretionary (non-10b5-1) sales by 6 unique insiders — CEO Leaver, CFO Pointon, CRO Feenan, COO Wilder, GC Willcocks, and director Garth Ritchie — all sold between 2026-04-02 and 2026-04-20, i.e. -8 to -26 days BEFORE the FY27 J-Book release on 2026-04-28. None of the 7 sales were 10b5-1.",
+      "M_value": {"signal": "CLUSTERED_DISCRETIONARY", "n_discretionary_proximate": 7, "n_unique_owners": 6, "is_10b5_1_count": 0, "event_date": "2026-04-28", "event_type": "fy27_jbook_release", "owners": ["Leaver Andrew (CEO)", "Pointon Nicholas (CFO)", "Feenan Paul (CRO)", "Wilder Ben Simon (COO)", "Willcocks Patrick (GC)", "Ritchie Garth (Dir)"], "total_value_usd": 193749.29, "days_from_event_range": [-26, -8]},
+      "interpretation": "Per Two-Mode DD Discipline: CLUSTERED_DISCRETIONARY is the highest-signal Mode B flag → SEVE or RED. Five C-suite officers (CEO, CFO, CRO, COO, GC) plus an independent director clustering discretionary (non-10b5-1) sales within 30 days BEFORE the FY27 J-Book release — the very event that confirmed Tranche 3 Transport Layer unfunded for a second year and SDA dissolution — is a textbook informed-trader pattern. The pre-event sale window combined with a contemporaneous narrative claim of a 'first U.S. Department of War contract' that yields 0 USAspending obligations and 0 counterparty disclosure (ARQQ-1) escalates this to RED_FLAG_NEGATIVE."
+    }
+  ]
+}

@@ -1,0 +1,147 @@
+{
+  "ticker": "RTX",
+  "cutoff": "2024-09-01",
+  "filing": "0000101829-24-000008_10-K.txt",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Raytheon segment is the prime contractor on the Long Range Stand Off Weapon (LRSO), explicitly named as one of Raytheon's air-to-air/air-to-ground weapons portfolio anchors.",
+      "category": "jbook_program_pipeline",
+      "severity": "UNVERIFIABLE",
+      "supports": "short",
+      "M_check": "pentagon_jbook.query_program_funding(program_name=\"Long Range Stand Off Weapon\" | \"LRSO\" | \"AGM-181\")",
+      "M_value": "NOT_FOUND in all 3 lookups",
+      "interpretation": "LRSO (AGM-181) is the air-launched nuclear cruise missile replacing AGM-86B; per public DoD nuclear modernization plans it sits inside Air Force RDT&E (likely PE 0101127F or successor) and is largely classified. Our 410-PE J-Book corpus does not cover it. Per heuristic #7, NOT_FOUND for a major classified strategic program is a COVERAGE GAP, not a red flag. Treat as UNVERIFIABLE; do not penalize."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Pratt & Whitney is sole-source producer of the F135 engine for the F-35 Joint Program Office. In 2023 Pratt & Whitney booked $2.5 billion for F135 production plus $2.2 billion for F135 sustainment, making F135 the largest single program backlog booking in the segment.",
+      "category": "jbook_program_revenue",
+      "severity": "PASS",
+      "supports": "long",
+      "M_check": "pentagon_jbook.query_program_funding(pe_number=\"0604840F\" F-35 C2D2) + (program_name=\"F-35 Squadrons\" PE 0207142F)",
+      "M_value": "F-35 C2D2 FUNDED_STEADY ($1.237B FY24); F-35 Squadrons FUNDED_STEADY ($89M FY24); F135 itself NOT_FOUND (procurement line not in our corpus)",
+      "interpretation": "F-35 ecosystem RDT&E is fully funded at the cutoff. The F135 is the sole-source engine; absence of a TERMINATE/UNFUNDED signal across multiple F-35 PEs supports the claim that F135 backlog is real. USAspending DoD contracts for 'Pratt & Whitney' returned only 36 awards / $19.8M \u2014 substring noise (Pratt & Whitney Engine Services is the typical recipient name and FMS goes via Joint Program Office), not a verification miss. Backlog claim is consistent with the J-Book at the cutoff."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Pratt & Whitney is in the prototype phase of the Next Generation Adaptive Propulsion (NGAP) program for the U.S. Air Force, having booked $232 million in 2023 for the prototype phase \u2014 forward-looking exposure to NGAP-driven sixth-gen fighter propulsion.",
+      "category": "jbook_program_pipeline",
+      "severity": "PASS",
+      "supports": "long",
+      "M_check": "pentagon_jbook.query_program_funding(pe_number=\"0604010F\" Next Generation Adaptive Propulsion)",
+      "M_value": "FUNDED_STEADY at $573.8M FY24 (latest visible year at cutoff)",
+      "interpretation": "NGAP prototype phase is funded at the cutoff at substantial scale. Pratt's $232M booking is consistent with being one of two NGAP prototype primes (the other typically GE Aerospace). PASS at the cutoff. NOTE for future cutoff updates: the FY26 J-Book shows NGAP DECLINING from $574M to $507M (FY25) to $330M (FY26) as NGAD propulsion competition narrows \u2014 a forward concern post-cutoff but not visible to the framework at 2024-09-01 with cutoff filter applied."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Raytheon's strategic missile defense growth in 2023 was driven by the Next Generation Interceptor (NGI) program, an MDA program where Raytheon competes (as a Northrop Grumman team partner) against the Lockheed Martin team for the homeland missile defense interceptor.",
+      "category": "jbook_program_revenue",
+      "severity": "PASS",
+      "supports": "long",
+      "M_check": "pentagon_jbook.query_program_funding(pe_number=\"0604874C\" Improved Homeland Defense Interceptors) + (program_name=\"Next Generation Interceptor\")",
+      "M_value": "NGI by name NOT_FOUND; Improved Homeland Defense Interceptors (the MDA PE that funds NGI development) FUNDED_STEADY at $2.074B FY24",
+      "interpretation": "PE 0604874C (Improved Homeland Defense Interceptors) is the MDA RDT&E line that funds NGI; at the cutoff it is well-funded at over $2B/year. The claim that NGI drove Raytheon strategic-missile-defense growth is consistent with strong, growing MDA RDT&E. Note: Raytheon's NGI team partnership (with Northrop Grumman) competes against the Lockheed Martin team \u2014 the MDA was expected to down-select in FY25. The claim is a competitive-pipeline claim, not a booked-revenue claim; J-Book status supports the addressable opportunity."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Raytheon booked a contract to develop and produce Hypersonic Attack Cruise Missile (HACM) for the U.S. Air Force, with $408 million in 2023 bookings, as part of forward hypersonics pipeline.",
+      "category": "jbook_program_revenue",
+      "severity": "PASS",
+      "supports": "strong",
+      "M_check": "pentagon_jbook.query_program_funding(pe_number=\"0604183F\" Hypersonics Prototyping - Hypersonic Attack Cruise Missile)",
+      "M_value": "FUNDED_STEADY at $333.3M FY24 (latest visible at cutoff)",
+      "interpretation": "HACM RDT&E is the dedicated PE for the program Raytheon is on contract to develop and produce. Strong, growing RDT&E in the latest visible J-Book year. Claim is verified; PASS."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Raytheon booked $1.2 billion in 2023 for AMRAAM (Advanced Medium Range Air-to-Air Missile) production for the U.S. Air Force, U.S. Navy, and international customers \u2014 material program-of-record revenue.",
+      "category": "jbook_program_revenue",
+      "severity": "PASS",
+      "supports": "long",
+      "M_check": "pentagon_jbook.query_program_funding(pe_number=\"0207163F\" AMRAAM RDT&E)",
+      "M_value": "FUNDED_STEADY at $52.0M FY24 RDT&E (sustainment-tier funding \u2014 procurement line not in corpus)",
+      "interpretation": "AMRAAM RDT&E is funded; procurement is on the AF/Navy munitions account. The $1.2B booked-in-2023 figure is for production+international FMS, which is captured in usaspending (not queried here). RDT&E continuance supports product-line longevity. PASS."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Raytheon booked $1.2 billion to provide Patriot Air Defense systems to Switzerland in 2023 and 'proven Patriot air and missile defense system' is named as a core layered air defense product line. Patriot pipeline (FMS + LTAMDS upgrade path) is a key forward driver.",
+      "category": "jbook_program_revenue",
+      "severity": "UNVERIFIABLE",
+      "supports": "long",
+      "M_check": "pentagon_jbook.query_program_funding for Patriot, LTAMDS, Lower Tier Air and Missile Defense Sensor",
+      "M_value": "All 3 NOT_FOUND in J-Book corpus",
+      "interpretation": "Patriot, LTAMDS, NASAMS, Javelin, Stinger, Excalibur are all U.S. Army procurement/RDT&E programs. The 410-PE corpus does not appear to cover Army procurement (P-40) line items. Heuristic #7 applies: this is a coverage gap, not evidence against the claim. Patriot/LTAMDS demand at the cutoff was demonstrably strong from public DoD record (Switzerland FMS, Ukraine surge replenishment). UNVERIFIABLE \u2014 recommend extending corpus with Army Missiles & Space and Army Aircraft Procurement P-40s."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Raytheon was awarded a contract for the Next Generation Short Range Interceptor (NGSRI) for the U.S. Army to replace the Stinger MANPADS \u2014 $412 million booked in 2023, presented as a forward Army air-defense pipeline.",
+      "category": "jbook_program_pipeline",
+      "severity": "UNVERIFIABLE",
+      "supports": "short",
+      "M_check": "pentagon_jbook.query_program_funding(program_name=\"Next Generation Short Range Interceptor\"|\"NGSRI\")",
+      "M_value": "NOT_FOUND in both lookups",
+      "interpretation": "NGSRI is the U.S. Army's Stinger replacement; would sit under Army Missiles & Space Procurement / RDT&E. Outside corpus scope. Per heuristic #7, UNVERIFIABLE. Claim is supported by the disclosed $412M booking which would also show in usaspending; do not penalize."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "Raytheon booked $650 million in 2023 for Next Generation Jammer Mid-Band (NGJ-MB) for U.S. Navy and Australia \u2014 electronic-warfare program of record for F/A-18.",
+      "category": "jbook_program_revenue",
+      "severity": "UNVERIFIABLE",
+      "supports": "short",
+      "M_check": "pentagon_jbook.query_program_funding(program_name=\"Next Generation Jammer\"|\"NGJ-MB\")",
+      "M_value": "NOT_FOUND in both lookups",
+      "interpretation": "NGJ-MB is a Navy F/A-18 electronic-warfare upgrade program; sits in Navy RDT&E. Outside corpus scope. UNVERIFIABLE per heuristic #7. Note: the FY25 Navy budget zeroed NGJ-Low Band procurement and reportedly slowed NGJ-MB ramp \u2014 this is a forward concern but not visible at our 2024-09-01 cutoff and not in our current corpus."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "Raytheon is the supplier of the SPY-6 family naval radar; booked $619 million in 2023 on the SPY-6 Hardware Production and Sustainment contract for the U.S. Navy \u2014 material naval surface combatant pipeline.",
+      "category": "jbook_program_revenue",
+      "severity": "UNVERIFIABLE",
+      "supports": "short",
+      "M_check": "pentagon_jbook.query_program_funding(program_name=\"SPY-6\"|\"AN/SPY-6\")",
+      "M_value": "NOT_FOUND in both lookups",
+      "interpretation": "SPY-6 is Navy Shipbuilding & Conversion / Other Procurement Navy; outside our Air Force-/Space Force-/MDA-/DARPA-/SOCOM-/OSD-skewed corpus. UNVERIFIABLE per heuristic #7. SPY-6 backlog supported by disclosed $619M Navy contract; do not penalize."
+    },
+    {
+      "claim_id": "C11",
+      "claim_text": "Pratt & Whitney supplies engines to the B-21 Raider next-generation strategic bomber \u2014 explicit B-21 propulsion exposure was disclosed as a 2023 milestone (B-21 first flight).",
+      "category": "jbook_program_pipeline",
+      "severity": "PASS",
+      "supports": "strong",
+      "M_check": "pentagon_jbook.query_program_funding(pe_number=\"B02100\" B-21 Raider Procurement P-40)",
+      "M_value": "FUNDED_STEADY at $1.879B FY24 procurement (P-40 line)",
+      "interpretation": "B-21 Raider procurement is well-funded at the cutoff and Pratt's role as engine supplier is a multi-year LRIP+production tailwind. PASS. (Future-period zeros in FY27/FY29/FY30 visible in the corpus are post-cutoff information from the FY26 J-Book and are properly masked by the cutoff filter.)"
+    },
+    {
+      "claim_id": "C12",
+      "claim_text": "Pratt & Whitney's PW1100G-JM Geared Turbofan (GTF) commercial engine fleet is subject to the 'Powder Metal Matter' \u2014 a rare-condition in powder metal forcing accelerated inspection of the PW1100 GTF fleet, the largest disclosed risk in the filing and a multi-billion-dollar accrued liability impacting forward FCF.",
+      "category": "other",
+      "severity": "PASS",
+      "supports": "long",
+      "M_check": "(no M-source query needed \u2014 claim is self-disclosure of a contingent liability)",
+      "M_value": "Disclosed as principal risk factor with multi-billion-dollar accrued liability; matches segment reorganization and customer-compensation accounting in the filing footnotes",
+      "interpretation": "This is a control / non-J-Book claim. RTX itself made the disclosure; the framework does not need external verification beyond confirming the company has filed updates (8-K). No edits to severity. PASS as a faithful self-disclosure; the magnitude (>$5B P&L charge in 2023) is the dominant near-term cash drag and is appropriately flagged in the filing."
+    },
+    {
+      "claim_id": "C13",
+      "claim_text": "Raytheon booked $2.8 billion in 2023 on a NATO Support and Procurement Agency (NSPA) contract for Guidance Enhanced Missiles (GEM-T) \u2014 Patriot interceptor variant for European demand.",
+      "category": "counterparty_disclosure",
+      "severity": "UNVERIFIABLE",
+      "supports": "short",
+      "M_check": "pentagon_jbook.query_program_funding(program_name=\"GEM-T\"|\"Guidance Enhanced Missile\")",
+      "M_value": "NOT_FOUND in both lookups",
+      "interpretation": "GEM-T is a NATO/NSPA international procurement of Patriot PAC-2 GEM-T interceptors; it is NOT a U.S. Pentagon J-Book line item, it is a NATO buy. The J-Book corpus by design does not cover NATO procurement. UNVERIFIABLE per heuristic #7. The $2.8B booking is an FMS/NATO contract \u2014 verifiable via the State Department DSCA notification record, not pentagon_jbook."
+    },
+    {
+      "claim_id": "C14",
+      "claim_text": "Raytheon booked $7.8 billion in 2023 on 'a number of classified contracts', representing the single largest 2023 booking category \u2014 disclosed but undescribed black-budget exposure.",
+      "category": "other",
+      "severity": "PASS",
+      "supports": "strong",
+      "M_check": "usaspending.query_dod_contracts(recipient_name=\"Raytheon\", 2023-01-01..2024-09-01)",
+      "M_value": "11,713 DoD awards totaling $70.9B over the window \u2014 consistent with the $7.8B classified plus disclosed unclassified bookings",
+      "interpretation": "Aggregate DoD obligations to Raytheon ($70.9B over 20 months) substantially exceed the disclosed segment-level booking figures, supporting the claim that disclosed classified bookings ($7.8B) are part of a much larger real DoD contract footprint. No claim inflation. PASS."
+    }
+  ]
+}

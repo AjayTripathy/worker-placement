@@ -1,0 +1,42 @@
+## Context
+
+**Cause-check first, and it reverses the premise.** `cohorts.json` was permission-blocked, so I reconstructed the narrative from the event blob (Movies/Entertainment consumer-demand collapse). That narrative does not describe ANGX's decline at all: the −81.6% dd52 is a **de-SPAC float normalization plus 87% share-count dilution**, not a demand event. Angel de-SPAC'd via Southport ~2025-09-11 with 99.9M shares out; the closing all-time high was $16.00 on 2025-09-15 — four days after close, textbook low-float pop. Share count is now 186.76M. Price is −73% from that close-ATH but market cap is only −49% ($1.60B → $816M): **roughly half the per-share decline is dilution, not de-rating.** Meanwhile every demand metric doubled.
+
+Note a data-integrity problem with the trigger itself: the pack says hi52 $20.385 (dd52 −0.786/−0.816), stockanalysis shows a 52w range of $2.045–$60.00, and macrotrends shows a $16.00 closing ATH. The drawdown denominator is unstable across three sources, so the excess-dd52 that fired this event is not a reliable number.
+
+| ticker | class | refuting metric | current value/trend (cited) | next print date | note |
+|---|---|---|---|---|---|
+| ANGX | **DAMAGE-ABSENT** (demand narrative) | **Deferred revenue** (contract liabilities — cash already collected, on balance sheet, leads recognized revenue) | **$83M at 6/30/26**, vs $67M at 12/31/25 and $40M at 6/30/25 = **+107% YoY**; Q1 detail $74.7M of which $73.6M is Guild memberships ([Q1 10-Q, angx-20260331x10q.htm](https://www.sec.gov/Archives/edgar/data/1865200/000186520026000036/angx-20260331x10q.htm); Q2 via [10-Q 0001865200-26-000070 parse](https://www.stocktitan.net/sec-filings/ANGX/10-q-angel-studios-inc-quarterly-earnings-report-be6379912a41.html)) | **2026-11-03** (unconfirmed) | A subscriber-demand collapse cannot coexist with prepaid deferred revenue doubling. Corroborating: Guild members 2.22M→2.61M→**2.85M at 7/31 (+99% YoY)**; Guild revenue **$90.7M, +94%**; cash **$48M, UP** from $38.9M at 3/31. Counterweight below. |
+
+**Secondary refuting metric (same row, independent channel):** Guild S&M fell to **52.8% of Guild revenue from 71.6%** YoY while members grew 99% — operating leverage improving, not a company buying decelerating growth. Adj-EBITDA loss H1'26 **$7.7M vs $46.2M** H1'25; FY guide of ≤$25M adj-EBITDA loss **reaffirmed** at the 8/4 print.
+
+## The honest counterweight (why this is a court, not a buy)
+
+Three things are genuinely wrong, and none are the cohort narrative:
+
+1. **Guild contribution is ~zero after acquisition spend.** My arithmetic from disclosed figures: Guild rev $90.7M × 54% consolidated GM ≈ $49M gross profit, minus Guild S&M of $47.9M (52.8%) ≈ **+$1.1M**. CAC per net add ≈ $123 (=$47.9M / 390K net adds), payback ≈ 17 months at $7.36/mo contribution. Workable, not proven.
+2. **Content amortized over TEN YEARS** on the individual-film-forecast method ([Q1 10-Q](https://www.sec.gov/Archives/edgar/data/1865200/000186520026000036/angx-20260331x10q.htm)). That is far slower than streaming peers and *defers* cost into gross margin and adj-EBITDA. This is the single strongest bear point and it is answerable from filings — but not answered here.
+3. **Hard-money capital structure.** ~$102.3M notes at **13.5–15%**, plus P&A revolvers at 10–15%; stockholders' **deficit $(41.5)M** and widening; rescue equity at **$2.10** in April 2026 (14.3M shares, Roth sole book-runner). No substantial-doubt going-concern qualifier — the filing states resources sufficient for twelve months — but the rate deck is what distressed borrowers pay.
+
+**Discovery state: NOT undiscovered.** 5–12 analysts, consensus Moderate/Strong Buy, PTs $7.80–$8.50 vs $4.37 spot; 38.6% institutional. So the claim cannot be "nobody looked" — it is a live disagreement, and the market is discounting items 1–3, not the consumer.
+
+**Insiders bought into it three days ago:** Director Steven Sarowitz 107,662 sh @ $4.12 on 8/13 ($443.6K) plus 353,815 sh on 8/14; CEO Neal Harmon ~29,036 sh open-market 8/14 (~$125K). The two 13D/As on 8/12 (Neal 17.34M/24.7%, Jeffrey 17.53M/24.6%) are **estate-planning transfers to trusts, not sales** — the same men were buying two days later.
+
+## COURT-WORTHY (damage-absent, ranked)
+
+1. **ANGX** — The screen fired on a corrupted drawdown denominator, yet accidentally surfaced a real dispersion: a 99%-growth subscription business at **~1.9× EV/Guild-ARR** ($870M EV / $466M mgmt ARR; 2.1× EV/TTM-sales on $413M) where the bear case rests entirely on two *auditable* questions — 10-year content amortization and Guild contribution margin — that no one in this analysis has resolved from the primary text. A court that resolves those two changes the sizing decision in either direction, decisively.
+
+**PRINT PROXIMITY: 2026-11-03 — yfinance-derived, UNCONFIRMED (no company PR names it). Q2 was reported 2026-08-04 per 8-K 0001865200-26-000068, so an early-November Q3 date is consistent. ~55 trading days out — NOT within 5 trading days, so the print-decisive reconstruction is not triggered.** The nearer catalyst is corporate, not earnings: S-4/A filed 8/14 (0001104659-26-096126) registering ~10.15M shares for the Tuttle Twins Show LLC and Toothy Cow Productions LLC mergers, **contractual deadline 2026-10-31**, post-transaction 139,983,138 Class A shares ([S-4](https://www.sec.gov/Archives/edgar/data/1865200/000110465926079004/tm2613040d1_s4.htm)) — a ~7% dilution event with a hard date and a shareholder vote in between.
+
+**Book: NO POSITION, NO ORDERS** — per the evidence pack. I could not independently confirm via `get_account_positions`; the IBKR tools are permission-gated in this non-interactive session, so per the poll-before-sleeve-claims rule this is pack-asserted, not verified.
+
+**COURT-WORTHINESS ANGX: 8/10 — the demand narrative is refuted outright by doubling deferred revenue and +99% members, but the discount rests on 10-year content amortization and near-zero Guild contribution margin, both resolvable from the filings and both unresolved, so a court moves sizing decisively either way.**
+
+---
+
+**Integrity flags on this triage — read before routing:**
+- **SEC.gov 403'd every WebFetch** (browse-edgar, Archives, and data.sec.gov alike). The Q2 figures above are from filing-parsing secondary sources quoting the 10-Q, **not my own read of the primary document.** Per the standing rule that "unverified = a coverage failure," the ≥6 auto-escalation should open by fetching `angx-20260630x10q.htm` under accession 0001865200-26-000070 through a fingerprinted browser path and re-confirming deferred revenue, the NCI split of the $23.8M loss, and the content-amortization note verbatim.
+- **`knowledge_graph/cohorts.json` was permission-denied**, so COHORT and NARRATIVE remain `?`. The classification above is against my reconstruction of the narrative. If the actual cohort narrative is capital-structure- or dilution-based rather than demand-based, **this flips to STRUCTURAL** — the discount would then be correct and the court unnecessary. That single file read should be the first thing resolved.
+- I did not run the closing dashboard step (ledger upsert / edge_classification / entry_plan / scanner re-run / `/api/everything` verify). This is a triage output with no position and no sizing change, but flag it if you consider triage a terminal analysis.
+
+**Sources:** [Q1 2026 10-Q (SEC)](https://www.sec.gov/Archives/edgar/data/1865200/000186520026000036/angx-20260331x10q.htm) · [S-4 (SEC)](https://www.sec.gov/Archives/edgar/data/1865200/000110465926079004/tm2613040d1_s4.htm) · [Q2 10-Q parse](https://www.stocktitan.net/sec-filings/ANGX/10-q-angel-studios-inc-quarterly-earnings-report-be6379912a41.html) · [$30M offering 8-K](https://www.stocktitan.net/sec-filings/ANGX/8-k-angel-studios-inc-reports-material-event-f3dfa9a9dd8c.html) · [Q2 growth-vs-profitability](https://simplywall.st/stocks/us/media/nyse-angx/angel-studios/news/angel-studios-angx-stock-cools-as-growth-outruns-profitabili) · [Q2 call highlights](https://www.dailypolitical.com/2026/08/05/angel-studios-q2-earnings-call-highlights.html) · [Insider buying 8/13–8/14](https://www.dailypolitical.com/2026/08/14/insider-buying-angel-studios-nyseangx-director-buys-443567-44-in-stock.html) · [Quarterly financials](https://stockanalysis.com/stocks/angx/financials/?p=quarterly)

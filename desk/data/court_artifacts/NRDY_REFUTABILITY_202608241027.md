@@ -1,0 +1,26 @@
+## Context
+
+Cause-check first, and it kills the premise: NRDY's 2026-08-19 "class dislocation" fired on the exact day a **1-for-15 reverse split took effect**, and the event record's `mcap` of $1.956B is that split's artifact — it multiplies the post-split price ($10.56) by the *pre-split* share count. True market cap is ~$135M. The drawdown itself is real (tape fields are split-adjusted consistently); the fundamental field is corrupted, the sector tag ("Real Estate") is wrong for an online-tutoring company, and the COHORT/narrative slots came through unfilled — so `excess_dd −0.426` is computed against a peer set NRDY does not belong to.
+
+| ticker | class | refuting metric | current value/trend (cited) | next print date | note |
+|---|---|---|---|---|---|
+| NRDY | **DAMAGE-ARRIVING** | Active Learning Memberships × ARPM (consumer revenue run-rate) — the pair that would refute AI-disintermediation if members stabilized while ARPM held | Members **29.1k at 6/30/26, −5% y/y** (4th straight quarter of moderating decline: −9% at 3/31/26); ARPM **$366, +5% y/y**, decelerating from **$374, +12% y/y** in Q1. Revenue inflected: Q1'26 **$48.7M (+2%)** → Q2'26 **$43.3M (−4%)**. FY26 guide **cut to $168–175M from $180–190M**; active Experts **8.4k, −13% y/y**. Offsetting: gross margin **expanded to 64.7% from 61.5%** ([Q1 PR](https://s206.q4cdn.com/118732467/files/doc_news/Nerdy-Announces-First-Quarter-2026-Financial-Results-2026.pdf); [Q4'25 PR](https://www.businesswire.com/news/home/20260226513294/en/Nerdy-Announces-Fourth-Quarter-2025-Financial-Results); [reverse-split 8-K, sec.gov](https://www.sec.gov/Archives/edgar/data/1819404/000181940426000085/reversestocksplitpressrele.htm)) | **2026-11-05** (yfinance-derived, UNCONFIRMED) | Not cohort selling — idiosyncratic: guide cut 8/06, NYSE-compliance reverse split effective 8/19, COO terminated effective immediately 8/20 (8-K in pack). Event record has 3 defects: 15x mcap error, wrong sector, unfilled cohort. |
+
+**The decisive arithmetic (Q4 bridge).** FY26 guide $168–175M − Q1 $48.7M − Q2 $43.3M − Q3 guide $32–35M ⇒ **implied Q4'26 = $41–51M, midpoint ~$46M**, against Q4'25 actual **$49.1M**. But Q4'26 carries *less business*: VT4S and First Tutors UK are being wound down. So the just-cut guide still requires the remaining consumer business to grow enough to absorb the exited revenue — while members run −5% and ARPM growth has halved. Mechanically, members ~0% × ARPM +5% ⇒ consumer ~+5%, which lands at the **bottom** of the implied range and puts FY at ~$165M, *below the new $168M floor*. **A second guide cut on 11/05 is the base case, not the tail.**
+
+**Liquidity.** Cash $38.4M at 6/30 but YE guide $30–32M **including** the $20M term-loan draw ⇒ ~$10–12M unborrowed. Q3 guide EBITDA −$9M to −$6M plus $2–4M exit costs = an $8–13M burn quarter. That is a real solvency clock, not a debating point.
+
+## COURT-WORTHY (damage-absent, ranked):
+
+**None.** NRDY is the only member and it classifies DAMAGE-ARRIVING, not damage-absent — the narrative's predicted damage is present in members, experts, revenue growth, and the guide itself. The only damage-absent metric is gross margin (+320bps), which is a mix/pricing artifact of shedding low-margin institutional work, not evidence the demand narrative is false.
+
+**COURT-WORTHINESS NRDY: 4/10** — cheap on sales (EV ≈ $117M ≈ 0.7x FY26 revenue) but the sizing question is answered by arithmetic, not adjudication: the Q4 bridge doesn't math, the burn clock runs into a thin balance sheet, and it rhymes with the retired 0-for-7 earnings-dislocation template.
+
+**PRINT PROXIMITY: 2026-11-05 — UNCONFIRMED (yfinance-derived; no company PR names it).** Pattern-consistent with the prior cadence (Q4'25 2/26, Q1'26 5/07, Q2'26 8/06), so ~10 weeks out — well beyond 5 trading days, so no print race. Position anyway: **FLAT.** The named kill is the liquidity path — a likely second guide cut into ~$10–12M of unborrowed cash, inside a 48.7%-controlled Up-C where minorities can't force the outcome; sub-1x sales does not compensate until the Q4 bridge is re-based on 11/05.
+
+## Two things to fix upstream
+
+1. **The 15x mcap error is not NRDY-specific.** Any name that reverse-splits will get a market cap inflated by the split ratio for as long as the price feed and share-count feed disagree, silently corrupting every downstream sizing, liquidity, and mcap-band screen. Worth a guard: flag when `mcap / (px × shares_from_latest_filing)` deviates from 1, and cross-check against a corporate-actions feed.
+2. **This event should not have fired as a class dislocation** — the cohort slot was empty, the sector tag was wrong, and the drawdown was idiosyncratic. A cause-check that reads the last 30 days of 8-Ks before scoring dispersion would have caught it.
+
+One caveat on sourcing: the reverse-split 8-K and the 8/21 COO 8-K are verified primary (SEC). The Q1'26/Q2'26/Q4'25 revenue figures come from company press releases surfaced via search rather than documents I read end-to-end — SEC.gov 403'd every direct fetch here, and IBKR price verification was permission-denied in this non-interactive session, so the $10.56 tape is cross-checked only against stockanalysis.com. Before any capital acts on this, re-verify Q4'25 revenue ($49.1M) directly, since it anchors the bridge.

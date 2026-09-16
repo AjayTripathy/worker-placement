@@ -1,0 +1,146 @@
+{
+  "ticker": "MRCY",
+  "cutoff": "2023-01-15",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Forward revenue concentration on F-35, Filthy Buzzard & Badger, F/A-18, LTAMDS, THAAD, Aegis as 'a large portion of our future revenues'.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook(F-35)=NOT_FOUND_IN_TIMERANGE; n_matches=2 (F-35 C2D2 PE 0604840F, F-35 Squadrons PE 0207142F)",
+        "pentagon_jbook(Aegis)=NOT_FOUND_IN_TIMERANGE; n_matches=2 (AEGIS BMD PE 0603892C, Aegis BMD Test PE 0604878C)",
+        "pentagon_jbook(F/A-18, LTAMDS, THAAD, Filthy Buzzard)=NOT_FOUND",
+        "Cutoff is 2023-01-15; J-Book corpus is FY26 (published mid-2025) — primary verifier is structurally out-of-range for this PIT date"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "NOT_FOUND / NOT_FOUND_IN_TIMERANGE for all six named programs",
+      "interpretation": "Per J-Book heuristic #7: NOT_FOUND alone is not a red flag — corpus does not cover all PEs and is forward of cutoff. Per heuristic #1: NOT_FOUND_IN_TIMERANGE → UNVERIFIABLE. Cannot test the divergence pattern at this cutoff because the J-Book verifier's corpus post-dates the cutoff. Coverage-gap noted: F-35 and Aegis ARE in corpus (verifying program existence) but no funding data within cutoff range. Programs like LTAMDS, THAAD, F/A-18, SEWIP, Filthy Buzzard appear genuinely outside corpus coverage (procurement-line / older RDT&E PEs not loaded)."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Products deployed across Aegis, Patriot, LTAMDS, SEWIP, THAAD, Predator, F-35, Reaper, F-18, F-16 SABR, E2-D Hawkeye, Paveway, Filthy Buzzard, PGK, P-8, AIDEWS, CDS, AMCS, WIN-T.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook(SEWIP, Patriot, Reaper, F-16 SABR, E2-D Hawkeye, P-8, AIDEWS, WIN-T, Paveway, PGK) all returned NOT_FOUND",
+        "usaspending(Mercury Systems, Inc.) confirms n=73 direct DoD awards totaling $9.2M through cutoff — confirms a USG customer relationship but does not directly tie to any of the named programs above (descriptions are component-level: 'MODULE,MATRIX,SWITC', 'SUPPORT PRODUCTION AND DELIVERY')"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding + usaspending.query_dod_contracts",
+      "M_value": "All 10 J-Book queries: NOT_FOUND. usaspending: 73 direct awards $9.2M (no program tagging confirmed)",
+      "interpretation": "Past-tense deployment claim ('we have successfully penetrated') is corroborated weakly by 73 direct DoD awards in usaspending, but the named-program tagging cannot be verified at PE level because pentagon_jbook corpus lacks coverage for these long-running procurement programs at the FY26 horizon. Per heuristic #7, NOT_FOUND is treated as UNVERIFIABLE. Coverage gap (not company-side red flag)."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "FY2022 customer concentration: RTX 14%, U.S. Navy 14%, LMT 10%; defense/USG ~97% of revenues.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "usaspending(direct, recipient_name='Mercury Systems, Inc.', cutoff 2023-01-15): only 73 awards, $9.25M total — orders of magnitude smaller than implied by the 14%+14%+10% concentration claim (which implies ~$380M+ of revenue derives from these customers)",
+        "edgar_fts(RTX 0000101829, search='Mercury Systems', cutoff 2023-01-15): 0 hits — RTX's filings do not name Mercury Systems as a material supplier",
+        "edgar_fts(LMT 0000936468, search='Mercury Systems', cutoff 2023-01-15): 0 hits — LMT's filings do not name Mercury Systems either",
+        "Note: the broader usaspending search (recipient_name='Mercury Systems') returns 589 awards / $550M because it pulls in Physical Optics Corp (acquired Dec 2020) — but POC contracts are awarded TO PHYSICAL OPTICS, not Mercury directly"
+      ],
+      "M_check": "usaspending.query_dod_contracts + edgar_fts.query_fulltext (orthogonal counterparty)",
+      "M_value": "MRCY-direct DoD awards through cutoff: $9.25M / 73 awards. RTX/LMT 10-K mentions of Mercury Systems: 0/0",
+      "interpretation": "The revenue concentration claim is structurally consistent with Mercury's subcontractor model (revenue flows through prime contracts, not direct DoD purchases — so direct USG awards being small is expected). However the orthogonal counterparty check fails: NEITHER RTX (14% customer) NOR LMT (10% customer) names Mercury Systems anywhere in their EDGAR full-text filings through the cutoff. That is a soft red flag for materiality on the prime side — if Mercury is ~$140M+ of RTX FY22 sourcing, it would normally appear in supplier-related disclosure. Scored MODERATE_UNDERDELIVERY — the customer concentration claim isn't disproven, but the counterparty asymmetry suggests Mercury's importance to its primes is much smaller than the reverse exposure."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": ">300 programs with >25 different defense prime contractors.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "usaspending direct: only 73 awards over the full pre-cutoff history — insufficient to verify '300 programs' independently",
+        "Subcontractor model means most program participation flows through primes and is not visible in usaspending direct"
+      ],
+      "M_check": "usaspending.query_dod_contracts",
+      "M_value": "73 direct DoD awards (recipient_name='Mercury Systems, Inc.')",
+      "interpretation": "Standard pattern for tier-2 defense suppliers: claims of broad program participation are not directly visible in primary DoD contract data. Scored UNVERIFIABLE rather than RED because the methodology mismatch (sub-contractor vs prime) is structural, not deceptive."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Positioned to capitalize on DoD program-protection / embedded-security mandates.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook('Trusted and Assured Microelectronics')=NOT_FOUND",
+        "pentagon_jbook('Microelectronics Commons')=NOT_FOUND",
+        "No specific PE number / DARPA / OSD program named in claim — vague forward-looking language"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "NOT_FOUND (both T&AM and ME Commons absent from corpus)",
+      "interpretation": "Marketing-narrative claim without a specific PE or contract reference. Even with a J-Book corpus that included T&AM (PE 0603253A) and ME Commons (FY24 stand-up), the claim is too non-specific to discriminate. Scored UNVERIFIABLE."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Future growth in radar modernization, avionics mission computers, secure processing, trusted custom microelectronics.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook('radar modernization')=NOT_FOUND",
+        "pentagon_jbook('mission computing')=NOT_FOUND",
+        "No specific PE number / program of record named"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "NOT_FOUND",
+      "interpretation": "Generic technology-category narrative without a discriminating PE or program-of-record anchor. UNVERIFIABLE by design — the framework cannot test against the J-Book without a named program."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "FMS sales expected to be an increasing part of revenue going forward.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "usaspending direct shows few FMS-tagged awards in the 73-award dataset (top awards are NAVAIR/NAVSEA general production)"
+      ],
+      "M_check": "usaspending.query_dod_contracts",
+      "M_value": "73 direct DoD awards, no FMS-tagged awards visible in top 5",
+      "interpretation": "Forward-looking pipeline claim; not falsifiable at point-in-time. UNVERIFIABLE."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Rollup thesis: 15 acquisitions / $1.4B since FY14; FY22 revenue $988.2M of which $117.8M acquired.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "acq_coherence.score_acquisition_coherence(parent_thesis=mission processing/RF/EW/secure microelectronics, 4 named recent deals): signal=INCOHERENT_ROLLUP, mean_coherence=0.0, n_low_coherence=4/4 (NOTE: LLM judge defaulted to low when descriptions lack rich context; signal direction is suggestive not conclusive)",
+        "12% of FY22 revenue ($117.8M / $988.2M) is acquired — high dependence on M&A to maintain growth",
+        "FY22 net income collapsed to $11.3M from $62.0M FY21 (-82%) despite higher revenue — classic rollup margin-compression signature: 15 deals, $1.4B deployed, $200.5M adj EBITDA = ~14.4% LTM EBITDA on $1.4B of deployed capital",
+        "Operating cash flow swung from +$97.2M (FY21) to -$18.9M (FY22)"
+      ],
+      "M_check": "acq_coherence.score_acquisition_coherence + filing financials cross-check",
+      "M_value": "INCOHERENT_ROLLUP signal (with LLM-judge caveat); 12% of revenue acquired; net income -82% YoY; OCF negative",
+      "interpretation": "Independent of the J-Book pattern, the rollup narrative shows stress: aggregate $1.4B M&A spend has not produced commensurate adj-EBITDA growth ($200.5M FY22 vs $201.9M FY21 = flat YoY despite $117.8M of acquired revenue), net income collapsed 82%, OCF turned negative. The 1MPACT restructuring is itself an admission that prior M&A integration has been suboptimal. MODERATE_UNDERDELIVERY on the implicit growth-via-acquisition thesis. (Caveat: acq_coherence LLM 0-score reflects sparse input, not strong incoherence evidence — narrative scoring should be treated as ancillary.)"
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "Operating presence at 16 named facilities incl. Andover MA HQ 145,262 sqft.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "epa_frs.query_facilities returned n_facilities=null / empty — Mercury's facilities are not heavy industrial / no EPA presence expected for electronics assembly"
+      ],
+      "M_check": "epa_frs.query_facilities",
+      "M_value": "0 facilities indexed (expected — electronics manufacturer)",
+      "interpretation": "Verifier mismatch: EPA FRS covers regulated emitters, not electronics assembly. Control claim — UNVERIFIABLE."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "Substantial patent / IP portfolio underlying the Processing Platform.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "uspto_odp.query_assignee(Mercury Systems, cutoff 2023-01-15): n_total_applications=20, n_granted=7",
+        "For a company describing itself as having 'industry-leading' R&D investment >2x competitors on a percentage basis with FY22 revenue $988M, 7 granted patents is sparse"
+      ],
+      "M_check": "uspto_odp.query_assignee",
+      "M_value": "20 applications / 7 granted patents",
+      "interpretation": "The IP-portfolio claim is light on substance: 7 issued patents against $988M revenue and a 40-year operating history is below comparable defense-tech peers. Not a fatal disclosure — Mercury operates an integrator/COTS model so much of the value is in trade secret / supply chain rather than patentable IP. Scored MODERATE_UNDERDELIVERY rather than RED to reflect the integrator-model caveat."
+    }
+  ],
+  "summary": {
+    "n_claims": 10,
+    "n_jbook_grounded_claims": 6,
+    "n_jbook_queries_fired": 20,
+    "n_jbook_returning_signal_in_range": 0,
+    "severity_counts": {
+      "PASS": 0,
+      "MODERATE_UNDERDELIVERY": 3,
+      "SEVERE_UNDERDELIVERY": 0,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 7
+    },
+    "framework_note": "J-Book verifier is structurally out-of-range for a 2023-01-15 cutoff: the FY26 corpus post-dates the cutoff, so all forward-funding queries return NOT_FOUND_IN_TIMERANGE or NOT_FOUND. The divergence pattern cannot be tested directly at this PIT. The strongest non-J-Book signals are: (i) counterparty-asymmetry — RTX (14% customer) and LMT (10% customer) do not name Mercury anywhere in EDGAR full text, suggesting Mercury's importance to its primes is smaller than the reverse exposure; (ii) rollup-thesis stress — $1.4B deployed across 15 deals has produced flat adj-EBITDA YoY, net income collapsed 82%, OCF turned negative, 1MPACT itself admits prior integration was suboptimal."
+  }
+}

@@ -1,0 +1,54 @@
+{
+ "asof": "2026-08-03",
+ "source": "intake_court_20260803 \u2014 six independent courts; per feedback_codify_agent_dd_feedback these are WIRED-WORK-OWED, not notes",
+ "euronext_shelf.py": [
+  "P1 PENSION GUARD: net-cash/EV math omits IAS-19 obligations (SFPI EUR50.6M -> 39% net cash was really 12-18%; EV/EBIT 4.5x really 6.0-6.5x). Pull provisions/pension from the same filing pass; flag pension>10% of mktcap.",
+  "P1 ibkr_verified is conid-existence, NOT executability: require live bid/ask with is_close=false else DATA_GATED (PRIC-B SFB returned no-market-data on a 'verified' line).",
+  "P1 fcf omits PP&E capex when dev is capitalized (PRIC-B overstated 34%): use CFO - TOTAL investing capex; wc_fcf flag must look back 4 quarters (FY25 CFO was 35% WC release, flag said false).",
+  "P2 ebit_trend is trough-anchored (8.66x that is simultaneously 0.50x of the last normal year): also compute vs MAX trailing EBIT in window; flag trough_anchored when current <0.75x peak; backlog/book-to-bill <1.0 must force durability_suspect.",
+  "P2 FX-translation guard: where the AR discloses a COGS currency split, compute constant-currency EBIT; flag fx_driven_margin when FX >50% of the margin delta (the PRIC-B mechanism, generalizes across the non-USD shelf).",
+  "P2 flow_months=1 read as freshness is actually max catalyst-staleness: add days_since_last_report + post-print cooling window (PRIC-B sourced 13 sessions after a +36% re-rate on the sourcing report itself).",
+  "P2 ADV: use MEDIAN daily turnover not mean (SFPI 90k mean vs 51k median, spike-inflated)."
+ ],
+ "bank_consolidation_scanner.py": [
+  "P1 FRESHNESS GATE: latest 8-K item 2.02 must POSTDATE the financial snapshot or the name is flagged STALE_INPUTS (RVSB scored on 3/31 data while the 7/28 print that resolved the thesis sat 5 days old in EDGAR).",
+  "P2 CRE/RBC: compute the regulatory non-owner-occ basis (LNRECONS+LNREMULT+LNRENROT), not the upper bound (442% -> 350% on RVSB); keep both.",
+  "P2 loss-decomposition hint: when NI<0, check for securities-restructuring 8-K language (HTM->AFS reclass) \u2014 an accretive loss is a different animal; auto-annotate."
+ ],
+ "spinoff_orphans.py": [
+  "P1 DOCTRINE: spin-offs have NO underwriter quiet period \u2014 coverage initiates day 1 of regular-way. Any initiation-wave-at-25-40d catalyst is FABRICATED; remove from playbook, re-rank the late-window cohort.",
+  "P2 recovery_off_trough_pct from closes only hides intraday bounce-and-fade (+26% intraday invisible); add intraday range leg.",
+  "P2 SOLS setup_class vs doctrine contradiction (flagged by court, unresolved).",
+  "P2 process: for any spin, pull the PRE-SPIN INVESTOR DAY DECK alongside the Form 10 \u2014 management guidance (organic growth, standalone costs, leverage target, capital-return) is NOT in EDGAR (MBGL: missed +$20-25M run-rate costs, $75-100M one-time, ~$1B IHS DTL)."
+ ],
+ "ai_adopter_smallcap": [
+  "P1 bank_holdco_ratio_denominator guard: never fire a cost-out detector on X/Revenue for SIC 6022 / any registrant with an ALCO table \u2014 require the numerator tested vs FEE revenue and absolute dollars (CASS: Labor/Rev improved while Labor/FeeRev worsened on the same audited inputs).",
+  "P1 onetime_base_effect_inflation: screen the PRIOR 4-quarter window for discrete items before computing any delta-margin (77% of the CASS 'inflection' was base rolloff).",
+  "P1 disclosure_recency_gate: an absence-of-disclosure archetype must re-check ALL venues incl 8-Ks to the cutoff (CASS 'zero AI disclosure' was refuted by an 8-K 11 days before intake; signal-to-price latency ~7 sessions, already elapsed)."
+ ],
+ "CLOSED_20260804": {
+  "euronext_shelf.py P1 PENSION GUARD": {
+   "status": "FIXED",
+   "how": "_map_facts now reads 'Long Term Provisions' (yfinance carries no explicit pension tag for European filers) and folds it into the debt slot so EV and net-cash inherit it everywhere downstream; _pension_is_proxy + _pension_note flag that provisions OVER-capture (warranty/restructuring/litigation) and the IAS-19 split must be read before sizing",
+   "VALIDATION": "SFPI net cash 39% -> 13.4% of market cap. The court, reading the annual report by hand, said 39% -> 12-18%. The automated guard lands inside the court's band.",
+   "shelf_wide_effect": "BAR.BR -EUR18.9M, TFI.PA -EUR24.7M \u2014 this is a systematic correction across the DE/FR/Nordic industrial shelf, not a one-name patch"
+  },
+  "ai_adopter P1 x3": {
+   "status": "FIXED \u2014 new module verticals/generators/ai_adopter_gates.py",
+   "G1_mix_regression": "from the CRVL court; constant-intensity fit with no productivity term. Returns UNKNOWN (not PASS) when the store lacks segment revenue \u2014 an untested gate is not a passed gate",
+   "G2_alco_denominator": "resolved from the registrant's OWN XBRL companyfacts rather than a name heuristic. NARROWED after a false positive: 'Deposits' catches any company holding customer funds (PHR processes patient payments), so the tag set is now four spread-lender-only tags",
+   "G3_base_effect": "uses the store's 8-quarter margin series; replaces the prior window's worst quarter with its median and re-measures. A >100% share is reported as a SIGN REVERSAL (PAYC: +0.44pp becomes -1.64pp ex-outlier = there is no inflection, only a weak base)",
+   "G4_disclosure_recency": "fires on the absence-of-disclosure archetype using named_ai_cost_program",
+   "RESULT_ON_80_NAMES": "33 BLOCKED, 47 UNRESOLVED, 0 CLEAR. Of the original top-8 intake: PAYC/MMS/STC BLOCKED on base effect, CRVL/CASS/ALIT/HQY/PHR UNRESOLVED pending segment data.",
+   "THE_FINDING": "ZERO of the 80 names clears all four gates on the data the store currently holds. The AI-adopter list is not a court queue \u2014 it is a research queue, and promoting from it requires pulling segment revenue and labour series per name."
+  },
+  "still_open": [
+   "euronext P1 executability (ibkr_verified is conid-existence, not a live two-sided quote)",
+   "euronext P1 FCF total-capex",
+   "euronext P2 x4",
+   "bank_consolidation P1 freshness + P2 x2",
+   "spinoff P2 x3 (P1 doctrine already applied)",
+   "quality_drawdown P2-6 recurring-revenue gate (needs segment data this rail lacks)"
+  ]
+ }
+}

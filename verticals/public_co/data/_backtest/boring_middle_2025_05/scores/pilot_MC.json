@@ -1,0 +1,125 @@
+{
+  "ticker": "MC",
+  "company": "Moelis & Company",
+  "cutoff": "2025-05-15",
+  "filing": "0000950170-25-029070_10K.txt",
+  "filing_date": "2025-02-27",
+  "cik": "0001596967",
+  "sector": "Financial Services",
+  "industry": "Capital Markets",
+  "group": "boring_middle",
+  "rfm_tuples": [
+    {
+      "claim_id": "C1",
+      "R": "Our independent registered public accounting firm ... expressed an unqualified opinion ... We have served as the Company's auditor since 2008. /s/ DELOITTE & TOUCHE LLP, February 27, 2025.",
+      "f": "auditor_change_tracker.query_auditor_changes(cik='0001596967') — verify auditor continuity, look for 8-K Item 4.01 changes, dismissals, or affirmative disagreements in last 10 years.",
+      "M_source": "auditor_change_tracker",
+      "M_value": "signal=CLEAN_AUDITOR_TENURE; n_8k_item_401=0; n_big4_resignations=0; n_disagreements=0; lookback 2015-05-18 to 2025-05-15. Deloitte tenure since 2008 (17 yrs) consistent across all filings.",
+      "severity": "PASS",
+      "interpretation": "Long-tenured Big-4 auditor with unqualified opinion on both financial statements and internal controls; zero auditor turnover events in lookback. No forensic-audit red flag."
+    },
+    {
+      "claim_id": "C2",
+      "R": "Going-concern test (Mode B derivation): a high-fixed-cost advisory firm coming off a 2023 GAAP operating loss of $40.4M should disclose any substantial-doubt language if real. Filing language search.",
+      "f": "going_concern_local.going_concern_from_text on the full 10-K text + manual review of MD&A/Liquidity section.",
+      "M_source": "going_concern_local",
+      "M_value": "signal=NO_GOING_CONCERN; n_matches=0. Manual confirm: $412.5M cash + cash equiv, $147.9M sovereign-debt investments, zero borrowings under both revolvers ($50M aggregate), $203.9M broker-dealer net capital vs $250 (thousand) regulatory minimum (815x cushion). 'Strong balance sheet with substantial liquidity and zero debt' restated in Q1 10-Q.",
+      "severity": "PASS",
+      "interpretation": "No going-concern language and the balance sheet substantiates absence of doubt — net capital is several orders of magnitude above the SEC 15c3-1 floor and the company carries no funded debt. Mode B derivation confirms the implied solvency claim."
+    },
+    {
+      "claim_id": "C3",
+      "R": "For the year ended December 31, 2024, we earned GAAP revenues of $1,194.5 million compared with $854.7 million ... an increase of 40% compared to a de minimis increase in the number of global completed M&A transactions greater than $100 million in the same period.",
+      "f": "Self-consistency check vs subsequently filed Q1 2025 10-Q (accession 0000950170-25-057541, filed 2025-04-24) — does the revenue trajectory hold post-period?",
+      "M_source": "sec_filings (Q1 2025 10-Q MD&A)",
+      "M_value": "Q1 2025 revenues $306.6M vs Q1 2024 $217.5M = +41% YoY; net income $53.8M vs $17.5M = +208%; 60 clients with fees >=$1M vs 57 prior. Pre-cutoff data corroborates the FY24 inflection narrative.",
+      "severity": "PASS",
+      "interpretation": "Q1 2025 results filed before cutoff confirm the revenue inflection is real and continuing, not an FY24 anomaly. Fee productivity per MD up materially (917 advisory bankers at YE24, 934 at 1Q25)."
+    },
+    {
+      "claim_id": "C4",
+      "R": "10-K Outlook (filed Feb 27, 2025): 'We expect to see continued improvement in the M&A market ... we anticipate a prolonged restructuring cycle ... improving macroeconomic and investor sentiment has led to better capital raising ...'",
+      "f": "claim_evolution: compare to subsequent 10-Q outlook language (Q1 2025 filed 2025-04-24) for drift in tone/qualifiers (cutoff_date='2025-05-15').",
+      "M_source": "claim_evolution (manual classification — no API key)",
+      "M_value": "Q1 10-Q adds: 'Recent tariff policy announcements have introduced a new wave of volatility into the capital markets and the overall business environment which has caused a slowdown in the pace of announced M&A transactions ... current volatility may delay the timing of revenues ... the trajectory of capital markets remains unclear due to economic uncertainty.' Tone shifts from 'continued improvement expected' to 'may delay timing of revenues'.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Outlook claim DRIFTED meaningfully within 8 weeks of the 10-K — tariff-driven slowdown was acknowledged in 10-Q. This is honest disclosure rather than a lie (they upgraded the qualifier in the very next filing), but the 10-K's confident 'continued improvement' framing did not survive the next quarter's filing — a Mode-B claim-evolution flag."
+    },
+    {
+      "claim_id": "C5",
+      "R": "On August 8, 2023, we reached an agreement on an Offer of Settlement with the SEC to resolve an administrative cease-and-desist proceeding regarding our practices relating to recordkeeping of business communications on messaging applications. Moelis & Company LLC agreed to be censured, pay a civil monetary penalty of $10.0 million and comply with certain undertakings, including retaining a compliance consultant.",
+      "f": "edgar_fts.query_fulltext('West Palm Beach Firefighters' / 'Atlas Crest' / 'Singh Complaint') — verify other regulatory & litigation disclosures are anchored in the EDGAR record across multiple filings.",
+      "M_source": "edgar_fts",
+      "M_value": "'West Palm Beach Firefighters' returns 11 hits across MC 10-K/10-Q filings 2023-2025 (consistent disclosure of Delaware Chancery action). 'Atlas Crest' returns 21 hits. 'Singh Complaint' returns 2 hits. SEC settlement is also matched in the FY23 income statement footnote ($10.0M SEC fine reconciled inside Other Income line).",
+      "severity": "PASS",
+      "interpretation": "Material regulatory + litigation items (SEC off-channel settlement, WPB Firefighters Stockholders Agreement suit, Singh/Wortman Atlas Crest aiding-and-abetting class actions) are all disclosed consistently across filings. Mode-A verification passes."
+    },
+    {
+      "claim_id": "C6",
+      "R": "We have no meaningful concentration, with our top 10 transactions representing approximately 19% of our revenues in 2024.",
+      "f": "revenue_concentration: top-10 = 19% is genuinely low for an advisory boutique. Cross-check vs fee-paying client count and >$1M-fee client count.",
+      "M_source": "self_text (10-K Business + MD&A)",
+      "M_value": "FY24: 406 fee-paying clients, 241 with fees >=$1M (vs 304 / 175 in FY23). Top-10 share = 19%, so ~$227M from top-10 implies ~$23M avg per top-10 deal — consistent with multi-billion-dollar M&A advisory mandates and no single dominant client.",
+      "severity": "PASS",
+      "interpretation": "Concentration claim is internally consistent and supported by client-count disclosures. Lower concentration than disclosed mid-cap I-bank peers, reduces single-client downside."
+    },
+    {
+      "claim_id": "C7",
+      "R": "Form 4 insider activity (Mode B derivation): if management is selling heavily into the 10-K release and any positive FY24 print, that's a discordant signal even absent distress.",
+      "f": "insider_vs_calendar.query_insider_sales_near_budget_events(cik='0001596967', cutoff_date='2025-05-15', lookback_days=540) and EDGAR Form 4 timing review around 10-K filing date (2025-02-27) and dividend record date (2025-02-18).",
+      "M_source": "insider_vs_calendar / form4",
+      "M_value": "124 Form 4 filings in trailing 18 months; 67 sales totalling $53.7M. Form 4 activity is concentrated in Feb (15 in 2024-02, 22 in 2025-02), April, June, September, December — i.e., the annual bonus / RSU vest cycle (mid-Feb vest, end-of-quarter tax-withholding settlements). signal=NO_PROXIMATE_SALES against the default budget-event calendar (which doesn't fit an advisory firm).",
+      "severity": "PASS",
+      "interpretation": "Form 4 cadence matches compensation vest cycle, not opportunistic selling. No discretionary cluster around the 10-K release that would suggest insiders front-running a deterioration. Mr. Moelis retains 38% voting control via Class B — alignment is intact."
+    },
+    {
+      "claim_id": "C8",
+      "R": "On March 4, 2024, the Court of Chancery issued an interlocutory order, presently in effect, that certain provisions of the Stockholders Agreement, including the provisions relating to approval rights and director vacancies, are facially invalid, void, and unenforceable under Delaware law. The Company has filed an appeal.",
+      "f": "Mode B: governance overhang from West Palm Beach Firefighters' Pension Fund litigation — does the 10-K under-disclose the potential dilution of Mr. Moelis's control rights (Secondary Class B Condition fallback)?",
+      "M_source": "self_text + edgar_fts",
+      "M_value": "10-K acknowledges the adverse Chancery ruling on Stockholders Agreement approval rights, but Mr. Moelis's 38% voting power flows from Class B 10-vote-per-share structure (still in effect), not solely from the Stockholders Agreement. Risk-factor section explicitly maps the Secondary Class B Condition fallback. Disclosure appears complete; no hidden governance time-bomb.",
+      "severity": "PASS",
+      "interpretation": "Governance litigation is disclosed and the consequence (loss of approval-right provisions) is bounded. Class B dual-class structure itself was not invalidated. Not a forensic red flag, but a real overhang to monitor."
+    },
+    {
+      "claim_id": "C9",
+      "R": "Compensation and benefits expenses ... for the year ended December 31, 2024, compensation-related expenses of $830.2 million represented 69% of revenues, compared with $714.7 million which represented 84% of revenues in the prior year.",
+      "f": "Self-consistency: 84% comp ratio in 2023 (FY revenue decline year) and 76% in Q1 2024 are unusually high for an i-bank that targets ~65-70%. Did management 'over-accrue' bonuses in a down year to be reversed when revenues recovered?",
+      "M_source": "self_text (consolidated stmts of operations)",
+      "M_value": "FY22 comp ratio 63%, FY23 84%, FY24 69%, Q1-25 69%. The 84% 2023 ratio drove the FY23 GAAP operating loss of $40.4M. Management's discretionary-bonus accounting allows considerable smoothing — comp ratio of 69% in FY24 is consistent with restoring normalized payout after revenues rebounded.",
+      "severity": "UNVERIFIABLE",
+      "interpretation": "Discretionary comp accrual is a judgment call. The 2023 84% ratio is high relative to peers (Evercore/Houlihan/Lazard typically 60-67%); this could reflect (a) genuine retention pay in a down year or (b) cookie-jar reserving to be unwound. Insufficient external data to distinguish — flagging as UNVERIFIABLE rather than penalizing for disclosed accounting."
+    },
+    {
+      "claim_id": "C10",
+      "R": "During February 2025, the Board of Directors of Moelis & Company declared a quarterly dividend of $0.65 per share ... During the year ended December 31, 2024, the Company paid aggregate dividends of $2.40 per share. ... we have no obligation to do so, and our dividend policy may change at any time.",
+      "f": "Mode B: dividend coverage check. $0.65/qtr * ~73.9M Class A shares = ~$48M/qtr = ~$192M/yr base. FY24 net income $151.5M (parent share less NCI = ~$144M). Is the dividend over-distributing?",
+      "M_source": "self_text (cash flow + per-share data)",
+      "M_value": "FY24 financing cash outflow $215.1M (dividends + tax-withholding repurchases + partner tax distributions). FY24 operating cash flow $427.5M. Operating cash flow covers financing outflow 2.0x. Dividend is funded out of cash flow, not borrowing (zero debt). $412.5M cash + $147.9M investments = >$560M liquid reserves, more than 2 years of dividend at the current rate. February 2025 dividend was held flat at $0.65 — no cut signaling needed.",
+      "severity": "PASS",
+      "interpretation": "Dividend is covered by operating cash flow with ample cushion. Decision to hold (not raise) the dividend in February 2025 is conservative against the cyclical revenue stream — not a distressed retention. No covenant or capital-return red flag."
+    }
+  ],
+  "supplemental_signals": {
+    "auditor_tenure_years": 17,
+    "auditor_change_signal": "CLEAN_AUDITOR_TENURE",
+    "going_concern_signal": "NO_GOING_CONCERN",
+    "form4_n_sales_18mo": 67,
+    "form4_total_sale_value_usd": 53742487,
+    "form4_pattern": "vest_cycle_clustering (Feb/Jun/Sep/Dec) — no opportunistic 10-K-release sell-cluster",
+    "balance_sheet_debt": "zero funded debt; $50M aggregate revolver capacity undrawn",
+    "broker_dealer_net_capital_excess_usd_thousand": 203627,
+    "broker_dealer_net_capital_cushion_vs_minimum_x": 815,
+    "fy24_revenue_yoy_pct": 40,
+    "q1_25_revenue_yoy_pct": 41,
+    "fy23_gaap_operating_loss_usd_m": -40.4,
+    "fy24_gaap_operating_income_usd_m": 172.9,
+    "comp_ratio_fy23_pct": 84,
+    "comp_ratio_fy24_pct": 69,
+    "top10_revenue_concentration_pct": 19,
+    "dividend_per_share_q1_25": 0.65,
+    "outlook_drift_10k_to_10q": "MODERATE — 10-K (Feb 27) bullish on continued M&A improvement; Q1 10-Q (Apr 24) adds tariff-volatility slowdown qualifier; no withdrawal of guidance, no cut to dividend."
+  },
+  "summary": "Moelis is a textbook 'boring middle' name — the -23% pre-cutoff drawdown looks driven by macro/tariff-cycle re-rating (April 2025 Q1 10-Q acknowledges tariff-induced M&A slowdown and revenue-timing risk) rather than any forensic distress. The 10-K passes every honesty-detector check: 17-year Deloitte tenure with unqualified opinion, no going-concern language, no material-weakness disclosure, zero funded debt, $412M cash and $204M broker-dealer net capital (815x regulatory minimum), undrawn revolvers, disclosed SEC off-channel settlement and Atlas Crest / Stockholders-Agreement litigation all cross-anchored in EDGAR FTS. Form 4 activity clusters to the annual vest/comp cycle, not opportunistic selling. The one meaningful Mode-B finding is outlook drift between the Feb 10-K (confident 'continued improvement') and the April 10-Q (tariff slowdown delaying revenue timing), but that drift was disclosed honestly in the very next filing, which is the opposite of a lying-detector signal. Comp ratio bouncing 63%->84%->69% across FY22-24 is the only UNVERIFIABLE flag — discretionary-bonus accrual could mask earnings smoothing, but is also consistent with normalization after the FY23 revenue trough. Verdict: LONG-tier within boring_middle (clean disclosures, real Q1 inflection, sentiment-driven drawdown).",
+  "composite": 0.85
+}

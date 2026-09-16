@@ -1,0 +1,62 @@
+CRONTAB PATCH — broken_print_radar v2 session windows
+written 2026-08-11 by the v2 build; NOT applied (the user's crontab is never edited by an agent)
+=================================================================================================
+
+WHY THIS FILE EXISTS
+--------------------
+On 2026-08-11 ONON printed pre-market, broke ~-14% into the open and settled near -20%. No radar
+line surfaced it; the principal caught it by hand. The root cause was the CLOCK, not the universe
+and not the threshold:
+
+  desk/registry.py had broken_print_radar at cadence "daily" (= 1440 minutes). The only thing that
+  executes it is the consolidated heartbeat `30 * * * 1-5 ... desk.desk run`, and the cadence gate
+  in registry.due() lets a "daily" watch through exactly once per 24h. In practice that was the
+  00:30 PT heartbeat (log: 2026-08-11 01:35, reporting the settled 2026-08-10 session). A break
+  that happens during US regular trading hours could not be seen until the next small-hours run,
+  ~24 hours later.
+
+  Contributing, second order: the -15.0% bar. ONON traded around -14% through the morning. Even a
+  radar that HAD been looking at 11:00 ET would not have printed a line.
+
+WHAT IS ALREADY APPLIED (no user action required)
+------------------------------------------------
+desk/registry.py: broken_print_radar
+    cmd     -> ["python3", "-m", "desk.broken_print_radar", "--auto-window"]
+    cadence -> 60      (was "daily")
+
+Because the heartbeat already runs hourly on weekdays, this alone closes the gap: --auto-window
+reads the New York wall clock and runs only the legs whose tape is worth reading, with a
+once-per-window guard (desk/data/broken_print_radar_state.json) so the extra invocations are
+cheap no-ops. Effective coverage from the existing `30 * * * 1-5` heartbeat, in ET:
+
+    03:30, 04:30 ET  asia leg      (TSE closed 15:00 JST, KRX closed 15:30 KST)
+    10:30 - 15:30 ET us_intraday   (six scans through RTH, provisional -12% bar)
+    12:30, 13:30 ET  europe leg    (LSE closed 16:30 London, Euronext closed 17:30 CET)
+    16:30 ET onward  us_settled    (the completed session, full -15% bar, keyed to that session)
+
+OPTIONAL TIGHTENING (requires the user to edit their crontab)
+------------------------------------------------------------
+The heartbeat fires at :30, so the earliest RTH look is 10:30 ET — a print that breaks at 09:45 ET
+waits up to 45 minutes. If that latency matters, add ONE dedicated pin. All times below are
+PACIFIC, matching the existing crontab convention (the machine runs PT; `*/15 6-13` on the
+intraday sentinel is 09:00-16:45 ET).
+
+    # signalos broken-print radar — RTH fast leg (07:00-13:00 PT = 10:00-16:00 ET)
+    0,30 7-12 * * 1-5 cd /Users/ajay/exalted/signalos && /Library/Developer/CommandLineTools/usr/bin/python3 -m desk.broken_print_radar --auto-window --force >> /Users/ajay/exalted/signalos/desk/data/broken_print_radar.out 2>&1 # signalos broken-print RTH
+
+Notes on that line:
+  - --force is required ONLY on a sub-hourly pin, because the intraday once-per-window guard is
+    keyed to the hour. Without --force the second run inside an hour is correctly skipped.
+  - Do NOT add pins for the asia/europe/settled legs. Those are once-per-session by design and the
+    hourly heartbeat already lands inside every one of their windows; a second pin would just
+    burn Yahoo rate limit for a guard-skipped no-op.
+  - Yahoo rate-limits by IP and enrichment costs 2 calls/name. The intraday leg is capped at
+    --max-enrich 10 for this reason. If YFRateLimitError starts appearing in the log, drop the
+    fast leg to hourly (delete the `0,` and the `--force`) rather than widening the caps.
+
+VERIFY AFTER APPLYING
+---------------------
+    python3 -m desk.broken_print_radar --auto-window --dry
+        -> prints "auto-window <ts> ET (US session RTH) — legs due: us_intraday"
+    python3 -m pytest tests/test_broken_print_radar_v2.py -q
+        -> 30 passed (the session-window block is the regression test for this miss)

@@ -1,0 +1,564 @@
+{
+  "ticker": "RIVN",
+  "cutoff": "2022-04-30",
+  "n_claims": 8,
+  "n_contradicted": 0,
+  "claims": [
+    {
+      "claim_id": "C-001",
+      "claim_text": "The company has an agreement with Amazon under which Amazon has initially ordered 100,000 EDVs, subject to modification.",
+      "subject": "Rivian Automotive, Inc.",
+      "predicate": "has_customer_order_from",
+      "object_value": "Amazon / 100,000 EDVs",
+      "source_quote": "In September 2019, we entered into an agreement with Amazon under which Amazon has initially ordered 100,000 EDVs, subject to modification as described below under Certain Relationships and Related Party Transactions.",
+      "category": "customer_pipeline"
+    },
+    {
+      "claim_id": "C-002",
+      "claim_text": "The company plans to deliver at least 10 EDV vehicles in December 2021.",
+      "subject": "Rivian Automotive, Inc.",
+      "predicate": "produces_vehicle",
+      "object_value": "EDV / 10+ vehicles in December 2021",
+      "source_quote": "We expect to deliver at least 10 vehicles in the month of December 2021.",
+      "category": "production_volume"
+    },
+    {
+      "claim_id": "C-003",
+      "claim_text": "The company is building the Rivian Adventure Network (RAN), a planned collection of more than 3,500 Rivian-engineered DCFCs located at approximately 600 sites by 2023.",
+      "subject": "Rivian Automotive, Inc.",
+      "predicate": "has_fueling_stations",
+      "object_value": "RAN / 3,500+ DCFCs at 600 sites by 2023",
+      "source_quote": "We are building the RAN, a planned collection of more than 3,500 Rivian-engineered DCFCs located at approximately 600 sites by 2023 on popular thoroughfares and major highways intended for quick, convenient recharges.",
+      "category": "fueling_infrastructure"
+    },
+    {
+      "claim_id": "C-004",
+      "claim_text": "The company plans to deploy approximately 10,000 Rivian Waypoints chargers across the United States and Canada.",
+      "subject": "Rivian Automotive, Inc.",
+      "predicate": "has_fueling_stations",
+      "object_value": "Rivian Waypoints / 10,000 chargers in US and Canada",
+      "source_quote": "Over time, we plan to deploy approximately 10,000 Rivian Waypoints chargers across the United States and Canada.",
+      "category": "fueling_infrastructure"
+    },
+    {
+      "claim_id": "C-005",
+      "claim_text": "The company released its first consumer vehicle, the R1T, in September 2021.",
+      "subject": "Rivian Automotive, Inc.",
+      "predicate": "produces_vehicle",
+      "object_value": "R1T / September 2021 launch",
+      "source_quote": "We released our first consumer vehicle, the R1T, in September 2021 and plan to launch the R1S in December 2021 following the completion of ongoing vehicle validation and all required testing",
+      "category": "production_volume"
+    },
+    {
+      "claim_id": "C-006",
+      "claim_text": "The company operates a manufacturing facility in Normal, Illinois dedicated to production of R1T, R1S, and EDV vehicles.",
+      "subject": "Rivian Automotive, Inc.",
+      "predicate": "operates_factory_at",
+      "object_value": "Normal, Illinois",
+      "source_quote": "may need to manufacture our vehicles in increasingly higher volumes than our present production capabilities at our manufacturing facility in Normal, Illinois (the Normal Factory ).",
+      "category": "physical_facility"
+    },
+    {
+      "claim_id": "C-007",
+      "claim_text": "The company has principal executive offices located at 14600 Myford Road, Irvine, CA 92606.",
+      "subject": "Rivian Automotive, Inc.",
+      "predicate": "operates_facility_at",
+      "object_value": "14600 Myford Road, Irvine, CA 92606",
+      "source_quote": "Our principal executive offices are located at 14600 Myford Road, Irvine, CA 92606",
+      "category": "physical_facility"
+    },
+    {
+      "claim_id": "C-008",
+      "claim_text": "The company plans to deliver 100,000 EDVs by 2025 to Amazon as part of their ongoing relationship.",
+      "subject": "Rivian Automotive, Inc.",
+      "predicate": "has_customer_order_from",
+      "object_value": "Amazon / 100,000 EDVs by 2025",
+      "source_quote": "We plan to deliver 100,000 EDVs by 2025 and continue our relationship with Amazon thereafter.",
+      "category": "customer_pipeline"
+    }
+  ],
+  "evidence": {
+    "C-003": [
+      {
+        "source": "nrel_fuel.query_alt_fuel_stations",
+        "kwargs": {
+          "fuel_type": "ELEC",
+          "cutoff_date": "2022-04-30",
+          "name_filter": "Rivian"
+        },
+        "rationale": "Claim asserts Rivian is building a network of 3,500+ DCFCs (EV charging stations) at 600 sites by 2023; the NREL fuel stations registry will show actual deployed charging stations under the Rivian brand as of the cutoff date.",
+        "result": {
+          "error": "nrel_api_failed: Client error '429 Too Many Requests' for url 'https://developer.nrel.gov/api/alt-fuel-stations/v1.json?api_key=DEMO_KEY&fuel_type=ELEC&status=all&limit=all'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429"
+        }
+      }
+    ],
+    "C-002": [
+      {
+        "source": "nhtsa.query_manufacturer",
+        "kwargs": {
+          "name": "Rivian"
+        },
+        "rationale": "Claim asserts delivery of EDV (electric delivery vehicles) in December 2021, which is a complete vehicle production claim; NHTSA registration would confirm Rivian's manufacturer status and vehicle types.",
+        "result": {
+          "search_term": "Rivian",
+          "n_manufacturers": 1,
+          "manufacturers": [
+            {
+              "mfr_name": "RIVIAN AUTOMOTIVE LLC",
+              "mfr_id": 18870,
+              "country": "UNITED STATES (USA)",
+              "address": "14600 Myford Rd",
+              "vehicle_types": [
+                "Truck",
+                "Multipurpose Passenger Vehicle (MPV)"
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "C-006": [
+      {
+        "source": "epa_frs.query_facilities",
+        "kwargs": {
+          "facility_name": "Rivian",
+          "state_abbr": "IL",
+          "city_filter": "NORMAL"
+        },
+        "rationale": "Claim asserts Rivian operates a manufacturing facility in Normal, Illinois; EPA FRS query can verify presence of a factory-named facility in that state and city.",
+        "result": {
+          "search_name": "Rivian",
+          "state_abbr": "IL",
+          "city_filter": "NORMAL",
+          "n_facilities": 8,
+          "facilities": [
+            {
+              "registry_id": "110071707459",
+              "facility_name": "RIVIAN - BIW BUFFER",
+              "address": "100 RIVIAN MOTORWAY",
+              "city": "NORMAL",
+              "county": null,
+              "state": "IL",
+              "zip": "61761",
+              "lat": "40.5094",
+              "lon": "-89.0527"
+            },
+            {
+              "registry_id": "110071823131",
+              "facility_name": "RIVIAN - NEW NORMAL - MID-SIZE PLATFORM VEHICLE FACTORY",
+              "address": "100 N. RIVIAN MOTORWAY",
+              "city": "NORMAL",
+              "county": null,
+              "state": "IL",
+              "zip": "61761",
+              "lat": "40.5051",
+              "lon": "-89.0491"
+            },
+            {
+              "registry_id": "110071064219",
+              "facility_name": "RIVIAN AUTOMOTIVE",
+              "address": "301 KERRICK RD",
+              "city": "NORMAL",
+              "county": "MCLEAN COUNTY",
+              "state": "IL",
+              "zip": "61761",
+              "lat": "40.552088",
+              "lon": "-88.994165"
+            },
+            {
+              "registry_id": "110071139343",
+              "facility_name": "RIVIAN AUTOMOTIVE (NORMAL SERVICE)",
+              "address": "2430 ELECTRIC AVE",
+              "city": "NORMAL",
+              "county": "MCLEAN",
+              "state": "IL",
+              "zip": "61761",
+              "lat": "40.51714",
+              "lon": "-89.054743"
+            },
+            {
+              "registry_id": "110072110001",
+              "facility_name": "RIVIAN AUTOMOTIVE - NEW NORMAL II - RAIL EXPANSION",
+              "address": "100 RIVIAN MOTORWAY",
+              "city": "NORMAL",
+              "county": null,
+              "state": "IL",
+              "zip": "61761",
+              "lat": "40.517",
+              "lon": "-89.0483"
+            },
+            {
+              "registry_id": "110070359609",
+              "facility_name": "RIVIAN AUTOMOTIVE LLC",
+              "address": "100 N MISUBISHI MOTORWAY",
+              "city": "NORMAL",
+              "county": "MCLEAN COUNTY",
+              "state": "IL",
+              "zip": "61761",
+              "lat": "40.509195",
+              "lon": "-89.054342"
+            },
+            {
+              "registry_id": "110071501161",
+              "facility_name": "RIVIAN N1.0 WEST EXPANSION",
+              "address": "100 N. RIVIAN MOTORWAY",
+              "city": "NORMAL",
+              "county": null,
+              "state": "IL",
+              "zip": "61761",
+              "lat": "40.5059",
+              "lon": "-89.0572"
+            },
+            {
+              "registry_id": "110071783827",
+              "facility_name": "W COLLEGE AVE (US 150 / RIVIAN MTWY TO 65' W OF NORFOLK SOUTHERN RAILROAD)",
+              "address": "WHITE OAK RD & W. COLLEGE AVE",
+              "city": "NORMAL",
+              "county": null,
+              "state": "IL",
+              "zip": "61761",
+              "lat": "40.4875",
+              "lon": "-89.0406"
+            }
+          ],
+          "epa_error": null
+        }
+      },
+      {
+        "source": "nhtsa.query_manufacturer",
+        "kwargs": {
+          "name": "Rivian"
+        },
+        "rationale": "Claim asserts production of complete vehicles (R1T, R1S, EDV); NHTSA manufacturer registry can confirm Rivian is registered to produce these vehicle types and not just incomplete vehicles.",
+        "result": {
+          "search_term": "Rivian",
+          "n_manufacturers": 1,
+          "manufacturers": [
+            {
+              "mfr_name": "RIVIAN AUTOMOTIVE LLC",
+              "mfr_id": 18870,
+              "country": "UNITED STATES (USA)",
+              "address": "14600 Myford Rd",
+              "vehicle_types": [
+                "Truck",
+                "Multipurpose Passenger Vehicle (MPV)"
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "C-005": [
+      {
+        "source": "nhtsa.query_manufacturer",
+        "kwargs": {
+          "name": "Rivian"
+        },
+        "rationale": "Claim asserts Rivian released its first consumer vehicle (R1T) in September 2021, a complete passenger vehicle; NHTSA manufacturer registration and vehicle type classification will confirm or contradict this production claim.",
+        "result": {
+          "search_term": "Rivian",
+          "n_manufacturers": 1,
+          "manufacturers": [
+            {
+              "mfr_name": "RIVIAN AUTOMOTIVE LLC",
+              "mfr_id": 18870,
+              "country": "UNITED STATES (USA)",
+              "address": "14600 Myford Rd",
+              "vehicle_types": [
+                "Truck",
+                "Multipurpose Passenger Vehicle (MPV)"
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "C-001": [
+      {
+        "source": "edgar_fts.query_fulltext",
+        "kwargs": {
+          "search_term": "Rivian",
+          "cutoff_date": "2022-04-30",
+          "cik": "0001018724",
+          "start_date": "2018-01-01"
+        },
+        "rationale": "The claim asserts a named US-listed counterparty (Amazon, CIK 0001018724) has placed a material order (100,000 EDVs) with Rivian; Amazon's own SEC filings should disclose this supply commitment.",
+        "result": {
+          "search_term": "Rivian",
+          "cik": "0001018724",
+          "total_hits": 15,
+          "top_filings": [
+            {
+              "form": "10-Q",
+              "filing_date": "2022-04-29",
+              "accession": "0001018724-22-000013:amzn-20220331.htm",
+              "company": [
+                "AMAZON COM INC  (AMZN)  (CIK 0001018724)"
+              ]
+            },
+            {
+              "form": "8-K",
+              "filing_date": "2021-04-15",
+              "accession": "0001104659-21-050346:tm216818d2_ex99-1.htm",
+              "company": [
+                "AMAZON COM INC  (AMZN)  (CIK 0001018724)"
+              ]
+            },
+            {
+              "form": "10-K",
+              "filing_date": "2022-02-04",
+              "accession": "0001018724-22-000005:amzn-20211231.htm",
+              "company": [
+                "AMAZON COM INC  (AMZN)  (CIK 0001018724)"
+              ]
+            },
+            {
+              "form": "8-K",
+              "filing_date": "2020-04-16",
+              "accession": "0001193125-20-108427:d902615dex991.htm",
+              "company": [
+                "AMAZON COM INC  (AMZN)  (CIK 0001018724)"
+              ]
+            },
+            {
+              "form": "8-K",
+              "filing_date": "2022-02-03",
+              "accession": "0001018724-22-000002:amzn-20211231xex991.htm",
+              "company": [
+                "AMAZON COM INC  (AMZN)  (CIK 0001018724)"
+              ]
+            },
+            {
+              "form": "8-K",
+              "filing_date": "2020-10-29",
+              "accession": "0001018724-20-000028:amzn-20200930xex991.htm",
+              "company": [
+                "AMAZON COM INC  (AMZN)  (CIK 0001018724)"
+              ]
+            },
+            {
+              "form": "8-K",
+              "filing_date": "2019-07-25",
+              "accession": "0001018724-19-000069:amzn-2019630xex991.htm",
+              "company": [
+                "AMAZON COM INC  (AMZN)  (CIK 0001018724)"
+              ]
+            },
+            {
+              "form": "8-K",
+              "filing_date": "2019-10-24",
+              "accession": "0001018724-19-000087:amzn-2019930xex991.htm",
+              "company": [
+                "AMAZON COM INC  (AMZN)  (CIK 0001018724)"
+              ]
+            },
+            {
+              "form": "8-K",
+              "filing_date": "2020-01-30",
+              "accession": "0001018724-20-000002:amzn-20191231xex991.htm",
+              "company": [
+                "AMAZON COM INC  (AMZN)  (CIK 0001018724)"
+              ]
+            },
+            {
+              "form": "8-K",
+              "filing_date": "2021-02-02",
+              "accession": "0001018724-21-000002:amzn-20201231xex991.htm",
+              "company": [
+                "AMAZON COM INC  (AMZN)  (CIK 0001018724)"
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "C-008": [
+      {
+        "source": "edgar_fts.query_fulltext",
+        "kwargs": {
+          "search_term": "Rivian",
+          "cutoff_date": "2022-04-30",
+          "cik": "0001018724",
+          "start_date": "2020-01-01"
+        },
+        "rationale": "The claim asserts a named US-listed counterparty (Amazon) has placed a specific order (100,000 EDVs) with Rivian; this order should be disclosed in Amazon's SEC filings if material.",
+        "result": {
+          "search_term": "Rivian",
+          "cik": "0001018724",
+          "total_hits": 13,
+          "top_filings": [
+            {
+              "form": "10-Q",
+              "filing_date": "2022-04-29",
+              "accession": "0001018724-22-000013:amzn-20220331.htm",
+              "company": [
+                "AMAZON COM INC  (AMZN)  (CIK 0001018724)"
+              ]
+            },
+            {
+              "form": "8-K",
+              "filing_date": "2021-04-15",
+              "accession": "0001104659-21-050346:tm216818d2_ex99-1.htm",
+              "company": [
+                "AMAZON COM INC  (AMZN)  (CIK 0001018724)"
+              ]
+            },
+            {
+              "form": "10-K",
+              "filing_date": "2022-02-04",
+              "accession": "0001018724-22-000005:amzn-20211231.htm",
+              "company": [
+                "AMAZON COM INC  (AMZN)  (CIK 0001018724)"
+              ]
+            },
+            {
+              "form": "8-K",
+              "filing_date": "2020-04-16",
+              "accession": "0001193125-20-108427:d902615dex991.htm",
+              "company": [
+                "AMAZON COM INC  (AMZN)  (CIK 0001018724)"
+              ]
+            },
+            {
+              "form": "8-K",
+              "filing_date": "2022-02-03",
+              "accession": "0001018724-22-000002:amzn-20211231xex991.htm",
+              "company": [
+                "AMAZON COM INC  (AMZN)  (CIK 0001018724)"
+              ]
+            },
+            {
+              "form": "8-K",
+              "filing_date": "2020-10-29",
+              "accession": "0001018724-20-000028:amzn-20200930xex991.htm",
+              "company": [
+                "AMAZON COM INC  (AMZN)  (CIK 0001018724)"
+              ]
+            },
+            {
+              "form": "8-K",
+              "filing_date": "2020-01-30",
+              "accession": "0001018724-20-000002:amzn-20191231xex991.htm",
+              "company": [
+                "AMAZON COM INC  (AMZN)  (CIK 0001018724)"
+              ]
+            },
+            {
+              "form": "8-K",
+              "filing_date": "2021-02-02",
+              "accession": "0001018724-21-000002:amzn-20201231xex991.htm",
+              "company": [
+                "AMAZON COM INC  (AMZN)  (CIK 0001018724)"
+              ]
+            },
+            {
+              "form": "8-K",
+              "filing_date": "2022-04-28",
+              "accession": "0001018724-22-000011:amzn-20220331xex991.htm",
+              "company": [
+                "AMAZON COM INC  (AMZN)  (CIK 0001018724)"
+              ]
+            },
+            {
+              "form": "DEF 14A",
+              "filing_date": "2020-04-16",
+              "accession": "0001193125-20-108422:d897711ddef14a.htm",
+              "company": [
+                "AMAZON COM INC  (AMZN)  (CIK 0001018724)"
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "C-007": [],
+    "C-004": [
+      {
+        "source": "nrel_fuel.query_alt_fuel_stations",
+        "kwargs": {
+          "fuel_type": "ELEC",
+          "cutoff_date": "2022-04-30",
+          "name_filter": "Rivian"
+        },
+        "rationale": "Claim asserts Rivian plans to deploy approximately 10,000 EV charging stations (Rivian Waypoints) across the United States and Canada; this recipe tests whether the claimed charger network exists in DOE's authoritative registry as of the cutoff date.",
+        "result": {
+          "error": "nrel_api_failed: Client error '429 Too Many Requests' for url 'https://developer.nrel.gov/api/alt-fuel-stations/v1.json?api_key=DEMO_KEY&fuel_type=ELEC&status=all&limit=all'\nFor more information check: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429"
+        }
+      }
+    ]
+  },
+  "findings": [
+    {
+      "claim_id": "C-001",
+      "claim_text": "The company has an agreement with Amazon under which Amazon has initially ordered 100,000 EDVs, subject to modification.",
+      "severity": "UNVERIFIABLE",
+      "M_supports_claim": null,
+      "M_check": "Searched Amazon (CIK 0001018724) SEC filings for disclosure of Rivian supply commitment; obtained filing metadata only, not full-text content.",
+      "M_value": "Query returned 15 hits including Amazon 10-K, 10-Q, and 8-K filings from 2019\u20132022 period (covering the September 2019 agreement date), but the result set contains only filing headers and accession numbers, not searchable document text or substantive content.",
+      "interpretation": "The evidence framework successfully identified relevant Amazon SEC filings that would plausibly contain disclosure of a material supplier commitment (10-K annual reports and 8-K current reports are standard venues for such disclosures). However, the returned result object lacks the actual filing content needed to verify whether Amazon disclosed the Rivian 100,000 EDV order. To resolve this claim, the full text of Amazon's 2020 10-K (filed Feb 2021, covering FY 2020) or 2019 10-K (filed Feb 2020, covering the September 2019 agreement date) would need to be retrieved and searched for 'Rivian' mentions and supply commitment language."
+    },
+    {
+      "claim_id": "C-002",
+      "claim_text": "The company plans to deliver at least 10 EDV vehicles in December 2021.",
+      "severity": "UNVERIFIABLE",
+      "M_supports_claim": null,
+      "M_check": "NHTSA manufacturer registration query for Rivian; vehicle types registered vs. EDV delivery volume in December 2021.",
+      "M_value": "Rivian is registered as a manufacturer (NHTSA ID 18870) with vehicle types listed as 'Truck' and 'Multipurpose Passenger Vehicle (MPV)'. No delivery volume data or EDV-specific type classification found.",
+      "interpretation": "NHTSA registration confirms Rivian's manufacturer status but does not include production volume data or delivery counts for specific months/years. The vehicle types registered (Truck, MPV) do not explicitly mention 'EDV' (electric delivery vehicle), though an electric truck could fall under Truck category. Historical delivery records from Q4 2021 would require SEC filings, earnings reports, or delivery databases\u2014not accessible via NHTSA. The claim cannot be verified or falsified with the available evidence."
+    },
+    {
+      "claim_id": "C-003",
+      "claim_text": "The company is building the Rivian Adventure Network (RAN), a planned collection of more than 3,500 Rivian-engineered DCFCs located at approximately 600 sites by 2023.",
+      "severity": "UNVERIFIABLE",
+      "M_supports_claim": null,
+      "M_check": "Query to NREL Alternative Fuel Stations registry for Rivian-branded electric charging stations as of April 2022",
+      "M_value": "API rate-limit error (HTTP 429); no data retrieved",
+      "interpretation": "The NREL fuel stations registry is the appropriate public source for verifying deployed EV charging infrastructure, but the query failed due to rate-limiting. Without access to the registry, we cannot determine whether Rivian had actually deployed charging stations matching the claim's 3,500+ DCFC / 600-site target by the 2023 deadline. This is a technical failure, not evidence of fraud or accuracy."
+    },
+    {
+      "claim_id": "C-004",
+      "claim_text": "The company plans to deploy approximately 10,000 Rivian Waypoints chargers across the United States and Canada.",
+      "severity": "UNVERIFIABLE",
+      "M_supports_claim": null,
+      "M_check": "Query to NREL Alternative Fuel Stations API for Rivian-branded electric charging stations (cutoff: 2022-04-30)",
+      "M_value": "API rate-limit error (HTTP 429) \u2014 no station data retrieved",
+      "interpretation": "The evidence source failed due to rate-limiting on the NREL API, preventing verification of whether Rivian Waypoints chargers appear in the DOE's authoritative alternative fuel station registry as of the cutoff date. This is a technical query failure, not a factual contradiction. No inference about the claim's truth value can be drawn from a failed data source."
+    },
+    {
+      "claim_id": "C-005",
+      "claim_text": "The company released its first consumer vehicle, the R1T, in September 2021.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "M_supports_claim": true,
+      "M_check": "NHTSA manufacturer registration query for Rivian to verify R1T production and vehicle type classification",
+      "M_value": "Rivian Automotive LLC is registered with NHTSA (mfr_id 18870) as a manufacturer producing Truck and Multipurpose Passenger Vehicle (MPV) types; registration confirms production capability but does not specify launch date or model name (R1T).",
+      "interpretation": "The NHTSA registry corroborates that Rivian is a legitimate registered vehicle manufacturer producing trucks, which aligns with the R1T being a truck. However, the registry does not contain specific launch dates, model names, or production volume data\u2014it only confirms manufacturing registration and vehicle-type categories. The claim's specific assertion about September 2021 release cannot be verified through this source alone, though nothing contradicts it. This represents partial but incomplete evidence support."
+    },
+    {
+      "claim_id": "C-006",
+      "claim_text": "The company operates a manufacturing facility in Normal, Illinois dedicated to production of R1T, R1S, and EDV vehicles.",
+      "severity": "PASS",
+      "M_supports_claim": true,
+      "M_check": "EPA FRS facility registry query for Rivian in Normal, Illinois + NHTSA manufacturer registration for vehicle types",
+      "M_value": "EPA FRS returns 8 Rivian-related facilities in Normal, IL including 'NEW NORMAL - MID-SIZE PLATFORM VEHICLE FACTORY' and 'NEW NORMAL II - RAIL EXPANSION'; NHTSA confirms Rivian Automotive LLC registered as manufacturer of Truck and Multipurpose Passenger Vehicle (MPV) types.",
+      "interpretation": "The EPA FRS registry directly corroborates Rivian's operation of a manufacturing facility in Normal, Illinois, with multiple facility records at the same Motorway address confirming ongoing automotive production operations. NHTSA registration confirms Rivian manufactures Truck (R1T) and MPV (R1S/EDV) vehicle types as complete vehicles, not incomplete units. The facility names explicitly reference mid-size platform vehicle production and expansions, aligning with the R1T, R1S, and EDV product line assertion."
+    },
+    {
+      "claim_id": "C-007",
+      "claim_text": "The company has principal executive offices located at 14600 Myford Road, Irvine, CA 92606.",
+      "severity": "UNVERIFIABLE",
+      "M_supports_claim": null,
+      "M_check": "Search for Rivian Automotive, Inc. principal executive office address in public records (SEC filings, corporate registry, business databases).",
+      "M_value": "No evidence data provided; query framework unable to return results.",
+      "interpretation": "The evidence array is empty, preventing verification of the claimed address at 14600 Myford Road, Irvine, CA 92606. This is a query failure rather than a factual contradiction. A proper assessment requires access to SEC Form 10-K/10-Q filings or California Secretary of State corporate records where Rivian's principal place of business is registered."
+    },
+    {
+      "claim_id": "C-008",
+      "claim_text": "The company plans to deliver 100,000 EDVs by 2025 to Amazon as part of their ongoing relationship.",
+      "severity": "UNVERIFIABLE",
+      "M_supports_claim": null,
+      "M_check": "Searched Amazon's SEC filings (2020\u20132022) for disclosure of Rivian order; obtained filing metadata but no extraction of actual text content.",
+      "M_value": "Query returned 13 hits across Amazon 10-K, 10-Q, 8-K, and DEF 14A filings mentioning 'Rivian,' but evidence dataset contains only filing headers and metadata\u2014no substantive text excerpts confirming, denying, or quantifying the 100,000 EDV order claim.",
+      "interpretation": "Although Amazon's SEC filings were identified and searched, the evidence provided consists only of filing metadata (form type, date, accession number) without extraction of the actual disclosure content. A material customer order of 100,000 vehicles would likely be disclosed in Amazon's 10-K or 8-K filings, but we cannot verify the claim's specifics (order volume, delivery timeline, or relationship continuity) without access to the full text of these documents. This is a framework limitation, not a fraud signal."
+    }
+  ]
+}

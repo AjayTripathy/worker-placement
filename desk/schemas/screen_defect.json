@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "screen_defect (one JSONL row)",
+  "type": "object",
+  "required": ["date", "screen", "defect", "fix_direction", "status"],
+  "properties": {
+    "date": {"type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$"},
+    "screen": {"type": "string", "minLength": 1},
+    "defect": {"type": "string", "minLength": 10},
+    "names_hit": {"type": "array", "items": {"type": "string"}},
+    "fix_direction": {"type": "string", "minLength": 5},
+    "status": {"enum": ["open", "fix_landed", "fix_verified_e2e", "wont_fix", "superseded"]},
+    "fix_commit": {"type": "string"},
+    "e2e_verified": {
+      "type": "object",
+      "description": "PRD R1.7: required to close a defect — the screen re-ran end-to-end and the caught names' corrected values were checked in fresh output",
+      "required": ["run_date", "assertions"],
+      "properties": {
+        "run_date": {"type": "string"},
+        "assertions": {"type": "array", "items": {"type": "string"}, "minItems": 1}
+      }
+    }
+  }
+}

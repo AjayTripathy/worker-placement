@@ -1,0 +1,104 @@
+{
+  "ticker": "LHX",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Tactical Communications (software-defined resilient comms / tactical radios) — $179M growth in CS; noted lower DoW demand.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["pentagon_jbook NOT_FOUND for 'Handheld Manpack Small Form Fit Radios' and 'tactical radio'"],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Handheld Manpack...') / (program_name='tactical radio')",
+      "M_value": "signal=NOT_FOUND on both queries",
+      "interpretation": "Army tactical radio PoR (HMS Manpack / Leader Radio) is a Procurement (P-40) line item not represented in our 410-PE RDT&E-heavy corpus. Coverage gap. However, the filing itself flags 'lower DoW demand' on tactical comms — the international-deliveries growth narrative masks a domestic DoW softness signal. Treat as UNVERIFIABLE per J-BOOK heuristic 7; flag for follow-up via P-40 procurement exhibits."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Broadband Communications +$82M from program ramps including Next Generation Jammer Electronic Warfare program.",
+      "severity": "PASS",
+      "supports": ["pentagon_jbook FUNDED_GROWING on PE 0604270F Electronic Warfare Development (FY24 $23.7M -> FY25 $13.8M -> FY26 $17.0M)", "NGJ-specific PE NOT_FOUND in corpus but EW Development umbrella PE is funded"],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Next Generation Jammer') / (program_name='Electronic Warfare Development')",
+      "M_value": "NGJ direct: NOT_FOUND; EW Development PE 0604270F: FUNDED_GROWING (FY26 +24% vs FY25)",
+      "interpretation": "NGJ is principally a Navy procurement program (not in AF RDT&E corpus). Closest umbrella PE shows growing funding. No divergence signal. Forward narrative is consistent with funded posture."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "SAS Space Systems — satellites and space payloads; revenue declined $166M YoY despite SDA Tracking Layer prime status. Forward depends on Tranche 3.",
+      "severity": "PASS",
+      "supports": ["pentagon_jbook by contractor 'L3 Harris' returns Tranche 3 Tracking Layer PWSA (PE 1206410SF) FUNDED_STEADY, $3.5B awarded Dec 2025 across 4 contractors", "Resilient Missile Warning MT-LEO PE 1206446SF FUNDED_STEADY", "Note: same PE number 1206410SF disambiguates to TRANSPORT Layer (UNFUNDED_TWO_PLUS_YEARS, replaced by SDN Backbone) but the J-Book corpus also tracks the Tracking Layer entry which IS funded; L3Harris is on Tracking, not Transport"],
+      "M_check": "pentagon_jbook.query_program_funding(contractor_name='L3 Harris') AND (pe_number='1206410SF') AND (program_name='Resilient Missile Warning Missile Tracking')",
+      "M_value": "Tracking Layer: FUNDED_STEADY $3.5B FY26. Transport Layer at same PE: UNFUNDED. L3Harris is on Tracking per contractor lookup.",
+      "interpretation": "PE name-ambiguity per J-BOOK heuristic 4: the PE number alone collides with Transport Layer which is being killed (SDA dissolved, replaced by SDN Backbone). L3Harris is a primary on the Tracking variant which IS funded. Score PASS, but flag this as a narrative caveat — the broader SDA architecture is being restructured and L3Harris' Space Systems revenue already declined $166M in FY25 on 'program timing'. Watch for spillover into Tracking Layer execution risk."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "$155B reconciliation pkg includes priorities 'closely aligned with L3Harris interests', specifically Golden Dome, munitions, shipbuilding.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["pentagon_jbook NOT_FOUND for 'Golden Dome' (new initiative, no PE yet in corpus)", "Hypersonic Defense PE 0604181C FUNDED_STEADY ($200M FY26)", "AEGIS BMD PE 0603892C FUNDED_STEADY ($588M FY26)"],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Golden Dome'/'Hypersonic Defense'/'AEGIS BMD')",
+      "M_value": "Golden Dome: NOT_FOUND. Adjacent BMD/hypersonic-defense PEs: FUNDED_STEADY but each slightly declining FY25->FY26.",
+      "interpretation": "Golden Dome is a 2025-announced White House initiative that has NOT yet been instantiated as a PE in the FY26 J-Book; the reconciliation $155B is appropriated but not yet line-itemized. Filing's claim that LHX 'interests are closely aligned' is real but pipeline is unverifiable at PE granularity. Adjacent funded BMD PEs anchor the thesis only weakly. Downgrade to MODERATE per heuristic 2 — narrative load-bearing for the SAS+AR pivot but not yet booked."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "AR — +$235M Missile Solutions on key missile/munitions production volume + new program ramp; AR segment +10% growth.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["Conventional Munitions PE 0602602F FUNDED_STEADY ($125M FY26, down 12% YoY)", "Hypersonics Prototyping PE 0604033F UNFUNDED_TWO_PLUS_YEARS ($28M FY24 -> $0 FY25 -> $0 FY26)", "Hypersonics Prototyping-HACM same PE UNFUNDED_TWO_PLUS_YEARS"],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Conventional Munitions'/'Hypersonics Prototyping'/'Hypersonics Prototyping - Hypersonic Attack Cruise Missile')",
+      "M_value": "Munitions: FUNDED_STEADY (modest declines). Hypersonics Prototyping AF Vol II PE 0604033F: UNFUNDED 2 yrs running.",
+      "interpretation": "FY25 actuals look real (production volume cited), but the FORWARD AF RDT&E hypersonics-prototyping PE went to $0 in FY25 and stayed $0 in FY26. Conventional munitions is funded but trending down. The AR rollup thesis (Aerojet Rocketdyne) is materially exposed to hypersonics prototyping R&D drying up at the Air Force. Score MODERATE: production work continues but the R&D feeder PE for next-generation hypersonics is zero. (Note: other-service hypersonics PEs not queried may carry funding — coverage caveat.)"
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "AR Space Propulsion +$56M on NASA volume; $85M goodwill impairment on Space Technology disposal group.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": ["pentagon_jbook NOT_FOUND for 'Space Launch System' (NASA, not DoD)", "Aerospace Propulsion and Power Technology PE 0603216F UNFUNDED_TWO_PLUS_YEARS ($92M FY24 -> $0 FY25 -> $0 FY26)"],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Space Launch System'/'Aerospace Propulsion and Power Technology')",
+      "M_value": "AF Aerospace Propulsion & Power Tech RDT&E zeroed two consecutive FYs. SLS (NASA) outside DoD J-Book corpus.",
+      "interpretation": "The $85M GOODWILL IMPAIRMENT on the Space Technology disposal group is itself a self-disclosed concession that forward space-propulsion economics are impaired. J-Book confirms the corresponding AF RDT&E PE went to zero. Score SEVERE: management is partially writing down the same exposure pentagon_jbook flags. NASA SLS revenue ($56M up) is a real but small cushion against a much larger structural zero-out. Per heuristic 6, past USAspending revenue was real but forward pipeline is gone."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "IMS — +$359M ISR ramp (multiple classified programs + ROK AEW&C), +$41M Targeting & Sensor Systems.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["Multi-Platform Electronic Warfare Equipment PE 0207040F UNFUNDED_TWO_PLUS_YEARS ($14M FY24 -> $0 FY25 -> $0 FY26)", "Airborne SIGINT Enterprise PE 0304260F FUNDED_STEADY", "Airborne Reconnaissance Systems PE 0305206F FUNDED_SHRINKING ($84M FY25 -> $25M FY26, -70%)"],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Multi-Platform Electronic Warfare Equipment'/'Airborne SIGINT Enterprise'/'Airborne Reconnaissance Systems')",
+      "M_value": "Multi-Platform EW PE: UNFUNDED 2 yrs. Airborne Recon: -70% FY26 vs FY25. SIGINT Enterprise: stable.",
+      "interpretation": "Two of three airborne-ISR adjacent PEs are negative: multi-platform EW equipment is zeroed and Airborne Reconnaissance Systems was cut 70% in FY26. The 'multiple classified programs' language in the filing is unverifiable directly, but the named-PE peers in the airborne ISR space are deteriorating. ROK FMS volume is real but international. Score MODERATE — domestic forward pipeline shows clear shrinkage signals even where revenue grew in FY25."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "DoW anchor investor $1.0B convertible preferred in MSL (Aerojet Rocketdyne) ahead of 2H 2026 IPO.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["pentagon_jbook NOT_FOUND for contractor 'Aerojet Rocketdyne' as a primary"],
+      "M_check": "pentagon_jbook.query_program_funding(contractor_name='Aerojet Rocketdyne')",
+      "M_value": "NOT_FOUND in by_entity index",
+      "interpretation": "Aerojet Rocketdyne is not indexed as a primary contractor in the J-Book by_entity file (likely because it operates as a propulsion subcontractor under prime missile programs). The MSL IPO narrative load-bearingly depends on continued funding of munitions/hypersonics PEs — and C5b/C5c show Hypersonics Prototyping zeroed. Treat overall as UNVERIFIABLE at corpus level but cross-reference C5 (MODERATE) and C6 (SEVERE) for the indirect read-through. Note: the very fact that DoW is taking a $1B preferred could be read as supportive of the munitions pillar but also as evidence the standalone economics needed government underwriting."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "75% of FY25 revenue from US Government (vs 76%/76% prior two years).",
+      "severity": "PASS",
+      "supports": ["self-disclosed and consistent with composition"],
+      "M_check": "usaspending.query_dod_contracts(recipient_name='L3HARRIS TECHNOLOGIES INC') [not executed]",
+      "M_value": "Control claim — not externally verified",
+      "interpretation": "Concentration is high but stable. Note the 1pp decline from 76% to 75% is consistent with the international-deliveries growth narrative in C1. No divergence."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "~230 locations, 25M sq ft footprint with major operations across listed US cities.",
+      "severity": "PASS",
+      "supports": ["control claim; geographic disclosure"],
+      "M_check": "epa_frs.query_facilities (control claim — not executed)",
+      "M_value": "Not relevant to J-Book divergence test",
+      "interpretation": "Standard footprint disclosure. PASS as control."
+    },
+    {
+      "claim_id": "C11",
+      "claim_text": "113 PRP environmental sites; $659M accrued liability (+$22M YoY); $483M recoverable from USG pricing.",
+      "severity": "PASS",
+      "supports": ["disclosure-only; minor YoY increase consistent with reserve adequacy"],
+      "M_check": "epa_frs.query_facilities (control)",
+      "M_value": "Not relevant to J-Book divergence test",
+      "interpretation": "Environmental disclosure is stable and 73% indemnified through allowable-cost USG pricing recovery. PASS as control."
+    }
+  ]
+}

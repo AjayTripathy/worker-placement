@@ -1,0 +1,22 @@
+## BLUE BENCH — CCOI — RED CASE: PARTIALLY OVERTURNED
+
+PACK: acknowledged. Superseded (concur with red): tape → Aug-7 close $9.92 −9.07%, 52wk $9.00–45.69, mcap $475M, AH $9.95 ([stockanalysis](https://stockanalysis.com/stocks/ccoi/)); pack XBRL slice unusable. Coverage gaps this session: IBKR blocked again (search_contracts permission-denied — live-IBKR quote still outstanding); SEC Archives still 403 (index fetch failed), but the decisive 10-Q language surfaced verbatim via full-text search of the filing.
+
+**Per-finding rulings:**
+
+1. **SUSTAINED.** {red: cliff ~Oct-2027 | check: [Q2 PR](https://www.prnewswire.com/news-releases/cogent-communications-reports-second-quarter-2026-results-302844087.html) — "$350.0M in equal monthly installments over the subsequent 42 months" after year 1; 12+42=54mo from 2023-05-01 → ~Nov-2027 | CONFIRMED}. The thesis's own "54 months" arithmetic yields Nov-2027; it wrote 2026-11-01 three times. The urgency frame was fabricated by a date error. FATAL tag stands.
+2. **SUSTAINED.** {red: IPv4 base-effect | check: PR — Q2 $18,089k vs Q1 $17,992k = **+0.5% QoQ**; addresses billed +0.1% QoQ | CONFIRMED}. "Compounding engine" refuted; wavelength (+9.2% QoQ) real but 6.3% of revenue.
+3. **OVERTURNED — red's central number is a double-count.** {red: OCF includes $33.3M T-Mobile → ex-subsidy burn −$78M/qtr, cash ≈ 3¼ quarters | check: Cogent 10-Q primary text — "Payments received under the IP Transit Services Agreement are reflected as cash flows from **investing activities**" ([SEC 10-Q](https://www.sec.gov/Archives/edgar/data/1158324/000141057825001593/ccoi-20250630x10q.htm)); PR confirms the $25M is added to adjusted EBITDA precisely because it's absent from reported results | REFUTED}. OCF $3.195M **excludes** T-Mobile cash. The thesis's −$45M/qtr **was already the ex-subsidy burn**; all-in burn ≈ **−$12M/qtr** through ~Oct-2027. Red inverted the classification and manufactured a 73% overstatement.
+4. **SUSTAINED.** {red: company, not insiders | check: PR — "**Cogent** purchased $20.4M par… $118.4M in July at 90.071," cumulative $13.4M gain | CONFIRMED}. Equity-accretive liability management; thesis's revealed-preference inference dead.
+5. **REDUCED.** {red: crowded, no edge | check: 12 analysts, Hold, PT $18.68 confirmed | CONFIRMED coverage — orphan discipline doesn't bar the ruling}. But "efficiently priced" is undercut by red itself missing the burn by 73% and both benches missing the cash split (below); the crowd is plausibly wrong in both directions.
+
+**NEW FINDINGS RED MISSED:**
+- **Restricted-cash overstatement (cuts against thesis AND red's runway):** the $369.7M "cash" = **$183.7M unrestricted + $186.0M restricted** (PR balance sheet). Likely escrowed DC proceeds per the ≥$175M debt-repurchase covenant; July's ~$107M buybacks plausibly drew the restricted pool. Which pool funded them = UNVERIFIED (10-Q unread).
+- **July payment prepaid Jun-30**, so Q2's $33.3M overstates the $25M/qtr run-rate.
+- **Corrected runway:** $183.7M unrestricted − ~$60M all-in burn to the cliff → ~$124M entering post-cliff at ~−$45M/qtr (before ~$45M/yr integration-cost roll-off). The binary is the **$750M June-2027 refi**, not near-term cash exhaustion.
+
+**NET POSITION AFTER BOTH BENCHES:** FLAT pre-refi — all three benches concur, now for the right reason: the refi 8-K (imminent) reprices the largest unknown, and runway is adequate until it prints. Red's date kill and growth-limb kill stand; its solvency math does not. Court-worthiness **6/10, not red's 4**: the decisive reconstruction (fungible liquidity split + refi terms + 14-DC/IPv4 appraisal vs the June-2027 wall) is intact, and two benches making material cash errors on a covered name is itself evidence it isn't cleanly priced. Re-admit trigger: refi 8-K terms + a genuine read of 10-Q 0001104659-26-091790 (cash-interest, IRU balance, restricted-cash purpose) before any leverage math is load-bearing.
+
+**CONVICTION: 8/10.**
+
+Sources: [Q2-26 PR](https://www.prnewswire.com/news-releases/cogent-communications-reports-second-quarter-2026-results-302844087.html), [CCOI 10-Q (T-Mobile investing-activities classification)](https://www.sec.gov/Archives/edgar/data/1158324/000141057825001593/ccoi-20250630x10q.htm), [stockanalysis CCOI](https://stockanalysis.com/stocks/ccoi/).

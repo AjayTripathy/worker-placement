@@ -1,0 +1,53 @@
+## BLUE BENCH — ARRY — RED CASE: PARTIALLY OVERTURNED
+
+**PACK: acknowledged.** Tape anchored to pack ($4.67 / $4.57 at red's 12:34Z stamp; dd52 −0.62). Superseded: pack XBRL (no 2026 quarters) — replaced with the SEC companyconcept series I pulled directly. **PRIZE TABLE: N/A** — ARRY is revenue-generating, not a pre-revenue developer. **COVERAGE GAP:** IBKR `search_contracts` permission denied again → no NXT quote, no `discovery_state`. Investing.com (red's Q1-guide source) now 403s even proxied.
+
+**Primary series I obtained that neither bench had** ([SEC XBRL companyconcept](https://data.sec.gov/api/xbrl/companyconcept/CIK0001820721/us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax.json)): Q1'25 $302.4M · Q2'25 $362.2M · Q3'25 $393.5M · FY25 $1,284.1M ⇒ **Q4'25 $226.0M**. Q1'26 $223.4M · Q2'26 $342.1M.
+
+**1. "Margin damage is a RAISED guide read backwards" | my check: Ex 99.1 (PROXY-FETCHED) + Q2 transcript + FY EBITDA guide history | REDUCED.** The *normalization* is CONFIRMED from the primary source red only inferred: CFO Jennings — "the first quarter…included **over 300 basis points of one-time benefits**"; "roughly 200 basis points" for H1, "so you're looking at a **normalized 28.8% for H1**" ([transcript](https://www.fool.com/earnings/call-transcripts/2026/08/12/array-technologies-arry-q2-2026-earnings-call-transcript/)). Normalized step-down is **~340bp, not 540bp** — the brief overstated by 200bp. But red's *mechanism* — "FY adj-GM guided 26–27% in May → 27–28% in Aug, a +100bp RAISE" — is **UNVERIFIED**: sole source 403s, and the Q1 8-K exhibit was not obtainable. What I can confirm is directional only: FY adj-EBITDA $200–230M (May) → $210–230M (Aug), a low-end raise. Severity tag FATAL is not earned on an unverified prior-period column. Also unmentioned by both benches: **Q2'26 adj GM 30.8% vs Q2'25 27.8%, +300bp y/y with <50bp of one-times** — margin is genuinely improving on lower revenue.
+
+**2. "The causal quote is not in the document it cites" | my check: direct transcript fetch | OVERTURNED as characterized; REDUCED to a citation defect.** The quote is real and management-spoken: *"Second half gross margins will also be impacted by increased international mix"* and *"increased commodity and logistics costs that we have to deal with in the second half."* Red proved only that Ex 99.1 doesn't contain it — a **negative finding from an LLM summarizer's "document does not contain,"** which is absence-of-evidence, and red then escalated it to "phantom," "VENUE-DIVERGENT," "the exact FVRR failure mode." It is none of those: single-venue, unquantified, but said. Red's own change-my-mind (a) is satisfied except for the dollar/bp quantification. **This matters because red's STRONGEST SINGLE KILL is findings 1+2 together, and half of it collapses.**
+
+**3. "Guide gap is precision forged from an 'approximately'" | my check: guide arithmetic + transcript | SUSTAINED, narrow.** Q4 implied $504.5–624.5M is correct; the brief's $1,390M needs an exact 60/40. Note the transcript reads *"H2 has roughly a 60-40 between Q3 and Q4"* — ambiguous, and the guide's own components force **~36/64 Q3/Q4**, i.e. *more* Q4-weighted than the brief assumed. Red won the arithmetic and missed that the arithmetic cuts against it (see N1).
+
+**4. "Liquidity knock omits $332.9M undrawn + positive FCF" | my check: 10-Q (PROXY-FETCHED) | CONFIRMED on facts, REDUCED on relevance.** Cash $307.3M, revolver $332.9M undrawn, H1'26 OCF **+$91.9M**, equity **$(202.1)M** — all verified. But funding AWM off the revolver raises net debt 1:1, so the brief's **EV ≈ $1.58B / 7.2x is untouched**. Red rebutted a solvency claim the brief didn't make.
+
+**5. "Base-mixing / blob artifact" | red's own tag: PLAUSIBLE | SUSTAINED as method, non-load-bearing.** Red's doctrine bars PLAUSIBLE from carrying a verdict; NXT remains unverified for me too.
+
+**6. "Preferred flipped to mandatory cash-pay" | my check: 10-Q Series A note + transcript | FACTS SUSTAINED; KILL-CLASS CONTESTED (NOVEL → CONSENSUS).** I tried to refute it — liq pref $506.4M vs $395.4M paid in 2021 looked too slow for 5 years of 6.25% PIK — and the 10-Q refutes *me*: *"During the three months ended June 30, 2026 and 2025, the Company **accrued** dividends…at the Accrued Regular Dividend rate of 6.25%, totaling $7.8 million and $7.4 million"*; liq pref $493.1M (12/31/25) → $506.4M. They were PIKing; it is genuinely new cash. **But it is not undiscovered:** CFO Jennings said on 8/5 that dividends *"will transition to cash pay in the third quarter,"* approximately **"$12 million for the remainder of 2026."** A mechanism the CFO quantified on the earnings call is CONSENSUS, not NOVEL. Real, sizing-relevant (~$31.7M/yr ≈ 20% of run-rate FCF, ≈4.4% of market cap annually, non-callable), correctly found — mis-tagged.
+
+**RED'S SELECTION:** it attacked the brief's *weakest* legs (a sloppy footnote, a 2pp split assumption) and declared the strongest leg consensus. It never tested the revenue series.
+
+## NEW FINDINGS RED MISSED
+
+**N1 (the actual axis, NOVEL). ARRY's revenue is shrinking 17% while the FY guide requires an all-time-record Q4.** H1'26 $565.5M = **−14.9% y/y**; Q3 guide $310–330M = **−21% to −16% y/y** vs Q3'25 $393.5M; 9M'26 ≈ −16% y/y. Yet FY $1.4–1.5B = **+9% to +17%** over FY25's $1,284.1M. All of it lands in Q4: **$504.5–624.5M vs $226.0M (+123% to +176% y/y, +53% to +101% q/q)**, with the **midpoint $564.5M an all-time company record** (prior peak $507.7M, Q2'23). Red's "precedented at the low end" is true only at the absolute floor. This — not the margin footnote — is the guide's load-bearing risk, and both benches missed it.
+
+**N2. Orders up 37%, deliveries down 15%** (book-to-bill 1.5x, $2.5B executed+awarded). The gap is conversion/permitting timing, not demand — which cuts *for* the stub if Q4 converts, and is precisely what the 11/04 print resolves.
+
+**N3 (UNVERIFIED).** Liq pref rose $13.3M in H1 against ~$15.5M accrued; the ~$2.2M delta and the 10-Q's preferred share-count movement are unexplained in my read. Not load-bearing.
+
+## DETECTORS CONSULTED
+- **osha_establishment** — NOT-FIRED: no factory-existence claim; NM sites long-operating and disclosed.
+- **plant_thermal** — UNCHECKABLE: Spain parcel 39.326/−4.838 is a country centroid, not the STI Norland plant; needs the plant's own street address geocoded.
+- **sentinel2_buildout** — UNCHECKABLE: same centroid defect; no load-bearing construction claim.
+- **cybercom_budget** — NOT-FIRED: no cyber revenue; SIC 3674 is a mis-tag (BOS hardware).
+- **doe_budget** — NOT-FIRED: demand is utility-PPA/IRA, not appropriations.
+- **earmark_detector** — NOT-FIRED: commercial contracts only.
+- **export_control_check** — NOT-FIRED: no named foreign customer cliff; book >95% domestic.
+- **pentagon_jbook** — NOT-FIRED: no defense program.
+- **chinese_smallcap_ramp_dump_archetype** — NOT-FIRED: Delaware C-corp, Big-4 audited, no Asia jurisdiction.
+- **clinical_trial_referral_quality / clinicaltrials_lookup / competitor_trial_omission** — NOT-FIRED: no clinical program; dispatch mis-match off the SIC tag.
+- **common_control_merger_accounting** — NOT-FIRED: AWM is a third-party arm's-length acquisition, not common control.
+- **lockup_expiration_calendar** — NOT-FIRED: no follow-on; S-8 6/18/26 is routine plan registration.
+- **preferred_pik_to_cash_conversion_cliff** (red's Ring-2 candidate) — **FIRED, and I independently confirmed its trigger** in the 10-Q. Endorsed for harvest, with one spec correction: severity must be scored against **management's own quantification** where one exists (here $12M/rest-of-2026), or the detector will re-flag disclosed events as novel.
+- **Planner's coverage ruling: SUSTAINED.** The axis is disclosure-bound; every binding fact this bench moved came from the 10-Q, Ex 99.1, the transcript, or the XBRL revenue series. The real pack defect is that the XBRL block carried **no 2026 or Q3/Q4 2025 quarters** — the exact rows N1 turns on.
+
+## NET POSITION AFTER BOTH BENCHES
+
+What survives: (a) the brief's **DAMAGE-ARRIVING tag as reasoned is not supported** — management raised EBITDA, Q2 GM rose 300bp y/y, and the H2 step-down is ~340bp normalized on mix plus a disclosed one-time comp, not erosion; red wins this, though on a partly unverified column; (b) the **pref-adjusted EV $1.58B / 7.2x stands unrefuted** — red's revolver rebuttal is orthogonal, and the now-cash-pay preferred takes ~$31.7M/yr (~20% of FCF, ~4.4% of market cap) permanently, non-convertible; (c) the **real kill is N1**: 9M revenue −16% y/y against a guide whose midpoint needs the largest quarter in company history, in the quarter the §232 tariff takes effect (12/04). Red's REJECT is the right disposition reached through two wrong doors. **Disposition: NOT COURT-WORTHY as briefed; NO POSITION; auto re-court on the 11/04 print** with pre-registered gates — Q3 ≥ $310M, FY revenue not cut, executed+awarded ≥ $2.5B post-proclamation, and implied Q4 ≤ $560M. A miss on any of those makes this a levered stub compounding a 4.4%/yr preferred bleed against a shrinking top line; a clean sweep makes 7.2x EV/EBITDA on a re-accelerating BOS franchise a genuine starter. **Kills: 1 novel (N1) / 5 consensus.**
+
+**PRINT PROXIMITY: 2026-11-04 — UNCONFIRMED** (yfinance-derived; no company PR names it; ARRY's pattern is a date PR ~3 weeks prior, so expect confirmation mid-October). ~70 calendar days out, far beyond 5 trading days — no pre-print reconstruction required. Dated items ahead of it: preferred cash-pay began Q3'26 (~$12M) · AWM close (outside date 2026-12-13) · §232 effective 2026-12-04, *after* the print.
+
+**Conviction that this net position is right: 8/10.** Findings from the 10-Q, Ex 99.1, transcript and XBRL are document-confirmed; residuals are the unverifiable May adj-GM guide line and the denied NXT/IBKR refresh.
+
+**Sources:** [10-Q 6/30/26](https://www.sec.gov/Archives/edgar/data/1820721/000162828026053517/arry-20260630.htm) · [Q2'26 8-K Ex 99.1](https://www.sec.gov/Archives/edgar/data/0001820721/000162828026053342/exhibit9912026q2pressrelea.htm) · [SEC XBRL revenue series](https://data.sec.gov/api/xbrl/companyconcept/CIK0001820721/us-gaap/RevenueFromContractWithCustomerExcludingAssessedTax.json) · [Q2'26 call transcript](https://www.fool.com/earnings/call-transcripts/2026/08/12/array-technologies-arry-q2-2026-earnings-call-transcript/) · [Blackstone $500M commitment](https://www.blackstone.com/news/press/array-technologies-inc-announces-500-million-capital-commitment-from-blackstone/)

@@ -1,0 +1,104 @@
+{
+  "ticker": "ARQQ",
+  "cutoff": "2022-06-01",
+  "scores": [
+    {
+      "claim_id": "c1",
+      "claim_text": "ARQQ has a ~$1 billion sales pipeline of customer contracts in negotiation / initial revenue indications, not yet contractually committed.",
+      "severity": "UNVERIFIABLE",
+      "supports": "Pipeline = uncommitted; no specific DoD program named. pentagon_jbook(contractor_name='Arqit', cutoff_date='2022-06-01') = NOT_FOUND. pentagon_jbook(program_name='quantum key distribution', cutoff_date='2022-06-01') = NOT_FOUND. usaspending.query_dod_contracts(recipient_name='Arqit'|'Arqit Limited'|'Arqit Inc') = 0 awards each.",
+      "M_check": "pentagon_jbook + usaspending",
+      "M_value": "NOT_FOUND / 0_awards",
+      "interpretation": "Honest 2022 view: pipeline is a forward-looking commercial figure with no named Pentagon PE. JBook corpus does not list Arqit as a primary contractor on any covered program. Zero DoD awards in usaspending. Per J-Book heuristic #7, NOT_FOUND is not itself a red flag — corpus may simply not cover the program. The framework correctly flags this as UNVERIFIABLE at the cutoff: the company has not pinned the pipeline to a budgeted Pentagon line that could be falsified."
+    },
+    {
+      "claim_id": "c2",
+      "claim_text": "ARQQ has $130M backlog from signed customer contracts as of Sept 30, 2021.",
+      "severity": "UNVERIFIABLE",
+      "supports": "usaspending.query_dod_contracts(recipient_name='Arqit'|'Arqit Limited'|'Arqit Inc'|'Arqit Quantum') returned 0 awards across all four name variants. Backlog as disclosed is largely UK Government / ESA / BT / Sumitomo (not U.S. DoD).",
+      "M_check": "usaspending.query_dod_contracts",
+      "M_value": "0 awards (all name variants)",
+      "interpretation": "USAspending only covers U.S. federal contracting; the backlog appears to be UK + commercial. The 0-award result is consistent with the disclosed customer base (no U.S. DoD prime contract claimed). The framework cannot verify the backlog from public DoD/J-Book sources; this is a commercial/UK-government disclosure outside the cohort scope. NOT a red flag at 2022 cutoff — the company does not claim U.S. DoD backlog."
+    },
+    {
+      "claim_id": "c3",
+      "claim_text": "ARQQ's Federated Quantum System (FQS) consortium will enable NATO-allied government collaboration; first FQS satellites to launch on Virgin Orbit's LauncherOne from Newquay in 2023.",
+      "severity": "UNVERIFIABLE",
+      "supports": "pentagon_jbook(program_name='Federated Quantum System', cutoff_date='2022-06-01') = NOT_FOUND. pentagon_jbook(program_name='NATO quantum', cutoff_date='2022-06-01') = NOT_FOUND. pentagon_jbook(program_name='quantum networking', cutoff_date='2022-06-01') = FUNDED_STEADY ($13M FY22) but primary contractor is IonQ, not Arqit (AFRL Quantum Networking).",
+      "M_check": "pentagon_jbook",
+      "M_value": "NOT_FOUND for FQS / NATO; adjacent quantum networking program is funded but contracts go to IonQ",
+      "interpretation": "FQS is an Arqit-organized international consortium, not a Pentagon PE — not expected to appear in DoD J-Book. The adjacent AFRL Quantum Networking program at FY22 is funded but the primary contractor is IonQ, not Arqit, so Arqit has no direct exposure to that PE. The forward NATO-allied claim is narrative-only at the 2022 cutoff; the framework cannot verify or falsify from J-Book. UNVERIFIABLE."
+    },
+    {
+      "claim_id": "c4",
+      "claim_text": "ARQQ's current customers include the UK Government, the European Space Agency, BT plc, and Sumitomo Corporation.",
+      "severity": "PASS",
+      "supports": "ESA agreement disclosed in financial notes (deferred income recognized in line with milestones). Customers explicitly named (UK Government, ESA, BT, Sumitomo) are non-U.S.-DoD entities, so usaspending non-coverage is expected. pentagon_jbook returns no Arqit primary-contractor match — also consistent with non-U.S.-DoD customer base.",
+      "M_check": "pentagon_jbook + filing internal consistency",
+      "M_value": "Consistent (non-DoD customers)",
+      "interpretation": "These are named customers in the disclosed business (UK / EU / Japan), not U.S. DoD programs. The disclosure is internally consistent with the financials (ESA deferred income $2.46M non-current government-grant liability). No J-Book divergence pattern applies here. PASS within the cohort frame (the framework's J-Book signal is not triggered because no Pentagon PE is claimed)."
+    },
+    {
+      "claim_id": "c5",
+      "claim_text": "Northrop ['Northrup'] Grumman has contracted to test Arqit's technologies (suggesting defense-prime channel).",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": "edgar_fts.query_fulltext(search_term='Arqit', cik='0001133421' [Northrop Grumman]) = 0 hits. edgar_fts.query_fulltext(search_term='Arqit', no cik filter) = 39 hits but all are Arqit/Centricus SPAC filings; no defense-prime counterparty mentions Arqit. usaspending.query_dod_contracts(recipient_name='Arqit*') = 0 awards.",
+      "M_check": "edgar_fts.query_fulltext (Northrop CIK + corpus)",
+      "M_value": "0 counterparty disclosure hits across Northrop or any other counterparty",
+      "interpretation": "Northrop Grumman has not disclosed Arqit as a vendor, partner, or material counterparty in any SEC filing through 2022-06-01. The 'has contracted to test' framing is a low-stakes pilot, and Arqit lumps Northrop with non-defense names (Verizon, BP, NEOM, Juniper, Dentons, Iridium) — a defense-prime test agreement of any size would normally surface in either Northrop's filings or in DoD subcontract data. Mode-B implied-verification finding: the orthogonal counterparty channel does not corroborate. Score MODERATE_UNDERDELIVERY: the 'NATO/defense-prime exposure' narrative is present in the deck framing but unbacked by counterparty disclosure."
+    },
+    {
+      "claim_id": "c6",
+      "claim_text": "ARQQ is positioned for U.S. DoD markets via board members with prior USAF / DoD-JROC roles.",
+      "severity": "UNVERIFIABLE",
+      "supports": "pentagon_jbook(program_name='Air Force quantum', cutoff_date='2022-06-01') = NOT_FOUND. pentagon_jbook(program_name='AFRL Quantum Networking', cutoff_date='2022-06-01') = FUNDED_STEADY but primary contractor = IonQ (not Arqit). pentagon_jbook(program_name='post-quantum cryptography', cutoff_date='2022-06-01') = NOT_FOUND.",
+      "M_check": "pentagon_jbook",
+      "M_value": "NOT_FOUND for Air Force quantum / PQC; AFRL Quantum Networking funded but goes to IonQ",
+      "interpretation": "Board composition is a credentialing signal, not a contracted-revenue claim. The actual nearest U.S. DoD quantum-networking PE the J-Book corpus knows about (AFRL Quantum Networking) is funded at FY22 but the contracted recipient is IonQ, not Arqit. At the 2022 cutoff this is correctly UNVERIFIABLE — the board provides access but no booked DoD revenue is yet claimed."
+    },
+    {
+      "claim_id": "c7",
+      "claim_text": "ARQQ's QuantumCloud private-instance product is positioned for IL5 government-customer deployments.",
+      "severity": "UNVERIFIABLE",
+      "supports": "pentagon_jbook(program_name='post-quantum cryptography', cutoff_date='2022-06-01') = NOT_FOUND. pentagon_jbook(program_name='DoD cryptographic modernization', cutoff_date='2022-06-01') = NOT_FOUND. No DISA / FedRAMP / IL5 authorization disclosed; framed as 'typically for government customers who want total control'.",
+      "M_check": "pentagon_jbook",
+      "M_value": "NOT_FOUND",
+      "interpretation": "IL5 is mentioned as a target deployment posture, not as an attained authorization. No Pentagon PE is named. Forward-looking marketing language; framework cannot verify from J-Book. UNVERIFIABLE."
+    },
+    {
+      "claim_id": "c8",
+      "claim_text": "ARQQ has a firm fixed-price Qinetiq Space NV contract for QKD-satellite delivery by May 2022 and launch readiness review by July 2022.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": "edgar_fts.query_fulltext(search_term='Arqit Qinetiq', cutoff_date='2022-06-01') returned status_500 (transient). Filing internally discloses Qinetiq contract was signed 27-Jan-2020 with delivery May 2022 — i.e., delivery is essentially at the cutoff date but the company simultaneously says first satellite launches 'by 2023' on Virgin Orbit (LauncherOne, Newquay), which itself was an unproven UK-from-Cornwall launch site at this cutoff.",
+      "M_check": "edgar_fts + filing internal-consistency check",
+      "M_value": "Internal-consistency check: delivery milestone is at cutoff but launch slips to 2023; supply-chain dependence on a not-yet-proven UK launch service",
+      "interpretation": "Mode-B implied-verification: the timeline is internally fragile — a fixed-price 2020 contract for May-2022 satellite delivery is being followed by a 2023 launch on an unproven LauncherOne / Newquay service. Schedule risk is concentrated on counterparties (Qinetiq + Virgin Orbit) the company has limited control over, and is the gating event for the entire FQS / NATO narrative. Score MODERATE_UNDERDELIVERY: not a J-Book defunding signal, but the load-bearing operational milestone has material execution risk that the framework's orthogonal-counterparty lens flags."
+    },
+    {
+      "claim_id": "c9",
+      "claim_text": "Capitalized development costs were $18.2M (FY21) vs $8.8M (FY20), with most expenditure treated as intangible asset rather than expensed R&D.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": "Filing notes 11: capitalized development costs $18,235,034 (FY21) up from $8,776,530 (FY20). Note 1: 'For the periods ended September 30, 2021, 2020 and 2019, there were no research costs reflected in the statement of comprehensive income. This is primarily due to the research phase being deemed as complete in 2018.' Going-concern note: only $8.7M cash at 30-Sep-2021 after a SPAC that grossed ~$96M (de-SPAC and PIPE) — heavy cash burn already.",
+      "M_check": "filing internal-consistency (IFRS IAS 38) + cash runway",
+      "M_value": "100% of dev spend capitalised; $8.7M cash remaining after $96M raise; net loss $271.7M (driven by reverse-acquisition expense $155.5M).",
+      "interpretation": "Mode-B finding: aggressive IAS 38 capitalisation policy (zero research expense across three fiscal years because the 'research phase was deemed complete in 2018') combined with the satellite timeline (delivery May-2022, launch 2023) means $18.2M of intangibles are pre-revenue and untested. Cash position post-deSPAC is unexpectedly thin ($8.7M) given the $96M raise, due to ~$24M operating cash use in FY21. The framework flags this as MODERATE_UNDERDELIVERY of the capital story, even without a J-Book signal."
+    },
+    {
+      "claim_id": "c10",
+      "claim_text": "ARQQ owns the IP to a novel symmetric-key quantum encryption protocol.",
+      "severity": "PASS",
+      "supports": "uspto_odp.query_assignee(assignee_name='Arqit', cutoff_date='2022-06-01') = 6 applications, 4 granted patents pre-cutoff. Patent titles include 'QUANTUM-SAFE NETWORKING' and 'A METHOD OF MANAGEMENT OF REMOTE OPERATIONS' — assignee 'Arqit Limited'. CPC codes H04L 9/0852, H04L 9/0855, H04L 9/0825, H04L 9/0877 align with quantum-key-distribution claims.",
+      "M_check": "uspto_odp.query_assignee",
+      "M_value": "6 apps / 4 granted pre-cutoff; CPC classes consistent with QKD",
+      "interpretation": "Patent-portfolio claim corroborates at the cutoff. Control claim PASSES — the IP framing is supported by USPTO. (Caveat: patent existence is orthogonal to revenue durability; this is a quality-of-disclosure check, not a J-Book check.)"
+    }
+  ],
+  "summary": {
+    "n_claims": 10,
+    "n_queries": 19,
+    "severity_counts": {"PASS": 2, "MODERATE_UNDERDELIVERY": 3, "SEVERE_UNDERDELIVERY": 0, "RED_FLAG_NEGATIVE": 0, "UNVERIFIABLE": 5},
+    "jbook_grounded_claims": 5,
+    "pentagon_jbook_fires": 2,
+    "notes": "At the 2022-06-01 cutoff, ARQQ does NOT name any specific U.S. DoD Program Element. The cohort's primary J-Book divergence pattern therefore does not have a sharp anchor here. Pentagon_jbook returns NOT_FOUND on all Arqit-specific queries; the adjacent AFRL Quantum Networking program is FUNDED_STEADY at FY22 but the primary contractor is IonQ (not Arqit). usaspending shows zero DoD awards under any Arqit name variant. The Mode-B (implied-verification) findings — Northrop Grumman counterparty silence (c5), satellite-timeline fragility (c8), and aggressive capitalisation + thin cash (c9) — are the framework's strongest 2022 signals; per the prompt these warrant MODERATE flags rather than SEVERE because the FY 2024-26 J-Book defundings that would crystallise the thesis are not yet visible. This is the honest 2022 view."
+  }
+}

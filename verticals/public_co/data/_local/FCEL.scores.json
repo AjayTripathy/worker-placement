@@ -1,0 +1,125 @@
+{
+  "ticker": "FCEL",
+  "scores": [
+    {
+      "claim_id": "C1_GGE_korea_concentration",
+      "claim_text": "FCEL recognized $66.0M of $69.1M FY25 product revenue under LTSA with Gyeonggi Green Energy (Hwaseong-si, S. Korea, 58.8 MW). Single-customer concentration.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": false,
+      "M_check": "edgar_fts.query_fulltext('Gyeonggi') => 402 hits, top filing is FCEL's own 8-K (2023-07-28). GGE is a real Korean IPP affiliate (Korea Southern Power related). The relationship is internally consistent and corroborated by FCEL's own historic 8-K disclosures.",
+      "M_value": {
+        "gyeonggi_total_hits": 402,
+        "fcel_top_match": true
+      },
+      "interpretation": "The customer / project is real and verifiable. However, 95.5% product-revenue concentration in a single Korean module-replacement contract is a structural fragility: revenue 'growth' of 169% is mechanical (counted modules delivered per LTSA cadence) not new-customer acquisition. Product backlog fell from $111.3M to $66.2M YoY (Claim C8), implying the GGE pipeline is being consumed faster than replaced. Calibration Heuristic 11 (revenue-recognition pattern): this is concentrated 'bookings burn-down' rather than diversified commercial expansion. Score MODERATE \u2014 claim is factually true but materially obscures qualitative weakness."
+    },
+    {
+      "claim_id": "C2_EXIM_25m_financing",
+      "claim_text": "FCEL closed $25M EXIM debt Nov 2025 at 5.29% (7yr), with covenant cash-floor cut from $100M to $55M.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": true,
+      "M_check": "usaspending.query_recipient_contracts(FuelCell Energy) => 0 awards (EXIM financing is debt, not USAspending grants). usaspending.query_recipient_grants => 10 DOE awards including DEEE0009290 ($8M), DEFE0026199 ($6.3M), DEAR0000808 ($4.6M) \u2014 confirming FCEL is a real DOE contractor.",
+      "M_value": {
+        "contract_awards": 0,
+        "grant_awards": 10,
+        "top_grant_amount_usd": 8000000,
+        "agencies": [
+          "Department of Energy"
+        ]
+      },
+      "interpretation": "Financial transaction itself is self-reported and corroborated by SEC filings. However, the simultaneous 45% reduction in minimum cash covenant ($100M -> $55M) suggests EXIM concession was necessary to give FCEL liquidity headroom \u2014 a tell that the company expected its FY26 cash position to test the prior covenant. Combined with $190M ATM raises in FY25 and 1-for-30 reverse split history, this $25M is incremental life-extension capital, not growth capital. Score MODERATE: claim is true, but interpretation is distress-adjacent."
+    },
+    {
+      "claim_id": "C3_data_center_pivot",
+      "claim_text": "FCEL repositions carbonate modules as the on-site behind-the-meter hyperscaler-data-center solution, marketing modular 1.25 MW blocks scalable to 'hundreds of megawatts'.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": false,
+      "M_check": "edgar_fts.query_fulltext('FuelCell Energy', cik=AMZN/MSFT/META/GOOGL): Amazon=0, Microsoft=0, Meta=0, Alphabet=0 hits.",
+      "M_value": {
+        "AMZN_hits": 0,
+        "MSFT_hits": 0,
+        "META_hits": 0,
+        "GOOGL_hits": 0
+      },
+      "interpretation": "Calibration Heuristic 3 (planned vs operational) + Rule 7 with extra weight. The 10-K dedicates substantial 'Market Opportunity' real-estate to AI data-center power demand but discloses ZERO named hyperscaler contract, LOI, MOU, or even a pilot deployment. Annualized production rate is 31.5 MW \u2014 a single 50 MW data-center customer would 1.6x consume the entire factory. The pivot is pure marketing tier with no Stage Ladder progression past 'announced opportunity'. Bloom Energy (BE) actually has signed and disclosed AEP/Equinix/data-center deals; FCEL has none. The disconnect between the size of the marketing claim ('hundreds of MW') and zero counterparty disclosure (which would be material to any hyperscaler 10-K under Rule 7) is the hardest divergence in the filing. Score SEVERE \u2014 not RED_FLAG because FCEL does not actually CLAIM a specific hyperscaler customer, but marketing-vs-substance gap is severe.  [POST-HOC MANUAL: downgraded from SEVERE_UNDERDELIVERY to MODERATE \u2014 Mixed H7 (AMZN/MSFT/META/GOOGL 0 hits \u2014 weak: hyperscalers rarely name DC-power vendors regardless of size; cf. Bloom Energy) + self-disclosed (zero contracts/LOI/MOU/pilot, marketing-only positioning). MODERATE captures the marketing-vs-operational gap without overweighting counterparty silence.]",
+      "original_severity": "SEVERE_UNDERDELIVERY"
+    },
+    {
+      "claim_id": "C4_toyota_h2_project",
+      "claim_text": "FCEL operates 20-year Toyota tri-gen hydrogen+power project at Port of Long Beach; fixed-price fuel hedge expires May 2026; listed among four projects with material fuel sourcing risk.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": true,
+      "M_check": "edgar_fts.query_fulltext('Tri-gen') => 38 hits, dominated by FCEL's own 8-Ks (2021-04-08, 2021-06-10, 2021-09-14, 2021-12-29, 2023-09-11). Toyota Motor Corp (CIK 0001094517) 20-F => 0 hits for 'FuelCell Energy' (expected \u2014 Toyota is a $200B+ revenue parent; a single tri-gen project at TMNA-Long Beach is immaterial to TMC global financials, so Rule 7 threshold not triggered).",
+      "M_value": {
+        "trigen_hits": 38,
+        "toyota_parent_hits": 0,
+        "fcel_self_8k_hits": 5
+      },
+      "interpretation": "Project itself is real (multiple FCEL 8-Ks document construction, completion, hydrogen production milestones). However, the financial-statement note flags the Toyota project among four with 'fuel sourcing risk' and explicitly warns of 'further charges for the Toyota project asset' if fuel cannot be secured on favorable terms post-May 2026 \u2014 i.e., the hedge that made the project economic is rolling off RIGHT AT the cutoff date (May 2026 = the cutoff month). This is an explicit forward-impairment-risk disclosure embedded in the boilerplate. Score MODERATE: project is operational and corroborated, but management is telegraphing potential impairment as the fuel hedge expires."
+    },
+    {
+      "claim_id": "C5_reverse_split_dilution",
+      "claim_text": "1-for-30 reverse split Nov 2024 (611M -> 20.4M shares), then 25.6M new ATM shares sold in FY25 at avg $7.44 ($190.4M gross). Net share count expansion in 12 months largely offsets the reverse split's optical effect.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": false,
+      "M_check": "Internal corroboration only (filings_index shows 8-K dated 2025-12-30 + 424B5 same date \u2014 confirming ongoing ATM activity post fiscal year-end). 1.6M additional shares sold post-Oct-31 at $8.37 confirms continued ATM dependence. Combined with FY24 10-K disclosure of the reverse split itself, the dilution pattern is uncontested.",
+      "M_value": {
+        "reverse_split_ratio": 30,
+        "atm_shares_fy25_millions": 25.6,
+        "atm_gross_proceeds_fy25_usd": 190400000,
+        "post_quarter_atm_shares_millions": 1.6,
+        "atm_capacity_remaining_usd": 1100000
+      },
+      "interpretation": "Calibration Heuristic 10 (delisting / going-concern fingerprints, elevated weight for hydrogen names). FCEL has done multiple reverse splits historically (subject-note confirms). The pattern \u2014 large reverse split, then immediately re-dilute via ATM at the higher per-share price, then exhaust the ATM ($1.1M remaining = effectively zero) \u2014 is the textbook hydrogen / EV-SPAC capital-stack treadmill. Combined with chronic negative gross margins (-16.7% FY25; -32.0% FY24; gross loss every year), continuous outside-financing requirement (explicitly required per the 10-K liquidity-management list), and $278M cash burn-rate sustainability via further dilution. Score SEVERE \u2014 claim is factually accurate (FCEL truthfully discloses), but the pattern is itself a distress signal that elevates severity of all forward-revenue claims."
+    },
+    {
+      "claim_id": "C6_patent_portfolio",
+      "claim_text": "FCEL claims proprietary molten-carbonate fuel-cell technology and solid-oxide-electrolysis R&D; expects meaningful granted patent portfolio.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "uspto_odp.query_assignee('FuelCell Energy', cutoff=2026-05-16): n_granted=114, n_total_applications=314.",
+      "M_value": {
+        "n_total_applications": 314,
+        "n_granted": 114,
+        "category_counts": {
+          "carbonate": 70,
+          "electrolysis": 12,
+          "soec_sofc": 0,
+          "carbon_capture": 3,
+          "hydrogen": 25,
+          "other": 204
+        }
+      },
+      "interpretation": "Heuristic 8: PASS threshold is n_granted >= 10 with claimed-technology hit. FCEL has 114 granted with 70 carbonate / 25 hydrogen / 12 electrolysis hits \u2014 strongly aligned with the disclosed technology focus. ('soec_sofc' category returned 0 because FCEL's solid-oxide work is filed under 'electrolysis'/electrolyzer language not 'solid oxide' string per se, but 'REFORMER-ELECTROLYZER-PURIFIER' patent applications dated Dec 2025 confirm active SOEC pipeline.) This is the rare credible technology-substance claim in the filing \u2014 patent depth supports the 'proprietary' framing."
+    },
+    {
+      "claim_id": "C7_torrington_manufacturing",
+      "claim_text": "FCEL operates Torrington CT (167,000 sq ft, lease to 2030) primary manufacturing and Danbury CT (72,000 sq ft, owned) HQ/R&D; FY25 annualized production rate 31.5 MW.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "epa_frs.query_facilities('FuelCell', CT): 5 facilities \u2014 2 at Danbury (3 Great Pasture Rd, 2 Great Pasture Rd) and 3 at Torrington (Lot 8 Technology Park Dr, 539 Technology Park Dr x2).",
+      "M_value": {
+        "epa_facilities_ct": 5,
+        "danbury_facilities": 2,
+        "torrington_facilities": 3,
+        "address_match_filing": true
+      },
+      "interpretation": "Heuristic 1: EPA FRS scope applies \u2014 fuel-cell manufacturing IS EPA-registered. Both claimed sites are present in the federal registry with addresses matching disclosed locations. This is concrete operational substance. Score PASS \u2014 facilities exist; the question of UTILIZATION (31.5 MW vs nameplate ~100 MW Torrington capacity historically marketed) is separately discussed under Claim C8 backlog decline."
+    },
+    {
+      "claim_id": "C8_backlog_decline",
+      "claim_text": "Product backlog fell from $111.3M (Oct 2024) to $66.2M (Oct 2025), -41% YoY, while reported revenue grew via GGE module-replacement consumption.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": false,
+      "M_check": "Internal disclosure consistency \u2014 no external query needed; the backlog roll-forward arithmetic is in the filing. Combined with Claim C1 (single-customer concentration) and C3 (zero hyperscaler contracts) this is fully cross-validated.",
+      "M_value": {
+        "product_backlog_oct2024_usd_millions": 111.3,
+        "product_backlog_oct2025_usd_millions": 66.2,
+        "yoy_change_pct": -40.5,
+        "service_backlog_oct2025_usd_millions": 162.4,
+        "service_backlog_oct2024_usd_millions": 174.2
+      },
+      "interpretation": "Calibration Heuristic 3 + 11 applied. Headline revenue growth (+41%) is misleading: it is the mechanical recognition of pre-existing GGE LTSA modules (22 modules in FY25 vs 6 in FY24), not new commercial momentum. The leading indicator \u2014 product backlog \u2014 fell 41%. At current burn-down rate ($69M of product revenue, $66M backlog remaining), the company has roughly ONE YEAR of product revenue runway from the existing book before the GGE replacement cycle exhausts. With no signed hyperscaler / data-center / utility offtake to replace it (Claim C3), and the data-center marketing pivot unsubstantiated, FY26 product revenue faces a high probability of cliff-edge contraction unless a new headline win materializes. Score SEVERE \u2014 the disclosure is buried in the segment commentary while the front-of-filing emphasizes 41% revenue GROWTH; this is the highest-signal divergence in the entire 10-K."
+    }
+  ]
+}

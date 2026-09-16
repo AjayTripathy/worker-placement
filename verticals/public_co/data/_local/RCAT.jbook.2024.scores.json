@@ -1,0 +1,176 @@
+{
+  "ticker": "RCAT",
+  "cutoff": "2024-09-01",
+  "filing": "0001554795-24-000195_10-K.txt",
+  "scores": [
+    {
+      "claim_id": "C1_SRR_T2_PoR_finalist",
+      "claim_text": "Teal one of two finalists for Army SRR Tranche 2 PoR; $5.7M T2 contract complete; production award expected Q4 CY2024.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook returned NOT_FOUND for program_name='Short Range Reconnaissance' / 'Short Range Reconnaissance Tranche 2' / contractor_name='Teal Drones' / contractor_name='Red Cat' (cutoff 2024-09-01) -- J-Book corpus (DARPA/MDA/SOCOM/OSD/AF/SF RDT&E + Procurement) does not seed Army sUAS PE lines; per heuristic #7, NOT_FOUND -> UNVERIFIABLE (coverage gap, not red flag).",
+        "usaspending.query_dod_contracts(recipient_name='Teal Drones', 2021-2024-09-01) shows only 15 DoD awards totaling $726,613 -- visible awards are small ($250K is largest, for 'TEAL 2 DRONES' on FA8601-23-F-0127). The claimed $5.7M SRR T2 contract is NOT visible in USAspending DoD recipient data through cutoff; it may be (a) routed via DIU/OSD with a different recipient name, (b) under a different PIID prefix, or (c) classified at the line-item level.",
+        "Materiality is very high: production award expected in 12 weeks; the broader forward narrative depends entirely on SRR PoR win."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding + usaspending.query_dod_contracts",
+      "M_value": "pentagon_jbook=NOT_FOUND; usaspending Teal total $726K (no $5.7M T2 award visible)",
+      "interpretation": "FRAMEWORK COVERAGE GAP. The single most narrative-load-bearing forward claim is exactly the kind of program (Army sUAS PoR) where the J-Book corpus would catch a YSS/IONQ-style divergence -- but the corpus does not currently seed Army sUAS PEs. Severity remains UNVERIFIABLE per heuristic #7. ACTION: extend programs.json with Army sUAS PoR / Tranche 2/3 PE; this is the high-leverage coverage gap surfaced by this backtest."
+    },
+    {
+      "claim_id": "C2_Blue_UAS_DIU",
+      "claim_text": "Teal 2 received DoD Blue UAS designation under DIU Blue sUAS program (June 2023).",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook NOT_FOUND for 'Blue UAS' / 'Blue sUAS' / 'Defense Innovation Unit' (cutoff 2024-09-01). DIU is funded via OSD-level lines not seeded into the corpus.",
+        "Blue UAS designation is a qualification list, not a budget line -- it doesn't have a J-Book PE in the conventional sense. The framework would need a separate DIU-list M-source to verify."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "NOT_FOUND (no DIU Blue sUAS seed in corpus)",
+      "interpretation": "PASS-equivalent: claim is qualification-status, not budget claim. Coverage gap noted; not a red flag."
+    },
+    {
+      "claim_id": "C3_CBP_BPA_90M",
+      "claim_text": "Teal one of 5 contractors on CBP $90M 5-year BPA (Dec 2021); separate $1.8M CBP order Sep 2023.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "CBP is a DHS agency; usaspending.query_dod_contracts (DoD-only filter) intentionally excludes it. usaspending.query_federal_presence errored (bad_kwargs: requires name_variants), so DHS-side verification didn't complete in this run.",
+        "$90M is a BPA CEILING, not committed obligations -- only ~$1.8M of actual orders disclosed against it through 2024-09-01."
+      ],
+      "M_check": "usaspending.query_dod_contracts (DoD-only) + (federal_presence errored)",
+      "M_value": "no DHS coverage in this pass",
+      "interpretation": "Underverified due to tool-arg error on federal_presence; BPA ceilings are commonly inflated vs realized obligations. Not red-flagged but noted as soft. UNVERIFIABLE."
+    },
+    {
+      "claim_id": "C4_DLA_SOE_TLS",
+      "claim_text": "Teal received $5.2M DLA POs Aug 2023 via Noble Supply under SOE TLS Program ($33B, 10-yr).",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook NOT_FOUND for 'Special Operational Equipment Tailored Logistics Support' / 'SOE TLS' -- SOE TLS is a DLA logistics IDIQ, not an RDT&E or Procurement PE; correctly outside corpus.",
+        "usaspending.query_dod_contracts(recipient_name='Noble Supply', 2023-2024-09-01) returns 121,417 awards totaling $374.6M of DoD obligations -- Noble Supply / SOE TLS framework is unambiguously alive and well-funded.",
+        "Heuristic #6 (usaspending cross-check): underlying program flow is real; Teal's $5.2M slice is plausible relative to Noble's volume."
+      ],
+      "M_check": "pentagon_jbook + usaspending.query_dod_contracts on Noble Supply",
+      "M_value": "Noble Supply DoD total $374.6M / 121K awards through cutoff -- SOE TLS pipeline robust",
+      "interpretation": "PASS. Program exists, is funded, and Noble is an active conduit. Teal's claim is plausible and not contradicted."
+    },
+    {
+      "claim_id": "C5_Teal2_FY24_revenue_286pct",
+      "claim_text": "FY24 revenue +286% to $17.8M; product revenue +351% on Teal 2; contract revenue $4.17M.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "usaspending shows only $726,613 of direct DoD contract obligations to Teal Drones from 2022-05 through 2024-09-01 (15 awards, max $250K) -- far less than the claimed $4.17M FY24 contract revenue.",
+        "Possible reconciliation: (a) contract revenue includes non-DoD federal (CBP/DHS), foreign military, and DLA-via-Noble pass-through, (b) revenue recognition can lead/lag obligation timing, (c) SBIR/OTA awards routed through alternate vehicles.",
+        "Still, the disconnect between $4.17M claimed contract revenue and ~$0.5M of direct DoD visible in USAspending is large and undisclosed."
+      ],
+      "M_check": "usaspending.query_dod_contracts on Teal Drones FY-window",
+      "M_value": "Teal Drones DoD total = $726K (15 awards); largest single = $250K",
+      "interpretation": "MODERATE_UNDERDELIVERY. Direct-DoD spend visible is ~6x smaller than disclosed contract revenue, implying heavy reliance on indirect / non-DoD federal pathways and/or revenue-recognition timing. Not red flag but worth disclosure pressure."
+    },
+    {
+      "claim_id": "C6_customer_concentration_53pct_AR",
+      "claim_text": "53% AR concentration (Customer A); 3 customers each >=10% of FY24 revenue.",
+      "severity": "PASS",
+      "supports": [
+        "Concentration is DISCLOSED in the filing -- this is the company telling us, not us catching them hiding it.",
+        "Consistent with USAspending profile showing a small number of large-prime/agency relationships (top award $250K from a single DoD command)."
+      ],
+      "M_check": "usaspending top_awards profile",
+      "M_value": "Top 3 of 15 Teal DoD awards = $444K of $726K (61%) -- consistent with 53%/24%/10% pattern",
+      "interpretation": "PASS on disclosure quality; concentration itself is a structural risk but not an undisclosed one."
+    },
+    {
+      "claim_id": "C7_Offensive_sUAS_AF_PE",
+      "claim_text": "Adjacency probe: AF PE 0208201F Offensive small Unmanned Aircraft Systems forward-funding status as a proxy for the DoD sUAS budget envelope Red Cat is positioned to capture.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "pentagon_jbook returned signal=UNFUNDED_THIS_YEAR for PE 0208201F (cutoff 2024-09-01). FY24 funded_M=0.0 in the FY 2026 Air Force RDTE Vol III. n_consecutive_unfunded=1.",
+        "Per heuristic #1, UNFUNDED_THIS_YEAR -> SEVERE_UNDERDELIVERY for a directly-claimed program-revenue claim. However, per heuristic #2 (materiality test), this is an ADJACENCY probe -- Red Cat did NOT name PE 0208201F in the 10-K; it's a budget-envelope proxy. Downgrade to MODERATE.",
+        "earmark_detector returned NOT_EARMARK for PE 0208201F -- de-funding is not from an earmark sunset; it's a structural Air Force budget choice."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(pe_number='0208201F', cutoff_date='2024-09-01') + earmark_detector",
+      "M_value": "signal=UNFUNDED_THIS_YEAR, latest_funded_year=null, n_consecutive_unfunded=1, NOT_EARMARK",
+      "interpretation": "MODERATE. The closest J-Book PE related to the Air Force's offensive sUAS envelope is unfunded in the cutoff-year view, signaling that the broader AF sUAS RDT&E demand is thinner than the cohort narrative implies. This is suggestive (not dispositive) of headwinds for sUAS small-caps relying on AF/Joint sUAS demand."
+    },
+    {
+      "claim_id": "C8_RFI_partners_OPTT",
+      "claim_text": "Red Cat Futures Initiative formed May 2024 with OPTT and other partners.",
+      "severity": "PASS",
+      "supports": [
+        "edgar_fts.query_fulltext('Red Cat Futures Initiative', 2024-04 to 2024-09) returns 2 hits -- counterparty disclosure exists in EDGAR."
+      ],
+      "M_check": "edgar_fts.query_fulltext",
+      "M_value": "total_hits=2",
+      "interpretation": "PASS. Counterparty disclosure corroborated."
+    },
+    {
+      "claim_id": "C9_Patents_22_issued",
+      "claim_text": "UAVPatent Corp holds 22 issued patents/registered designs + 8 pending.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "uspto_odp.query_assignee('Teal Drones', cutoff 2024-09-01): 24 total applications, 13 granted (pre-cutoff).",
+        "uspto_odp.query_assignee('UAVPatent', cutoff 2024-09-01): 9 applications, 1 granted.",
+        "uspto_odp.query_assignee('Red Cat'): 0 applications.",
+        "Combined granted patents pre-cutoff = 13 + 1 = 14, vs. claimed 22 issued. Total applications = 33, vs. claimed 30 (22 issued + 8 pending). Application-count is roughly aligned; granted count materially below claim."
+      ],
+      "M_check": "uspto_odp.query_assignee Teal Drones + UAVPatent + Red Cat",
+      "M_value": "14 granted vs 22 claimed (~36% shortfall); 33 total applications vs 30 claimed (rough alignment)",
+      "interpretation": "MODERATE_UNDERDELIVERY. The 'issued' count appears to include design patents that may be counted differently, foreign registrations not in USPTO ODP, or trademarks. The 36% shortfall in granted US patents vs claim is material; not red-flag because (a) registered designs and foreign IP may legitimately bridge the gap, (b) 13 of the 14 are real and grant dates pre-cutoff."
+    },
+    {
+      "claim_id": "C10_Autonodyne_8_25M_litigation",
+      "claim_text": "Autonodyne suing Teal Drones for $8.25M accelerated SLA payments (filed May 2024).",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "edgar_fts.query_fulltext('Autonodyne Teal Drones', 2022-09 to 2024-09) returns 0 hits -- but EDGAR FTS is keyword-restricted and litigation is disclosed in the 10-K itself (which is the source-document), so absence-of-hits in counterparty search is not informative.",
+        "Litigation is DISCLOSED in the 10-K Item 3 Legal Proceedings; outcome is contingent."
+      ],
+      "M_check": "edgar_fts.query_fulltext",
+      "M_value": "total_hits=0 (within window; source 10-K not indexed by query phrase)",
+      "interpretation": "UNVERIFIABLE via edgar_fts; the company already discloses the litigation -- no hidden risk here, just an open contingency."
+    },
+    {
+      "claim_id": "C11_SLC_facility",
+      "claim_text": "Teal manufactures Teal 2 at ~22,000-sf South Salt Lake UT facility; max capacity 5,000+/mo with capex.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "epa_frs.query_facilities('Teal Drones', 'UT'): n_facilities=0 -- EPA FRS does not regulate drone assembly (not RCRA/CAA/NPDES-significant); absence is expected for this NAICS.",
+        "Facility lease IS disclosed in Item 2 Properties ($22,667/mo, expires Dec 2030, 22,000sf South Salt Lake)."
+      ],
+      "M_check": "epa_frs.query_facilities",
+      "M_value": "n_facilities=0 (EPA FRS coverage gap for this industry)",
+      "interpretation": "UNVERIFIABLE via EPA; lease economics are in-filing and consistent."
+    },
+    {
+      "claim_id": "C12_NATO_2_5M",
+      "claim_text": "Teal received $2.5M new contracts from two NATO allied countries (March 2024).",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "usaspending.query_federal_presence errored (bad_kwargs: requires name_variants).",
+        "Foreign military direct-commercial sales do NOT appear in USAspending regardless -- only FMS-via-DSCA does. Direct NATO-country sales would be invisible to US federal-procurement DBs."
+      ],
+      "M_check": "usaspending.query_federal_presence (errored)",
+      "M_value": "n/a -- foreign sales out of scope for USAspending",
+      "interpretation": "UNVERIFIABLE via available federal M-sources; foreign-customer claims need export-license or trade-data M-sources we don't currently have."
+    }
+  ],
+  "summary": {
+    "n_claims": 12,
+    "n_queries_run": 22,
+    "severity_counts": {
+      "PASS": 3,
+      "MODERATE_UNDERDELIVERY": 3,
+      "SEVERE_UNDERDELIVERY": 0,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 6
+    },
+    "jbook_grounded_claims": ["C1_SRR_T2_PoR_finalist","C2_Blue_UAS_DIU","C4_DLA_SOE_TLS","C7_Offensive_sUAS_AF_PE"],
+    "jbook_pentagon_hits": 1,
+    "jbook_pentagon_hits_detail": "pentagon_jbook fired (returned a matched program) on 1 of 4 J-Book-grounded claims: C7 (PE 0208201F, UNFUNDED_THIS_YEAR). C1/C2/C4 all returned NOT_FOUND -- the corpus does not seed Army sUAS PoR PEs, Blue UAS/DIU lines, or DLA SOE TLS IDIQ. This is a CORPUS COVERAGE GAP and the main framework-improvement signal from this backtest.",
+    "framework_notes": [
+      "Coverage gap: Army sUAS Program of Record (SRR T1/T2/T3) PEs are not seeded in programs.json. This is exactly the kind of small-cap-load-bearing program where the YSS/IONQ pattern would surface; recommend extending the corpus.",
+      "Adjacency hit: PE 0208201F (AF Offensive sUAS) returned UNFUNDED_THIS_YEAR in the FY26 budget view at cutoff -- consistent with thinner-than-narrative AF sUAS demand.",
+      "Direct-DoD vs disclosed contract revenue gap: Teal Drones direct-DoD obligations ($726K) materially below FY24 contract revenue ($4.17M) -- suggests indirect routing via DLA/Noble + DHS + foreign; not necessarily a red flag but a useful diligence vector.",
+      "Patent count shortfall: 14 USPTO-granted vs 22 claimed issued; partially explainable by foreign registrations / trademarks but the gap is real."
+    ]
+  }
+}

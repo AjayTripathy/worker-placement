@@ -1,0 +1,123 @@
+{
+  "ticker": "AXON",
+  "cik": "0001069183",
+  "cutoff": "2023-01-15",
+  "filing": "0001558370-22-002006_10-K.txt",
+  "cohort": "jbook_divergence_pit2023",
+  "framework_verdict_summary": "AXON is STRUCTURALLY OUTSIDE the J-Book divergence pattern. The FY2021 10-K names ZERO Pentagon Program Elements, ZERO programs of record, and asserts NO customer >10% of net sales. usaspending confirms real but small federal presence ($93.7M lifetime contracts, DoD only 3 of 134 awards) overwhelmingly DHS/DOJ body-camera buys, not Pentagon RDT&E/Procurement PEs. The framework correctly returns NOT_FOUND across pentagon_jbook for every Axon/TASER probe — there is nothing to find because the issuer makes no PE-grounded claim. Net read: PASS on every claim Axon actually made; NOT_FOUND is the right J-Book signal (per heuristic 7, NOT_FOUND is UNVERIFIABLE, not bad). This is a useful negative-control for the cohort: framework does not over-fire on a non-defense issuer.",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Axon sells to 'U.S. federal civilian and defense agencies' as a customer market.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending.query_federal_presence returned signal=RECURRING_FEDERAL with 134 contracts totaling $93.7M lifetime across 9 federal agencies (DHS 8 contracts incl $20.5M IDV body-worn-camera award; DOJ 7 contracts incl $10.3M body-worn-camera award; DoD 3 contracts; SSA 10; VA 3; State 1; Treasury 1; USDA 2; Interior 2). 3 UEIs resolved: AXON ENTERPRISE INC (parent), THE AXON GROUP LTD (child), AXON CABLE INC (separate entity)."
+      ],
+      "M_check": "usaspending.query_federal_presence",
+      "M_value": "RECURRING_FEDERAL, 134 contracts, $93.7M, 9 agencies incl DoD (3 awards)",
+      "interpretation": "Claim is corroborated. Federal+defense presence is REAL but small relative to $863M FY2021 net sales (<2% of revenue lifetime). DoD specifically is a footnote (3 of 134 awards). No inflation. PASS."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Axon is investing in sales personnel to capture U.S. federal government and military as a new market.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook NOT_FOUND for contractor_name=Axon and Axon Enterprise — corpus does not show Axon as a primary contractor on any of the 410 RDT&E/Procurement PEs in the FY26 J-Book set. Consistent with their position as a non-prime, non-RDT&E issuer.",
+        "usaspending shows DoD presence (3 contracts) is incipient, not a J-Book-programmed pipeline. Body-camera DoD pilots are a plausible-future market expansion, not a Program-of-Record-backed forward."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding (contractor) + usaspending.query_federal_presence",
+      "M_value": "J-Book NOT_FOUND; usaspending DoD=3 contracts (small)",
+      "interpretation": "The claim is forward and unquantified ('investing in sales personnel ... including ... military'). No revenue guidance is tied to a named PE. The framework cannot mark this SEVERE because nothing specific was promised — Axon did not say 'we expect X% of FY2023 revenue from DoD program Y'. PASS with a structural caveat: their military pipeline is not visible in J-Book, so any FUTURE 10-K that names a DoD PE will need re-scoring."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "No customer represented more than 10% of total net sales in 2021, 2020, or 2019.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending lifetime federal contracts $93.7M against three reported years of net sales ($530.9M FY2019 + $681.0M FY2020 + $863.4M FY2021 = $2.075B), implying federal share <5% cumulative. No single agency contract approaches 10% of any single year's net sales (largest single award is DHS $20.5M IDV — and that's an indefinite-delivery vehicle, not booked all at once). Disclosure is internally consistent."
+      ],
+      "M_check": "usaspending.query_federal_presence",
+      "M_value": "All federal contracts combined <5% of cumulative 3yr revenue; no single award approaches 10% of any single FY revenue",
+      "interpretation": "Disclosure consistent with awards data. PASS."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Axon derives a significant portion of revenue from TASER CEDs.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook returned NOT_FOUND for program_name='TASER', 'TASER 7', 'Conducted Energy Device' — correct, because TASER is NOT a Pentagon program of record; it is a commercial product sold to municipal police departments. Heuristic 7 explicitly states NOT_FOUND is not a red flag when the claim is outside corpus scope, which is the case here.",
+        "TASER segment net sales reported $436.9M in FY2021 (50.6% of total) — a real product line backed by SAM-registered manufacturing footprint (EPA FRS confirms TASER INTERNATIONAL physical facilities at 17800 N 85TH ST and 7860 E MCCLAIN DR, Scottsdale AZ, both Maricopa County)."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding (program_name)",
+      "M_value": "NOT_FOUND (correctly out-of-scope; TASER is commercial, not a Pentagon PE)",
+      "interpretation": "Claim verifies via control sources (EPA FRS facility existence + USPTO patent estate). J-Book is the wrong M-source for this claim — and the framework correctly does not penalize for that. PASS."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Software & Sensors segment revenue depends on Axon Body / Axon Fleet / Axon Evidence cloud SaaS.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook returned NOT_FOUND for 'Axon Body', 'Body Worn Camera', 'Evidence.com' — body-worn cameras are NOT a Pentagon Program Element in the FY26 J-Book corpus; they are a DOJ/DHS/state-local procurement category. Per heuristic 7, NOT_FOUND for out-of-corpus categories is UNVERIFIABLE, not negative.",
+        "usaspending confirms BWC product line is real and growing: DHS $20.5M IDV ('IDVRS-BODY WORN CAMERAS'), DOJ $10.3M ('BODY WORN CAMERAS AXON FOR OPR'), DHS $9.8M follow-on. These are body-camera-specific contract titles, confirming Axon Body as the deployed product line.",
+        "Software & Sensors segment reported $426.5M in FY2021 (49.4% of total)."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding (program) + usaspending.top_awards",
+      "M_value": "J-Book NOT_FOUND (out-of-scope); usaspending confirms BWC product line via explicit contract titles",
+      "interpretation": "Claim is corroborated by usaspending top-awards descriptions naming 'BODY WORN CAMERAS AXON' explicitly. PASS."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "ABSENCE: Axon names NO specific Pentagon PE / Program of Record in its FY2021 10-K.",
+      "severity": "PASS",
+      "supports": [
+        "Exhaustive search of the 120K-char slice (90% of the 10-K text by character) for PE-number pattern, program names from the canonical J-Book program list (Skyborg, CCA, SDA Tracking Layer, Project Maven, Short Range Reconnaissance, Quantum Networking, Valkyrie, BQM-167, etc.), and 'program of record' language returned zero hits. The only DoD-adjacent text is generic customer-market language ('U.S. federal civilian and defense agencies' / 'U.S. federal government and military').",
+        "by_entity.json confirms zero J-Book entries keyed to Axon or TASER. ticker_entity_resolution.json and ticker_pe_crosswalk.json both return empty for AXON — Axon is not in the defense-cohort entity-resolution layer at all, consistent with the cohort metadata note ('ITA inclusion is unusual')."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding (contractor) + entity-resolution corpus",
+      "M_value": "J-Book NOT_FOUND across all queries; entity-resolution returns empty",
+      "interpretation": "Absence of PE-grounded claims means the J-Book divergence pattern is STRUCTURALLY INAPPLICABLE to AXON. This is the correct framework behavior: no specific Pentagon promise was made, so none can fail. PASS as a negative control for the cohort."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Axon holds patent protection in CED / Axon device / SaaS technology.",
+      "severity": "PASS",
+      "supports": [
+        "uspto_odp returned 354 total patent applications and 197 granted patents under Axon Enterprise (pre-cutoff 2023-01-15). Additional 128 applications and 66 grants under legacy 'TASER International' assignee name (pre-name-change April 2017).",
+        "Grant titles include 'Conducted Electrical Weapon' patents (e.g., #10274290 'Systems and Methods for Calibrating a Conducted Electrical Weapon'), confirming CED-specific patent coverage; and Axon Enterprise filings on 'Electronic Restraint Device', 'Weapon with Indicator', 'Generating Alerts ... by Conducted Electrical Weapons' confirm contemporaneous prosecution."
+      ],
+      "M_check": "uspto_odp.query_assignee",
+      "M_value": "Axon Enterprise: 354 apps / 197 grants; TASER International: 128 apps / 66 grants",
+      "interpretation": "Strongly substantiated. ~263 combined granted patents under the two assignee names pre-cutoff is consistent with a 28-year-old product company. PASS."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Axon owns an ~100,000 sq ft HQ + manufacturing facility in Scottsdale, AZ.",
+      "severity": "PASS",
+      "supports": [
+        "epa_frs returned 2 facilities in Scottsdale, AZ under name 'TASER INTERNATIONAL': 17800 N 85th St (Maricopa County, 85255) and 7860 E McClain Dr (Maricopa County, 85260). Both are pre-name-change FRS registrations; the company has been operating from these addresses since well before the 2017 name change."
+      ],
+      "M_check": "epa_frs.query_facilities",
+      "M_value": "2 facilities in Scottsdale AZ Maricopa County registered to TASER INTERNATIONAL",
+      "interpretation": "Facility existence confirmed. PASS."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "FY2021 net sales $863.4M (+26.8% YoY), 80% U.S., no federal/DoD revenue breakout.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending shows lifetime federal contracts of $93.7M (~$15-25M/yr run-rate) — small enough that not breaking out federal revenue is consistent with materiality thresholds. No agency-specific breakout would be required under Reg S-K Item 101 at this share."
+      ],
+      "M_check": "usaspending.query_federal_presence",
+      "M_value": "$93.7M lifetime federal across all agencies; implied <3% of any single FY net sales",
+      "interpretation": "Disclosure consistent with materiality. PASS."
+    }
+  ],
+  "framework_metrics": {
+    "n_claims": 9,
+    "n_queries_run": 16,
+    "n_jbook_grounded_claims": 5,
+    "n_jbook_queries_with_hits": 0,
+    "severity_counts": {"PASS": 9, "MODERATE_UNDERDELIVERY": 0, "SEVERE_UNDERDELIVERY": 0, "RED_FLAG_NEGATIVE": 0, "UNVERIFIABLE": 0},
+    "jbook_hits_summary": "pentagon_jbook fired on 0 of 5 J-Book-grounded claims — all NOT_FOUND. Correctly interpreted as STRUCTURAL ABSENCE (Axon makes no PE-specific claims), not as a coverage gap, per cohort heuristic 7."
+  }
+}

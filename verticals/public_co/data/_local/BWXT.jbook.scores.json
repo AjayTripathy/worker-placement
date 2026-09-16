@@ -1,0 +1,172 @@
+{
+  "ticker": "BWXT",
+  "cutoff": "2026-05-20",
+  "filing": "0001486957-26-000007_10-K.txt",
+  "scope_note": "BWXT revenue flows through DOE/NNSA (Naval Reactors, Y-12 NSC, Pantex, naval fuel) and U.S. Navy direct procurement, NOT the DoD RDT&E/Procurement Program Elements covered by the pentagon_jbook v1 corpus. By Heuristic #7, NOT_FOUND for Navy/DOE programs is treated as UNVERIFIABLE (coverage gap), not a red flag. doe_budget v1 also does NOT ingest NNSA, so its NOT_FOUND on Naval Nuclear Propulsion is also UNVERIFIABLE. Forward-funding signal for BWXT is therefore not testable in the current Signal OS framework — usaspending provides only rear-view contract confirmation. This finding is a META-OBSERVATION on framework coverage: BWXT is exactly the kind of company where the J-Book + DOE-Office-of-Science combo cannot speak to the forward thesis.",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "BWXT supplies naval nuclear components/reactors/fuel to DOE/NNSA Naval Nuclear Propulsion Program; demand by U.S. Government determines a substantial portion of segment backlog.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending: BWXT recipient family received $24.3B across 52 contracts (38 DOE awards), including BWXT Nuclear Operations Group (Naval Reactors prime), BWXT Y-12 LLC ($10.99B M&O contract), BWXT Pantex LLC ($6.57B M&O), BWXT Enrichment Operations ($110M HALEU pilot plant) — directly confirms NNSA/Naval Nuclear Propulsion participation.",
+        "usaspending: BWXT NUCLEAR OPERATIONS GROUP holds awards including 'PROCESSING OF ENRICHED URANIUM SCRAP' and HALEU processing (3.6 MT) — consistent with naval fuel and NNSA work."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding + doe_budget + usaspending",
+      "M_value": {
+        "pentagon_jbook(Naval Nuclear Propulsion Program)": "NOT_FOUND",
+        "pentagon_jbook(contractor=BWX Technologies)": "NOT_FOUND",
+        "doe_budget(Naval Nuclear Propulsion)": "NOT_FOUND",
+        "usaspending.federal_presence": "RECURRING_FEDERAL, 52 contracts, $24.3B obligated, 38 DOE / 11 DoD / 2 NRC / 1 NASA"
+      },
+      "interpretation": "Past revenue is real and large (usaspending confirms multi-billion-dollar prime positions across NNSA sites + Naval Reactors). Forward J-Book divergence test is UNVERIFIABLE here because the corpus does not cover Navy/NNSA — the cohort pattern (named DoD PE going unfunded) is not applicable to BWXT's primary revenue line. Treating as PASS on the claim of existing program participation; framework cannot reject the forward thesis."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "U.S. Government accounted for ~91% of Government Operations segment revenues in FY2025 (vs 95% FY2024, 93% FY2023).",
+      "severity": "PASS",
+      "supports": [
+        "usaspending shows >$24B in cumulative obligations and ~$650M annual FY snapshot across BWXT family UEIs — consistent with the disclosed concentration.",
+        "Trend in disclosure (95% -> 91%) explained in the same filing by 2025 acquisitions (A.O.T. ordnance + Kinectrics commercial mix) — internal coherence."
+      ],
+      "M_check": "usaspending.query_recipient_contracts + query_federal_presence",
+      "M_value": {
+        "usaspending.federal_presence.fy_amount_snapshot_top_UEIs": "~$650M (BWXT parent $80M + NNNB-LANL $208M + Fluor-BWXT Portsmouth $139M + BWXT Enrichment $110M + BWXT Ordnance TN $76M + BWXT NOG $13M + BWXT Adv Tech $12M + CH2M West Valley $10M)"
+      },
+      "interpretation": "Customer concentration claim is verifiable via usaspending and is consistent with the disclosed magnitudes. PASS."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "U.S. Government contracts comprised approximately 68% of total consolidated revenues for FY2025.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending federal presence signal = RECURRING_FEDERAL; multi-vehicle DOE/DoD/NRC/NASA exposure is unambiguous.",
+        "Backlog disclosed at $7.26B with $2.15B unfunded Government component — internal consistency."
+      ],
+      "M_check": "usaspending.query_federal_presence",
+      "M_value": {"signal": "RECURRING_FEDERAL", "agencies": "DOE x38, DoD x11, NRC x2, NASA x1"},
+      "interpretation": "Concentration disclosure is corroborated by federal-spending traffic. PASS."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "BWXT anchors capex/headcount growth on March 2024 U.S. Navy 30-year shipbuilding plan — sustained or growing nuclear submarine + carrier procurement under all three profiles.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "Naval procurement (Columbia-class, Virginia-class, Ford-class) is funded through Navy SCN appropriation, not via the DoD RDT&E PEs in the pentagon_jbook v1 corpus.",
+        "The Columbia-class SSBN and Virginia-class SSN are not in either programs.json (corpus is Air Force / Space Force / DARPA / MDA / SOCOM / OSD) or doe_budget (Office of Science only)."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(Columbia/Virginia/Ford-class)",
+      "M_value": {
+        "pentagon_jbook(Columbia-class submarine)": "NOT_FOUND",
+        "pentagon_jbook(Virginia-class submarine)": "NOT_FOUND",
+        "pentagon_jbook(Ford-class aircraft carrier)": "NOT_FOUND"
+      },
+      "interpretation": "Per Heuristic #7, NOT_FOUND is UNVERIFIABLE — these PEs are outside the v1 J-Book corpus coverage (Navy shipbuilding is in the SCN appropriation, not in DARPA/MDA/SOCOM/OSD/AF/SF RDT&E and procurement R-2/P-40 lines). Coverage gap; framework cannot test the forward shipbuilding thesis."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "BWXT serves NASA, DoW/DoD, DOE for advanced nuclear reactors in space and terrestrial domains (power/propulsion), offering full design/engineering/licensing/manufacture services.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "USPTO records one BWXT space-nuclear-propulsion patent application (PCTUS2022026557, 'SPACE NUCLEAR PROPULSION REACTOR AFT PLENIUM ASSEMBLY') — independent corroboration that BWXT is doing the work claimed.",
+        "usaspending shows BWXT Advanced Technologies LLC has $11.8M FY snapshot — modest, consistent with early-stage advanced-reactor work."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(Project Pele / DRACO / microreactor / contractor=BWXT Advanced Technologies) + uspto_odp",
+      "M_value": {
+        "pentagon_jbook(Project Pele)": "NOT_FOUND",
+        "pentagon_jbook(DRACO)": "NOT_FOUND",
+        "pentagon_jbook(advanced nuclear microreactor)": "NOT_FOUND",
+        "pentagon_jbook(BWXT Advanced Technologies)": "NOT_FOUND",
+        "uspto_odp(BWX Technologies)": "1 of 3 applications is space nuclear propulsion reactor (PCT)"
+      },
+      "interpretation": "Project Pele (DoD SCO microreactor) and DRACO (DARPA/NASA NTP) are real programs but absent from the v1 J-Book corpus. NOT_FOUND -> UNVERIFIABLE by Heuristic #7. The patent record independently confirms BWXT is doing space-nuclear-propulsion engineering, which is consistent with the claim. Framework cannot verify forward funding for these specific lines."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Backlog $7,260.7M at 12/31/2025 (incl. $2,151.3M unfunded gov backlog); ~40% to recognize by end of 2026; unexercised options ~$2.8B expected to award $1.4B (2026), $0.9B (2030), $0.5B (2035) subject to Congressional appropriations.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending shows long-tenor M&O vehicles (Y-12 $11B, Pantex $6.6B) consistent with multi-FY option pipelines.",
+        "Disclosure is explicit about appropriations risk; no contradiction found in catalog M-sources."
+      ],
+      "M_check": "pentagon_jbook + doe_budget + usaspending.recipient_contracts",
+      "M_value": {
+        "pentagon_jbook(BWX Technologies)": "NOT_FOUND",
+        "doe_budget(BWX Technologies)": "NOT_FOUND",
+        "usaspending(BWX Technologies)": "52 contracts / $24.3B obligated lifetime"
+      },
+      "interpretation": "Backlog disclosure is internally consistent and corroborated by the long-tenor DOE M&O contracts visible in usaspending. Forward J-Book test is N/A (Navy + NNSA outside corpus). PASS on rear-view; UNVERIFIABLE on forward-PE-specific risk."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "BWXT completed acquisitions of Aerojet Ordnance Tennessee from L3Harris (Jan 3, 2025) and Kinectrics Holdings (May 20, 2025).",
+      "severity": "PASS",
+      "supports": [
+        "usaspending shows 'BWXT ORDNANCE TENNESSEE, INC.' UEI MMACD85DT5D5 with $75.8M FY snapshot on a 'HIGH PURITY DEPLETED URANIUM (HPDU) PRODUCTION SERVICES' DOE/NNSA contract — corroborates that A.O.T. is integrated into BWXT and producing for NNSA HPDU.",
+        "edgar_fts search on L3Harris CIK for 'Aerojet Ordnance Tennessee BWXT' returns 0 hits — minor disclosure-side note but expected for divestiture by L3Harris."
+      ],
+      "M_check": "edgar_fts.query_fulltext(L3Harris counterparty) + usaspending family lookup",
+      "M_value": {
+        "edgar_fts(L3Harris CIK)": "0 hits",
+        "usaspending(BWXT Ordnance Tennessee)": "UEI resolved, $75.8M FY snapshot, NNSA HPDU contract"
+      },
+      "interpretation": "Acquisition is corroborated by the post-deal UEI showing up under BWXT family with active NNSA contract flow. PASS."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Commercial Operations large-utility revenue share declined from 77% (FY2023) to 71% (FY2024) to 63% (FY2025), reflecting Kinectrics mix shift.",
+      "severity": "PASS",
+      "supports": [
+        "Internally consistent with disclosed Kinectrics acquisition (May 20, 2025) broadening Commercial Operations beyond the historical large-utility base.",
+        "No contradictory signal from M-sources; not a J-Book-grounded claim."
+      ],
+      "M_check": "(control claim, edgar_fts attempted; non-J-Book)",
+      "M_value": {"edgar_fts(BWXT Kinectrics nuclear refurbishment)": "0 hits"},
+      "interpretation": "Control claim (non-J-Book). Decline in utility share is internally consistent with the disclosed Kinectrics deal which broadened the customer mix; not flagged."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "BWXT plans to launch a Mo-99 product line and additional radioisotope-based imaging/diagnostic/therapeutic products.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "Forward product-launch claim; the v1 catalog does not have a strong M-source for Mo-99 supply forecasting. ClinicalTrials returned 0 studies for 'BWXT Medical' sponsor.",
+        "USPTO uspto_odp on 'BWXT Medical' returned a 429 rate-limit; no patent confirmation either way."
+      ],
+      "M_check": "clinical_trials.query_by_lead_sponsor + uspto_odp",
+      "M_value": {
+        "clinical_trials(BWXT Medical)": "0 studies",
+        "uspto_odp(BWXT Medical)": "status_429 (rate-limited)"
+      },
+      "interpretation": "Forward narrative claim without testable forward M-source in the catalog. UNVERIFIABLE; no negative signal."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "BWXT is sole-source supplier of proprietary naval valves/manifolds/fittings, and has supplied nuclear components to DOE since the 1950s.",
+      "severity": "PASS",
+      "supports": [
+        "USPTO records confirm BWXT engineering output in naval nuclear (helical baffle for OTSG, U-bend support — typical steam-generator IP for naval and CANDU work).",
+        "usaspending shows the longest-tenor DOE M&O contracts (Y-12 DEAC0500OR22800, Pantex DEAC5400AL66620) — confirms multi-decade DOE relationship."
+      ],
+      "M_check": "edgar_fts.query_fulltext + uspto_odp.query_assignee",
+      "M_value": {
+        "edgar_fts(BWXT sole-source naval valve)": "0 hits",
+        "uspto_odp(BWX Technologies)": "3 applications incl. naval steam-generator IP"
+      },
+      "interpretation": "Control claim; corroborated by long-tenor DOE M&O contracts visible in usaspending and naval steam-generator IP in USPTO. PASS."
+    }
+  ],
+  "summary": {
+    "n_claims": 10,
+    "n_queries_run": 21,
+    "severity_counts": {
+      "PASS": 7,
+      "MODERATE_UNDERDELIVERY": 0,
+      "SEVERE_UNDERDELIVERY": 0,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 3
+    },
+    "jbook_grounded_claims": 6,
+    "pentagon_jbook_hits": 0,
+    "jbook_coverage_note": "All 9 pentagon_jbook queries returned NOT_FOUND. Per Heuristic #7, this is UNVERIFIABLE coverage gap (Navy SCN + DOE/NNSA are structurally outside the FY2026 Air Force / Space Force / DARPA / MDA / SOCOM / OSD RDT&E + Procurement corpus). BWXT is a stress-test case demonstrating where the J-Book primary verifier cannot speak to a defense-prime forward thesis."
+  }
+}

@@ -1,0 +1,425 @@
+<title>Desk OS — System Architecture</title>
+<style>
+:root{
+  --bg:#FDFDFB; --ink:#111411; --sub:#3D453F; --line:#D8DDD8; --panel:#F5F7F5;
+  --navy:#1E3A5F; --navy-soft:#E8EDF4; --good:#14532D; --bad:#A32B18; --warn:#7A5410;
+  --chip-bg:#EEF1EE; --mono:ui-monospace,Menlo,'SF Mono',monospace;
+}
+@media (prefers-color-scheme: dark){:root{
+  --bg:#12150F; --ink:#E8EBE4; --sub:#9BA69B; --line:#2E352C; --panel:#191D16;
+  --navy:#8FB0DC; --navy-soft:#1C2634; --good:#7CC08F; --bad:#E08A7A; --warn:#D2A857;
+  --chip-bg:#20251E;
+}}
+:root[data-theme="dark"]{
+  --bg:#12150F; --ink:#E8EBE4; --sub:#9BA69B; --line:#2E352C; --panel:#191D16;
+  --navy:#8FB0DC; --navy-soft:#1C2634; --good:#7CC08F; --bad:#E08A7A; --warn:#D2A857;
+  --chip-bg:#20251E;
+}
+:root[data-theme="light"]{
+  --bg:#FDFDFB; --ink:#111411; --sub:#3D453F; --line:#D8DDD8; --panel:#F5F7F5;
+  --navy:#1E3A5F; --navy-soft:#E8EDF4; --good:#14532D; --bad:#A32B18; --warn:#7A5410;
+  --chip-bg:#EEF1EE;
+}
+*{box-sizing:border-box}
+body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);
+  max-width:1080px;margin:0 auto;padding:28px 24px 80px;line-height:1.45}
+h1{font-size:27px;margin:0;letter-spacing:-.01em}
+.sub{color:var(--sub);font-size:13px;margin:4px 0 0;max-width:78ch}
+.thesis{border-left:3px solid var(--navy);padding:8px 14px;margin:18px 0 26px;font-size:14.5px;
+  background:var(--panel);max-width:80ch}
+.layer{border:1px solid var(--line);border-radius:6px;margin:22px 0;overflow:hidden}
+.lhead{display:flex;align-items:baseline;gap:12px;padding:10px 16px;background:var(--navy-soft);
+  border-bottom:1px solid var(--line)}
+.lnum{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--navy);letter-spacing:.08em}
+.lhead h2{font-size:15px;margin:0;text-transform:uppercase;letter-spacing:.06em}
+.scope{font-family:var(--mono);font-size:9.5px;font-weight:700;letter-spacing:.08em;border:1px solid var(--line);
+  border-radius:3px;padding:2px 6px;color:var(--sub)}
+.lhead .why{margin-left:auto;font-size:11.5px;color:var(--sub);font-style:italic;text-align:right}
+.lbody{padding:14px 16px 16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px;margin:0 0 6px}
+.cell{border:1px solid var(--line);border-radius:5px;padding:8px 10px;background:var(--bg)}
+.cell b{font-size:12.5px;display:block;font-family:var(--mono)}
+.cell span{font-size:11.5px;color:var(--sub);display:block;margin-top:2px}
+.grouplab{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--navy);
+  margin:14px 0 6px}
+.rules{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px;padding-top:10px;border-top:1px dashed var(--line)}
+.rule{font-size:11px;background:var(--chip-bg);border:1px solid var(--line);border-radius:3px;
+  padding:3px 8px;color:var(--ink)}
+.rule b{color:var(--navy)}
+.rule.new{border-color:var(--good);}
+.rule.new b{color:var(--good)}
+.flow{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-family:var(--mono);font-size:12px;
+  background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:10px 12px;margin:4px 0 10px}
+.flow .step{background:var(--bg);border:1px solid var(--line);border-radius:4px;padding:4px 9px;white-space:nowrap}
+.flow .gate{border-color:var(--bad);color:var(--bad);font-weight:700}
+.flow .arr{color:var(--sub)}
+.statgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:20px 0 4px}
+.stat{border:1px solid var(--line);border-radius:5px;padding:9px 12px;background:var(--panel)}
+.stat .k{font-size:10px;text-transform:uppercase;letter-spacing:.09em;color:var(--sub)}
+.stat .v{font-family:var(--mono);font-size:17px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums}
+.stat .v small{font-size:11px;font-weight:400;color:var(--sub)}
+.good{color:var(--good)}.bad{color:var(--bad)}.warn{color:var(--warn)}
+table{border-collapse:collapse;width:100%;font-size:12.5px;margin:8px 0}
+th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--sub);
+  border-bottom:2px solid var(--ink);padding:4px 8px}
+td{padding:4px 8px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+td.m{font-family:var(--mono)}
+.foot{margin-top:34px;padding-top:12px;border-top:1px solid var(--line);font-size:11px;color:var(--sub);max-width:88ch}
+.tablewrap{overflow-x:auto}
+a{color:var(--navy)}
+@media (prefers-reduced-motion: no-preference){ .layer{scroll-margin-top:20px} }
+</style>
+
+<h1>The Desk OS — System Architecture</h1>
+<p class="sub">Every layer, rule, and detector, in plain English, as wired on 2026-07-27. Naming, precisely:
+<b>SignalOS</b> is the verification core — the machinery that checks claims against primary sources.
+<b>The Desk</b> is the watcher — it monitors everything and routes what matters. The rest is the trading
+operation built around both. The page reads top to bottom because that is how information actually flows:
+raw sources become verified facts, facts become judged investment cases, cases become written-down
+predictions, and only then does money move — always behind a human's approval.</p>
+
+<div class="thesis"><b>The product is the accumulated knowledge</b> — a growing map of how information travels
+into prices: which mechanisms move which companies, through which channels, on what delay. Trades and
+diligence reports are byproducts. A strategy that tests out worthless but teaches a mechanism is a success.
+The one rule underneath everything: <b>whoever generates an idea never grades it.</b></div>
+
+<div class="statgrid">
+  <div class="stat"><div class="k">Research ledger</div><div class="v">435 <small>names, every verdict</small></div></div>
+  <div class="stat"><div class="k">Written-down predictions</div><div class="v">228 <small>· 31 graded · 181 open</small></div></div>
+  <div class="stat"><div class="k">Accuracy (all)</div><div class="v">0.163 <small>Brier; coin flip = 0.25</small></div></div>
+  <div class="stat"><div class="k">Business-numbers calls</div><div class="v good">0.126 <small>89% right · n=18</small></div></div>
+  <div class="stat"><div class="k">Stock-reaction calls</div><div class="v bad">0.382 <small>n=2 · now anchored</small></div></div>
+  <div class="stat"><div class="k">Sizing gate</div><div class="v warn">0 / 20 <small>must beat the market first</small></div></div>
+  <div class="stat"><div class="k">Live book</div><div class="v">38 <small>positions · 41 working orders</small></div></div>
+  <div class="stat"><div class="k">Watchers / subsystems</div><div class="v">49 <small>/ ~77 health-graded</small></div></div>
+</div>
+
+<!-- ═══════════ LAYER 1 ═══════════ -->
+<div class="layer">
+<div class="lhead"><span class="lnum">LAYER 1</span><h2>Data connectors</h2><span class="scope">SIGNALOS CORE</span>
+<span class="why">primary sources only — claims get checked against the world, not against news coverage</span></div>
+<div class="lbody">
+  <div class="grouplab">Filings &amp; regulators (the audited spine)</div>
+  <div class="grid">
+    <div class="cell"><b>EDGAR / XBRL</b><span>Every US company's filings, straight from the SEC. When we quote a number it comes from the audited tables, never from the company's press release.</span></div>
+    <div class="cell"><b>EDINET</b><span>Japan's filing system. We read roughly a thousand Japanese companies directly — including the accounting quirks that make some cheap-looking ones fake-cheap.</span></div>
+    <div class="cell"><b>EMMA</b><span>The municipal-bond disclosure system. The fastest way to see whether a city or school district files its financials honestly and on time.</span></div>
+    <div class="cell"><b>SEC Form D</b><span>Checks a private fund manager's marketed fund sizes against what they actually registered — "unverifiable" is itself an answer.</span></div>
+    <div class="cell"><b>ClinicalTrials.gov</b><span>The drug-trial registry, with edit history — catches companies quietly changing what a trial was supposed to prove after the fact.</span></div>
+  </div>
+  <div class="grouplab">Government &amp; courts</div>
+  <div class="grid">
+    <div class="cell"><b>USASpending</b><span>Every federal contract dollar. Shows when a company's government money actually arrives — including money routed through subsidiaries the company doesn't highlight.</span></div>
+    <div class="cell"><b>CourtListener</b><span>Federal court dockets. Screens any executive or company for lawsuits that matter — fraud and disputes, not routine employment claims.</span></div>
+    <div class="cell"><b>openFDA / MAUDE</b><span>FDA product registrations and device-complaint reports. Used to verify claims — not to predict failures, since complaint spikes measure paperwork, not defects.</span></div>
+    <div class="cell"><b>FEMA risk maps</b><span>Federal disaster-risk data joined to school-district boundaries: which municipal borrowers sit on land that burns or floods, and whether insurers are leaving.</span></div>
+    <div class="cell"><b>State gaming data</b><span>Casino and slot-machine revenue that states publish monthly — hard numbers to check company stories against.</span></div>
+  </div>
+  <div class="grouplab">Physical truth (things that are hard to fake)</div>
+  <div class="grid">
+    <div class="cell"><b>Carbon Mapper</b><span>Satellites that see methane plumes. When a company says "no leaks," we can check from orbit.</span></div>
+    <div class="cell"><b>Sentinel-2</b><span>Free satellite imagery. Did the factory actually get built? Is the farmland actually healthy? Pixel changes answer both.</span></div>
+    <div class="cell"><b>Customs records</b><span>US import manifests, shipment by shipment. Often reveals who a company's undisclosed biggest customer really is.</span></div>
+    <div class="cell"><b>Job postings</b><span>Hiring at a specific plant ramps before production does — a free early read on utilization.</span></div>
+    <div class="cell"><b>Appointment calendars</b><span>How full the booking systems of lab-test companies are, weeks before they report earnings. Fed our best-graded prediction to date.</span></div>
+    <div class="cell"><b>Virality radar</b><span>Tracks which beauty products are going viral, then finds the public company that makes them — social buzz shows up in revenue one or two quarters later.</span></div>
+    <div class="cell"><b>Maps data</b><span>Do the stores a company claims actually exist, and do they have customers? Google Places and OpenStreetMap answer store-by-store.</span></div>
+    <div class="cell"><b>Ships &amp; storms</b><span>Tanker traffic through chokepoints like Hormuz, and hurricane tracks in season — for the positions those actually touch.</span></div>
+  </div>
+  <div class="grouplab">Markets &amp; crowds</div>
+  <div class="grid">
+    <div class="cell"><b>Interactive Brokers</b><span>The broker. Live prices, what we actually hold, what orders are working. Always the final word. As of 2026-07-28 the connection can STAGE untransmitted orders (they activate only when the operator clicks Transmit); live transmission from code remains forbidden until the sizing gate is earned.</span></div>
+    <div class="cell"><b>Option prices</b><span>Options embed the market's own odds on where a stock goes. We compute those odds and use them as the honest baseline for our predictions.</span></div>
+    <div class="cell"><b>Betting markets</b><span>Polymarket and Kalshi price elections and policy events in real time — a genuine crowd number for political questions.</span></div>
+    <div class="cell"><b>Short-sale data</b><span>Daily short-selling volume shows who's betting against a stock and when they're being squeezed out; free delayed prices serve as backup.</span></div>
+  </div>
+  <div class="rules">
+    <span class="rule"><b>Fresh price first</b> — get a live quote from the broker before valuing anything; never reuse this morning's number.</span>
+    <span class="rule"><b>Look like a real browser</b> when a government site blocks the scraper, before falling back to archives.</span>
+    <span class="rule"><b>Read the pictures</b> — if a filing puts its numbers in a chart instead of a table, fetch the image and read it.</span>
+    <span class="rule"><b>Nothing found ≠ nothing there</b> — an empty search means try a second phrasing before concluding absence.</span>
+  </div>
+</div></div>
+
+<!-- ═══════════ LAYER 2 ═══════════ -->
+<div class="layer">
+<div class="lhead"><span class="lnum">LAYER 2</span><h2>Watchers &amp; detectors</h2><span class="scope">THE DESK</span>
+<span class="why">watches everything, decides nothing — it routes what matters to the verifier</span></div>
+<div class="lbody">
+  <div class="flow">
+    <span class="step">hourly heartbeat runs 49 standing watchers</span><span class="arr">+</span>
+    <span class="step">a morning sentinel (6:15 &amp; 7:45) emails what landed and what it means</span><span class="arr">→</span>
+    <span class="step">one daily digest of anything actionable</span>
+  </div>
+  <div class="grid">
+    <div class="cell"><b>gauntlet_sentinel</b><span>Spots earnings reports the moment they land, checks them against what we predicted in advance, and sends a plain-language email: what happened, what we pre-agreed to do about it, what happens next.</span></div>
+    <div class="cell"><b>print_radar + grader</b><span>Catches results we might otherwise miss and grades our predictions automatically — no result lands ungraded.</span></div>
+    <div class="cell"><b>band_watch</b><span>Emails when a stock we've already researched falls into the price range where we said we'd buy.</span></div>
+    <div class="cell"><b>catalyst board</b><span>The calendar of dated events we care about — every one with a written-down prediction and a pre-agreed response.</span></div>
+    <div class="cell"><b>event watchers</b><span>Hurricane season for the insurers we own, strait traffic for the energy names, short-squeeze fingerprints for crowded stocks.</span></div>
+    <div class="cell"><b>sleeve books</b><span>Standing watch-lists per theme — the aesthetics/beauty names, the Korea value-up names — each with entry levels and tripwires.</span></div>
+    <div class="cell"><b>positions_sync</b><span>Keeps the dashboard's picture of holdings and working orders synced with the broker, so the screen never lies.</span></div>
+    <div class="cell"><b>diagnostics</b><span>Grades all ~77 subsystems green/yellow/red every hour. Standing ritual: every red gets investigated the same day, never ignored.</span></div>
+    <div class="cell"><b>memory_lint</b><span>Flags remembered facts that are going stale so they get re-verified before anyone acts on them.</span></div>
+    <div class="cell"><b>discovery_state</b><span>Answers "has the crowd already found this?" — undiscovered, being discovered, or crowded — before we call anything mispriced.</span></div>
+    <div class="cell"><b>scanner suite</b><span>Ten screens that go looking for candidates: unusually cheap companies, expiring share lockups, odd borrowing costs, betting-market disagreements, and so on.</span></div>
+  </div>
+  <div class="rules">
+    <span class="rule"><b>Many small detectors beat one big score</b> — each fires rarely and means it when it does; blended master-scores looked great and failed blind tests.</span>
+    <span class="rule"><b>Every detector declares what it applies to</b>, so the right checks run on the right kind of company — and a pre-flight check catches coverage gaps.</span>
+    <span class="rule"><b>New watchers must be switched on explicitly</b> — one wasn't, and sat silently dead for months. Now it's checked.</span>
+    <span class="rule"><b>Expected a cover-up and found none?</b> That's a finding too — record it, don't discard the sector.</span>
+  </div>
+</div></div>
+
+<!-- ═══════════ LAYER 3 ═══════════ -->
+<div class="layer">
+<div class="lhead"><span class="lnum">LAYER 3</span><h2>The diligence courts</h2><span class="scope">SIGNALOS CORE</span>
+<span class="why">the best findings come from trying to kill the idea, not from checking its boxes</span></div>
+<div class="lbody">
+  <div class="flow">
+    <span class="step">pin down who we're actually investigating</span><span class="arr">→</span>
+    <span class="step">pull their filings up to today</span><span class="arr">→</span>
+    <span class="step">verify every claim at the source</span><span class="arr">+</span>
+    <span class="step">independently try to disprove the thesis</span><span class="arr">→</span>
+    <span class="step gate">prosecution vs defense, then a ruling</span><span class="arr">→</span>
+    <span class="step">verdict recorded with sizing and kill-conditions</span>
+  </div>
+  <div class="grid">
+    <div class="cell"><b>Two-pass diligence</b><span>Every pitch gets both: verify what it claims, and separately attack it from first principles. The attack pass has flipped more verdicts than the checklist ever has.</span></div>
+    <div class="cell"><b>The court</b><span>One agent prosecutes the thesis, another defends it, on the strongest model available — and any single finding big enough to decide the case gets re-verified before anyone acts on it.</span></div>
+    <div class="cell"><b>The honesty lens</b><span>We flag companies whose story diverges from their own numbers. Re-discovering bad news a company disclosed honestly is not a finding — the value is excluding the ones who shade the truth.</span></div>
+    <div class="cell"><b>Count all the shares</b><span>Warrants, convertibles, and pre-funded instruments come out of the fine print before any per-share math — or the valuation is fiction.</span></div>
+    <div class="cell"><b>Same claim, every venue</b><span>What a company tells investors is compared against what it told regulators, courts, and its own past self.</span></div>
+    <div class="cell"><b>Right entity first</b><span>The name on the pitch deck is rarely the right thing to search — permits live under the contractor, filings under the shell company, patents under the founder.</span></div>
+  </div>
+  <div class="rules">
+    <span class="rule"><b>No shortcut diligence</b> — everything routes through the pipeline; a quick ad-hoc look skips detectors and calls gaps "clean."</span>
+    <span class="rule"><b>Trust the cleans, re-check the exclusions</b> — our error pattern runs one direction: we wrongly condemn more often than we wrongly acquit.</span>
+    <span class="rule"><b>Check the tape</b> — before repeating "the stock crashed on X," verify the crash actually happened. One famous one hadn't.</span>
+    <span class="rule"><b>When an agent suggests a rule improvement, wire it in</b> — a validated lesson left as a note is a lesson lost.</span>
+  </div>
+</div></div>
+
+<!-- ═══════════ LAYER 4 ═══════════ -->
+<div class="layer">
+<div class="lhead"><span class="lnum">LAYER 4</span><h2>Predictions &amp; the scoreboard</h2><span class="scope">TRADING OPERATION</span>
+<span class="why">every belief is written down before the event and graded after — our own honesty test, applied to ourselves</span></div>
+<div class="lbody">
+  <div class="flow">
+    <span class="step">write the prediction down before the event</span><span class="arr">→</span>
+    <span class="step">pre-write exactly how it will be judged</span><span class="arr">→</span>
+    <span class="step">the sentinel grades it when the event lands</span><span class="arr">→</span>
+    <span class="step">the scoreboard updates</span><span class="arr">→</span>
+    <span class="step">any pre-agreed action fires within 30 minutes</span>
+  </div>
+  <div class="grouplab">How a prediction gets made (the enforced path)</div>
+  <div class="grid">
+    <div class="cell"><b>Fixed event types</b><span>Every prediction is one of a fixed list of event kinds, chosen before results existed — so the scoreboard's categories can't be reshuffled after the fact to look better.</span></div>
+    <div class="cell"><b>The four questions</b><span>Every prediction must answer: what do we believe, what does the market believe, why might we know better, and why might it already be in the price?</span></div>
+    <div class="cell"><b>Two calls per earnings</b><span>The business result and the stock's reaction are predicted separately — being right about the business and wrong about the stock are different mistakes, and a good quarter never excuses a bad stock call.</span></div>
+    <div class="cell"><b>Check the crowd first</b><span>Before a prediction freezes, the system checks whether a betting market already prices the same event — and records the check even when none exists.</span></div>
+  </div>
+  <div class="grouplab">New this week — defer to the market where we haven't earned the right to disagree</div>
+  <div class="grid">
+    <div class="cell"><b>Options-implied odds</b><span>For every "will the stock be up a week later" call, we now compute the odds the options market implies and store them beside ours — with a source stamp, so a real market number can never be confused with one we derived ourselves.</span></div>
+    <div class="cell"><b>Name the driver</b><span>A stock-reaction prediction must say what the stock will actually trade on — the guidance, a policy decision, the backlog. "The quarter" is not an answer; that mistake cost us our worst grade.</span></div>
+    <div class="cell"><b>The ±5-point rule</b><span>In categories where we've shown no skill, our number defaults to the market's. Disagreeing by more than five points requires naming what we know that the market doesn't.</span></div>
+    <div class="cell"><b>Kill the story first</b><span>A confident story-based prediction requires one documented attempt to disprove it — plus the growth arithmetic: "growth continues at 20%" against a year that grew 38% is a long-shot, and now the system says so.</span></div>
+  </div>
+  <div class="grouplab">The scoreboard, by skill class (first reading, 31 graded calls)</div>
+  <div class="tablewrap"><table>
+    <tr><th>class</th><th>n</th><th>score</th><th>right</th><th>plain reading</th></tr>
+    <tr><td class="m">business numbers</td><td class="m">18</td><td class="m good">0.126</td><td class="m">89%</td><td>predictions fed by our own data connectors — the genuine skill; here our number IS the anchor</td></tr>
+    <tr><td class="m">deals &amp; other</td><td class="m">4</td><td class="m">0.117</td><td class="m">100%</td><td>too few to judge yet</td></tr>
+    <tr><td class="m">controls</td><td class="m">2</td><td class="m">0.133</td><td class="m">100%</td><td>mega-cap predictions made purely to test our own bias; never count toward the edge</td></tr>
+    <tr><td class="m">stories</td><td class="m">5</td><td class="m warn">0.256</td><td class="m">60%</td><td>worse than a coin — now gated by the kill-the-story and growth-arithmetic rules</td></tr>
+    <tr><td class="m">stock reactions</td><td class="m">2</td><td class="m bad">0.382</td><td class="m">50%</td><td>was guessed without an anchor — now defaults to the options market's odds</td></tr>
+  </table></div>
+  <div class="rules">
+    <span class="rule new"><b>The sizing gate</b>: our predictions may influence position sizes only once they beat the market's own odds across 20+ events with real market prices. Currently 0 of 20 — not earned.</span>
+    <span class="rule"><b>Odds we derived ourselves don't count as "the market"</b> — only real external prices (options, betting venues) qualify; four old unlabeled numbers are excluded until traced.</span>
+    <span class="rule"><b>Frozen means frozen</b> — a prediction is never revised after the fact; a wrong date gets moved, never regraded.</span>
+    <span class="rule"><b>Grades speak plainly</b> — a 55% call that misses "leaned slightly wrong, little information"; only high-conviction calls can meaningfully fail.</span>
+    <span class="rule"><b>No ambiguous grading</b> — if two predictions could match the same grade command, the system refuses rather than guessing.</span>
+  </div>
+</div></div>
+
+<!-- ═══════════ LAYER 5 ═══════════ -->
+<div class="layer">
+<div class="lhead"><span class="lnum">LAYER 5</span><h2>From idea to position</h2><span class="scope">TRADING OPERATION</span>
+<span class="why">courts before capital; being paid fairly for a risk needs no crystal ball</span></div>
+<div class="lbody">
+  <div class="flow">
+    <span class="step">scanners propose candidates</span><span class="arr">→</span>
+    <span class="step gate">an independent court judges them</span><span class="arr">→</span>
+    <span class="step gate">a written thesis anyone could read</span><span class="arr">→</span>
+    <span class="step">order prepared with limits</span><span class="arr">→</span>
+    <span class="step gate">the human submits it</span>
+  </div>
+  <div class="grid">
+    <div class="cell"><b>Three reasons to own anything</b><span>We know something the market doesn't (rare, must be proven) · we're being paid fairly for a bounded risk (the default) · it survived deep diligence. Fair pay is enough — no forecast needed.</span></div>
+    <div class="cell"><b>The problem decides the response</b><span>Too expensive → wait for the price. Business risk → own less. Timing uncertainty → buy in steps. Bad data → kill it. Each objection type maps to exactly one lever.</span></div>
+    <div class="cell"><b>What's already priced in?</b><span>Before claiming an edge, we back out what the market already believes from the current price. Bullish-but-priced is fair, not attractive.</span></div>
+    <div class="cell"><b>Thesis travels with the event</b><span>For fast-moving names the court and the written thesis are finished before the catalyst — so nothing gets decided in the heat of the reaction window.</span></div>
+    <div class="cell"><b>Every idea needs a date</b><span>Each position names the future event that could prove it right, with odds and tripwires. No event on the calendar = dead money.</span></div>
+    <div class="cell"><b>Before every earnings report</b><span>Two questions, answered in advance: what do the public numbers already show, and what has the stock already priced in?</span></div>
+  </div>
+  <div class="grouplab">Sizing rules</div>
+  <div class="rules">
+    <span class="rule"><b>Sizes are set against the target $1M book</b>, not today's balance — a first position is about 1% (~$10k); only thin trading volume shrinks that.</span>
+    <span class="rule"><b>Sector limits are checked before the court sits</b>, counting everything held, pending, and staged together.</span>
+    <span class="rule"><b>No option-selling in the taxable account</b> — the tax treatment eats the premium; patient limit orders do the same job better.</span>
+    <span class="rule"><b>2026 is a tax-loss-harvesting year</b> — no muni bonds here (the household already owns them elsewhere); every ballast dollar stays harvest-capable.</span>
+    <span class="rule"><b>Limits, never market orders</b> — and in thin stocks, extra patience; some exchanges quote in cents, so units are verified before any order exists.</span>
+    <span class="rule"><b>A net saver doesn't buy crash insurance</b> — with cash still flowing in, a drawdown is a discount, not a disaster.</span>
+  </div>
+</div></div>
+
+<!-- ═══════════ LAYER 6 ═══════════ -->
+<div class="layer">
+<div class="lhead"><span class="lnum">LAYER 6</span><h2>Execution rails</h2><span class="scope">TRADING OPERATION</span>
+<span class="why">the machine proposes; the human disposes</span></div>
+<div class="lbody">
+  <div class="grid">
+    <div class="cell"><b>The software cannot trade</b><span>Sessions prepare orders — ticker, size, limit price — staged UNTRANSMITTED at the broker (as of 2026-07-28); nothing goes live until a human clicks Transmit. Live transmission from code stays forbidden until the sizing gate is earned — the guarantee is now discipline + review, no longer the config switch.</span></div>
+    <div class="cell"><b>One writer at a time</b><span>Only one session may write to shared state, named in a lock file. Two sessions once staged the same orders with different numbers — never again.</span></div>
+    <div class="cell"><b>The broker outranks the notes</b><span>Approvals happen overnight without any session knowing. When our notes and the broker's records disagree, the broker is right.</span></div>
+    <div class="cell"><b>Autonomy is earned, not granted</b><span>Direct order placement unlocks only on measured performance: prediction skill beating the market (20+ events), execution costs verified low, and a full month of clean operations — then still with hard limits.</span></div>
+  </div>
+  <div class="rules">
+    <span class="rule"><b>Check holdings before claiming holdings</b> — plans and resting orders are not positions.</span>
+    <span class="rule"><b>The misses get graded too</b> — every "we'll buy at X" that never filled is scored later: was the discipline right, or did we just miss it?</span>
+  </div>
+</div></div>
+
+<!-- ═══════════ LAYER 7 ═══════════ -->
+<div class="layer">
+<div class="lhead"><span class="lnum">LAYER 7</span><h2>Portfolio, risk &amp; operations</h2><span class="scope">TRADING OPERATION</span>
+<span class="why">the book is measured like a fund; the machine is maintained like a fleet</span></div>
+<div class="lbody">
+  <div class="grid">
+    <div class="cell"><b>rotation_fund</b><span>Measures what the whole book is really exposed to — which sectors, which risk factors — stress-tests it against past market rotations, and routes new money toward whatever is underweight.</span></div>
+    <div class="cell"><b>regional_factors</b><span>Foreign holdings are measured against their own home markets, so the claimed diversification is verified, not assumed.</span></div>
+    <div class="cell"><b>The household picture</b><span>The full family balance sheet — outside accounts, the concentrated stock position, incoming cash — so this account never duplicates or collides with the rest (tax rules included).</span></div>
+    <div class="cell"><b>Ballast</b><span>Cash plus a small gold position as the book's stable floor; the cash reserve doubles as ammunition for buying dislocations.</span></div>
+    <div class="cell"><b>The dashboard</b><span>One local web app: the scoreboard, the strategy book, every thesis, system health, and daily briefs — refreshed continuously.</span></div>
+    <div class="cell"><b>Memory &amp; handoff</b><span>A ~140-entry memory of hard-won lessons plus a living handoff brief, refreshed whenever doctrine changes. Sessions are temporary; the files are the truth.</span></div>
+  </div>
+  <div class="rules">
+    <span class="rule"><b>Every red light gets investigated the day it appears</b> — root cause found, fixed or formally retired, never ignored.</span>
+    <span class="rule"><b>Perishable facts carry dates</b> — memory supplies questions to re-check, never stale premises to build on.</span>
+    <span class="rule"><b>Merge, never overwrite</b> shared records — clobbering a shared file is the system's oldest recurring bug.</span>
+    <span class="rule"><b>Reports keep the discipline, drop the jargon</b> — every published page is written for a reader who has never seen the codebase. (This page included.)</span>
+    <span class="rule"><b>Published research carries a disclaimer and our positions</b> — and once positions are published, their exits get published too, forever.</span>
+  </div>
+</div></div>
+
+<!-- ═══════════ LAYER 8 ═══════════ -->
+<div class="layer">
+<div class="lhead"><span class="lnum">LAYER 8</span><h2>Household resilience &amp; uncorrelated streams</h2><span class="scope">HOUSEHOLD LAYER</span>
+<span class="why">what pays or protects when the book doesn't — deliberately outside its correlation structure</span></div>
+<div class="lbody">
+  <div class="grid">
+    <div class="cell"><b>Disaster Planner</b><span>Runs the entire family balance sheet through tail scenarios: how big the drawdown would be, which sleeves bleed versus hedge, and how much cash could be raised without touching illiquid assets or triggering the tax bomb.</span></div>
+    <div class="cell"><b>Harvest engine</b><span>Tracks the $2.4M tax-loss goal across all accounts, projects the year-end total at the current pace, and says out loud — in time to act — if we're tracking to miss. Losses must land by December 31; they carry forward, not back.</span></div>
+    <div class="cell"><b>The built-in hedge</b><span>A large incoming gain plus a harvesting engine makes the tax bill itself anti-correlated with the market: a crash produces more harvested losses, which shrinks the tax owed. The reserve gets cheaper exactly when everything else gets worse.</span></div>
+    <div class="cell"><b>Crash insurance: priced and declined</b><span>A full options-based insurance program was designed, priced, and rejected — correctly: a household still adding money has no forced seller to protect. The design stays on the shelf and reactivates only if the book ever uses leverage.</span></div>
+    <div class="cell"><b>The research-as-product thread</b><span>Publishing our verified research is itself an income stream uncorrelated with markets — replicating what active managers charge ~1% a year for, with the transparency (including our own confessed errors) as the brand.</span></div>
+    <div class="cell"><b>Dry powder</b><span>The cash reserve doubles as dip-buying ammunition, a weekly gold accumulation provides the stable floor, and the large September inflow is standing optionality — not a deadline.</span></div>
+  </div>
+  <div class="rules">
+    <span class="rule"><b>A net saver doesn't buy index insurance</b> — self-insurance is the default; the market's crashes are a buyer's discounts.</span>
+    <span class="rule"><b>Tax rules wall off the hedges</b> — no derivatives that overlap the professionally-managed accounts, ever, without counsel signing off first.</span>
+    <span class="rule"><b>Harvest losses from stocks, not bonds</b> — bond discounts count as ordinary income and can't be harvested.</span>
+    <span class="rule"><b>The concentrated position is a HOLD</b> — no harvesting against it (owner's explicit call); restructuring it is a lawyer conversation, not a trade.</span>
+    <span class="rule"><b>One model for planning and panic</b> — the disaster scenarios and the daily dashboard read the same balance sheet, so they can never drift apart.</span>
+  </div>
+</div></div>
+
+
+<!-- ═══════════ THE CAMPAIGNS ═══════════ -->
+<div class="layer">
+<div class="lhead"><span class="lnum">LEDGER</span><h2>The campaigns — every thesis run down, and the code it left behind</h2>
+<span class="why">a refuted thesis that taught a mechanism is an asset; the code stays and keeps watching</span></div>
+<div class="lbody">
+
+  <div class="grouplab">The big research campaigns (verticals/)</div>
+  <div class="tablewrap"><table>
+    <tr><th>thesis</th><th>verdict</th><th>the code it left behind</th></tr>
+    <tr><td>Companies that shade the truth underperform — a lying detector, not a stock picker</td>
+        <td>Real within the test window, not deployable as standalone alpha; the survivor is a catastrophe-warning overlay (80-93% of blowups caught). The product insight: the value is EXCLUDING liars, not re-finding disclosed bad news.</td>
+        <td class="m">public_co/ honesty backtests; the honesty lens now inside every diligence court</td></tr>
+    <tr><td>Most IPOs are avoidable losers</td>
+        <td>Median 2024-25 IPO −67%; a 4-part deterministic screen discriminates (AUC .73) but exclusion baskets fail the placebo test — so it guards diligence, doesn't trade. 29 of 30 recent pitches declined.</td>
+        <td class="m">ipo backtest suite; underwriter-archetype + ramp-dump detectors in the court dispatch</td></tr>
+    <tr><td>Biotech catalyst honesty — companies telegraph failed trials in how they talk about them</td>
+        <td>Discriminates only on outright disclosure games so far; the subtle channels don't yet. Hard-won craft rules: bind the claim to the SPECIFIC trial, never fabricate an exclusion from aggregate numbers.</td>
+        <td class="m">public_biotech/; trial-binding + per-claim attribution guards in freeze_call courts</td></tr>
+    <tr><td>California muni credit — insulated bonds, dishonest issuers, dislocation buying</td>
+        <td>Validated (the Oakland headline-dislocation buy worked; 11-screen underwriting suite built; taxable-coupon and call-trap catches banked) — then deliberately PARKED: 2026 is a tax-loss year and munis harvest nothing. Warm, scanning daily.</td>
+        <td class="m">muni_credit/ (scanner, liquidity gate, diligence master, RFQ book, bond analytics)</td></tr>
+    <tr><td>Frontrun public data pipelines — five pilots</td>
+        <td>CEF re-marks: REFUTED (price leads the mark). Device-complaint spikes: KILLED (measures paperwork). Deal-cycle filings: 4th straight negative. Gov-contract awards: half-alive (civilian flow is same-day tradeable; defense is 98 days stale). BDC arm: still live. Net: the lag structure of every pipeline is now mapped knowledge.</td>
+        <td class="m">frontrun_engine/ (one module per pilot, kept as diligence connectors)</td></tr>
+    <tr><td>Cheap small-caps are mostly traps — verify, then own the survivors</td>
+        <td>DEPLOYED. ~44% of screen-cheap names survive the trap gauntlet; the survivors are the live value basket (GCT/DFIN/EVER/EPAM/SBH/BKE/CRCT lineage). The trap catalog (14+ autopsies) is the asset.</td>
+        <td class="m">deep_value/ (screen, score, TTM fundamentals, trap files, smallcap_value_watch)</td></tr>
+    <tr><td>Growth-at-a-reasonable-price screens</td>
+        <td>Trailing PEG is FRAGILE — 1 in 5 survivors real; four distortion modes catalogued (recovery base-effects, peak earnings, crash-cheapness, acquisition step-ups). The base-effect guard now lives in the prediction pipeline too.</td>
+        <td class="m">garp/; the distortion checks folded into deep_value scoring</td></tr>
+    <tr><td>Banks and insurers priced below book with consistent returns</td>
+        <td>DEPLOYED as a screen. First run: VEL courted to a starter (now working), NMIH/MTG on watch, MBIN passed. Key craft: rank on earnings-to-common, and mortgage-insurer returns are peak-cycle mirages.</td>
+        <td class="m">deep_value/financials_screen (weekly on the heartbeat)</td></tr>
+    <tr><td>Global value where nobody screens honestly — Japan, Korea, Europe</td>
+        <td>Japan: 968 companies scored from primary filings, PFIC-gated, tranche-1 staged and filling. Korea value-up: EXECUTED (the governance-reform catalyst worked; Woori/Hyundai-pref/SK live). Europe batch: first court produced the STERV position + the published deck.</td>
+        <td class="m">deep_value/global/ (EDINET crawl, PFIC gate), krx_value watch, Europe court records</td></tr>
+    <tr><td>Social attention is a universe generator, not a buy list — "be the casino"</td>
+        <td>Reframed after testing: attention finds candidates and flags premium-selling spots; it never sizes. The conditioning layer (has the crowd found this?) came out of this work and now gates every divergence claim.</td>
+        <td class="m">social_thesis_engine/; discovery_state in the desk core</td></tr>
+    <tr><td>Beauty virality leads the manufacturer's revenue by 1-2 quarters</td>
+        <td>Corroborated (viral brands traced to their contract manufacturer; Cosmecca positioned off it). Sibling win: customs records resolved an undisclosed whale customer and de-risked a bear case.</td>
+        <td class="m">beauty-virality radar, origin_mix, customs whale detector, stvn_watch sleeve book</td></tr>
+    <tr><td>Physical truth beats narrative — the satellite/alt-data program</td>
+        <td>Methane claims refuted from orbit at full confidence; construction verified 3/3; forest holdings verified for the STERV deck (with a national-park control); lab appointment calendars nowcast the DGX quarter to our best grade ever (0.02). Each connector is now a standing court witness.</td>
+        <td class="m">buyside_dd/connectors/ (carbon, sentinel-2, forest, scheduler exhaust, hiring, places)</td></tr>
+    <tr><td>Event-driven odds and ends — the graveyard that taught the most</td>
+        <td>Overnight thin-tape dislocation fade: KILLED (the "edge" was the bid-ask bounce). Post-reorg orphan equity: 2/2 avoid, narrowed. Fallen angels: narrow fit — the account-sized version is baby bonds (OXLCZ owned). Thin cash-tender arb: passes twice on after-tax math. Each kill is a standing rule now.</td>
+        <td class="m">thesis_backlog entries + the December dislocation + January reversal scanners</td></tr>
+    <tr><td>Special-situation one-offs with country/political spines</td>
+        <td>EM banks (funding moat × geopolitical repricing: HSBK, TBC live), Ukraine recovery (one instrument survived scrutiny: the Step-Up B bond), Korea prefs (carry, not catch-up). Method files, not systems.</td>
+        <td class="m">court records + method memories; band_watch carries their levels</td></tr>
+  </table></div>
+
+  <div class="grouplab">The scanner fleet (verticals/generators/ — 31 scanners, one edge class each)</div>
+  <div class="tablewrap"><table>
+    <tr><th>edge class</th><th>live scanners (what each hunts)</th></tr>
+    <tr><td class="m">FLOW<br>(forced buyers/sellers)</td>
+        <td>lock-up expiries · thematic-ETF rebalances · Russell reconstitution · December tax-loss dislocations + the January reversal leg · preferred odd-lots · <b>dislocation_sweep</b> (new 07-28: fresh idiosyncratic drops across the whole researched universe, daily)</td></tr>
+    <tr><td class="m">CARRY<br>(paid to wait)</td>
+        <td>SPAC trust floors · closed-end-fund term liquidations · sub-$500M merger spreads the arb funds skip (financing/board gates added after review)</td></tr>
+    <tr><td class="m">INFO<br>(published, unread)</td>
+        <td>insider buy-clusters + 10b5-1 terminations · borrow-fee spikes (ETF filter added) · PTAB/ITC docket calendars · Kalshi-vs-equity divergence · Polymarket whales (pre-registered) · WARN layoffs · hiring waves · methane plume clusters · FDA approval velocity (cannibalization gate added) · NIH grant flow · award flow · fresh litigation · attention divergence · distress 8-Ks · biotech cash-runway clearings · cross-border twin mispricings</td></tr>
+    <tr><td class="m">EXCLUSION<br>(what not to own)</td>
+        <td>auditor resignation + late filing pairs · the whole trap catalog — the class where precision is the product</td></tr>
+  </table></div>
+  <div class="rules">
+    <span class="rule"><b>Scanners propose, courts dispose</b> — no scanner output has ever staged an order directly, and the two that tried (mislabeled as adjudicated) caused the integrity fix that hardened the pipeline.</span>
+    <span class="rule"><b>Kills are catalogued, not deleted</b> — the killed thesis's tripwire logic keeps running where it costs nothing, because absence-of-edge is also a mapped mechanism.</span>
+  </div>
+
+  <div class="grouplab">The system's own bets (meta-theses, still being graded)</div>
+  <div class="tablewrap"><table>
+    <tr><th>bet</th><th>state</th><th>code</th></tr>
+    <tr><td>Our probabilities beat the market's on events we connector-nowcast</td><td>The calibration experiment: 31 graded, beating the coin everywhere, market-comparison gate 0/20 — unproven where it counts, and sizing waits for it</td><td class="m">calibration.py, freeze_call.py, implied_binary.py, resolution packs, the gauntlet page</td></tr>
+    <tr><td>Skill is class-specific and should be enforced, not assumed</td><td>Adopted this week: business-numbers calls anchor on our nowcasts; reaction/political calls anchor on market odds; story calls must survive a kill attempt</td><td class="m">the anchor-and-adjust gates in freeze_call</td></tr>
+    <tr><td>The whole book, measured as one fund, self-corrects</td><td>Live: factor exposures measured against five historic rotations, new money routed to what's underweight, foreign sleeves verified against their own markets</td><td class="m">rotation_fund.py, regional_factors.py, disaster.py, harvest_ledger.py</td></tr>
+  </table></div>
+</div></div>
+
+<p class="foot">Internal systems documentation for the desk OS (SignalOS verification core + Desk watch agent +
+trading operation), generated 2026-07-27, plain-language revision 2026-07-28. Not investment research and not
+financial advice; the operator holds positions in securities the system tracks. Companion pages: the Gauntlet
+&amp; Brier Book (the scoreboard), Strategy Book, and Thesis Index tabs on the desk dashboard. Source of truth:
+<span style="font-family:var(--mono)">desk/data/*</span> +
+<span style="font-family:var(--mono)">FABLE5_HANDOFF.md</span> + the memory index.</p>

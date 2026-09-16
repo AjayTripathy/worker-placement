@@ -1,0 +1,141 @@
+{
+  "ticker": "TDG",
+  "cutoff": "2024-09-01",
+  "scoring_notes": [
+    "TDG's 10-K avoids naming specific Pentagon Program Elements (PEs); J-Book divergence pattern has limited surface area. We score the claims TDG actually makes against the relevant J-Book signal (platform-level proxies for ~39%-defense exposure) and against usaspending and counterparty disclosures."
+  ],
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Defense market accounted for approximately 39% of TransDigm's net sales in FY2023.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook contractor lookup returned NOT_FOUND for 'TransDigm' (expected: TDG is a components supplier, not a prime named in J-Book PE exhibits). Treat as UNVERIFIABLE for direct prime exposure but PASS on the underlying platform exposure (see C3).",
+        "usaspending DoD search returned 1,903 awards summing to ~$64.5M direct DoD obligations to TDG subsidiaries (AeroControlex, Skurka Aerospace, etc.) over 2020-01-01 through 2024-09-01. Direct DoD prime contracts are a small fraction of stated defense revenue, consistent with TDG selling primarily to DoD primes and the DoD aftermarket channel (DLA, depots) — not necessarily a red flag, but a flag that TDG's 'defense market' = aftermarket spares + sales-to-primes, not direct prime contracts."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding + usaspending.query_dod_contracts",
+      "M_value": "pentagon_jbook=NOT_FOUND (contractor); usaspending=1903 awards $64.5M (TDG subs)",
+      "interpretation": "The 39% defense-revenue claim is plausibly accurate but routed through primes (Boeing, Lockheed, etc.) and through DLA aftermarket buys, not direct prime contracts on named PEs. Forward outlook depends on the underlying platforms (F-35, B-21, KC-46, etc.) all of which are FUNDED_STEADY per C3 — so the claim is PASS at cutoff."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Approximately 56% of FY2023 net sales were generated from the aftermarket (commercial + military).",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook does not have a specific 'aircraft spares' or 'operations and maintenance' program in the 410-PE corpus (NOT_FOUND on both probes). This is a corpus-coverage gap, not a red flag: O&M and aircraft-spares procurement flow through service O&M appropriations and DLA, not RDT&E/Procurement PEs. The J-Book corpus is focused on R-2 and P-40 exhibits, not O&M."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "NOT_FOUND (corpus coverage gap, not red flag — O&M flow outside corpus scope)",
+      "interpretation": "Aftermarket claim is structural (designed-in products = 25-30 year aftermarket tail). No J-Book contradiction is possible from the available corpus; broader DoD O&M budgets have been steady-to-up since 2020 per TDG's own narrative. PASS with explicit UNVERIFIABLE-on-quantitative-magnitude footnote."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Forward DoD budget outlook is uncertain due to Russia/Ukraine and Israel/Hamas reprioritization; recent DOD budgets have trended upwards.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook F-35 (PE 0604840F, F-35 C2D2): FUNDED_STEADY at $1,236.71M FY2024.",
+        "pentagon_jbook B-21 Raider (PE B02100, AF Aircraft Procurement P-40): FUNDED_STEADY at $1,878.87M FY2024.",
+        "pentagon_jbook KC-46A Tanker Squadrons (PE 0401221F): FUNDED_STEADY at $78.7M FY2024 (R-2)."
+      ],
+      "M_check": "pentagon_jbook.query_program_funding (F-35, B-21, KC-46)",
+      "M_value": "all three FUNDED_STEADY at cutoff",
+      "interpretation": "TDG's hedged-but-positive forward outlook is consistent with the J-Book: the major platforms it supplies into are FUNDED_STEADY at the cutoff date with no terminations or shrinkage flagged. No divergence pattern detected. PASS."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Products installed on >100,000 fixed-wing turbine aircraft, commercial + regional + military + GA.",
+      "severity": "PASS",
+      "supports": [
+        "Implied platform support is broad (F-35, B-21, KC-46 all FUNDED_STEADY; commercial aerospace Boeing/Airbus disclosed as planning OEM rate increases for CY2024). usaspending DoD direct obligations to TDG subs ($64.5M over 4+ years) is plausibly an undercount given TDG sells primarily via primes; not a contradiction of the 100k installed-base claim."
+      ],
+      "M_check": "pentagon_jbook + usaspending.query_dod_contracts",
+      "M_value": "platforms FUNDED_STEADY; 1903 DoD awards to TDG subs",
+      "interpretation": "Installed-base claim is qualitatively supported and quantitatively non-falsifiable from available M-sources. PASS."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "~90% of FY2023 net sales generated from proprietary products with sole-source positions.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "usaspending.query_dod_contracts shows 1,903 awards across TDG subs — many of which would carry sole-source justification codes — but the M-source as called here does not break out the sole-source flag. To adjudicate the specific 90% figure we would need a sole-source-flag aggregator on FPDS data."
+      ],
+      "M_check": "usaspending.query_dod_contracts",
+      "M_value": "1903 awards $64.5M to TDG subs (no sole-source flag breakout in this call)",
+      "interpretation": "No contradicting signal; specific magnitude (90%) cannot be adjudicated from available sources. UNVERIFIABLE."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Top ten customers ~41% of FY2023 net sales; no single customer >10%.",
+      "severity": "PASS",
+      "supports": [
+        "edgar_fts.query_fulltext on Boeing (CIK 0000012927) for 'TransDigm' returned 0 hits in 2022-01-01 to 2024-09-01 window (Boeing's filings do not name TDG by substring — consistent with TDG being a tier-2 component supplier below the named-vendor threshold).",
+        "edgar_fts.query_fulltext on Lockheed Martin (CIK 0000936468) returned 3 hits (LMT 10-Ks 2022, 2023, 2024). LMT discloses TDG in its 10-K narrative."
+      ],
+      "M_check": "edgar_fts.query_fulltext (Boeing CIK 0000012927; LMT CIK 0000936468)",
+      "M_value": "Boeing 0 hits; LMT 3 hits (10-Ks 2022-2024)",
+      "interpretation": "Counterparty disclosure is consistent with TDG-as-supplier to large primes; the 41% top-ten aggregation is not directly testable but not contradicted. PASS."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "TransDigm subsidiaries periodically subject to DOD OIG pricing audits; 2019 congressional letter requested comprehensive review.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "edgar_fts.query_fulltext for 'TransDigm OIG' returned 0 hits — likely a substring/tokenization limitation; the 10-K narrative itself confirms the OIG posture (TDG's own disclosure)."
+      ],
+      "M_check": "edgar_fts.query_fulltext (TransDigm OIG)",
+      "M_value": "0 hits (likely M-source limitation)",
+      "interpretation": "This is a self-disclosed regulatory-risk claim; the J-Book divergence framework does not really apply here. We flag MODERATE_UNDERDELIVERY because (a) the company self-discloses recurring DOD-OIG pricing-review exposure, which is a known TDG-specific overcharging-risk vector with multi-year multi-cycle history, and (b) the M-source verification failed (cannot confirm or refute pricing-review status post-cutoff). Severity reflects the disclosed-but-uncertain quality of the risk, not a finding of any new wrongdoing."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Calspan ($729M) and CPI Electron Device Business (~$1,385M) acquisitions executed in FY23/FY24; both characterized as aligned with the aerospace-component-rollup thesis.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "acq_coherence.score_acquisition_coherence (signal MIXED_COHERENCE) returned mean=0.67, with: Calspan = 0.35 LOW_COHERENCE (revenue_synthetic=True; wind-tunnel-services is a contract-services / capex-heavy business with no proprietary-aftermarket margin profile), CPI EDB = 0.75 HIGH_COHERENCE, DART = 0.92 HIGH_COHERENCE.",
+        "usaspending.query_dod_contracts for 'Calspan' returned 766 awards summing to $200.8M (2020-01-01 to 2024-09-01) — confirms Calspan is a real DoD-funded test-services contractor, but the awards are concentrated in 'North Wind Test' / 'North Wind Systems' subsidiaries with a different margin/aftermarket profile than TDG's core."
+      ],
+      "M_check": "acq_coherence.score_acquisition_coherence + usaspending",
+      "M_value": "acq_coherence MIXED (mean 0.67); Calspan=0.35 revenue_synthetic; Calspan_usaspending=$200.8M",
+      "interpretation": "Calspan flagged as low-coherence and 'revenue_synthetic' relative to TDG's stated proprietary-aftermarket thesis — the deal extends TDG into a contract-services business with a different margin profile, partially funded by ~$2,020M debt-funded special dividend and large new debt tranches. MODERATE_UNDERDELIVERY: not an existential pattern but a directional drift from the stated thesis."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "Boeing Distribution Services and Satair A/S (Airbus) named as distribution counterparties.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "edgar_fts.query_fulltext for 'Boeing Distribution Services TransDigm' returned 0 hits — multi-word M-source likely tokenized too strictly to surface either direction of the relationship.",
+        "Counterparties are independent units of Boeing/Airbus distribution; their independent SEC disclosure of TDG would be unusual."
+      ],
+      "M_check": "edgar_fts.query_fulltext",
+      "M_value": "0 hits",
+      "interpretation": "Cannot verify or refute named-counterparty claim from M-sources alone. UNVERIFIABLE (low-stakes control claim — non-J-Book)."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "~$21.9B total debt at June 29, 2024; $(2.5)B stockholders deficit; debt-funded $35.00/share special dividend (~$2,020M) in November 2023.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "ucc_proxy.query_ucc_exposure: signal HIGH_LIEN_EXPOSURE; 40 8-K 'secured terms' references; 15 10-K/10-Q secured references; 24 distress-term hits; 116 total term hits over 36-month window. Lien/security-agreement/first-priority-lien terms dominate. No 8-K Item 2.03 filings — secured-debt narrative is disclosed via the credit-facility filings rather than as new direct-financial-obligation events.",
+        "Filing self-disclosure confirms total debt at $21.9B vs $19.75B prior FY; new Tranche J ($1.0B) added to fund CPI EDB acquisition + 6.75%/7.125% senior secured notes."
+      ],
+      "M_check": "ucc_proxy.query_ucc_exposure",
+      "M_value": "HIGH_LIEN_EXPOSURE (40 secured-terms 8-K hits; 24 distress-term hits)",
+      "interpretation": "TDG's capital-structure-as-engine-of-equity-returns is well known and self-disclosed; ucc_proxy flagging HIGH_LIEN_EXPOSURE is consistent with the highly-secured-debt model and is not by itself a fraud signal. MODERATE_UNDERDELIVERY captures the directional point: $21.9B debt with negative stockholders equity, debt-funded special dividends, and an LBO-style capital structure is materially riskier than a 39%-defense-aerospace-aftermarket investor might naively expect from TDG's product-mix narrative — but it is fully disclosed."
+    }
+  ],
+  "summary": {
+    "n_claims": 10,
+    "n_queries": 13,
+    "severity_counts": {
+      "PASS": 5,
+      "MODERATE_UNDERDELIVERY": 3,
+      "SEVERE_UNDERDELIVERY": 0,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 2
+    },
+    "jbook_grounded_claims": ["C1", "C2", "C3", "C4"],
+    "jbook_hits": ["C3"],
+    "jbook_hit_count": 1,
+    "headline_finding": "No J-Book divergence pattern detected. TDG's 10-K characteristically avoids naming specific PEs / DoD programs; the platforms its components fly on (F-35, B-21, KC-46) are all FUNDED_STEADY at the 2024-09-01 cutoff. The framework's named-PE divergence trap does not catch TDG. Implied-verification (Mode B) signals are: (a) Calspan acquisition flagged as LOW_COHERENCE / revenue-synthetic relative to stated proprietary-aftermarket thesis, (b) HIGH_LIEN_EXPOSURE in capital-structure proxy reflecting LBO-style $21.9B debt with negative stockholders equity, (c) self-disclosed recurring DOD-OIG pricing-review posture. None rise to SEVERE/RED on the J-Book rubric."
+  }
+}

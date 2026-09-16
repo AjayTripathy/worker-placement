@@ -1,0 +1,51 @@
+## BLUE BENCH — SOUN — RED CASE: PARTIALLY OVERTURNED
+
+PACK: acknowledged. Superseded: pack `dil_sh` (stale, ends 2025-06-30) — and I supersede red's *use* of it (see #7). All reads PROXY-FETCHED via r.jina.ai (SEC 403s direct). PRIZE-TABLE MANDATE: N/A — SOUN is a revenue-generating operator ($106.1M H1'26), not a pre-revenue project developer; no magic-funding counterfactual applies.
+
+**1. "Burn WORSENED 37%"** | R6.htm re-pulled | OCF −$59,969K vs −$43,682K CONFIRMED. But red never decomposed it: **contract assets consumed $16,942K vs $6,314K** — a $10.6M incremental working-capital drag. Ex that, burn is −$49.3M vs −$43.7M = **+13%, not +37%**, on revenue **+47.7%**. Burn *intensity* improved either way: −60.8% of revenue → −56.5% (−46.5% adjusted). | **REDUCED.** Absolute dollars up, unit economics improving — the opposite of the narrative clause "cash burns."
+
+**2. "The $32.3M investing swing is where the 610bp GM expansion went"** | R6 line items, which red did not open | **OVERTURNED on the mechanism.** The $32.7M is: PP&E $822K + **capitalized software $5,404K** + **payment related to asset acquisition $26,501K**. Red's own change-my-mind test (b) was "capitalized software <$5M" — actual **$5.404M**, i.e. red's disconfirmer effectively fired. Capitalized dev costs relieve **R&D opex**, not COGS; they cannot explain gross margin. They *do* flatter adj EBITDA by ≤$2.7M/qtr against −$9.6M — **SUSTAINED in that reduced form only.** The $26.5M is a discrete acquisition, not relocated operating cost.
+
+**3. "42% of the sequential is one Colombian counterparty"** | R43 verbatim | **SUSTAINED and STRENGTHENED.** Colombia $135K→$7,648K; Q1'26 Colombia $118K ⇒ sequential contribution $7,530K of $17,702K = 42.5%. Red *missed the bigger one*: **China $0 in Q1'26 → $8,970K in Q2'26** (Q1'25 also ≈$540K) — 51% of the sequential gain, structurally a Q2-only recognition. **~93% of the "+40% sequential" is Colombia+China lumpiness.** The brief's headline refuting metric is worse than red proved.
+
+**4. "Ex-Colombia the run-rate lands below the $230M floor"** | seasonality doctrine (MANDATORY on any deceleration claim; red skipped it) | Arithmetic CONFIRMED, assumption **REFUTED**: red flat-lines Q2 twice. Actual H2/H1 shape: FY25 71.8→97.1 (**1.35x**); FY24 25.1→59.6 (2.38x). Applying 1.35x to H1'26 **ex-Colombia** ($98.3M) ⇒ H2 $132.8M ⇒ **FY $238.9M — above the $230M floor with zero Colombia recurrence.** | **OVERTURNED.** This was red's only street-divergence mechanism and it dies on the seasonality check.
+
+**5. "'No debt' is refuted"** | R2 | Contingent earnout $83,637K is real but is performance-contingent, no maturity, no covenants, no fixed charge — and red's own #6 says it is evaporating. Counting it as debt in #5 while calling its markdown deterioration in #6 uses both venues at once. | **REDUCED** to: "no *borrowings*" is accurate; "no claims" is not.
+
+**6. "Net loss improved 43% is an earnout mark"** | R64 rollforward | **OVERTURNED on the cited metric.** Earnout **Q1'26 $87,334K → Q2'26 $83,637K**, with $3,538K cash-settled ⇒ **FV change in Q2'26 ≈ −$0.16M**. The quarter the brief cited is earnout-clean. Red switched to the six-month basis, where Q1'25's gain (H1'25 net income +$55.2M vs Q2'25 net *loss* ~$75M) manufactures the "$122.8M adverse swing" — **a base-effect artifact, the III trick, on red's side.** The 18-month $286.9M→$83.6M decline is real; whether it signals Amelia missing or is share-price-linked (SOUN $24→$6.97) is **UNVERIFIED — R64 carries no valuation-input narrative. COVERAGE GAP.**
+
+**7. "45% growth is 31% per share"** | R1 vs pack | Red compared *weighted-average diluted* 402.0M (a net-income quarter, so it includes ITM options/warrants) to *point-in-time outstanding* 444.1M. Apples/oranges — but it **understates** true share growth. | **SUSTAINED, red conservative.** Offsetting fact red omitted: ATM draw **$75,565K→$48,481K, halved Y/Y** while revenue grew 48%. Dilution is decelerating.
+
+**8. Notes-agreement break/termination unread** | 8-K/425 | Floor text confirmed; termination section still unread. | **SUSTAINED as a genuine coverage gap** — binds sizing, not direction.
+
+**9. "Internal contradiction: DAMAGE-ABSENT vs correct de-rate"** | response-taxonomy doctrine | **OVERTURNED.** Damage-absence is a *narrative* classification; the de-rate is a *price* judgment. Clean fundamentals at a wrong multiple is the normal case, and valuation routes to the price gate, not to reclassification. Separately, the brief's 6/10 leaned on `discovery_state` CROWDED — **CROWDED is a size/timing instrument, never a rejection**; its FLAT survives only on the flow gate.
+
+**NEW FINDINGS RED MISSED:** (a) **$26,501K cash asset acquisition in H1'26** — a *new* acquisition booked while the last earnout is marked down 71%; target unnamed in R6. **UNVERIFIED, material.** (b) **Contract assets $34.8M current / $48.1M non-current, +$16.9M cash use** — revenue recognized far ahead of billing is the real cash-quality kill, stronger than red's headline. (c) **US revenue +60% Y/Y ($22,729→$36,420K)** — the durable organic engine, which cuts *for* the brief and red never engaged. (d) Red's runway math annualizes a one-time acquisition: recurring pre-financing burn is $66.2M/half ⇒ **~18 months, not 13**.
+
+**SELECTION JUDGMENT:** Red attacked real legs (concentration, cash) but reached for the easiest venue-switch (six-month earnout) and skipped the two mandated checks — seasonality and the investing-line decomposition — that its own strongest claims depended on.
+
+### DETECTORS CONSULTED
+- **app_review_velocity** — NOT-FIRED (mismatched; B2B voice AI inside customers' apps).
+- **cybercom_budget** — NOT-FIRED. No cyber SAG exposure.
+- **doe_budget** — NOT-FIRED. No DOE program.
+- **ic_contracting_proxy** — NOT-FIRED. R43 geography is commercial.
+- **pentagon_jbook** — NOT-FIRED. No J-Book program.
+- **revenue_concentration** — **FIRED, wider than red:** Colombia $7,648K + China $8,970K = 26.8% of Q2 revenue and 93% of the sequential gain; Ireland −96%. [R43]
+- **rpo_drift** — UNCHECKABLE (no RPO/cRPO disclosed). Proxy finding: non-current contract assets $48.1M, +$16.9M H1 cash drag.
+- **runway_calculator** — FIRED, **corrected to ~18 months** ex-ATM ($66.2M/half recurring vs $202.8M cash). [R2, R6]
+- **common_control_merger_accounting** — NOT-FIRED (LPSN arm's-length); *but* the unnamed $26.5M asset acquisition is uninspected.
+- **lockup_expiration_calendar** — FIRED (adjacent): ~42.4M shares, registration rights, no disclosed lockup.
+- **chinese_smallcap_ramp_dump_archetype** — NOT-FIRED. DE-domiciled, Big-4 audited, no Cayman/VIE; China is auto-royalty revenue. Red omitted this entry.
+- **clinical_trial_referral_quality / clinicaltrials_lookup / competitor_trial_omission** — NOT-FIRED (no clinical program). Red omitted all three and instead consulted `beauty_*`/`permits` entries not on this case's dispatch list — a roster error.
+
+**PRINT PROXIMITY: 2026-11-05 — UNCONFIRMED (yfinance-derived; no SoundHound PR names it; last confirmed cadence Q1 2026-05-07, Q2 2026-08-05), ~53 trading days out. Nearest dated catalyst: LPSN special meeting 2026-09-02, 8 trading days. Both outside the 5-day trigger.** PRE-CATALYST POSITION: FLAT.
+
+**NET POSITION AFTER BOTH BENCHES:** Red's REJECT does not survive as reasoned, but the action does. What survives red: revenue concentration (broader than red found), the contract-asset build, dilution, and the unread notes-break — all **SIZING/TIMING**, none a DATA kill. What dies: the burn-deterioration framing (working-capital artifact), the gross-margin contamination (capitalized software is $5.4M and hits R&D not COGS), the guide-shortfall mechanism (fails seasonality), and the earnout flattery (Q2'26 FV change ≈ $0.16M; red's swing is a Q1'25 base effect). Classification: **DAMAGE-ABSENT is SUSTAINED** on the narrative's own three clauses — growth accelerated, margin expanded, burn intensity improved. Action is nonetheless **FLAT**, and for the brief's reason, not red's: ~42.4M unlocked shares to distressed noteholders at close is flow we ourselves predict, and the value-ladder flow gate forbids bidding into it. Gate to a STARTER (≤0.5% sleeve, no leverage): noteholder distribution cleared **and** Q3'26 showing (i) US revenue ≥$40M, (ii) contract-asset growth below revenue growth. Immediate: open the $26.5M asset-acquisition target and the notes termination section; file the pipeline ticket on the stale XBRL block (both benches hit it).
+
+**Conviction that FLAT-with-dated-gate is right: 8/10.**
+
+```kg_candidate
+{"name": "seasonal_quarter_only_geography_fakes_sequential_acceleration", "kind": "detector", "one_line": "A country line that recognizes revenue in one calendar quarter per year (contract/royalty true-ups) makes the sequential growth rate look like acceleration when it is a calendar artifact.", "fires_on": "Any single geography in the ASC 606 disaggregation contributes >25% of the sequential revenue gain while showing ~$0 in the immediately prior quarter in BOTH the current and the prior year.", "evidence_here": "SOUN China: $0 in Q1'26, $8,970K in Q2'26 (Q1'25 ~$540K, Q2'25 $6,979K) = 51% of the +$17.7M sequential gain; with Colombia's one-off $7.5M, 93% of the headline +40% sequential is non-organic-sequential.", "applies_to_guess": {"issuer_features": ["asc606_geographic_disaggregation", "automotive_royalty_revenue", "annual_true_up_contracts"], "sic_prefixes": ["7372", "7370", "3674"]}}
+```
+
+Primary sources: [R6 cash flows](https://www.sec.gov/Archives/edgar/data/1840856/000184085626000022/R6.htm) · [R43 revenue by geography](https://www.sec.gov/Archives/edgar/data/1840856/000184085626000022/R43.htm) · [R64 fair-value rollforward](https://www.sec.gov/Archives/edgar/data/1840856/000184085626000022/R64.htm) · [R2 balance sheet](https://www.sec.gov/Archives/edgar/data/1840856/000184085626000022/R2.htm) · [R1 cover](https://www.sec.gov/Archives/edgar/data/1840856/000184085626000022/R1.htm) · [8-K/425 2026-04-21](https://www.sec.gov/Archives/edgar/data/0001840856/000121390026045987/ea0287117-8k425_sound.htm) · quarterly revenue history [stockanalysis.com](https://stockanalysis.com/stocks/soun/financials/?p=quarterly)

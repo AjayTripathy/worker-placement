@@ -1,0 +1,53 @@
+## BLUE BENCH — IMRX — RED CASE: PARTIALLY OVERTURNED
+
+**PACK: acknowledged.** Tape px 5.04, dd52 −0.500, pct_off_low +0.306 taken as given. Superseded: pack `dil_sh`/`sbc`/`ocf`/`rev` (stale — same reason both benches gave). **COVERAGE GAP (reportable):** no egress in this container; sec.gov and the r.jina.ai PROXY-FETCH fallback both failed, so every read is pack-excerpt or arithmetic on it. Primary docs cited: 8-K Ex-99.1 8/5/26 https://www.sec.gov/Archives/edgar/data/0001790340/000179034026000088/imrx-20260805xexx991.htm · 10-Q Q2'26 https://www.sec.gov/Archives/edgar/data/1790340/000179034026000091/ · 10-Q Q1'26 https://www.sec.gov/Archives/edgar/data/1790340/000179034026000057/imrx-20260331.htm · https://clinicaltrials.gov/study/NCT07562152
+
+**1. "Thesis refutes its own DAMAGE-ABSENT label."** {red: $20M/qtr × 8 = $160M vs $182.7M ⇒ raise certain | my check: burn from filed figures — $217.0M (12/31/25) → $182.7M (6/30/26) = $34.3M H1 = **$17.15M/qtr actual**, not $20M. 182.7 / 17.15 = **10.65 quarters ⇒ exhaustion ~Q1-Q2 2029**, which is exactly the company's filed "into 2029" (8-K Ex-99.1). Red's $20M ramp is blue's own stress input — analyst-constructed, UNVERIFIED, never filed. Red killed on the defendant's concession, not on a document | **REDUCED**} Ruling: SUSTAINED that a pre-topline raise is *likely*; **severity overturned FATAL → SIZING**. KILL-CLASS correctly CONSENSUS.
+
+**2. Net-cash mark decays.** {red: ~$165M today, $2.55/sh, EV $162M | my check: as of 2026-09-07 only ~68 of 92 days of Q3 have elapsed — 0.74 × $17.15M = $12.7M ⇒ **~$170.0M, $2.53–2.62/sh, EV ≈ $156M**, not $162M. Red over-decayed by ~$5M and, more importantly, treated spend as value destruction: the burn buys Phase 3 enrollment, an asset absent from both sides' balance-sheet math | **CONFIRMED direction, REDUCED magnitude**}
+
+**3. Per-share omits Class B/dilutives.** {red: blue divided by Class A only | my check: Class B contexts are live at 2026-06-30 in the Q2 XBRL — red is right in principle. Magnitude: Class B is a small static founder block (no Class B rows in any equity-rollforward context, only balance dates), so ~67M A+B ⇒ $2.72/sh vs $2.82 — a **3.5%** error, not a basis failure. **Red's own prize table uses "~65M sh"** — Class-A-only — so red commits the identical error it prosecutes | **REDUCED to DATA-minor; internally inconsistent**}
+
+**4. ATM context in Q2 10-Q.** {red: `imrx:AtMarketOfferingMember 2026-01-01 2026-06-30` proves issuance | my check: the pack excerpt shows the SAME member tagged for **2025-01-01 2025-06-30** — a comparative period. A member context is instantiated for any tagged ATM fact including $0 and prior-year comparatives; it is not evidence of issuance. Red's inference would equally "prove" H1-25 issuance | **OVERTURNED as evidence**} Blue's hygiene failure (citing the Q1 10-Q when the Q2 exists) is SUSTAINED; the Q2 cover-page count remains the unfetched test.
+
+**5. "Tape already voted twice."** {red's own tag: PLAUSIBLE | grading rule: verdicts rest only on CONFIRMED/REFUTED — red's REJECT leans on it anyway. Also: the −21%/−23% event dates appear in no primary source here (UNVERIFIED, pack has no price series). And "the market voted" on a name with no extracted street PoS or peak-sales number is an **orphan priced-in ruling** — an uncovered $326M microcap cannot be efficiently priced by assertion | **STRUCK from the verdict basis**}
+
+**6. Prize table — "roof already priced."** {my check: red's table **omits net cash entirely** while finding 2 spends a whole kill marking that cash to time. Re-run red's own inputs (1.9× peak, 67M pre / 92M post-raise) with $182.7M added: $300M/PoS10 = **$3.57** (floor, not $0.90); $800M/PoS20 = **$7.25**; $1.5B/PoS20 = **$11.22**; $800M/PoS35 = $10.65. +50% ($7.56) clears in **3 of 9 cells pre-raise**, not one corner, and the *downside* floor doubles. Red understated both tails | **REDUCED — conclusion "not deep value" survives; "roof is priced" OVERTURNED**} My table is equally UNVERIFIED (same assumed multiple).
+
+**7. Insider/dual-class.** {red: PLAUSIBLE, transaction codes unfetchable. Five Form 4s on one day plus an 8-K is the signature of an **annual-meeting/board grant cycle**, and the 7/16 Form 3 + 7/17 Form 4 is a new-officer onboarding — arguably a positive. No sale codes evidenced | **REDUCED to neutral/UNVERIFIED**} But red is RIGHT and under-priced on Class B voting control: see New Finding B.
+
+**8. "31% off the low."** {pct_off_low +0.306 **CONFIRMED** from pack. But red's gloss — "half the drawdown is already retraced" — is arithmetically wrong: (5.04−3.86)/(10.08−3.86) = **19%** of the peak-trough range recovered | **REDUCED — fact sustained, characterization overturned**}
+
+**9. Liquidity/exit.** Honestly labeled COVERAGE GAP. **SUSTAINED as a gap**; cannot carry a verdict, and it equally voids red's "exit into the ATM" claim.
+
+**NEW FINDINGS RED MISSED:**
+**A (pro-blue, weakens red-1):** Gross opex Q2 = R&D $14.0M + G&A $5.0M = **$19.0M**, yet net cash fell only ~$17.15M/qtr — the ~$1.85M/qtr wedge is SBC (non-cash, ~$1.7–2.0M/qtr per pack `sbc`) plus interest income on ~$180M (~$1.8M/qtr). Neither bench reconciled gross-to-net; this wedge is precisely what makes "into 2029" a true statement rather than a stretch.
+**B (pro-red, stronger than red's version):** The "$2.82 net-cash floor" is **not a floor**. With Class B voting control and a single-asset mandate, Class A holders have no mechanism to force a return of capital; management will spend to the 2028 readout regardless. The correct floor is the *terminal* cash at readout (~$25–45M) plus salvage — i.e. the floor red priced as protection is a bid-suppressant, not support. This is the one place red was too gentle.
+**C (against both):** Neither bench extracted a single street number for the operative period — no published PoS, no peak-sales range. Divergence is asserted by blue and denied by red with equal evidence: none.
+
+**NET POSITION AFTER BOTH BENCHES:** What survives is narrow. Red's arithmetic core (1, 2, 6) is real in direction but inflated in every magnitude I could check — the $20M burn is blue's own stress input rather than a filed fact (actual $17.15M/qtr reconciles to the filed "into 2029"), the cash mark was over-decayed ~$5M, the prize table omitted the balance sheet, and the "half retraced" line is 19%. Red's two strongest genuine points are that a pre-topline raise is probable inside the holding period and that entry at +30.6% off the low is not entry at the dislocation. Against that, New Finding B kills the floor blue was sizing off. Corrected: EV ≈ $156M, funded-prize floor ~$3.6/sh, +50% clearing at ≥$800M peak with PoS ≥20%. That is fairly-paid risk, not a bargain, with a 21-month evidence blackout and no forcing mechanism. **Position: FLAT at $5.04** (from NO POSITION) — but not REJECT-and-delete: standing limit **quarter-unit at ≤$3.90** (time-adjusted net cash, ~the $300M/PoS10 floor cell), gated on the 11/11 cover page showing Class A ≤65.0M, cash ≥$165M, R&D ≤$16M/qtr. Post-audit kills: **1 novel / 2 consensus**.
+
+**PRINT PROXIMITY: 2026-11-11 — UNCONFIRMED** (yfinance-derived per pack; no company PR names a Q3 date; cadence-consistent with 11/12/25, 5/15/26, 8/5/26). ~45 trading days out — **NOT within 5 trading days**; print-decisive race not triggered. Pre-staged: Q3 cover-page Class A vs 64,688,915 (tests red-4); cash vs my $170.0M roll-forward (tests red-2); R&D vs $14.0M (tests the ramp in red-1).
+
+**DETECTORS CONSULTED**
+- clinicaltrials_lookup — UNCHECKABLE: no egress; NCT07562152 arm/interim schedule unfetchable.
+- competitor_trial_omission — UNCHECKABLE: needs CT.gov 1L-PDAC enrolling-sponsor pull; no API.
+- carbon_mapper — NOT-FIRED: leased office/lab floors only; no combustion source. Planner ruling upheld.
+- consumer_product_heat — NOT-FIRED: pre-revenue, no SKU.
+- consumer_product_reviews — NOT-FIRED: no consumer product, no review corpus.
+- osha_establishment — NOT-FIRED: no claimed factory.
+- plant_thermal — NOT-FIRED: no owned parcel; a ~150 sq ft NY office is not thermally resolvable.
+- clinical_trials — UNCHECKABLE (egress): site count/enrollment status is the best pre-2028 tell on the burn ramp and would settle red-1.
+- multi_venue_disclosure_consistency — **FIRED, but AGAINST RED**: the ATM member is tagged for both H1-26 and H1-25 in the same Q2 document, so the cross-venue divergence red claimed is a comparative-period artifact (finding 4).
+- openfda — NOT-FIRED: never shipped a drug; no commercial damage channel.
+- orange_book — NOT-FIRED: no listed product, no LOE ladder.
+- runway_calculator — **FIRED, REDUCED**: at filed $17.15M/qtr net burn, exhaustion ~Q1-Q2 2029, consistent with the 8-K's "into 2029"; red's Q3-2028 result depends on an unsourced $20M ramp.
+- clinical_trial_referral_quality — NOT-APPLICABLE per its own contract (pure sponsor-developer).
+- common_control_merger_accounting — NOT-FIRED: no common-control merger disclosed in the filing inventory or the 10-Q contexts.
+- lockup_expiration_calendar (red-added) — UNCHECKABLE: SC 13G 0002012383-26-002523 (7/28/26) signals a ≥5% holder change worth reading for overhang; document not fetchable.
+
+```kg_candidate
+{"name": "cash_floor_without_forcing_mechanism", "kind": "mechanism", "one_line": "Net cash per share is treated as a downside floor, but with dual-class voting control and a single-asset mandate there is no mechanism for outside holders to force a return of capital — the correct floor is TERMINAL cash at readout, not today's cash.", "fires_on": "pre-revenue issuer where net_cash/mktcap > 0.4 AND controlled_class_votes AND single binary readout beyond current runway midpoint AND no announced capital-return or dissolution policy", "evidence_here": "IMRX: $182.7M cash = ~56% of $326M cap and both benches sized off $2.82/sh; Class B contexts live at 2026-06-30 give founder voting control; management spends to a mid-2028 topline, leaving ~$25-45M terminal cash — the marketed floor is ~7x above the enforceable one.", "applies_to_guess": {"issuer_features": ["pre_revenue", "dual_class_control", "single_asset_pipeline", "net_cash_above_40pct_of_cap"], "sic_prefixes": ["2834", "2836", "1040", "8731"]}}
+```
+
+**Conviction that FLAT-at-$5.04 with a ≤$3.90 quarter-unit limit is the right net position: 7/10.** Weakness: the entire court ran without a live fetch — the Q2 cover-page share count and the CT.gov interim-analysis schedule each sit inside documents whose URLs both benches cited and neither could open.

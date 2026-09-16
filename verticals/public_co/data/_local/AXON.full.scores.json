@@ -1,0 +1,155 @@
+{
+  "ticker": "AXON",
+  "scores": [
+    {
+      "claim_id": "AXON-001",
+      "claim_text": "Axon's largest customer vertical is U.S. federal, state and local law enforcement; entered/will enter contracts with U.S. federal government subject to FAR.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "usaspending.query_recipient_contracts + sam_entity.query_entity_by_uei",
+      "M_value": {
+        "n_awards": 476,
+        "total_amount_usd": 185485639.46,
+        "top_agencies": ["Department of Homeland Security", "Department of Justice", "Department of the Interior"],
+        "representative_award_descriptions": ["IDVRS-BODY WORN CAMERAS (DHS, $20.5M)", "TASER 10 CYCLICAL REPLACEMENT (DOJ, $14M)", "BODY WORN CAMERAS AXON FOR OPR (DOJ, $10.3M)", "TASK ORDER FOR DEMS (DOJ, $10.2M)", "BODY CAM IDIQ DELIVERY ORDER (Interior, $10M)"],
+        "sam_entity_lookup": "skipped_required_uei_first"
+      },
+      "interpretation": "USAspending registry confirms 476 federal awards totaling ~$185M across DHS, DOJ, DOI, VA, DOD, USDA, State, Treasury — multi-agency federal law-enforcement and security customer relationship is real and corroborated. Largest awards explicitly tied to body-worn cameras and TASER 10 cyclical replacements, matching the 10-K narrative."
+    },
+    {
+      "claim_id": "AXON-002",
+      "claim_text": "Axon has some DoD adjacency (subject notes); test materiality of DoD obligations.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "usaspending.query_dod_contracts (Mode A) + usaspending.query_federal_presence (Mode B, UEI-anchored aggregate)",
+      "M_value": {
+        "mode_a_dod_n_awards": 15,
+        "mode_a_dod_total_usd": 3405544.19,
+        "mode_a_dod_top": [
+          {"award_id": "HQ003423P0206", "desc": "BODY WORN CAMERAS AND SOFTWARE", "amount": 2097058.59},
+          {"award_id": "FA281620P0029", "desc": "AXON VEHICLE TRACKERS (12) AND AXON BODY CAMERAS (50)", "amount": 380954.06},
+          {"award_id": "W50RAJ25C0004", "desc": "JCO DEMO 6 PRIZE MONEY-DEDRONE (counter-UAS prize, FY25)", "amount": 250000.0},
+          {"award_id": "FA805223C0012", "desc": "PURCHASE OF HEMI DEVICES", "amount": 160501.18}
+        ],
+        "mode_b_federal_presence": {
+          "n_ueis_resolved": 4,
+          "ueis": ["Axon Enterprise (TBW7MGPYURM7)", "Dedrone Defense LLC", "Dedrone Holdings", "Dedrone Defense Inc."],
+          "n_contracts_total": 497,
+          "contracts_amount_M": 187.61,
+          "agencies": {"DHS": 12, "DOJ": 11, "DOD": 8, "VA": 5, "Interior": 1, "Treasury": 1, "USDA": 1, "State": 1},
+          "signal": "RECURRING_FEDERAL"
+        }
+      },
+      "interpretation": "DoD obligations are real (15 awards, $3.4M) but small (~0.12% of $2.78B revenue) — consistent with the 10-K's framing of LE as the primary vertical and DoD as adjacency. Notable: a $250K JCO DEMO 6 prize specifically tied to Dedrone (counter-UAS), and DoD purchases of body-worn cams / TASER X26P / Axon vehicle trackers — narrow but real cross-Service procurement. Federal presence signal=RECURRING_FEDERAL across 4 UEIs (Axon + Dedrone subsidiaries)."
+    },
+    {
+      "claim_id": "AXON-003",
+      "claim_text": "Axon is rolling up multiple acquisitions (Carbyne $625M Feb 2026, Dedrone Oct 2024 $443.6M goodwill, Fusus Jan 2024 $249.9M goodwill, Prepared 2025) into a public-safety / emergency-comms platform. Test aggregate rollup coherence vs parent thesis.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "edgar_fts.query_fulltext (Mode A: counterparty named in Axon's own filings) + acq_coherence.score_acquisition_coherence (Mode B: aggregate rollup coherence vs parent thesis)",
+      "M_value": {
+        "mode_a_carbyne_edgar_hits_in_axon_filings": 6,
+        "mode_a_carbyne_forms_confirmed": ["10-K (2026-02-25)", "10-Q (2026-05-07)", "10-Q (2025-11-05)", "8-K (2026-02-24)", "8-K (2025-11-04)", "DEF 14A (2026-04-16)"],
+        "mode_b_n_acquisitions_scored": 4,
+        "mode_b_per_acquisition_coherence": {"Carbyne": 0.80, "Dedrone": 0.75, "Fusus": 0.78, "Prepared": 0.75},
+        "mode_b_mean_coherence": 0.77,
+        "mode_b_n_low_coherence": 0,
+        "mode_b_n_revenue_synthetic": 0,
+        "mode_b_signal": "COHERENT_ROLLUP"
+      },
+      "interpretation": "Mode A confirms Carbyne acquisition disclosed in 6 Axon filings (proper public disclosure, no concealment). Mode B aggregate coherence is 0.77 = COHERENT_ROLLUP: all 4 acquisitions (cloud 911/PSAP, counter-UAS, real-time crime center, 911 call-taker AI) directly extend Axon's end-to-end public-safety ecosystem thesis. No incoherence flags — unlike IONQ pattern (quantum + SAR + foundry incoherence), Axon's M&A stays inside the LE/public-safety adjacency. Heavy capital deployed ($1.5B+ goodwill) but on-thesis."
+    },
+    {
+      "claim_id": "AXON-004",
+      "claim_text": "In 2025 Axon raised ~$2.25B in capital markets: $1.75B Senior Notes (March 2025), $494.7M ATM equity, plus $608.9M induced conversion of 2027 Notes. Test for insider sales clustered around these events and other budget-event windows.",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "sec_filings.list_filings_by_form (Mode A: confirm S-3/424B5 on file) + insider_vs_calendar.query_insider_sales_near_budget_events (Mode B: Form-4 clustering around budget events, window_days=14, start_date='2024-01-01', end_date='2026-05-20')",
+      "M_value": {
+        "mode_a_424B5_filings_in_window": 1,
+        "mode_a_424B5_date": "2024-05-13",
+        "mode_a_note": "S-3 shelf + 424B5 supplements appear sparse on EDGAR submissions API filter; the actual 2025 Senior Notes issuance ($1B 2030 + $750M 2033) and ATM are reflected in cash-flow statements (proceeds from notes $1.75B; net ATM proceeds $489.6M) per the 10-K MD&A and would have been registered under Rule 415 + 424B prospectus supplements",
+        "mode_b_n_form4_filings": 76,
+        "mode_b_n_total_sales": 253,
+        "mode_b_n_total_sale_value_usd": 244712667.72,
+        "mode_b_n_proximate_sales": 36,
+        "mode_b_proximate_value_usd": 27125447.90,
+        "mode_b_n_discretionary_proximate": 0,
+        "mode_b_n_unique_owners_proximate": 2,
+        "mode_b_proximate_unique_owners": ["SMITH PATRICK W (Founder/CEO)", "Bagley Brittany"],
+        "mode_b_proximate_events_matched": ["fiscal_year_end 2025-09-30 ($20.9M)", "bipartisan_budget_signed 2026-01-20 ($6.2M)"],
+        "mode_b_signal": "NO_CLUSTERED_DISCRETIONARY (all proximate sales 10b5-1 pre-planned)"
+      },
+      "interpretation": "Insider activity is heavy in absolute terms ($244.7M sales over 24 months, 253 transactions across 76 Form 4s), but the framework's high-discrimination signal — discretionary (non-10b5-1) sales clustered to budget events — is ZERO. Every proximate sale near a budget event was a 10b5-1 pre-planned trade (a/d='D', is_10b5_1=true). Sellers limited to 2 unique owners (CEO Smith + Bagley). No IONQ/AHC-style red flag. PASS."
+    },
+    {
+      "claim_id": "AXON-005",
+      "claim_text": "Material weakness in ICFR over revenue recognition for customer contracts as of Dec 31, 2025; PwC issued adverse ICFR opinion. Restatement context — 10-K/A filed for FY2024 on May 7, 2025.",
+      "severity": "RED_FLAG_NEGATIVE",
+      "supports": false,
+      "M_check": "sec_filings.list_filings_by_form (Mode A: confirm 10-K/A restatement exists) + claim_evolution.query_claim_evolution (Mode B: track recurrence in subsequent filings)",
+      "M_value": {
+        "mode_a_filings_found": 6,
+        "mode_a_10K_A_confirmed": {"form": "10-K/A", "filing_date": "2025-05-07", "accession": "0001069183-25-000075", "doc": "axon-20241231.htm"},
+        "mode_a_original_2024_10K": {"form": "10-K", "filing_date": "2025-02-28", "accession": "0001069183-25-000019"},
+        "mode_a_PwC_opinion": "adverse on ICFR (per 10-K Item 9A) — material weakness in revenue recognition for customer contracts not remediated as of Dec 31, 2025",
+        "mode_b_n_subsequent_mentions": 14,
+        "mode_b_forms_mentioning": ["10-K", "10-K/A", "10-Q", "8-K"],
+        "mode_b_evolution_status": "REAFFIRMED_IN_STRUCTURED_DISCLOSURE",
+        "mode_b_classification_counts": {"AFFIRMED": 6, "AMENDED": 0, "TERMINATED": 0},
+        "mode_b_prior_material_weakness": "convertible debt classification — disclosed in restated 2024 10-K/A; remediated as of June 30, 2025",
+        "mode_b_current_material_weakness": "revenue recognition for customer contracts — UNREMEDIATED as of Dec 31, 2025",
+        "mode_b_restatement_trigger": "8-K dated 2025-05-07: 2027 Notes carrying value should have been classified as current liabilities rather than long-term — drove restatement of FY2024 financials"
+      },
+      "interpretation": "Hard contradiction to clean-ICFR posture and a recurring control-deficiency pattern: (1) FY2024 10-K was RESTATED on 10-K/A 2025-05-07 due to a material weakness in convertible-debt liability classification; (2) THAT material weakness was remediated by June 30, 2025 but (3) a NEW, DIFFERENT material weakness emerged in revenue recognition for customer contracts as of Dec 31, 2025, with an ADVERSE PwC ICFR opinion. claim_evolution tracks 14 subsequent mentions across 10-K, 10-K/A, 10-Q, 8-K — REAFFIRMED, no termination/remediation of the FY2025 revenue-recognition weakness. Per heuristic 7 (calibration): 'Adverse ICFR or recurring material weakness is RED.' Two separate material weaknesses in two consecutive fiscal years, both touching core financial-reporting integrity (debt classification → revenue recognition), is a RED_FLAG_NEGATIVE."
+    },
+    {
+      "claim_id": "AXON-006",
+      "claim_text": "Primary corporate HQ spread across seven facilities, ~900,000 sq ft in Phoenix AZ metro; largest manufacturing in Arizona; TASER 10 firearm product manufactured there.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": true,
+      "M_check": "epa_frs.query_facilities (Mode A: AZ facility list) + osha_establishments.query_establishments (Mode B: 300A-registered establishments in AZ)",
+      "M_value": {
+        "mode_a_epa_frs_n_facilities": 1,
+        "mode_a_epa_frs_match": {"facility_name": "AXON", "county": "PIMA COUNTY", "address": "NO ADDRESS ON FILE", "registry_id": "110072133021"},
+        "mode_a_note": "Pima County (Tucson area), not Maricopa County (Phoenix metro); single FRS record with no address",
+        "mode_b_osha_n_matches": 0,
+        "mode_b_osha_signal": "NO_OSHA_FOOTPRINT",
+        "mode_b_osha_filters": {"company_name": "Axon Enterprise", "state": "AZ"}
+      },
+      "interpretation": "Per calibration heuristic 1, EPA FRS scope is limited to EPA-regulated facilities; light electronics / CED & camera assembly may not be in scope. The single Pima County (not Phoenix metro) FRS record with no address is weak evidence. Per heuristic for OSHA: Form 300A absence is mostly UNVERIFIABLE except for explicit large-employer claims — but Axon explicitly claims a ~900,000 sq ft, 7-facility footprint with the LARGEST manufacturing and research spaces in Arizona, which would suggest a substantial workforce. 0 OSHA establishments in AZ for 'Axon Enterprise' is notable. Axon does have ~5,500 employees globally and a real Scottsdale/Phoenix HQ campus per public record, so the absence may reflect OSHA registration name variants ('Axon Holdings', subsidiary names) rather than non-existence. Scoring MODERATE_UNDERDELIVERY: registries don't materially contradict the property claim, but the lack of an EPA FRS facility in Maricopa County (Phoenix metro) and zero OSHA 300A registrations is a meaningful gap that downstream investigators should resolve via name-variant retries."
+    },
+    {
+      "claim_id": "AXON-007",
+      "claim_text": "Axon claims patent protection in key areas of Axon devices, CEDs and SaaS technology; subject to Airspace v. Dedrone patent suit (PTAB instituted review on all claims).",
+      "severity": "PASS",
+      "supports": true,
+      "M_check": "uspto_odp.query_assignee (Mode A: Axon Enterprise) + uspto_odp.query_assignee (Mode B: Dedrone subsidiary)",
+      "M_value": {
+        "mode_a_axon_n_total_applications": 503,
+        "mode_a_axon_n_granted": 241,
+        "mode_a_axon_categorization_evident_from_titles": ["CED/TASER (Electrode, Electrical Weapon, Electrode Deployment, High Voltage Circuit)", "Camera/Video (Incident Recording Systems, Lighted Projectile)", "Training (Simulation-Based Training)", "Hardware (Magnetic Coupler, Spherical Joint)"],
+        "mode_b_dedrone_n_total_applications": 39,
+        "mode_b_dedrone_n_granted": 26,
+        "mode_b_dedrone_categorization_evident_from_titles": ["UAV detection/tracking/disruption", "Signal generation/RF analysis for drone detection"],
+        "combined_granted": 267
+      },
+      "interpretation": "Per heuristic 8 (Patents): PASS when n_granted >= 5 with hits in claimed categories. Axon has 241 granted patents (massive) plus 26 from Dedrone subsidiary = 267 total, with explicit hits in CED (Electrode for Conducted Electrical Weapon, Electrode Deployment), camera/recording (Incident Recording Systems), counter-UAS (Identifying/Tracking/Disrupting Unmanned Aerial Vehicles), and training (Simulation-Based Training). The Airspace v. Dedrone PTAB challenge is a defensive posture (Axon petitioned and PTAB instituted review on all claims of all 3 asserted patents) — actually a moderately favorable signal for Axon's IP-litigation strategy. Strong PASS."
+    },
+    {
+      "claim_id": "AXON-008",
+      "claim_text": "Axon has a $425M / 6-year cloud hosting purchase commitment (June 2022 - mid-2028) with $110.6M storage fees recognized in 2025; large material cloud counterparty.",
+      "severity": "UNVERIFIABLE",
+      "supports": null,
+      "M_check": "edgar_fts.query_fulltext (Mode A: Microsoft 10-K mentions 'Axon Enterprise') + edgar_fts.query_fulltext (Mode B: Amazon 10-K mentions 'Axon Enterprise')",
+      "M_value": {
+        "mode_a_microsoft_cik": "0000789019",
+        "mode_a_microsoft_total_hits": 0,
+        "mode_b_amazon_cik": "0001018724",
+        "mode_b_amazon_total_hits": 0
+      },
+      "interpretation": "Per heuristic 7 (counterparty-disclosure threshold): 0 mentions is SEVERE only when (a) counterparty is large, (b) claim is material, (c) revenue from that counterparty exceeds typical sub-tier disclosure thresholds. Here Axon is a CUSTOMER of the cloud provider (not vice versa), so $110.6M of cloud spend is asymmetric — large for Axon, sub-material for Microsoft ($245B+ revenue) or Amazon ($574B+ revenue). Neither hyperscaler would name a single mid-cap as a customer in their 10-K. The Axon 10-K does NOT name the specific cloud provider, so we cannot definitively select between AWS and Azure. UNVERIFIABLE per calibration; absence is non-informative."
+    }
+  ]
+}

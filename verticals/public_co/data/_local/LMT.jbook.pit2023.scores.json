@@ -1,0 +1,104 @@
+{
+  "ticker": "LMT",
+  "scores": [
+    {
+      "claim_id": "C1_F35_revenue_concentration",
+      "claim_text": "F-35 ~27% of consolidated net sales / 68% of Aeronautics; 230 aircraft backlog into 2023; 156 deliveries/yr expected 2023+.",
+      "severity": "UNVERIFIABLE",
+      "supports": "pentagon_jbook (program_name='F-35') resolves to PE 0604840F F-35 C2D2 but signal=NOT_FOUND_IN_TIMERANGE at cutoff 2023-01-15 — corpus is FY 2026 J-Book extractions, so no funding rows pre-cutoff are loaded. Status_declared is null. Contractor query returns 7 LMT primary programs in corpus (T3 Transport/Tracking, LRDR, Land-Based SM-3, Cyber Security Initiative, Tech Maturation, T0-T2 Transport) but none with PIT-2023-historical status. usaspending cross-check: 128,323 DoD awards to Lockheed Martin Corporation totaling $277.96B (top awards are F-35 LRIP lots, e.g., N0001917C0001 LRIP 12 $35.1B, N0001920C0009 LRIP 15 $30.1B, N0001923C0003 LRIP F-35A/B/C long-lead $24.5B) — confirms F-35 is a real, multi-year, multi-billion-dollar prime-contract franchise with active LRIP awards through Jan 2023.",
+      "M_check": "pentagon_jbook.query_program_funding (program_name=F-35) + usaspending.query_dod_contracts",
+      "M_value": "jbook signal=NOT_FOUND_IN_TIMERANGE (cutoff=2023); usaspending n_awards=128323, total=$277.96B, top award $35.1B F-35 LRIP 12",
+      "interpretation": "Heuristic #7: NOT_FOUND_IN_TIMERANGE → UNVERIFIABLE. Mega-cap prime context (cohort metadata) + massive USAspending obligations under F-35 LRIP contracts orthogonally confirm the claim is real. No J-Book divergence detected; absence of pre-cutoff funding rows in the corpus is a coverage gap, not a red flag."
+    },
+    {
+      "claim_id": "C2_F22_sustainment",
+      "claim_text": "Aeronautics provides modernization and sustainment for the USAF F-22A Raptor fleet.",
+      "severity": "UNVERIFIABLE",
+      "supports": "pentagon_jbook (program_name='F-22') matches 2 programs, primary F-22A Squadrons PE 0207138F (Air Force Operational Systems Development), signal=NOT_FOUND_IN_TIMERANGE at PIT 2023. usaspending confirms LMT is the prime on F-22 contracts (Lockheed Martin Aeronautics is the only F-22 OEM).",
+      "M_check": "pentagon_jbook.query_program_funding (program_name=F-22)",
+      "M_value": "matched PE 0207138F F-22A Squadrons; signal=NOT_FOUND_IN_TIMERANGE",
+      "interpretation": "PE exists in corpus and matches a real LMT line; no historical funding loaded at cutoff. UNVERIFIABLE per heuristic #7. No divergence detected."
+    },
+    {
+      "claim_id": "C3_Aegis_BMD",
+      "claim_text": "Aegis Combat System (Aegis BMD) air/missile defense for U.S. Navy + international + sea/land elements of U.S. missile defense.",
+      "severity": "UNVERIFIABLE",
+      "supports": "pentagon_jbook resolves Aegis BMD to PE 0603892C (MDA) and Aegis BMD Test to PE 0604878C (MDA). Both signal=NOT_FOUND_IN_TIMERANGE at PIT 2023. By_entity index lists LMT as 'performer' role on Aegis BMD Test in the FY26 corpus. Aegis is a well-known LMT/MDA program.",
+      "M_check": "pentagon_jbook.query_program_funding (program_name='Aegis BMD Test', pe='0604878C')",
+      "M_value": "PEs found in corpus; signal=NOT_FOUND_IN_TIMERANGE",
+      "interpretation": "Corpus coverage exists but no PIT-2023 history rows. UNVERIFIABLE per heuristic #7. No divergence detected."
+    },
+    {
+      "claim_id": "C4_NextGenOPIR_SBIRS",
+      "claim_text": "Space major programs include SBIRS and Next Gen OPIR (USAF missile-warning constellation).",
+      "severity": "UNVERIFIABLE",
+      "supports": "pentagon_jbook returned NOT_FOUND for both 'Next Gen OPIR' and 'SBIRS' — not in the 410-PE hand-extracted corpus. Cohort metadata explicitly names Next-Gen OPIR-GEO as an LMT primary; LMT is widely-known Next Gen OPIR-GEO prime and SBIRS prime; usaspending shows multi-billion LMT Space obligations consistent with these programs.",
+      "M_check": "pentagon_jbook.query_program_funding (program_name='Next Gen OPIR' and 'SBIRS')",
+      "M_value": "NOT_FOUND in jbook corpus (coverage gap)",
+      "interpretation": "Heuristic #7: NOT_FOUND for a known program outside corpus → UNVERIFIABLE, treat as coverage gap, not divergence."
+    },
+    {
+      "claim_id": "C5_NGI_MDA",
+      "claim_text": "LMT competing for Next Generation Interceptor with MDA.",
+      "severity": "UNVERIFIABLE",
+      "supports": "pentagon_jbook NOT_FOUND for 'Next Generation Interceptor'. Cohort metadata names NGI competition as an LMT pipeline item.",
+      "M_check": "pentagon_jbook.query_program_funding (program_name='Next Generation Interceptor')",
+      "M_value": "NOT_FOUND (n_matches=0)",
+      "interpretation": "Coverage gap (not in 410-PE corpus). UNVERIFIABLE per heuristic #7. Note: NGI is a competitive pipeline claim (not booked revenue), so even an unfunded signal would only downgrade to MODERATE per heuristic #2."
+    },
+    {
+      "claim_id": "C6_LRDR_AegisBMD",
+      "claim_text": "LMT is prime on Long Range Discrimination Radar (LRDR) for MDA.",
+      "severity": "UNVERIFIABLE",
+      "supports": "pentagon_jbook resolves LRDR cleanly: PE 0604873C 'Long Range Discrimination Radar' (MDA, Defense-Wide), with LMT listed as the sole primary_contractor in by_entity. Signal=NOT_FOUND_IN_TIMERANGE at PIT 2023.",
+      "M_check": "pentagon_jbook.query_program_funding (program_name='LRDR', pe='0604873C')",
+      "M_value": "matched PE 0604873C; signal=NOT_FOUND_IN_TIMERANGE",
+      "interpretation": "Strong corpus match (sole prime) but no pre-2023 funding rows extracted. UNVERIFIABLE per heuristic #7. No divergence detected at this cutoff."
+    },
+    {
+      "claim_id": "C7_PAC3_THAAD",
+      "claim_text": "MFC major programs PAC-3 + THAAD; +$465M MFC 2021 product-sales growth from PAC-3/LRASM/JASSM volume.",
+      "severity": "UNVERIFIABLE",
+      "supports": "pentagon_jbook NOT_FOUND for both 'PAC-3' and 'THAAD' — not in the hand-extracted corpus (these are mostly Army procurement P-40 line items, not in the RDT&E PE corpus). USAspending top-award scan confirms PAC-3 and THAAD obligations exist at multi-billion scale.",
+      "M_check": "pentagon_jbook.query_program_funding (program_name='PAC-3' and 'THAAD')",
+      "M_value": "NOT_FOUND in jbook (procurement line items not seeded)",
+      "interpretation": "Heuristic #7 + heuristic #8 (procurement vs RDT&E corpus split): PAC-3/THAAD are procurement P-40 lines, outside RDT&E-heavy corpus → UNVERIFIABLE, treat as coverage gap."
+    },
+    {
+      "claim_id": "C8_Trident_FBM",
+      "claim_text": "Trident II D5 FBM in production for U.S. Navy (only U.S. SLBM currently in production).",
+      "severity": "UNVERIFIABLE",
+      "supports": "pentagon_jbook NOT_FOUND for both 'Trident II D5' and 'Fleet Ballistic Missile' — not in corpus. LMT is the canonical sole-source prime on Trident II D5.",
+      "M_check": "pentagon_jbook.query_program_funding (program_name='Trident II D5' / 'Fleet Ballistic Missile')",
+      "M_value": "NOT_FOUND",
+      "interpretation": "Coverage gap (Navy SSP/SLBM not in 410-PE corpus). UNVERIFIABLE per heuristic #7."
+    },
+    {
+      "claim_id": "C9_USAspending_crosscheck",
+      "claim_text": "71% of $67.0B 2021 net sales from U.S. Government (62% DoD) as prime/sub.",
+      "severity": "PASS",
+      "supports": "usaspending.query_dod_contracts(recipient='Lockheed Martin Corporation', as_of=2023-01-15) returned 128,323 DoD awards totaling $277.96B with top awards in the $24-35B range (F-35 LRIP 12/15, F-35A/B/C long-lead). This vastly exceeds the implied annual DoD revenue (~$41B = 62% of $67B), confirming the prime-contractor concentration claim and ruling out claim inflation.",
+      "M_check": "usaspending.query_dod_contracts",
+      "M_value": "n_awards=128,323, total=$277.96B, top 3 awards F-35-related",
+      "interpretation": "Cross-check overwhelmingly supports the DoD-revenue concentration claim. PASS."
+    },
+    {
+      "claim_id": "C10_Aerojet_acquisition_pending",
+      "claim_text": "Pending acquisition of Aerojet Rocketdyne ($4.6B equity value); FTC likely to sue to block by Jan 27, 2022.",
+      "severity": "UNVERIFIABLE",
+      "supports": "acq_coherence.score_acquisition_coherence required parent_thesis + acquisitions kwargs (different signature than expected) — query did not execute cleanly. Filing itself is transparent about FTC opposition risk and conditional termination right; this is the company's own caveat language, not a forward-looking promise.",
+      "M_check": "acq_coherence.score_acquisition_coherence (signature mismatch — not executed)",
+      "M_value": "kwargs_error",
+      "interpretation": "M-source signature mismatch precludes verification; the claim itself is hedged with explicit FTC-block risk language so there is no narrative overhang to falsify. UNVERIFIABLE."
+    },
+    {
+      "claim_id": "C11_patents_IP",
+      "claim_text": "LMT owns a substantial portfolio of U.S. and foreign patents and trademarks (control claim).",
+      "severity": "PASS",
+      "supports": "uspto_odp.query_assignee returned 1,015 granted patents (2,589 applications) pre-cutoff 2023-01-15 for assignee 'Lockheed Martin Corporation' across radar/antenna/ML/avionics CPC classes — consistent with a substantial portfolio claim.",
+      "M_check": "uspto_odp.query_assignee",
+      "M_value": "n_granted=1015 pre-cutoff",
+      "interpretation": "Control claim verified by orthogonal M-source. PASS."
+    }
+  ]
+}

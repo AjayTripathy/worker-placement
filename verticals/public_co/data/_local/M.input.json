@@ -1,0 +1,180 @@
+{
+  "ticker": "M",
+  "cutoff": "2026-05-16",
+  "filing": "0001628280-26-021721_10-K.txt",
+  "filing_period": "Fiscal Year ended January 31, 2026 (FY2025); filed March 27, 2026",
+  "claims": [
+    {
+      "claim_id": "C1",
+      "category": "physical_facility",
+      "claim_text": "As of January 31, 2026, the Company operated 665 stores (Macy's 432, Bloomingdale's 61, Bluemercury 172) in 43 states + DC + PR + Guam, totaling ~98 million sq ft. Store count rolled from 680 at start of FY2025 -> 665 at end, with 12 new stores opened and 27 closed/consolidated. 243 owned, 340 leased, 79 ground-leased, 3 partly-owned/leased.",
+      "discriminative_features": [
+        "specific store-count trajectory (680 -> 665) is internally auditable",
+        "tests Calibration Heuristic 11 (store-count trajectory): announced new-store opens (12) vs disclosed closures (27)",
+        "lease/owned mix is a structural distress indicator"
+      ],
+      "queries": [
+        {
+          "query_id": "C1.Q1",
+          "source": "edgar_fts.query_fulltext",
+          "kwargs": {"search_term": "Bluemercury", "cutoff_date": "2026-05-16", "forms": "10-K,10-Q"},
+          "purpose": "External corroboration of Bluemercury subsidiary brand existence"
+        },
+        {
+          "query_id": "C1.Q2",
+          "source": "edgar_fts.query_fulltext",
+          "kwargs": {"search_term": "Macy's", "cutoff_date": "2026-05-16", "cik": "0001063761", "forms": "10-K,10-Q"},
+          "purpose": "Simon Property Group (SPG) tenant exposure: does SPG's 10-K mention Macy's as a major tenant?"
+        }
+      ]
+    },
+    {
+      "claim_id": "C2",
+      "category": "financial_distress",
+      "claim_text": "Operating lease obligations approximately $6.0 billion, primarily due after 2030. Long-term debt obligations $2.4 billion with $1.3 billion related interest. Senior unsecured notes of $2,441M aggregate principal outstanding with maturities 2027-2043. Credit ratings: Moody's Ba1, S&P BB+, Fitch BBB- (split-rated — only Fitch is investment grade); outlook Stable across all three.",
+      "discriminative_features": [
+        "Calibration Heuristic 10: ratings posture / covenant indicators",
+        "Calibration Heuristic 12: lease portfolio long-tail",
+        "Split rating with two of three at junk is a structural distress marker"
+      ],
+      "queries": [
+        {
+          "query_id": "C2.Q1",
+          "source": "edgar_fts.query_fulltext",
+          "kwargs": {"search_term": "Macy's", "cutoff_date": "2026-05-16", "cik": "0000912242", "forms": "10-K,10-Q"},
+          "purpose": "Macerich (MAC) mall REIT tenant disclosure — does MAC's 10-K name Macy's as major tenant?"
+        },
+        {
+          "query_id": "C2.Q2",
+          "source": "edgar_fts.query_fulltext",
+          "kwargs": {"search_term": "going concern", "cutoff_date": "2026-05-16", "cik": "0000794367"},
+          "purpose": "Confirm absence of going-concern language in any Macy's filing"
+        }
+      ]
+    },
+    {
+      "claim_id": "C3",
+      "category": "customer_pipeline",
+      "claim_text": "FY2025 comparable sales on owned-plus-licensed-plus-marketplace basis: total Macy's, Inc. up 1.5% (vs -0.9% in FY2024 and -6.0% in FY2023). Macy's nameplate +0.4%, Reimagine 125 stores +1.0%, Bloomingdale's +7.4% (highest in 14 quarters), Bluemercury +1.6% (20th consecutive quarter of comp growth, 6th consecutive year). Digital sales 35% of net sales (up from 33%).",
+      "discriminative_features": [
+        "Calibration Heuristic 9: marketing-tier comp claims vs financial-statement notes",
+        "Net sales DOWN 2.4% ($21.764B vs $22.293B) but comp +1.5% — gap due to store closures (~$700M)",
+        "Three-year comp trajectory shows turn-around progression"
+      ],
+      "queries": [
+        {
+          "query_id": "C3.Q1",
+          "source": "edgar_fts.query_fulltext",
+          "kwargs": {"search_term": "Bloomingdale's", "cutoff_date": "2026-05-16", "forms": "10-K"},
+          "purpose": "Asymmetric mention test — luxury-tier brand visibility in cross-filer 10-Ks"
+        }
+      ]
+    },
+    {
+      "claim_id": "C4",
+      "category": "partnership",
+      "claim_text": "Credit Card Program with Citibank (long-term marketing/servicing alliance dating to 2005 Citibank sale; sixth amendment dated December 13, 2021) extends until March 31, 2030. Citibank owns receivables; M receives fees + profit share. Credit card revenues, net = $669M in FY2025 = approx 3.1% of net sales (up from $537M = 2.4% in FY2024, a +25% YoY jump). Proprietary credit card sales penetration 40.1% (down from 41.6%).",
+      "discriminative_features": [
+        "Counterparty financial-partner relationship — counterparty 10-K should mention M",
+        "Tests Calibration Heuristic 7: counterparty disclosure threshold",
+        "Material partnership economics — 3.1% of net sales = ~$669M"
+      ],
+      "queries": [
+        {
+          "query_id": "C4.Q1",
+          "source": "edgar_fts.query_fulltext",
+          "kwargs": {"search_term": "Macy's", "cutoff_date": "2026-05-16", "cik": "0000927628", "forms": "10-K,10-Q"},
+          "purpose": "Capital One co-branded card?"
+        },
+        {
+          "query_id": "C4.Q2",
+          "source": "edgar_fts.query_fulltext",
+          "kwargs": {"search_term": "Macy's", "cutoff_date": "2026-05-16", "cik": "0000004962", "forms": "10-K,10-Q"},
+          "purpose": "AmEx counterparty mention"
+        }
+      ]
+    },
+    {
+      "claim_id": "C5",
+      "category": "financial_distress",
+      "claim_text": "ABL Credit Facility amended April 9, 2025 — REDUCED from $3,000M to $2,100M, extended maturity to April 2030. $0 outstanding borrowings at year-end. Borrowing capacity $1,957M (net of $143M standby LCs). Debt transactions in 2025: issued $500M of 7.375% senior unsecured notes due 2033; redeemed $393M senior notes + tendered $251M (cost $255M); redeemed additional $194M August 2025. $33M extinguishment losses recognized. Two of three rating agencies hold sub-investment-grade.",
+      "discriminative_features": [
+        "ABL reduction by $900M (30%) signals lender retrenchment despite framing as expense optimization",
+        "7.375% coupon on 2033 notes — well above pre-2022 cost of capital",
+        "Multiple debt-tender/redemption transactions = active liability management"
+      ],
+      "queries": [
+        {
+          "query_id": "C5.Q1",
+          "source": "edgar_fts.query_fulltext",
+          "kwargs": {"search_term": "covenant waiver", "cutoff_date": "2026-05-16", "cik": "0000794367"},
+          "purpose": "Test for absence of covenant-waiver disclosures (Calibration Heuristic 10)"
+        }
+      ]
+    },
+    {
+      "claim_id": "C6",
+      "category": "vendor_relationship",
+      "claim_text": "Macy's, Inc. operates as a major US department store carrying national apparel brands. As a multi-format retailer with $21.8B in net sales, M is expected to be a material wholesale customer for major apparel/consumer brands. ~$3.6B of other obligations (majority merchandise purchase obligations due in less than one year).",
+      "discriminative_features": [
+        "Counterparty-disclosure threshold test (Heuristic 7): if M is a material wholesale customer of HBI/LEVI/VFC/TPR, supplier 10-Ks should mention Macy's",
+        "ABSENCE of mention while M presents as major brand carrier would be a soft signal"
+      ],
+      "queries": [
+        {
+          "query_id": "C6.Q1",
+          "source": "edgar_fts.query_fulltext",
+          "kwargs": {"search_term": "Macy's", "cutoff_date": "2026-05-16", "cik": "0001359841", "forms": "10-K"},
+          "purpose": "Hanesbrands (HBI) 10-K: does it name Macy's as a top customer?"
+        },
+        {
+          "query_id": "C6.Q2",
+          "source": "edgar_fts.query_fulltext",
+          "kwargs": {"search_term": "Macy's", "cutoff_date": "2026-05-16", "cik": "0001116132", "forms": "10-K"},
+          "purpose": "Tapestry (TPR) 10-K: customer mention"
+        },
+        {
+          "query_id": "C6.Q3",
+          "source": "edgar_fts.query_fulltext",
+          "kwargs": {"search_term": "Macy's", "cutoff_date": "2026-05-16", "cik": "0000103379", "forms": "10-K"},
+          "purpose": "VF Corp (VFC) 10-K: customer mention"
+        }
+      ]
+    },
+    {
+      "claim_id": "C7",
+      "category": "physical_facility",
+      "claim_text": "Opened new China Grove, NC fulfillment/store replenishment center — 2,650K sq ft (largest single facility in network), leased, direct-to-customer. Described as 'state-of-the-art' with automation, robotics, and AI. Capital expenditures FY2025: $740M; expected FY2026: ~$800M, primarily focused on digital/technology and omni-channel.",
+      "discriminative_features": [
+        "Calibration Heuristic 3: announced (state-of-the-art) vs operational evidence; facility appears in Properties table as leased",
+        "Capex level (~3.4% of net sales) is moderate for retail transformation phase"
+      ],
+      "queries": [
+        {
+          "query_id": "C7.Q1",
+          "source": "edgar_fts.query_fulltext",
+          "kwargs": {"search_term": "China Grove", "cutoff_date": "2026-05-16"},
+          "purpose": "Independent corroboration of China Grove facility in any 10-K"
+        }
+      ]
+    },
+    {
+      "claim_id": "C8",
+      "category": "financial_distress",
+      "claim_text": "Real-estate monetization strategy continues. FY2025: $48M gains on sale of real estate (down from $144M in FY2024 and $61M in FY2023); $107M net proceeds from disposition of assets. Impairment, restructuring and other costs $230M in FY2025 (vs $171M in FY2024 and $1,027M in FY2023). $160M non-cash asset impairments primarily on non-go-forward locations; $47M restructuring/severance. Take-private overtures noted in cohort context as prior-cycle events.",
+      "discriminative_features": [
+        "Real-estate gains DECLINING — monetization slowing as productive parcels exhausted",
+        "Recurring impairments tied to non-go-forward stores = continued store-base contraction",
+        "Bold New Chapter is multi-year transformation; tests Heuristic 3 (announced vs operational)"
+      ],
+      "queries": [
+        {
+          "query_id": "C8.Q1",
+          "source": "edgar_fts.query_fulltext",
+          "kwargs": {"search_term": "Bold New Chapter", "cutoff_date": "2026-05-16"},
+          "purpose": "Cross-filer mentions of Macy's transformation plan branding"
+        }
+      ]
+    }
+  ]
+}

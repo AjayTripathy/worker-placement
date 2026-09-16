@@ -1,0 +1,114 @@
+{
+  "ticker": "MSEX",
+  "company": "Middlesex Water Company",
+  "cutoff": "2025-05-15",
+  "filing": "0001174947-25-000318_10K.txt",
+  "filing_date": "2025-03-11",
+  "cik": "0000066004",
+  "sector": "Utilities",
+  "industry": "Utilities - Regulated Water",
+  "group": "boring_middle",
+  "rfm_tuples": [
+    {
+      "claim_id": "C1",
+      "R": "10-K (FY2024) contains no 'going concern' or 'substantial doubt' language. Mortgage debt covenants: 'The Company is in compliance with all of its mortgage covenants and restrictions.' Q1 2025 10-Q reaffirms compliance with no covenant-stress disclosure.",
+      "f": "Mode A — scan 10-K/A and 10-Q text for 'going concern', 'substantial doubt', 'waiver', 'forbearance', 'breach'. Confirm covenant-compliance language carries forward.",
+      "M_source": "going_concern_local + self_text scan of 0001174947-25-000318 (10-K/A) and 0001174947-25-000677 (Q1 2025 10-Q)",
+      "M_value": "Zero hits for 'going concern' or 'substantial doubt' in either filing. Four mortgage-covenant references all state compliance. Lines of credit utilization $34M of $140M at 3/31/2025 (up from $23M at 12/31/2024), weighted average rate 5.45%.",
+      "severity": "PASS",
+      "interpretation": "No going-concern language. Mortgage covenants in compliance, liquidity headroom on $140M lines is intact. This is a regulated water utility with stable cash flow — the framework's top-priority distress filter does not fire."
+    },
+    {
+      "claim_id": "C2",
+      "R": "Implied claim — long-tenured auditor with no audit-relationship issues. 10-K/A Exhibit 23.1 lists 'Consent of Independent Registered Public Accounting Firm, Baker Tilly US, LLP' and the 10-K/A was filed specifically to add Baker Tilly's omitted conformed signature.",
+      "f": "Mode B — auditor_change_tracker: 5-year lookback for 8-K Item 4.01, check for Baker Tilly resignation/dismissal, reportable disagreements, or material-weakness disclosures.",
+      "M_source": "auditor_change_tracker (8-K Item 4.01 lookback 2020-05-16 to 2025-05-15)",
+      "M_value": "n_8k_item_401: 1; signal: UPGRADE_OR_LATERAL. 8-K filed 2025-03-04 (acc 0001174947-25-000269): Audit Committee DISMISSED Baker Tilly on 2025-02-28, effective 2025-03-03; appointed PricewaterhouseCoopers LLP (PwC, Big 4) effective same day. The 8-K discloses NO disagreements but explicitly reports prior material weaknesses in ICFR as of 12/31/2023: (i) ineffective IT general controls (user access + change management) and (ii) ineffective controls over income-tax accounting for a non-routine transaction. Company states material weaknesses were 'remediated in the third quarter of 2024'.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Mode B catch the 10-K narrative does not flag: auditor was dismissed less than one week before the original 10-K was filed (Baker Tilly out 3/3, 10-K filed 2/28), and the company filed the 10-K/A on 3/11 to fix Baker Tilly's missing signature. This is unusual choreography around an auditor change immediately after sign-off. Prior-year material weaknesses (IT general controls + non-routine tax accounting) are real ICFR red flags — claimed-remediated but not yet re-audited by the new firm (PwC's first audit is FY2025). The auditor swap is an upgrade in firm size but the timing/context is borderline."
+    },
+    {
+      "claim_id": "C3",
+      "R": "Implied claim — no material capital raise pending. The 10-K/A 'Sources of Liquidity' section discusses internally generated funds, $140M lines of credit, and the Investment Plan (DRIP). Q1 2025 10-Q filed 2025-05-01 makes no mention of an at-the-market equity program or new shelf registration.",
+      "f": "Mode B — search EDGAR for shelf filings (S-3), prospectus supplements, and Item 1.01 8-Ks filed BEFORE the 2025-05-15 cutoff that signal undisclosed dilution.",
+      "M_source": "edgar list_filings + 8-K body fetch (0001104659-25-047384)",
+      "M_value": "On 2025-05-12 (3 days before cutoff, 11 days after Q1 10-Q filing), MSEX filed an 8-K disclosing a $110.0 million ATM Equity Offering Sales Agreement with BofA Securities, Robert W. Baird, and Janney Montgomery Scott (2.0% commission). New S-3 shelf (333-287177) and prospectus supplement filed same day. Use of proceeds: capital expenditures, plant equipment, general corporate purposes. The 2024 10-K and 2025-05-01 Q1 10-Q contain zero references to 'ATM', 'at-the-market', 'Equity Sales Agreement', or '110 million' shelf size.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "interpretation": "Mode B catch the filings do not telegraph. A $110M ATM shelf is ~12% of the ~$907M public float (using YE2024 non-affiliate float per 10-K). For a 17.9M-share utility, that is meaningful overhead supply that the 10-K's 'Sources of Liquidity' section and Q1 10-Q materially under-emphasize. Filed 3 calendar days before the backtest cutoff — the timing means the equity supply is structurally present but not yet absorbed at pre-cutoff prices. Reads as 'we need balance-sheet capacity beyond DRIP for the $387M 2025-27 CapEx program' but the disclosure cadence (silent in 10-K and Q1 10-Q, then a $110M shelf with three underwriters on 11-day notice) is the kind of late-quarter capital action the framework flags."
+    },
+    {
+      "claim_id": "C4",
+      "R": "Implied claim — for a name down -16.6% pre-cutoff in a 'boring middle' utility, insiders should not be transacting in a manner correlated with capital-action timing. 10-K/A Item 9B states 'no director or officer of the Company adopted or terminated a Rule 10b5-1 trading arrangement during the three months ended December 31, 2024.'",
+      "f": "Mode B — insider_vs_calendar: enumerate Form 4 activity 12 months pre-cutoff, segregate code-S (open-market sale) from code-F (tax-withhold) and code-A (grant); flag clustering around capital-action or rate-event dates.",
+      "M_source": "insider_vs_calendar.query_insider_sales_near_budget_events(cik='0000066004', lookback_days=500, cutoff_date='2025-05-15')",
+      "M_value": "55 Form 4 filings in window; 29 sales total; 5 proximate to budget-calendar events; 5 unique owners proximate; signal: CLUSTERED_DISCRETIONARY. Top sales: CEO Nadine Duchemin-Leslie F (tax-withhold) 2475sh @ $58.03 on 2025-03-05 (~$144K); Director Dennis W. Doll S 4067sh @ $60.05 on 2025-03-21 (~$244K); Director Walter G. Reinhard S 300sh @ $64.41 on 2025-03-11 (~$19K); COO Gregory S. Sorensen F 846sh @ $54.84 on 2024-12-20; CCO Bernadette M. Sohler F (acquired) 2738sh on 2024-12-31. NO insider OPEN-MARKET PURCHASES (code P) appear in the proximate sample. Discretionary sales concentrated March 2025 (post-10-K, pre-ATM).",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "The budget-calendar overlay is the wrong validator for a regulated utility (program-exposure validators correctly do not fire), but the underlying pattern is informative: zero open-market insider buying through a -16.6% drawdown is a yellow flag for a 'dividend aristocrat since 1973' utility — historically a name where directors step in on weakness. The Doll S-sale on 3/21/2025 (47 days before the surprise $110M ATM) is the kind of timing that, while not provably informed, is structurally adjacent to the dilution event."
+    },
+    {
+      "claim_id": "C5",
+      "R": "The Company is a defendant in other lawsuits in the normal course of business. We believe the resolution of these pending claims and legal proceedings will not have a material adverse effect ... The Company does not believe that the Term Sheet [Vera et al. v. Middlesex / Lonsk et al. v. Middlesex PFOA class actions] and the anticipated Settlement Agreement, once executed, will have any material financial or operational impact to Middlesex.",
+      "f": "Mode B — for claimed-immaterial PFAS class-action settlement, verify (i) whether the Settlement Agreement was actually executed in Q1 2025 as promised, (ii) whether the magnitude of the 3M Settlement ($48.3M reclassification) is consistent with 'immaterial' for the parallel class actions, and (iii) whether insurance coverage is named.",
+      "M_source": "self_text 10-K Note + Q1 2025 10-Q legal proceedings section + 3M Settlement context",
+      "M_value": "Vera/Lonsk Term Sheet signed 2024-08-30; 10-K (filed 2025-02-28, period 12/31/2024) says Settlement Agreement 'expected to be completed in the first quarter of 2025'. Q1 2025 10-Q (filed 2025-05-01) does not affirmatively confirm a fully executed Settlement Agreement and does not disclose a dollar value, but reiterates the immateriality claim. The 3M PFAS recovery itself was $48.3M reclassified from Regulatory Liabilities to Contributions in Aid of Construction in 2024 — material in scale relative to MSEX's annual net income (~$32M-$44M range). MSEX did not name any insurance carrier as the funding source for the Vera/Lonsk settlement.",
+      "severity": "UNVERIFIABLE",
+      "interpretation": "The claim is internally consistent (small PFOA class with limited damages relative to the 3M-funded plant remediation) and management has been honest about the existence and stage of the litigation. But the dollar magnitude is undisclosed and the Q1 10-Q does not affirmatively confirm the 'completed in Q1 2025' timing promise made in the 10-K. Not provably underdelivering — but the implied claim ('immaterial') is not yet fully demonstrated in a hard number."
+    },
+    {
+      "claim_id": "C6",
+      "R": "We expect to spend approximately $387 million for capital projects through 2027 ... we use internally generated funds, short-term and long-term debt borrowings, proceeds from sales of common stock under the Investment Plan and, when market conditions are favorable, proceeds from sales to the public of our common stock.",
+      "f": "Mode B — cross-walk the $387M 2025-2027 CapEx plan vs current funding sources (operating cash flow $58.7M FY2024; $140M lines of credit with $23M drawn at YE24, $34M at 3/31/25; mortgage covenants restrict debt). Derive the implied external-capital ask.",
+      "M_source": "self_text 10-K MD&A + Q1 2025 10-Q + post-cutoff 8-K shelf",
+      "M_value": "$387M over 3 years = ~$129M/yr CapEx vs $58.7M FY2024 operating cash flow = $70M/yr funding gap. DRIP raised only ~$1.0M in FY2024. 2025-2027 maturity schedule on long-term debt is $7.7M / $7.5M / $7.3M — manageable. The 5/12/2025 $110M ATM shelf (claim C3) is sized exactly to close roughly one year of the funding gap. Q1 2025 net income $9.5M vs $10.7M prior-year Q1 (-11.5%), EPS $0.53 vs $0.60.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "The CapEx-plan disclosure is honest in numerator ($387M is stated) but the 10-K narrative under-emphasizes the equity-issuance dependency. Operating cash flow covers ~45% of planned CapEx; DRIP supplies a rounding error; mortgage covenants cap incremental secured debt. The post-cutoff $110M ATM is exactly the math the 10-K should have telegraphed more loudly. Q1 2025 earnings decline (-11.5% YoY) reduces the internal-funding contribution further. Honest about the spend, soft on the cap-structure implication."
+    },
+    {
+      "claim_id": "C7",
+      "R": "In April 2024, the USEPA finalized drinking water regulations for PFAS, establishing maximum contaminant levels (MCLs) ... Water systems have five years (by April 2029) to implement solutions that reduce Regulated PFAS if monitoring shows that drinking water levels exceed these MCLs.",
+      "f": "Mode B — verify whether the PFAS regulatory regime referenced in the 10-K is fully stable as of 2025-05-15 (i.e., not subject to pending challenges). EDGAR FTS for sector peers (American Water, California Water, Artesian) on PFAS compliance cost cross-checks.",
+      "M_source": "edgar_fts.query_fulltext + 10-K disclosure",
+      "M_value": "The 10-K's PFAS disclosure is the standard April-2024 USEPA framework. MSEX's specific exposure is the Park Avenue Plant (the one funded by the 3M Settlement). The 10-K does NOT quantify residual PFAS-related capex beyond what the 3M proceeds and approved rate-case recovery cover. PFOA-class settlement (Vera/Lonsk) is separate from the regulatory compliance cost. Industry-wide, the April 2024 MCLs were not yet litigated to a final position as of cutoff per the 10-K's own forward-looking language.",
+      "severity": "PASS",
+      "interpretation": "PFAS disclosure is comprehensive and the 3M Settlement / rate-case recovery framing is transparent. Residual exposure (other wellfields, MCL compliance beyond Park Avenue) is not separately quantified but is honestly flagged in risk factors. Not a hidden liability."
+    },
+    {
+      "claim_id": "C8",
+      "R": "Twin Lakes Utilities, Inc. (Twin Lakes) - Twin Lakes provides water services to approximately 115 residential customers in Shohola, Pennsylvania ... Following the Third Circuit Court's decision, Middlesex will not pursue further litigation in the federal courts and intends to submit the required escrow payment to complete the Receiver Utility's acquisition of the Twin Lakes system. The estimated loss recorded by the Company related to [Twin Lakes is...]",
+      "f": "Mode A — verify the Twin Lakes loss is fully recognized and no further contingent exposure remains.",
+      "M_source": "self_text 10-K + 10-K/A",
+      "M_value": "10-K discloses Middlesex has accepted the PAPUC forced-sale outcome (PA Receiver Utility takes Twin Lakes) and will submit escrow payment. Loss is recognized. 115 customers is de minimis relative to MSEX's 61,000 Middlesex + 62,000 Tidewater retail customer base (~0.09%).",
+      "severity": "PASS",
+      "interpretation": "Honestly disclosed, fully recognized loss on a tiny subsidiary. Resolved cleanly via the courts. No hidden contingent exposure."
+    },
+    {
+      "claim_id": "C9",
+      "R": "The approval by the NJBPU in February 2024 of the negotiated settlement of the Middlesex 2023 base rate case is expected to increase annual operating revenues by $15.4 million, effective March 1, 2024 ... return on common equity of 9.6% ... Under the terms of the Foundational Filing, the Company is required to file a base rate petition before November 2026.",
+      "f": "Mode B — verify the rate-case-recovery claim by tracking actual FY2024 operating revenue growth and the 9.6% authorized ROE vs realized ROE.",
+      "M_source": "self_text 10-K MD&A + 10-Q",
+      "M_value": "FY2024 operating revenues: increased $25.6M YoY (10-K MD&A), consistent with the $15.4M/yr base-rate-case uplift plus DSIC roll-up and consumption. Net income $44.4M FY2024 vs $31.6M FY2023 — material rebound aided by 3M Settlement recoveries (carrying-cost component). Q1 2025 net income $9.5M, annualized run-rate ~$38M, below the $44.4M FY2024 result. Q1 2025 EPS $0.53 vs $0.60 prior-year Q1 (-11.5%).",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "interpretation": "Rate-case revenue claim verifies cleanly in absolute terms ($25.6M revenue growth contains the $15.4M tariff uplift). But the implied earnings durability is softening: Q1 2025 EPS is down 11.5% YoY despite the full annualized tariff being in effect, suggesting cost pressure (interest expense from the climbing line-of-credit balance + non-recurring 3M-recovery tailwind tapering). Rate case is real and large; earnings translation is incrementally underwhelming."
+    },
+    {
+      "claim_id": "C10",
+      "R": "We have paid dividends on our common stock each year since 1912 and have increased the amount of dividends paid each year since 1973. Our earnings, financial condition, capital requirements, applicable regulations and other factors ... will determine the amount of future dividends.",
+      "f": "Mode B — derive whether the dividend-aristocrat claim is sustainable given the funding gap (claim C6), the post-cutoff dilution (claim C3), and the Q1 2025 earnings decline (claim C9).",
+      "M_source": "self_text 10-K + Q1 10-Q + supplemental analysis",
+      "M_value": "FY2024 net income $44.4M on 17.89M diluted shares = $2.48 EPS; current quarterly dividend $0.33/sh = $1.32 annual = ~53% payout ratio on FY2024. On Q1 2025 annualized EPS of $2.12, payout ratio rises to ~62%. With $387M CapEx through 2027 and Q1 2025 financing cash flow already showing increased credit-line drawdown, dividend continuity is funded out of fresh equity/debt, not free cash flow. The 51-year consecutive-increase streak is honestly disclosed but operates as a constraint, not a buffer.",
+      "severity": "PASS",
+      "interpretation": "The historical dividend record is true; the forward sustainability is reasonable but structurally dependent on the ATM equity program disclosed 3 days before cutoff. This is honest disclosure with no claim drift — the company is not concealing the funding mechanics, just under-emphasizing the equity-issuance leg."
+    }
+  ],
+  "supplemental_signals": {
+    "going_concern": "NO_GOING_CONCERN — zero matches in 10-K/A or Q1 2025 10-Q",
+    "auditor_change": "Baker Tilly dismissed 2025-02-28 (effective 3/3/2025), replaced by PwC. Prior FY2023 ICFR material weaknesses (IT general controls + non-routine tax accounting) disclosed as remediated Q3 2024 but not yet re-audited by PwC.",
+    "insider_signal": "CLUSTERED_DISCRETIONARY per insider_vs_calendar; 5 sales by 5 unique owners proximate to Mar 2025 budget events; ZERO open-market purchases through the -16.6% drawdown",
+    "capital_action_late_disclosed": "$110M ATM Equity Sales Agreement filed 2025-05-12 (3 days pre-cutoff), not disclosed in 10-K (2/28) or Q1 10-Q (5/1)",
+    "earnings_trajectory": "FY2024 EPS $2.48 (rebound year) -> Q1 2025 EPS $0.53 vs $0.60 prior-year Q1 (-11.5%)",
+    "covenant_status": "In compliance with all mortgage covenants; lines of credit $34M of $140M drawn at 3/31/2025",
+    "10b5_1_arrangements": "10-K Item 9B states no director/officer adopted or terminated a 10b5-1 plan during Q4 2024"
+  },
+  "summary": "MSEX is structurally honest disclosure with three Mode B catches that the 10-K narrative does not telegraph: (1) a $110M ATM equity shelf filed 3 days before cutoff that neither the 10-K nor the 5/1 Q1 10-Q hints at, sized at ~12% of public float; (2) an auditor swap (Baker Tilly dismissed, PwC appointed) executed days before the original 10-K filing, with the 10-K/A filed two weeks later to retrofit Baker Tilly's omitted signature — coupled with prior-year ICFR material weaknesses claimed-remediated but not yet re-audited; (3) the $387M 2025-2027 CapEx plan implies ~$70M/yr external funding gap, with zero insider buying through a -16.6% drawdown and Q1 2025 EPS already down 11.5% YoY. The dividend-aristocrat status and rate-case recovery are real, but earnings durability and dilution overhang are softer than the narrative suggests. NEUTRAL with a tilt toward SHORT — not a 'lying detector' fire, but the capital-action choreography is the framework's signature pattern.",
+  "composite": 0.55
+}

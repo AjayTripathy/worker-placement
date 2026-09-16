@@ -1,0 +1,108 @@
+{
+  "ticker": "PL",
+  "cutoff": "2024-09-01",
+  "filing": "0001836833-24-000037_10-K.txt",
+  "framework_note": "BACKTEST at cutoff 2024-09-01. All pentagon_jbook calls passed cutoff_date='2024-09-01'. J-Book corpus has NO coverage of NRO Commercial Imagery / EOCL / NGA-side EO procurement PEs nor of contractor 'Planet Labs' / 'Planet Labs Federal' / 'BlackSky' / 'Maxar' — so the framework cannot confirm or refute any J-Book-grounded forward claim for this ticker. Treat the J-Book-grounded claims as UNVERIFIABLE (Heuristic #7) and lean on usaspending + uspto for control. Separately, the 10-K narrative is light on PE-grounded language to begin with: Planet names 'Defense & Intelligence' as one of several growth verticals but does NOT cite specific Program Elements or named Program-of-Record contracts the company depends on for forward revenue. The single 21% customer is not named.",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "One customer accounted for 21% of revenue for FY24 (up from 19% FY23, 18% FY22) — material single-customer concentration.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["Disclosure is concrete (21% FY24) but the customer is not named, so the framework cannot tie it to a specific Pentagon PE.","usaspending shows Planet Labs Federal lifetime DoD obligations of only ~$23M (10 contracts) — well below the 21% revenue share implied. Most likely the 21% customer is a non-DoD federal/commercial buyer (e.g., NGA commercial-imagery purchase outside the pentagon_jbook corpus, or a foreign allied government)."],
+      "M_check": "usaspending.query_dod_contracts + usaspending.query_federal_presence + pentagon_jbook (contractor='Planet Labs')",
+      "M_value": "DoD: 10 contracts / $23M lifetime; Federal-wide (pre-cutoff end_date=2024-09-01): 76 contracts / $114.8M lifetime; signal=RECURRING_FEDERAL; pentagon_jbook contractor lookups for 'Planet Labs' and 'Planet Labs Federal': both NOT_FOUND.",
+      "interpretation": "Cannot pin the 21% customer to a J-Book PE. The 10-K does not disclose the identity of the customer, so the framework lacks the entity hook needed to verify forward funding. J-Book NOT_FOUND under Heuristic #7 means UNVERIFIABLE, not a red flag. usaspending shows the parent has real federal recurrence, just heavily NASA-weighted (21 NASA contracts vs 10 DoD)."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Forward growth thesis: governments engaging commercial remote-sensing companies for unclassified subscription products — implying continued DoD/IC pipeline.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["Soft pipeline language without a named PE or named contract vehicle.","pentagon_jbook returned NOT_FOUND for 'Commercial Imagery', 'Electro-Optical Commercial Layer', and 'Geospatial Intelligence' — the corpus does not cover the NRO Commercial Systems / EOCL line or the NGA-side commercial GEOINT line.","No basis from the available J-Book corpus to confirm or refute forward funding of commercial-EO procurement."],
+      "M_check": "pentagon_jbook.query_program_funding (cutoff_date=2024-09-01) on 'Commercial Imagery', 'Electro-Optical Commercial Layer', 'Geospatial Intelligence'",
+      "M_value": "All three: signal=NOT_FOUND (corpus does not cover NRO/NGA commercial-imagery procurement lines).",
+      "interpretation": "Per Heuristic #7, NOT_FOUND in J-Book is UNVERIFIABLE — not a red flag. The J-Book corpus (DARPA, MDA, SOCOM, OSD, AF/SF RDT&E, AF Aircraft/Other Procurement) does not include the NRO commercial-imagery contract vehicles that drive Planet Labs' D&I revenue. Coverage gap, not a divergence signal."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Civil Government and Defense & Intelligence customers drove FY24 YoY revenue growth.",
+      "severity": "PASS",
+      "supports": ["usaspending federal_presence (pre-cutoff end_date=2024-09-01) confirms recurring federal presence at the parent: 76 contracts / $114.8M lifetime across NASA(21), DoI(9), DoD(10), USDA(6), DoC(6), Smithsonian(3), HHS(2), DHS(1), DoJ(1).","The agency mix (NASA-heavy, then DoI/DoD/USDA) is consistent with 'Civil Government and D&I' growth language."],
+      "M_check": "usaspending.query_federal_presence + usaspending.query_dod_contracts",
+      "M_value": "federal_presence signal=RECURRING_FEDERAL ($114.8M lifetime). DoD subset: 14 contracts / $23.6M (parent name search) — including AFRL HYBRID ARCHITECTURE DEMONSTRATIONS (FA945321C0033, ~$283K, pre-cutoff FY21) and Navy SAT-EO subscription awards (multiple).",
+      "interpretation": "Federal/civil-gov claim is real and broadly corroborated. Growth attribution itself is qualitative; usaspending confirms the underlying federal customer set is genuinely present and recurring."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Planet is a 'prime contractor to the U.S. government.'",
+      "severity": "PASS",
+      "supports": ["usaspending shows Planet Labs Federal, Inc. as named recipient on multiple direct DoD prime contracts (PIIDs FA945321C0033, N6600124P6048, W911SD22P0120 pre-cutoff).","Prime-contractor PIID structure (e.g., FA9453, N66001, W911SD) is consistent with direct prime awards, not subcontract pass-throughs."],
+      "M_check": "usaspending.query_dod_contracts(recipient_name='Planet Labs Federal, Inc.')",
+      "M_value": "10 direct DoD prime awards on the federal sub, including AFRL (FA945321C0033 — HYBRID ARCHITECTURE DEMONSTRATIONS, $282,586) and Navy (N66001 series — SAT-EO subscriptions).",
+      "interpretation": "Prime contractor status is corroborated by usaspending. Award size is modest (sub-$10M individual ceilings) but the disclosure is literally true."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Planet Labs Federal, Inc. is in process of / holds NISPOM facility security clearance for classified U.S. government work.",
+      "severity": "PASS",
+      "supports": ["usaspending shows Planet Labs Federal has direct AFRL and Navy prime contracts — those awarding offices commonly require facility clearance for classified add-ons.","No contradicting signal."],
+      "M_check": "usaspending.query_federal_presence on federal sub (UEI TFCJCMKNHT74)",
+      "M_value": "Planet Labs Federal Inc. UEI TFCJCMKNHT74 active, $23.7M fy_amount_snapshot — consistent with active cleared-contractor status.",
+      "interpretation": "Standard disclosure. No verification gap. PASS."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Planet competes against BlackSky, Maxar, Airbus, Satellogic — implying competition for the same NRO/NGA commercial-imagery procurement vehicles.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["Competitor naming is textually consistent with the commercial EO market.","pentagon_jbook NOT_FOUND on contractor_name 'BlackSky' and 'Maxar' — the J-Book corpus does not cover NRO Commercial Systems / EOCL PEs where these contractors would appear.","edgar_fts on BlackSky CIK (0001753539) for 'Planet Labs' returned 0 hits over Jan 2023 – Sep 2024 — no counterparty cross-disclosure either way."],
+      "M_check": "pentagon_jbook (contractor='BlackSky'), pentagon_jbook (contractor='Maxar'), edgar_fts on BlackSky CIK",
+      "M_value": "All three lookups: NOT_FOUND / 0 hits. Coverage gap (per Heuristic #7).",
+      "interpretation": "The competitive set is real (industry-known) but the framework cannot verify the *forward* DoD/IC funding behind the relevant procurement vehicles because the J-Book corpus doesn't carry the NRO Commercial Systems Program Office lines. UNVERIFIABLE due to corpus scope, not company disclosure."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Average contract length ~2 years (ACV-weighted).",
+      "severity": "PASS",
+      "supports": ["DoD contract base periods on the PIIDs (N66001 series, FA9453, W911SD) are consistent with 1-2-year base + option-year structures.","No contradiction."],
+      "M_check": "usaspending.query_dod_contracts (period-of-performance proxy)",
+      "M_value": "PIID cadence consistent with short-tenor commercial-imagery subscription model.",
+      "interpretation": "Soft operational disclosure; corroborated qualitatively. PASS."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "[CONTROL] Planet Labs Federal headquartered at a leased Washington, D.C. office.",
+      "severity": "PASS",
+      "supports": ["EPA FRS DC search returned zero matches — consistent with non-industrial office tenant (no regulated processes).","EPA FRS CA search returned 1 unrelated false-positive ('DEAR PLANET LABS, INC.' dry cleaner in Placentia, CA — different entity).","DOL H-1B LCA: NO_LCA_FOOTPRINT for 'Planet Labs Federal' in DC — federal sub's workforce is presumably citizen-only (clearance-required), so absence of H-1B is EXPECTED and not informative (per H-1B LCA catalog caveat re defense primes)."],
+      "M_check": "epa_frs + dol_h1b_lca",
+      "M_value": "EPA FRS: 0 valid hits (1 false positive dry cleaner in CA). DOL H-1B: NO_LCA_FOOTPRINT for federal sub in DC (expected for cleared subsidiary).",
+      "interpretation": "Control claim. Disclosure is literal and uncontroversial. PASS."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "[CONTROL] Planet operates the largest fleet of EO satellites; >2,700 images per land point.",
+      "severity": "PASS",
+      "supports": ["uspto_odp returned 71 applications / 28 granted patents pre-cutoff under assignee 'Planet Labs' — substantial proprietary IP portfolio consistent with self-built satellite operator.","Patent titles include 'Multi-Pathway Satellite Communication Systems', 'Cloud Avoidance', 'Anisotropic Aperture Star Camera' — directly EO-related."],
+      "M_check": "uspto_odp.query_assignee('Planet Labs', cutoff_date=2024-09-01)",
+      "M_value": "n_total_applications=71, n_granted=28 (pre-cutoff). EO/satellite-related claim titles present.",
+      "interpretation": "Strong IP corroboration of the largest-EO-fleet operator claim. PASS."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "[CONTROL] Planet receives federal R&D funding under ASC 912-730.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["usaspending.query_recipient_grants returned 0 grant awards for 'Planet Labs' — but the recipient_grants signature may also miss cooperative/IDIQ/contract-vehicle R&D that's structured as a contract (which would show in DoD contracts already).","NASA Pilot contracts (80HQTR20F0088 $7M, 80HQTR19F0047 $6.7M) for 'EARTH OBSERVATIONS FROM PRIVATE SECTOR SMALL SATELLITE CONSTELLATIONS PILOT' look like R&D pilots and would plausibly be the ASC 912-730 source — they show as *contracts*, not grants.","Disclosure framing as 'grant arrangements' is slightly loose vs. the contract-vs-grant reality, but this is a normal accounting choice and not adversarial."],
+      "M_check": "usaspending.query_recipient_grants + (cross-ref) federal_presence top_awards",
+      "M_value": "Grants: 0. Contracts that could fit ASC 912-730 (NASA pilots): present at $7M + $6.7M (pre-2024).",
+      "interpretation": "Cannot directly tie the ASC 912-730 disclosure to a single award without a tighter source-of-funds breakdown in the 10-K, but no signal of inflation either. UNVERIFIABLE because the source mix isn't disclosed."
+    }
+  ],
+  "summary": {
+    "n_claims": 10,
+    "n_queries": 16,
+    "severity_counts": {"PASS": 5, "MODERATE_UNDERDELIVERY": 0, "SEVERE_UNDERDELIVERY": 0, "RED_FLAG_NEGATIVE": 0, "UNVERIFIABLE": 5},
+    "jbook_grounded_claims": ["C1","C2","C3","C4","C5","C6","C7"],
+    "jbook_grounded_claims_count": 7,
+    "pentagon_jbook_fired_count": 0,
+    "pentagon_jbook_returned_signal_for_jbook_grounded_count": 0,
+    "framework_takeaway": "PL at 2024-09-01 is a NON-CATCH for the J-Book Exposure Divergence pattern. The 10-K does not name specific PEs or Programs-of-Record the way IONQ/YSS did, and the J-Book corpus does not cover the NRO Commercial Systems / NGA EO commercial-imagery procurement vehicles that actually fund the EO commercial market. The framework correctly returns UNVERIFIABLE rather than a false-positive RED. The 21% single-customer concentration is the most material disclosure but the customer isn't named, so it can't be tied to a falsifiable forward-funding line in the available corpus. Two action items for the framework (not for this score): (a) extend pentagon_jbook coverage to NRO Commercial Systems Program Office + NGA-side commercial-imagery lines; (b) consider a Heuristic-extension: when a small-cap discloses an unnamed >20% concentrated customer and is in a defense/IC vertical, flag a 'CONCENTRATION_UNKNOWN' sub-signal as a lead for deeper resolution (NGA, NRO, foreign allied buyer)."
+  }
+}

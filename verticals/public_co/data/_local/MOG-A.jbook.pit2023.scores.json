@@ -1,0 +1,95 @@
+{
+  "ticker": "MOG-A",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Aircraft Controls' military OEM programs are anchored on the F-35 program; F-35 timing caused a $29M sales decrease in FY2022.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["pentagon_jbook returned F-35 C2D2 (PE 0604840F) and F-35 Squadrons (PE 0207142F) — both RDT&E operational-sustainment PEs, NOT_FOUND_IN_TIMERANGE through cutoff (only FY2026 history rows present). The procurement P-40 line for F-35A/B/C is not in the v1 corpus.", "usaspending shows Moog Military Aircraft LLC actively contracted on multiple actuator awards through Department of Defense — supports the customer-of-record claim."],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='F-35', cutoff_date='2023-01-15')",
+      "M_value": "signal=NOT_FOUND_IN_TIMERANGE; primary_match=F-35 C2D2 / PE 0604840F; no funded history rows ≤ FY2023 in v1 corpus",
+      "interpretation": "Per heuristic 7, NOT_FOUND_IN_TIMERANGE for a major procurement program reflects v1 J-Book corpus coverage gap (the corpus is 410 RDT&E + procurement PEs; F-35A/B/C P-40 line is not seeded). The claim is well-grounded in PIT reality but the framework cannot independently verify forward funding from the available J-Book corpus. usaspending crosscheck PASSES — Moog is an actual F-35 / DoD contractor."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "F-18 aftermarket spares/repair is a material revenue line; lower F-18 orders pressured FY2022.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["F-18 / F/A-18 not present in J-Book v1 corpus (n_matches=0 for both spellings)."],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='F-18'/'F/A-18', cutoff_date='2023-01-15')",
+      "M_value": "signal=NOT_FOUND (no entries)",
+      "interpretation": "Corpus gap for F/A-18 Super Hornet, which is in Navy P-40 procurement. By PIT 2023, Super Hornet production was winding down (final block buys), so a J-Book check could in principle support a FUNDED_SHRINKING signal. Without corpus coverage, marked UNVERIFIABLE per heuristic 7. Note: aftermarket revenue does NOT require new procurement funding — installed-base spares are O&M funded — so even a 'procurement shrinking' signal would only weakly map to Moog's spares claim."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "V-22 spares/repair activity provides material ongoing aftermarket revenue.",
+      "severity": "PASS",
+      "supports": ["pentagon_jbook matched CV-22 (PE 0401318F, Air Force RDT&E Vol IV) — NOT_FOUND_IN_TIMERANGE in v1 corpus (rows only for FY2026). usaspending confirms Moog Military Aircraft LLC has the largest single award in our scan ($43.3M Award ID N0038325CC001) explicitly described 'PROCUREMENT OF ACTUATOR,ELECTRO-ME IN SUPPORT OF V-22 PLATFORM', plus multiple repeat V-22 actuator-repair awards (N0038319FP900 'V-22 ACUTUATOR REPAIRS')."],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='V-22') + usaspending.query_dod_contracts(recipient_name='Moog')",
+      "M_value": "pentagon_jbook signal=NOT_FOUND_IN_TIMERANGE (CV-22 PE 0401318F); usaspending n_awards=4224, top awards include multiple V-22 actuator awards",
+      "interpretation": "While J-Book corpus does not capture V-22 procurement funding history pre-cutoff, the usaspending crosscheck strongly corroborates the V-22 aftermarket revenue claim — Moog Military Aircraft LLC has been receiving regular V-22 actuator procurement and repair awards through the cutoff window. Treat as PASS."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "F-15 program (legacy) provides aftermarket spares/repair revenue that offsets F-18 weakness.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["pentagon_jbook matched the legacy F-15 P-40 procurement line (F01500) with signal UNFUNDED_TWO_PLUS_YEARS — history rows show FY2008=$0M and FY2023=$0M for the legacy F-15 production line. Companion matches: F-15 EPAWSS (PE 0207171F), F-15E Squadrons (PE 0207134F), F-15EX (PE 0207146F) all NOT_FOUND_IN_TIMERANGE in v1 corpus."],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='F-15', cutoff_date='2023-01-15')",
+      "M_value": "primary_match=F-15 (P-40 line F01500), signal=UNFUNDED_TWO_PLUS_YEARS, n_consecutive_unfunded=2 (FY2008, FY2023 both $0M)",
+      "interpretation": "The legacy F-15 procurement line is structurally zeroed by the cutoff (the active production program is F-15EX, a replacement variant — heuristic 3 reorganization caveat). Moog's claim is about aftermarket spares & repair on the installed F-15 fleet, which is O&M-funded (not P-40), so the strict materiality test (heuristic 2) is weak — Moog's aftermarket continues independent of new production. Downgrade SEVERE/RED to MODERATE_UNDERDELIVERY: forward growth tied to F-15 new-build is structurally constrained, but spares-and-repair on installed fleet is a separate revenue stream not directly tested by the J-Book signal."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "RIwP turret program is the Space and Defense Controls FY2022 defense growth driver ($69M sales increase from production ramp); implies sustainable forward production.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["pentagon_jbook returned NOT_FOUND for both 'RIwP' and 'Reconfigurable Integrated' queries — the Stryker-related turret line is not in v1 corpus."],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='RIwP' / 'Reconfigurable Integrated', cutoff_date='2023-01-15')",
+      "M_value": "signal=NOT_FOUND (no matches in J-Book corpus)",
+      "interpretation": "Corpus gap. The RIwP turret is a real Army platform but the v1 J-Book index does not include the relevant Army procurement / RDT&E PE. Per heuristic 7, mark UNVERIFIABLE rather than red-flag. Coverage gap noted for future extension."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Space-market growth includes hypersonic applications, although hypersonic development is winding down and legacy launch vehicle sales are lower.",
+      "severity": "PASS",
+      "supports": ["pentagon_jbook matched Hypersonic Defense (MDA PE 0604181C), Hypersonics Prototyping (AF PE 0604033F), and Hypersonics Prototyping - HACM (PE 0604183F) — all NOT_FOUND_IN_TIMERANGE for ≤2023 in v1 corpus. Moog itself already disclosed the wind-down in this filing."],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='hypersonic', cutoff_date='2023-01-15')",
+      "M_value": "n_matches=3 (Hypersonic Defense / Hypersonics Prototyping / HACM); all NOT_FOUND_IN_TIMERANGE in v1 corpus pre-cutoff",
+      "interpretation": "Moog itself disclosed hypersonic wind-down as a headwind — this is honest disclosure, not a divergence pattern. PASS (no claim of forward hypersonic growth to verify against)."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Government contracts = 42% of FY2022 sales; primarily Aircraft Controls and Space and Defense Controls segments.",
+      "severity": "PASS",
+      "supports": ["pentagon_jbook.query_program_funding(contractor_name='Moog') returned 0 matches in by_entity index — Moog is not listed as primary contractor on any indexed PE (consistent with Tier-2 supplier role). usaspending shows 4,224 DoD awards totaling $404.5M, with the recipient broken across Moog Inc, Moog Military Aircraft LLC, and other subs — corroborates the 42% government-revenue concentration claim at order of magnitude."],
+      "M_check": "pentagon_jbook.query_program_funding(contractor_name='Moog') + usaspending.query_dod_contracts(recipient_name='Moog')",
+      "M_value": "pentagon_jbook signal=NOT_FOUND (0 primary-contractor matches — consistent with Tier-2 status); usaspending n_awards=4224, total_amount=$404M",
+      "interpretation": "The J-Book by-entity index doesn't surface Moog because the v1 corpus only tracks PRIME contractors (Lockheed/Boeing/Northrop), not Tier-2 actuator/control suppliers. usaspending strongly corroborates the 42% government-share claim. PASS."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "$2.3B 12-month backlog and $5.2B total backlog as of October 1, 2022.",
+      "severity": "PASS",
+      "supports": ["Internal consistency: 12-month backlog growth FY2020→FY2022 ($1.5B → $1.7B → $2.1B → $2.3B) is plausible and aligns with stated recovery in commercial aircraft programs. No J-Book check applicable (aggregate backlog claim, not program-specific)."],
+      "M_check": "n/a (aggregate backlog, no program-specific verifier)",
+      "M_value": "n/a",
+      "interpretation": "Non-J-Book claim included as a control. Aggregate consistency check passes; no PE-level divergence to test against."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "Boeing = 11% and Lockheed Martin = 9% of FY2022 sales.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["edgar_fts.query_fulltext for 'Moog' in Boeing 10-Ks (CIK 0000012927) and Lockheed 10-Ks (CIK 0000936468) up to cutoff returned 0 hits in both cases — primes do not name Tier-2 suppliers in 10-K disclosures. usaspending confirms Moog has substantial DoD-prime supply relationships."],
+      "M_check": "edgar_fts.query_fulltext(search_term='Moog', cik=BA/LMT, form_type='10-K', cutoff_date='2023-01-15')",
+      "M_value": "Boeing total_hits=0; LMT total_hits=0",
+      "interpretation": "Counterparty disclosure asymmetry — primes do not disclose Tier-2 suppliers by name, so absence of mentions in BA/LMT 10-Ks is expected and not disconfirmatory. Mark UNVERIFIABLE on the strict counterparty test; the underlying claim remains well-grounded through usaspending."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "Acquired TEAM Accessories Limited on Feb 21, 2022 ($19.7M total / $12.3M net assets).",
+      "severity": "PASS",
+      "supports": ["Disclosed and quantified inside the filing itself; non-J-Book control claim included to exercise the non-DoD verifier path."],
+      "M_check": "n/a (audit-disclosed acquisition; no J-Book linkage)",
+      "M_value": "n/a",
+      "interpretation": "Bolt-on acquisition is small (<1% of revenue), audit-reviewed, and not connected to a J-Book pattern. Control claim — PASS."
+    }
+  ]
+}

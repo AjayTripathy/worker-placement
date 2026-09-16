@@ -1,0 +1,81 @@
+{
+  "ticker": "WWD",
+  "cutoff": "2026-05-20",
+  "filing": "0001193125-25-296204_10-K.txt",
+  "filing_date": "2025-11-25",
+  "filing_age_days": 176,
+  "scores": [
+    {
+      "claim_id": "WWD-1",
+      "claim_text": "Significant content on Blackhawk/Apache, F-35/F-15 fighter jets, smart defense weapons.",
+      "severity": "PASS",
+      "supports": "Mode A: usaspending.query_dod_contracts(recipient_name='Woodward') -> 2,398 awards totaling $274.4M; top awards include explicit UH-60 Black Hawk common fuel control / common hydro-mechanical unit overhaul work (W58RGZ20D0011 IDIQ, multiple task orders W58RGZ24F0248 $12.4M, W58RGZ23F0150 $11.7M, W58RGZ20F0161 $12.2M, W58RGZ14D0148 $15.2M & $14.6M) and Navy fuel control hardware (SPRRA124F0058 $19.4M, N00383 IDIQs to Woodward HRT). Mode A2: query_recipient_contracts(Woodward, Inc.) -> 924 awards / $186.5M (same NSN family 2915-01-587-7242 'fuel control, main, turbine engine'). The naming of Black Hawk specifically and presence of turbine fuel-control NSNs is consistent with the disclosed propulsion-controls/actuation defense thesis.",
+      "M_check": "usaspending.query_dod_contracts + query_recipient_contracts",
+      "M_value": "2398 DoD awards / $274.4M; 924 recipient-named awards / $186.5M; explicit Black Hawk fuel-control task orders.",
+      "interpretation": "Defense customer claim is corroborated by registry."
+    },
+    {
+      "claim_id": "WWD-2",
+      "claim_text": "Operates a joint venture with GE Aerospace.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": "Mode B: edgar_fts.query_fulltext(search_term='Woodward', cik='0000040545' [GE / GE Aerospace], cutoff_date='2026-05-20') -> 0 total hits. The JV (historically: EGT — Engine Alliance / similar JV referenced repeatedly in Woodward's 10-K) is not surfaced by full-text search of GE's filings under the 'Woodward' search term at this CIK. Counterparty-disclosure threshold heuristic 7: GE Aerospace is large; the JV is repeatedly highlighted in Woodward's forward-looking statements ('plans and expectations relating to the performance of our joint venture with GE Aerospace'), and is a material item for Woodward. Zero counterparty hits on a JV name search is mildly suspect, but EDGAR FTS at this CIK may not cover GE Aerospace's post-spin filings (GE Aerospace's CIK lineage may be split between legacy GE and a newer registrant). Calibrated to MOD rather than SEVE given likely CIK-naming-coverage issue.",
+      "M_check": "edgar_fts.query_fulltext(cik=GE_AEROSPACE)",
+      "M_value": "0 hits",
+      "interpretation": "Counterparty disclosure search returned zero; calibrated to MOD due to GE Aerospace CIK-lineage ambiguity (legacy GE CIK 0000040545 may not capture post-2024 spinout filings)."
+    },
+    {
+      "claim_id": "WWD-3",
+      "claim_text": "Acquired the Safran Electronics & Defense electromechanical actuation business (FY2025).",
+      "severity": "PASS",
+      "supports": "Mode B: acq_coherence.score_acquisition_coherence(parent_thesis='propulsion controls and actuation for aerospace/defense engines', acquisitions=[Safran E&D electromechanical actuation]) -> coherence_score=0.85, category=high_coherence, signal=COHERENT_ROLLUP, is_revenue_synthetic=false. LLM reasoning: 'direct vertical extension of Woodward's core propulsion controls and actuation thesis—same aerospace/defense end-market, same actuation technology stack, high complementarity'. This is exactly the kind of bolt-on a real propulsion-controls company would make; no rollup-distraction signal.",
+      "M_check": "acq_coherence.score_acquisition_coherence (LLM)",
+      "M_value": "coherence_score=0.85, signal=COHERENT_ROLLUP",
+      "interpretation": "Acquisition is strategically coherent with the stated thesis; not a synthetic-revenue rollup."
+    },
+    {
+      "claim_id": "WWD-4",
+      "claim_text": "Planned precision manufacturing facility in Greer, South Carolina (Spartanburg County), operational 2027.",
+      "severity": "UNVERIFIABLE",
+      "supports": "Mode A: epa_frs.query_facilities(facility_name='Woodward', state_abbr='SC') -> 12 hits, none currently registered to Woodward, Inc. operations in Spartanburg County for Greer (the closest match 'STOWE WOODWARD INC XERIUM INC' is unrelated Xerium subsidiary). This is a *planned* facility (operational 2027), so absence from EPA FRS is expected and not a contradiction (calibration heuristic 3 — planned/to-be-delivered claims not red-flagged). Tracked but not penalized.",
+      "M_check": "epa_frs.query_facilities(SC)",
+      "M_value": "12 unrelated SC facilities; no Woodward Greer site (expected — site not yet built).",
+      "interpretation": "Planned site; pre-operational. Out of scope for current EPA FRS verification."
+    },
+    {
+      "claim_id": "WWD-5",
+      "claim_text": "Patent estate in fuel/combustion/actuation/motion control technologies as a 155-year-old propulsion controls specialist.",
+      "severity": "PASS",
+      "supports": "Mode A: uspto_odp.query_assignee(assignee_name='Woodward, Inc.', cutoff_date='2026-05-20') -> n_total_applications=697, n_granted=251, total_granted_patents_pre_cutoff=251. Recent applications include 'GEAR DISCONNECT MECHANISM FOR LANDING GEAR ACTUATOR EMERGENCY DEPLOYMENT', 'Dual-Parallel Actuator Piston Interface', 'BUTTERFLY VALVE ASSEMBLIES', 'HYDRAULIC FORCE FIGHT MITIGATION' — all directly in claimed categories (actuation, valves, hydraulics). Heuristic 8: PASS if n_granted >= 5 with claimed-category hit; here n_granted=251 with multiple actuation/valve hits. Mode B: query_assignee('Woodward Governor') -> 30 historical applications (legacy entity), 0 granted (older filings, mostly abandoned/PCT), consistent with active assignee being 'Woodward, Inc.' post-2010 rebrand.",
+      "M_check": "uspto_odp.query_assignee (Woodward, Inc.) and (Woodward Governor)",
+      "M_value": "251 granted patents under Woodward, Inc.; legacy Woodward Governor applications mostly abandoned PCT filings.",
+      "interpretation": "IP estate corroborates the propulsion controls / actuation thesis; deep, claimed-category hits."
+    },
+    {
+      "claim_id": "WWD-6",
+      "claim_text": "Top 5 customers = ~36% of FY25 net sales; no single customer >10%. Should appear in primes' filings.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": "Mode B: edgar_fts.query_fulltext(search_term='Woodward', cik='0000012927' [Boeing], cutoff_date='2026-05-20') -> 0 hits. cik='0000101829' [United Technologies / Raytheon legacy] -> 1 hit (2019-10-02 8-K). Boeing's filings show 0 textual matches for 'Woodward' under that CIK; Raytheon legacy returns one stale 2019 reference. Calibration heuristic 7: per-customer Woodward revenue is sub-10% (company explicitly states 'no customers >= 10%'), so individual prime concentration sits below typical sub-tier disclosure thresholds for the prime. Therefore zero/sparse counterparty mentions is consistent with sub-threshold concentration, NOT a contradiction. However Mode B did not affirmatively identify Customer A/B/C/D/E from usaspending alone (DoD share is large but a single named prime is not isolable as a top-5 customer). Calibrated MOD because the unnamed customers remain unidentified and counterparty FTS is silent.",
+      "M_check": "edgar_fts.query_fulltext on Boeing, Raytheon (CIK 0000101829); usaspending DoD recipient breakdown",
+      "M_value": "Boeing 0 hits; Raytheon/UTC 1 stale hit (2019); DoD obligations $274M total but not concentrated on a single named prime.",
+      "interpretation": "Top-5 concentration is plausible but unnamed customers unidentified from registries; no contradiction."
+    },
+    {
+      "claim_id": "WWD-7",
+      "claim_text": "FY25 $172.9M and FY24 $390.8M common stock repurchases; expected calendar of insider sales / Form 4 activity.",
+      "severity": "PASS",
+      "supports": "Mode B: insider_vs_calendar.query_insider_sales_near_budget_events(cik='0000108312', window_days=14, start_date='2024-01-01', end_date='2026-05-20') -> n_form4_filings=55, n_total_sales=148, total_sale_value=$58.0M; only 3 sales clustered within 14 days of named events (all at fiscal-year-end 2025-09-30), proximate value just $394K. signal=ROUTINE_10B5_1, n_discretionary_proximate=0. The three Oct-3-2025 transactions (Blankenship/Cromwell/McLevige) were Code F (tax-withholding on RSU vesting) at $257.72, not discretionary opportunistic sales. No clustered discretionary sales around capital events. Per heuristic on Mode B for equity/buyback context: this is the cleanest possible read.",
+      "M_check": "insider_vs_calendar.query_insider_sales_near_budget_events",
+      "M_value": "signal=ROUTINE_10B5_1; n_discretionary_proximate=0; 3 proximate transactions all Code F (tax-withholding).",
+      "interpretation": "Insider sale pattern is benign; tax-withholding only, no discretionary calendar-clustered sales."
+    },
+    {
+      "claim_id": "WWD-8",
+      "claim_text": "Fort Collins, CO headquarters at 1081 Woodward Way; physical manufacturing operations in Colorado.",
+      "severity": "PASS",
+      "supports": "Mode A: epa_frs.query_facilities(facility_name='Woodward', state_abbr='CO') -> 8 Woodward-named CO facilities including 'WOODWARD INC. - FORT COLLINS FACILITY' (1000 E Drake Rd), 'WOODWARD LINCOLN CAMPUS' (777 E Lincoln Ave Fort Collins), 'WOODWARD TECHNOLOGY CENTER' (1041 Woodward Way Fort Collins), 'WOODWARD INC' (Windsor CO), 'WOODWARD GOVERNOR' (Bellvue CO), and additional Fort Collins parcels. The 1081 Woodward Way address is corroborated (TECHNOLOGY CENTER at 1041 Woodward Way and WLC PARKING LOT at 1081 Woodward Way). Multiple legitimate operating sites.",
+      "M_check": "epa_frs.query_facilities (state CO)",
+      "M_value": "8 Woodward facilities in CO including Fort Collins HQ campus and Windsor, Bellvue.",
+      "interpretation": "Physical-facility claim cleanly corroborated by EPA FRS."
+    }
+  ]
+}

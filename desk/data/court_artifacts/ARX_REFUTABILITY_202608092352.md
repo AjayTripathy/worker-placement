@@ -1,0 +1,36 @@
+ARX is a **mis-cohorted member**: its −59.7% drawdown vs a −7.0% Finance-sector median is not the sector narrative at all — it is a single-name governance de-rate dated to **3 Sept 2025**, when Accelerant disclosed that Hadron (a fronting carrier co-founded by Altamont Capital, which held ~79% of ARX voting power at IPO) accounted for ~60% of its third-party premium; shares fell nearly a third that day ([insurancebusinessmag.com](https://www.insurancebusinessmag.com/us/news/breaking-news/accelerant-shares-tumble-after-disclosure-of-ties-to-fronting-insurer-548360.aspx)). The narrative being priced is therefore **"the 'third-party' premium on the risk exchange is circular related-party volume; the capital-light fee model is an illusion"** — and that claim has a named, company-disclosed, quarterly refuting series.
+
+| ticker | class | refuting metric | current value/trend (cited) | next print date | note |
+|---|---|---|---|---|---|
+| ARX | **DAMAGE-ABSENT** | Non-Hadron third-party direct written premium ($M) and Hadron's % of third-party DWP | Non-Hadron 3P DWP **61 → 121 → 156 → 229 → 275** (1Q'25→1Q'26), **4.5× YoY**, up every quarter; Hadron share **67% → 58% → 54% → 47% → 41%**, and Hadron's *absolute* dollars fell QoQ for the first time (205 → 188). Guided 35–40% FY26, **<⅓ in 4Q'26**. Source: 1Q'26 deck slide 10, [s205.q4cdn.com](https://s205.q4cdn.com/859787934/files/doc_presentations/2026/May/13/1Q-2026-Accelerant-Presentation-vF.pdf) | **2026-08-13 BMO** (company PR, confirmed) | Corroborated by capital that Altamont does not control: WoodStar Reciprocal, **>$220M surplus notes from Kilter Finance (KKR-backed) and Blue Owl, AM Best A−, Accelerant holds no ownership interest** ([businesswire](https://www.businesswire.com/news/home/20260713031461/en/Accelerant-Announces-Partnership-With-New-Third-Party-Capitalized-Insurer-WoodStar)); plus Spinnaker/Hippo >$500M GPW '27, Incline P&C >$500M, 7-syndicate Lloyd's ARX Consortium ([theinsurer.com](https://www.theinsurer.com/program-manager/news/accelerant-agrees-enhanced-partnerships-and-supports-reciprocal-launch-2026-07-31/)) |
+
+**Data-quality catch:** the "new third-party premium production fell to 54% from 58%" datapoint circulating in aggregator summaries is a misread of the *Hadron mix* series (58% in 2Q'25 → 54% in 3Q'25). That is Hadron's share **falling** — the bullish direction — being repackaged as a production decline.
+
+**COURT-WORTHY (damage-absent, ranked):**
+1. **ARX** — The market is pricing a related-party-circularity narrative against a company that discloses the exact disconfirming series on one slide: non-Hadron third-party premium compounded 4.5× in four quarters and Hadron's absolute dollars have now turned down, while $2.68B of market cap sits at ~9.4× the FY26 adjusted-EBITDA guide (≥$285M, $276M of it fee-based) with Exchange Services take rate rising 7.1%→8.7% at a 67% segment margin. Nothing in the −59.7% drawdown is sector dispersion; it is a single unrepriced 2025 disclosure event.
+
+**What a red bench gets to hit back with (genuinely live, not strawmen):**
+- **Net revenue retention is decelerating: 157% → 126% → 116%** (122% ex-terminated Canadian member) — and a member was terminated for "subpar unit economics," an adverse-selection tell on the supply side.
+- **"Capital-light" is drifting the wrong way:** ARX net-retained % rose 8% → 9% → 10% of exchange premium; Underwriting segment adj. EBITDA fell $11M → $7M on $149M revenue (4% margin).
+- **GAAP net loss of $4.1M vs $37.7M adjusted net income** — a ~$42M adjustment gap I could **not** verify against audited XBRL (the SBC/diluted-share/OCF slots in the evidence pack are empty).
+- **Operating cash flow −$21.4M vs +$91.8M** prior-year (management: reinsurance payment timing).
+- **WoodStar swaps one affiliated-fee structure for another** — its attorney-in-fact is majority-owned by Accelerant, the same reciprocal-AIF economics that draw scrutiny at HCI/Slide/Kingstone — and it writes meaningful business only in **2027**, so it does nothing for Q2.
+- **A reported Department of Insurance investigation** into the Accelerant / Hadron Specialty / Augment Risk related-party triangle is **UNCORROBORATED** — sourced only to USA Herald on "sources say" framing, with no 8-K and no mainstream trade-press confirmation found. Treat as an unpriced governance tail, not a fact.
+- **Continuous insider distribution:** weekly Rule 144 filings from one filer (7/13, 7/17, 7/20, 7/24, 7/27, 8/03) plus CEO entity Badly Bent LLC selling 80,000 shares @ $12.06 on 8/03 under a 3/24/26 10b5-1.
+
+---
+
+**PRINT PROXIMITY: 2026-08-13 (Q2'26, before market open) — CONFIRMED by company press release naming the date and 8:00 AM ET call, not yfinance-derived. Four trading days out.**
+
+**Print-decisive reconstruction (pre-print public data only).** The loudest bear claim — circular related-party volume — is resolvable from the guide plus slide 10 without any new company input. Q2 guide: EWP $1.27–1.32B, third-party DWP $580–620M, adj. EBITDA $60–66M. Against 1Q'26's $462M third-party DWP split $188M Hadron / $275M non-Hadron:
+- Hadron flat at ~$188M → Hadron = **31%** of 3P DWP, non-Hadron ≈ **$412M** (+50% QoQ) — already inside the 4Q'26 "<⅓" target two quarters early.
+- Hadron at the 38% FY-guide midpoint → Hadron ≈ $228M, non-Hadron ≈ **$372M** (+35% QoQ).
+- Bear path: the guide is hit only because Hadron re-accelerates to ≥$260M (43%), leaving non-Hadron ≈ $340M (+24% QoQ, a break in the +98/+29/+47/+20% QoQ chain).
+
+**Tripwire: non-Hadron third-party DWP ≥ $350M AND Hadron ≤ 40% of third-party DWP.** Both hold → the circularity narrative is refuted on the company's own series and the −59.7% drawdown is a stale 2025 disclosure event. Hadron % ticks **up**, or non-Hadron prints **<$320M** → reclassify DAMAGE-ARRIVING, because the mix-down would be Hadron shrinking rather than genuine third-party capital growing.
+
+**PRE-PRINT POSITION: STARTER.** The refutation is strong and disclosed, but the tape argues against sizing into it: ARX ripped roughly +30% over four sessions into early August (closed $11.88 on 8/03, +6.1%) then gave back ~16% in one session on ~1.4× ADV with no cited catalyst, leaving it at $12.46 — **+36% off the $9.18 low, not washed out** — while insiders distribute weekly and the DOI-investigation tail is unresolved. A guided beat is partly pre-positioned; the un-priced information is the Hadron mix line itself. Take a small starter so a mix-down confirmation isn't chased, and hold the bulk of the sizing decision for the slide-10 print on 8/13.
+
+*Caveat on the tape: IBKR `search_contracts` was permission-denied in this non-interactive session, so prices are from the evidence pack plus public secondary sources and were not independently tape-verified against live bars.* Separately, `knowledge_graph/cohorts.json` was not readable (permission), so the cohort narrative above is reconstructed from the evidence rather than read from the cohort definition.
+
+**COURT-WORTHINESS ARX: 8/10 — a company-disclosed quarterly series directly refutes the narrative that produced a −59.7% de-rate, but a live governance tail, decelerating NRR, and rising retained risk make the benches evenly matched, so a court would move the sizing decision materially.**

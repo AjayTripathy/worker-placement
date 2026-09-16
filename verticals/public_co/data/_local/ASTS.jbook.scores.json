@@ -1,0 +1,138 @@
+{
+  "ticker": "ASTS",
+  "scores": [
+    {
+      "claim_id": "ASTS-C1",
+      "claim_text": "ASTS entered a contract with the U.S. SDA through a prime contractor with total expected revenue of $43.0 million to provide certain testing services utilizing the initial BB satellites.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["C1_jbook_contractor", "C1_jbook_sda_transport", "C1_usaspending"],
+      "M_check": "pentagon_jbook.query_program_funding + usaspending.query_dod_contracts",
+      "M_value": {
+        "pentagon_jbook_by_contractor": {"signal": "NOT_FOUND", "n_matches": 0, "note": "AST SpaceMobile not indexed as primary contractor on any J-Book PE in corpus"},
+        "pentagon_jbook_sda_transport": {"signal": "UNFUNDED_TWO_PLUS_YEARS", "primary_match": "Tranche 3 Transport Layer (PE 1206410SF)", "replacement_program": "Space Data Network (SDN) Backbone / Space Link", "replacement_sole_source": "SpaceX (Starshield)"},
+        "usaspending_dod": {"recipient_name": "AST SpaceMobile", "n_awards": 0, "total_amount_USD": 0}
+      },
+      "interpretation": "The $43M expected revenue is described as flowing 'through a prime contractor' for 'testing services utilizing the initial BB satellites'. The largest SDA-side recipient program — the Transport Layer program of record (PE 1206410SF) — is UNFUNDED for the second consecutive year per the J-Book corpus and is being replaced by SDN, sole-sourced to SpaceX/Starshield. ASTS itself is not listed as a primary contractor on any J-Book PE in the corpus, and direct USAspending DoD obligations to 'AST SpaceMobile' / 'AST & Science' / 'SpaceMobile' = $0. That is consistent with the $43M being a sub-contract; the past performance is plausible (BB1-5 launched and tested with U.S. government for non-communication apps). The risk is forward extension: the SDA program of record that would absorb new task orders for satellite-comms testing is unfunded and folded into SpaceX-sole-sourced SDN. Scoring MODERATE: the $43M is largely past/recognized revenue under existing PO; the forward narrative ('utilizing the initial BB satellites' for the U.S. government) is structurally exposed."
+    },
+    {
+      "claim_id": "ASTS-C2",
+      "claim_text": "ASTS has an agreement directly with the U.S. SDA for the Europa Track 2 commercial solutions program with a total contract value of approximately $30.0 million.",
+      "severity": "RED_FLAG_NEGATIVE",
+      "supports": ["C2_jbook_europa_t2", "C2_jbook_t3_transport", "C2_jbook_sdn", "C2_jbook_sdn_v2", "C2_jbook_sdn_v3", "C1_usaspending"],
+      "M_check": "pentagon_jbook.query_program_funding (multi-name) + usaspending",
+      "M_value": {
+        "pentagon_jbook_europa_t2": {"signal": "NOT_FOUND", "n_matches": 0},
+        "pentagon_jbook_sda_t3_transport": {"signal": "UNFUNDED_TWO_PLUS_YEARS", "pe_number": "1206410SF", "history_M": {"FY2025": 0, "FY2026": 0, "FY2027": 0}, "replacement_program": "Space Data Network (SDN) Backbone (sole-sourced to SpaceX/Starshield)"},
+        "pentagon_jbook_sdn_by_name": {"signal": "UNFUNDED_THIS_YEAR", "pe_number": "1203636SF", "FY2026_M": 0, "FY2027_M": 1392, "note": "SDN is the replacement architecture but Pentagon has stated single-vendor (SpaceX/Starshield) with no binding second-vendor commitment"},
+        "pentagon_jbook_sdn_by_pe": {"signal": "UNFUNDED_THIS_YEAR", "pe_number": "1203636SF"},
+        "usaspending_dod_direct": {"recipient_name": "AST SpaceMobile", "n_awards": 0, "total_amount_USD": 0}
+      },
+      "interpretation": "This is the load-bearing J-Book divergence finding. ASTS asserts a DIRECT SDA contract on 'Europa Track 2 commercial solutions program' worth $30M, AND that SHIELD/IDIQ at MDA + the $43M sub-contract together represent the forward DoD pipeline. The Signal-OS corpus shows: (a) the SDA satellite-comms program-of-record line item (Tranche 3 Transport Layer, PE 1206410SF) is UNFUNDED for FY2025-FY2027; (b) per corpus notes the SDA is being DISSOLVED as a standalone agency, with requirements rolled into the Space Data Network backbone; (c) the SDN replacement (PE 1203636SF) is sole-sourced to SpaceX / Starshield with Pentagon stating only non-binding intent to add a second vendor. ASTS's BB constellation directly competes with the Starshield architecture but is NOT the named contractor on the replacement PE. The $30M Europa Track 2 itself is not in the corpus (NOT_FOUND — possible coverage gap, treat with caution) but the entire SDA umbrella is unfunded/being absorbed, and direct USAspending shows ZERO DoD obligations to ASTS by recipient name. Per heuristic 6 (USAspending cross-check: if pentagon_jbook says UNFUNDED AND usaspending shows ZERO obligations under the claimed program → RED_FLAG). The narrative-load is severe: the company's DoD pipeline beyond the booked $73M is dependent on a contracting authority that the J-Book corpus indicates is being dissolved in favor of a sole-source incumbent. RED_FLAG_NEGATIVE."
+    },
+    {
+      "claim_id": "ASTS-C3",
+      "claim_text": "ASTS received an IDIQ contract award on the Scalable Homeland Innovative Enterprise Layered Defense (SHIELD) program, enabling it to pursue future task orders under MDA's multi-award framework.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["C3_jbook_shield", "C3_jbook_mda_space", "C3_jbook_bmd_enabling", "C1_usaspending"],
+      "M_check": "pentagon_jbook.query_program_funding + usaspending",
+      "M_value": {
+        "pentagon_jbook_shield_by_name": {"signal": "NOT_FOUND", "n_matches": 0, "note": "SHIELD acronym not indexed in corpus — possible coverage gap"},
+        "pentagon_jbook_bmd_space_programs": {"signal": "FUNDED_SHRINKING", "pe_number": "1206895C", "history_M": {"FY2024": 107.6, "FY2025": 119.6, "FY2026": 97.1}},
+        "pentagon_jbook_bmd_enabling": {"signal": "FUNDED_STEADY", "pe_number": "0603890C", "history_M": {"FY2024": 578.3, "FY2025": 602.3, "FY2026": 646.0}},
+        "usaspending_dod_direct": {"recipient_name": "AST SpaceMobile", "n_awards": 0}
+      },
+      "interpretation": "The SHIELD IDIQ claim is intrinsically a PIPELINE claim — no ceiling disclosed, no task orders disclosed, and 'enables us to pursue future task orders' is explicit forward language. SHIELD itself is not in the J-Book corpus (NOT_FOUND); the most likely host PE in the MDA J-Book is the Ballistic Missile Defense System Space Programs PE 1206895C, which is FUNDED_SHRINKING (FY24 $107.6M → FY26 $97.1M). The broader MDA enabling PE 0603890C is FUNDED_STEADY. No earmark sub-signal. Heuristic 2 applies: future / not-booked + materially uncertain host PE → downgrade to MODERATE. USAspending shows zero direct DoD obligations to ASTS, which is consistent with the claim itself ('enables us to pursue future task orders' — i.e., no obligations yet). The risk to investors is that SHIELD IDIQ awards being announced without a host PE in the FY26 J-Book + shrinking BMD-Space funding makes the forward pipeline uncertain even if the IDIQ vehicle is real."
+    },
+    {
+      "claim_id": "ASTS-C4",
+      "claim_text": "FY 2025 services revenue of $26.5M was mainly attributable to performance obligations under agreements with the U.S. government either directly or through prime contractors; ASTS intends to continue generating DoD services revenue from BB satellites.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["C4_usaspending_asts", "C4_usaspending_astscience", "C4_usasp_ast_llc", "C4_usasp_spacemobile", "C4_jbook_contractor"],
+      "M_check": "usaspending.query_dod_contracts + pentagon_jbook.query_program_funding(contractor_name=...)",
+      "M_value": {
+        "usaspending_asts_direct": {"recipient_name": "AST SpaceMobile", "n_awards": 0, "total_amount_USD": 0},
+        "usaspending_ast_science": {"recipient_name": "AST & Science", "n_awards": 0, "total_amount_USD": 0},
+        "usaspending_ast_llc": {"recipient_name": "AST LLC", "n_awards": 113, "total_amount_USD": 74600760.48, "note": "substring matches to OTHER 'AST LLC' entities — top awards are Mountain West Precast (F-35 hangar construction), Overseas Shipholding, Superior Construction — NOT AST SpaceMobile subsidiary"},
+        "usaspending_spacemobile": {"recipient_name": "SpaceMobile", "n_awards": 0, "total_amount_USD": 0},
+        "pentagon_jbook_by_contractor": {"contractor_name": "AST SpaceMobile", "signal": "NOT_FOUND"}
+      },
+      "interpretation": "$26.5M of FY2025 services revenue is described as DoD-derived, but ZERO direct DoD obligations show up in USAspending for any recognizable ASTS entity name (the 113 'AST LLC' matches are substring false-positives for unrelated firms). This is most consistent with revenue flowing entirely through a prime contractor (sub-tier obligation, invisible in recipient-name USAspending) — which is consistent with the C1 'through a prime contractor' language. However, the forward narrative ('intend to generate additional services revenue from BB satellites for the U.S. government') is rated against a J-Book that shows the most-relevant SDA program-of-record is unfunded (see C2). Per heuristic 6: past revenue real (booked $26.5M) but the forward pipeline is structurally weakened. Scoring MODERATE rather than SEVERE because (a) $26.5M is only ~37% of FY25 revenue, not majority concentration, and (b) the prime-contractor pathway means specific PE identification is partial."
+    },
+    {
+      "claim_id": "ASTS-C5",
+      "claim_text": "ASTS expects to 'secure additional contracts with the U.S. government or its prime contractors for non-commercial use of our BB satellites' as a forward business pillar.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["C5_jbook_commercial_services", "C5_jbook_tactically_responsive", "C5_jbook_sspt"],
+      "M_check": "pentagon_jbook.query_program_funding across plausible host PEs",
+      "M_value": {
+        "pentagon_jbook_commercial_services": {"program": "Commercial Services (PE 1206771SF, Space Force)", "signal": "FUNDED_STEADY", "history_M": {"FY2024": 48.3, "FY2025": 40.0, "FY2026": 36.6}, "note": "actually trending down ~24% from FY24"},
+        "pentagon_jbook_tactically_responsive_space": {"program": "Tactically Responsive Space (PE 1206862SF)", "signal": "FUNDED_SHRINKING", "history_M": {"FY2024": 48.3, "FY2025": 40.1, "FY2026": 33.3}},
+        "pentagon_jbook_sspt": {"program": "Space Systems Prototype Transitions (PE 1206427SF)", "signal": "FUNDED_SHRINKING", "history_M": {"FY2024": 78.3, "FY2025": 115.7, "FY2026": 67.2}}
+      },
+      "interpretation": "The forward 'additional DoD contracts' claim is the kind of soft pipeline statement that anchors valuation but doesn't name a PE. Searching plausible host PEs in the J-Book corpus: Commercial Services is borderline (FUNDED_STEADY but ~24% smaller than FY24), Tactically Responsive Space is SHRINKING, SSPT is SHRINKING. Aggregate signal across the most-relevant Space Force commercial / responsive PE pool is downward, not flat or growing. Per heuristic 1 and 2: shrinking host PEs + forward narrative-load → MODERATE_UNDERDELIVERY. The claim is not falsified (the PEs are funded and ASTS could win task orders), but the budget-line trajectory is contracting, not expanding."
+    },
+    {
+      "claim_id": "ASTS-C6",
+      "claim_text": "ASTS positions its BB constellation for transport-layer-style satellite communications applications adjacent to the SDA PWSA pipeline.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": ["C6_jbook_t3", "C6_jbook_narrowband", "C2_jbook_sdn", "C2_jbook_sdn_v3"],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Tranche 3 Transport Layer')",
+      "M_value": {
+        "pentagon_jbook_t3_transport_layer": {"signal": "UNFUNDED_TWO_PLUS_YEARS", "pe_number": "1206410SF", "primary_contractors_listed": ["York Space Systems", "Lockheed Martin", "Northrop Grumman"], "replacement_program": "Space Data Network (SDN) Backbone / Space Link", "replacement_sole_source": "SpaceX (Starshield)"},
+        "pentagon_jbook_narrowband_satcom": {"signal": "FUNDED_GROWING", "pe_number": "1203109SF", "history_M": {"FY2024": 160.4, "FY2025": 201.7, "FY2026": 421.8}, "note": "growing but ASTS not listed as participant in corpus"}
+      },
+      "interpretation": "ASTS positions its BB constellation as a candidate for SDA Transport Layer-type missions (direct-to-cellular, beyond-line-of-sight comms). The J-Book corpus shows: (a) Tranche 3 Transport Layer is UNFUNDED_TWO_PLUS_YEARS and is being replaced by SDN sole-sourced to SpaceX/Starshield; (b) ASTS is NOT named as a primary contractor on T3 or T0-T2 (those are York/Lockheed/Northrop); (c) Narrowband SatCom PE 1203109SF is growing, but ASTS is not in the corpus as a participant. Per heuristic 1: UNFUNDED_TWO_PLUS_YEARS on the host PE → SEVERE; per heuristic 3 (reorganization caveat) the replacement IS in corpus and is sole-source to a competitor (SpaceX), so the funding has not 'moved to ASTS'. Downgrade from RED to SEVERE because the adjacency claim is implicit (not an explicit revenue tie) — but the forward government-use pillar of ASTS's narrative is contradicted by the J-Book: the line of business the company is positioning toward (mil-grade direct-to-device transport) is being concentrated with a sole-source incumbent that is not ASTS."
+    },
+    {
+      "claim_id": "ASTS-C7",
+      "claim_text": "ASTS owns approximately 3,850 patent and patent pending claims worldwide, of which approximately 1,900 have been officially granted or allowed; 38 patent families with terms starting in 2039.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["C7_uspto_assignee_astsm", "C7_uspto_assignee_astsc"],
+      "M_check": "uspto_odp.query_assignee",
+      "M_value": {
+        "uspto_ast_spacemobile": {"n_total_applications": 0, "n_granted": 0},
+        "uspto_ast_science": {"n_total_applications": 123, "n_granted": 56, "note": "core legal-entity name; sample patents are direct-to-cell / phased-array satcom — clearly the real ASTS portfolio"}
+      },
+      "interpretation": "The 3,850-claim, 1,900-granted figure is a CLAIMS count (a single patent typically has 15-30 claims). USPTO ODP returns 56 granted U.S. patents for 'AST & Science' (the operating LLC), which at ~20 claims/patent maps to ~1,100 U.S. claims — meaningfully below 1,900 but plausibly explained by the worldwide / 38-family figure (foreign jurisdictions, allowed-but-not-granted claims). USPTO ODP doesn't index multi-token assignee names well so this is a directional check only. Not a J-Book claim. Score MODERATE because the U.S.-only USPTO read-through is materially smaller than the headline number but the claim explicitly says 'worldwide' and 'claims' (not patents). Control claim — not the primary signal."
+    },
+    {
+      "claim_id": "ASTS-C8",
+      "claim_text": "ASTS operates approximately 450,000 sq ft of facilities globally, with Midland, TX AIT facilities, plus FL, MD, India, Scotland, Spain, Israel.",
+      "severity": "PASS",
+      "supports": ["C8_epa_tx", "C8_epa_fl"],
+      "M_check": "epa_frs.query_facilities",
+      "M_value": {
+        "epa_tx": {"n_facilities": 1, "facility": "AST SPACEMOBILE SITE 2, 13600 W INTERSTATE 20, ODESSA TX (Midland County)"},
+        "epa_fl": {"n_facilities": 0, "note": "Homestead/Miami offices may not be EPA-regulated industrial sites; absence is not falsifying"}
+      },
+      "interpretation": "EPA FRS confirms a real industrial-grade ASTS facility in Midland County, TX — corroborating the company's stated AIT footprint. Control claim, J-Book independent. PASS."
+    },
+    {
+      "claim_id": "ASTS-C9",
+      "claim_text": "ASTS has definitive commercial agreements with AT&T, Verizon, Vodafone, and STC for direct-to-cellular service.",
+      "severity": "PASS",
+      "supports": ["C9_edgar_att", "C9_edgar_vz"],
+      "M_check": "edgar_fts.query_fulltext (counterparty CIK)",
+      "M_value": {
+        "edgar_att": {"cik": "0000732717", "search_term": "SpaceMobile", "total_hits": 3, "filings": ["8-K 2023-07-26", "8-K 2023-10-19", "DEF 14A 2025-04-04"]},
+        "edgar_vz": {"cik_searched": "0001418091", "total_hits": 0, "note": "CIK 0001418091 may not be Verizon proper — cohort-provided CIK list did not include Verizon; result is inconclusive, not falsifying"}
+      },
+      "interpretation": "AT&T independently discloses 'SpaceMobile' in three filings (8-Ks and proxy) — corroborates the AT&T partnership claim. Verizon CIK lookup inconclusive (likely wrong CIK). Vodafone/STC are foreign filers not in EDGAR. Counterparty corroboration is partial but the AT&T independent disclosure is the most material one. Not a J-Book claim. PASS."
+    }
+  ],
+  "summary": {
+    "n_claims": 9,
+    "n_jbook_grounded": 6,
+    "n_jbook_fired": 6,
+    "pentagon_jbook_signals": {
+      "C1": "UNFUNDED_TWO_PLUS_YEARS on SDA Transport (host program)",
+      "C2": "UNFUNDED_TWO_PLUS_YEARS T3 + UNFUNDED_THIS_YEAR SDN, both with sole-source-to-SpaceX replacement",
+      "C3": "FUNDED_SHRINKING on BMD Space Programs PE 1206895C (SHIELD host)",
+      "C4": "NOT_FOUND by contractor; USAspending direct = $0",
+      "C5": "FUNDED_SHRINKING across Tactically Responsive Space + SSPT",
+      "C6": "UNFUNDED_TWO_PLUS_YEARS Transport Layer (positioning target)"
+    },
+    "severity_counts": {"PASS": 2, "MODERATE_UNDERDELIVERY": 5, "SEVERE_UNDERDELIVERY": 1, "RED_FLAG_NEGATIVE": 1, "UNVERIFIABLE": 0},
+    "headline_finding": "ASTS names SDA as a direct customer ($30M Europa Track 2) and via prime ($43M testing services) plus SHIELD/MDA IDIQ; J-Book corpus indicates SDA Transport Layer-of-record is UNFUNDED for 2+ consecutive years and is being replaced by SDN sole-sourced to SpaceX/Starshield. ASTS is not named as a contractor on any host J-Book PE in the corpus. Direct USAspending DoD obligations to AST SpaceMobile / AST & Science / SpaceMobile recipient names = $0 across 2020-2026. The DoD pipeline that ASTS's forward narrative anchors on (beyond the already-booked $26.5M FY25 services revenue) is structurally exposed."
+  }
+}

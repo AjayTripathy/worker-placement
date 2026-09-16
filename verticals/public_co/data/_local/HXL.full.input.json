@@ -1,0 +1,139 @@
+{
+  "ticker": "HXL",
+  "cutoff": "2026-05-20",
+  "filing": "0001193125-26-046377_10-K.txt",
+  "filing_date": "2026-02-11",
+  "filing_age_days": 98,
+  "claims": [
+    {
+      "claim_id": "HXL-001",
+      "claim_text": "Airbus and its subcontractors represented approximately 39% of 2025 net sales (35% commercial aerospace, 4% defense & space)",
+      "subject": "Hexcel",
+      "predicate": "customer_concentration",
+      "object_value": "Airbus 39% 2025 net sales",
+      "source_quote": "Approximately 39%, 40% and 39% of our 2025, 2024 and 2023 net sales, respectively, were to Airbus and its subcontractors.",
+      "category": "customer_concentration",
+      "queries": [
+        {"mode": "A", "source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Airbus"}, "purpose": "Confirm Airbus relationship disclosed in HXL filings"},
+        {"mode": "B", "source": "usaspending.query_recipient_contracts", "kwargs": {"recipient_name": "Airbus"}, "purpose": "Identify federal/defense contracts; Airbus mostly commercial so federal $$ should be limited"}
+      ]
+    },
+    {
+      "claim_id": "HXL-002",
+      "claim_text": "Boeing and its subcontractors represented approximately 13% of 2025 net sales",
+      "subject": "Hexcel",
+      "predicate": "customer_concentration",
+      "object_value": "Boeing 13% 2025 net sales",
+      "source_quote": "Approximately 13%, 15% and 15% of our 2025, 2024 and 2023 net sales, respectively, were to Boeing and its subcontractors.",
+      "category": "counterparty_disclosure",
+      "queries": [
+        {"mode": "A", "source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Hexcel", "cik": "0000012927"}, "purpose": "Mode B: counterparty (Boeing CIK 0000012927) discloses Hexcel"},
+        {"mode": "B", "source": "usaspending.query_recipient_contracts", "kwargs": {"recipient_name": "Hexcel"}, "purpose": "Mode B: Hexcel's direct federal contracts (sub-tier reporting)"}
+      ]
+    },
+    {
+      "claim_id": "HXL-003",
+      "claim_text": "Hexcel composite materials are used on F-35 Lightning and CH-53K heavy lift transport helicopter (DoD programs)",
+      "subject": "Hexcel",
+      "predicate": "supplies_dod_program",
+      "object_value": "F-35 Lightning, CH-53K",
+      "source_quote": "composites now comprise the majority of the airframe of latest generation aircraft to enhance performance, range and payload, including the F-35 Lightning and the CH-53K heavy lift transport helicopter.",
+      "category": "named_dod_program",
+      "queries": [
+        {"mode": "A", "source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "Hexcel"}, "purpose": "DoD direct contracts to Hexcel (Tier-2/3 supplier so may be limited)"},
+        {"mode": "B", "source": "pentagon_jbook.query_program_funding", "kwargs": {"program_name": "F-35"}, "purpose": "Verify F-35 program still funded in latest PB"}
+      ]
+    },
+    {
+      "claim_id": "HXL-004",
+      "claim_text": "Hexcel operates 18 manufacturing facilities including Decatur Alabama (PAN Precursor, 819,863 sq ft) and Salt Lake City Utah (Carbon Fibers/Prepregs, 1,365,000 sq ft)",
+      "subject": "Hexcel",
+      "predicate": "operates_facility",
+      "object_value": "Decatur AL, Salt Lake City UT carbon fiber facilities",
+      "source_quote": "Decatur, Alabama Composite Materials PAN Precursor (used to produce Carbon Fibers) 819,863 ... Salt Lake City, Utah Composite Materials Carbon Fibers; Prepregs 1,365,000",
+      "category": "physical_facility",
+      "queries": [
+        {"mode": "A", "source": "epa_frs.query_facilities", "kwargs": {"company_name": "Hexcel"}, "purpose": "Confirm US chemical/composite manufacturing facilities in EPA registry"},
+        {"mode": "B", "source": "osha_establishments.query_establishments", "kwargs": {"company_name": "Hexcel"}, "purpose": "OSHA establishment registry validation of US sites"}
+      ]
+    },
+    {
+      "claim_id": "HXL-005",
+      "claim_text": "Board approved $600M share repurchase plan Oct 22 2025; executed $350M ASR with Bank of America and Goldman Sachs, $454.3M repurchased in 2025",
+      "subject": "Hexcel",
+      "predicate": "capital_return",
+      "object_value": "$600M repurchase plan + $350M ASR Oct 2025",
+      "source_quote": "On October 22, 2025, the Board approved an additional $600 million share repurchase plan ... the Company entered into accelerated share repurchase agreements ... aggregate of $350 million of the Company's common stock ... we repurchased 5,720,616 shares ... at a cost of $454.3 million",
+      "category": "capital_event",
+      "queries": [
+        {"mode": "A", "source": "sec_filings.list_filings_by_form", "kwargs": {"cik": "0000717605", "form_type": "8-K"}, "purpose": "Confirm 8-K announcement of repurchase plan / ASR"},
+        {"mode": "B", "source": "insider_vs_calendar.query_insider_sales_near_budget_events", "kwargs": {"cik": "0000717605", "window_days": 14, "start_date": "2024-01-01", "end_date": "2026-05-20"}, "purpose": "Mode B: detect discretionary insider Form 4 selling clustered to ASR / large repurchase windows"}
+      ]
+    },
+    {
+      "claim_id": "HXL-006",
+      "claim_text": "Hexcel issued $300M of 5.875% Senior Unsecured Notes due 2035 in Q1 2025 and redeemed $300M 4.7% Senior Notes due 2025",
+      "subject": "Hexcel",
+      "predicate": "debt_issuance",
+      "object_value": "$300M 5.875% notes due 2035 Q1 2025",
+      "source_quote": "During the first quarter of 2025, the Company issued $ 300.0 million in aggregate principal amount of 5.875 % Senior Unsecured Notes due in 2035.",
+      "category": "financing",
+      "queries": [
+        {"mode": "A", "source": "sec_filings.list_filings_by_form", "kwargs": {"cik": "0000717605", "form_type": "8-K"}, "purpose": "Confirm 8-K for Feb 2025 notes issuance"},
+        {"mode": "B", "source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "5.875% Senior Notes 2035", "cik": "0000717605"}, "purpose": "Confirm registration/indenture references"}
+      ]
+    },
+    {
+      "claim_id": "HXL-007",
+      "claim_text": "Disclosure controls and procedures effective; no material weakness; no ICFR changes during Q4 2025 that materially affected ICFR",
+      "subject": "Hexcel",
+      "predicate": "icfr_effective",
+      "object_value": "ICFR effective FY2025",
+      "source_quote": "Our Chief Executive Officer and Interim Chief Financial Officer have evaluated our disclosure controls and procedures as of December 31, 2025 and have concluded that these disclosure controls and procedures were effective",
+      "category": "icfr",
+      "queries": [
+        {"mode": "A", "source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "material weakness", "cik": "0000717605"}, "purpose": "Mode A: confirm narrative claim of ICFR effective"},
+        {"mode": "B", "source": "claim_evolution.query_claim_evolution", "kwargs": {"cik": "0000717605", "claim_topic": "internal control material weakness restatement"}, "purpose": "Mode B: detect prior-year restatement / material weakness history"}
+      ]
+    },
+    {
+      "claim_id": "HXL-008",
+      "claim_text": "Lower Passaic River CERCLA PRP; $150M settlement with 83 other PRPs in escrow pending Consent Decree (Dec 2024 court approval, appeal briefing complete Jan 2026)",
+      "subject": "Hexcel",
+      "predicate": "environmental_liability",
+      "object_value": "$150M Lower Passaic River Consent Decree (joint w/ 83 PRPs)",
+      "source_quote": "On December 16, 2022, the EPA lodged a Consent Decree with the U.S. District Court for the District of New Jersey requesting court approval of a $ 150 million settlement of the EPA s CERCLA claims against Hexcel and 83 other PRPs",
+      "category": "regulatory_environmental",
+      "queries": [
+        {"mode": "A", "source": "epa_frs.query_facilities", "kwargs": {"company_name": "Hexcel", "state": "NJ"}, "purpose": "Mode A: confirm NJ historical facility footprint (Lodi NJ)"},
+        {"mode": "B", "source": "epa_emissions.query_facility_emissions", "kwargs": {"company_name": "Hexcel"}, "purpose": "Mode B: detect ongoing emissions / compliance issues at active sites"}
+      ]
+    },
+    {
+      "claim_id": "HXL-009",
+      "claim_text": "Hexcel composites participate in commercial aerospace platforms: Boeing 787 (>50% composite), Airbus A350 (53% composite), Boeing 777X (>30% composite), LEAP engines, GE9X engine on 777X",
+      "subject": "Hexcel",
+      "predicate": "supplies_commercial_platform",
+      "object_value": "Boeing 787/777X, Airbus A350, LEAP engines",
+      "source_quote": "Boeing s 787, which entered into service in 2011, has a content of more than 50% composite materials by weight ... The Airbus A350 XWB ( A350 ) which has a composite content of 53% by weight ... The LEAP engines and nacelles on both the A320neo and 737 MAX are composite-rich as is the GE9X engine on the Boeing 777X.",
+      "category": "counterparty_disclosure",
+      "queries": [
+        {"mode": "A", "source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Hexcel", "cik": "0000012927"}, "purpose": "Mode A: Boeing 10-K mentions of Hexcel"},
+        {"mode": "B", "source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Hexcel"}, "purpose": "Mode B: broad SEC fulltext search for Hexcel as counterparty"}
+      ]
+    },
+    {
+      "claim_id": "HXL-010",
+      "claim_text": "Hexcel is registered for federal contracting (SAM entity); supplies aerospace composites to multiple DoD programs through subcontractor relationships with primes (Lockheed Martin, RTX, Boeing, GD, etc.)",
+      "subject": "Hexcel",
+      "predicate": "federal_registered_contractor",
+      "object_value": "Federal contractor / supplier to LM, RTX, Boeing, GD, GE, GKN, Textron",
+      "source_quote": "The Boeing Company Amesbury, Massachusetts CTRM Aero Composites ... General Dynamics ... General Electric ... GKN ... Lockheed Martin RTX Textron",
+      "category": "customer_pipeline",
+      "queries": [
+        {"mode": "A", "source": "sam_entity.query_entity_by_uei", "kwargs": {"legal_name": "Hexcel"}, "purpose": "Confirm SAM.gov registration"},
+        {"mode": "B", "source": "usaspending.query_federal_presence", "kwargs": {"recipient_name": "Hexcel"}, "purpose": "Confirm federal presence; Tier-2 supplier may have limited prime contracts"}
+      ]
+    }
+  ]
+}

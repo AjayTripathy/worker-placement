@@ -1,0 +1,38 @@
+## Cause-check first
+
+The cohort assignment is wrong, and that's the finding. GPGI is tagged "Finance: Consumer Services" because it *was* CompoSecure (NYSE: CMPO) until the January 2026 rename; after the Husky Technologies acquisition, **72% of Q2 pro-forma sales ($339.6M of $473.2M) are industrial injection-molding equipment**, not consumer finance. So "excess_dd −0.406 vs Finance sector median" is a classification artifact, not dispersion. The drawdown is single-name and dated: $23.12 (2026-02-26) → $12.94 (2026-05-07) on the Q1 print, plus a securities-fraud class action alleging the Husky deal was oversold. There is no same-event external anchor, so there is no cohort mispricing to harvest here.
+
+| ticker | class | refuting metric | current value/trend (cited) | next print date | note |
+|---|---|---|---|---|---|
+| GPGI | **DAMAGE-ARRIVING** (cohort narrative N/A — sector misclassified; consumer-card demand is *fine*, the damage is industrial + leverage) | **Pro-forma adjusted EBITDA vs the reaffirmed FY26 guide** — i.e. Q3 PF adj. EBITDA and margin | H1'26 actual: **$196.0M on $894.4M, 21.9% margin** (Q1 $82.1M/19.5%, −430bps; Q2 $113.9M/24.1%, −230bps). Husky Q2 EBITDA **−22.6% YoY**, margin 19.1% (−330bps); Q1 Husky EBITDA **−40%**. Net debt **$2.0B, 3.9x**. Guide reaffirmed 8/6: EBITDA $550–610M ([8-K/Q2 release](https://www.sec.gov/Archives/edgar/data/0001823144/000162828026053821/gpgi_2q26earningspressre.htm), [Q1 release](https://www.theglobeandmail.com/investing/markets/markets-news/GlobeNewswire/36656231/gpgi-reports-first-quarter-2026-results/)) | **2026-11-03** (yfinance-derived, UNCONFIRMED) | The guide is the falsifiable object — see arithmetic below |
+
+**The decisive arithmetic (all inputs from the company's own two 2026 releases):**
+
+| | H1'26 actual | FY26 guide low | implied H2 |
+|---|---|---|---|
+| PF adj. net sales | $894.4M | $1,950M | $1,055.6M (**+18.0%** vs H1) |
+| PF adj. EBITDA | $196.0M | $550M | **$354.0M (+80.6% vs H1)** |
+| PF adj. EBITDA margin | 21.9% | 27–29% | **33.5%** (vs Q2's 24.1% → **+940bps**) |
+
+At the guide's *midpoint* the requirement is H2 EBITDA +96% and at the top end **+111%**. Management reaffirmed this on 2026-08-06 with H1 already booked. Note the collision: the class action's core allegation is that Husky's "revenue and Adjusted EBITDA targets… lacked a reasonable basis in objective fact" — and the reaffirmed guide is itself an ~81–111% back-half EBITDA hockey stick. The guide is the disputed artifact, not independent evidence against the claim.
+
+The **~3.0x year-end leverage target is arithmetically unreachable**: 3.9x on $2.0B net debt implies LTM PF adj. EBITDA ≈ $513M. Hitting 3.0x needs either net debt $1,650M (≈$350M of H2 paydown, more than the entire remaining FY FCF guide) or EBITDA ~$667M. On H1-annualized EBITDA ($392M), net leverage is actually **5.1x**.
+
+**Valuation — the drawdown did not create a discount.** At $12.78 (8/14/26 close), 289.9M shares = **$3.70B cap**, EV ≈ **$5.70B**. That's 9.8x *guided* mid-EBITDA, 11.1x LTM, and **14.5x H1-annualized**. A generous sanity SOTP on Q2-annualized segment EBITDA — CompoSecure $221M × 13x + Husky $260M × 7.5x − ~$25M corporate × 10x — gives EV ≈ $4.6B, i.e. equity ≈ **$8.9/share, ~30% below the tape**, and that uses Husky's *better* quarter. (My multiples, not a model; directional.) There is no margin of safety to court over.
+
+**Doctrine binding:** pending SDNY securities-fraud class action (1:26-cv-05951, class period 2025-11-03→2026-05-06) alleging management overstated Husky's value to "generate millions of dollars in fees for Resolute Holdings and Defendants." That is an integrity overhang → **RP_TAINTED, never RP_FAIR**. Compounding it, Resolute's management fee is struck on *adjusted EBITDA* — a permanent adverse incentive on the exact metric being guided.
+
+**COURT-WORTHY (damage-absent, ranked):** **NONE.** GPGI is not damage-absent. The only damage-absent *segment* is CompoSecure (record $133.6M sales +11.7%, $55.2M EBITDA +13.6%, 41.3% margin) — but it is 28% of sales, unlisted separately, and already more than fully capitalized inside the current EV.
+
+**COURT-WORTHINESS GPGI: 3/10** — the discount isn't a discount (SOTP sits ~30% below the tape), the reaffirmed guide needs an 81–111% H2 EBITDA ramp, and RP_TAINTED already caps sizing at zero-initiate, so a court changes nothing.
+
+**PRINT PROXIMITY: 2026-11-03 — yfinance-derived, UNCONFIRMED (no company PR names it; note it is exactly the class-period start anniversary, consistent with a naive year-ago extrapolation). ~55 trading days out, so NOT within 5 trading days and the pre-print reconstruction is not triggered.** Recording it anyway since it costs nothing: **PRE-PRINT POSITION: FLAT** (book confirms NO POSITION / NO ORDERS — nothing to unwind). The nearest dated catalyst is not a print but the **2026-09-14 lead-plaintiff deadline**, which typically pulls in consolidated-complaint detail on what management knew about Husky's EBITDA trajectory pre-close. The Q3 threshold to watch: an even H2 split requires **Q3 PF adj. EBITDA ≈ $170M+ at ~33% margin** vs Q2's $113.9M/24.1%; a Q3 print below ~$150M kills the FY guide and the deleveraging path together.
+
+## Two data-integrity flags on the pack itself
+
+1. **The XBRL block is unusable for this name** — `rev 2025-06-30 = 0`, no rows at all for 2025-09-30 through 2026-06-30 (the entire post-Husky period), and `dil_sh` oscillating between 38M and 96M (Class A vs. combined Up-C units). Anything computed from it would be wrong; I used the filed releases instead.
+2. **The event JSON's `mcap` of $4.041B is stale** (implies ~$13.94/sh, the blob_sweep-date price). Actual is **$3.70B** at the 8/14 close. A search snippet also surfaced a cached $16.75 quote — disregarded, contradicted by the pack and by an independent 8/14 close.
+
+One verification caveat, stated plainly: direct `sec.gov` document fetches returned **403** on every attempt (index and document URLs alike), so I could not read the 10-Q or the 8-K exhibit first-hand. The Q2 figures cross-validate across two independent sources; the Q1 figures come from a GlobeNewswire reprint of the company's own release and are internally arithmetically consistent ($82.1M ÷ $421.2M = 19.49%, and the implied prior-year margin reproduces the stated −430bps). If you want this hardened before any action, the fix is the full-fingerprint header path from the scraping memory — but given the 3/10 score, I'd spend that effort elsewhere.
+
+Sources: [Q2'26 8-K press release (primary)](https://www.sec.gov/Archives/edgar/data/0001823144/000162828026053821/gpgi_2q26earningspressre.htm) · [Q2'26 deck summary](https://ca.investing.com/news/company-news/gpgi-q2-2026-slides-composecure-hits-record-as-husky-faces-headwinds-93CH-4782486) · [Q2'26 call transcript](https://www.fool.com/earnings/call-transcripts/2026/08/13/gpgi-gpgi-q2-2026-earnings-call-transcript/) · [Q1'26 results release](https://www.theglobeandmail.com/investing/markets/markets-news/GlobeNewswire/36656231/gpgi-reports-first-quarter-2026-results/) · [Class action / class period & deadline](https://www.newmediawire.com/news/gpgi-inc-gpgi-investors-september-14-2026-deadline-in-securities-fraud-class-action-lawsuit-7088135) · [Robbins LLP release on Husky allegations](https://www.globenewswire.com/news-release/2026/08/13/3344834/0/en/contact-robbins-llp-for-information-about-leading-the-class-action-against-gpgi-inc-alleging-that-the-company-misled-investors-regarding-its-acquisition-of-husky-technologies-limit.html) · [Share count / market cap](https://stockanalysis.com/stocks/gpgi/)

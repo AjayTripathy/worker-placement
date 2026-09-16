@@ -1,0 +1,77 @@
+{
+  "ticker": "QBTS",
+  "scores": [
+    {
+      "claim_id": "QBTS-1",
+      "claim_text": "D-Wave claims headline commercial customers including Mastercard, Pfizer, BASF, NTT DOCOMO, Davidson Technologies, etc. as 'blue-chip enterprise companies'.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["edgar_fts.query_fulltext(D-Wave, cik=Mastercard 1141391) -> 0 hits", "edgar_fts.query_fulltext(D-Wave, no cik) -> 598 hits but ALL top-10 are D-Wave's own filings or DPCM SPAC predecessor", "edgar_fts.query_fulltext(Leap quantum) -> 55 hits, every top-10 is from D-Wave's own 8-K/proxy disclosure"],
+      "M_check": "Counterparty disclosure - Mastercard 10-K + external mentions of Leap",
+      "M_value": "Mastercard CIK 1141391: 0 D-Wave mentions; cross-filer Leap quantum: 55 hits all from QBTS itself; cross-filer D-Wave: 598 hits dominated by QBTS own filings",
+      "interpretation": "Layer 3 Rule 7 (counterparty-disclosure threshold) — Mastercard, a $400B+ market-cap counterparty, makes ZERO mention of D-Wave in any SEC filing. External cross-filer corroboration is essentially nil — virtually every public mention of D-Wave / Leap originates with D-Wave itself. This is the canonical 'pilot project / professional-services engagement re-marketed as a customer relationship' pattern. Customer logos are real (the engagements likely happened) but the dollar magnitude is plainly immaterial to each named counterparty. Scored MODERATE rather than RED because D-Wave's framing ('our customers have included') is technically true for pilots and the company does report $24.6M GAAP revenue in FY2025, so SOME paid engagement exists — but the impression of 'blue-chip enterprise adoption at scale' is meaningfully overstated."
+    },
+    {
+      "claim_id": "QBTS-2",
+      "claim_text": "D-Wave's Leap and Advantage/Advantage2 systems are available via AWS Marketplace.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["edgar_fts.query_fulltext(D-Wave, cik=AMZN 1018724) -> 2 hits, both 8-K press release exhibits from 2020 (Braket launch era), nothing in any post-2020 Amazon 10-K", "edgar_fts.query_fulltext(Advantage2, cik=AMZN) -> 0 hits"],
+      "M_check": "Counterparty disclosure - Amazon (AWS)",
+      "M_value": "AMZN CIK 1018724: 2 D-Wave mentions total (both 2020), 0 Advantage2 mentions",
+      "interpretation": "Layer 3 Rule 7 reading: distribution-via-AWS-Marketplace is a partner-ecosystem relationship, not a deployment/revenue claim. D-Wave's framing is 'access can be purchased ... through AWS Marketplace' which is precisely the 'available via / partner ecosystem' wording the heuristic flags as MODERATE rather than RED. AWS doesn't disclose Braket-partner revenue (each QPU partner is immaterial to a $2T mcap company), so absence is expected — but the complete absence of the Advantage2 product name from any AMZN filing, combined with no post-2020 mentions, indicates the partnership is real but trivially small in dollar terms. Investors reading 'available on AWS' should not infer hyperscaler-scale revenue."
+    },
+    {
+      "claim_id": "QBTS-3",
+      "claim_text": "D-Wave demonstrated 'quantum supremacy on useful real-world problem' in March 2025 using 1,200 qubit Advantage2 prototype, peer-reviewed in Science.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["uspto_odp.query_assignee('D-Wave Systems') -> n_granted=197, with 162 qubit/superconducting, 163 quantum, 15 annealing-titled patents", "Latest titles include 'Superconducting tunable inductance', 'Kinetic inductance for couplers and compact qubits', 'Increasing energy-scale by minimizing qubit inductance' — consistent with annealing-QPU R&D"],
+      "M_check": "Patent footprint in claimed technology + framework Calibration Heuristic on 'quantum supremacy' jargon",
+      "M_value": "197 granted patents under 'D-Wave Systems' assignee with ~82% in qubit/quantum titles; 0 cross-filer mentions of the 'quantum supremacy' result outside D-Wave's own filings",
+      "interpretation": "The IP footprint is genuine (PASS on patent depth). However, per the Quantum-vertical-specific risk rubric: 'quantum supremacy / quantum advantage' is research-paper jargon that does NOT correspond to any commercial deployment milestone. The Science paper is real, but a published demonstration on a curated benchmark problem is materially distant from 'commercial-grade revenue at the claimed qubit count'. The Calibration Heuristic 9 (physical vs logical qubit) also applies: '1,200 qubit Advantage2 prototype' refers to physical qubits with the noisy annealing architecture, not error-corrected logical qubits. Score MODERATE because the underlying science is real but the marketing framing materially overstates commercial relevance."
+    },
+    {
+      "claim_id": "QBTS-4",
+      "claim_text": "Advantage2 (sixth-gen annealing) launched May 2025 with 'more than 4,400 qubits' available via Leap cloud, claimed as 'the world's largest' QPUs.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["edgar_fts.query_fulltext('Advantage2') -> 87 hits, top-10 ALL from D-Wave's own 8-Ks; no third-party/customer/analyst SEC filing corroborates", "edgar_fts.query_fulltext('annealing quantum', cik=AMZN) -> not run separately but consistent with the 0 Advantage2 hits in AMZN"],
+      "M_check": "Cross-filer external validation of product name + physical-vs-logical qubit calibration",
+      "M_value": "Advantage2 cross-filer mentions: 87 hits, all originating with D-Wave; zero mentions in AMZN (AWS Braket) filings",
+      "interpretation": "The qubit count claim is technically defensible — D-Wave's annealing architecture does provide thousands of *physical* qubits, but this is fundamentally different from gate-model qubit counts. Per Calibration Heuristic 9, headline qubit counts that conflate physical with logical qubits are MODERATE. The 'world's largest' framing is precisely the marketing language the rubric flags ('the metric changes monthly and absolute counts vary with how qubits are counted'). External-validation deficit is striking: a system being touted as the world's largest QPU has ZERO independent SEC-filing mentions — even its own AWS Braket distributor doesn't name the product. Score MODERATE: real hardware, real customers, but the framing overstates commercial significance."
+    },
+    {
+      "claim_id": "QBTS-5",
+      "claim_text": "FY2025 GAAP revenue of $24.6M (vs $8.8M FY2024); net loss $355.1M; accumulated deficit $982.0M.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": ["10-K Item 7 MD&A: revenue $24.6M FY25, $8.8M FY24; operating loss $100.4M; net loss $355.1M; accumulated deficit $982.0M as of Dec-31-2025", "Cash used in operating activities $72.0M in FY25", "Mastercard counterparty disclosure: 0 D-Wave mentions (claim QBTS-1) — none of the named blue-chip customers has D-Wave as a material counterparty"],
+      "M_check": "GAAP revenue vs market-implied valuation + counterparty materiality cross-check",
+      "M_value": "Revenue $24.6M against $355.1M net loss (~14.4x cash burn-to-revenue ratio); shareholder dilution to 358.7M shares outstanding; $19.65 share price -> ~$7.0B market cap on $24.6M revenue (~285x P/S)",
+      "interpretation": "Revenue is verifiably non-zero (real engagements with named customers), but the gap between commercial-stage marketing rhetoric ('the only commercial-grade quantum computing supplier with proven customers and production deployments') and the GAAP financial reality ($24.6M revenue, $355M annual loss, ~285x P/S multiple) is the canonical Quantum-vertical pattern. Calibration Heuristic 11 (revenue-recognition pattern) applies softly here: D-Wave does report GAAP revenue, but the magnitude is incompatible with the 'enterprise-scale adoption and deployment' narrative. The $982M accumulated deficit at 25 years from founding indicates the commercial economics have never been proven. Scored SEVERE because the narrative-vs-fundamentals divergence is material to investors evaluating QBTS as a near-term commercial quantum business."
+    },
+    {
+      "claim_id": "QBTS-6",
+      "claim_text": "Completed acquisition of Quantum Circuits, Inc. on Jan-20-2026 for $250M cash + 10.43M shares (~$455M total at the Feb-25-2026 $19.65 price), pivoting D-Wave into error-corrected gate-model technology.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["edgar_fts.query_fulltext('Quantum Circuits') -> 80 hits, top-10 ALL from D-Wave's own 8-Ks/press releases (Jan-2026 announcement / Jan-20-2026 closing / Q1-2026 10-Q)", "Acquisition disclosed as subsequent event; SUBSEQUENT EVENTS note explicitly states 'The Company is currently evaluating the accounting and disclosure implications of the acquisition in accordance with ASC 805, Business Combinations.' — i.e. no preliminary purchase-price allocation yet"],
+      "M_check": "External cross-filer corroboration + Calibration Heuristic 10 (distress-marker / balance-sheet pivot)",
+      "M_value": "80 Quantum-Circuits mentions, all D-Wave self-disclosure; no Series-A/B/C VC counterparty disclosure or pre-acquisition third-party validation present in EDGAR",
+      "interpretation": "Calibration Heuristic 10 reading: 'large balance-sheet-pivot acquisitions are distress markers' — a $250M+ cash spend (more than 10x FY25 revenue) on a private gate-model startup that lacks any independent third-party SEC disclosure history is precisely the balance-sheet-pivot pattern the heuristic flags. The acquisition's strategic logic is real (gate-model is structurally different from D-Wave's legacy annealing business and is where commercial gate-model competitors operate), but completing such a pivot via dilutive ATM proceeds while emphasizing 'commercial revenue' from the legacy annealing line is a stage-mismatch. Scored MODERATE rather than SEVERE because the acquisition itself is genuine and consideration was disclosed, but the narrative shift it implies (annealing was the lead, now gate-model is too) is itself a tacit admission that the original annealing-only thesis was insufficient for the long-term TAM."
+    },
+    {
+      "claim_id": "QBTS-7",
+      "claim_text": "D-Wave generates revenue from 'research, academic, and government customers' purchasing on-premises Advantage2 systems.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["usaspending.query_recipient_contracts(recipient='D-Wave') -> 0 awards, $0 total", "usaspending.query_recipient_contracts(recipient='D-WAVE SYSTEMS') -> 0 awards", "usaspending.query_recipient_grants(recipient='D-Wave') -> 0 grants", "(Sanity-check: 'DWAVE' substring returned 55 awards but all are 2NDWAVE LLC / CLOUDWAVE Inc — confounders, not D-Wave Quantum)"],
+      "M_check": "USAspending federal contract/grant database for the 'government customers' implied claim",
+      "M_value": "USAspending: 0 contracts, 0 grants to any D-Wave entity over 2020-2026",
+      "interpretation": "The 10-K explicitly cites 'government customers' as a revenue source for on-prem Advantage2 system sales, but USAspending shows ZERO US federal contracts or grants to D-Wave under any naming variant. This does not rise to RED_FLAG under Layer 3 Rule 7 (D-Wave is a Canadian-headquartered company and its 'government customers' may refer to non-US sovereigns — e.g. the Jülich Forschungszentrum in Germany, Italian government), and the company does not explicitly claim US DoD / national-lab revenue in this filing. But the absence is informative: unlike US-domiciled quantum peers, D-Wave has no federal-grant lifeline and its government-customer revenue stream depends on a handful of non-US sovereign deployments that are not externally verifiable through EDGAR or USAspending. Scored MODERATE because the framing 'government customers' is vague enough to be technically true (Canadian / Italian sovereign deployments) but materially over-implies federal-customer breadth that the company does not have."
+    },
+    {
+      "claim_id": "QBTS-8",
+      "claim_text": "Net cash from financing activities of $779.1M in FY2025 — completed 100% of FOUR ATMs ($100M + $75M + $150M + $400M) plus $202.9M from warrant exercises — while shares outstanding grew from ~192M weighted avg to 358.7M total at Dec-31-2025.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": ["10-K Liquidity & Capital Resources: $97.2M (100M ATM), $72.9M (75M ATM), $146.1M (150M ATM, Q1-2025), $390.6M (400M ATM, Q2-2025), $202.9M warrant exercises -> ~$779M total financing", "All four ATM programs 100% drawn by Dec-31-2025", "Cash used in ops $72M FY25; revenue $24.6M FY25"],
+      "M_check": "Internal cross-consistency check on liquidity / dilution / quantum-vertical revenue-recognition heuristic",
+      "M_value": "FY25 financing inflow $779M vs FY25 revenue $24.6M (~32x revenue raised in equity in a single year); share count expanded ~85% during the year",
+      "interpretation": "Calibration Heuristic 10 (delisting / distress fingerprints) and Heuristic 11 (revenue-recognition divergence) are both implicated. Raising ~$779M in equity in a single fiscal year while generating $24.6M of revenue, plus the immediate deployment of $250M of that cash into a balance-sheet-pivot acquisition (Quantum Circuits), is the classic 'capital markets are the real business model' pattern. The company exhausted all four ATM facilities during FY25 — including a $400M ATM authorized in June 2025 and fully drawn within a single quarter. The June-July 2025 quantum-stock rally clearly created an opportunity-window the company exploited aggressively. Scored SEVERE because: (a) the dilution magnitude is material (>85% share-count growth in one year), (b) the equity issuance pace materially outstrips revenue/operations needs (cash balance ballooned to support multi-year runway and a $250M acquisition), and (c) this pattern, when combined with the counterparty-disclosure deficits in QBTS-1, QBTS-2, and QBTS-7, indicates the equity story is materially dependent on retail enthusiasm rather than on commercial-deployment economics."
+    }
+  ]
+}

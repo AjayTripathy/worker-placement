@@ -1,0 +1,138 @@
+{
+  "ticker": "HWM",
+  "scores": [
+    {
+      "claim_id": "c1",
+      "claim_text": "Defense aerospace = 19% of 2021 revenue (vs 19% in 2020, 13% in 2019).",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        {"source": "pentagon_jbook.query_program_funding", "args": {"contractor_name": "Howmet", "cutoff_date": "2023-01-15"}, "signal": "NOT_FOUND", "n_matches": 0},
+        {"source": "pentagon_jbook.query_program_funding", "args": {"contractor_name": "Arconic", "cutoff_date": "2023-01-15"}, "signal": "NOT_FOUND", "n_matches": 0},
+        {"source": "usaspending.query_dod_contracts", "args": {"recipient_name": "Howmet Aerospace"}, "n_awards": 0, "total_amount": 0.0}
+      ],
+      "M_check": "pentagon_jbook + usaspending",
+      "M_value": "no contractor-name match in J-Book corpus; usaspending returned zero DoD awards directly to 'Howmet Aerospace' (HWM is a sub-tier supplier to OEMs, not a DoD prime — so absence of prime contracts is expected, not falsifying)",
+      "interpretation": "Aggregate defense-share disclosure (19%) is a segment-mix statement, not a program-specific claim. The J-Book framework cannot verify or falsify aggregate-share claims; HWM is a sub-tier supplier whose DoD revenue flows through GE/RTX/Boeing/Lockheed primes (no direct DoD obligations expected on usaspending). Coverage gap, not a red flag."
+    },
+    {
+      "claim_id": "c2",
+      "claim_text": "Top 3 customers 2021: GE 13%, RTX 9%, Boeing 5% of sales.",
+      "severity": "PASS",
+      "supports": [
+        {"source": "edgar_fts.query_fulltext", "args": {"search_term": "Howmet", "cik": "0000040533", "cutoff_date": "2023-01-15"}, "total_hits": 0}
+      ],
+      "M_check": "edgar_fts counterparty disclosure",
+      "M_value": "General Dynamics (CIK 0000040533) filings have zero hits for 'Howmet' as of cutoff — consistent with the fact that GD is NOT in HWM's named top-3 (GE/RTX/Boeing are). Non-disconfirming.",
+      "interpretation": "Customer-concentration disclosure is internally coherent: HWM names GE Aviation, P&W (RTX), Boeing — all commercial-engine and airframe OEMs with significant defense tails (F135, F119, Boeing 737/767/787 + KC-46/P-8 derivatives). Counterparty filings would not be expected to itemize HWM since HWM is a component supplier. PASS on coherence; no contradictions surfaced."
+    },
+    {
+      "claim_id": "c3",
+      "claim_text": "Engine Products serves commercial + defense aerospace + industrial gas turbine — defense engine castings exposure.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        {"source": "pentagon_jbook.query_program_funding", "args": {"program_name": "F135", "cutoff_date": "2023-01-15"}, "signal": "NOT_FOUND", "n_matches": 0},
+        {"source": "pentagon_jbook.query_program_funding", "args": {"program_name": "F119", "cutoff_date": "2023-01-15"}, "signal": "NOT_FOUND", "n_matches": 0},
+        {"source": "pentagon_jbook.query_program_funding", "args": {"program_name": "T408", "cutoff_date": "2023-01-15"}, "signal": "NOT_FOUND", "n_matches": 0}
+      ],
+      "M_check": "pentagon_jbook (engine PEs F135/F119/T408)",
+      "M_value": "None of the candidate engine PEs are in the 410-PE corpus. Heuristic #7: NOT_FOUND in J-Book is a coverage gap, not a red flag — these are propulsion procurement line items the corpus may not cover.",
+      "interpretation": "HWM does not itself name F135/F119/T408 in the 10-K — these are inferred candidates because HWM names GE and P&W. Since neither the company-named claim nor the inferred PE candidate hits the corpus, UNVERIFIABLE. No divergence detected."
+    },
+    {
+      "claim_id": "c4",
+      "claim_text": "Engineered Structures titanium/aluminum/nickel forgings for airframe/wing/aero-engine/landing gear — defense aerospace + land and sea defense.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        {"source": "pentagon_jbook.query_program_funding", "args": {"program_name": "F-35", "cutoff_date": "2023-01-15"}, "signal": "NOT_FOUND_IN_TIMERANGE", "n_matches": 2, "matched": ["F-35 C2D2 (0604840F)", "F-35 Squadrons (0207142F)"]},
+        {"source": "pentagon_jbook.query_program_funding", "args": {"program_name": "V-22", "cutoff_date": "2023-01-15"}, "signal": "NOT_FOUND_IN_TIMERANGE", "n_matches": 1, "matched": ["CV-22 (0401318F)"]},
+        {"source": "pentagon_jbook.query_program_funding", "args": {"program_name": "Black Hawk", "cutoff_date": "2023-01-15"}, "signal": "NOT_FOUND", "n_matches": 0}
+      ],
+      "M_check": "pentagon_jbook (airframe PEs F-35, V-22, Black Hawk)",
+      "M_value": "F-35 C2D2 and F-35 Squadrons are in corpus but with FY 2026 funding rows only — NOT_FOUND_IN_TIMERANGE for a 2023 cutoff. V-22 / CV-22 similar (corpus shows FY26-only). Black Hawk not in corpus.",
+      "interpretation": "Heuristic #1: NOT_FOUND_IN_TIMERANGE → UNVERIFIABLE. Importantly, HWM itself does NOT name F-35, V-22, or Black Hawk in the 10-K slice — these are PEs an analyst would impute given HWM's product line. The 10-K stays at a generic 'defense aerospace' level. Framework cannot fire SEVERE/RED here because the company never made the program-specific claim."
+    },
+    {
+      "claim_id": "c5",
+      "claim_text": "Fastening Systems products are nose-to-tail on military aircraft + jet engines.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        {"source": "pentagon_jbook.query_program_funding", "args": {"program_name": "F-35", "cutoff_date": "2023-01-15"}, "signal": "NOT_FOUND_IN_TIMERANGE", "n_matches": 2},
+        {"source": "pentagon_jbook.query_program_funding", "args": {"program_name": "B-21", "cutoff_date": "2023-01-15"}, "signal": "NOT_FOUND_IN_TIMERANGE", "n_matches": 1, "matched": ["B-21 Raider (B02100)"]},
+        {"source": "pentagon_jbook.query_program_funding", "args": {"program_name": "KC-46", "cutoff_date": "2023-01-15"}, "signal": "NOT_FOUND_IN_TIMERANGE", "n_matches": 1, "matched": ["KC-46A Tanker Squadrons (0401221F)"]}
+      ],
+      "M_check": "pentagon_jbook (airframe procurement PEs)",
+      "M_value": "B-21 (B02100 procurement) and KC-46A (0401221F RDT&E) are in corpus but only FY26 funding rows — NOT_FOUND_IN_TIMERANGE for 2023 cutoff.",
+      "interpretation": "Same pattern as c4 — HWM doesn't name any specific program; the inferred candidate PEs are present in corpus but the corpus year coverage doesn't span the cutoff. UNVERIFIABLE per heuristic #1."
+    },
+    {
+      "claim_id": "c6",
+      "claim_text": "Forward production-ramp claim: HWM is under contract for new + existing military aircraft / engine programs, many contemplate production increases over next several years.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        {"source": "pentagon_jbook.query_program_funding", "args": {"contractor_name": "Howmet", "cutoff_date": "2023-01-15"}, "signal": "NOT_FOUND"},
+        {"source": "pentagon_jbook.query_program_funding", "args": {"program_name": "F-35", "cutoff_date": "2023-01-15"}, "signal": "NOT_FOUND_IN_TIMERANGE"},
+        {"source": "pentagon_jbook.query_program_funding", "args": {"program_name": "CH-53K", "cutoff_date": "2023-01-15"}, "signal": "NOT_FOUND"},
+        {"source": "usaspending.query_dod_contracts", "args": {"recipient_name": "Howmet Aerospace"}, "n_awards": 0}
+      ],
+      "M_check": "pentagon_jbook (contractor) + usaspending (DoD prime)",
+      "M_value": "Contractor lookup empty. Direct DoD prime obligations zero (HWM is sub-tier).",
+      "interpretation": "The forward-ramp claim is generic — not tied to any named PE. Framework cannot verify a production ramp without a named program; without a named program, J-Book divergence cannot be tested. UNVERIFIABLE, and a structural feature of HWM's disclosure style (generic, not PE-grounded). The J-Book pattern simply does not apply to this filing."
+    },
+    {
+      "claim_id": "c7",
+      "claim_text": "Defense aerospace cycle highly dependent on US/foreign government funding; military programs extend several years; defense spending reductions could reduce demand.",
+      "severity": "PASS",
+      "supports": [
+        {"source": "pentagon_jbook.query_program_funding", "args": {"contractor_name": "Howmet", "cutoff_date": "2023-01-15"}, "signal": "NOT_FOUND"},
+        {"source": "earmark_detector.query_earmark_status", "args": {"program_name": "F-35"}, "signal": "NOT_EARMARK"}
+      ],
+      "M_check": "pentagon_jbook + earmark_detector",
+      "M_value": "No contractor match; F-35 is not an earmark (regular Pentagon request, not a committee plus-up). No earmark sunset risk to bump severity.",
+      "interpretation": "This is a boilerplate risk-factor disclosure, not a forward-looking program claim. It correctly acknowledges defense-funding cyclicality without making testable assertions. PASS — disclosure is conservative and self-flagging, no divergence detectable."
+    },
+    {
+      "claim_id": "c8",
+      "claim_text": "2021 sales were down 5% YoY partly due to lower defense aerospace volumes — defense softness already visible.",
+      "severity": "PASS",
+      "supports": [
+        {"source": "pentagon_jbook.query_program_funding", "args": {"contractor_name": "Howmet", "cutoff_date": "2023-01-15"}, "signal": "NOT_FOUND"},
+        {"source": "usaspending.query_dod_contracts", "args": {"recipient_name": "Howmet Aerospace"}, "n_awards": 0}
+      ],
+      "M_check": "pentagon_jbook + usaspending",
+      "M_value": "No contractor match; no direct DoD obligations (sub-tier expected).",
+      "interpretation": "Company is self-disclosing a NEGATIVE — defense volumes already declined. This is an honest backward-looking admission, not a forward-looking inflated claim. No divergence pattern; if anything, sets a low forward bar. PASS."
+    },
+    {
+      "claim_id": "c9",
+      "claim_text": "Operates in 20 countries; US 68%, Europe 22% of revenue.",
+      "severity": "PASS",
+      "supports": [
+        {"source": "epa_frs.query_facilities", "args": {"facility_name": "Howmet", "state_abbr": "PA"}, "n_facilities": 1, "match": "HOWMET MEXICO HOLDINGS LLC at 201 Isabella St, Pittsburgh, PA 15212"}
+      ],
+      "M_check": "epa_frs facility lookup",
+      "M_value": "EPA registry shows Howmet at the disclosed Pittsburgh HQ address (201 Isabella St) — corroborates corporate presence; full international footprint not testable via EPA US registry alone but the principal office disclosure matches.",
+      "interpretation": "PASS — geographic disclosure is internally consistent and corroborated for the disclosed US HQ. Non-J-Book control claim."
+    },
+    {
+      "claim_id": "c10",
+      "claim_text": "Sales negatively affected by Boeing 737 MAX grounding and Boeing 787 production pause / reduced rates since May 2021 — commercial program headwinds.",
+      "severity": "PASS",
+      "supports": [
+        {"source": "edgar_fts.query_fulltext", "args": {"search_term": "Howmet", "cik": "0000012927", "cutoff_date": "2023-01-15"}, "total_hits": 0}
+      ],
+      "M_check": "edgar_fts on Boeing (CIK 0000012927)",
+      "M_value": "Boeing filings have zero hits for 'Howmet' as of cutoff — expected (HWM is one of thousands of suppliers; Boeing does not itemize component suppliers in 10-K). Non-disconfirming.",
+      "interpretation": "Honest commercial-headwind admission, not a J-Book-pattern claim. PASS — disclosed risk is conservative and reflects publicly visible 737 MAX / 787 production issues. Out-of-scope for J-Book divergence test."
+    }
+  ],
+  "_summary": {
+    "ticker": "HWM",
+    "cutoff": "2023-01-15",
+    "n_claims": 10,
+    "n_queries_executed": 18,
+    "severity_counts": {"PASS": 5, "MODERATE_UNDERDELIVERY": 0, "SEVERE_UNDERDELIVERY": 0, "RED_FLAG_NEGATIVE": 0, "UNVERIFIABLE": 5},
+    "jbook_grounded_claim_ids": ["c3", "c4", "c5", "c6", "c8"],
+    "jbook_pentagon_fired_claim_ids": ["c4", "c5"],
+    "framework_note": "HWM's 10-K does not name a single Pentagon Program Element or program-of-record title — it stays at the segment-aggregate level ('defense aerospace = 19% of revenue'). The J-Book divergence pattern requires program-specific claims to test; HWM provides none. Inferred candidate PEs (F-35, V-22, B-21, KC-46) exist in the corpus but resolve to NOT_FOUND_IN_TIMERANGE because the 410-PE corpus is FY 2026 books, which do not span the 2023-01-15 cutoff. Net: framework correctly produces UNVERIFIABLE rather than false-positive RED on a company that didn't make J-Book-grounded claims to begin with."
+  }
+}

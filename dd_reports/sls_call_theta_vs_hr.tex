@@ -1,0 +1,271 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{xcolor}
+\usepackage{mathtools}
+\usepackage{enumitem}
+
+\newcommand{\PAY}{\mathrm{PAY}}
+\newcommand{\dd}{\mathrm{d}}
+
+\title{\vspace{-2em}A Binary--Catalyst Call: When a Falling Hazard Ratio Cancels Theta}
+\author{SELLAS / SLS --- GPS REGAL readout}
+\date{2026-06-02}
+
+\begin{document}
+\maketitle
+\vspace{-1.5em}
+
+\section*{Setup}
+
+A binary catalyst (the REGAL topline) lands at a random month $\tau$ with arrival density
+$f(\tau)$ and survival $S(t)=P(\tau>t)=\int_t^\infty f$. Define the \emph{readout hazard}
+\[
+  h(t)\;=\;\frac{f(t)}{S(t)}.
+\]
+At the readout the stock jumps to $U$ (success) with probability $p(\tau)$ or to $D$ (failure)
+otherwise. We hold a call struck at $K$, with $D<K<U$, paying
+$\PAY=U-K$ on success and $0$ on failure; $r$ is the risk-free rate. Pre-readout
+diffusion is ignored (appropriate for a binary event).
+
+Conditional on \emph{no readout yet} at month $t$, the call is the discounted,
+probability-weighted payoff over every time $\tau\in(t,T]$ it could still fire before
+expiry $T$:
+\begin{equation}
+  \boxed{\;C(t)\;=\;\frac{1}{S(t)}\int_t^T f(\tau)\,p(\tau)\,\PAY\,e^{-r(\tau-t)}\,\dd\tau\;}
+  \label{eq:C}
+\end{equation}
+where $p(\tau)$ rises with $\tau$ because a slower-accruing trial implies a lower hazard
+ratio (Sec.~\ref{sec:hr}); we model $p(\tau)=\mathrm{clip}\!\big(p_0+\alpha\tau,\,0,1\big)$,
+so $\dd p/\dd t=\alpha>0$.
+
+\section*{The exact dynamics: one ODE}
+
+Differentiate \eqref{eq:C}. Writing $C(t)=\PAY\,e^{rt}G(t)/S(t)$ with
+$G(t)=\int_t^T f\,p\,e^{-r\tau}\dd\tau$, so that $G'(t)=-f(t)p(t)e^{-rt}$, and using
+$S'(t)=-f(t)$,
+\[
+  \frac{\dd}{\dd t}\!\left(\frac{e^{rt}}{S(t)}\right)
+  = \frac{e^{rt}}{S(t)}\big(r+h(t)\big),
+\]
+the two terms collapse to a single linear ODE:
+\begin{equation}
+  \boxed{\;\frac{\dd C}{\dd t}
+  \;=\;\big(r+h\big)\,C\;-\;h\,p\,\PAY
+  \;=\;\underbrace{r\,C}_{\text{carry}}
+  \;+\;\underbrace{h\big[\,C-p\,\PAY\,\big]}_{\text{jump term}}\;}
+  \label{eq:ode}
+\end{equation}
+
+\paragraph{Numerical verification (exact, not approximate).}
+At $t=2$ ($h=0.406/\text{mo}$, $C=5.28$, $p=0.50$, $\PAY=10$):
+\[
+  (r+h)C-h\,p\,\PAY
+  = 0.4093(5.28)-0.406(5.0)
+  = 2.161-2.030 = +0.131/\text{mo},
+\]
+matching the numerically differentiated $\dd C/\dd t=+0.131$. At $t=4$ the ODE gives
+$-0.004$ versus an actual $-0.002$. Equation~\eqref{eq:ode} \emph{is} the dynamics.
+
+\section*{The two forces}
+
+The jump term is $h\,[\,C-p\,\PAY\,]$. Split the gap $C-p\,\PAY$ into a miss-drag and a
+rising-$p$ lift, with $q(t)\equiv S(T)/S(t)$ the probability the readout \emph{misses}
+expiry given none yet:
+\begin{equation}
+  \frac{\dd C}{\dd t}\;\approx\;
+  \underbrace{-\,h\,p\,\PAY\,q}_{\textbf{THETA (miss-drag)}}
+  \;+\;\underbrace{\alpha\,\PAY\,(1-q)}_{\textbf{RISING-}p\ \textbf{(falling HR)}}
+  \;+\;rC .
+  \label{eq:split}
+\end{equation}
+
+\begin{center}
+\begin{tabular}{cccccc}
+\toprule
+$t$ (mo) & $h$/mo & $q=S(T)/S(t)$ & THETA & RISING-$p$ & net $\dd C/\dd t$ \\
+\midrule
+0.5 & 0.03 & 0.010 & $-0.00$ & $+0.25$ & $+$ climb \\
+2.0 & 0.41 & 0.014 & $-0.03$ & $+0.25$ & $+$ climb \\
+4.0 & 0.74 & 0.047 & $-0.19$ & $+0.24$ & $\approx 0$ peak \\
+5.0 & 0.83 & 0.102 & $-0.49$ & $+0.22$ & $-$ decay \\
+7.0 & 0.95 & 0.617 & $-3.68$ & $+0.10$ & $-$ collapse \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section*{The cancellation condition}
+
+Setting $\dd C/\dd t=0$ in \eqref{eq:ode} (dropping the small $rC$) gives the flat-call
+locus two equivalent ways:
+\begin{equation}
+  C(t)\;=\;p(t)\,\PAY\cdot\frac{h}{r+h}\;\approx\;p(t)\,\PAY
+  \qquad\Longleftrightarrow\qquad
+  \boxed{\;q^\*(t)\;=\;\frac{\alpha}{\alpha+p\,h(t)}\;}
+  \label{eq:cancel}
+\end{equation}
+The call is flat exactly when its pre-readout value equals its \emph{fire-now} value
+$p\,\PAY$. It \textbf{climbs while $q(t)<q^\*$} and \textbf{decays once $q(t)>q^\*$}.
+With $q^\*\approx 0.06$ throughout, the crossover is at $t^\*\approx 4$ months --- the
+observed price peak ($C\approx\$5.47$).
+
+\section*{What ``HR cancels theta'' really means}
+
+The loose phrasing is imprecise; the exact picture from \eqref{eq:split} is:
+\begin{itemize}[leftmargin=1.4em,itemsep=2pt]
+  \item \textbf{Early, theta is already $\sim\!0$} --- not because rising-$p$ cancels it,
+        but because $q\approx0.01$: a readout this likely to beat a Jan-2027 expiry has
+        almost no decay to cancel ($-h\,p\,q\,\PAY\approx-\$0.03/\text{mo}$).
+  \item \textbf{The falling HR adds a positive drift} ($\approx\alpha\,\PAY\approx
+        +\$0.25/\text{mo}$) on top of $\sim\!0$ theta, so the call \emph{climbs} rather
+        than merely holding flat.
+  \item \textbf{True one-for-one cancellation occurs only in a narrow band at the peak}
+        ($t^\*\approx4$ mo), where theta has grown to $-\$0.19/\text{mo}$ and finally
+        matches the $+\$0.24/\text{mo}$ lift.
+\end{itemize}
+
+\section*{$\alpha$ is pinned by the science, not a free knob}
+\label{sec:hr}
+
+The lift slope is
+\[
+  \alpha=\frac{\dd p}{\dd t}=\frac{\dd p}{\dd\,\mathrm{HR}}\cdot\frac{\dd\,\mathrm{HR}}{\dd t}.
+\]
+The ABC fit to the public death trajectory gives a drift
+$\dd\,\mathrm{HR}/\dd t\approx-0.07$ over the accrual window (median interim
+$\mathrm{HR}\,0.71\to$ final $0.64$ as deaths accrue slowly); the two-state PoS map turns
+this into $\dd p/\dd t\approx+0.025/\text{mo}$. That \emph{negative} $\dd\mathrm{HR}/\dd t$
+is the entire source of the RISING-$p$ term.
+
+\paragraph{Counterfactual.} Set $\alpha=0$ (HR does \emph{not} fall as the trial drags).
+Then the lift vanishes and \eqref{eq:split} reduces to
+$\dd C/\dd t = rC - h\,p\,q\,\PAY \le 0$ for all $t$: \textbf{no climb, no hump --- the call
+only ever decays.} The hump exists \emph{iff} HR falls with time.
+
+\section*{The rigorous $p(\tau)$: a filtered ABC posterior}
+
+The linear ramp above is a teaching device. The defensible object is the \textbf{filtered
+posterior}
+\[
+  p(\tau)=P\!\big(\text{final logrank HR}<0.636 \,\big|\, \mathcal{D}_{\text{now}},\
+  \text{80th death at month } 64+\tau\big),
+\]
+obtained by accepting ABC draws (flat over the GPS cure-tail; wide priors on BAT median OS,
+dropout, differential transplant, Weibull shape) that reproduce the \emph{public death
+trajectory through today} --- 60th death at month~46, 72 deaths by month~58, 78 by month~64,
+interim passed futility --- then binning the survivors by the simulated arrival month of the
+80th death and reading off the success rate. BAT is marginalized out; sampling noise and the
+cure-tail non-proportionality are intrinsic.
+
+\begin{center}
+\begin{tabular}{lcccccccc}
+\toprule
+$\tau$ (mo) & 0 & 1 & 2 & 3 & 4 & 6 & 8 & 12 \\
+\midrule
+$p(\tau)$ filtered & 0.40 & 0.43 & 0.46 & 0.49 & 0.53 & 0.57 & 0.62 & 0.71 \\
+naive $0.45+0.025\tau$ & 0.45 & 0.48 & 0.50 & 0.52 & 0.55 & 0.60 & 0.65 & 0.74 \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Three corrections to the ramp:
+\begin{itemize}[leftmargin=1.4em,itemsep=2pt]
+  \item \textbf{Slope --- vindicated.} Local fit over $\tau\le 7.5$:
+        $p(\tau)\approx 0.405 + 0.0275\,\tau$. The naive $+0.025/\text{mo}$ was essentially right.
+  \item \textbf{Level --- too high.} Real intercept $\approx 0.40$ vs naive $0.45$; the
+        readout-timing-weighted \textbf{PoS today is $0.48$, not $0.52$} --- and it is now
+        \emph{derived from the trajectory}, not assumed.
+  \item \textbf{Shape --- convex and saturating.} $p(\tau)$ accelerates mildly, then bends
+        toward a $\sim\!0.71$ ceiling; the line has neither feature (hence its $\mathrm{clip}$).
+\end{itemize}
+
+Feeding the filtered $p(\tau)$ through the \emph{same} option integral:
+\begin{center}
+\begin{tabular}{lccccc}
+\toprule
+$t$ (mo) & 0 & 2 & 4 (peak) & 6 & 7 \\
+\midrule
+$C_{\text{naive}}$ & 5.13 & 5.28 & 5.47 & 4.64 & 2.41 \\
+$C_{\text{real}}$  & 4.77 & 4.94 & 5.21 & 4.43 & 2.31 \\
+diff & $-0.36$ & $-0.34$ & $-0.26$ & $-0.21$ & $-0.11$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{What survives and what moves.} The physics --- the hump, $\dd C/\dd t=0$ at
+$q^\*=\alpha/(\alpha+ph)$, the 4-month no-bleed horizon --- is \textbf{robust}: it rides on the
+\emph{slope} $\alpha>0$, which the ABC confirms, and the peak stays at $t^\*\approx 4$ months
+under both $p$-specifications. The \emph{level} moves: fair value drops a near-uniform
+$\sim\!\$0.30$ ($C(0):5.13\to4.77$, peak $5.47\to5.21$), so the call is cheap versus the
+\$4.30 mid by $\sim\!11\%$ (real) rather than $\sim\!19\%$ (naive). The directional edge is real
+but smaller once the level is \emph{earned} rather than assumed.
+
+\paragraph{Caveats.} The readout-arrival law $f(\tau)$ here is still the assumed gamma (only
+$p(\tau)$ was replaced); a fully consistent build would also draw $f(\tau)$ from the ABC
+80th-death distribution. The analysis-lag component of $\tau$ is HR-uninformative, so the
+\emph{effective} slope against announcement time is modestly shallower than the $+0.0275$
+measured against death time (regression dilution).
+
+\section*{Fully consistent: timing \emph{and} outcome from one ABC pass}
+
+The section above still borrowed the assumed gamma for \emph{when} the readout lands. The honest
+endpoint draws both from a single ABC pass: each accepted draw carries its own success outcome
+\emph{and} its 80th-death month; the announcement is that death time plus an analysis lag
+($\sim$gamma, mean 2~mo). We price the call directly off the empirical joint --- no assumed timing
+law, no separately fitted $p(\tau)$ --- which also captures the strong-effect tail where the 80th
+death slips past the Jan-2027 expiry. (See the $C(t)$ comparison figure
+\texttt{sls\_call\_Ct\_curves.svg} / the rendered PDF.)
+
+\noindent Three things change, all tracing to one cause --- \textbf{timing and outcome are now
+coupled}:
+\begin{itemize}[leftmargin=1.4em,itemsep=2pt]
+  \item \textbf{The hump collapses.} Peak \$3.71 at $0.75$ mo (economically flat, then decay)
+        versus \$5.47 at $4$ mo. The 80th death is \emph{imminent} --- median $1.4$ months away,
+        since only two more deaths are needed --- so rising-$p$ has almost no window to act before
+        the catalyst resolves.
+  \item \textbf{Coupling cancels the lift.} A strong effect \emph{delays} the deaths, so the
+        high-success draws are precisely the ones that risk slipping past the Jan-2027 expiry
+        ($P(\text{slip})=14.3\%$). In the gamma model timing was independent of outcome, so
+        rising-$p$ lifted the price unopposed; here the lift is offset by the correlated slip-risk.
+        \textbf{The earlier hump was partly an artifact of that independence.}
+  \item \textbf{The edge reverses.} $C(0)=\$3.70$ versus the \$4.30 market mid: against a fixed
+        $U=\$20$ the call is $\sim\!14\%$ \emph{rich}, not cheap. The $11\text{--}19\%$
+        ``cheapness'' of the simpler models was an artifact of assumed-independent timing and the
+        higher assumed $p$-level.
+\end{itemize}
+
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+specification & $C(0)$ & peak & vs market \$4.30 \\
+\midrule
+naive (linear $p$, gamma timing) & \$5.13 & \$5.47 @ 4.0 mo & $\sim$19\% cheap \\
+real $p(\tau)$, gamma timing & \$4.77 & \$5.21 @ 4.0 mo & $\sim$11\% cheap \\
+fully consistent (timing $+$ outcome) & \$3.70 & \$3.71 @ 0.8 mo & $\sim$14\% rich$^*$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+\noindent{\small $^*$at fixed $U=\$20$ and strict event-driven analysis; reverses to cheap if
+$U\gtrsim\$24$ or a date-driven final cut caps the slip-risk.}
+
+\section*{Conclusion}
+
+\begin{quote}
+A falling hazard ratio converts an otherwise monotonically-decaying catalyst call into one that
+\textbf{appreciates until $q(t)=\alpha/(\alpha+p\,h)$} --- \emph{but only when the readout timing is
+independent of the outcome.} That assumption is what produces the $\sim\!4$-month no-bleed hump.
+Once the ABC couples timing to outcome --- a stronger effect delays the deaths, so the very draws
+that would win are the ones that risk expiring before they read out --- the lift is canceled, the
+hump collapses to a gentle decay, and the call's apparent cheapness ($\sim\!11\text{--}19\%$)
+reverses to roughly fair-to-rich at $U=\$20$.
+\end{quote}
+
+\noindent The model's verdict is therefore \textbf{conditional, not categorical}: the trade is
+attractive only if you believe the success-state price $U\gtrsim\$24$, or that a date-driven final
+analysis caps the $14\%$ expiry-slip risk. The robust, assumption-free takeaways are narrower:
+(i) the $q^\*=\alpha/(\alpha+ph)$ cancellation law holds whenever timing is exogenous; (ii) the
+trajectory-derived PoS is $\approx\!0.48$; and (iii) the dominant risk to a Jan-2027 call is not
+theta but a \emph{late readout} --- which, perversely, is most likely exactly when the drug works.
+
+\end{document}

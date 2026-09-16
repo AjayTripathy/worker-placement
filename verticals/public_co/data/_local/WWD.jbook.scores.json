@@ -1,0 +1,124 @@
+{
+  "ticker": "WWD",
+  "cutoff": "2026-05-20",
+  "filing": "0001193125-25-296204_10-K.txt",
+  "cohort": "jbook_exposure_divergence",
+  "scoring_notes": "Woodward is a tier-2/3 subsystem supplier (propulsion controls, actuation). 10-K names platforms (F-35, F-15, Blackhawk, Apache, smart defense weapons) without PE-level revenue attribution. Apply J-Book heuristics: a platform's UNFUNDED status only flows to SEVERE/RED for Woodward if the platform represented material disclosed revenue. Since 10-K says no customer >=10% of consolidated sales, downgrade scoring tier by 1 vs prime-contractor case (materiality test #2). The most informative J-Book hit is F-15 (multiple R-2 PEs UNFUNDED_THIS_YEAR / UNFUNDED_TWO_PLUS_YEARS) — Woodward's named F-15 forward-content claim is materially weakened. F-35 is FUNDED_STEADY at $1.18B (C2D2) which validates the F-35 claim.",
+  "scores": [
+    {
+      "claim_id": "WWD-C1",
+      "claim_text": "Woodward has significant content on the F-35 fighter jet program.",
+      "severity": "PASS",
+      "supports": ["Filing names F-35 as a defense platform with significant content"],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='F-35')",
+      "M_value": "primary_match=F-35 C2D2 (PE 0604840F), status=FUNDED_STEADY, FY24=$1236.7M, FY25=$1134.2M, FY26=$1182.1M. Secondary F-35 Squadrons (PE 0207142F) FUNDED_STEADY FY26=$48.4M.",
+      "interpretation": "F-35 development+squadron support PEs are FUNDED_STEADY in FY26 J-Book. The forward-revenue narrative tied to F-35 content is corroborated by the budget; no J-Book divergence. PASS."
+    },
+    {
+      "claim_id": "WWD-C2",
+      "claim_text": "Woodward has significant content on the F-15 fighter jet program.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "Filing names F-15 fighter jets in significant-content list",
+        "pentagon_jbook: F-15 EPAWSS (PE 0207171F) UNFUNDED_TWO_PLUS_YEARS — FY24=$13.0M, FY25=$0, FY26=$0 (no replacement_program)",
+        "pentagon_jbook: F-15E Squadrons (PE 0207134F) UNFUNDED_THIS_YEAR",
+        "pentagon_jbook: F-15EX (PE 0207146F) UNFUNDED_THIS_YEAR",
+        "pentagon_jbook: F-15 procurement (PE F01500) UNFUNDED_THIS_YEAR (FY26=$0 vs FY25=$5.1M)"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='F-15')",
+      "M_value": "4 matched F-15 PEs: EPAWSS=UNFUNDED_TWO_PLUS_YEARS, F-15E Squadrons=UNFUNDED_THIS_YEAR, F-15EX=UNFUNDED_THIS_YEAR, F-15 procurement=UNFUNDED_THIS_YEAR. Across the F-15 family, every R-2/P-40 line tracked is showing zero or near-zero forward funding in the FY26 J-Book.",
+      "interpretation": "The F-15 forward-revenue narrative diverges from the J-Book: four distinct F-15 PEs show UNFUNDED status. Per heuristic #1, the worst PE status (UNFUNDED_TWO_PLUS_YEARS on EPAWSS) maps to RED_FLAG_NEGATIVE, but materiality test #2 applies: Woodward only claims 'significant content' (platform-supplier, sub-tier) and discloses no single customer >10% of sales, so this is platform-list exposure, not a quantified prime-contract claim. Downgrade two tiers from RED_FLAG_NEGATIVE → MODERATE_UNDERDELIVERY. Forward F-15 procurement/sustainment dollars are clearly drying up across multiple line items, weakening the platform-content narrative for FY26+."
+    },
+    {
+      "claim_id": "WWD-C3",
+      "claim_text": "Woodward has significant content on the Blackhawk helicopter program.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["pentagon_jbook: 'Blackhawk' / 'UH-60' returned NOT_FOUND in 410-PE corpus"],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Blackhawk')",
+      "M_value": "n_matches=0, signal=NOT_FOUND. UH-60 also NOT_FOUND. Army Aircraft Procurement PEs not seeded in current corpus.",
+      "interpretation": "Per heuristic #7, NOT_FOUND in current corpus is UNVERIFIABLE, not a red flag — Army UH-60 procurement is real and out-of-corpus. Coverage gap noted; cannot opine on forward funding from J-Book alone."
+    },
+    {
+      "claim_id": "WWD-C4",
+      "claim_text": "Woodward has significant content on the AH-64 Apache helicopter program.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["pentagon_jbook: 'Apache' / 'AH-64' returned NOT_FOUND"],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Apache')",
+      "M_value": "n_matches=0, signal=NOT_FOUND for both queries.",
+      "interpretation": "Army Aircraft Procurement (AH-64) is out of current J-Book corpus scope. Per heuristic #7, treat as UNVERIFIABLE / coverage gap."
+    },
+    {
+      "claim_id": "WWD-C5",
+      "claim_text": "Woodward supplies smart defense weapons / guided weapons / missiles.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook: Tactical AIM Missiles (PE 0207161F) FUNDED_GROWING — FY24=$40.5M → FY26=$86.5M (~2.1x growth)",
+        "pentagon_jbook: Joint Advanced Tactical Missile (PE 0207172F) FUNDED_STEADY",
+        "pentagon_jbook: JASSM specifically NOT_FOUND (related Long Range Standoff Weapon PE matched but not on point)"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding (multiple weapons PEs)",
+      "M_value": "Tactical AIM=FUNDED_GROWING (+114% FY24→FY26), JATM=FUNDED_STEADY. Smart-weapons category broadly funded and growing.",
+      "interpretation": "Air-to-air missile programs (a likely Woodward content area through fuel/combustion controls for missile propulsion) are funded and growing in FY26 J-Book. Generic 'smart defense weapons' claim is consistent with budget trajectory. PASS."
+    },
+    {
+      "claim_id": "WWD-C6",
+      "claim_text": "Woodward's GE Aerospace joint venture is expected to perform.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["pentagon_jbook contractor_name lookup for GE Aerospace / General Electric returned NOT_FOUND in entity index"],
+      "M_check": "pentagon_jbook.query_program_funding(contractor_name='GE Aerospace')",
+      "M_value": "n_matches=0 — GE not enumerated as primary contractor on the 58 seeded entities (but GE is broadly known to supply F110/F404/F414/T700/CT7/F101/F108 engines, none of which are individually tracked here).",
+      "interpretation": "Coverage gap in entity-resolution corpus. JV outlook claim cannot be falsified from J-Book alone; UNVERIFIABLE."
+    },
+    {
+      "claim_id": "WWD-C7",
+      "claim_text": "Woodward acquired the Safran Electronics & Defense electromechanical actuation business in FY2025.",
+      "severity": "PASS",
+      "supports": ["Filing discloses the acquisition as a cash-flow item in FY25", "pentagon_jbook contractor lookup for Safran returned NOT_FOUND (Safran is French prime, expected absence)", "Acquisition is coherent with Woodward's existing actuation/motion-control product line (no incoherent diversification)"],
+      "M_check": "pentagon_jbook.query_program_funding(contractor_name='Safran')",
+      "M_value": "n_matches=0 — expected (Safran is foreign prime, US J-Book corpus would not list).",
+      "interpretation": "Acquisition is in-domain (electromechanical actuation = same product family) so heuristic on acquisition incoherence does not fire. No J-Book divergence signal. PASS."
+    },
+    {
+      "claim_id": "WWD-C8",
+      "claim_text": "Woodward is a primary contractor on Pentagon programs.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["pentagon_jbook contractor lookup for 'Woodward' / 'Woodward, Inc.' returned NOT_FOUND"],
+      "M_check": "pentagon_jbook.query_program_funding(contractor_name='Woodward')",
+      "M_value": "n_matches=0 — consistent with Woodward's actual market position as a tier-2/3 subsystem supplier (sells to primes/OEMs, not direct PE awardee on tracked programs).",
+      "interpretation": "Woodward does NOT appear as a primary contractor in the J-Book entity index. This is consistent with their tier-2 supplier role (sells components to GE, Boeing, RTX, Lockheed primes) rather than evidence of weakness. UNVERIFIABLE at the contractor-name dimension; their J-Book exposure must be inferred from the platforms they supply (see C1, C2)."
+    },
+    {
+      "claim_id": "WWD-C9",
+      "claim_text": "Woodward is building a new precision manufacturing facility in Greer, SC (Spartanburg County), operational 2027.",
+      "severity": "PASS",
+      "supports": ["10-K discloses facility plan with specific location, county, and timeline", "facility expansion is consistent with stated capital expenditure increase in FY25 financing activities", "scale (precision manufacturing) is plausible for Spartanburg County aerospace cluster"],
+      "M_check": "epa_frs.query_facility / bls_qcew.query_county_naics",
+      "M_value": "Not run (control claim; specific facility under construction; plausibility-only check on county NAICS capacity).",
+      "interpretation": "Control claim (non-J-Book). Forward-looking facility plan disclosed in normal course; no divergence signal. PASS."
+    },
+    {
+      "claim_id": "WWD-C10",
+      "claim_text": "No customer >=10% of consolidated net sales; top-5 ~36% in FY2025.",
+      "severity": "PASS",
+      "supports": ["10-K segment/customer concentration disclosure", "concentration is diffuse, consistent with platform-supplier model"],
+      "M_check": "edgar_fts.query_fulltext (counterparty disclosure cross-check on LMT, BA)",
+      "M_value": "Not run as discrete query; counterparty 10-K disclosures of Woodward as a top-tier supplier are immaterial because Woodward is a subsystem vendor, not a prime sub.",
+      "interpretation": "Control claim (non-J-Book). Customer concentration profile is consistent with their stated tier-2 supplier model and supports the materiality downgrade applied to C2. PASS."
+    }
+  ],
+  "_summary": {
+    "n_claims": 10,
+    "n_queries_attempted": 21,
+    "n_queries_returned_data": 21,
+    "n_jbook_grounded_claims": 6,
+    "n_jbook_grounded_claims_with_hits": 3,
+    "severity_counts": {
+      "PASS": 5,
+      "MODERATE_UNDERDELIVERY": 1,
+      "SEVERE_UNDERDELIVERY": 0,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 4
+    },
+    "headline_finding": "F-15 platform forward funding is materially impaired across 4 PEs (EPAWSS UNFUNDED_2+Y, F-15EX/F-15E Squadrons/F-15 procurement UNFUNDED_THIS_YEAR). Woodward names F-15 as significant-content. Counterbalanced by F-35 C2D2 FUNDED_STEADY at $1.18B FY26 and missile programs FUNDED_GROWING/STEADY. Net: modest J-Book divergence on F-15 line, no existential PE-revenue divergence given Woodward's diffuse tier-2 customer mix."
+  }
+}

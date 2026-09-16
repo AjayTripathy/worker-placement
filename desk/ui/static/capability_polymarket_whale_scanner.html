@@ -1,0 +1,100 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>polymarket_whale_scanner</title><style>
+body{margin:0;background:#0b0e12;color:#e8ebee;font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:26px 24px 90px}
+a{color:#8b7cf6} h1{font-size:23px;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:#7d858e;margin:0 0 20px;font-size:13px}
+h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:#7d858e;margin:24px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 10px;border-bottom:1px solid #242a31;text-align:left;vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#7d858e}
+.k{font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:20px}
+.k-generator{color:#c3b8fb;background:rgba(139,124,246,.15)}
+.k-detector{color:#eccb8a;background:rgba(217,164,65,.15)}
+.k-watcher{color:#8ee5c1;background:rgba(53,201,143,.15)}
+.k-evidence{color:#b3bcc6;background:rgba(138,147,158,.15)}
+.h-OK{color:#35c98f} .h-STALE{color:#d9a441} .h-ERROR{color:#e0736a} .h-NEVER_RUN{color:#8a939e}
+pre{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px;overflow-x:auto;font-size:12px;line-height:1.5}
+.panel{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px 18px;margin-bottom:12px}
+ul{margin:4px 0;padding-left:20px} li{margin-bottom:4px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+</style></head><body><div class="wrap"><h1>polymarket_whale_scanner</h1><p class="sub">registered capability · polymarket_whale_scanner</p><a href="signals.html">&larr; all signals</a><div class="panel" style="margin-top:10px"><span class="k k-generator">GENERATOR</span> &nbsp;<span class="h-NEVER_RUN"><b>NEVER_RUN</b></span> · last run <span class="mono">never</span></div><p>Stage 0b generator: LARGE single-wallet prints on Polymarket.  [index-only: prediction-market flow intel feeds calibration, not a holdings strategy]</p><form method="POST" action="/signals/run" style="margin:10px 0"><input type="hidden" name="name" value="polymarket_whale_scanner"><input name="symbol" placeholder="symbol (if applicable)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px"><input name="symbols" placeholder="universe, comma-sep (generators)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px;margin-left:6px"><button type="submit" style="background:#8b7cf6;color:#0b0e12;border:0;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;margin-left:6px">Run now</button></form><h2>Datasources</h2><ul><li>reference implementation: verticals/generators/polymarket_whale_scanner.py (see the code section for the feeds it touches)</li></ul><h2>Applies to</h2><ul></ul><h2>The code</h2><pre>&quot;&quot;&quot;polymarket_whale_scanner — Stage 0b generator: LARGE single-wallet prints on Polymarket.
+
+STATUS: ATTENTION-ALLOCATION ONLY — the pre-registered drift test (PREREGISTRATION_polymarket_
+whale.md, frozen 2026-07-05) has NOT run. Seeds carry NO priority; whale flow must never be
+cited as drift evidence (the Form-4 NULL lesson). What this scanner IS for today: (1) surfacing
+which EVENTS informed-looking money is engaging (attention routing to our event calendar);
+(2) accumulating the observation log the backtest needs.
+
+Pipeline: data-api.polymarket.com/trades?filterAmount=50000 (keyless) -&gt; log {proxyWallet, side,
+size, price, title, ts}; wallet track-record enrichment = phase 2 (Dune/Polygon join).
+
+  python3 verticals/generators/polymarket_whale_scanner.py [--min-usd 50000]
+Writes data/POLYMARKET_WHALES.json + appends data/whale_observation_log.jsonl. READ-ONLY.
+&quot;&quot;&quot;
+from __future__ import annotations
+import json, datetime, argparse, urllib.request
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+OUT = HERE / &quot;data&quot; / &quot;POLYMARKET_WHALES.json&quot;
+LOG = HERE / &quot;data&quot; / &quot;whale_observation_log.jsonl&quot;
+HDRS = {&quot;User-Agent&quot;: &quot;signalos-research 4tripathy@gmail.com&quot;}
+
+
+def scan(min_usd: int) -&gt; dict:
+    url = f&quot;https://data-api.polymarket.com/trades?filterType=CASH&amp;filterAmount={min_usd}&amp;limit=60&quot;
+    try:
+        with urllib.request.urlopen(urllib.request.Request(url, headers=HDRS), timeout=30) as r:
+            trades = json.load(r)
+    except Exception as e:
+        return {&quot;asof&quot;: datetime.datetime.utcnow().isoformat(), &quot;error&quot;: str(e), &quot;whales&quot;: []}
+    SPORTS = (&quot;vs.&quot;, &quot;Spread:&quot;, &quot;O/U&quot;, &quot;Exact Score&quot;, &quot;win on&quot;, &quot;Team to Advance&quot;, &quot;World Cup&quot;,
+              &quot;NBA&quot;, &quot;NFL&quot;, &quot;MLB&quot;, &quot;NHL&quot;, &quot;UFC&quot;, &quot;F1&quot;, &quot;Wimbledon&quot;, &quot;Grand Prix&quot;)
+    LEAK_PRONE = (&quot;acquired&quot;, &quot;acquisition&quot;, &quot;merger&quot;, &quot;buyout&quot;, &quot;FDA&quot;, &quot;approval&quot;, &quot;approve&quot;,
+                  &quot;announce&quot;, &quot;IPO&quot;, &quot;delist&quot;, &quot;SEC &quot;, &quot;DOJ &quot;, &quot;indict&quot;, &quot;pardon&quot;, &quot;recall&quot;)
+    rows = []
+    for t in trades if isinstance(trades, list) else []:
+        title = t.get(&quot;title&quot;) or &quot;&quot;
+        if any(k in title for k in SPORTS):
+            continue          # sports = the bulk of whale flow and pure noise for event-mapping
+        usd = float(t.get(&quot;size&quot;, 0)) * float(t.get(&quot;price&quot;, 0) or 1)
+        rows.append({&quot;wallet&quot;: (t.get(&quot;proxyWallet&quot;) or &quot;&quot;)[:12], &quot;side&quot;: t.get(&quot;side&quot;),
+                     &quot;usd&quot;: round(usd), &quot;price&quot;: t.get(&quot;price&quot;), &quot;outcome&quot;: t.get(&quot;outcome&quot;),
+                     &quot;title&quot;: (t.get(&quot;title&quot;) or &quot;&quot;)[:80], &quot;ts&quot;: t.get(&quot;timestamp&quot;),
+                     &quot;leak_prone_class&quot;: any(k.lower() in title.lower() for k in LEAK_PRONE)})
+    seen = set()
+    if LOG.exists():
+        for l in LOG.read_text().splitlines()[-500:]:
+            try:
+                d = json.loads(l); seen.add((d[&quot;wallet&quot;], d[&quot;ts&quot;], d[&quot;usd&quot;]))
+            except Exception:
+                pass
+    with LOG.open(&quot;a&quot;) as f:
+        for r in rows:
+            if (r[&quot;wallet&quot;], r[&quot;ts&quot;], r[&quot;usd&quot;]) not in seen:
+                f.write(json.dumps(r) + &quot;\n&quot;)
+    return {&quot;asof&quot;: datetime.datetime.utcnow().isoformat(), &quot;min_usd&quot;: min_usd, &quot;whales&quot;: rows}
+
+
+def main():
+    ap = argparse.ArgumentParser(); ap.add_argument(&quot;--min-usd&quot;, type=int, default=50000)
+    a = ap.parse_args()
+    res = scan(a.min_usd)
+    print(f&quot;=== POLYMARKET WHALE SCANNER  {res[&#x27;asof&#x27;][:16]}  (&gt;= ${a.min_usd/1000:.0f}k prints) ===&quot;)
+    for w in res.get(&quot;whales&quot;, [])[:15]:
+        print(f&quot;  ${w[&#x27;usd&#x27;]:&gt;8,}  {w[&#x27;side&#x27;]:&lt;4} {w[&#x27;outcome&#x27;] or &#x27;?&#x27;:&lt;4} @{w[&#x27;price&#x27;]}  {w[&#x27;title&#x27;]}&quot;)
+    if not res.get(&quot;whales&quot;):
+        print(&quot;  no qualifying prints this pass&quot; + (f&quot;  [error: {res.get(&#x27;error&#x27;)}]&quot; if res.get(&quot;error&quot;) else &quot;&quot;))
+    lp = [w for w in res.get(&quot;whales&quot;, []) if w.get(&quot;leak_prone_class&quot;)]
+    if lp:
+        print(f&quot;  LEAK-PRONE CLASS prints ({len(lp)}) — the insider-signature arm&#x27;s watch cohort (M&amp;A/approvals/announcements):&quot;)
+        for w in lp[:5]:
+            print(f&quot;    &gt;&gt;&gt; ${w[&#x27;usd&#x27;]:&gt;8,}  {w[&#x27;side&#x27;]} {w[&#x27;outcome&#x27;]}  {w[&#x27;title&#x27;]}&quot;)
+    print(&quot;  DOCTRINE: attention-allocation ONLY — pre-registered drift test NOT yet run; no seed priority.&quot;)
+    OUT.write_text(json.dumps(res, indent=1))
+    print(f&quot;[-&gt; {OUT.name} + whale_observation_log.jsonl]&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</pre></div></body></html>

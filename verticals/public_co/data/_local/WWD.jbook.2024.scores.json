@@ -1,0 +1,118 @@
+{
+  "ticker": "WWD",
+  "scores": [
+    {
+      "claim_id": "C1_f35_content_growth",
+      "claim_text": "Woodward has significant content on the F-35 Lightning II fighter program and counts it among the 'newer programs' increasing in production, supporting defense-segment growth in fiscal year 2024.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook PE 0604840F (F-35 C2D2): FUNDED_STEADY, FY2024 funded $1,236.71M",
+        "pentagon_jbook PE 0207142F (F-35 Squadrons): FUNDED_STEADY, FY2024 funded $88.99M",
+        "Name-based F-35 lookup returns 2 matched programs, both FUNDED_STEADY"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "FUNDED_STEADY across both F-35 PEs (C2D2 modernization $1.24B FY24, Squadrons $89M FY24)",
+      "interpretation": "F-35 program of record is healthy and growing in the J-Book through cutoff. Woodward's claim of significant F-35 content + 'newer programs increase' is consistent with the Pentagon's forward funding posture. No divergence."
+    },
+    {
+      "claim_id": "C2_f15_steady_up",
+      "claim_text": "The F-15 legacy program 'should maintain or potentially increase production' — Woodward expects F-15 content to be stable to growing.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook PE 0207146F (F-15EX RDT&E): FUNDED_STEADY, FY2024 $102M — this is the active F-15EX modernization line",
+        "pentagon_jbook PE 0207134F (F-15E Squadrons): FUNDED_STEADY, FY2024 $40.3M",
+        "pentagon_jbook PE 0207171F (F-15 EPAWSS electronic warfare upgrade): FUNDED_STEADY, FY2024 $13.0M",
+        "pentagon_jbook PE F01500 (legacy F-15A-D procurement): UNFUNDED_TWO_PLUS_YEARS — last funded 2008, n_consecutive_unfunded=3 — but this is the retired baseline procurement line, not relevant"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "Active F-15EX family FUNDED_STEADY; legacy procurement line F01500 zero (expected — legacy A-D variants out of production since 2008)",
+      "interpretation": "The active F-15 program (F-15EX new-build + F-15E squadrons + EPAWSS upgrade) is fully funded through FY2024 J-Book — supports Woodward's 'maintain or potentially increase' framing. The UNFUNDED_TWO_PLUS_YEARS signal on F01500 is a false positive (legacy line). Calibration heuristic #4 (PE name ambiguity) applied: most-likely-matched PE is F-15EX, not the legacy line. PASS."
+    },
+    {
+      "claim_id": "C3_kc46a_steady",
+      "claim_text": "KC-46A Tanker is one of the 'relatively steady' defense programs supporting Woodward's defense-segment baseline.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook PE 0401221F (KC-46A Tanker Squadrons): FUNDED_STEADY, FY2024 $78.7M, n_consecutive_unfunded=0"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "FUNDED_STEADY",
+      "interpretation": "KC-46A operations PE is fully funded. Note the J-Book corpus covers the operations/squadron PE; the larger procurement line is outside the 410-PE corpus but the operations funding tracks platform health. Claim corroborated."
+    },
+    {
+      "claim_id": "C4_v22_decline",
+      "claim_text": "V-22 Osprey is listed as a legacy program decreasing in production — Woodward already books this as a headwind.",
+      "severity": "PASS",
+      "supports": [
+        "pentagon_jbook PE 0401318F (CV-22 — AFSOC tiltrotor variant of V-22): FUNDED_STEADY, FY2024 $16.6M",
+        "Note: the Marine Corps Navy-procurement V-22 line (the larger volume driver) is outside the 410-PE corpus (Navy procurement P-40s underrepresented)"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "FUNDED_STEADY on the AFSOC operations variant only; main USMC/USN V-22 procurement not in corpus",
+      "interpretation": "Woodward's declining-V-22 claim aligns with the well-documented end of new V-22 production (last Marine Corps V-22 build-out was scheduled for completion in this window). The J-Book signal on the AFSOC operations PE (CV-22) being steady is not a contradiction — sustainment funding can continue while new-build procurement winds down. The company's claim is self-debasing (a headwind they already booked), so no underdelivery risk. PASS."
+    },
+    {
+      "claim_id": "C5_guided_tactical_weakness",
+      "claim_text": "Guided tactical weapons (JDAM, SDB, AIM-9X) are softening: Woodward expects 'overall demand to flatten' with production of some programs decreasing — a self-disclosed weak spot already pressuring FY2024 defense growth.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "pentagon_jbook PE 0207327F (Small Diameter Bomb): FUNDED_STEADY, FY2024 $42.86M — Pentagon still funding SDB modernization at modest level",
+        "pentagon_jbook program_name='JDAM': NOT_FOUND in 410-PE corpus (JDAM funded via Air Force Ammunition Procurement, not the RDT&E PEs that dominate this corpus)",
+        "pentagon_jbook program_name='AIM-9X': NOT_FOUND in corpus (Navy procurement)",
+        "pentagon_jbook program_name='Sidewinder': NOT_FOUND",
+        "Woodward 10-K already self-disclosed: 'we believe budget increases ... will support growth in fiscal year 2024, with the exception of our guided tactical weapons programs' + 'overall demand to flatten ... production of some programs decreasing'"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding (+ self-disclosure cross-check)",
+      "M_value": "Mixed — SDB R-2 line FUNDED_STEADY at low dollar amount ($42.9M); JDAM/AIM-9X procurement lines not in corpus (calibration heuristic #7: NOT_FOUND != red flag, treat as UNVERIFIABLE coverage gap). But Woodward itself flagged this segment as weakening.",
+      "interpretation": "Calibration heuristic #6 partially: the company is *already* telling the market guided-weapons demand is flat-to-down, and SDB R-2 funding at $43M is modest. Severity nudged to MODERATE_UNDERDELIVERY because: (a) WWD self-disclosed the weakness (no surprise relative to filing), (b) corpus gaps prevent ruling out worse on JDAM/AIM-9X. Important: the FY2023 10-K already shows defense OEM sales DECREASED in FY2023 ('primarily driven by the reduced demand for guided weapons') and the company expects only flattening — not recovery. Forward J-Book funding for these P-40 lines outside corpus would need to be checked but the company's own narrative is already a soft pre-warning."
+    },
+    {
+      "claim_id": "C6_t7a_trainer_growth",
+      "claim_text": "T-7A Trainer is named alongside F-35 as a new defense program supporting growth — Woodward implicitly expects FY2024+ production-rate ramp.",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "pentagon_jbook program_name='T-7A Trainer': NOT_FOUND (n_matches=0)",
+        "pentagon_jbook program_name='T-7A Red Hawk': NOT_FOUND",
+        "pentagon_jbook program_name='T-7': NOT_FOUND",
+        "T-7A is a known Air Force program (Boeing/Saab Red Hawk) — corpus gap, not a divergence signal"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding",
+      "M_value": "NOT_FOUND — corpus does not cover T-7A R-2 / P-40 line",
+      "interpretation": "Calibration heuristic #7: NOT_FOUND is UNVERIFIABLE, not a red flag. T-7A is publicly known to be in flight test with schedule slips through 2024 (test-fleet only, no production-rate Lot 1 funded at cutoff), but in-corpus data does not let us discriminate at the J-Book level. Note: the T-7A Air Force EMD program has had widely-reported schedule issues — a Mode B investigator-add finding worth flagging to the cohort lead, even though no in-corpus M-source confirms it. Mark UNVERIFIABLE."
+    },
+    {
+      "claim_id": "C7_rtx_concentration",
+      "claim_text": "RTX Corporation accounted for approximately 10% of consolidated net sales in fiscal year 2023 (and 11% in fiscal year 2022) — material counterparty.",
+      "severity": "PASS",
+      "supports": [
+        "edgar_fts: RTX filings (CIK 0000101829) returned only 1 historical hit on 'Woodward' (UTC-era 8-K from 2019-10-02) — no recent reciprocal disclosure. This is expected: RTX is the customer (RTX buys ~$290M of WWD; that's ~0.4% of RTX's ~$70B revenue, below RTX's own materiality threshold for counterparty disclosure)."
+      ],
+      "M_check": "edgar_fts.query_fulltext",
+      "M_value": "1 total hit, all pre-2024 — non-material from RTX's vantage point as expected",
+      "interpretation": "Absence of reciprocal RTX disclosure is consistent with WWD-as-supplier rather than WWD-as-customer-of-RTX. Claim is internally consistent and not contradicted. PASS."
+    },
+    {
+      "claim_id": "C8_ge_concentration",
+      "claim_text": "General Electric (GE) accounted for approximately 12% of consolidated net sales in fiscal year 2023 — Woodward's largest customer, tied to commercial engine joint venture.",
+      "severity": "PASS",
+      "supports": [
+        "usaspending.query_dod_contracts: Woodward, Inc. has 850 direct DoD awards totaling $186.5M (date range 2022-01-01 to 2024-09-01)",
+        "Top awards concentrated in UH-60 Black Hawk common fuel control upgrades (NSN 2915-01-587-7242) and turbine-engine spares — confirms real, sustained military propulsion-controls exposure independent of prime-contractor flow"
+      ],
+      "M_check": "usaspending.query_dod_contracts",
+      "M_value": "850 direct DoD awards, $186.5M total in window, dominated by UH-60 fuel-control sustainment",
+      "interpretation": "Cross-check confirms genuine defense exposure beyond the GE/RTX customer-concentration disclosure. The direct DoD pipeline is dominated by sustainment work (legacy fleet fuel controls), not new-program ramp — consistent with WWD's defense narrative being more sustainment-weighted than the F-35/T-7A growth language suggests. No claim divergence. PASS."
+    }
+  ],
+  "framework_notes": {
+    "jbook_grounded_claims": 6,
+    "jbook_grounded_claim_ids": ["C1_f35_content_growth","C2_f15_steady_up","C3_kc46a_steady","C4_v22_decline","C5_guided_tactical_weakness","C6_t7a_trainer_growth"],
+    "control_claims": 2,
+    "control_claim_ids": ["C7_rtx_concentration","C8_ge_concentration"],
+    "pentagon_jbook_fired_on": 5,
+    "pentagon_jbook_fired_claim_ids": ["C1_f35_content_growth","C2_f15_steady_up","C3_kc46a_steady","C4_v22_decline","C5_guided_tactical_weakness"],
+    "pentagon_jbook_not_found_on": 1,
+    "pentagon_jbook_not_found_claim_ids": ["C6_t7a_trainer_growth"],
+    "overall_divergence_assessment": "Woodward's J-Book exposure is GENUINELY DIVERSIFIED across multiple FUNDED_STEADY program-of-record lines (F-35 C2D2, F-15EX, F-15E Squadrons, KC-46A, CV-22, SDB). The company is a propulsion-controls supplier to primes, not a prime contractor, so its revenue ties to platform program health rather than to a single PE. The one self-disclosed soft spot (guided tactical weapons: JDAM/SDB/AIM-9X) is acknowledged in the 10-K as a headwind already pressuring defense OEM sales — no positive divergence to attack. Investigator-add (Mode B): T-7A Red Hawk has documented public EMD schedule slips that may delay the production ramp WWD implies, but the J-Book corpus doesn't surface this at the PE level. Overall: thesis is LOW-DIVERGENCE — WWD's named-program exposure largely matches the Pentagon's forward funding posture at cutoff."
+  }
+}

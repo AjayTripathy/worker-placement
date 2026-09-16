@@ -1,0 +1,116 @@
+{
+  "ticker": "AXON",
+  "cutoff": "2024-09-01",
+  "filing": "0001069183-24-000006_10-K.txt",
+  "secondary_filing": "0001069183-24-000049_10-Q.txt",
+  "notes": "AXON's 10-K (FY2023) and Q2-2024 10-Q narrative is dominated by state/local law enforcement (TASER, Axon body cameras, Evidence.com SaaS). DoD/Pentagon exposure is aspirational and unstructured: no named Program Elements (PEs), no named DoD programs (Skyborg/CCA/Project Maven/etc.), no quantified DoD program revenue. Closest DoD-adjacent vectors are: (a) general 'U.S. military' customer-base-expansion language, (b) the pending Dedrone acquisition (counter-UAS / airspace security) which has DoD-adjacent applications, (c) Sky-Hero (indoor tactical drones, competes with Brinc/XTEND), (d) 'federal agencies' as a customer category with no PE-tied dollar figures. This is essentially a state/local-government revenue story with DoD-adjacency as a future option. Per the J-Book heuristic, claims naming SPECIFIC PEs simply do not exist; pentagon_jbook is structurally not the primary verifier for AXON's core thesis. Most J-Book-grounded probes will return NOT_FOUND -> UNVERIFIABLE; that is the correct framework answer, not a defect.",
+  "claims": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Axon's customer base is expanding beyond law enforcement to include attorneys, corrections, fire and emergency medical services personnel and the U.S. military.",
+      "subject": "Axon Enterprise, Inc.",
+      "predicate": "customer_base_expansion_into",
+      "object_value": "U.S. military (unspecified branch/program)",
+      "source_quote": "the types of customers who find value in our product offerings are expanding beyond law enforcement to include attorneys, corrections, fire and emergency medical services personnel and the U.S. military.",
+      "category": "dod_customer_concentration",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "Axon Enterprise", "cutoff_date": "2024-09-01"}},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "Axon", "cutoff_date": "2024-09-01"}},
+        {"source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "Axon Enterprise, Inc."}}
+      ]
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Axon caters to federal agencies, corrections, justice and enterprise-level security needs by integrating hardware devices and cloud software solutions.",
+      "subject": "Axon Enterprise, Inc.",
+      "predicate": "serves_customer_segment",
+      "object_value": "federal agencies (unnamed)",
+      "source_quote": "Axon is building the public safety operating system of the future by integrating a suite of hardware devices and cloud software solutions that not only revolutionize modern policing but also cater to federal agencies, corrections, justice and enterprise-level security needs.",
+      "category": "dod_customer_concentration",
+      "queries": [
+        {"source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "Axon Enterprise"}},
+        {"source": "edgar_fts.query_fulltext", "kwargs": {"q": "Axon Enterprise", "cik": "0000040533"}}
+      ]
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Axon's indoor tactical drone hardware platform, Sky-Hero, competes with Brinc, Indoor Robotics and XTEND in the indoor tactical drone market.",
+      "subject": "Sky-Hero (Axon subsidiary)",
+      "predicate": "competitive_position_in",
+      "object_value": "indoor tactical drone market",
+      "source_quote": "Our indoor tactical drone hardware platform, Sky-Hero, competes with a few other companies in the space, including Brinc, Indoor Robotics and XTEND.",
+      "category": "jbook_program_pipeline",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"program_name": "Short Range Reconnaissance Program of Record", "cutoff_date": "2024-09-01"}},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "Sky-Hero", "cutoff_date": "2024-09-01"}},
+        {"source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "Sky-Hero"}}
+      ]
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Axon entered into a definitive agreement on April 30, 2024 to acquire the remaining outstanding stock of Dedrone Holdings, Inc., a market leader in airspace security (counter-UAS) combining hardware sensors with software to detect, identify, track and mitigate drones, for approximately $400.0 million.",
+      "subject": "Dedrone Holdings, Inc. (pending Axon acquisition)",
+      "predicate": "acquisition_with_market_position",
+      "object_value": "$400.0M; airspace security / counter-UAS market leader",
+      "source_quote": "On April 30, 2024, we entered into a definitive agreement to acquire the remaining outstanding stock of Dedrone Holdings, Inc. ... approximately $400.0 million ... Dedrone is a market leader in air space security combining hardware sensors with software to detect, identify, track and mitigate drones.",
+      "category": "jbook_program_pipeline",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "Dedrone", "cutoff_date": "2024-09-01"}},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"program_name": "Counter-Small Unmanned Aerial Systems", "cutoff_date": "2024-09-01"}},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"program_name": "C-UAS", "cutoff_date": "2024-09-01"}},
+        {"source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "Dedrone"}},
+        {"source": "acq_coherence.score_acquisition_coherence", "kwargs": {"acquirer_ticker": "AXON", "target_name": "Dedrone Holdings, Inc.", "deal_value_usd": 400000000, "cutoff_date": "2024-09-01"}}
+      ]
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "As of December 31, 2023, Axon had approximately $7.1 billion of future contracted revenue, expecting to recognize 15-25% over the next 12 months and the remainder generally over the following ten years, subject to risks including delayed deployments, budget appropriation or other contract cancellation clauses.",
+      "subject": "Axon Enterprise, Inc.",
+      "predicate": "future_contracted_revenue",
+      "object_value": "$7.1B remaining performance obligation (RPO)",
+      "source_quote": "As of December 31, 2023, we had approximately $7.1 billion of future contracted revenue, an increase from $4.6 billion as of December 31, 2022.",
+      "category": "rollup_thesis",
+      "queries": [
+        {"source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "Axon Enterprise"}},
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "Axon Enterprise", "cutoff_date": "2024-09-01"}}
+      ]
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "Federal agency orders may be canceled or substantially delayed due to budgetary, political or other scheduling delays; federal agencies may be particularly impacted by governmental impasse regarding continued government funding and debt limit constraints.",
+      "subject": "Axon Enterprise, Inc.",
+      "predicate": "risk_disclosure_dependency_on",
+      "object_value": "federal appropriations cycle (no named PE)",
+      "source_quote": "agency orders may also be canceled or substantially delayed due to budgetary, political or other scheduling delays, which frequently occur in connection with the acquisition of products by such agencies ... Federal agencies may be particularly impacted by governmental impasse regarding continued government funding and debt limit constraints, which has previously resulted in shutdowns of the federal government in 2018 and 2019.",
+      "category": "dod_customer_concentration",
+      "queries": [
+        {"source": "pentagon_jbook.query_program_funding", "kwargs": {"contractor_name": "Axon Enterprise", "cutoff_date": "2024-09-01"}},
+        {"source": "earmark_detector.query_earmark_status", "kwargs": {"program_name": "Axon Enterprise body camera procurement"}}
+      ]
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "Axon's protective measures for proprietary technology include patents, trademarks, copyrights and trade secret protection, supporting AXON's R&D-led product roadmap (TASER 10, Axon Body 4, AI/VR-based products).",
+      "subject": "Axon Enterprise, Inc.",
+      "predicate": "ip_portfolio_status",
+      "object_value": "patent estate covering CEDs, body cameras, AI/VR",
+      "source_quote": "Our future success depends upon our proprietary technology. Our protective measures for this proprietary technology include patents, trademarks, copyrights and trade secret protection.",
+      "category": "patent",
+      "queries": [
+        {"source": "uspto_odp.query_assignee", "kwargs": {"assignee_name": "Axon Enterprise"}}
+      ]
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Axon's corporate headquarters and manufacturing facilities are based in an approximately 100,000 square foot facility in Scottsdale, Arizona, which it owns; as of December 31, 2023, Axon had more than 15 leased locations.",
+      "subject": "Axon Enterprise, Inc.",
+      "predicate": "operates_facility_at",
+      "object_value": "~100,000 sq ft owned HQ in Scottsdale, AZ + 15+ leased locations",
+      "source_quote": "Our corporate headquarters and manufacturing facilities are based in an approximately 100,000 square foot facility in Scottsdale, Arizona, which we own.",
+      "category": "facility",
+      "queries": [
+        {"source": "epa_frs.query_facilities", "kwargs": {"company_name": "Axon Enterprise", "state": "AZ"}}
+      ]
+    }
+  ]
+}

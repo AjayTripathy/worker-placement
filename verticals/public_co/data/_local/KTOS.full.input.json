@@ -1,0 +1,139 @@
+{
+  "ticker": "KTOS",
+  "cutoff": "2026-05-20",
+  "filing": "0001069258-26-000013_10-K.txt",
+  "filing_date": "2026-02-23",
+  "filing_age_days": 86,
+  "claims": [
+    {
+      "claim_id": "ktos_001_usgov_revenue_concentration",
+      "claim_text": "In fiscal 2025, 68% of total revenues were derived from contracts with the U.S. Government (including all branches of the U.S. military and FMS), either as a prime contractor or a subcontractor.",
+      "subject": "Kratos Defense & Security Solutions, Inc.",
+      "predicate": "derives_revenue_pct_from",
+      "object_value": "U.S. Government=68%, FY2025",
+      "source_quote": "In fiscal 2025, 2024 and 2023, we generated 68%, 67% and 69%, respectively, of our total revenues from contracts with the U.S. Government (including all branches of the U.S. military and FMS), either as a prime contractor or a subcontractor.",
+      "category": "customer_concentration",
+      "queries": [
+        {"mode": "A", "source": "usaspending.query_recipient_contracts", "kwargs": {"recipient_name": "Kratos Defense"}, "rationale": "Mode A: confirm Kratos has material federal contract obligations consistent with ~$1B+ federal revenue (68% of ~$1.35B total)."},
+        {"mode": "B", "source": "usaspending.query_recipient_contracts", "kwargs": {"recipient_name": "Kratos Unmanned"}, "rationale": "Mode B: subsidiary-level entity resolution to ensure obligations sum to the ~$900M federal-revenue scale; if obligated $$ << disclosed federal revenue, MOD/SEVE."}
+      ]
+    },
+    {
+      "claim_id": "ktos_002_rpo_1573m",
+      "claim_text": "At Dec 28, 2025, Kratos had approximately $1,573.4 million of remaining performance obligations; expects 54% to be recognized as revenue in 2026, 20% in 2027, balance thereafter.",
+      "subject": "Kratos Defense & Security Solutions, Inc.",
+      "predicate": "has_remaining_performance_obligations",
+      "object_value": "$1,573.4M as of 2025-12-28",
+      "source_quote": "On December 28, 2025, the Company had approximately $ 1,573.4 million of remaining performance obligations. The Company expects to recognize approximately 54 % of the remaining performance obligations as revenue in 2026, an additional 20 % in 2027, and the balance thereafter.",
+      "category": "backlog_rpo",
+      "queries": [
+        {"mode": "A", "source": "sec_filings.list_filings_by_form", "kwargs": {"cik": "0001069258", "form": "10-K", "limit": 3}, "rationale": "Mode A: confirm 10-K on file and corroborate RPO disclosure is in the 10-K."},
+        {"mode": "B", "source": "usaspending.query_recipient_contracts", "kwargs": {"recipient_name": "Kratos"}, "rationale": "Mode B per heuristic 10: cross-check federal obligated $$ vs disclosed RPO. If federal obligations are materially below disclosed RPO of $1.57B AND the company says 68% of revenue is federal, the gap is a SEVE."}
+      ]
+    },
+    {
+      "claim_id": "ktos_003_dod_contracts_existence",
+      "claim_text": "Kratos is a long-established DoD prime with revenue across named programs including Valkyrie (XQ-58), Zeus solid rocket motors, Erinyes hypersonic flight systems, and Sentinel ICBM-related work.",
+      "subject": "Kratos Defense & Security Solutions, Inc.",
+      "predicate": "is_dod_prime_with_programs",
+      "object_value": "XQ-58 Valkyrie, Zeus SRM, Erinyes, Sentinel ICBM-related",
+      "source_quote": "These investments include unmanned jet powered aircraft such as Kratos Valkyrie ahead of potential contract award; a hypersonic system fabrication and integration facility including for Kratos Zeus solid rocket missiles (SRMs) and Erinyes hypersonic flight systems in Indiana ... establishment of a new facility related to the Sentinel intercontinental ballistic missile (ICBM) program",
+      "category": "customer_pipeline",
+      "queries": [
+        {"mode": "A", "source": "usaspending.query_dod_contracts", "kwargs": {"recipient_name": "Kratos"}, "rationale": "Mode A: confirm DoD contracts exist for Kratos."},
+        {"mode": "B", "source": "pentagon_jbook.query_program_funding", "kwargs": {"program_name": "Valkyrie"}, "rationale": "Mode B: PB-line check across the most-recent two PB releases for the named programs (Valkyrie / CCA). Zero-out or wind-down in newest PB is SEVE even if past obligations exist."}
+      ]
+    },
+    {
+      "claim_id": "ktos_004_ge_aerospace_teaming",
+      "claim_text": "Kratos has a formal teaming agreement with GE Aerospace to advance development and production of engines for the next generation of affordable unmanned aerial systems and Collaborative Combat Aircraft (CCA)-type aircraft, including a planned small turbofan jet engine production facility in Oklahoma.",
+      "subject": "Kratos Defense & Security Solutions, Inc.",
+      "predicate": "has_teaming_partnership_with",
+      "object_value": "GE Aerospace (CCA-type engines, Oklahoma facility)",
+      "source_quote": "GE Aerospace ( GE ) announced a formal teaming agreement to advance the development and production of engines for the next generation of affordable unmanned aerial systems and Collaborative Combat Aircraft-type (CCA-type) aircraft",
+      "category": "counterparty_disclosure",
+      "queries": [
+        {"mode": "A", "source": "sec_filings.list_filings_by_form", "kwargs": {"cik": "0001069258", "form": "8-K", "limit": 20}, "rationale": "Mode A: confirm Kratos disclosed the GE teaming arrangement via 8-K or 10-K narrative."},
+        {"mode": "B", "source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Kratos", "cik": "0000040545"}, "rationale": "Mode B: GE Aerospace CIK 0000040545 - search GE's disclosures for any mention of Kratos. Zero hits when Kratos publicly claims a 'formal teaming agreement' would be SEVE per heuristic 7 (though for engine supplier-tier teaming, partial mention may suffice for PASS)."}
+      ]
+    },
+    {
+      "claim_id": "ktos_005_rafael_prometheus",
+      "claim_text": "Kratos has a Prometheus venture with Rafael (Israeli defense company), with investments expected to ramp up during 2026.",
+      "subject": "Kratos Defense & Security Solutions, Inc.",
+      "predicate": "has_joint_venture_with",
+      "object_value": "Rafael (Prometheus venture)",
+      "source_quote": "Investments related to the Company s Prometheus venture with Rafael and the new turbofan production facility in Oklahoma related to our arrangement with GE Aerospace are expected to begin to ramp up during 2026.",
+      "category": "counterparty_disclosure",
+      "queries": [
+        {"mode": "A", "source": "sec_filings.list_filings_by_form", "kwargs": {"cik": "0001069258", "form": "8-K", "limit": 30}, "rationale": "Mode A: confirm 8-K disclosure of the Prometheus / Rafael venture."},
+        {"mode": "B", "source": "claim_evolution.query_claim_evolution", "kwargs": {"cik": "0001069258", "claim_keyword": "Prometheus Rafael"}, "rationale": "Mode B: check evolution of Prometheus/Rafael language in prior filings - persistent disclosure pattern vs new-this-cycle hype."}
+      ]
+    },
+    {
+      "claim_id": "ktos_006_acq_norden_nomad",
+      "claim_text": "Kratos issued 1,095,674 shares (deemed value $32.2M) to acquire assets of Norden Millimeter (Feb 2025) and consummated the Nomad Global Communication Solutions acquisition on Feb 11, 2026 (issued 972,136 shares deemed $88M plus up to $23M earnouts).",
+      "subject": "Kratos Defense & Security Solutions, Inc.",
+      "predicate": "completed_acquisitions",
+      "object_value": "Norden Millimeter (Feb 2025, $32.2M stock); Nomad Global Communication Solutions (Feb 2026, $88M stock + earnouts)",
+      "source_quote": "On February 4, 2025, pursuant to an Asset Purchase Agreement among the Company, Kratos Microwave, Inc., and Norden Millimeter, Inc. ... the Company issued 1,095,674 shares of its common stock, with a deemed value of $32.2 million ... The Nomad acquisition was consummated on February 11, 2026 ... issued 972,136 shares of Kratos common stock with a deemed value of $ 88",
+      "category": "rollup_thesis",
+      "queries": [
+        {"mode": "A", "source": "sec_filings.list_filings_by_form", "kwargs": {"cik": "0001069258", "form": "8-K", "limit": 30}, "rationale": "Mode A: confirm 8-Ks for Norden and Nomad acquisitions exist."},
+        {"mode": "B", "source": "acq_coherence.score_acquisition_coherence", "kwargs": {"parent_thesis": "Kratos is a defense-tech prime focused on affordable hardware: unmanned drones (Valkyrie/CCA), hypersonics (Zeus/Erinyes), microwave electronics, jet engines for drones, and C5ISR. The roll-up thesis is bolt-on subscale defense electronics and tactical comms shops that fit the prime-supplier hardware portfolio.", "acquisitions": ["Norden Millimeter (microwave / millimeter-wave electronics)", "Nomad Global Communication Solutions (mobile connected operations centers / tactical comms)", "Florida Turbine Technologies / KTT Core (small turbojet/turbofan engines for drones; majority-owned since 2019, top-up to 100% in 2024-2025)"]}, "rationale": "Mode B: roll-up coherence check on the aggregate. Norden=microwave (fits microwave electronics segment), Nomad=tactical comms (fits C5ISR), FTT=jet engines (fits drones/CCA). Should score high coherence; low coherence would be SEVE."}
+      ]
+    },
+    {
+      "claim_id": "ktos_007_facilities_62_locations",
+      "claim_text": "At Dec 28, 2025, Kratos owned or leased approximately 2.4 million square feet at 62 separate locations primarily in the U.S., plus international (Australia, Canada, France, Germany, Israel, Norway, UK).",
+      "subject": "Kratos Defense & Security Solutions, Inc.",
+      "predicate": "operates_facilities",
+      "object_value": "~2.4M sqft, 62 locations, US + 7 international countries",
+      "source_quote": "At December 28, 2025, we owned or leased approximately 2.4 million square feet of floor space at 62 separate locations, primarily in the U.S., for manufacturing, warehousing, research and development, administration and various other uses.",
+      "category": "physical_facility",
+      "queries": [
+        {"mode": "A", "source": "epa_frs.query_facilities", "kwargs": {"company_name": "Kratos"}, "rationale": "Mode A: confirm physical facility footprint via EPA FRS (heuristic 1: light electronics may not be in FRS; assess accordingly)."},
+        {"mode": "B", "source": "osha_establishments.query_establishments", "kwargs": {"company_name": "Kratos Defense"}, "rationale": "Mode B: OSHA establishments cross-check - confirms manufacturing presence at multiple US locations."}
+      ]
+    },
+    {
+      "claim_id": "ktos_008_icfr_clean",
+      "claim_text": "Management concluded that Kratos's internal control over financial reporting was effective at the reasonable assurance level as of Dec 28, 2025; Deloitte & Touche issued an unqualified opinion on ICFR.",
+      "subject": "Kratos Defense & Security Solutions, Inc.",
+      "predicate": "icfr_opinion",
+      "object_value": "Effective (unqualified, Deloitte & Touche)",
+      "source_quote": "internal control over financial reporting was effective at the reasonable assurance level as of December 28, 2025 ... internal control over financial reporting has been audited by Deloitte & Touche LLP, an independent registered public accounting firm, as stated in their report appearing below, which expresses an unqualified opinion on the effectiveness of our internal control over financial reporting.",
+      "category": "icfr",
+      "queries": [
+        {"mode": "A", "source": "sec_filings.list_filings_by_form", "kwargs": {"cik": "0001069258", "form": "10-K", "limit": 5}, "rationale": "Mode A: confirm 10-K on file with auditor opinion."},
+        {"mode": "B", "source": "claim_evolution.query_claim_evolution", "kwargs": {"cik": "0001069258", "claim_keyword": "material weakness"}, "rationale": "Mode B: check for prior material-weakness language, restatements, or adverse opinions in claim evolution. Recurring material weakness is RED."}
+      ]
+    },
+    {
+      "claim_id": "ktos_009_israel_facility_expansion",
+      "claim_text": "Kratos is expanding existing microwave electronics manufacturing facility in Israel, and establishing an additional space-qualified microwave electronics facility in Israel.",
+      "subject": "Kratos Defense & Security Solutions, Inc.",
+      "predicate": "operates_facilities_in",
+      "object_value": "Israel (microwave electronics, space-qualified)",
+      "source_quote": "expansion of our existing microwave electronics manufacturing facility in Israel, establishment of an additional microwave electronics facility in Israel, including a space qualified facility",
+      "category": "physical_facility",
+      "queries": [
+        {"mode": "A", "source": "sec_filings.list_filings_by_form", "kwargs": {"cik": "0001069258", "form": "10-K", "limit": 2}, "rationale": "Mode A: confirm Israeli subsidiary disclosure (Orbit, KGS Israeli operations)."},
+        {"mode": "B", "source": "edgar_fts.query_fulltext", "kwargs": {"search_term": "Kratos Israel microwave"}, "rationale": "Mode B: full-text cross-check for prior-period Israel facility narrative consistency."}
+      ]
+    },
+    {
+      "claim_id": "ktos_010_insider_calendar_check",
+      "claim_text": "Kratos has issued material stock as acquisition consideration (Norden Feb 2025 $32.2M; Nomad Feb 2026 $88M+; KTT/FTT 9.95% topup in shares) and is registered for resale (S-3 / registration rights to Nomad holders).",
+      "subject": "Kratos Defense & Security Solutions, Inc.",
+      "predicate": "has_dilutive_share_issuance",
+      "object_value": "~$120M+ in stock consideration over 12-month window; registration rights to Nomad holders",
+      "source_quote": "issued 972,136 shares of Kratos common stock with a deemed value of $ 88 ... registered the 972,136 shares of Kratos common stock issued to the former Nomad shareholders on February 11, 2026 with the SEC on February 12, 2026",
+      "category": "dilution_equity",
+      "queries": [
+        {"mode": "A", "source": "sec_filings.list_filings_by_form", "kwargs": {"cik": "0001069258", "form": "S-3", "limit": 5}, "rationale": "Mode A: confirm S-3 registration statements on file consistent with disclosed registration of acquisition shares."},
+        {"mode": "B", "source": "insider_vs_calendar.query_insider_sales_near_budget_events", "kwargs": {"cik": "0001069258", "window_days": 14, "start_date": "2024-01-01", "end_date": "2026-05-20"}, "rationale": "Mode B per Two-Mode DD Discipline: Form 4 timing vs PB releases / earnings / large fund-raise dates. CLUSTERED_DISCRETIONARY signal = SEVE-RED. Heuristic equity-raise check."}
+      ]
+    }
+  ]
+}

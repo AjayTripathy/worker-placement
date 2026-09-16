@@ -1,0 +1,12 @@
+# MHPC.L — MHP SE (poultry; LSE IOB GDR)
+**Sleeve:** ukraine_recovery · **Verdict:** STARTER
+
+**Conviction:** PRIMARY Ukraine equity — high-variance recovery beta + real low-cost moat + Spain hedge at ~5x earnings; user prefers equity (harvest) & tolerates variance
+
+## Thesis
+
+EQUITY-LED Ukraine sleeve (user prefers equity to bonds for tax-loss harvesting + tolerates high variance). MHP = the quality leg: LEG-1 moat = feed self-sufficiency on ~360k ha owned black soil -> bottom-of-cost-curve GLOBAL poultry + Vinnytsia mega-complex. LEG-2 hedge: Jul-2025 Grupo UVESA (Spain) acq -> ~27% of revenue NON-Ukraine EU (raises floor in re-escalation). FY25: rev $3,766m (+24%), adj EBITDA $569m, NP $187m, ND/EBITDA 2.69x. ~$8.62: EV/EBITDA ~4.3x, P/E ~5x = ~40% war/governance discount; 52w $5.10-$10.50 (the variance you are paid to hold). TWO TAILS, treated differently: (a) war-beta drawdown = RECOVERABLE variance (snaps back on ceasefire) -> size for it; (b) oligarch SQUEEZE-OUT (Kosyuk ~60%+, what hit Kernel) = PERMANENT impairment not variance -> CAP the position so a squeeze is not uncapped. MHP safer than peers on (b): EU holdco, larger float, Spain assets. HARVEST ROTATION PAIR with Astarta (Ukraine-ag, not substantially identical) -> harvest MHP loss vs the $2.4M goal, rotate to AST through the 31-day wash window, rotate back. UNVERIFIABLE: share count ~107-110m & ~$0.93bn mcap triangulated; cost-per-kg not disclosed; GDR-underlying ratio confirm; ADV thin (~$62k/day) = build over days. || EDGE-BATCH 2026-06-30: RISK_PREMIUM pending PRICING PASS (war-discount may be overblown vs warranted). CORRECTIONS: "bottom-of-cost-curve GLOBAL poultry" overstates (Brazilians are; MHP carries a war-logistics premium); EU duty-free was curtailed to tariff-rate-QUOTAS mid-2024 (verify before leaning on it); ADV inconsistent (62k vs 129k). || PRICING PASS 2026-06-30: RP_FAIR -> stays RISK_PREMIUM. Discount mostly warranted; fair ~4.5-5.5x EV/EBITDA. Flips to OVERBLOWN only on (a) a squeeze-out floor/tender capping minority downside, (b) durable EU TRQ expansion, or (c) a ceasefire.
+
+
+---
+*Research card auto-generated from the SignalOS research ledger (2026-06-29). Where a full deep-dive exists (DD_* / SLEEVE_* docs), that document carries the worked valuation, Mode-B pass, and primary sources.*

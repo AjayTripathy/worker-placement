@@ -1,0 +1,131 @@
+{
+  "ticker": "QBTS",
+  "cutoff": "2026-05-20",
+  "filing": "0001907982-26-000026_10-K.txt",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "D-Wave achieved 'awardable' status through the CDAO Tradewinds Solutions Marketplace.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": ["usaspending.query_federal_presence", "usaspending.query_dod_contracts"],
+      "M_check": "usaspending.query_federal_presence(name_variants=[D-Wave Quantum, D-Wave Government Inc., D-Wave Systems, D-Wave US Inc., D-Wave Commercial Inc., D-Wave])",
+      "M_value": {"n_ueis_resolved": 1, "ueis": [{"name": "D-WAVE GOVERNMENT INC.", "uei": "PATGKJM747F7", "fy_amount_snapshot": 0.0}], "n_contracts": 0, "contracts_amount_M": 0.0, "n_grants": 0, "grants_amount_M": 0.0, "signal": "INFLATION_SUSPECT", "usaspending_dod": {"n_awards": 0, "total_amount": 0.0}},
+      "interpretation": "INFLATION_SUSPECT. D-Wave Government Inc. is registered as a federal contractor (UEI PATGKJM747F7) but has $0 in contracts and $0 in grants across 2018-05/2026. Tradewinds 'awardable' status is a marketplace eligibility flag, not a contract — it confirms that no DoD program has actually obligated dollars to D-Wave. Claim materially overstates federal traction."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Davidson Technologies hosts the second U.S.-based D-Wave Advantage2 quantum computer in Huntsville, AL.",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["usaspending.query_federal_presence", "pentagon_jbook.query_program_funding"],
+      "M_check": "usaspending.query_federal_presence(Davidson Technologies) + pentagon_jbook.query_program_funding(contractor_name=D-Wave Government)",
+      "M_value": {"davidson_federal_presence": {"n_ueis_resolved": 1, "n_contracts": 13, "contracts_amount_M": 199.4, "signal": "RECURRING_FEDERAL", "top_award_M": 104.5, "top_award_id": "FA861222CB005"}, "pentagon_jbook_dwave_government": {"signal": "NOT_FOUND", "n_matches": 0}, "pentagon_jbook_davidson": {"signal": "NOT_FOUND", "n_matches": 0}},
+      "interpretation": "Davidson Technologies is a real DoD prime with $199M lifetime contracts (Air Force, MDA-adjacent work). The installation of an Advantage2 at Davidson HQ is plausible as a co-location / demo node, but no DoD PE in our J-Book corpus names D-Wave or D-Wave Government as a contractor. Davidson's contracts are NOT funded under a quantum-computing PE — they're cyber, training, and IT-infrastructure awards (e.g., FA861222CB005 'ACC DTC CMCC'). D-Wave's claim that this drives 'United States government customer' revenue is a future-tense aspiration: there is no obligated revenue flowing from a DoD PE through Davidson to D-Wave today. Materiality is moderate because the claim is about deployment, not revenue."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "D-Wave worked with Davidson + Anduril on a missile-defense planning proof-of-concept (>=10x speedup, +45-60 missiles intercepted).",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": ["pentagon_jbook.query_program_funding", "usaspending.query_dod_contracts"],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='missile defense') + usaspending.query_dod_contracts(D-Wave)",
+      "M_value": {"jbook_missile_defense": {"n_matches": 10, "primary_matches_sample": ["Ballistic Missile Defense Terminal Defense Segment (PE 0603881C)", "Ballistic Missile Defense Midcourse Defense Segment (PE 0603882C)", "Ballistic Missile Defense C2BMC (PE 0603896C)"], "note": "Multiple MDA PEs are funded but NONE list D-Wave/Anduril/Davidson as primary contractors in the corpus."}, "jbook_anduril": {"signal": "NOT_FOUND"}, "usaspending_dwave_dod": {"n_awards": 0, "total_amount": 0.0}},
+      "interpretation": "MDA PEs (BMD Terminal/Midcourse/C2BMC) are real funded programs, but the J-Book corpus shows no D-Wave or Anduril as primary contractor on any of them. The 10-K language 'initial proof-of-concept' is explicit — this is unfunded R&D, not a program of record. There is zero booked revenue from missile defense and no Pentagon PE has obligated dollars to D-Wave. The disclosure is narrative-load-bearing (lead defense story in Item 1) but framework-quantitatively empty. MODERATE because the company is honest about it being a 'PoC'."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "D-Wave formed a new business unit dedicated to U.S. government adoption, led by a public-sector executive.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": ["usaspending.query_federal_presence"],
+      "M_check": "usaspending.query_federal_presence(D-Wave Government Inc.)",
+      "M_value": {"n_ueis_resolved": 1, "uei": "PATGKJM747F7", "n_contracts": 0, "contracts_amount_M": 0.0, "n_grants": 0, "signal": "INFLATION_SUSPECT"},
+      "interpretation": "A federal contracting subsidiary (D-Wave Government Inc.) exists and is SAM-registered, but has obligated $0 across the entire 2018-2026 window — confirmed via UEI-anchored USAspending lookup. A 'new business unit' with a 'seasoned public sector executive' is forward narrative; there is no historical federal revenue base to extend. Combined with C1 and C5 (Customer A is not federal), the U.S. government revenue thesis is structurally unsubstantiated at the cutoff. SEVERE_UNDERDELIVERY."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Customer A = 67% of FY2025 revenue (vs 17% in FY2024); not named.",
+      "severity": "RED_FLAG_NEGATIVE",
+      "supports": ["usaspending.query_federal_presence", "usaspending.query_dod_contracts"],
+      "M_check": "usaspending.query_federal_presence(D-Wave variants) + usaspending.query_dod_contracts(D-Wave)",
+      "M_value": {"federal_presence_signal": "INFLATION_SUSPECT", "n_contracts": 0, "contracts_amount_M": 0.0, "dod_signal": {"n_awards": 0, "total_amount": 0.0}, "fy2025_total_revenue_M": 24.6, "implied_customer_a_M": 16.5},
+      "interpretation": "Customer A is ~$16.5M (67% of $24.6M FY2025 revenue) and went from 17%->67% YoY. USAspending shows ZERO federal contracts/grants under any D-Wave name variant, including the UEI-anchored D-Wave Government Inc. — so Customer A is NOT a U.S. federal customer. Cross-referencing the 10-K narrative, the most likely identity is Forschungszentrum Juelich, which 'purchased' the Advantage system in Feb 2025 and upgraded to Advantage2 throughout 2025 (system-sale revenue recognized over the installation period). A single non-US public-research customer driving 67% of revenue is the dominant material risk in QBTS: it inverts the 'broad commercial adoption' narrative the rest of the 10-K paints. RED_FLAG_NEGATIVE because the concentration is existential AND the customer's identity is suppressed."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "FZJ purchased the D-Wave Advantage system in Feb 2025 and upgraded to Advantage2 in 2025.",
+      "severity": "PASS",
+      "supports": ["usaspending.query_federal_presence"],
+      "M_check": "usaspending.query_federal_presence(FZJ) — sanity check that FZJ is non-US",
+      "M_value": {"n_ueis_resolved": 0, "n_contracts": 0, "signal": "INFLATION_SUSPECT", "interpretation_note": "FZJ is a German federal research center, expected absence in US data"},
+      "interpretation": "PASS on the FZJ sale claim itself — this is a real, named, externally verifiable customer relationship (FZJ has separately publicized the D-Wave installation). The signal is that FZJ — not the DoD — is the load-bearing revenue customer. This re-frames the entire QBTS revenue story as a single foreign-public-lab system sale, not as Pentagon adoption. Counts as PASS for the literal claim (the sale happened); the *implication* (non-DoD concentration) is captured in C5."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "D-Wave closed acquisition of Quantum Circuits, Inc. on Jan 20, 2026.",
+      "severity": "PASS",
+      "supports": ["acq_coherence.score_acquisition_coherence", "uspto_odp.query_assignee"],
+      "M_check": "acq_coherence.score_acquisition_coherence + uspto_odp.query_assignee(Quantum Circuits)",
+      "M_value": {"coherence_score": 0.85, "signal": "COHERENT_ROLLUP", "is_revenue_synthetic": false, "qci_patents_granted_pre_cutoff": 2, "qci_total_apps": 8},
+      "interpretation": "Acquisition coherence score 0.85 — Quantum Circuits' error-corrected superconducting gate-model architecture is technologically continuous with D-Wave's stated pivot from annealing to gate-model. Not a defensive / rollup-distraction acquisition. PASS. Caveat: QCI has only 2 granted US patents, so the technology base being acquired is thin from an IP standpoint, but that does not change the coherence verdict."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "Gate-model quantum computer will be generally available in 2026.",
+      "severity": "UNVERIFIABLE",
+      "supports": ["uspto_odp.query_assignee"],
+      "M_check": "uspto_odp.query_assignee(Quantum Circuits) + uspto_odp.query_assignee(D-Wave)",
+      "M_value": {"qci_n_apps": 8, "qci_n_granted": 2, "dwave_n_apps_substring_noisy": 20119, "note": "D-Wave assignee substring picks up huge non-related noise (Aerogel R&D, TransferMyRx, etc.); cannot cleanly verify D-Wave-specific patent rate without disambiguation."},
+      "interpretation": "Forward technical milestone — by definition not verifiable from disclosure alone. Pre-cutoff signal: only ~5 months between QCI acquisition close (Jan 20 2026) and the stated 2026 GA target is very compressed for productizing an error-corrected gate-model system. Patent base at QCI (2 grants) is small. We mark UNVERIFIABLE rather than red-flagging because this is a roadmap statement, not a revenue claim."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "D-Wave addresses 'unique research and government classified applications' as a growth market.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": ["pentagon_jbook.query_program_funding", "usaspending.query_federal_presence"],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='quantum') + pentagon_jbook.query_program_funding(contractor_name='D-Wave')",
+      "M_value": {"jbook_quantum_matches": 3, "jbook_quantum_programs": [{"name": "AFRL Quantum Networking (IONQ)", "status": "UNFUNDED_TWO_PLUS_YEARS", "contractors": ["IonQ"]}, {"name": "AFRL Qubitekk Quantum Networking", "status": "FUNDED_STEADY", "contractors": ["Qubitekk (acquired by IonQ Dec 2024)"]}, {"name": "UMD Quantum (IONQ subcontractor)", "status": "UNFUNDED_THIS_YEAR", "contractors": ["UMD / IonQ"]}], "jbook_dwave_contractor": {"signal": "NOT_FOUND", "n_matches": 0}, "dwave_federal_presence_signal": "INFLATION_SUSPECT"},
+      "interpretation": "The three quantum-computing PEs covered in the J-Book corpus are ALL IonQ-anchored (AFRL Quantum Networking, AFRL Qubitekk, UMD Quantum). Two of the three are UNFUNDED_THIS_YEAR / UNFUNDED_TWO_PLUS_YEARS — the broader Pentagon quantum-program budget environment is contracting, not expanding. D-Wave appears in zero of these PEs as a primary contractor. Combined with $0 federal awards via USAspending, the 'classified government applications' growth pillar has no current obligated funding anywhere visible to the framework. SEVERE_UNDERDELIVERY: the claimed market is funded today only for IonQ-flagged programs (and even those are sunsetting), and D-Wave has no contractor footprint to inherit residual flows. Note: corpus coverage gap — there may be SBIR/STTR-level dollars below the PE-tracking threshold."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "D-Wave Government Inc. is the primary federal contracting entity.",
+      "severity": "SEVERE_UNDERDELIVERY",
+      "supports": ["usaspending.query_federal_presence"],
+      "M_check": "usaspending.query_federal_presence(D-Wave Government variants)",
+      "M_value": {"n_ueis_resolved": 1, "uei": "PATGKJM747F7", "duns": "079837872", "n_contracts": 0, "contracts_amount_M": 0.0, "n_grants": 0, "signal": "INFLATION_SUSPECT"},
+      "interpretation": "UEI exists, $0 in awards. The subsidiary functions as a registration vehicle without an operating federal contract footprint. SEVERE_UNDERDELIVERY relative to the framing that the entity is the 'primary federal contracting' arm — primacy implies dollars, and there are none."
+    },
+    {
+      "claim_id": "C11",
+      "claim_text": "Quantum systems installed at FZJ (Germany), USC ISI (Marina del Rey), Davidson Technologies (Huntsville, AL), and HQ Burnaby (BC).",
+      "severity": "PASS",
+      "supports": ["epa_frs.query_facilities"],
+      "M_check": "epa_frs.query_facilities(facility_name='D-Wave', state_abbr='AL')",
+      "M_value": {"n_facilities": 14, "note": "All 14 results are unrelated 'TIDAL WAVE' car-wash franchises; no D-Wave facility found under EPA FRS in AL (expected — quantum systems hosted at a third party's site won't be under D-Wave's own EPA registry).", "huntsville_matches_dwave": 0},
+      "interpretation": "EPA FRS absence is consistent with D-Wave being a tenant of Davidson, not the EPA-registered operator. FZJ, USC ISI, and Davidson HQ are all independently externally verifiable counterparties. PASS on the literal facility-existence claim."
+    },
+    {
+      "claim_id": "C12",
+      "claim_text": "FY2025 revenue $24.6M vs FY2024 $8.8M (179% YoY).",
+      "severity": "PASS",
+      "supports": [],
+      "M_check": "internal arithmetic check from filing",
+      "M_value": {"fy2025_revenue_M": 24.6, "fy2024_revenue_M": 8.8, "yoy_pct": 179.5, "customer_a_share_2025": 0.67, "implied_customer_a_M": 16.5, "implied_non_customer_a_M": 8.1, "implied_non_customer_a_M_prev_year": 7.3, "implied_non_customer_a_growth": "11%"},
+      "interpretation": "PASS on the absolute number. But the arithmetic exposes the underlying story: stripping out Customer A ($16.5M in 2025 vs $1.5M in 2024 implied by 17% share), the non-Customer-A book grew only ~11% YoY ($7.3M -> $8.1M). The 179% top-line growth is essentially one customer (likely FZJ) buying one system. This is consistent with C5 framing the concentration risk."
+    }
+  ],
+  "summary": {
+    "n_claims": 12,
+    "n_queries": 17,
+    "severity_counts": {
+      "PASS": 4,
+      "MODERATE_UNDERDELIVERY": 2,
+      "SEVERE_UNDERDELIVERY": 4,
+      "RED_FLAG_NEGATIVE": 1,
+      "UNVERIFIABLE": 1
+    },
+    "jbook_grounded_claims": ["C2", "C3", "C8", "C9"],
+    "pentagon_jbook_fired_on": ["C2", "C3", "C9"],
+    "n_jbook_grounded": 4,
+    "n_pentagon_jbook_fired": 3,
+    "headline_finding": "QBTS is light on the canonical 'named PE / named program' J-Book divergence pattern — the 10-K avoids naming specific Pentagon programs. But the orthogonal verifications hit hard: D-Wave Government Inc. (the federal contracting sub) has $0 in lifetime DoD awards despite Tradewinds 'awardable' status and a 'public sector' business unit; the J-Book quantum portfolio is contracting (2 of 3 quantum PEs UNFUNDED) and D-Wave is named on none; and FY2025 revenue is 67% concentrated in a single undisclosed customer that the 10-K narrative strongly implies is FZJ (a German national lab), not the DoD. The 'DoD growth' pillar is essentially a marketing posture without obligated dollars."
+  }
+}

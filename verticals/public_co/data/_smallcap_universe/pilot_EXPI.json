@@ -1,0 +1,93 @@
+{
+  "ticker": "EXPI",
+  "company": "eXp World Holdings, Inc.",
+  "cutoff": "2026-05-20",
+  "filing": "0001104659-26-019145_10-K.txt",
+  "filing_date": "2026-02-24",
+  "rfm_tuples": [
+    {
+      "claim_id": "C1",
+      "R": "Going-concern / financial-distress disclosure: 10-K asserts management 'believes that its existing balances of cash and cash equivalents and cash flows expected to be generated from its operations will be sufficient to satisfy its normal operating requirements for at least the next 12 months and beyond.'",
+      "f": "If management is honestly disclosing solvency, the 10-K filing parsed for ASC 205-40 substantial-doubt language should be clean (NO_GOING_CONCERN).",
+      "M_source": "going_concern_detector.query_going_concern",
+      "M_value": "signal=NO_GOING_CONCERN, n_matches=0 in 10-K for fy2025",
+      "severity": "PASS",
+      "interpretation": "Clean. No substantial-doubt language; consistent with $124.2M cash, no bank debt, positive operating cash flow ($118.6M)."
+    },
+    {
+      "claim_id": "C2",
+      "R": "Auditor relationship stability: 10-K does not flag any auditor change; consistent disclosure implies durable Big-4-tier engagement over the 5-year window.",
+      "f": "Auditor-change tracker on CIK 0001495932 over 5y lookback should find no Item 4.01 8-Ks, no resignations, no disagreements.",
+      "M_source": "auditor_change_tracker.query_auditor_changes",
+      "M_value": "signal=CLEAN_AUDITOR_TENURE, n_8k_item_401=0, n_big4_resignations=0, n_disagreements=0",
+      "severity": "PASS",
+      "interpretation": "Clean. No auditor turnover or disagreement signal \u2014 quality flag is absent."
+    },
+    {
+      "claim_id": "C3",
+      "R": "Antitrust class-action settlement: 10-K discloses a $34.0M Dec-2024 settlement (first payment $17M in 2025) AND describes the matter as ongoing/subject to final court approval \u2014 implies continued, structured disclosure in subsequent filings (no quiet abandonment).",
+      "f": "claim_evolution on 'settlement' from Dec 2024 base through cutoff should show REAFFIRMED in subsequent 10-Qs/8-Ks with no adverse findings or amended/terminated language.",
+      "M_source": "claim_evolution.query_claim_evolution",
+      "M_value": "n_subsequent_mentions=25, evolution_status=REAFFIRMED_IN_STRUCTURED_DISCLOSURE, classification_counts={AFFIRMED:4, AMENDED:0, TERMINATED:0, UNRELATED:2}, adverse_findings=[]",
+      "severity": "PASS",
+      "interpretation": "Re-disclosed in subsequent 10-Q with no adverse evolution. No silent-disappearance pattern."
+    },
+    {
+      "claim_id": "C4",
+      "R": "Insider trading discipline: management did not disclose any MNPI-style discretionary insider dumping; small-cap framework expects clean Form 4 pattern absent budget/program exposure.",
+      "f": "insider_vs_calendar overlay with contractor_name='eXp' should NOT fire CLUSTERED_DISCRETIONARY because EXPI has no Pentagon-program exposure (real estate brokerage), so validators 1+2 must downgrade any temporal-coincidence cluster.",
+      "M_source": "insider_vs_calendar.query_insider_sales_near_budget_events",
+      "M_value": "n_form4_filings=48, n_proximate_sales=3, signal=CLUSTERED_DISCRETIONARY_UNCONFIRMED (baseline CLUSTERED_DISCRETIONARY downgraded; validator_1_program_exposure=False, validator_2_event_content_relevance=False, downgrade_reason='no program exposure')",
+      "severity": "PASS",
+      "interpretation": "Validators correctly rejected temporal-coincidence false positive \u2014 eXp has no DoD/budget exposure; small Form 4 sales are routine RSU tax-withholding and unconnected to budget events."
+    },
+    {
+      "claim_id": "C5",
+      "R": "Capital-structure cleanliness: 10-K asserts 'We currently do not hold any bank debt, nor have we issued any debt instruments through public offerings or private placements.'",
+      "f": "UCC-proxy via SEC filings should show no Form 8-K Item 2.03 secured-debt creations, no distress cluster, low secured-term hits.",
+      "M_source": "ucc_proxy.query_ucc_exposure",
+      "M_value": "n_8k_item_2_03=0, n_8k_secured_terms=0, n_10k_10q_secured=6 (template UCC-1 references), distress_term_hits=0, cluster_in_6mo=False, signal=MODERATE_LIEN_EXPOSURE",
+      "severity": "PASS",
+      "interpretation": "MODERATE_LIEN_EXPOSURE is the source's default floor when only routine UCC-1 boilerplate is detected; zero Item 2.03 creations and zero distress cluster confirms the no-debt claim. Honest disclosure."
+    },
+    {
+      "claim_id": "C6",
+      "R": "Counterparty/brand existence: 10-K describes eXp Realty as a global brokerage operating in all 50 U.S. states and 27 countries; should generate sustained external corroboration in third-party SEC filings.",
+      "f": "EDGAR fulltext search for 'eXp Realty' across all filers (10-K/10-Q/8-K) should yield substantial unrelated-filer mentions, confirming ecosystem presence.",
+      "M_source": "edgar_fts.query_fulltext",
+      "M_value": "total_hits=171 across own + third-party filings",
+      "severity": "PASS",
+      "interpretation": "Robust ecosystem corroboration \u2014 consistent with real, operating multi-jurisdiction brokerage."
+    },
+    {
+      "claim_id": "C7",
+      "R": "Revenue-concentration disclosure: 10-K reports North American Realty = 96.9% of consolidated revenue (single-segment dominance) but characterizes international expansion (27 countries, new entries in Peru/Ecuador/Turkiye/Japan/Romania/Netherlands during 2025) as a growth lever.",
+      "f": "Revenue-concentration adjudicator should treat this as customer-mix disclosure; segment % is informational under the 10% SEC customer rule and is not a fraud-pattern signal for brokerage.",
+      "M_source": "revenue_concentration.query_revenue_concentration",
+      "M_value": "signal=UNVERIFIABLE (source is calibrated for federal-services-prime IDIQ/TO concentration, not brokerage geographic mix)",
+      "severity": "UNVERIFIABLE",
+      "interpretation": "Source not applicable to a non-federal-prime real estate brokerage. Geographic concentration in NA is honestly disclosed and operationally rational; no obscuring pattern."
+    },
+    {
+      "claim_id": "C8",
+      "R": "Filing cadence / corporate-event transparency: 10-K filed 2026-02-24; 10-Q for Q1 2026 filed 2026-05-11; multiple 8-Ks throughout 2025-2026 implying steady disclosure cadence and no hidden material events.",
+      "f": "SEC submissions API for CIK 0001495932 should show consistent quarterly cadence (10-K/10-Q on time) over the test window.",
+      "M_source": "sec_filings.list_filings_by_form",
+      "M_value": "n_total=44 (10-K/10-Q/8-K from 2024-01-01 through cutoff); 10-K 2026-02-24 + Q1 10-Q 2026-05-11 on schedule. Also detected: ticker symbol change to 'AGNT' visible in primary-doc names beginning ~2026-05-08 (8-K 2026-05-07 ex99 references 'AGNT'), a corporate rebrand AFTER the 10-K filing date, properly disclosed via 8-K.",
+      "severity": "PASS",
+      "interpretation": "Cadence is on-time and transparent. Rebrand to AGNT is disclosed through proper 8-K mechanics \u2014 not an obscuring pattern."
+    }
+  ],
+  "composite": 0.0,
+  "summary": "EXPI is a clean honesty-alpha screen: NO going-concern, clean auditor, no debt, antitrust settlement honestly re-disclosed, insider-sale clustering correctly downgraded by validators (no DoD exposure), regular filing cadence with a transparent post-cutoff rebrand to AGNT. The -57% drawdown reflects cyclical housing/commission-rate headwinds and an honestly-disclosed $34M antitrust settlement, not concealed deterioration. No LYING/OBSCURING pattern detected.",
+  "scoring": {
+    "PASS": 7,
+    "UNVERIFIABLE": 1,
+    "MODERATE_UNDERDELIVERY": 0,
+    "SEVERE_UNDERDELIVERY": 0,
+    "RED_FLAG_NEGATIVE": 0,
+    "verifiable_claims": 8,
+    "weighted_sum": "(0*7 + 1*0 + 2*0 + 3*0) / 8 = 0 / 8",
+    "composite": 0.0
+  }
+}

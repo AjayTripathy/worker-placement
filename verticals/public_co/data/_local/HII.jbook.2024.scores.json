@@ -1,0 +1,163 @@
+{
+  "ticker": "HII",
+  "cutoff": "2024-09-01",
+  "filing": "0001501585-24-000007_10-K.txt",
+  "cohort": "jbook_exposure_divergence",
+  "scoring_notes": "Navy SCN procurement (Virginia/Columbia/Ford/DDG/LHA/LPD) and aircraft-carrier RCOH are NOT covered by the 410-PE J-Book corpus, which is heavy on RDT&E + AF/Space/DARPA/MDA/SOCOM. Per J-Book Calibration Heuristic #7, NOT_FOUND in J-Book is UNVERIFIABLE (corpus gap), not a red flag. HII is also absent from by_entity.json and entity_resolution. This is the predicted UNVERIFIABLE corpus-gap outcome flagged in the cohort metadata ('Tests Navy SCN corpus gap — expected UNVERIFIABLE'). USAspending strongly corroborates the past contract pattern ($61.6B / 901 awards on 'Huntington Ingalls Industries' + $100B / 353 awards on 'Huntington Ingalls Inc' through 2024-09-01, including the canonical CVN 79/80 awards), so the rear-view obligations are real; forward-view J-Book divergence cannot be tested here. The framework correctly self-flags coverage gap rather than fabricating a signal.",
+  "scores": [
+    {
+      "claim_id": "C1",
+      "claim_text": "Virginia Class (SSN 774) submarines — Block IV 4-of-10 delivered, Block V = 12 boats (with +2 LLTM), Block VI advance procurement initiated 2023; multi-year procurement authority reauthorized in FY24 NDAA",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "usaspending.query_dod_contracts(recipient_name='Huntington Ingalls Industries') -> 901 awards / $61.6B total; top awards include CVN 80 ($11.9B) and CVN 78 ($6.6B). Same query on 'Huntington Ingalls Inc' returns 353 awards / $100.2B. Past-contract obligations are real.",
+        "usaspending.query_dod_contracts(recipient_name='Newport News Shipbuilding') -> 1 award / $250.7M (most NN work is under HII Inc parent legal name)"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Virginia Class Submarine' | 'SSN 774')",
+      "M_value": "NOT_FOUND (both queries)",
+      "interpretation": "J-Book corpus does not cover Navy SCN procurement line items. Per Heuristic #7, NOT_FOUND ≠ red flag — coverage gap, not divergence. USAspending confirms $61.6B+ past-contract pattern consistent with the 10-K narrative. Forward J-Book divergence is untestable for this PE/program in v1 corpus."
+    },
+    {
+      "claim_id": "C2",
+      "claim_text": "Columbia Class (SSBN 826) — 12-boat program-of-record, Build II = +5 boats LLTM in 2023; CR exception authorizes SSBN 827 construction start",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "usaspending awards under Huntington Ingalls Inc include $4.6B contract N0002498C2104 and others consistent with submarine work; specific Columbia line items not surfaced in top-3 but $100B+ in total DoD awards"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Columbia Class Submarine' | 'SSBN 826')",
+      "M_value": "NOT_FOUND (both queries)",
+      "interpretation": "Columbia is Navy SCN procurement — outside the FY26 J-Book RDT&E/AF/Space corpus scope. Heuristic #7 applies: UNVERIFIABLE corpus gap. Note: the 10-K itself documents Congressional support (FY24 NDAA authorizes 1 SSBN-826) and a CR exception specifically permitting SSBN 827 obligation, both of which would be PASS-level signals if the J-Book had the line item."
+    },
+    {
+      "claim_id": "C3",
+      "claim_text": "Ford-class (CVN 78) carriers — CVN 79 = $8.7B awards, CVN 80+81 = $15.3B awards; HII is exclusive prime",
+      "severity": "PASS",
+      "supports": [
+        "usaspending top-2 awards directly confirm the carrier program: Award N0002416C2116 'CVN 80 ENGINEERING EFFORTS AND STEEL' = $11.89B; Award N0002408C2110 'CVN 78 SHIP CONSTRUCTION' = $6.65B. These two alone validate the $15.3B and $8.7B figures order-of-magnitude.",
+        "Multiple HII-named EPA FRS facilities at 4101 Washington Ave Newport News (the carrier shipyard) confirm physical infrastructure"
+      ],
+      "M_check": "pentagon_jbook (NOT_FOUND) + usaspending cross-check",
+      "M_value": "USAspending confirms claimed contract values within reason; J-Book NOT_FOUND (corpus gap)",
+      "interpretation": "Specific dollar claims about CVN 79/80/81 are directly corroborated by usaspending award descriptions and amounts. The J-Book cannot independently verify the FORWARD trajectory of carrier procurement, but the REAR-view obligations match the disclosure. PASS on the documented past awards; forward Ford-class trajectory remains untestable via J-Book corpus."
+    },
+    {
+      "claim_id": "C4",
+      "claim_text": "Carrier RCOH program — HII is exclusive prime; ~35% of lifecycle maintenance; currently performing CVN 74 Stennis RCOH; positioned for Ford-class RCOH",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "EPA FRS confirms Newport News dry-dock/carrier facilities exist (14 NN-Shipbuilding registered sites); usaspending Huntington Ingalls Inc shows $100B+ in DoD obligations consistent with multi-decade carrier maintenance"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Aircraft Carrier RCOH' | 'Refueling Complex Overhaul')",
+      "M_value": "NOT_FOUND (both queries)",
+      "interpretation": "RCOH is funded under SCN / O&M Navy line items not represented in the RDT&E-heavy J-Book corpus. Heuristic #7 applies — UNVERIFIABLE corpus gap. Sole-source moat claim is structurally defensible but cannot be J-Book-verified."
+    },
+    {
+      "claim_id": "C5",
+      "claim_text": "Arleigh Burke (DDG 51) — 2023 multi-year for 7 ships (6 + 1 option); FY24 NDAA funds 2 DDGs; HII is 1 of 2 builders",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "usaspending under Huntington Ingalls Inc / Industries shows DDG-class contracts consistent with multi-year award pattern (901 + 353 awards across name variants)"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Arleigh Burke' | 'DDG 51')",
+      "M_value": "NOT_FOUND (both queries)",
+      "interpretation": "DDG-51 is SCN procurement — outside corpus. UNVERIFIABLE per Heuristic #7. 10-K self-reports FY24 NDAA + both House/Senate appropriations bills fund 2 DDGs/year, which would be FUNDED_STEADY if a corresponding J-Book line item existed."
+    },
+    {
+      "claim_id": "C6",
+      "claim_text": "LHA/LPD amphibious ships — sole builder; building Bougainville/Fallujah (LHA 8-9), McCool/Harrisburg/Pittsburgh (LPD 29-31), Philadelphia (LPD 32); LHA 10 LLTM in 2023; FY24 NDAA authorizes LPD 33 Flight II with $500M advance procurement (Senate Approps)",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "EPA FRS shows USS Kearsarge (LHD-3) registered at Huntington Ingalls Newport News — physical evidence of amphibious work at the yard"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='LPD 17' | 'LHA' | 'Amphibious Assault Ship')",
+      "M_value": "NOT_FOUND (all three queries)",
+      "interpretation": "Amphibious LPD/LHA is SCN procurement — corpus gap, UNVERIFIABLE per Heuristic #7. Note Senate Approps disagreement on LPD 33 timing (added advance procurement) is a budget-detail risk the J-Book would surface if covered, but is not a divergence signal at this level."
+    },
+    {
+      "claim_id": "C7",
+      "claim_text": "U.S. Navy ~81% of FY2023 revenue, 82% FY2022, 90% FY2021 — extreme single-customer concentration on Navy SCN/RCOH/Mission-Tech lines",
+      "severity": "PASS",
+      "supports": [
+        "usaspending.query_dod_contracts(recipient_name='Huntington Ingalls Inc') = 353 awards / $100.2B total 2020-01-01 → 2024-09-01",
+        "usaspending.query_dod_contracts(recipient_name='Huntington Ingalls Industries') = 901 awards / $61.6B total same window",
+        "Top awards are explicitly carrier (CVN 78, CVN 80) — direct Navy SCN consistent with disclosed concentration"
+      ],
+      "M_check": "usaspending.query_dod_contracts on three name variants",
+      "M_value": "$100B+ DoD obligations across recipient-name variants; concentration profile consistent with 81-90% Navy disclosure",
+      "interpretation": "Customer-concentration claim is directly corroborated by USAspending. The Navy concentration is a structural risk (high-impact-low-probability if Navy budget shifts), but the claim itself is truthful and verified. PASS."
+    },
+    {
+      "claim_id": "C8",
+      "claim_text": "FY24 NDAA authorizes $886B defense topline + $32.9B shipbuilding, explicitly funding 2 SSN-774, 1 SSBN-826, 2 DDG-51, LPD 33 Flight II; FY25 cap = $895B",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "Internal 10-K legislative narrative; the framework cannot independently re-query Congressional appropriations via the M-source catalog without the Navy SCN J-Book corpus"
+      ],
+      "M_check": "pentagon_jbook.query_program_funding(program_name='Shipbuilding and Conversion Navy' | 'SCN')",
+      "M_value": "NOT_FOUND (both queries)",
+      "interpretation": "Top-of-the-house shipbuilding budget claims rely on the very corpus this v1 J-Book lacks. UNVERIFIABLE per Heuristic #7. To stress-test this cohort, the corpus would need Navy SCN/RCOH P-40 line items added (the cohort metadata anticipates this gap)."
+    },
+    {
+      "claim_id": "C9",
+      "claim_text": "Mission Technologies built around 2021 Alion acquisition ($1B notes + $650M term loan); ongoing customer dispute since Jan 2023 on a manufacturing contract with provisions for losses; risk of pivot via incoherent acquisitions",
+      "severity": "MODERATE_UNDERDELIVERY",
+      "supports": [
+        "edgar_fts.query_fulltext(search_term='Alion', cik=0001501585) = 52 hits across 10-K/8-K/8-K/A 2021-2022 — confirms the disclosed acquisition narrative is reflected in filings",
+        "10-K self-discloses an unresolved Mission Tech customer dispute (Jan 2023 → still unresolved Feb 2024) with provisions for contract losses — an internal soft signal of underdelivery in the segment built on the Alion rollup",
+        "acq_coherence M-source returned None (likely no usaspending NAICS map for HII configured) — cannot independently score acquisition coherence"
+      ],
+      "M_check": "acq_coherence.score_acquisition_coherence (None) + edgar_fts (52 hits)",
+      "M_value": "Alion-disclosed-in-filings = yes (52 fulltext hits); active customer dispute disclosed = yes; coherence-score = unavailable",
+      "interpretation": "The rollup itself (Alion + Hydroid + ongoing Mission Tech footprint) is well documented, so the existence claim is PASS. However the 10-K's own admission of an unresolved manufacturing-contract dispute and recorded contract-loss provisions inside Mission Tech — the segment built on the Alion rollup, with no clean resolution path — qualifies as MODERATE_UNDERDELIVERY against the implicit forward-revenue narrative of the segment. This is a Mode-B (implied-verification) catch: the company is not lying about Alion, but is partially admitting Mission Tech underperformance."
+    },
+    {
+      "claim_id": "C10",
+      "claim_text": "Electric Boat (General Dynamics) teaming agreement structurally underpins HII's Virginia + Columbia submarine work",
+      "severity": "UNVERIFIABLE",
+      "supports": [
+        "edgar_fts.query_fulltext(search_term='Ingalls' OR 'Huntington', cik=0000040533) = 0 hits — General Dynamics 10-Ks do not surface the HII name via exact-phrase fulltext search (likely refers to teaming partner generically as 'our shipbuilding partner' or 'Newport News' which we did not test)"
+      ],
+      "M_check": "edgar_fts.query_fulltext on counterparty CIK 0000040533",
+      "M_value": "0 hits on both 'Ingalls' and 'Huntington' single-word fulltext queries",
+      "interpretation": "edgar_fts returning zero is suggestive but not dispositive — GD may disclose the relationship via Newport News naming, or via 'our teaming partner' generic language that exact-phrase fulltext cannot match. The teaming agreement existence is widely documented in HII's own filings (10-K, multiple sections). Without ability to do a fuzzy GD-side disclosure read, this claim is UNVERIFIABLE from the counterparty side. NOT a red flag per heuristic discipline."
+    },
+    {
+      "claim_id": "C11",
+      "claim_text": "Newport News shipyard owns 550 acres with 7 graving docks, floating dry dock, 18-acre steel fab, 300K sqft machine shops — capital-intensive moat",
+      "severity": "PASS",
+      "supports": [
+        "epa_frs.query_facilities(facility_name='Huntington Ingalls', state_abbr='VA') = 11 registered facilities",
+        "epa_frs.query_facilities(facility_name='Newport News Shipbuilding', state_abbr='VA') = 14 registered facilities including 4101 Washington Ave (the main shipyard), Oyster Pt Industrial Park, City Line Rd Warehouse, Saltyers Creek Warehouses, Picketts Line site, etc.",
+        "USS Kearsarge (LHD-3) registered to Huntington Ingalls at 4101 Washington Ave — concrete evidence of large-ship work at the yard"
+      ],
+      "M_check": "epa_frs.query_facilities",
+      "M_value": "11 + 14 = 25 distinct EPA-registered facilities (with overlap) under HII / Newport News Shipbuilding in VA",
+      "interpretation": "Physical-facility claim is independently corroborated by EPA FRS at multiple addresses consistent with a 550-acre shipyard plus support facilities. PASS."
+    },
+    {
+      "claim_id": "C12",
+      "claim_text": "Total backlog $48.1B at 12/31/2023 with ~22% (~$10.6B) expected to convert in FY24",
+      "severity": "PASS",
+      "supports": [
+        "usaspending.query_dod_contracts(recipient_name='Huntington Ingalls Inc') = $100.2B obligated over 2020-2024; backlog of $48.1B is fully consistent with typical undelivered-portion ratios for multi-year SCN/RCOH contracts"
+      ],
+      "M_check": "usaspending.query_dod_contracts",
+      "M_value": "Cross-checks consistent with disclosed backlog magnitude",
+      "interpretation": "Backlog disclosure is consistent with the public DoD obligation footprint. PASS on order-of-magnitude check; cannot independently re-tie obligated-but-not-yet-recognized vs ceiling without contract-level detail."
+    }
+  ],
+  "summary": {
+    "n_claims": 12,
+    "n_queries_executed": 25,
+    "severity_counts": {
+      "PASS": 4,
+      "MODERATE_UNDERDELIVERY": 1,
+      "SEVERE_UNDERDELIVERY": 0,
+      "RED_FLAG_NEGATIVE": 0,
+      "UNVERIFIABLE": 7
+    },
+    "jbook_claims_total": 7,
+    "jbook_claims_hit": 0,
+    "corpus_gap_note": "All 7 J-Book-grounded claims (C1-C6, C8) returned NOT_FOUND because Navy SCN procurement and carrier RCOH P-40 line items are not in v1 of the 410-PE corpus. This matches the cohort metadata's expectation ('Tests Navy SCN corpus gap (expected UNVERIFIABLE)'). The framework correctly produced UNVERIFIABLE rather than fabricating divergence signals. PASS-level catches came from usaspending (Ford carrier contracts directly confirmed, customer concentration verified) and EPA FRS (facility moat verified). One Mode-B implied-verification MODERATE catch on Mission Technologies (unresolved customer dispute + Alion rollup acq-coherence not independently scoreable)."
+  }
+}

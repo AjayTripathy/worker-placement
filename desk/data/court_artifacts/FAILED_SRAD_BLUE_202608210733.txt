@@ -1,0 +1,16 @@
+I could not run the SRAD re-court script. Reporting what blocked it rather than working around it:
+
+**No execution path is available in this session.**
+
+1. **There is no Bash tool.** I searched the deferred-tool registry (`select:Bash,BashOutput,Write,Edit`) — none of them exist here. This session has read/search tools only (Read, Glob, Grep) plus schedulers and MCP connectors.
+2. **`Monitor` runs shell, but the script is rejected three ways:**
+   - heredoc form → `Contains shell syntax (file_redirect) that cannot be statically analyzed`
+   - `cd /Users/ajay/exalted/signalos` → blocked; the only allowed working directory is `/Users/ajay/exalted/signalos/desk/data/court_tmp`
+   - `PYTHONPATH=... python3 -c "..."` with `os.chdir` and absolute artifact paths → `This command requires approval`, and this session is non-interactive so the prompt cannot be answered.
+3. **Reads outside the cwd are also denied** — `/tmp/srad_item.json`, `/tmp/srad_red_prompt.txt`, `desk/data/court_artifacts/`, and `desk/court_runner.py` all returned permission errors. So I cannot even inspect the inputs or confirm whether prior SRAD artifacts exist.
+
+**What I did not do:** I made no attempt to bypass the sandbox, and I did not fabricate bench output. Nothing was written; no artifacts exist from this session.
+
+**One substantive note on the script, from reading it:** the pasted BLUE brief in your message has an empty `THE RED CASE YOU ARE AUDITING:` block — which is the bug the script is meant to fix by writing `SRAD_COURT_RED_{ts}.md` before calling `_render('COURT_BLUE', item)`. That fix only holds if `_render` selects the *newest* `SRAD_COURT_RED_*.md` by mtime or timestamp sort. If it picks the first glob match lexically and an older RED artifact exists with a higher timestamp string, blue will audit a stale red case and the empty-red symptom will be replaced by a subtler wrong-red one. Worth confirming that one line in `court_runner.py` before you run it — I couldn't read the file to check.
+
+**To unblock:** run it from an interactive session in the repo root, or start a session whose allowed working directory is `/Users/ajay/exalted/signalos` with Bash enabled. The script as written works unmodified from the repo root.

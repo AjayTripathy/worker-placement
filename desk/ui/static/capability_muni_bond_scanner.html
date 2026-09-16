@@ -1,0 +1,283 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Muni bond scanner (incremental)</title><style>
+body{margin:0;background:#0b0e12;color:#e8ebee;font:14px/1.6 -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}
+.wrap{max-width:940px;margin:0 auto;padding:26px 24px 90px}
+a{color:#8b7cf6} h1{font-size:23px;margin:0 0 4px;letter-spacing:-.02em}
+.sub{color:#7d858e;margin:0 0 20px;font-size:13px}
+h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.12em;color:#7d858e;margin:24px 0 8px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+td,th{padding:7px 10px;border-bottom:1px solid #242a31;text-align:left;vertical-align:top}
+th{font-size:10.5px;text-transform:uppercase;letter-spacing:.08em;color:#7d858e}
+.k{font-size:10px;font-weight:700;letter-spacing:.05em;padding:2px 8px;border-radius:20px}
+.k-generator{color:#c3b8fb;background:rgba(139,124,246,.15)}
+.k-detector{color:#eccb8a;background:rgba(217,164,65,.15)}
+.k-watcher{color:#8ee5c1;background:rgba(53,201,143,.15)}
+.k-evidence{color:#b3bcc6;background:rgba(138,147,158,.15)}
+.h-OK{color:#35c98f} .h-STALE{color:#d9a441} .h-ERROR{color:#e0736a} .h-NEVER_RUN{color:#8a939e}
+pre{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px;overflow-x:auto;font-size:12px;line-height:1.5}
+.panel{background:#14181d;border:1px solid #242a31;border-radius:12px;padding:14px 18px;margin-bottom:12px}
+ul{margin:4px 0;padding-left:20px} li{margin-bottom:4px}
+.mono{font-family:ui-monospace,Menlo,monospace}
+</style></head><body><div class="wrap"><h1>Muni bond scanner (incremental)</h1><p class="sub">registered capability · muni_bond_scanner</p><a href="signals.html">&larr; all signals</a><div class="panel" style="margin-top:10px"><span class="k k-generator">GENERATOR</span> &nbsp;<span class="h-NEVER_RUN"><b>NEVER_RUN</b></span> · last run <span class="mono">never</span></div><p>Grows the muni book: diffs the priced universe against held + already-seen, funnels only NEW names through the validated screen (EMMA issue-title gate, liquidity floor, de-minimis-aware after-tax TEY, fit-to-need). Respects EMMA rate limits — incremental only.</p><form method="POST" action="/signals/run" style="margin:10px 0"><input type="hidden" name="name" value="muni_bond_scanner"><input name="symbol" placeholder="symbol (if applicable)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px"><input name="symbols" placeholder="universe, comma-sep (generators)" style="background:#1a1f25;color:#e8ebee;border:1px solid #242a31;border-radius:8px;padding:7px 10px;margin-left:6px"><button type="submit" style="background:#8b7cf6;color:#0b0e12;border:0;border-radius:8px;padding:7px 14px;font-weight:700;cursor:pointer;margin-left:6px">Run now</button></form><h2>Datasources</h2><ul><li>IBKR BOND.MUNI scanner universe (bonds_priced.json)</li><li>EMMA security details + trade tape (per-CUSIP)</li></ul><h2>Applies to</h2><ul><li><b>strategies:</b> muni</li></ul><h2>The code</h2><pre>&quot;&quot;&quot;bond_scanner.py — standing scanner that surfaces NEWLY-qualifying insulated CA munis to grow the book.
+
+Re-run this whenever the universe refreshes (new IBKR scan dropped into bonds_priced.json, or a
+--universe file). It diffs against everything already seen + already held, runs only the NEW names
+through the validated screen, and emits execution-ready candidates (with limits) for the resting-bid
+want-list. Incremental by design: expensive steps (OpenFIGI, EMMA) touch only genuinely new CUSIPs.
+
+FUNNEL (each new CUSIP):
+  1. dedup        — skip if already held or already evaluated (state)
+  2. feasible     — near-par/discount px in range, intermediate maturity
+  3. pre-filter   — OpenFIGI sector ∈ insulated (cached from breadth_scan; OpenFIGI only new issuers)
+  4. AUTH gate    — build_option_B.verify(): EMMA issue-title sectype ∈ {SCHOOL-GO, WATER-REV, ELEC-REV}
+                    AND not federally taxable  (catches COP/CFD/judgment/taxable the pre-filter misses)
+  5. liquidity    — liquidity_gate floor (≤90d since trade, ≥12 tr/yr, ≥1 two-sided day)
+  6. after-tax    — tey_aftertax (de-minimis aware) = the selection metric
+  7. fit-to-need  — ladder-rung gap + new-issuer diversification (book-growth, not just finding)
+Output: outputs/new_candidates_&lt;date&gt;.{json,md}. Deep credit/zone/fire DD stays at promotion time
+(school_go_issuer_credit + build_sleeve_blend) — the scanner FINDS, the build VETS.
+
+State: outputs/scanner_state.json  — seed it once from breadth_scan_state.json (889 issuers pre-classified).
+&quot;&quot;&quot;
+import json, os, re, sys, time, datetime, argparse
+from collections import Counter, defaultdict
+
+import liquidity_gate as L
+import breadth_scan as BS
+import build_option_B as B
+import school_go_issuer_credit as SC   # OpenFIGI resolve_cusips
+import emma_scraper as E
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+OUT = os.path.join(HERE, &quot;outputs&quot;)
+STATE = os.path.join(OUT, &quot;scanner_state.json&quot;)
+BOOK = os.path.join(HERE, &quot;muni_etf_sleeve_blended.json&quot;)
+UNIVERSE_DEFAULT = os.path.join(HERE, &quot;bonds_priced.json&quot;)
+PX_LO, PX_HI = 74.0, 103.5          # feasible dollar-price band (discount 3s .. near-par 4-5s)
+MAT_LO, MAT_HI = 2034, 2046         # ladder zone
+MIN_TEY = 0.060                     # after-tax TEY floor — below this it can&#x27;t compete with the
+                                    # ~8.2% book (premium callable bonds with negative yield-to-worst
+                                    # pass the pledge/liquidity gates but are uninvestable)
+RETEST = (&quot;liquidity&quot;, &quot;low_tey&quot;, &quot;fetch_blocked&quot;, &quot;verify_err&quot;)  # transient -&gt; re-test next run
+
+def load_json(p, default):
+    try: return json.load(open(p))
+    except Exception: return default
+def save_json(p, obj):
+    json.dump(obj, open(p, &quot;w&quot;), indent=1, default=str)
+
+def load_state():
+    s = load_json(STATE, None)
+    if s: return s
+    # seed from the breadth scan: reuse the 889 issuer→sector classifications (free OpenFIGI cache)
+    bs = load_json(os.path.join(OUT, &quot;breadth_scan_state.json&quot;), {})
+    sectors = {iss6: v[&quot;sector&quot;] for iss6, v in bs.get(&quot;sectors&quot;, {}).items()}
+    return {&quot;seen&quot;: {}, &quot;issuer_sector&quot;: sectors, &quot;emitted&quot;: [], &quot;runs&quot;: []}
+
+def load_held():
+    bk = load_json(BOOK, {})
+    held = [x[&quot;cusip&quot;] for x in bk.get(&quot;barbell&quot;, [])]
+    held_iss = {c[:6] for c in held}
+    held_yr = Counter(int(x[&quot;maturity&quot;][:4]) for x in bk.get(&quot;barbell&quot;, []) if x.get(&quot;maturity&quot;))
+    return set(held), held_iss, held_yr
+
+def issuer_sector(iss6, state, new_issuers):
+    &quot;&quot;&quot;Cached sector for an issuer-6; queue unknowns for a batch OpenFIGI resolve.&quot;&quot;&quot;
+    s = state[&quot;issuer_sector&quot;].get(iss6)
+    if s is None:
+        new_issuers.add(iss6)
+    return s
+
+def resolve_new_issuers(reps, state):
+    &quot;&quot;&quot;Batch-OpenFIGI the representative CUSIPs of unseen issuers; cache the sector.&quot;&quot;&quot;
+    if not reps: return
+    res = SC.resolve_cusips(list(reps.values()))
+    for iss6, cu in reps.items():
+        nm = (res.get(cu) or {}).get(&quot;figi_name&quot;)
+        state[&quot;issuer_sector&quot;][iss6] = BS.classify_sector(nm)
+
+def fit_note(cusip, mat_yr, held_iss, held_yr):
+    notes, score = [], 0
+    if held_yr.get(mat_yr, 0) &lt; 2:
+        notes.append(f&quot;fills {mat_yr} rung&quot;); score += 2
+    if cusip[:6] not in held_iss:
+        notes.append(&quot;new issuer&quot;); score += 1
+    return score, &quot;; &quot;.join(notes) or &quot;ladder OK&quot;
+
+def limit_from_tape(pxv, sectype):
+    &quot;&quot;&quot;Resting-bid limit = last customer-buy + a small tolerance (tighter on discounts).&quot;&quot;&quot;
+    if pxv is None: return None
+    tol = 0.25 if pxv &gt;= 95 else 0.40
+    return round(pxv + tol, 2)
+
+def scan(universe_path, max_new=60, relax_liquidity=False):
+    state = load_state()
+    held, held_iss, held_yr = load_held()
+    uni = load_json(universe_path, {}).get(&quot;bonds&quot;, [])
+    sess = E._session()
+    today = datetime.date.today()
+    run_id = today.isoformat()
+
+    # 1-2. candidate set: feasible, not held, not already emitted, not already evaluated
+    #       (unless prior fail was liquidity-only — those get a monthly re-test)
+    emitted = set(state.get(&quot;emitted&quot;, []))
+    cand = []
+    for b in uni:
+        cu = b.get(&quot;cusip&quot;); px = b.get(&quot;px&quot;) or 0
+        if not cu or cu in held or cu in emitted: continue
+        if not (PX_LO &lt;= px &lt;= PX_HI): continue
+        try: yr = int(str(b.get(&quot;maturity&quot;))[:4])
+        except Exception: continue
+        if not (MAT_LO &lt;= yr &lt;= MAT_HI): continue
+        prev = state[&quot;seen&quot;].get(cu)
+        if prev and prev.get(&quot;reject&quot;) not in (None,) + RETEST:    # permanent rejects: skip
+            continue
+        if prev and prev.get(&quot;reject&quot;) in RETEST and (today - datetime.date.fromisoformat(prev[&quot;last&quot;])).days &lt; 30:
+            continue  # re-test yield/liquidity rejects only monthly (price/tape can flip them)
+        cand.append(b)
+
+    # 3. pre-filter to insulated sectors (OpenFIGI, cached). Resolve unseen issuers in one batch.
+    new_issuers, reps = set(), {}
+    for b in cand:
+        iss6 = b[&quot;cusip&quot;][:6]
+        if issuer_sector(iss6, state, new_issuers) is None and iss6 not in reps:
+            reps[iss6] = b[&quot;cusip&quot;]
+    if reps:
+        print(f&quot;[scan] OpenFIGI resolving {len(reps)} new issuers...&quot;, flush=True)
+        resolve_new_issuers(reps, state)
+    pre = [b for b in cand if (state[&quot;issuer_sector&quot;].get(b[&quot;cusip&quot;][:6]) or &quot;&quot;) in BS.INSULATED]
+    print(f&quot;[scan] universe new&amp;feasible={len(cand)} → insulated pre-filter={len(pre)}&quot;, flush=True)
+
+    # 4-7. authoritative EMMA gate + liquidity + after-tax TEY + fit, bounded to max_new EMMA pulls
+    out, tested, blocks = [], 0, 0
+    # test cheapest-first: discounts/par carry the best after-tax TEY and avoid the premium-callable
+    # junk (high YTM-to-maturity but negative YTW-to-call) that would otherwise burn the EMMA budget
+    for b in sorted(pre, key=lambda x: (x.get(&quot;px&quot;) or 999)):
+        if tested &gt;= max_new: break
+        cu = b[&quot;cusip&quot;]; tested += 1
+        rec = {&quot;cusip&quot;: cu, &quot;last&quot;: run_id}
+        try:
+            st, ytw, td, pxv, taxable = B.verify(cu, sess)
+            blocks = 0
+        except RuntimeError as e:                # EMMA rate-limit / block -&gt; back off, mark retryable
+            if &quot;blocked&quot; in str(e):
+                blocks += 1
+                rec[&quot;reject&quot;] = &quot;fetch_blocked&quot;; state[&quot;seen&quot;][cu] = rec
+                save_json(STATE, state)
+                if blocks &gt;= 8:                  # sustained block -&gt; stop, let next run resume
+                    print(f&quot;[scan] EMMA blocked x{blocks}; stopping run to resume later&quot;, flush=True); break
+                if blocks % 3 == 0: sess = E._session()          # refresh session
+                time.sleep(min(45, 4 * blocks)); continue
+            rec[&quot;reject&quot;] = &quot;verify_err&quot;; state[&quot;seen&quot;][cu] = rec; continue
+        except Exception:
+            rec[&quot;reject&quot;] = &quot;verify_err&quot;; state[&quot;seen&quot;][cu] = rec; continue
+        if taxable or st not in B.INCLUDE:
+            rec[&quot;reject&quot;] = &quot;pledge_or_taxable&quot;; rec[&quot;sectype&quot;] = st; rec[&quot;taxable&quot;] = taxable
+            state[&quot;seen&quot;][cu] = rec; continue
+        m = L.tape_metrics(cu, sess, today)
+        ok, why = L.passes(m)
+        if not ok and not relax_liquidity:
+            rec[&quot;reject&quot;] = &quot;liquidity&quot;; rec[&quot;why&quot;] = why; state[&quot;seen&quot;][cu] = rec; continue
+        px = b.get(&quot;px&quot;) or pxv
+        tey, demin = (None, None)
+        try: tey, demin = B.tey_aftertax(px, b[&quot;coupon&quot;], ytw or 0, b[&quot;maturity&quot;])
+        except Exception: pass
+        if tey is None or tey &lt; MIN_TEY:   # premium-callable / negative-YTW etc. — re-testable
+            rec[&quot;reject&quot;] = &quot;low_tey&quot;; rec[&quot;tey_aftertax&quot;] = tey; state[&quot;seen&quot;][cu] = rec; continue
+        yr = int(str(b[&quot;maturity&quot;])[:4])
+        fscore, fnote = fit_note(cu, yr, held_iss, held_yr)
+        ch, label, lbl2 = (B.MAP.get(st) or (&quot;&quot;, &quot;&quot;, st))
+        # OUTLIER GATE: a clean insulated CA muni yields ~4.0-4.6% gross (~8.0-9.2% after-tax TEY).
+        # Abnormally high yield on a &#x27;safe&#x27; pledge = the market pricing in something (weaker credit,
+        # long duration, odd/uncovered structure, stale px). Flag for priority DD; do NOT treat the
+        # high TEY as a clean find — same cheap-for-a-reason trap as the deep-value/GARP finders.
+        outlier = None
+        if (ytw or 0) &gt; 0.05 or (tey or 0) &gt; 0.095:
+            outlier = f&quot;yield&gt;peer (gross {ytw*100:.2f}%) — verify credit/duration/structure&quot;
+        rec.update(reject=None, sectype=st, security=lbl2, coupon=b[&quot;coupon&quot;], maturity=b[&quot;maturity&quot;],
+                   px=px, ytw=ytw, tey_aftertax=tey, demin=demin, limit=limit_from_tape(pxv, st),
+                   last_print=pxv, last_trade=td, outlier=outlier, liq={k: m.get(k) for k in
+                   (&quot;n365&quot;,&quot;two_sided_days&quot;,&quot;days_since_trade&quot;,&quot;med_block&quot;,&quot;max_block&quot;)},
+                   liq_pass=ok, fit_score=fscore, fit_note=fnote)
+        state[&quot;seen&quot;][cu] = rec
+        out.append(rec)
+        if tested % 25 == 0:                     # incremental persist — survive a mid-pass EMMA failure
+            save_json(STATE, state); print(f&quot;[scan] tested {tested}, qualified {len(out)}...&quot;, flush=True)
+        time.sleep(0.7)                          # throttle: 2 EMMA hits/name, stay under the rate limit
+
+    # rank: fit-adjusted after-tax TEY; emit
+    out.sort(key=lambda r: ((r.get(&quot;tey_aftertax&quot;) or 0) + 0.0015 * r.get(&quot;fit_score&quot;, 0)), reverse=True)
+    new_ids = [r[&quot;cusip&quot;] for r in out if r[&quot;cusip&quot;] not in state[&quot;emitted&quot;]]
+    state[&quot;emitted&quot;] = sorted(set(state[&quot;emitted&quot;]) | set(new_ids))
+    state[&quot;runs&quot;].append({&quot;run&quot;: run_id, &quot;tested&quot;: tested, &quot;qualified&quot;: len(out),
+                          &quot;new&quot;: len(new_ids), &quot;universe&quot;: os.path.basename(universe_path)})
+    save_json(STATE, state)
+    write_candidates(out, run_id, tested, len(cand))
+    return out
+
+STANDING = os.path.join(OUT, &quot;SCANNER_STANDING_WANTLIST&quot;)
+def append_standing(out):
+    &quot;&quot;&quot;Maintain a cumulative, deduped standing want-list of PROMOTE-READY finds (non-outliers).
+    This is the running &#x27;names to add&#x27; list the cron appends to and you work as resting bids.&quot;&quot;&quot;
+    book = load_json(STANDING + &quot;.json&quot;, [])
+    have = {r[&quot;cusip&quot;] for r in book}
+    added = [r for r in out if not r.get(&quot;outlier&quot;) and r.get(&quot;cusip&quot;) not in have]
+    book += added
+    book.sort(key=lambda r: -(r.get(&quot;tey_aftertax&quot;) or 0))
+    save_json(STANDING + &quot;.json&quot;, book)
+    md = [&quot;# Scanner Standing Want-List — promote-ready insulated candidates&quot;,
+          f&quot;\n_Cumulative, deduped. Each is credit/zone/fire DD-pending before promotion. &quot;
+          f&quot;‡ = de-minimis (limit is a hard tax ceiling). Limits are resting-bid levels._\n&quot;,
+          &quot;| CUSIP | Security | Cpn/Mat | After-tax TEY | Px | **Limit** | n365 | 2sd | Found | Fit |&quot;,
+          &quot;|---|---|---|---|---|---|---|---|---|---|&quot;]
+    for r in book:
+        liq = r.get(&quot;liq&quot;) or {}; dm = &quot;‡&quot; if r.get(&quot;demin&quot;) else &quot;&quot;
+        tey = f&quot;{r[&#x27;tey_aftertax&#x27;]*100:.2f}%&quot; if r.get(&quot;tey_aftertax&quot;) else &quot;—&quot;
+        md.append(f&quot;| {r[&#x27;cusip&#x27;]} | {r.get(&#x27;security&#x27;,&#x27;&#x27;)}{dm} | {r[&#x27;coupon&#x27;]}s {r[&#x27;maturity&#x27;][:7]} &quot;
+                  f&quot;| {tey} | {r.get(&#x27;px&#x27;)} | **{r.get(&#x27;limit&#x27;)}** | {liq.get(&#x27;n365&#x27;)} &quot;
+                  f&quot;| {liq.get(&#x27;two_sided_days&#x27;)} | {r.get(&#x27;last&#x27;,&#x27;&#x27;)} | {r.get(&#x27;fit_note&#x27;,&#x27;&#x27;)} |&quot;)
+    open(STANDING + &quot;.md&quot;, &quot;w&quot;).write(&quot;\n&quot;.join(md))
+    return added
+
+def write_candidates(out, run_id, tested, n_feasible):
+    save_json(os.path.join(OUT, f&quot;new_candidates_{run_id}.json&quot;), out)
+    L_ = []
+    L_.append(f&quot;# New Bond Candidates — {run_id}&quot;)
+    L_.append(f&quot;\n_Scanner pass: {n_feasible} new&amp;feasible names → {tested} EMMA-tested → &quot;
+              f&quot;**{len(out)} qualified** (insulated pledge + not taxable + liquidity floor passed). &quot;
+              f&quot;Ranked by de-minimis-aware after-tax TEY. ‡ = de-minimis. Limits are resting-bid levels &quot;
+              f&quot;(last customer-buy + tolerance). Credit/zone/fire DD pending before promotion._\n&quot;)
+    clean = [r for r in out if not r.get(&quot;outlier&quot;)]
+    flagged = [r for r in out if r.get(&quot;outlier&quot;)]
+    def tbl(rows):
+        s = [&quot;| CUSIP | Security | Cpn/Mat | After-tax TEY | Px | **Limit** | n365 | 2sd | Fit |&quot;,
+             &quot;|---|---|---|---|---|---|---|---|---|&quot;]
+        for r in rows:
+            liq = r.get(&quot;liq&quot;) or {}; dm = &quot;‡&quot; if r.get(&quot;demin&quot;) else &quot;&quot;
+            tey = f&quot;{r[&#x27;tey_aftertax&#x27;]*100:.2f}%&quot; if r.get(&quot;tey_aftertax&quot;) else &quot;—&quot;
+            s.append(f&quot;| {r[&#x27;cusip&#x27;]} | {r.get(&#x27;security&#x27;,&#x27;&#x27;)}{dm} | {r[&#x27;coupon&#x27;]}s {r[&#x27;maturity&#x27;][:7]} &quot;
+                     f&quot;| {tey} | {r.get(&#x27;px&#x27;)} | **{r.get(&#x27;limit&#x27;)}** | {liq.get(&#x27;n365&#x27;)} &quot;
+                     f&quot;| {liq.get(&#x27;two_sided_days&#x27;)} | {r.get(&#x27;fit_note&#x27;)} |&quot;)
+        return s
+    L_.append(f&quot;## Promote-ready ({len(clean)}) — peer-range yield, DD then add\n&quot;)
+    L_ += tbl(clean) if clean else [&quot;| _none this pass_ | | | | | | | | |&quot;]
+    if flagged:
+        L_.append(f&quot;\n## Outliers ({len(flagged)}) — cheap for a reason? PRIORITY DD before trusting the TEY\n&quot;)
+        L_ += tbl(flagged)
+        for r in flagged:
+            L_.append(f&quot;- **{r[&#x27;cusip&#x27;]}** — {r[&#x27;outlier&#x27;]}&quot;)
+    open(os.path.join(OUT, f&quot;new_candidates_{run_id}.md&quot;), &quot;w&quot;).write(&quot;\n&quot;.join(L_))
+    print(&quot;\n&quot;.join(L_))
+
+if __name__ == &quot;__main__&quot;:
+    ap = argparse.ArgumentParser()
+    ap.add_argument(&quot;--universe&quot;, default=UNIVERSE_DEFAULT, help=&quot;bonds_priced.json-shaped feed&quot;)
+    ap.add_argument(&quot;--max-new&quot;, type=int, default=60, help=&quot;cap EMMA pulls per run&quot;)
+    ap.add_argument(&quot;--relax-liquidity&quot;, action=&quot;store_true&quot;, help=&quot;emit even if liquidity floor fails&quot;)
+    ap.add_argument(&quot;--append-wantlist&quot;, action=&quot;store_true&quot;,
+                    help=&quot;append new promote-ready finds to the cumulative standing want-list&quot;)
+    a = ap.parse_args()
+    out = scan(a.universe, max_new=a.max_new, relax_liquidity=a.relax_liquidity)
+    if a.append_wantlist:
+        added = append_standing(out)
+        print(f&quot;\n[standing want-list] +{len(added)} new promote-ready → {STANDING}.md&quot;)
+</pre></div></body></html>
