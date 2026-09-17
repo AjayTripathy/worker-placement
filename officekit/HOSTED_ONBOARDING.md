@@ -5,12 +5,14 @@ a local office to a hosted office with email login. This document specifies the
 full product direction. The first command-line release now implements email login,
 explicit device approval, resumable migration, encrypted durable office snapshots,
 private viewing/export, and shared seeded research. Start with the public installer,
-then use `./wp login` and `./wp migrate`. The local **Host this office** UI, scoped
-upload-only grants, hosted editing/jobs and connector reconnects remain planned.
+then choose **Host office** in the local app, or use `./wp login` and `./wp migrate`.
+The browser flow now supports device sign-in, an explicit file review, resumable
+upload, and confirmed replacement. Scoped upload-only grants, hosted editing/jobs
+and connector reconnects remain planned.
 The sections below describe that fuller target, not an inventory of shipped work.
 See [hosted operations](../hosting/README.md) for implemented boundaries and limits.
 
-## Current release — 2026-09-15
+## Current release — 2026-09-17
 
 The public installer clones the full product branch and executes `start.sh`.
 `start.sh` bootstraps dependencies and runs the local office in one execution.

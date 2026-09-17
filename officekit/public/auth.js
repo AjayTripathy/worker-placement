@@ -53,7 +53,7 @@
     event.preventDefault(); const button=deviceForm.querySelector('button');button.disabled=true;errorBox.hidden=true;
     try {
       await request('/api/cli/approve', {device:deviceForm.elements.device.value, code:deviceForm.elements.code.value});
-      statusBox.textContent='Device connected. Return to your terminal.';statusBox.hidden=false;deviceForm.hidden=true;
+      statusBox.textContent='Device connected. Return to your local app or terminal.';statusBox.hidden=false;deviceForm.hidden=true;
     } catch(error) {showError(error.message);button.disabled=false;}
   });
   const signout=document.getElementById('sign-out');

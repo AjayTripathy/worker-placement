@@ -7,15 +7,15 @@ from officekit.render_landing import page
 
 def account(email,offices):
     rows=''.join('<article><h2>'+esc(o['name'])+'</h2><p>Balances as of '+esc(o['as_of'])+'</p><a class="text-link" href="'+esc(o['path'],quote=True)+'">Open hosted office ↗</a></article>' for o in offices)
-    if not rows:rows='<article><h2>Bring your office.</h2><p>From your local checkout:</p><pre class="code-block"><code>./wp login\n./wp migrate</code></pre><p>Your saved office and retained research move together.</p></article>'
+    if not rows:rows='<article><h2>Bring your office.</h2><p>In your local app, choose <strong>Host office</strong>. Sign in, review the saved files, then upload your office.</p><p>Your local copy stays available. Prefer the terminal? Use <code>./wp login</code> and <code>./wp migrate --dir /path/to/office</code>.</p></article>'
     content='<main id="main" class="subpage"><p class="eyebrow">YOUR WORKSPACE</p><h1>Welcome home.</h1><p>'+esc(email)+'</p><div id="auth-error" role="alert" class="notice error" hidden></div><div class="account-grid">'+rows+'<article><h2>Start with the research.</h2><p>The SignalOS library is included with every account. Explore its datasets, evidence and findings.</p><a class="text-link" href="/app/research">Open research library ↗</a></article></div></main>'
     return page('Your workspace',content,auth_script=True,signed_in=True)
 
 def device(device,code,email=None):
     if email:
-        panel='<p>Connect this command line to <strong>'+esc(email)+'</strong>.</p><p>Only approve if this matches the code printed by your own <code>./wp login</code> command.</p><p class="device-code">'+esc(code)+'</p><form id="device-form"><input type="hidden" name="device" value="'+esc(device,quote=True)+'"><input type="hidden" name="code" value="'+esc(code,quote=True)+'"><button class="button primary">Connect this device</button></form><p>Connecting signs this machine in. Office upload happens only when you run <code>./wp migrate</code>.</p>'
-    else:panel='<p>Sign in to connect your command line. Return here after verifying your email.</p><p class="device-code">'+esc(code)+'</p><a class="button primary" href="/signup">Sign in with email ↗</a>'
-    return page('Connect your command line','<main id="main" class="subpage"><p class="eyebrow">LOCAL LOGIN</p><h1>One account.<br>Your machine.</h1><div id="auth-error" class="notice error" role="alert" hidden></div><div id="auth-status" class="notice" role="status" hidden></div>'+panel+'</main>',auth_script=True,signed_in=bool(email))
+        panel='<p>Connect this local device to <strong>'+esc(email)+'</strong>.</p><p>Only approve if this matches the code shown in your local app or by your own <code>./wp login</code> command.</p><p class="device-code">'+esc(code)+'</p><form id="device-form"><input type="hidden" name="device" value="'+esc(device,quote=True)+'"><input type="hidden" name="code" value="'+esc(code,quote=True)+'"><button class="button primary">Connect this device</button></form><p>Connecting signs this machine in. Return to your local app to review your saved files and choose <strong>Upload my office</strong>, or run <code>./wp migrate</code>.</p>'
+    else:panel='<p>Sign in to connect your local app. Return here after verifying your email.</p><p class="device-code">'+esc(code)+'</p><a class="button primary" href="/signup">Sign in with email ↗</a>'
+    return page('Connect your device','<main id="main" class="subpage"><p class="eyebrow">LOCAL LOGIN</p><h1>One account.<br>Your machine.</h1><div id="auth-error" class="notice error" role="alert" hidden></div><div id="auth-status" class="notice" role="status" hidden></div>'+panel+'</main>',auth_script=True,signed_in=bool(email))
 
 def office(receipt,record):
     docs={k:base64.b64decode(v) for k,v in record['documents'].items()}

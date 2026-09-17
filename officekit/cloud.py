@@ -4,6 +4,7 @@ import json
 import os
 from pathlib import Path
 import secrets
+import re
 import time
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlparse
@@ -45,17 +46,33 @@ def request(origin,path,payload=None,token=None):
     except (URLError,TimeoutError):raise ValueError('The hosted service could not be reached. Retry when your connection returns.') from None
 
 
-def login(origin=None,timeout=900):
+def begin_login(origin=None):
     origin=origin or hosted_origin()
     proof=secrets.token_urlsafe(48)
     pending=request(origin,'/api/cli/start',{'proof':proof})
+    url=urlparse(pending['url'])
+    if url.scheme!='https' or url.netloc!=urlparse(origin).netloc or url.path!='/cli':
+        raise ValueError('The sign-in destination could not be verified.')
+    return dict(pending,proof=proof,origin=origin)
+
+
+def poll_login(pending):
+    return request(pending['origin'],'/api/cli/poll',{'device':pending['device'],'proof':pending['proof']})
+
+
+def remember_login(pending,result):
+    save_private(config_path(),{'origin':pending['origin'],'token':result['token'],'email':result['email'],'expires_at':result['expires_at']})
+
+
+def login(origin=None,timeout=900):
+    pending=begin_login(origin)
     print('Open '+pending['url']+'\nConfirm this device code: '+pending['code'],flush=True)
     webbrowser.open(pending['url'])
     deadline=time.monotonic()+timeout
     while time.monotonic()<deadline:
-        result=request(origin,'/api/cli/poll',{'device':pending['device'],'proof':proof})
+        result=poll_login(pending)
         if result.get('status')=='approved':
-            save_private(config_path(),{'origin':origin,'token':result['token'],'email':result['email'],'expires_at':result['expires_at']})
+            remember_login(pending,result)
             print('Signed in as '+result['email']+'. Your office has not been uploaded.')
             return 0
         time.sleep(3)
@@ -71,20 +88,41 @@ def credentials():
     return value
 
 
-def migrate(folder,replace_revision=None,open_browser=True):
-    auth=credentials();origin=auth['origin'];token=auth['token']
-    who=request(origin,'/api/me',token=token)
-    print('Preparing your saved office and retained research for '+who['email']+' at '+origin+'…',flush=True)
-    manifest,chunks=snapshot(folder);sid=validate_manifest(manifest)
-    print(str(len(manifest['files']))+' documents; '+str(sum(f['size'] for f in manifest['files']))+' bytes. Local copy is retained.',flush=True)
+def receipt_url(origin,receipt):
+    path=receipt.get('path','')
+    if not re.fullmatch(r'/app/offices/[a-f0-9-]{36}',path) or path!='/app/offices/'+receipt.get('office_id',''):
+        raise ValueError('The hosted receipt has an invalid destination.')
+    return origin+path
+
+
+def upload_snapshot(manifest,chunks,auth,replace_revision=None,progress=None):
+    """Upload exactly the reviewed bytes; credential storage and UI stay local."""
+    origin=auth['origin'];token=auth['token'];sid=validate_manifest(manifest)
+    progress=progress or (lambda phase,done,total:None)
     state=request(origin,'/api/migrations',{'manifest':manifest},token)
+    if state.get('digest')!=sid or any(h not in chunks for h in state.get('missing',[])):
+        raise ValueError('The hosted upload does not match the reviewed snapshot.')
+    progress('uploading',0,len(state.get('missing',[])))
     for i,h in enumerate(state.get('missing',[]),1):
-        print('Transferring '+str(i)+'/'+str(len(state['missing']))+'…',flush=True)
         request(origin,'/api/migrations/'+sid+'/chunks',{'sha256':h,'data':base64.b64encode(chunks[h]).decode()},token)
-    print('Checking document integrity and activating…',flush=True)
+        progress('uploading',i,len(state['missing']))
+    progress('verifying',len(state.get('missing',[])),len(state.get('missing',[])))
     receipt=request(origin,'/api/migrations/'+sid+'/activate',{'replace_revision':replace_revision},token)
     if receipt.get('digest')!=sid or receipt.get('office_id')!=manifest['office_id'] or receipt.get('status')!='active':
         raise ValueError('The hosted receipt does not match this office. No local completion was recorded.')
+    receipt_url(origin,receipt)
+    return receipt
+
+
+def migrate(folder,replace_revision=None,open_browser=True):
+    auth=credentials();origin=auth['origin']
+    who=request(origin,'/api/me',token=auth['token'])
+    print('Preparing your saved office and retained research for '+who['email']+' at '+origin+'…',flush=True)
+    manifest,chunks=snapshot(folder)
+    print(str(len(manifest['files']))+' documents; '+str(sum(f['size'] for f in manifest['files']))+' bytes. Local copy is retained.',flush=True)
+    def progress(phase,done,total):
+        print('Checking document integrity and activating…' if phase=='verifying' else 'Transferring '+str(done)+'/'+str(total)+'…',flush=True)
+    receipt=upload_snapshot(manifest,chunks,auth,replace_revision,progress)
     save_private(Path(folder)/'.hosted-receipt.json',receipt)
     print('Hosted office ready: '+origin+receipt['path']+'\nThe local office remains available. Later local edits are not synced automatically.')
     if open_browser:webbrowser.open(origin+receipt['path'])

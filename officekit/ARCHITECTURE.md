@@ -169,3 +169,12 @@ still checks that snapshot separately. `mandates.validate_target_pct` is the
 shared agent, manual-mandate and proposal allocation gate: absent or finite
 `0 < target <= 100`, never booleans. Both financial JSON documents are serialized
 with `allow_nan=False` before either is published.
+
+
+## Local hosting UI (2026-09-17)
+
+The shell exposes `Host office`, opening `/hosting` in a separate page. `hosting_ui.Hosting` owns one bounded in-memory workflow per local server. It runs authentication, snapshot review, and uploads in a background thread; the browser polls credential-free progress. Device proofs and session tokens stay server-side, with approved login persisted through `cloud.save_private` outside the office. The existing CLI and UI share `cloud.upload_snapshot` and receipt validation.
+
+The loopback bridge requires an exact localhost Host, a per-server page token, and an exact Origin on POST. Its responses are not cached and the page cannot be framed by another origin. GET does not start login or migration. Local hosting requests bypass the global office-write wrapper so network waits do not block edits; snapshot creation still uses the shared office lock.
+
+Review caches immutable allowlisted bytes for at most a 15-minute approval window, pinned to the verified account, destination, snapshot digest, and current hosted revision. Upload requires the exact review ID and explicit replacement confirmation when applicable. Before transfer, it rechecks local bytes and the signed-in credential/account. The hosted service remains the authority for tenant identity and atomic activation against the reviewed revision. No automatic upload, financial recomputation, private-to-public research publication, or continuous sync is introduced. Errors use the shared sanitized banner and server logging; retries retain already verified remote chunks.

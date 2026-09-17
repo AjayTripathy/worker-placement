@@ -1,3 +1,12 @@
+# Hosting UI shipped — 2026-09-17
+
+- The local shell now has **Host office**, opening `/hosting` separately. The flow is connect by email/device code, review saved files, then explicitly upload. Progress and retry stay in the page. Hosted replacement requires a checkbox tied to the reviewed revision.
+- `hosting_ui.py` owns the local workflow; `render_hosting.py` renders it. `cloud.py` shares login and snapshot-upload helpers with the CLI. Never return device proofs/session tokens to the browser or collect them in the office snapshot.
+- Review pins the account, origin, exact saved bytes, and hosted revision. Account/local-data changes require another review; hosted changes are rejected by activation. Do not remove these gates for a smoother-looking flow.
+- The local route is protected by Host, Origin, and a per-server page token. Never add CORS access or deploy the local server on the public origin.
+- Hosted views and device confirmation now direct users back to the local app. Hosted editing, scoped upload grants, quotas, and deletion remain future work.
+- Acceptance uses synthetic offices and mocked hosted storage. No real household migration is performed as a test; the user initiates that in the UI.
+
 # Current handoff — installer, login, migration and seeded research
 
 Updated 2026-09-16. Public origin: `https://worker-placement-web-653732113303.us-west1.run.app`.

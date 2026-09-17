@@ -199,7 +199,7 @@ def test_cli_refuses_mismatched_receipt(office,monkeypatch):
     monkeypatch.setattr(cloud,'credentials',lambda:{'origin':ORIGIN,'token':'private'})
     def request(origin,path,payload=None,token=None):
         if path=='/api/me':return {'email':'alice@example.com'}
-        if path=='/api/migrations':return {'missing':[]}
+        if path=='/api/migrations':return {'digest':validate_manifest(m),'missing':[]}
         return {'digest':'wrong','office_id':m['office_id'],'status':'active'}
     monkeypatch.setattr(cloud,'request',request)
     with pytest.raises(ValueError,match='receipt'):cloud.migrate(office,open_browser=False)

@@ -32,6 +32,18 @@ Review imported positions and their sources, enter assets and debts, add goals a
 
 Back up the entire office folder. `answers.json` and `balance_sheet.json` preserve your plan; the folder also retains research, decisions and source history. `models.json` stores provider/model choices and environment-variable names, never API keys. Set the corresponding provider keys in your environment for chat and courts.
 
+## Host your office from the app
+
+Choose **Host office** in the local app's top bar. The hosting page opens separately so your workspace stays available.
+
+1. **Connect:** choose **Sign in with email**, open the sign-in page, and approve the matching device code. Return to the local hosting page; it updates automatically. Signing in uploads nothing.
+2. **Review:** choose **Review saved files** to see the signed-in destination, saved balance date, document count, size, and exact file list. Save any form edits first.
+3. **Upload:** choose **Upload my office**. Follow the progress, then choose **Open hosted office**. If a different snapshot already exists, explicitly confirm its replacement first.
+
+Your local copy remains available. An interrupted upload can be retried. If the local files, signed-in account, or hosted snapshot changed, review again before proceeding. Hosted viewing and export are available now; continue editing locally.
+
+The terminal commands below remain available as an alternative.
+
 ## One command to log in
 
 ```sh

@@ -391,10 +391,12 @@ html,body{{height:100%;margin:0;overflow:hidden}}
 body{{display:flex;flex-direction:column}}
 .bar{{flex:0 0 auto}}
 #pane{{flex:1 1 auto;width:100%;height:auto;border:0;display:block}}
+.host-office{{color:#42dfb1;border:1px solid #31554a;border-radius:7px;padding:7px 10px;text-decoration:none;white-space:nowrap;font-size:12px}}
+@media(max-width:600px){{.bar .brand{{display:none}}.bar .workspace-nav{{max-width:145px}}}}
 .workspace-nav{{display:none;width:auto;margin:0;max-width:190px;padding:8px 10px;font-size:13px}}
 .bar{{gap:3px}} .tab{{padding:8px 10px;font-size:11px}} .brand{{margin-right:8px}} .reb{{white-space:nowrap}}
 #refresh-note{{padding:9px 16px;background:#2c2518;color:#edcc8a;font-size:12px}} #refresh-note button{{font-size:12px;padding:5px 10px;margin-left:10px}}
-@media(max-width:1100px){{.bar .tab{{display:none}} .workspace-nav{{display:block}} .bar{{justify-content:space-between;padding:10px 12px}} .brand{{font-size:12px;margin:0}} .bar .grow{{display:none}}}}
+@media(max-width:1220px){{.bar .tab{{display:none}} .workspace-nav{{display:block}} .bar{{justify-content:space-between;padding:10px 12px}} .brand{{font-size:12px;margin:0}} .bar .grow{{display:none}}}}
 @media(max-width:420px){{.bar .reb{{display:none}} .workspace-nav{{max-width:170px}}}}
 </style></head><body>
 <div class="bar"><span class="brand">worker<span>placement</span></span>
@@ -409,7 +411,7 @@ body{{display:flex;flex-direction:column}}
   <button class="tab" id="t_imports" onclick="show('imports')">IMPORTS</button>
   <select class="workspace-nav" id="workspace-nav" aria-label="Workspace" onchange="show(this.value)">
     <option value="office">Home</option><option value="capital">Capital &amp; Commitments</option><option value="scenarios">Scenario Planner</option><option value="strategies">Strategies</option><option value="growth">Growth</option><option value="harvest">Harvest</option><option value="risk">Risk Officer</option><option value="signals">Signals</option><option value="imports">Imports</option>
-  </select><span class="grow"></span><a class="reb" href="/reset">start over</a></div>
+  </select><span class="grow"></span><a class="host-office" href="/hosting" target="_blank" rel="noopener">Host office ↗</a><a class="reb" href="/reset">start over</a></div>
 <div id="refresh-note" role="status" hidden>Updated office data is available. Your unsaved edits are still here.<button type="button" onclick="reloadPane()">Reload page</button></div>
 <iframe title="Office workspace" id="pane" src="/pages/office.html"></iframe>
 <script>
@@ -1662,6 +1664,8 @@ def _classify_unknowns(answers, folder, ai):
 
 def make_handler(folder):
     folder = Path(folder)
+    from officekit.hosting_ui import Hosting, handle as handle_hosting
+    hosting = Hosting(folder)
     from officekit.commitment_routes import prune_previews
     from officekit.strategy_proposals import recover_interrupted
     recover_interrupted(folder)
@@ -1704,6 +1708,10 @@ def make_handler(folder):
             self._response_started = True
             self.send_response(code)
             self.send_header("Content-Type", ctype)
+            if self.path == "/hosting" or self.path.startswith("/hosting/"):
+                self.send_header("Cache-Control", "no-store")
+                self.send_header("Referrer-Policy", "no-referrer")
+                self.send_header("Content-Security-Policy", "frame-ancestors 'self'")
             if event:
                 self.send_header("X-Office-API-Error-Id", event['id'])
                 from urllib.parse import quote
@@ -1744,12 +1752,15 @@ def make_handler(folder):
             except (BrokenPipeError, ConnectionResetError):
                 return
             except Exception as error:
-                return self._failure(error, json_response='application/json' in self.headers.get('Content-Type', ''))
+                return self._failure(error, json_response='application/json' in self.headers.get('Content-Type', ''),
+                                     context='hosting' if self.path.startswith('/hosting/') else None)
 
         def do_GET(self):
             return self._guard(self._get)
 
         def do_POST(self):
+            if self.path.startswith("/hosting/"):
+                return self._guard(self._post)
             from officekit.office_lock import locked
             with locked(folder):
                 return self._guard(self._post)
@@ -1826,6 +1837,8 @@ def make_handler(folder):
 
         def _get(self):
             self.path = self.path.split("?", 1)[0]       # strip query (cache-busters, ?v=)
+            if self.path == "/hosting" or self.path.startswith("/hosting/"):
+                return handle_hosting(self, hosting)
             from officekit.render_landing import asset, render_landing, render_local_guide, render_privacy, render_signup, hosted_origin
             if self.path in {'/welcome', '/guides/local', '/privacy', '/signup'} or self.path.startswith('/public/'):
                 self._public_request = True
@@ -1904,6 +1917,8 @@ def make_handler(folder):
             return payload
 
         def _post(self):
+            if self.path.startswith("/hosting/"):
+                return handle_hosting(self, hosting)
             if self.path == '/api-errors/dismiss':
                 from officekit.api_errors import clear
                 try:
