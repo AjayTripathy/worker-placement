@@ -701,7 +701,8 @@ class TestGoalCoverage:
         data, _ = self._built(tmp_path)
         m = build_model(data)
         office = render_office(m)
-        assert office.count("→ served by Core public equity") == 3
+        assert office.count('<ul class="goal-strategies"') == 3
+        assert office.count('href="/pages/strategies.html#strat-core_equity"') == 3
         strat = render_strategies(m)
         assert "Serving goals" in strat
         assert "goal-mandated ≈ <b>65%</b> of NW" in strat

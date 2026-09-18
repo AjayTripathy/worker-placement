@@ -11,6 +11,7 @@ from officekit.commitments import pending_deployable, tax_funding
 
 import math
 from datetime import datetime
+from urllib.parse import quote
 
 from officekit.fmt import esc, fmt_usd as _fmt, betacell as _betacell
 from officekit.model import catmap_for, strategy_tags
@@ -113,6 +114,11 @@ _EDITOR_STYLE = """<style>
 .gx:hover{color:#e0736a;background:rgba(224,115,106,.12)}
 .goallink{color:#e8ebee;text-decoration:none;border-bottom:1px dashed rgba(53,201,143,.45);cursor:pointer;font-weight:600}
 .goallink:hover{color:#35c98f;border-bottom-color:#35c98f}
+.goal-serving{margin:12px 0 18px}.goal-serving-label{font-size:11px;color:#9aa4b0;margin:0 0 6px}
+.goal-strategies{list-style:none;padding:0;margin:0;display:grid;gap:6px}
+.goal-strategies a{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:5px 16px;padding:9px 12px;border:1px solid #242a31;border-radius:8px;text-decoration:none;color:#35c98f;font-size:12px}
+.goal-strategies a:hover{background:#1a1f25;border-color:#35c98f66}.goal-strategies a:focus-visible{outline:2px solid #35c98f;outline-offset:3px}
+.goal-strategy-name{font-weight:600;overflow-wrap:anywhere}.goal-strategy-meta{color:#9aa4b0;font-size:11px}
 .intuited{font-size:9.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#c3b8fb;background:rgba(177,165,255,.15);border-radius:20px;padding:2px 8px;margin-left:6px}
 .implicit-why{color:#9aa4b0;font-size:12px;line-height:1.5;padding:2px 0 10px 14px}
 .implicit-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:6px}
@@ -255,10 +261,16 @@ def _goals_panel(m, d, assets, sleeves, cash_now, goals_endpoint, chat,
                 P.append(f'<p class="goal-detail">{esc(ev["detail"])}</p>')
             serving = cov.get(g.get("id"), [])
             if serving:
-                txt = " · ".join(f'{esc(e["title"])} ({esc(e["status"].upper().replace("_", " "))}'
-                                 + (f' · {e["cur_pct"]:.1f}% now' if e["cur_val"] else "") + ")"
-                                 for e in serving)
-                P.append(f'<div class="g" style="font-size:11px;padding:1px 0 8px 14px">→ served by {txt}</div>')
+                P.append('<div class="goal-serving"><p class="goal-serving-label">Served by</p>'
+                         f'<ul class="goal-strategies" aria-label="Strategies serving {esc(ev["label"])}">')
+                for e in serving:
+                    href = strategies_href + '#strat-' + quote(str(e['sid']), safe='')
+                    status = e['status'].replace('_', ' ').capitalize()
+                    allocation = f' · {e["cur_pct"]:.1f}% now' if e['cur_val'] else ''
+                    P.append(f'<li><a href="{esc(href)}"><span class="goal-strategy-name">{esc(e["title"])} '
+                             f'<span aria-hidden="true">→</span></span>'
+                             f'<span class="goal-strategy-meta">{esc(status)}{allocation}</span></a></li>')
+                P.append('</ul></div>')
             elif g.get("id"):
                 P.append(f'<div class="g" style="font-size:11px;padding:1px 0 8px 14px">'
                          f'→ no strategy serving this goal yet — '
