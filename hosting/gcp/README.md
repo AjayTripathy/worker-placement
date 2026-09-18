@@ -90,3 +90,15 @@ that `/api/auth/google/start` returns an `accounts.google.com` URL with the exac
 redirect and that the Google account chooser opens without a configuration error.
 A successful real account sign-in must still be checked separately; synthetic
 Firebase/email-link identities cannot demonstrate that OAuth works end to end.
+
+
+Google sign-in is live on revision `worker-placement-web-00013-m4t` (2026-09-17).
+The OAuth app is External / In production, with the hosted homepage and privacy
+policy configured. The active web client is named **Worker Placement hosted
+sign-in**. Its secret is stored only in Identity Platform. A real login preserved
+the existing Firebase UID and returned the previously migrated office.
+
+Setup also produced an unused duplicate client. It is named **Unused setup
+duplicate - no authorized redirects**, has no authorized origins or redirect URIs,
+and is not referenced by Identity Platform. Do not select it when configuring the
+provider. Only the named active client should be used.

@@ -1,6 +1,6 @@
 ## Google sign-in — 2026-09-17
 
-Rollout pending: code is staged in Cloud Run revision `worker-placement-web-00013-m4t` with zero traffic. Revision `00012-xlp` continues serving email sign-in. Google Auth Platform branding is prepared but awaits the owner’s approval to accept the Google API Services User Data Policy; a web OAuth client/provider still needs configuration. Do not promote until Google account selection and callback configuration are checked.
+Live on Cloud Run revision `worker-placement-web-00013-m4t` with 100% traffic. Google Auth Platform is in production and the `google.com` Identity Platform provider is enabled. A real Google login completed, preserved the existing account UID and returned the existing hosted office. All 82 relevant auth, migration, workspace and landing tests pass. Callback request logging is excluded; no Google client secret is shipped in the app.
 
 Signup now uses Google OAuth through the existing Identity Platform account store.
 `hosting/app/auth.py` starts `createAuthUri` CODE_FLOW and exchanges its callback
