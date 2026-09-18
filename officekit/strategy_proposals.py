@@ -130,6 +130,8 @@ def run(folder, pid, pipeline=None):
             p.update(fields, stage=stage)
             p["history"].append({"at": now(), "stage": stage})
             save(folder, p)
+        from officekit.runtime import checkpoint as persist_checkpoint
+        persist_checkpoint()
     try:
         if pipeline is None:
             from officekit_ai.strategy_proposal import build_proposal

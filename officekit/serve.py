@@ -29,7 +29,7 @@ from datetime import date
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
-from officekit.runtime import hosted
+from officekit.runtime import hosted, credential
 
 from officekit import (build_from_answers, build_model, render_office, render_scenarios,
                        render_strategies)
@@ -40,7 +40,9 @@ def _ai(folder=None, slot="intake"):
     Anthropic + ANTHROPIC_API_KEY is only the zero-config default) — else None
     and every AI affordance simply doesn't render (INTELLIGENCE.md principle 1)."""
     if hosted():
-        return None
+        from officekit.runtime import credential
+        if not credential("ANTHROPIC_API_KEY"):
+            return None
     try:
         import officekit_ai
         return officekit_ai if officekit_ai.available(folder, slot) else None
@@ -415,7 +417,7 @@ body{{display:flex;flex-direction:column}}
   <button class="tab" id="t_imports" onclick="show('imports')">IMPORTS</button>
   <select class="workspace-nav" id="workspace-nav" aria-label="Workspace" onchange="show(this.value)">
     <option value="office">Home</option><option value="capital">Capital &amp; Commitments</option><option value="scenarios">Scenario Planner</option><option value="strategies">Strategies</option><option value="growth">Growth</option><option value="harvest">Harvest</option><option value="risk">Risk Officer</option><option value="signals">Signals</option><option value="imports">Imports</option>
-  </select><span class="grow"></span><a class="host-office" href="/hosting" target="_blank" rel="noopener">Host office ↗</a><a class="reb" href="/reset">start over</a></div>
+  </select><span class="grow"></span><a class="host-office" href="/settings" target="_blank" rel="noopener">Office settings</a><a class="reb" href="/reset">start over</a></div>
 <div id="refresh-note" role="status" hidden>Updated office data is available. Your unsaved edits are still here.<button type="button" onclick="reloadPane()">Reload page</button></div>
 <iframe title="Office workspace" id="pane" src="/pages/office.html"></iframe>
 <script>
@@ -482,7 +484,8 @@ _DISCOVERY_CACHE = {"ts": 0.0, "results": None}
 
 def _discover_cached(max_age_s=90):
     if hosted():
-        return []
+        import officekit_adapters
+        return officekit_adapters.discover(names=["alpaca", "ibkr_flex"])
     import time as _t
     if _DISCOVERY_CACHE["results"] is None or _t.time() - _DISCOVERY_CACHE["ts"] > max_age_s:
         try:
@@ -566,6 +569,8 @@ def _key_ask_html(notice=None, via=None):
     for one). Leads with the same detection/import first line (key-free facts),
     then the ask. The key goes to the process environment — never into the
     office folder — and to ~/.anthropic_key only if the user opts in."""
+    if hosted():
+        return '<div class="panel"><p>Connect your AI key to enable chat, extraction and courts.</p><a class="btn" href="/settings" target="_top">Office settings</a></div>'
     first = chat_first_line(notice, via)
     ask = ("To enable the wizard chat and ticker auto-classification, paste an Anthropic "
            "API key. It stays on this machine — never in your Worker Placement folder.")
@@ -598,7 +603,9 @@ _BUSY_ATTR = "onsubmit=\"var b=this.querySelector('button[type=submit]')||this.q
 
 def _key_status(folder=None):
     if hosted():
-        return {"attached": False, "label": "AI agent key can be added later. Manual planning is available now."}
+        from officekit.runtime import credential
+        attached = bool(credential("ANTHROPIC_API_KEY"))
+        return {"attached": attached, "label": "Connected privately to this office" if attached else "Connect your AI key in Office settings"}
     """The AI key, treated as an INTEGRATION (principal 2026-09-05): tell the
     user where we imported it from, or that one needs attaching and how."""
     try:
@@ -679,6 +686,9 @@ def _dropzone_html(folder=None, back=None):
     else:
         note = ("CSVs are parsed exactly and work right now. <b>Screenshots and PDFs need an agent "
                 "key first</b> — " + html.escape(ks["label"]) + ".")
+    saved_note = ("Uploads are saved privately. Reconciled position data updates this office; review source warnings below."
+                  if folder and (Path(folder) / "balance_sheet.json").exists() else
+                  "Files are retained in this office for review. Build the office to apply the staged positions.")
     return ('<div class="panel">'
             '<form id="dzform" method="POST" action="/import/files" enctype="multipart/form-data" '
             + _BUSY_ATTR + '>' + back_field +
@@ -692,8 +702,7 @@ def _dropzone_html(folder=None, back=None):
             '<div id="dzcount" class="note" style="margin:0"></div>'
             '<button type="submit" class="btn2">Read documents</button></div>'
             '<p class="note">' + note + ' Drag a whole folder and it\u2019s scanned recursively \u2014 '
-            'statements, screenshots and CSVs are read, everything else is ignored. Everything '
-            'lands in the table above for your review; nothing is saved until you build.</p>'
+            'statements, screenshots and CSVs are read, everything else is ignored. ' + saved_note + '</p>'
             '</form>' + _DROPZONE_JS + '</div>')
 
 
@@ -723,6 +732,15 @@ def import_files(folder, parts, on_error=None):
         if name in seen:
             continue
         seen.add(name)
+        from officekit.migration import inspect_document, safe_path
+        import hashlib
+        retained = "attachments/" + hashlib.sha256(name.encode()).hexdigest()[:16] + Path(name).suffix.lower()
+        if not safe_path(retained):
+            raise ValueError("Unsupported upload filename")
+        inspect_document(retained, data)
+        target = Path(folder) / retained
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes(data)
         docs.append((name, data))
 
     def failed(name, error):
@@ -782,7 +800,8 @@ def import_files(folder, parts, on_error=None):
 
         workers = min(MODEL_CONCURRENCY, len(model_docs))
         with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as ex:
-            futs = {ex.submit(_do, nd): nd[0] for nd in model_docs}
+            from contextvars import copy_context
+            futs = {ex.submit(copy_context().run, _do, nd): nd[0] for nd in model_docs}
             for fut in concurrent.futures.as_completed(futs):
                 name = futs[fut]
                 try:
@@ -966,6 +985,8 @@ def _import_refresh_html(folder, entry):
         picker to re-upload/replace (a file adapter also keeps a re-scan button)
       * proposed (born of a verdict) -> nothing to refresh."""
     from officekit.render_imports import import_slug
+    if hosted() and entry.get("source_id", "").startswith("adapter:") and entry["source_id"].split(":", 1)[1] not in {"alpaca", "ibkr_flex"}:
+        return '<p class="note">This source runs on your computer. Refresh it in the local app and enable Hosting &amp; sync to share updates.</p><a href="/settings" target="_top">Office settings →</a>' + _remove_button(entry["source_id"])
     import officekit_adapters
     kind, sid = entry.get("kind"), entry.get("source_id", "")
     slug = import_slug(sid)
@@ -1013,7 +1034,8 @@ def write_imports_page(folder):
     pages.mkdir(parents=True, exist_ok=True)
     (pages / "imports.html").write_text(render_imports(
         disc, ledger, rows, overlaps,
-        key_status=_key_status(folder), pull_endpoint=None if hosted() else "/adapter/import",
+        key_status=_key_status(folder), pull_endpoint="/adapter/import",
+        upload_html=_dropzone_html(folder, back="imports.html"),
         reconciliation=(json.loads((Path(folder) / "answers.json").read_text()).get("reconciliation")
                         if (Path(folder) / "answers.json").exists() else None)))
 
@@ -1027,7 +1049,7 @@ def write_imports_page(folder):
         label = e.get("ref") or sid
         (pages / f"{import_slug(sid)}.html").write_text(render_import_detail(
             f"{label} — import detail", f"{e.get('kind','')} · {e.get('detail','')[:80]}",
-            e, srows, ("<p>Saved source. Live connections must be reconnected for hosted use.</p>" if hosted() else _import_refresh_html(folder, e))))
+            e, srows, _import_refresh_html(folder, e)))
     for a in disc:
         sid = f"adapter:{a['name']}"
         if sid in seen or not a.get("can_fetch"):
@@ -1880,6 +1902,9 @@ def make_handler(folder):
                                       answers_json=html.escape(json.dumps(answers), quote=True)))
 
         def _get(self):
+            if self.path == "/settings":
+                from officekit.render_settings import render_settings
+                return self._send(render_settings())
             self.path = self.path.split("?", 1)[0]       # strip query (cache-busters, ?v=)
             if self.path == "/hosting" or self.path.startswith("/hosting/"):
                 return handle_hosting(self, hosting)
@@ -2089,6 +2114,8 @@ def make_handler(folder):
                     else:
                         failures = []
                         results = import_files(folder, parts, on_error=lambda name, error: failures.append((name, error)))
+                        if (folder / "balance_sheet.json").exists():
+                            sync_office_from_staging(folder)
                         write_imports_page(folder)
                         if failures:
                             name, error = failures[0]
@@ -2124,7 +2151,7 @@ def make_handler(folder):
                     a = officekit_adapters.ADAPTERS.get(name, {})
                     # manual-only adapters (downloads_csv) stage as MANUAL so the
                     # daily loop leaves them alone — a deliberate pull, not a standing feed
-                    refresh = "auto" if a.get("auto", True) else "manual"
+                    refresh = "auto" if a.get("auto", True) and not hosted() else "manual"
                     staging.record_pull(folder, f"adapter:{name}", "adapter",
                                         a.get("label", name), rows, refresh=refresh,
                                         as_of=snapshot["as_of"], snapshot=snapshot["snapshot"],
@@ -2185,7 +2212,7 @@ def make_handler(folder):
                     import officekit_signals as sig
                     answers = json.loads((folder / "answers.json").read_text())
                     data = json.loads((folder / "balance_sheet.json").read_text())
-                    ctx = {"office_data": data, "contact": os.environ.get("OFFICEKIT_CONTACT")}
+                    ctx = {"office_data": data, "contact": credential("OFFICEKIT_CONTACT")}
                     if g("symbol"):
                         ctx["symbol"] = g("symbol").upper()
                     if g("symbols"):
@@ -2207,9 +2234,12 @@ def make_handler(folder):
                         if hosted():
                             from officekit.strategy_proposals import load, save
                             proposal = load(folder, pid)
-                            proposal.update(status="awaiting_key", stage="Ready for an AI agent key",
-                                            errors=[])
-                            save(folder, proposal)
+                            if _ai(folder):
+                                from officekit.runtime import enqueue_proposal
+                                enqueue_proposal(pid)
+                            else:
+                                proposal.update(status="awaiting_key", stage="Ready for an AI agent key", errors=[])
+                                save(folder, proposal)
                         else:
                             dispatch(folder, pid)
                 except Exception as e:
@@ -2257,7 +2287,7 @@ def make_handler(folder):
                                      decisions=answers.get("strategy_decisions") or {},
                                      lib=STRATEGY_LIB,
                                      office_data=json.loads((folder / "balance_sheet.json").read_text()),
-                                     contact=os.environ.get("OFFICEKIT_CONTACT"))
+                                     contact=credential("OFFICEKIT_CONTACT"))
                     build_office(answers, folder)
                 except Exception as e:
                     return self._failure(e)
@@ -2279,7 +2309,7 @@ def make_handler(folder):
                     import os
                     run_court(g("symbol"), sid, dec, pc, folder, lib=STRATEGY_LIB.get(sid),
                               office_data=json.loads((folder / "balance_sheet.json").read_text()),
-                              contact=os.environ.get("OFFICEKIT_CONTACT"))
+                              contact=credential("OFFICEKIT_CONTACT"))
                     build_office(answers, folder)      # re-render with the verdict on the card
                 except Exception as e:
                     return self._failure(e)
@@ -2659,8 +2689,12 @@ def main(argv=None):
         return _reload_supervisor(["--dir", args.dir, "--port", str(args.port)])
     folder = Path(args.dir)
     folder.mkdir(parents=True, exist_ok=True)
+    from officekit import cloud_sync as sync
+    from officekit.office_lock import locked
+    with locked(folder):
+        sync.recover(folder)
+    threading.Thread(target=sync.loop, args=(folder,), daemon=True, name="office-sync").start()
     srv = ThreadingHTTPServer(("127.0.0.1", args.port), make_handler(folder))
-    import threading
     threading.Thread(target=_daily_pull_loop, args=(folder,), daemon=True).start()
     tag = " (auto-reload child)" if os.environ.get("OFFICEKIT_RELOAD_CHILD") else ""
     print(f"[serve] Worker Placement: http://localhost:{args.port}  (folder: {folder.resolve()}){tag}")

@@ -15,12 +15,40 @@ from . import views
 PENDING='__Host-wp_cli_pending'
 
 
-def install(app, offices, research, origin, member, body, csrf_page, limiter):
+def install(app, offices, research, origin, member, body, csrf_page, limiter, jobs):
     async def private(request):
         claims=await member(request)
         # CLI APIs use explicit bearer credentials, never ambient browser cookies.
         if not request.headers.get('authorization','').startswith('Bearer '):raise AuthFailure('Sign in from the command line first.',401)
         return claims
+
+    @app.post('/internal/office-job')
+    async def run_job(request: Request):
+        if jobs.queue is None:
+            raise AuthFailure('Workers are not configured.', 503)
+        authorization = request.headers.get('authorization', '')
+        if not authorization.startswith('Bearer '):
+            raise AuthFailure('Worker authentication required.', 403)
+        await run_in_threadpool(jobs.queue.verify, authorization[7:])
+        data = await body(request, require_browser=False)
+        if set(data) != {'uid', 'oid', 'job'} or not all(isinstance(v, str) and len(v) <= 128 for v in data.values()):
+            raise AuthFailure('Invalid job request.')
+        await run_in_threadpool(jobs.run, data['uid'], data['oid'], data['job'])
+        return {'ok': True}
+
+    @app.get('/api/offices/{oid}/revision')
+    async def office_revision(oid: str, request: Request):
+        claims = await private(request)
+        receipt, _ = await run_in_threadpool(offices.db().get, offices.prefix(claims['uid'], oid) + 'active')
+        if not receipt:
+            raise AuthFailure('Office not found.', 404)
+        return receipt
+
+    @app.get('/api/offices/{oid}/snapshot')
+    async def office_snapshot(oid: str, request: Request):
+        claims = await private(request)
+        receipt, record = await run_in_threadpool(offices.read, claims['uid'], oid)
+        return {'receipt': receipt, 'record': record}
 
     @app.get('/cli')
     async def cli(request:Request):
@@ -108,7 +136,7 @@ def install(app, offices, research, origin, member, body, csrf_page, limiter):
             collected = bytearray()
             async for chunk in request.stream():
                 collected.extend(chunk)
-                if len(collected) > 2 * 1024 * 1024:
+                if len(collected) > 20 * 1024 * 1024:
                     raise AuthFailure('This request is too large.', 413)
             raw = bytes(collected)
             token = request.headers.get('x-csrf-token', '')
@@ -127,6 +155,27 @@ def install(app, offices, research, origin, member, body, csrf_page, limiter):
             cookie = request.cookies.get('__Host-wp_csrf', '')
             if not re.fullmatch(r'[A-Za-z0-9_-]{43}', cookie) or not isinstance(token, str) or not secrets.compare_digest(cookie, token):
                 raise AuthFailure('Reload this office before saving.', 403)
+        from .credentials import Credentials
+        from .jobs import LONG_PATHS, progress_page
+        credentials = Credentials(offices)
+        if request.method == 'POST' and path == '/settings/credentials':
+            if ctype.split(';', 1)[0] != 'application/x-www-form-urlencoded':
+                raise AuthFailure('Use the connection settings form.')
+            data = {name: form.getvalue(name) or '' for name in
+                    ('provider', 'credential_revision', 'remove', 'ANTHROPIC_API_KEY',
+                     'APCA_API_KEY_ID', 'APCA_API_SECRET_KEY', 'APCA_API_BASE_URL',
+                     'IBKR_FLEX_TOKEN', 'IBKR_FLEX_QUERY_ID', 'OFFICEKIT_CONTACT')}
+            await run_in_threadpool(credentials.update, claims['uid'], oid, data)
+            return RedirectResponse('/app/offices/' + oid + '/settings', 303)
+        if request.method == 'POST' and path in LONG_PATHS:
+            values, _ = await run_in_threadpool(credentials.read, claims['uid'], oid)
+            # Without a key, strategy briefs still save synchronously for later.
+            if not path.startswith('/strategy/') or values.get('ANTHROPIC_API_KEY'):
+                jid = await run_in_threadpool(jobs.start, claims['uid'], oid, path, raw, ctype, expected)
+                receipt, _ = await run_in_threadpool(offices.read, claims['uid'], oid)
+                if ctype.split(';', 1)[0] == 'application/json':
+                    return JSONResponse({'job': receipt['path'] + '/jobs/' + jid}, status_code=202)
+                return RedirectResponse(receipt['path'] + '/jobs/' + jid, 303)
         try:
             status, headers, data, receipt = await run_in_threadpool(
                 workspace.dispatch, offices, claims['uid'], oid, request.method, path,
@@ -177,13 +226,38 @@ def install(app, offices, research, origin, member, body, csrf_page, limiter):
     async def office_settings(oid: str, request: Request):
         claims = await member(request)
         receipt, _ = await run_in_threadpool(offices.read, claims['uid'], oid)
-        return workspace_response(request, receipt, workspace.settings(receipt))
+        from .credentials import Credentials
+        connections = await run_in_threadpool(Credentials(offices).status, claims['uid'], oid)
+        return workspace_response(request, receipt, workspace.settings(receipt, connections))
 
     @app.get('/app/offices/{oid}/documents')
     async def office_documents(oid: str, request: Request):
         claims = await member(request)
         receipt, record = await run_in_threadpool(offices.read, claims['uid'], oid)
         return csrf_page(views.office(receipt, record), request)
+
+    @app.get('/app/offices/{oid}/jobs/{jid}')
+    @app.get('/app/offices/{oid}/jobs/{jid}/{action}')
+    async def office_job(oid: str, jid: str, request: Request, action: str = ''):
+        claims = await member(request)
+        job, _ = await run_in_threadpool(jobs.read, claims['uid'], oid, jid)
+        receipt, _ = await run_in_threadpool(offices.read, claims['uid'], oid)
+        if action == 'status':
+            return {'status': job['status'], 'error': job.get('error')}
+        if action == 'result':
+            if job['status'] != 'complete':
+                raise AuthFailure(job.get('error') or 'Work is still running.', 409)
+            result = job['response'];headers = result['headers']
+            if headers.get('Location'):
+                return RedirectResponse(receipt['path'] + headers['Location'], 303)
+            data = base64.b64decode(result['body'])
+            if 'text/html' in headers.get('Content-Type', ''):
+                return workspace_response(request, receipt, data.decode(), result['status'])
+            return Response(data, status_code=result['status'], media_type=headers.get('Content-Type', 'application/json'))
+        if action:
+            raise AuthFailure('Page not found.', 404)
+        from .jobs import progress_page
+        return workspace_response(request, receipt, progress_page(jid))
 
     @app.api_route('/app/offices/{oid}/{path:path}', methods=['GET', 'POST'])
     async def office_action(oid: str, path: str, request: Request):

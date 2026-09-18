@@ -40,7 +40,8 @@ def evidence_source(name):
 
 
 def _contact(contact=None):
-    c = contact or os.environ.get("OFFICEKIT_CONTACT")
+    from officekit.runtime import credential
+    c = contact or credential("OFFICEKIT_CONTACT")
     if not c:
         raise RuntimeError("evidence: SEC fair-access needs a contact — set OFFICEKIT_CONTACT "
                            "or pass contact= (an email or URL identifying the operator)")

@@ -154,6 +154,6 @@ def test_loopback_origin_and_page_token_protect_http_bridge(bridge, office):
         assert req('/hosting/review',{},**{k:v for k,v in good.items() if k!='Origin'})[0]==403
         assert req('/hosting/review',{},**good)[0]==202
         with urllib.request.urlopen(base+'/') as r:
-            assert 'href="/hosting"' in r.read().decode()
+            assert 'href="/settings"' in r.read().decode()
     finally:
         server.shutdown();server.server_close()

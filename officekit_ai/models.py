@@ -61,6 +61,9 @@ def resolve_key(env="ANTHROPIC_API_KEY"):
     ~/.anthropic_key file (default env name only — a custom api_key_env means
     the user manages their own environment). The key value is returned to the
     SDK client and never logged, echoed, or written anywhere by this layer."""
+    from officekit.runtime import hosted, credential
+    if hosted():
+        return credential(env)
     k = os.environ.get(env)
     if k:
         return k
@@ -77,6 +80,9 @@ def key_source(env="ANTHROPIC_API_KEY"):
     """WHERE the key came from — for the integrations UI, which treats the AI
     key as an integration like any broker connection. Returns
     'env:<NAME>' | 'file:~/.anthropic_key' | None. Never returns key material."""
+    from officekit.runtime import hosted, credential
+    if hosted():
+        return "office:encrypted" if credential(env) else None
     if os.environ.get(env):
         return f"env:{env}"
     if env == "ANTHROPIC_API_KEY":
@@ -99,7 +105,7 @@ def _anthropic(cfg):
         import anthropic
     except ImportError:
         raise RuntimeError("models: the `anthropic` SDK is not installed (pip install officekit[ai])")
-    return anthropic.Anthropic(api_key=key)
+    return anthropic.Anthropic(api_key=key, timeout=120.0, max_retries=0)
 
 
 def validate(cfg):

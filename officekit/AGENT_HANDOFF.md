@@ -1,3 +1,31 @@
+# Local / hosted parity — 2026-09-17
+
+Read [HOSTED_PARITY.md](HOSTED_PARITY.md) for the current contract. The changes in
+this section supersede older notes saying keys/jobs/imports/sync are unavailable.
+
+- Both shells link Office settings. Same renderers and edit handlers; browser-local
+  greeting. Hosted credentials use KMS storage and a ContextVar, never os.environ.
+- Cloud Tasks handles long requests and proposal checkpoints. One job lease per
+  office; duplicate deliveries do not replay paid calls. Owner-only status/results.
+  Cloud Run staging now includes officekit_agents doctrine/templates and adapters.
+- CSV and AI statement imports use the existing staging/reconciliation engine;
+  original documents are retained. Alpaca/Flex are hosted read-only connections.
+  Desktop gateways stay local. Hosted Re-pull is explicit, not a daily schedule.
+- Opt-in `cloud_sync.py` shares saved files/deletions every 30 seconds. Distinct
+  from the pre-existing financial `sync.py`. Never overwrite both-sided edits:
+  hash-bound user choice, account binding, GCS CAS, file lock and recovery journal.
+- Keys, device sessions and local recovery files never migrate/export. API-error
+  notices remain runtime-local. Five-day device login expiry stops sync visibly.
+- Do not run real broker/model calls or migrate the principal's household as QA.
+  Use synthetic records and mocked models for financial mutations.
+- Verification: 549 local tests (Python 3.9), 98 hosted/sync/packaging checks
+  (Python 3.12), plus live synthetic Cloud Tasks/import/credential/export/sync
+  acceptance. No real household was changed. Revision `worker-placement-web-00015-b52`.
+- Open follow-ups: scoped upload/device grants, per-account quotas, self-service
+  deletion, team membership and wider broker OAuth support.
+
+---
+
 ## Google sign-in — 2026-09-17
 
 Live on Cloud Run revision `worker-placement-web-00013-m4t` with 100% traffic. Google Auth Platform is in production and the `google.com` Identity Platform provider is enabled. A real Google login completed, preserved the existing account UID and returned the existing hosted office. All 82 relevant auth, migration, workspace and landing tests pass. Callback request logging is excluded; no Google client secret is shipped in the app.

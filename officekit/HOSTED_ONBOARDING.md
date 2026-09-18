@@ -7,8 +7,9 @@ explicit device approval, resumable migration, encrypted durable office snapshot
 the shared office workspace with manual editing/export, and shared seeded research. Start with the public installer,
 then choose **Host office** in the local app, or use `./wp login` and `./wp migrate`.
 The browser flow now supports device sign-in, an explicit file review, resumable
-upload, and confirmed replacement. Scoped upload-only grants, hosted AI keys/jobs, statement uploads
-and connector reconnects remain planned.
+upload, and confirmed replacement. Hosted AI keys/jobs, statement uploads, Alpaca/IBKR Flex connections and opt-in
+offline sync now ship; see [HOSTED_PARITY.md](HOSTED_PARITY.md). Scoped upload-only
+grants and broader broker OAuth remain planned.
 The sections below describe that fuller target, not an inventory of shipped work.
 See [hosted operations](../hosting/README.md) for implemented boundaries and limits.
 

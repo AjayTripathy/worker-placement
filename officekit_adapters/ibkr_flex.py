@@ -162,8 +162,14 @@ def parse_flex_positions(xml_text, as_of=None, base="USD"):
 # --------------------------------------------------------------------- network
 def _http_get(url, timeout=20):
     req = urllib.request.Request(url, headers={"User-Agent": "worker-placement/flex"})
-    with urllib.request.urlopen(req, timeout=timeout) as resp:
-        return resp.read().decode("utf-8", "replace")
+    from officekit.cloud import NoRedirect
+    from urllib.error import URLError
+    try:
+        with urllib.request.build_opener(NoRedirect()).open(req, timeout=timeout) as resp:
+            return resp.read(16 * 1024 * 1024).decode("utf-8", "replace")
+    except (URLError, TimeoutError):
+        # URL query strings contain the Flex token; never expose them in logs.
+        raise ValueError("IBKR Flex could not be reached. Check the connection and try again.") from None
 
 
 def fetch_flex(token, query_id, as_of=None, tries=8, wait=3.0, timeout=20):
@@ -177,7 +183,12 @@ def fetch_flex(token, query_id, as_of=None, tries=8, wait=3.0, timeout=20):
         code = root.findtext("ErrorCode") or "?"
         raise RuntimeError(f"Flex SendRequest failed {code}: {root.findtext('ErrorMessage') or sr[:200]}")
     ref = root.findtext("ReferenceCode")
-    url = root.findtext("Url") or f"{FLEX_BASE}/GetStatement"
+    url = root.findtext("Url") or root.findtext("url") or f"{FLEX_BASE}/GetStatement"
+    parsed = urllib.parse.urlparse(url)
+    if (parsed.scheme != "https" or parsed.netloc not in {"ndcdyn.interactivebrokers.com", "gdcdyn.interactivebrokers.com"}
+            or parsed.path not in {"/AccountManagement/FlexWebService/GetStatement", "/Universal/servlet/FlexStatementService.GetStatement"}
+            or parsed.query or parsed.fragment):
+        raise ValueError("IBKR returned an unrecognized report destination.")
 
     last = ""
     for _ in range(tries):
@@ -202,8 +213,8 @@ def register():
              kind="broker")
     def _flex():
         def _creds():
-            return (os.environ.get("IBKR_FLEX_TOKEN"),
-                    os.environ.get("IBKR_FLEX_QUERY_ID"))
+            from officekit.runtime import credential
+            return (credential("IBKR_FLEX_TOKEN"), credential("IBKR_FLEX_QUERY_ID"))
 
         def detect(ctx):
             tok, qid = _creds()

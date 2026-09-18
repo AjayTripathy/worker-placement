@@ -124,6 +124,6 @@ def migrate(folder,replace_revision=None,open_browser=True):
         print('Checking document integrity and activating…' if phase=='verifying' else 'Transferring '+str(done)+'/'+str(total)+'…',flush=True)
     receipt=upload_snapshot(manifest,chunks,auth,replace_revision,progress)
     save_private(Path(folder)/'.hosted-receipt.json',receipt)
-    print('Hosted office ready: '+origin+receipt['path']+'\nThe local office remains available. Later local edits are not synced automatically.')
+    print('Hosted office ready: '+origin+receipt['path']+'\nThe local office remains available. Enable automatic sync in Office settings → Hosting & sync to keep both copies in step.')
     if open_browser:webbrowser.open(origin+receipt['path'])
     return 0

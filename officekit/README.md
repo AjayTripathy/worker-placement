@@ -34,13 +34,13 @@ Back up the entire office folder. `answers.json` and `balance_sheet.json` preser
 
 ## Host your office from the app
 
-Choose **Host office** in the local app's top bar. The hosting page opens separately so your workspace stays available.
+Choose **Office settings → Hosting & sync** in the local app's top bar. The hosting page opens separately so your workspace stays available.
 
 1. **Connect:** choose **Sign in with Google**, open the sign-in page, and approve the matching device code. Return to the local hosting page; it updates automatically. Signing in uploads nothing.
 2. **Review:** choose **Review saved files** to see the signed-in destination, saved balance date, document count, size, and exact file list. Save any form edits first.
 3. **Upload:** choose **Upload my office**. Follow the progress, then choose **Open hosted office**. If a different snapshot already exists, explicitly confirm its replacement first.
 
-Your local copy remains available. An interrupted upload can be retried. If the local files, signed-in account, or hosted snapshot changed, review again before proceeding. The hosted office uses the same workspace with manual editing and export. Local and hosted changes stay separate.
+Your local copy remains available. An interrupted upload can be retried. If the local files, signed-in account, or hosted snapshot changed, review again before proceeding. The hosted office uses the same workspace, with private connection settings, statement imports and background research. Enable **automatic sync** below the migration controls to keep both saved copies in step; conflicting edits pause for a reviewed choice. See [the local/hosted guide](HOSTED_PARITY.md).
 
 The terminal commands below remain available as an alternative.
 
@@ -60,7 +60,7 @@ Your browser opens hosted Google sign-in. Choose your Google account, then compa
 ./wp migrate --dir /path/to/office
 ```
 
-Migration copies the built office and its retained research, preserving its identity and original document bytes. It resumes missing chunks, checks hashes, validates the saved data and atomically activates the hosted revision. The local copy stays available. An exact repeat returns the same receipt; later local edits do not sync automatically.
+Migration copies the built office and its retained research, preserving its identity and original document bytes. It resumes missing chunks, checks hashes, validates the saved data and atomically activates the hosted revision. The local copy stays available. An exact repeat returns the same receipt; later local edits sync only after you explicitly enable automatic sync in the local UI.
 
 Included: the saved answers/balance sheet, context, staging, model variable names, decisions/learning/signal records and supported documents under `research/`, `attachments/`, `documents/`, `transcripts/` and `strategy_proposals/`. Supported retained formats: JSON, JSONL, Markdown, text, CSV, PDF, PNG, JPEG and WebP. Limits: 64 MiB and 1,024 files per snapshot. Credentials, symlinks, generated HTML, executable files, other directories and Git history are excluded or refused. Research outside the office folder stays in the repository; move a supported document into `research/` to retain it with your office.
 

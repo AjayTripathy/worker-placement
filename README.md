@@ -19,7 +19,7 @@ After cloning, **`./start.sh` is the only startup command**. It manages its own 
 ./wp migrate    # Saved office + retained research; keeps the local copy
 ```
 
-Hosted offices currently support viewing and export. Editing, broker reconnects and cloud jobs remain local. Every hosted account can browse the same seeded research library; private office documents are never added to it. Manual entry and core planning need no API key. AI features use the providers you configure.
+Hosted offices use the same workspace and editors. Office settings connects AI keys and supported brokers; Imports accepts statements. Optional automatic sync keeps a local copy, with review when both copies change. See [local/hosted workflows](officekit/HOSTED_PARITY.md). Every hosted account can browse the same seeded research library; private office documents are never added to it. Manual entry and core planning need no API key. AI features use the providers you configure.
 
 For product contributors: [architecture](officekit/ARCHITECTURE.md), [operating contracts](officekit/OPERATING_CONTRACTS.md), and [agent handoff](officekit/AGENT_HANDOFF.md).
 

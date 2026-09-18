@@ -20,7 +20,7 @@ OAUTH = '__Host-wp_google'
 CSP = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'"
 
 
-def create_app(backend=None, origin=None, store=None, research=None, google_enabled=None):
+def create_app(backend=None, origin=None, store=None, research=None, google_enabled=None, queue=None):
     app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
     if google_enabled is None:
         google_enabled = backend is not None or os.environ.get('GOOGLE_SIGNIN_ENABLED') == 'true'
@@ -42,6 +42,11 @@ def create_app(backend=None, origin=None, store=None, research=None, google_enab
     if research is None and os.environ.get('RESEARCH_BUCKET') and os.environ.get('RESEARCH_VERSION'):
         research = Research(os.environ['RESEARCH_BUCKET'], os.environ['RESEARCH_VERSION'])
     offices = Offices(store)
+    from .jobs import CloudQueue, Jobs
+    if queue is None and os.environ.get("OFFICE_TASK_QUEUE"):
+        queue = CloudQueue(origin)
+    jobs = Jobs(offices, queue)
+    app.state.jobs = jobs
 
     @app.middleware('http')
     async def headers(request, call_next):
@@ -122,7 +127,7 @@ def create_app(backend=None, origin=None, store=None, research=None, google_enab
     @app.get('/healthz')
     @app.get('/api/health')
     async def health():
-        return {'status': 'ok', 'google_signin_configured': backend is not None and google_enabled, 'office_migration_configured': store is not None, 'research_configured': research is not None}
+        return {'status': 'ok', 'google_signin_configured': backend is not None and google_enabled, 'office_migration_configured': store is not None, 'research_configured': research is not None, 'office_jobs_configured': queue is not None}
 
     @app.get('/signup')
     async def signup(request: Request):
@@ -244,7 +249,7 @@ def create_app(backend=None, origin=None, store=None, research=None, google_enab
         return {'email': claims['email'], 'email_verified': True, 'office_migration': 'available' if store else 'not_available'}
 
     from .routes import install
-    install(app, offices, research, origin, member, body, csrf_page, limiter)
+    install(app, offices, research, origin, member, body, csrf_page, limiter, jobs)
 
     @app.get('/install.sh')
     async def installer():

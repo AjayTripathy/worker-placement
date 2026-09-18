@@ -43,7 +43,7 @@ def test_same_shell_all_pages_and_reads_preserve_saved_facts(workspace):
     response = client.get(receipt['path'])
     assert response.status_code == 200
     assert 'Office workspace' in response.text and 'id="workspace-nav"' in response.text
-    assert 'Host office ↗' not in response.text and 'Hosted office' in response.text
+    assert 'Host office ↗' not in response.text and 'Office settings' in response.text
     assert receipt['path'] + '/pages/office.html' in response.text
     assert 'nonce-' in response.headers['content-security-policy']
     assert "script-src 'self' 'unsafe-inline'" not in response.headers['content-security-policy']

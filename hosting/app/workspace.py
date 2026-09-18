@@ -27,20 +27,13 @@ POSTS = {'/assets', '/goals', '/goals/add', '/goals/remove', '/goals/mortgage',
          '/commitments/add', '/commitments/update', '/inflows/preview', '/inflows/apply',
          '/strategy/adopt', '/strategy/new', '/strategy/goal-adopt', '/strategy/propose',
          '/strategy/proposal/retry', '/strategy/proposal/revise', '/strategy/proposal/decide',
-         '/api-errors/dismiss'}
+         '/api-errors/dismiss', '/import/files', '/import/remove', '/adapter/import', '/chat', '/court', '/docket', '/signals/run', '/commitments/preview'}
 GETS = {'/', '/state', '/api-errors', '/strategy/proposals/status'}
 EXTRAS = {'api_errors.json', 'commitment_history.jsonl'}
 EXTRA_DIRS = {'inflow_previews', 'commitment_previews'}
-DISABLED = {'/key': 'AI agent keys can be connected in a later update.',
-            '/adapter/import': 'Live broker connections need a hosted connector.',
-            '/import/files': 'Statement uploads will be available with hosted imports.',
-            '/import/remove': 'Manage imported sources locally for now.',
-            '/import/desk-board': 'Local desk imports are not available online.',
-            '/signals/run': 'Signal execution will be available with a hosted agent.',
-            '/court': 'Connect an AI agent key to run the courts.',
-            '/docket': 'Connect an AI agent key to run the courts.',
-            '/chat': 'Connect an AI agent key to use chat.',
-            '/commitments/preview': 'AI editing needs an agent key. Use the manual editor.'}
+DISABLED = {'/key': 'Connect your AI key in Office settings.',
+            '/import/desk-board': 'Use the local desktop app for desk imports; office sync brings the results online.'}
+
 
 
 def extra_path(name):
@@ -81,11 +74,13 @@ def capture(folder):
     return {'manifest': manifest, 'documents': documents, 'workspace': extra}
 
 
-def publish(offices, uid, receipt, record):
+def publish(offices, uid, receipt, record, job_id=None):
     prefix = offices.prefix(uid, receipt['office_id'])
     current, generation = offices.db().get(prefix + 'active')
     if not current or current['digest'] != receipt['digest']:
         raise AuthFailure('The office changed in another tab. Reload and review before saving.', 409)
+    from .jobs import writable
+    writable(current, job_id)
     revision = digest(canonical(record))
     try:
         offices.db().put(prefix + 'revisions/' + revision, record)
@@ -93,7 +88,7 @@ def publish(offices, uid, receipt, record):
         pass
     answers = json.loads(base64.b64decode(record['documents']['answers.json']))
     balance = json.loads(base64.b64decode(record['documents']['balance_sheet.json']))
-    updated = dict(receipt, digest=revision, activated_at=stamp(), as_of=balance['as_of'],
+    updated = dict(current, digest=revision, activated_at=stamp(), as_of=balance['as_of'],
                    name=str(answers.get('owner') or 'Your office')[:180],
                    documents=len(record['documents']), source='hosted')
     try:
@@ -131,8 +126,11 @@ def local_request(folder, method, path, raw, content_type):
     return request.status, request.response_headers, request.wfile.getvalue()
 
 
-def dispatch(offices, uid, oid, method, path, raw=b'', content_type='', expected=None):
+def dispatch(offices, uid, oid, method, path, raw=b'', content_type='', expected=None, job_id=None):
     receipt, record = offices.read(uid, oid)
+    if method == 'POST':
+        from .jobs import writable
+        writable(receipt, job_id)
     if method == 'POST' and path != '/api-errors/dismiss' and expected != receipt['digest']:
         raise AuthFailure('The office changed since this page was opened. Reload and review before saving.', 409)
     if method == 'GET' and path == '/state':
@@ -144,16 +142,28 @@ def dispatch(offices, uid, oid, method, path, raw=b'', content_type='', expected
     with tempfile.TemporaryDirectory(prefix='wp-office-') as directory:
         folder = Path(directory)
         materialize(folder, record)
-        with hosted_office(folder):
+        from .credentials import Credentials
+        credentials, _ = Credentials(offices).read(uid, oid)
+        pending = []
+        def checkpoint():
+            nonlocal receipt, record
+            updated = capture(folder)
+            receipt = publish(offices, uid, receipt, updated, job_id=job_id)
+            record = updated
+        with hosted_office(folder, credentials, enqueue=pending.append if job_id else None, checkpoint=checkpoint if job_id else None):
             from officekit.serve import render_saved_office
             if method == 'GET' and (path == '/' or path.startswith('/pages/')):
                 render_saved_office(folder)
             status, headers, data = local_request(folder, method, path, raw, content_type)
-            if method == 'POST' and status < 400:
+            for pid in pending:
+                checkpoint()
+                from officekit.strategy_proposals import run
+                run(folder, pid)
+            if method == 'POST' and (status < 400 or job_id):
                 updated = capture(folder)
                 # Rendering and exploratory calculations need no new revision.
                 if updated['documents'] != record['documents'] or updated['workspace'] != record.get('workspace', {}):
-                    receipt = publish(offices, uid, receipt, updated)
+                    receipt = publish(offices, uid, receipt, updated, job_id=job_id)
         if status >= 400 and 'text/plain' in headers.get('Content-Type', ''):
             from officekit.serve import STYLE
             data = ('<!doctype html><html lang="en"><head><title>Request needs attention</title><style>' + STYLE + '</style></head><body><main class="wrap"><h1>Changes were not saved</h1><p role="alert">' + escape(data.decode()) + '</p><button type="button" onclick="history.back()">Back to your edits</button></main></body></html>').encode()
@@ -174,7 +184,12 @@ window.officeBase=BASE;
      options=Object.assign({},options);options.headers=new Headers(options.headers|| (input instanceof Request?input.headers:{}));
      options.headers.set('X-CSRF-Token',csrf);options.headers.set('X-Office-Revision',revision);
    }
-   return original(url,options);
+   return original(url,options).then(async response=>{
+     if(response.status!==202||!response.headers.get('content-type')?.includes('application/json'))return response;
+     const queued=await response.clone().json();if(!queued.job)return response;
+     const job=new URL(queued.job,location.href);if(job.origin!==location.origin||!job.pathname.startsWith(base+'/jobs/'))throw new Error('Invalid job destination');
+     for(;;){await new Promise(r=>setTimeout(r,2000));const r=await original(job.pathname+'/status');const s=await r.json();if(!r.ok||s.error)throw new Error(s.error||'Background work failed');if(s.status==='complete')return original(job.pathname+'/result');}
+   });
  };
  document.addEventListener('click',function(event){const a=event.target.closest('a');if(a){const value=a.getAttribute('href');if(value)a.setAttribute('href',resolve(value));}},true);
  document.addEventListener('submit',function(event){
@@ -253,8 +268,8 @@ class Presentation(HTMLParser):
 
 def present(html, receipt, csrf):
     base = receipt['path']
-    html = html.replace('<a class="host-office" href="/hosting" target="_blank" rel="noopener">Host office ↗</a>',
-                        '<a class="host-office" href="' + base + '/settings">Hosted office</a>')
+    html = html.replace('<a class="host-office" href="/settings" target="_blank" rel="noopener">Office settings</a>',
+                        '<a class="host-office" href="' + base + '/settings">Office settings</a>')
     html = html.replace('<a class="reb" href="/reset">start over</a>', '<a class="reb" href="/app" target="_top">Account</a>')
     nonce = secrets.token_urlsafe(24)
     parser = Presentation(base, receipt['digest'], csrf, nonce)
@@ -266,7 +281,11 @@ def present(html, receipt, csrf):
     return ''.join(parser.output), policy
 
 
-def settings(receipt):
-    from officekit.serve import STYLE
-    base = receipt['path']
-    return '<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Hosted office</title><style>' + STYLE + '</style></head><body><main class="wrap"><a class="reb" href="' + base + '">← Back to your office</a><h1>Hosted office</h1><p class="sub">The same workspace, saved online.</p><section class="panel"><h2>Private &amp; saved</h2><p>Your edits are saved to your signed-in account. Your local copy stays separate; export a copy whenever you need it.</p><a class="btn" href="' + base + '/export">Export office</a></section><section class="panel"><h2>AI agent</h2><p>No key connected. Manual planning and the model-based Risk Officer work now. Strategy briefs are saved for research, courts and pitch decks once an agent key is connected.</p></section><section class="panel"><h2>Research</h2><p>Your retained research stays with this office. The included SignalOS library is available to every account.</p><a class="reb" href="' + base + '/documents">Saved documents &amp; research →</a><br><a class="reb" href="/app/research">Open SignalOS library →</a></section></main></body></html>'
+def settings(receipt, connections=None):
+    from officekit.render_settings import render_settings
+    html = render_settings(hosted=True, connections=connections)
+    if receipt.get('job') or receipt.get('last_job'):
+        from .jobs import progress_page
+        link = '<p class="panel"><a href="/jobs/' + (receipt.get('job', {}).get('id') or receipt['last_job']) + '">View latest background work →</a></p>'
+        html = html.replace('</main>', link + '</main>')
+    return html

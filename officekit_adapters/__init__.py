@@ -90,6 +90,9 @@ def adapter(name, label, kind, auto=True):
 def discover(names=None, ctx=None):
     """Run every registered detect concurrently under a hard timeout.
     Returns [{name, label, kind, found, status, detail, guidance, can_fetch}]."""
+    from officekit.runtime import hosted
+    if hosted():
+        names = [n for n in (names or ["alpaca", "ibkr_flex"]) if n in {"alpaca", "ibkr_flex"}]
     ctx = ctx or {}
     picked = [a for n, a in ADAPTERS.items() if names is None or n in names]
 
@@ -110,7 +113,8 @@ def discover(names=None, ctx=None):
         return out
 
     with concurrent.futures.ThreadPoolExecutor(max_workers=max(len(picked), 1)) as ex:
-        futs = {ex.submit(probe, a): a for a in picked}
+        from contextvars import copy_context
+        futs = {ex.submit(copy_context().run, probe, a): a for a in picked}
         results = []
         for f, a in futs.items():
             try:
@@ -128,6 +132,9 @@ def discover(names=None, ctx=None):
 def fetch_positions(name, ctx=None):
     """Run one adapter's fetcher. Raises on a detect-only adapter or any failure
     (callers surface the error; nothing silent)."""
+    from officekit.runtime import hosted
+    if hosted() and name not in {"alpaca", "ibkr_flex"}:
+        raise ValueError("This broker runs on your local machine. Enable office sync to share its imported balances.")
     a = ADAPTERS.get(name)
     if not a:
         raise KeyError(f"unknown adapter {name!r}")
@@ -146,6 +153,9 @@ def fetch_snapshot(name, ctx=None):
     never infer completeness from a nonempty list or recompute a control total.
     """
     from datetime import date
+    from officekit.runtime import hosted
+    if hosted() and name not in {"alpaca", "ibkr_flex"}:
+        raise ValueError("This broker runs on your local machine. Enable office sync to share its imported balances.")
     impl = ADAPTERS[name]["factory"]()
     if impl.get("snapshot"):
         result = dict(impl["snapshot"](ctx or {}))
@@ -518,24 +528,30 @@ def _ibkr_cp():
 @adapter("alpaca", label="Alpaca", kind="broker")
 def _alpaca():
     def _keys():
-        kid = os.environ.get("APCA_API_KEY_ID") or os.environ.get("ALPACA_API_KEY_ID")
-        sec = os.environ.get("APCA_API_SECRET_KEY") or os.environ.get("ALPACA_API_SECRET_KEY")
+        from officekit.runtime import credential
+        kid = credential("APCA_API_KEY_ID") or credential("ALPACA_API_KEY_ID")
+        sec = credential("APCA_API_SECRET_KEY") or credential("ALPACA_API_SECRET_KEY")
         return (kid, sec) if kid and sec else None
 
     def detect(ctx):
         if _keys():
-            return {"found": True, "status": "ready", "detail": "API keys present in environment"}
+            from officekit.runtime import hosted
+            return {"found": True, "status": "ready", "detail": "Keys saved privately for this office" if hosted() else "API keys present in environment"}
         return {"found": False, "status": "needs_key",
                 "detail": "no APCA_API_KEY_ID / APCA_API_SECRET_KEY in environment",
                 "guidance": "export Alpaca keys to enable position import"}
 
     def fetch(ctx):
         kid, sec = _keys()
-        base = os.environ.get("APCA_API_BASE_URL", "https://api.alpaca.markets")
+        from officekit.runtime import credential
+        base = credential("APCA_API_BASE_URL") or "https://api.alpaca.markets"
+        if base not in {"https://api.alpaca.markets", "https://paper-api.alpaca.markets"}:
+            raise ValueError("Choose Alpaca live or paper accounts")
         req = urllib.request.Request(f"{base}/v2/positions",
                                      headers={"APCA-API-KEY-ID": kid, "APCA-API-SECRET-KEY": sec})
-        with urllib.request.urlopen(req, timeout=8) as resp:
-            pos = json.loads(resp.read().decode())
+        from officekit.cloud import NoRedirect
+        with urllib.request.build_opener(NoRedirect()).open(req, timeout=8) as resp:
+            pos = json.loads(resp.read(16 * 1024 * 1024).decode())
         return [{"symbol": p["symbol"], "qty": p.get("qty"), "value": p.get("market_value"),
                  "ccy": "USD", "sec_type": p.get("asset_class", "STK").upper(),
                  "description": p["symbol"]} for p in pos]

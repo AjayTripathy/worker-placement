@@ -13,9 +13,9 @@ MAX_TOTAL = 64 * CHUNK
 MAX_FILES = 1024
 ROOT_FILES = {'answers.json', 'balance_sheet.json', 'personal_context.json', 'staging.json',
               'parametric_scorecard.json', 'fund_map_learned.json', 'docket.json', 'adjudications.jsonl',
-              'learning.jsonl', 'signals_state.json', 'signals_runs.jsonl', 'draft.json', 'models.json', 'positions.csv'}
-RETAINED = {'research', 'attachments', 'documents', 'transcripts', 'strategy_proposals'}
-SUFFIXES = {'.json', '.jsonl', '.md', '.txt', '.csv', '.pdf', '.png', '.jpg', '.jpeg', '.webp'}
+              'learning.jsonl', 'signals_state.json', 'signals_runs.jsonl', 'draft.json', 'models.json', 'positions.csv', 'commitment_history.jsonl'}
+RETAINED = {'research', 'attachments', 'documents', 'transcripts', 'strategy_proposals', 'inflow_previews', 'commitment_previews'}
+SUFFIXES = {'.json', '.jsonl', '.md', '.txt', '.csv', '.pdf', '.png', '.jpg', '.jpeg', '.webp', '.gif'}
 SECRET = re.compile(rb'(?:sk-(?:ant-)?[A-Za-z0-9_-]{20,}|gh[pousr]_[A-Za-z0-9]{20,}|AIza[0-9A-Za-z_-]{30,}|-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----)')
 
 def canonical(value):

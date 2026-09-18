@@ -5,9 +5,10 @@ import shutil
 
 ROOT = Path(__file__).resolve().parents[2]
 # Code packages only: no household folders, datasets, credentials or Git history.
-PACKAGES = ('officekit', 'officekit_ai', 'officekit_signals', 'officekit_research')
+PACKAGES = ('officekit', 'officekit_ai', 'officekit_signals', 'officekit_research', 'officekit_adapters', 'officekit_agents')
 FILES = [str(p.relative_to(ROOT)) for package in PACKAGES
          for p in sorted((ROOT / package).rglob('*.py')) if not {'__pycache__', 'evals'} & set(p.parts)]
+FILES += [str(p.relative_to(ROOT)) for p in sorted((ROOT / 'officekit_agents').rglob('*.md'))]
 FILES += ['officekit/public/' + name for name in
           ('landing.html', 'site.css', 'site.js', 'auth.js', 'mark.svg', 'install.sh')]
 FILES += [str(p.relative_to(ROOT)) for p in sorted((ROOT / 'hosting/app').glob('*.py'))]

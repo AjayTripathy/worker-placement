@@ -94,6 +94,9 @@ class Offices:
     def activate(self,uid,sid,replace_revision=None):
         key,transfer=self.transfer(uid,sid);manifest=transfer['manifest'];oid=manifest['office_id'];prefix=self.prefix(uid,oid)
         current,generation=self.db().get(prefix+'active')
+        if current:
+            from .jobs import writable
+            writable(current)
         if current and current['digest']==sid:return current
         if current and replace_revision!=current['digest']:
             raise AuthFailure('This office already has a different hosted revision. Review it, then use --replace-revision '+current['digest']+' if you intend to replace it.',409)

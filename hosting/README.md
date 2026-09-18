@@ -2,11 +2,11 @@
 
 Live: https://worker-placement-web-653732113303.us-west1.run.app
 
-The hosted service provides the same office workspace as the local app: Home, Capital & Commitments, Scenario Planner, Strategies, Growth, Harvest, Risk Officer, Signals and Imports. Manual planning edits save privately online. Strategy briefs wait for an AI agent key; hosted AI keys/jobs, statement uploads and live broker reconnects are not enabled yet. Retained documents, full export and the shared SignalOS research library remain available.
+The hosted service provides the same office workspace as the local app: Home, Capital & Commitments, Scenario Planner, Strategies, Growth, Harvest, Risk Officer, Signals and Imports. Manual planning edits save privately online. Office settings accepts office-scoped AI keys, Alpaca keys and IBKR Flex credentials. Durable background jobs run the shared research/court pipeline; Imports accepts statements. Optional local sync preserves an offline copy and stops on conflicts. See [the shared-runtime contract](../officekit/HOSTED_PARITY.md). Retained documents, full export and the shared SignalOS research library remain available.
 
 ## Use it
 
-From a checkout, run `./start.sh` to start locally, `./wp login` to connect your terminal through Google sign-in and a matching device code, then `./wp migrate` to transfer the built `./office`. Pass `--dir` for another saved office. Only the migration command uploads financial records; login does not. See [the usage guide](../officekit/README.md) for limits and replacing a snapshot.
+From a checkout, run `./start.sh` to start locally, `./wp login` to connect your terminal through Google sign-in and a matching device code, then `./wp migrate` to transfer the built `./office`. Pass `--dir` for another saved office. Migration, imports and explicitly enabled automatic sync transfer saved records; login alone does not. See [the usage guide](../officekit/README.md) for limits and replacing a snapshot.
 
 Every signed-in account can browse `/app/research`. The immutable seed is shared, while migrated documents are private to their verified identity. Uploads never become seed research. The initial seed contains 32,412 research files; credential-shaped and administrative files were withheld.
 
@@ -41,15 +41,15 @@ revision active. Forms carry CSRF and office-revision fields; fetch mutations ca
 the equivalent headers. Exact Origin is required. Error dismissal is event-scoped
 and may use the current revision; financial edits always require the reviewed one.
 
-Preview documents and commitment history are retained in a separately allowlisted
-`workspace` portion of the same encrypted revision and included in export. Generated
+Preview documents and commitment history are allowlisted in migration/export; older
+hosted revisions retain them in the compatible `workspace` section. Runtime error
+notices stay in that section and are not synchronized. Generated
 HTML is disposable and never uploaded or executed from customer documents. GETs
-never publish rebuilt balances. Hosted and local copies do not automatically sync.
+never publish rebuilt balances. Hosted and local copies synchronize only after explicit opt-in in the local app.
 
-AI proposal creation saves the shared brief and snapshot with `awaiting_key` status.
-No provider call, environment-key fallback or background job runs. Future agent keys
-must be owner-scoped secrets resolved through the runtime capability boundary; do
-not wire the local `/key` route or global environment into the hosted process.
+AI proposals use office-scoped credentials and durable Cloud Tasks jobs. Keyless
+briefs remain `awaiting_key` until explicitly retried. See [HOSTED_PARITY.md](../officekit/HOSTED_PARITY.md)
+for credential isolation, job leases/checkpoints, supported brokers and sync conflict rules.
 
 ## HTTP controls and operations
 
@@ -63,6 +63,8 @@ See [GCP operations](gcp/README.md). Stage only the explicit `stage_web.py` allo
 
 | Variable | Purpose |
 | --- | --- |
+| `OFFICE_TASK_QUEUE` | Full Cloud Tasks queue resource for office jobs |
+| `OFFICE_TASK_ACCOUNT` | Dedicated OIDC delivery service-account email |
 | `GOOGLE_CLOUD_PROJECT` | `worker-placement-508717` |
 | `PUBLIC_ORIGIN` | Exact deployed HTTPS origin |
 | `GOOGLE_SIGNIN_ENABLED` | `true` after the Google provider and OAuth client are configured |

@@ -57,11 +57,14 @@ _BUSY = ("onsubmit=\"var b=this.querySelector('button');b.textContent='\u23f3 pu
 
 
 def render_imports(discover_results, ledger, merged, overlaps, today=None,
-                   key_status=None, pull_endpoint=None, reconciliation=None):
+                   key_status=None, pull_endpoint=None, reconciliation=None, upload_html=""):
     """discover_results: officekit_adapters.discover() output (or []);
     ledger: staging.ledger(folder); merged: staging.merged_rows(folder)[0];
     key_status: the AI key treated as an integration; pull_endpoint enables
     per-integration Pull-now buttons."""
+    from officekit.runtime import hosted
+    connection_note = ("Use Re-pull to refresh cloud connections. Desktop sources update through your local app when office sync is enabled."
+                       if hosted() else "Connected sources refresh daily while the app runs. Setup details and timestamps live on each source page.")
     by_source = {r["source_id"]: r for r in ledger}
 
     # 0 — the AI key IS an integration: where it came from, or how to attach one
@@ -124,9 +127,7 @@ def render_imports(discover_results, ledger, merged, overlaps, today=None,
     n_attention = sum(1 for att, _ in rows if att == 0)
     rows_html = key_row + ''.join(h for _, h in rows)
     table_head = '<div class="table-scroll"><table><tr><th>Connection</th><th>Status</th><th>Refresh</th><th>Last import</th><th>Rows</th><th>Age</th></tr>'
-    lead_line = ('Connected sources refresh daily while the app runs. '
-                 + (f'<b class="h-STALE">{n_attention} need a refresh or reconnect</b> — shown first. ' if n_attention else '')
-                 + 'Setup details and timestamps live on each source page.')
+    lead_line = connection_note + (' ' + f'<b class="h-STALE">{n_attention} need a refresh or reconnect</b> — shown first.' if n_attention else '')
     integrations = ('<h2>Your connections</h2><p class="sub">' + lead_line + '</p>'
                     + (table_head + rows_html + '</table></div>' if rows or key_row else
                        '<div class="panel">No live connections yet. Add a connection below or upload a statement from Home.</div>'))
@@ -134,7 +135,7 @@ def render_imports(discover_results, ledger, merged, overlaps, today=None,
         integrations += ('<details class="panel" style="margin-top:20px"><summary>Add a connection · '
                          f'{len(available)} available</summary>'
                          '<p class="sub" style="margin:8px 0 0">Providers you can connect but haven\'t yet. '
-                         'Each row\'s setup notes (including any required environment variables) are on its page.</p>'
+                         'Open <a href="/settings" target="_top">Office settings</a> to manage your connections; source pages show import details.</p>'
                          + table_head + ''.join(available) + '</table></div></details>')
 
     # 2 — documents: uploads are manual-refresh sources; warnings shown in full
@@ -229,7 +230,7 @@ def render_imports(discover_results, ledger, merged, overlaps, today=None,
             reconciliation_html += f'<p class="h-ERROR">{esc(warning)}</p>'
     return _page("Imports",
                  "Keep your balances current. Review connected sources, refresh history and statement dates.",
-                 reconciliation_html + integrations + documents + proposed + asset_map)
+                 reconciliation_html + integrations + upload_html + documents + proposed + asset_map)
 
 
 def render_import_detail(title, subtitle, entry, rows, refresh_html,

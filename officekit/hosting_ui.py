@@ -7,6 +7,7 @@ import threading
 import time
 
 from officekit import api_errors, cloud
+from officekit import cloud_sync as sync
 from officekit.migration import snapshot, validate_manifest
 from officekit.render_hosting import render_hosting
 
@@ -27,7 +28,7 @@ class Hosting:
 
     def view(self):
         with self.lock:
-            return json.loads(json.dumps(self.state))
+            return json.loads(json.dumps(dict(self.state, sync=sync.read(self.folder))))
 
     def update(self, **values):
         with self.lock:
@@ -50,7 +51,7 @@ class Hosting:
                 api_errors.log_exception(error, 'hosting')
                 detail = api_errors.classify(error)[1]
                 if './wp login' in detail:
-                    detail = 'Sign in with email again, then review your office before uploading.'
+                    detail = 'Sign in with Google again, then review your office before uploading.'
                     self.update(connected=False)
                 if '--replace-revision' in detail:
                     detail = 'The hosted office changed. Review the files again before replacing it.'
@@ -76,7 +77,7 @@ class Hosting:
                                 code=None, login_url=None)
                     return
                 time.sleep(3)
-            raise ValueError('Sign-in expired. Choose Sign in with email to try again.')
+            raise ValueError('Sign-in expired. Choose Sign in with Google to try again.')
         return self.launch('connecting', work, clear=True)
 
     def review(self):
@@ -158,6 +159,19 @@ def handle(handler, hosting):
         result = hosting.login()
     elif handler.path == '/hosting/review':
         result = hosting.review()
+    elif handler.path == '/hosting/sync':
+        action = data.get('action')
+        if action == 'enable':
+            work = lambda: sync.enrollment(hosting.folder)
+        elif action == 'pause':
+            work = lambda: sync.pause(hosting.folder)
+        elif action == 'resolve':
+            work = lambda: sync.tick(hosting.folder, data.get('choice'), data.get('review'))
+        elif action == 'now':
+            work = lambda: sync.tick(hosting.folder)
+        else:
+            raise ValueError('Choose a sync action.')
+        result = hosting.launch('syncing', work)
     elif handler.path == '/hosting/upload':
         result = hosting.upload(data.get('preview'), data.get('replace', False))
     else:

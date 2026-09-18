@@ -667,7 +667,7 @@ a:focus-visible,button:focus-visible,summary:focus-visible{{outline:2px solid va
 </style></head><body>
 <div class="wrap">
   <div class="hdr"><div class="hi">
-    <div class="eyebrow">Your family office</div><h1>{hello}</h1>
+    <div class="eyebrow">Your family office</div><h1 id="office-greeting" data-owner="{esc(owner or "")}">{esc(hello)}</h1>
     <p class="sub">What needs your attention, and what your capital can support.</p>
     <p class="sub" style="margin-top:8px">Balance sheet as of {esc(d.get('as_of'))}{sync_line} · <a href="/pages/imports.html">Review sources</a></p>
   </div></div>
@@ -828,5 +828,6 @@ a:focus-visible,button:focus-visible,summary:focus-visible{{outline:2px solid va
   openHash();window.addEventListener('hashchange',openHash);
 })();
 </script>""")
+    P.append("""<script>(function(){const e=document.getElementById('office-greeting');if(!e)return;const h=new Date().getHours(),g=h<12?'Good morning':h<18?'Good afternoon':'Good evening';e.textContent=g+(e.dataset.owner?', '+e.dataset.owner:'')+'.';})();</script>""")
     P.append('</div></body></html>')
     return "\n".join(P)

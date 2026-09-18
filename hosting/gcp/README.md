@@ -102,3 +102,33 @@ Setup also produced an unused duplicate client. It is named **Unused setup
 duplicate - no authorized redirects**, has no authorized origins or redirect URIs,
 and is not referenced by Identity Platform. Do not select it when configuring the
 provider. Only the named active client should be used.
+
+## Shared AI/import workers and sync
+
+See [HOSTED_PARITY.md](../../officekit/HOSTED_PARITY.md). Cloud Tasks queue
+`projects/worker-placement-508717/locations/us-west1/queues/office-jobs` dispatches
+at most two jobs concurrently and one per second. Delivery uses
+`wp-office-jobs@worker-placement-508717.iam.gserviceaccount.com`, with Cloud Run
+Invoker on this service. The web runtime has queue-scoped Cloud Tasks Enqueuer and
+Service Account User on that delivery identity. Preserve the managed Cloud Tasks
+service agent's token-minting role; never create a service-account key.
+
+Set `OFFICE_TASK_QUEUE` and `OFFICE_TASK_ACCOUNT` to those resources alongside the
+existing environment. Cloud Run request timeout is 1,800 seconds, concurrency 4,
+max instances 3. This keeps browser reads available during jobs. A duplicate task
+delivery never replays a claimed provider call. Expired attempts require explicit
+resubmission. The service itself checks OIDC issuer/audience/verified identity;
+public ingress for the landing page does not make the worker endpoint public.
+
+Keep a bucket lifecycle Delete rule for `office-jobs/` after 30 days, preserving
+existing transfer/device rules. This does not delete office revisions. Agent
+packages/directives/templates and supported broker code are in the explicit
+source stage; research seed files are never executable deployment code.
+
+Parity rollout: `worker-placement-web-00015-b52` (2026-09-17 local date).
+Synthetic live acceptance verified authenticated Cloud Tasks delivery, retained
+CSV/staging, credential exclusion from exports, bidirectional sync and wrong-owner
+denial. Test users and their exact storage namespaces were removed afterward.
+Real provider credentials and paid model/broker calls were not used for acceptance.
+The prior `worker-placement-web-00013-m4t` is the pre-parity rollback revision;
+leave the new queue/IAM in place when rolling back unless intentionally retiring it.

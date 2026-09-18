@@ -6,6 +6,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY hosting ./hosting
 COPY officekit ./officekit
 COPY officekit_ai ./officekit_ai
+COPY officekit_agents ./officekit_agents
+COPY officekit_adapters ./officekit_adapters
 COPY officekit_signals ./officekit_signals
 COPY officekit_research ./officekit_research
 COPY strategies ./strategies

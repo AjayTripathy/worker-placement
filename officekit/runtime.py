@@ -3,6 +3,31 @@ from contextlib import contextmanager
 from contextvars import ContextVar
 from pathlib import Path
 
+_credentials = ContextVar("office_credentials", default={})
+_enqueue = ContextVar("office_enqueue", default=None)
+_checkpoint = ContextVar("office_checkpoint", default=None)
+
+
+def credential(name):
+    if hosted():
+        return _credentials.get().get(name)
+    import os
+    return os.environ.get(name)
+
+
+def enqueue_proposal(pid):
+    callback = _enqueue.get()
+    if callback is None:
+        raise ValueError("Research workers are not configured. Try again later.")
+    callback(pid)
+
+
+def checkpoint():
+    callback = _checkpoint.get()
+    if callback:
+        callback()
+
+
 _hosted_folder = ContextVar('hosted_office_folder', default=None)
 
 
@@ -11,12 +36,18 @@ def hosted():
 
 
 @contextmanager
-def hosted_office(folder):
+def hosted_office(folder, credentials=None, enqueue=None, checkpoint=None):
+    key_token = _credentials.set(dict(credentials or {}))
+    queue_token = _enqueue.set(enqueue)
+    save_token = _checkpoint.set(checkpoint)
     token = _hosted_folder.set(Path(folder).resolve())
     try:
         yield
     finally:
         _hosted_folder.reset(token)
+        _credentials.reset(key_token)
+        _enqueue.reset(queue_token)
+        _checkpoint.reset(save_token)
 
 
 def import_path(value):
