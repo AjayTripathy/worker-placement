@@ -9,12 +9,12 @@ installed-package boundary, and the daily brief / strategy workspace UX contract
 and remaining migration work. The tier design below is historical design context;
 its CLI, dependency and shipped-status descriptions are not a current inventory.
 The distribution is `worker-placement` with `wp` / `worker-placement` commands,
-six packages and default broker-library dependencies. Hosted snapshots now ship as a separate service; hosted editing and execution remain future work.
+six packages and default broker-library dependencies. The hosted transport uses the same office UI and manual editing engine; hosted AI execution remains future work.
 
 **Hosted onboarding direction (2026-09-15):** the primary local-to-hosted entry is
 **Host this office → email sign-in → automatic transfer → open hosted office**.
 Read [HOSTED_ONBOARDING.md](HOSTED_ONBOARDING.md) for the customer flow, verified
-transfer, active-office policy and connector reconnect behavior. The first shipped interface uses `curl …/install.sh | sh`, `./wp login`, and `./wp migrate`. Email accounts, encrypted private snapshots, viewing/export and shared seeded research are deployed. The one-click local UI, hosted editing, scoped upload grants and connector reconnects remain planned. See [hosted service operations](../hosting/README.md).
+transfer, active-office policy and connector reconnect behavior. The first shipped interface uses `curl …/install.sh | sh`, `./wp login`, and `./wp migrate`. Email accounts, encrypted private snapshots, viewing/export and shared seeded research are deployed. The local migration UI and shared hosted workspace now ship. Scoped upload grants, AI keys/jobs and connector reconnects remain planned. See [hosted service operations](../hosting/README.md).
 
 **The goal ladder:** (0) any user pulls the open source and has their own office + scenario planner running locally in minutes → (1) that user graduates, when *they* choose, to a hosted multi-tenant app that syncs their data continuously → (2) eventually, the app can manage execution for them. Each tier is opt-in, and the tier below always keeps working — no lock-in is the trust posture that matches the glass-box brand.
 
@@ -178,3 +178,32 @@ The shell exposes `Host office`, opening `/hosting` in a separate page. `hosting
 The loopback bridge requires an exact localhost Host, a per-server page token, and an exact Origin on POST. Its responses are not cached and the page cannot be framed by another origin. GET does not start login or migration. Local hosting requests bypass the global office-write wrapper so network waits do not block edits; snapshot creation still uses the shared office lock.
 
 Review caches immutable allowlisted bytes for at most a 15-minute approval window, pinned to the verified account, destination, snapshot digest, and current hosted revision. Upload requires the exact review ID and explicit replacement confirmation when applicable. Before transfer, it rechecks local bytes and the signed-in credential/account. The hosted service remains the authority for tenant identity and atomic activation against the reviewed revision. No automatic upload, financial recomputation, private-to-public research publication, or continuous sync is introduced. Errors use the shared sanitized banner and server logging; retries retain already verified remote chunks.
+
+
+## Shared local and hosted workspace (2026-09-17)
+
+The product has one UI and one deterministic editing engine. `_render_core` and
+`_render_additional` in `officekit.serve` serve both the local builder and
+`render_saved_office`; the latter consumes saved balances without publishing a
+rebuild. `hosting.app.workspace` is a transport/storage adapter to these functions
+and the existing handler. It does not run a local HTTP server in Cloud Run.
+
+Verified UID + explicit office UUID selects an encrypted active revision. Requests
+use disposable private folders; successful manual edits produce a validated immutable
+revision and atomically advance the GCS pointer. A submitted revision rejects stale
+forms, and GCS generation checks reject a save raced by another instance or migration.
+No in-memory tenant cache or local working directory is authoritative. Shared HTML
+is mounted under the office URL; nonce scripts and bound event listeners preserve
+interactivity without allowing arbitrary inline script. Same-origin iframe policy
+supports the shell. Forms and fetch mutations enforce CSRF + exact Origin.
+
+`officekit.runtime.hosted_office` is a request-local capability context. It suppresses
+machine discovery, local desk fallbacks and process-wide model keys, and confines
+CSV imports to retained office-relative paths. Strategy proposals can be drafted now
+and persist as `awaiting_key`. Future AI credentials and jobs must be tenant-scoped,
+with durable checkpoints; a key must never mutate shared process environment.
+
+Local and hosted records remain independent after migration. Subsequent transfers
+require explicit replacement of the current hosted digest. Export includes retained
+research and hosted preview/history documents. AI execution, hosted file imports and
+broker reconnects remain separate follow-ups; manual planning does not depend on them.

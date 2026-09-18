@@ -47,15 +47,25 @@ def create_app(backend=None, origin=None, store=None, research=None):
         except Exception:
             LOGGER.exception('Unexpected hosted request failure on %s', request.url.path)
             response = JSONResponse({'error': 'Something went wrong. Please try again.'}, status_code=500)
-        response.headers.update({'Cache-Control': 'no-store', 'Content-Security-Policy': CSP,
-                                 'Referrer-Policy': 'no-referrer', 'X-Content-Type-Options': 'nosniff',
-                                 'X-Frame-Options': 'DENY', 'Permissions-Policy': 'camera=(), microphone=(), geolocation=()'})
+        response.headers.setdefault('Content-Security-Policy', CSP)
+        response.headers.setdefault('X-Frame-Options', 'DENY')
+        response.headers.setdefault('Referrer-Policy', 'no-referrer')
+        response.headers.update({'Cache-Control': 'no-store',
+                                 'X-Content-Type-Options': 'nosniff',
+                                 'Permissions-Policy': 'camera=(), microphone=(), geolocation=()'})
         if origin:
             response.headers['Strict-Transport-Security'] = 'max-age=31536000'
         return response
 
     @app.exception_handler(AuthFailure)
     async def auth_error(request, error):
+        if request.url.path.startswith('/app/offices/') and 'text/html' in request.headers.get('accept', ''):
+            from html import escape
+            from officekit.serve import STYLE
+            html = '<!doctype html><html><head><title>Office needs attention</title><style>' + STYLE + '</style></head><body><main class="wrap"><h1>Request not completed</h1><p role="alert">' + escape(str(error)) + '</p><a class="btn" target="_top" href="/app">Return to your account</a></main></body></html>'
+            return HTMLResponse(html, status_code=error.status, headers={
+                'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; frame-ancestors 'self'; base-uri 'none'; form-action 'self'",
+                'X-Frame-Options': 'SAMEORIGIN'})
         return JSONResponse({'error': str(error)}, status_code=error.status)
 
     def csrf_page(html, request):

@@ -84,7 +84,7 @@ def render_account(email):
                '<div id="auth-error" class="notice error" role="alert" hidden></div><div class="account-status"><span class="review-check">✓</span><div><strong>Email verified</strong><small class="account-email">' + escape(email) + '</small></div></div>'
                '<p>You’re signed in. This is your private account page; your local financial records have not been uploaded.</p><div class="account-grid">'
                '<article><h2>Start your local office.</h2><p>Bring your accounts, goals and commitments together today.</p><a class="text-link" href="/guides/local">Local setup guide ↗</a></article>'
-               '<article><h2>Bring it to the cloud.</h2><p>Run ./wp login and ./wp migrate to host a private office snapshot with viewing and export.</p><a class="text-link" href="/guides/local">Migration guide ↗</a></article></div></main>')
+               '<article><h2>Bring it to the cloud.</h2><p>Run ./wp login and ./wp migrate to open the same office workspace online with private saved edits and export.</p><a class="text-link" href="/guides/local">Migration guide ↗</a></article></div></main>')
     return page('Your account', content, auth_script=True, signed_in=True)
 
 

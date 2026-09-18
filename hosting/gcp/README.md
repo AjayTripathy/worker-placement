@@ -4,7 +4,7 @@ Project: `worker-placement-508717` · region: `us-west1` · public service: `wor
 
 Live origin: https://worker-placement-web-653732113303.us-west1.run.app
 
-Read [the hosted service guide](../README.md) first. The deployed scope includes email accounts, CLI migration to private office snapshots, and shared seeded research. `project.json` describes the larger planned tier; Cloud SQL and hosted editing are not deployed.
+Read [the hosted service guide](../README.md) first. The deployed scope includes email accounts, CLI migration to private office snapshots, and shared seeded research. `project.json` describes the larger planned tier; Cloud SQL and hosted AI execution are not deployed. Manual editing uses the shared office workspace and encrypted object revisions.
 
 ## Current resources
 
@@ -39,7 +39,7 @@ gcloud run deploy worker-placement-web \
   --min=0 --max=2 --memory=2Gi --cpu=1 --concurrency=1 --timeout=300
 ```
 
-The service is public because its landing and signup endpoints must be reachable; `/app` and `/api/me` enforce verified sessions in application code. **Never deploy `officekit.serve` to this service or use `--source .` at the monorepo root.**
+The service is public because its landing and signup endpoints must be reachable; `/app` and `/api/me` enforce verified sessions in application code. **Never start the `officekit.serve` HTTP listener in this service or use `--source .` at the monorepo root.**
 
 Check `/api/health`, public pages, anonymous `/api/me` (401), and private office access, CLI migration, and a seeded research document. `/healthz` is intercepted by Google's frontend, so use `/api/health` for external checks. Run the synthetic authentication workflow in the parent README after auth changes.
 
@@ -49,7 +49,7 @@ For rollback, list revisions with `gcloud run revisions list --service=worker-pl
 
 The project was initialized through the public Identity Platform `initializeAuth` API after Firebase Management's `addFirebase` returned a permission error. Email sign-in uses the managed default action handler, which redirects to the exact approved continuation. Do not override `notification.sendEmail.callbackUri`: this project rejects that operation with `EMAIL_TEMPLATE_UPDATE_NOT_ALLOWED`.
 
-Current migration implements UID ownership, encrypted documents, resumable chunks and atomic activation. The first release uses a verified session as the CLI credential; narrower upload grants, team membership, hosted editing and reconnects remain planned in `officekit/HOSTED_ONBOARDING.md`. Cloud Run temporary storage is not a durable office. Do not infer tenant authorization from an entered email address.
+Current migration implements UID ownership, encrypted documents, resumable chunks and atomic activation. The first release uses a verified session as the CLI credential; narrower upload grants, team membership, hosted AI jobs and reconnects remain planned in `officekit/HOSTED_ONBOARDING.md`. Cloud Run temporary storage is not a durable office. Do not infer tenant authorization from an entered email address.
 
 ## References
 

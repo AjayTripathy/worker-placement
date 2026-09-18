@@ -36,6 +36,8 @@ button{{font-family:inherit;font-size:13px;font-weight:600;background:var(--gree
 <p class="lead">{esc(pitch.get('headline') or b['thesis'])}</p><span class="badge">{esc(status.replace('_',' '))}</span>
 <p class="muted">Source: {esc(p['source_ref'])} · Office snapshot {esc(p['snapshot']['data'].get('as_of',''))} · Created {esc(p['created_at'][:10])}</p></header>''']
     P.append('<div class="steps"><span>1 · SignalOS research</span><span>2 · RED / BLUE court</span><span>3 · Risk Officer</span><span>4 · Pitch & implementation</span></div>')
+    if status == 'awaiting_key':
+        P.append('<section class="slide progress"><h2>Ready for an AI agent key</h2><p>Your strategy brief is saved. SignalOS research, the courts, and the AI Risk Officer can run once an agent key is connected. No research has been billed or investments selected.</p></section>')
     if busy or p.get('errors'):
         P.append(f'<section class="slide progress"><div class="eyebrow">Review progress</div><h2>{esc(p["stage"])}</h2>')
         if busy:

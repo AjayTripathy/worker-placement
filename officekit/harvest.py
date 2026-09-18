@@ -91,7 +91,11 @@ def _read_scorecard(folder=None):
     paths = []
     if folder:
         paths.append(Path(folder) / "parametric_scorecard.json")
-    paths += [Path("desk/data/parametric_scorecard.json"),
+    from officekit.runtime import hosted
+    if hosted():
+        paths = paths[:1]
+    else:
+        paths += [Path("desk/data/parametric_scorecard.json"),
               Path.home() / "exalted" / "signalos" / "desk" / "data" / "parametric_scorecard.json"]
     for p in paths:
         try:
@@ -112,7 +116,8 @@ def _realized_split(m, folder):
     net = num(tm.get("realized_losses_ytd") or tm.get("harvest_realized_ytd") or 0) or 0.0
     st = num(tm.get("realized_st_ytd") or 0) or 0.0
     lt = num(tm.get("realized_lt_ytd") or 0) or 0.0
-    if _is_principal_office(folder):
+    from officekit.runtime import hosted
+    if _is_principal_office(folder) or (hosted() and folder and (Path(folder) / "parametric_scorecard.json").is_file()):
         sc = _read_scorecard(folder)
         ry = (sc or {}).get("realized_ytd") or {}
         n = ry.get("net")

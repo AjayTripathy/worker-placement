@@ -134,7 +134,7 @@ SCRIPT = r'''<script data-office-api-errors>
   bar.querySelector('.api-error-message').textContent=e.message;
   bar.querySelector('.api-error-count').textContent=items.length>1?items.length+' API issues':'';
   const link=bar.querySelector('a');link.hidden=!/^\/pages\/[a-zA-Z0-9_.-]+\.html(?:#[a-zA-Z0-9_-]+)?$/.test(e.href||'');
-  if(!link.hidden){link.href=e.href;link.onclick=function(ev){const pane=document.getElementById('pane');if(pane){ev.preventDefault();pane.src=e.href;}};}
+  if(!link.hidden){link.href=(window.officeBase||'')+e.href;link.onclick=function(ev){const pane=document.getElementById('pane');if(pane){ev.preventDefault();pane.src=(window.officeBase||'')+e.href;}};}
   bar.querySelector('button').onclick=async function(){
    if(e.id.startsWith('local:')){local.delete(e.context);render();return;}
    try{const r=await originalFetch('/api-errors/dismiss',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:e.id})});if(!r.ok)throw Error();

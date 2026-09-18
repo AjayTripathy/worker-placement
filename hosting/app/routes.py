@@ -79,14 +79,80 @@ def install(app, offices, research, origin, member, body, csrf_page, limiter):
         claims=await member(request)
         return {'offices':await run_in_threadpool(offices.listing,claims['uid'])}
 
-    @app.get('/app/offices/{oid}')
-    async def office(oid:str,request:Request):
-        try:claims=await member(request)
-        except AuthFailure as e:
-            if e.status==401:return RedirectResponse('/signup',303)
+    from . import workspace
+    import secrets
+
+    def workspace_response(request, receipt, html, status=200):
+        csrf = request.cookies.get('__Host-wp_csrf', '')
+        if not re.fullmatch(r'[A-Za-z0-9_-]{43}', csrf):
+            csrf = secrets.token_urlsafe(32)
+        html, policy = workspace.present(html, receipt, csrf)
+        response = HTMLResponse(html, status_code=status, headers={
+            'Content-Security-Policy': policy, 'X-Frame-Options': 'SAMEORIGIN',
+            'Referrer-Policy': 'same-origin'})
+        response.set_cookie('__Host-wp_csrf', csrf, secure=True, httponly=False, samesite='lax', path='/')
+        return response
+
+    async def workspace_request(oid, path, request):
+        try:
+            claims = await member(request)
+        except AuthFailure as error:
+            if error.status == 401:
+                return RedirectResponse('/signup', 303)
             raise
-        receipt,record=await run_in_threadpool(offices.read,claims['uid'],oid)
-        return csrf_page(views.office(receipt,record),request)
+        raw, expected = b'', None
+        ctype = request.headers.get('content-type', '')
+        if request.method == 'POST':
+            if request.headers.get('origin') != origin:
+                raise AuthFailure('Reload this office before saving.', 403)
+            collected = bytearray()
+            async for chunk in request.stream():
+                collected.extend(chunk)
+                if len(collected) > 2 * 1024 * 1024:
+                    raise AuthFailure('This request is too large.', 413)
+            raw = bytes(collected)
+            token = request.headers.get('x-csrf-token', '')
+            expected = request.headers.get('x-office-revision')
+            if ctype.split(';', 1)[0] in {'application/x-www-form-urlencoded', 'multipart/form-data'}:
+                from officekit.formdata import parse
+                from email.message import Message
+                headers = Message()
+                headers['Content-Type'] = ctype
+                headers['Content-Length'] = str(len(raw))
+                form = parse(io.BytesIO(raw), headers)
+                token = form.getvalue('_csrf') or token
+                expected = form.getvalue('_office_revision') or expected
+            elif ctype.split(';', 1)[0] != 'application/json':
+                raise AuthFailure('Submit this action from your office.', 400)
+            cookie = request.cookies.get('__Host-wp_csrf', '')
+            if not re.fullmatch(r'[A-Za-z0-9_-]{43}', cookie) or not isinstance(token, str) or not secrets.compare_digest(cookie, token):
+                raise AuthFailure('Reload this office before saving.', 403)
+        try:
+            status, headers, data, receipt = await run_in_threadpool(
+                workspace.dispatch, offices, claims['uid'], oid, request.method, path,
+                raw, ctype, expected)
+        except AuthFailure as error:
+            if error.status not in {400, 409} or request.headers.get('accept', '').startswith('application/json'):
+                raise
+            from html import escape
+            from officekit.serve import STYLE
+            receipt, _ = await run_in_threadpool(offices.read, claims['uid'], oid)
+            html = '<!doctype html><html><head><title>Review before saving</title><style>' + STYLE + '</style></head><body><main class="wrap"><h1>Changes were not saved</h1><p role="alert">' + escape(str(error)) + '</p><a class="btn" target="_top" href="' + receipt['path'] + '">Reload office</a><p>Your current saved office is unchanged.</p></main></body></html>'
+            return workspace_response(request, receipt, html, error.status)
+        if 'Location' in headers:
+            location = headers['Location']
+            if not location.startswith('/') or location.startswith('//'):
+                raise AuthFailure('The destination could not be opened.', 500)
+            return RedirectResponse(receipt['path'] + location, status)
+        if 'text/html' in headers.get('Content-Type', ''):
+            return workspace_response(request, receipt, data.decode(), status)
+        return Response(data, status_code=status, headers={k: v for k, v in headers.items()
+                        if k.lower() in {'content-type', 'x-office-api-error-id', 'x-office-api-error-context'}})
+
+    @app.get('/app/offices/{oid}')
+    @app.get('/app/offices/{oid}/')
+    async def office(oid: str, request: Request):
+        return await workspace_request(oid, '/', request)
 
     @app.get('/app/offices/{oid}/document')
     async def document(oid:str,request:Request):
@@ -102,10 +168,26 @@ def install(app, offices, research, origin, member, body, csrf_page, limiter):
         def build():
             output=io.BytesIO()
             with zipfile.ZipFile(output,'w',compression=zipfile.ZIP_DEFLATED) as z:
-                for path,encoded in record['documents'].items():z.writestr(path,base64.b64decode(encoded))
+                for path,encoded in {**record['documents'], **record.get('workspace', {})}.items():z.writestr(path,base64.b64decode(encoded))
                 z.writestr('migration-receipt.json',json.dumps(receipt,indent=2))
             return output.getvalue()
         return Response(await run_in_threadpool(build),media_type='application/zip',headers={'Content-Disposition':'attachment; filename="worker-placement-office.zip"'})
+
+    @app.get('/app/offices/{oid}/settings')
+    async def office_settings(oid: str, request: Request):
+        claims = await member(request)
+        receipt, _ = await run_in_threadpool(offices.read, claims['uid'], oid)
+        return workspace_response(request, receipt, workspace.settings(receipt))
+
+    @app.get('/app/offices/{oid}/documents')
+    async def office_documents(oid: str, request: Request):
+        claims = await member(request)
+        receipt, record = await run_in_threadpool(offices.read, claims['uid'], oid)
+        return csrf_page(views.office(receipt, record), request)
+
+    @app.api_route('/app/offices/{oid}/{path:path}', methods=['GET', 'POST'])
+    async def office_action(oid: str, path: str, request: Request):
+        return await workspace_request(oid, '/' + path, request)
 
     def library():
         if research is None:raise AuthFailure('The shared research library is being prepared. Please return shortly.',503)

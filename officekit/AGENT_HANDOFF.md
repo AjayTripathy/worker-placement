@@ -1,10 +1,20 @@
+# Shared hosted workspace shipped — 2026-09-17
+
+- The hosted office now uses the local app shell, page renderers and manual mutation handlers through `hosting.app.workspace`. Do not build a separate hosted dashboard or start the local unauthenticated HTTP listener in production.
+- `render_saved_office` preserves saved financial facts on GET. Shared core and extra rendering functions are also called by the local builder. Keep behavior changes in these shared modules.
+- Hosted edits use verified owner identity, explicit office UUID, CSRF/Origin checks, a submitted revision, then an encrypted immutable revision and GCS compare-and-swap. Temporary folders are disposable; never keep a customer's office in module globals or a shared working directory.
+- `officekit.runtime` isolates hosted capabilities. No local machine discovery, process-key fallback, arbitrary CSV paths, or detached background threads. Future AI keys must use tenant-scoped secrets. Proposals are saved as `awaiting_key`, with no paid research or court run.
+- The HTML mounting adapter rewrites office links/forms and wraps fetch; converts inline event attributes to nonce-bearing listeners. Workspace-only same-origin framing and referrers support the shared iframe and native POSTs. Keep strict auth-page policies.
+- Tests: `tests/test_hosted_workspace.py` covers all nine pages, preserved GET facts, durable edits after a new app instance, stale forms, concurrent save, owner isolation, CSRF, machine-path refusal, injected HTML and keyless strategy briefs. The related hosted/local regression suite and a synthetic browser save were verified. No real household was changed or migrated as a test.
+- Still separate follow-ups: hosted AI credentials/jobs, statement uploads, live connectors, scoped transfer credentials, tenant deletion and stronger distributed request quotas. Local and hosted copies do not auto-sync.
+
 # Hosting UI shipped — 2026-09-17
 
 - The local shell now has **Host office**, opening `/hosting` separately. The flow is connect by email/device code, review saved files, then explicitly upload. Progress and retry stay in the page. Hosted replacement requires a checkbox tied to the reviewed revision.
 - `hosting_ui.py` owns the local workflow; `render_hosting.py` renders it. `cloud.py` shares login and snapshot-upload helpers with the CLI. Never return device proofs/session tokens to the browser or collect them in the office snapshot.
 - Review pins the account, origin, exact saved bytes, and hosted revision. Account/local-data changes require another review; hosted changes are rejected by activation. Do not remove these gates for a smoother-looking flow.
 - The local route is protected by Host, Origin, and a per-server page token. Never add CORS access or deploy the local server on the public origin.
-- Hosted views and device confirmation now direct users back to the local app. Hosted editing, scoped upload grants, quotas, and deletion remain future work.
+- Hosted views and device confirmation now direct users back to the local app. Scoped upload grants, quotas, and deletion remain future work. The shared workspace supersedes the original viewing-only release.
 - Acceptance uses synthetic offices and mocked hosted storage. No real household migration is performed as a test; the user initiates that in the UI.
 
 # Current handoff — installer, login, migration and seeded research
@@ -20,8 +30,8 @@ Do not merge private development history into this repository. See `../PUBLIC_RE
   `wp` manages `.venv-worker-placement` and installs the assembled product.
 - `./wp login` uses an explicit browser-approved device code and a local secret
   proof. Login uploads nothing. `./wp migrate --dir <office>` is the transfer action.
-- The hosted office is a read-only saved snapshot with original document downloads
-  and export. Do not describe it as the full hosted app: editing, court/research
+- Historical first release: hosted offices were saved snapshots with downloads
+  and export. The shared workspace above supersedes that UI; court/research
   jobs, broker reconnects and the in-app hosting button are not implemented.
 - Use [hosting/README.md](../hosting/README.md) for the actual storage/auth/locking
   contract. The longer onboarding plan still contains future requirements.

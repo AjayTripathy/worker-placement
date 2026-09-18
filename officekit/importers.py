@@ -268,6 +268,7 @@ def run_import(spec, extra_map=None):
     """Dispatch one import spec {kind, path, account?} -> sleeves."""
     kind = spec.get("kind", "positions_csv")
     if kind == "positions_csv":
-        return parse_positions_csv(Path(spec["path"]), account=spec.get("account", "brokerage"),
+        from officekit.runtime import import_path
+        return parse_positions_csv(import_path(spec["path"]), account=spec.get("account", "brokerage"),
                                    extra_map=extra_map)
     raise ValueError(f"unknown import kind: {kind!r}")

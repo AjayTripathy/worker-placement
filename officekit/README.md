@@ -40,7 +40,7 @@ Choose **Host office** in the local app's top bar. The hosting page opens separa
 2. **Review:** choose **Review saved files** to see the signed-in destination, saved balance date, document count, size, and exact file list. Save any form edits first.
 3. **Upload:** choose **Upload my office**. Follow the progress, then choose **Open hosted office**. If a different snapshot already exists, explicitly confirm its replacement first.
 
-Your local copy remains available. An interrupted upload can be retried. If the local files, signed-in account, or hosted snapshot changed, review again before proceeding. Hosted viewing and export are available now; continue editing locally.
+Your local copy remains available. An interrupted upload can be retried. If the local files, signed-in account, or hosted snapshot changed, review again before proceeding. The hosted office uses the same workspace with manual editing and export. Local and hosted changes stay separate.
 
 The terminal commands below remain available as an alternative.
 
@@ -64,7 +64,7 @@ Migration copies the built office and its retained research, preserving its iden
 
 Included: the saved answers/balance sheet, context, staging, model variable names, decisions/learning/signal records and supported documents under `research/`, `attachments/`, `documents/`, `transcripts/` and `strategy_proposals/`. Supported retained formats: JSON, JSONL, Markdown, text, CSV, PDF, PNG, JPEG and WebP. Limits: 64 MiB and 1,024 files per snapshot. Credentials, symlinks, generated HTML, executable files, other directories and Git history are excluded or refused. Research outside the office folder stays in the repository; move a supported document into `research/` to retain it with your office.
 
-The hosted page supports balances, goals, private documents and complete export. Hosted editing, broker reconnects and research execution are not shipped yet. Make changes locally and migrate a new revision. To replace an existing hosted snapshot, copy its digest from **Migration receipt** and pass `--replace-revision DIGEST`; a stale digest is refused. No automatic overwrite occurs.
+The hosted office reuses the local workspace and supports manual planning edits, private documents and complete export. AI keys/jobs, statement uploads and broker reconnects remain future work. Edit online or locally; the copies do not automatically sync. To replace an existing hosted snapshot, copy its digest from **Migration receipt** and pass `--replace-revision DIGEST`; a stale digest is refused. No automatic overwrite occurs.
 
 Every account also receives access to a shared, read-only SignalOS seed library. Version `seed-20260916-accounts` includes 32,412 files from the tracked research at commit `6207310c8`; 64 administrative or credential-shaped files were withheld. This library is separate from private customer uploads and retains original research dates.
 

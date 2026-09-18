@@ -2,7 +2,7 @@
 
 Live: https://worker-placement-web-653732113303.us-west1.run.app
 
-The hosted service provides email login, device-approved CLI login, private office snapshots with viewing/export, and an included SignalOS research library. Hosted editing, broker reconnects and cloud court/research jobs remain future work. The localhost product remains the full editing environment.
+The hosted service provides the same office workspace as the local app: Home, Capital & Commitments, Scenario Planner, Strategies, Growth, Harvest, Risk Officer, Signals and Imports. Manual planning edits save privately online. Strategy briefs wait for an AI agent key; hosted AI keys/jobs, statement uploads and live broker reconnects are not enabled yet. Retained documents, full export and the shared SignalOS research library remain available.
 
 ## Use it
 
@@ -12,7 +12,7 @@ Every signed-in account can browse `/app/research`. The immutable seed is shared
 
 ## Boundaries and persistence
 
-- `app/main.py`, `auth.py`: independent FastAPI application and Google Identity Platform email verification. No import or deployment of `officekit.serve`.
+- `app/main.py`, `auth.py`: FastAPI authentication boundary with Google Identity Platform email verification. `workspace.py` adapts the shared `officekit.serve` renderers and request handlers in-process; it never starts or forwards to the unauthenticated local HTTP listener.
 - Browser sessions: five-day Secure/HttpOnly/SameSite `__Host-` cookie; private requests check verification and revocation. Exact Origin and CSRF checks protect browser mutations. Email-link GETs do not exchange codes.
 - CLI device login: 15-minute intent with a high-entropy proof retained locally, explicit verified browser approval and matching device code. The proof retrieves the approved session; tokens never enter URLs. The CLI stores it with owner-only permissions outside the office.
 - `offices.py`: derives an owner namespace from the verified provider UID, never an entered email or submitted tenant. CLI mutations require an explicit Bearer credential. This first release has one owner per office, not collaborative membership.
@@ -22,9 +22,38 @@ Every signed-in account can browse `/app/research`. The immutable seed is shared
 - Transfer/device staging expires logically after 24 hours/15 minutes; bucket lifecycle removes it after seven days. Immutable office revisions are retained for export/recovery. Self-service deletion and retention controls remain work to do.
 - `research.py`: indexed, immutable per-area ZIPs in a separate private bucket. Authenticated users browse or download individual seed files. Text is escaped and other files forced to download. The service does not run seed code or assume old findings are current.
 
+## Shared workspace and durable editing
+
+`officekit.serve.render_saved_office` renders the uploaded balance sheet without
+rebuilding financial facts on GET. The local builder and hosted renderer share
+the same core and supplementary page functions and app shell. The adapter mounts
+links, forms, fetch calls, deep links and refresh checks under the explicit office
+UUID, so multiple office tabs do not share an active-office cookie.
+
+Each authorized request materializes verified documents into a private temporary
+folder that is deleted afterward. The runtime ContextVar disables machine discovery,
+process-wide AI keys and local desk fallbacks. Retained relative CSV imports are
+confined to the office; absolute local paths cannot be read. Shared handlers perform
+manual goal, asset, commitment, receipt, allocation and strategy edits. Successful
+writes validate the documents and publish an encrypted immutable revision, then
+compare-and-swap its active pointer. Failures and concurrent writes leave the prior
+revision active. Forms carry CSRF and office-revision fields; fetch mutations carry
+the equivalent headers. Exact Origin is required. Error dismissal is event-scoped
+and may use the current revision; financial edits always require the reviewed one.
+
+Preview documents and commitment history are retained in a separately allowlisted
+`workspace` portion of the same encrypted revision and included in export. Generated
+HTML is disposable and never uploaded or executed from customer documents. GETs
+never publish rebuilt balances. Hosted and local copies do not automatically sync.
+
+AI proposal creation saves the shared brief and snapshot with `awaiting_key` status.
+No provider call, environment-key fallback or background job runs. Future agent keys
+must be owner-scoped secrets resolved through the runtime capability boundary; do
+not wire the local `/key` route or global environment into the hosted process.
+
 ## HTTP controls and operations
 
-CSP is self-only; responses are no-store/no-referrer. No third-party analytics. JSON limits are route-specific: 4 KiB auth, 1 MiB manifests, 1.5 MB base64 chunk requests. Auth/device request limits are process-local and can multiply across instances or reset; provider quotas also apply. This is early access, not a distributed abuse-control system.
+Public/auth pages keep the strict self-only CSP and no-referrer policy. Office pages use nonce-bearing scripts, translate inline event handlers to listeners, and allow only same-origin framing for the shared workspace shell. The workspace uses same-origin referrers so native form POSTs retain their Origin; no referrer is sent to external sites. Every response is no-store. No third-party analytics. JSON limits are route-specific: 4 KiB auth, 1 MiB manifests, 1.5 MB base64 chunk requests. Auth/device request limits are process-local and can multiply across instances or reset; provider quotas also apply. This is early access, not a distributed abuse-control system.
 
 Application access logs are disabled. The Cloud Logging exclusion `worker-placement-auth-links` drops Cloud Run `/auth/finish` request URLs. Unexpected failures retain server tracebacks with generic browser messages. Never log tokens, request bodies, complete auth configuration, or provider responses. Google sends email through its default action handler; keep the deployed host authorized. The project rejects a custom `notification.sendEmail.callbackUri`.
 
@@ -48,7 +77,7 @@ Use the attached runtime identity; do not ship service-account keys. Keep deploy
 
 ```sh
 python3 -m pip install -r hosting/app/requirements.txt pytest httpx
-python3 -m pytest -q tests/test_hosted_web.py tests/test_hosted_migration.py
+python3 -m pytest -q tests/test_hosted_web.py tests/test_hosted_migration.py tests/test_hosted_workspace.py
 python3 -m uvicorn hosting.app.main:create_app --factory --host 127.0.0.1 --port 8790 --no-access-log
 ```
 

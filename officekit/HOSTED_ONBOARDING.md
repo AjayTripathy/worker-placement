@@ -4,10 +4,10 @@ Product direction: 2026-09-15. The principal requested one-click graduation from
 a local office to a hosted office with email login. This document specifies the
 full product direction. The first command-line release now implements email login,
 explicit device approval, resumable migration, encrypted durable office snapshots,
-private viewing/export, and shared seeded research. Start with the public installer,
+the shared office workspace with manual editing/export, and shared seeded research. Start with the public installer,
 then choose **Host office** in the local app, or use `./wp login` and `./wp migrate`.
 The browser flow now supports device sign-in, an explicit file review, resumable
-upload, and confirmed replacement. Scoped upload-only grants, hosted editing/jobs
+upload, and confirmed replacement. Scoped upload-only grants, hosted AI keys/jobs, statement uploads
 and connector reconnects remain planned.
 The sections below describe that fuller target, not an inventory of shipped work.
 See [hosted operations](../hosting/README.md) for implemented boundaries and limits.
@@ -28,8 +28,10 @@ encrypted revisions and uses a GCS generation precondition to activate one revis
 A replacement requires the current hosted digest; exact retries are idempotent.
 The saved model is preserved, never refreshed from external paths in the cloud.
 
-The hosted page is read-only with private document downloads and complete export.
-The full local editing UI is not exposed on the internet. Retained customer
+The hosted office reuses the local shell, page renderers and manual editing handlers
+behind authenticated, owner-scoped routes. It does not expose the local HTTP listener,
+machine integrations or process-wide AI credentials. Hosted edits save as encrypted
+immutable revisions with stale-form and concurrent-write protection. Retained customer
 research stays private. A separate immutable SignalOS seed library is available
 to every verified account; shared seed updates never rewrite customer documents.
 

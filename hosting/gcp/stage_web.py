@@ -4,12 +4,15 @@ from pathlib import Path
 import shutil
 
 ROOT = Path(__file__).resolve().parents[2]
-FILES = ['officekit/render_landing.py', 'officekit/public/landing.html',
-         'officekit/public/site.css', 'officekit/public/site.js',
-         'officekit/public/auth.js', 'officekit/public/mark.svg',
-         'officekit/public/install.sh', 'officekit/migration.py', 'officekit/schema.py', 'officekit_ai/models.py',
-         'hosting/app/__init__.py', 'hosting/app/main.py', 'hosting/app/auth.py',
-         'hosting/app/store.py', 'hosting/app/offices.py', 'hosting/app/routes.py', 'hosting/app/views.py', 'hosting/app/research.py']
+# Code packages only: no household folders, datasets, credentials or Git history.
+PACKAGES = ('officekit', 'officekit_ai', 'officekit_signals', 'officekit_research')
+FILES = [str(p.relative_to(ROOT)) for package in PACKAGES
+         for p in sorted((ROOT / package).rglob('*.py')) if not {'__pycache__', 'evals'} & set(p.parts)]
+FILES += ['officekit/public/' + name for name in
+          ('landing.html', 'site.css', 'site.js', 'auth.js', 'mark.svg', 'install.sh')]
+FILES += [str(p.relative_to(ROOT)) for p in sorted((ROOT / 'hosting/app').glob('*.py'))]
+FILES += [str(p.relative_to(ROOT)) for p in sorted((ROOT / 'strategies').rglob('*'))
+          if p.is_file() and p.name in {'pack.json', 'DECK.md'}]
 
 
 def stage(destination):
@@ -24,9 +27,7 @@ def stage(destination):
         target = destination / name
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(src, target)
-    (destination / 'officekit/__init__.py').write_text('"""Public presentation only; no office engine is deployed."""\n')
     (destination / 'hosting/__init__.py').write_text('')
-    (destination / 'officekit_ai/__init__.py').write_text('')
     for name in ('Dockerfile', 'requirements.txt'):
         shutil.copy2(ROOT / 'hosting/app' / name, destination / name)
     (destination / '.gcloudignore').write_text('.git\n__pycache__\n*.pyc\n')

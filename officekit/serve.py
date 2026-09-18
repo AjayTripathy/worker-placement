@@ -29,6 +29,8 @@ from datetime import date
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
+from officekit.runtime import hosted
+
 from officekit import (build_from_answers, build_model, render_office, render_scenarios,
                        render_strategies)
 
@@ -37,6 +39,8 @@ def _ai(folder=None, slot="intake"):
     construct a client (models.json decides provider/model/key env-var;
     Anthropic + ANTHROPIC_API_KEY is only the zero-config default) — else None
     and every AI affordance simply doesn't render (INTELLIGENCE.md principle 1)."""
+    if hosted():
+        return None
     try:
         import officekit_ai
         return officekit_ai if officekit_ai.available(folder, slot) else None
@@ -416,10 +420,10 @@ body{{display:flex;flex-direction:column}}
 <iframe title="Office workspace" id="pane" src="/pages/office.html"></iframe>
 <script>
 var cur='office', pane=document.getElementById('pane'), dirty=false;
-function viewPath(){{try{{return pane.contentWindow.location.pathname+pane.contentWindow.location.hash;}}catch(e){{return '/pages/office.html';}}}}
+function viewPath(){{try{{var p=pane.contentWindow.location.pathname;var base=window.officeBase||'';if(base&&p.startsWith(base+'/'))p=p.slice(base.length);return p+pane.contentWindow.location.hash;}}catch(e){{return '/pages/office.html';}}}}
 function validPath(p){{return /^\/pages\/[a-zA-Z0-9_.-]+\.html(?:#[^<>]*)?$/.test(p);}}
 function fromHash(){{try{{var p=decodeURIComponent(location.hash.replace(/^#view=/,''));return validPath(p)?p:null;}}catch(e){{return null;}}}}
-function navigate(p){{try{{pane.contentWindow.location.replace(p);}}catch(e){{pane.src=p;}}}}
+function navigate(p){{p=(window.officeBase||'')+p;try{{pane.contentWindow.location.replace(p);}}catch(e){{pane.src=p;}}}}
 function show(k){{var p='/pages/'+k+'.html';if(!document.getElementById('t_'+k))return;history.pushState(null,'','#view='+encodeURIComponent(p));navigate(p);}}
 function syncNav(){{
   var path=viewPath(),slug=path.split('/').pop().split('.html')[0];
@@ -434,7 +438,7 @@ pane.addEventListener('load',function(){{
 }});
 window.addEventListener('popstate',function(){{navigate(fromHash()||'/pages/office.html');}});
 window.addEventListener('hashchange',function(){{var p=fromHash();if(p&&p!==viewPath())navigate(p);}});
-var initial=fromHash();if(initial)pane.src=initial;
+var initial=fromHash();if(initial)navigate(initial);
 function reloadPane(){{dirty=false;document.getElementById('refresh-note').hidden=true;var path=viewPath(),parts=path.split('#');navigate(parts[0]+'?v='+encodeURIComponent(_v)+(parts[1]?'#'+parts.slice(1).join('#'):''));}}
 var _v=null;
 setInterval(function(){{fetch('/state').then(r=>r.json()).then(function(s){{
@@ -477,6 +481,8 @@ _DISCOVERY_CACHE = {"ts": 0.0, "results": None}
 
 
 def _discover_cached(max_age_s=90):
+    if hosted():
+        return []
     import time as _t
     if _DISCOVERY_CACHE["results"] is None or _t.time() - _DISCOVERY_CACHE["ts"] > max_age_s:
         try:
@@ -591,6 +597,8 @@ _BUSY_ATTR = "onsubmit=\"var b=this.querySelector('button[type=submit]')||this.q
 
 
 def _key_status(folder=None):
+    if hosted():
+        return {"attached": False, "label": "AI agent key can be added later. Manual planning is available now."}
     """The AI key, treated as an INTEGRATION (principal 2026-09-05): tell the
     user where we imported it from, or that one needs attaching and how."""
     try:
@@ -1005,7 +1013,7 @@ def write_imports_page(folder):
     pages.mkdir(parents=True, exist_ok=True)
     (pages / "imports.html").write_text(render_imports(
         disc, ledger, rows, overlaps,
-        key_status=_key_status(folder), pull_endpoint="/adapter/import",
+        key_status=_key_status(folder), pull_endpoint=None if hosted() else "/adapter/import",
         reconciliation=(json.loads((Path(folder) / "answers.json").read_text()).get("reconciliation")
                         if (Path(folder) / "answers.json").exists() else None)))
 
@@ -1019,7 +1027,7 @@ def write_imports_page(folder):
         label = e.get("ref") or sid
         (pages / f"{import_slug(sid)}.html").write_text(render_import_detail(
             f"{label} — import detail", f"{e.get('kind','')} · {e.get('detail','')[:80]}",
-            e, srows, _import_refresh_html(folder, e)))
+            e, srows, ("<p>Saved source. Live connections must be reconnected for hosted use.</p>" if hosted() else _import_refresh_html(folder, e))))
     for a in disc:
         sid = f"adapter:{a['name']}"
         if sid in seen or not a.get("can_fetch"):
@@ -1278,6 +1286,11 @@ def _sma_constituents(folder):
     131/31 ratio), read from the newest MS bundle. Used to SPLIT the individual-
     equity book into the direct-index SMA vs deliberate single-name picks. None for
     any non-principal office (the split needs the SMA membership list)."""
+    if hosted():
+        saved = json.loads((Path(folder) / "balance_sheet.json").read_text())
+        sleeves = [s for s in saved.get("sleeves", []) if s.get("category") == "direct_index"]
+        symbols = {h.get("company") for s in sleeves for h in s.get("holdings", []) if h.get("company")}
+        return symbols or None, (sleeves[0]["name"].split(" — ", 1)[0] if sleeves else "Direct-index SMA")
     try:
         from officekit import harvest as _hv
         if not _hv._is_principal_office(folder):
@@ -1351,7 +1364,7 @@ def _apply_realized_tax(data, folder):
     try:
         from officekit import harvest as _hv
         tm = data.get("tax_model")
-        if tm and _hv._is_principal_office(folder):
+        if tm and (_hv._is_principal_office(folder) or (hosted() and (Path(folder) / "parametric_scorecard.json").is_file())):
             rl = _hv._realized_split({"d": data}, folder)
             if rl["net"] > 0:
                 tm["harvest_losses_2026"] = max(float(tm.get("harvest_losses_2026") or 0), rl["net"])
@@ -1410,6 +1423,38 @@ def build_office(answers, folder):
     except Exception:
         pass                                       # implicit strategies never block a build
     _apply_realized_tax(data, folder)
+    core = _render_core(answers, data, folder)
+    pages = folder / "pages"
+    pages.mkdir(parents=True, exist_ok=True)
+    # Reject non-finite values before publishing either financial document.
+    answers_json = json.dumps(answers, indent=1, ensure_ascii=False, allow_nan=False) + "\n"
+    data_json = json.dumps(data, indent=1, ensure_ascii=False, allow_nan=False) + "\n"
+    # Publish receipt facts and their embedded audit in one atomic replacement.
+    # Other derived files can be rebuilt if publication is interrupted later.
+    import tempfile
+    with tempfile.NamedTemporaryFile(mode="w", dir=folder, prefix=".answers-", delete=False) as saved:
+        saved.write(answers_json)
+        saved.flush()
+        os.fsync(saved.fileno())
+    os.replace(saved.name, folder / "answers.json")
+    (folder / "balance_sheet.json").write_text(data_json)
+    pc_path = folder / "personal_context.json"
+    if not pc_path.exists():   # empty-but-asserted from day one; never overwrite content
+        from officekit.personal_context import empty as _pc_empty
+        pc_path.write_text(json.dumps(_pc_empty(data.get("office_id")), indent=1) + "\n")
+    for fn, htmlstr in core.items():
+        (pages / fn).write_text(htmlstr)
+    (folder / "draft.json").unlink(missing_ok=True)   # built into answers now
+    try:
+        write_imports_page(folder)
+    except Exception:
+        pass
+    _render_additional(answers, data, folder)
+    return data
+
+
+def _render_core(answers, data, folder):
+    """Same decision pages in both transports, rendered from saved financial facts."""
     m = build_model(data)
     # UX ruling 2026-09-04: goals OFFER a strategy menu; nothing auto-queues.
     # The user adopts from the taxonomy (goal -> strategy -> assets).
@@ -1455,33 +1500,19 @@ def build_office(answers, folder):
             goal_menu=goal_menu, goal_adopt_endpoint="/strategy/goal-adopt",
             goal_unadopt_endpoint="/strategy/goal-unadopt", docket_items=docket_items,
             desk_theses=_thesis_sleeves(answers, folder),    # office-native + owned snapshot
-            desk_import_endpoint="/import/desk-board", proposals=list_proposals(folder)),
+            desk_import_endpoint=None if hosted() else "/import/desk-board", proposals=list_proposals(folder)),
     }
-    pages = folder / "pages"
-    pages.mkdir(parents=True, exist_ok=True)
-    # Reject non-finite values before publishing either financial document.
-    answers_json = json.dumps(answers, indent=1, ensure_ascii=False, allow_nan=False) + "\n"
-    data_json = json.dumps(data, indent=1, ensure_ascii=False, allow_nan=False) + "\n"
-    # Publish receipt facts and their embedded audit in one atomic replacement.
-    # Other derived files can be rebuilt if publication is interrupted later.
-    import tempfile
-    with tempfile.NamedTemporaryFile(mode="w", dir=folder, prefix=".answers-", delete=False) as saved:
-        saved.write(answers_json)
-        saved.flush()
-        os.fsync(saved.fileno())
-    os.replace(saved.name, folder / "answers.json")
-    (folder / "balance_sheet.json").write_text(data_json)
-    pc_path = folder / "personal_context.json"
-    if not pc_path.exists():   # empty-but-asserted from day one; never overwrite content
-        from officekit.personal_context import empty as _pc_empty
-        pc_path.write_text(json.dumps(_pc_empty(data.get("office_id")), indent=1) + "\n")
-    for fn, htmlstr in core.items():
-        (pages / fn).write_text(htmlstr)
-    (folder / "draft.json").unlink(missing_ok=True)   # built into answers now
+    return core
+
+
+def _render_additional(answers, data, folder):
+    m = build_model(data)
+    pages = Path(folder) / "pages"
     try:
-        write_imports_page(folder)
-    except Exception:
-        pass
+        from officekit_ai.court import load_adjudications
+        adjudications = load_adjudications(folder)
+    except ImportError:
+        adjudications = []
     # one projection page per goal: when the serving strategies reach it
     try:
         from officekit.goal_mandates import goal_coverage
@@ -1567,7 +1598,19 @@ def build_office(answers, folder):
                 render_asset(sym, data, adjudications, union, strats))
     except ImportError:
         pass
-    return data
+
+
+def render_saved_office(folder):
+    """Render an existing office without rebuilding or publishing its balances."""
+    folder = Path(folder)
+    answers = json.loads((folder / "answers.json").read_text())
+    data = json.loads((folder / "balance_sheet.json").read_text())
+    pages = folder / "pages"
+    pages.mkdir(exist_ok=True)
+    for name, content in _render_core(answers, data, folder).items():
+        (pages / name).write_text(content)
+    write_imports_page(folder)
+    _render_additional(answers, data, folder)
 
 
 def goals_from_form(form):
@@ -1665,10 +1708,11 @@ def _classify_unknowns(answers, folder, ai):
 def make_handler(folder):
     folder = Path(folder)
     from officekit.hosting_ui import Hosting, handle as handle_hosting
-    hosting = Hosting(folder)
+    hosting = None if hosted() else Hosting(folder)
     from officekit.commitment_routes import prune_previews
     from officekit.strategy_proposals import recover_interrupted
-    recover_interrupted(folder)
+    if not hosted():
+        recover_interrupted(folder)
     prune_previews(folder)
     prune_previews(folder, directory="inflow_previews")
 
@@ -2160,7 +2204,14 @@ def make_handler(folder):
                     with _OFFICE_WRITE_LOCK:
                         pid, start_job = _proposal_handle(self.path, folder, g, build_office, _capital_model)
                     if start_job:
-                        dispatch(folder, pid)
+                        if hosted():
+                            from officekit.strategy_proposals import load, save
+                            proposal = load(folder, pid)
+                            proposal.update(status="awaiting_key", stage="Ready for an AI agent key",
+                                            errors=[])
+                            save(folder, proposal)
+                        else:
+                            dispatch(folder, pid)
                 except Exception as e:
                     return self._failure(e)
                 return self._redirect(f"/pages/proposal_{pid}.html")

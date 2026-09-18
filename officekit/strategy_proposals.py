@@ -167,7 +167,7 @@ def retry(folder, pid):
         p = load(folder, pid)
         if (str(Path(folder).resolve()), pid) in _RUNNING | _QUEUED:
             return p
-        if p["status"] not in {"error", "queued", "running"}:
+        if p["status"] not in {"error", "queued", "running", "awaiting_key"}:
             raise ValueError("This proposal has finished; create a revision to change the thesis")
         p.update(status="queued", stage="Retry queued")
         save(folder, p)

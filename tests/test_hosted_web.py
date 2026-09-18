@@ -120,11 +120,14 @@ def test_unconfigured_service_fails_closed():
 def test_invalid_origin_rejected(origin):
     with pytest.raises(ValueError):create_app(Backend(),origin)
 
-def test_source_staging_contains_no_office_runtime(tmp_path):
+def test_source_staging_contains_shared_engine_but_no_customer_data(tmp_path):
     from hosting.gcp.stage_web import stage
     target=stage(tmp_path/'source')
     assert (target/'officekit/public/landing.html').is_file()
-    assert not (target/'officekit/serve.py').exists()
+    assert (target/'officekit/serve.py').exists()
+    assert (target/'officekit/runtime.py').exists()
+    assert not (target/'desk').exists()
+    assert not (target/'officekit/evals').exists()
     assert not (target/'officekit/answers.json').exists()
     assert not list(target.rglob('.git'))
     with pytest.raises(ValueError):stage(target)
