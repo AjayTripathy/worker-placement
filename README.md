@@ -2,7 +2,7 @@
 
 **Give every dollar a job.** Worker Placement brings your accounts, goals, commitments and investment decisions into a family office workspace. OfficeKit powers the product; SignalOS provides research and evidence.
 
-- **[Get started with email](https://worker-placement-web-653732113303.us-west1.run.app/signup)** — private office snapshots and an included SignalOS research library.
+- **[Get started with Google](https://worker-placement-web-653732113303.us-west1.run.app/signup)** — private office snapshots and an included SignalOS research library.
 - **[Run locally](officekit/README.md)** — one script installs dependencies, initializes your office and opens the app.
 - **[Deployment and operations](hosting/README.md)** — authentication, migration, storage and verification.
 
@@ -15,7 +15,7 @@ curl -fsSL https://worker-placement-web-653732113303.us-west1.run.app/install.sh
 After cloning, **`./start.sh` is the only startup command**. It manages its own `.venv-worker-placement` environment; no activation or separate install is needed. Requires Git and Python 3.9+ (3.11+ recommended). Windows: `python wp start`. Use `--dir /path/to/office` for an existing office or `--port 8790` for another port. Default: `./office` at `http://127.0.0.1:8787`.
 
 ```sh
-./wp login      # Email sign-in and device approval; uploads nothing
+./wp login      # Google sign-in and device approval; uploads nothing
 ./wp migrate    # Saved office + retained research; keeps the local copy
 ```
 

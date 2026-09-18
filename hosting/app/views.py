@@ -14,7 +14,7 @@ def account(email,offices):
 def device(device,code,email=None):
     if email:
         panel='<p>Connect this local device to <strong>'+esc(email)+'</strong>.</p><p>Only approve if this matches the code shown in your local app or by your own <code>./wp login</code> command.</p><p class="device-code">'+esc(code)+'</p><form id="device-form"><input type="hidden" name="device" value="'+esc(device,quote=True)+'"><input type="hidden" name="code" value="'+esc(code,quote=True)+'"><button class="button primary">Connect this device</button></form><p>Connecting signs this machine in. Return to your local app to review your saved files and choose <strong>Upload my office</strong>, or run <code>./wp migrate</code>.</p>'
-    else:panel='<p>Sign in to connect your local app. Return here after verifying your email.</p><p class="device-code">'+esc(code)+'</p><a class="button primary" href="/signup">Sign in with email ↗</a>'
+    else:panel='<p>Sign in to connect your local app. After Google sign-in, return here to approve this device.</p><p class="device-code">'+esc(code)+'</p><a class="button primary" href="/signup">Sign in with Google ↗</a>'
     return page('Connect your device','<main id="main" class="subpage"><p class="eyebrow">LOCAL LOGIN</p><h1>One account.<br>Your machine.</h1><div id="auth-error" class="notice error" role="alert" hidden></div><div id="auth-status" class="notice" role="status" hidden></div>'+panel+'</main>',auth_script=True,signed_in=bool(email))
 
 def office(receipt,record):

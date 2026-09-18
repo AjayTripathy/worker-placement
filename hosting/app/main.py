@@ -4,7 +4,7 @@ import logging
 import os
 import re
 import secrets
-from urllib.parse import urlparse
+from urllib.parse import urlparse, parse_qs, urlencode
 
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse, Response
@@ -16,11 +16,14 @@ from .auth import AuthFailure, FirebaseBackend, RateLimit
 LOGGER = logging.getLogger(__name__)
 SESSION = '__Host-wp_session'
 CSRF = '__Host-wp_csrf'
+OAUTH = '__Host-wp_google'
 CSP = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'"
 
 
-def create_app(backend=None, origin=None, store=None, research=None):
+def create_app(backend=None, origin=None, store=None, research=None, google_enabled=None):
     app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
+    if google_enabled is None:
+        google_enabled = backend is not None or os.environ.get('GOOGLE_SIGNIN_ENABLED') == 'true'
     origin = (origin if origin is not None else os.environ.get('PUBLIC_ORIGIN', '')).rstrip('/')
     if origin:
         parsed = urlparse(origin)
@@ -76,7 +79,7 @@ def create_app(backend=None, origin=None, store=None, research=None):
 
     async def body(request, limit=4096, require_browser=True):
         if not backend or not origin:
-            raise AuthFailure('Email signup is being configured. Please return shortly.', 503)
+            raise AuthFailure('Sign-in is being configured. Please return shortly.', 503)
         if require_browser:
             if request.headers.get('origin') != origin:
                 raise AuthFailure('Reload this page before trying again.', 403)
@@ -119,11 +122,17 @@ def create_app(backend=None, origin=None, store=None, research=None):
     @app.get('/healthz')
     @app.get('/api/health')
     async def health():
-        return {'status': 'ok', 'email_signup_configured': backend is not None, 'office_migration_configured': store is not None, 'research_configured': research is not None}
+        return {'status': 'ok', 'google_signin_configured': backend is not None and google_enabled, 'office_migration_configured': store is not None, 'research_configured': research is not None}
 
     @app.get('/signup')
     async def signup(request: Request):
-        return csrf_page(render_signup(available=backend is not None), request)
+        return csrf_page(render_signup(available=backend is not None and google_enabled), request)
+
+    @app.get('/auth/google/finish')
+    async def google_finish(request: Request):
+        # Never reflect provider query parameters. JS clears the address bar and
+        # completes via same-origin CSRF-protected POST, using the HttpOnly proof.
+        return csrf_page(render_signup(google_finish=True, available=backend is not None and google_enabled), request)
 
     @app.get('/auth/finish')
     async def finish(request: Request):
@@ -145,11 +154,56 @@ def create_app(backend=None, origin=None, store=None, research=None):
 
     @app.post('/api/auth/email')
     async def send_email(request: Request):
-        data = await body(request)
-        email = email_from(data)
-        limiter.claim(email, 'email')
-        await run_in_threadpool(backend.send_email, email)
-        return {'status': 'sent'}
+        await body(request)
+        raise AuthFailure('Email links have been replaced by Google sign-in. Reload the sign-in page to continue.', 410)
+
+    @app.post('/api/auth/google/start')
+    async def google_start(request: Request):
+        await body(request)
+        if not google_enabled:
+            raise AuthFailure('Google sign-in is being configured. Please return shortly.', 503)
+        limiter.claim(request.cookies[CSRF], 'google_start')
+        url, proof = await run_in_threadpool(backend.begin_google)
+        response = JSONResponse({'url': url})
+        response.set_cookie(OAUTH, proof, max_age=600, secure=True, httponly=True, samesite='lax', path='/')
+        return response
+
+    def session_response(cookie, request):
+        response = JSONResponse({'next': '/cli' if request.cookies.get('__Host-wp_cli_pending') else '/app'})
+        response.set_cookie(SESSION, cookie, max_age=5*24*3600, secure=True, httponly=True, samesite='lax', path='/')
+        return response
+
+    @app.post('/api/auth/google/complete')
+    async def google_complete(request: Request):
+        data = await body(request, limit=16384)
+        if not google_enabled:
+            raise AuthFailure('Google sign-in is being configured. Please return shortly.', 503)
+        proof = request.cookies.get(OAUTH, '')
+        try:
+            if not re.fullmatch(r'[A-Za-z0-9_-]{43}', proof):
+                raise AuthFailure('Start Google sign-in again in this browser. The attempt is missing or expired.', 401)
+            limiter.claim(proof, 'google_complete')
+            query = data.get('query')
+            if not isinstance(query, str) or len(query) > 12000:
+                raise AuthFailure('Google did not return a valid sign-in response. Please start again.')
+            try:
+                values = parse_qs(query, keep_blank_values=True, max_num_fields=20)
+            except ValueError:
+                raise AuthFailure('Google did not return a valid sign-in response. Please start again.') from None
+            if 'error' in values:
+                raise AuthFailure('Google sign-in was canceled or declined. You can try again.')
+            for key in ('code', 'state'):
+                if len(values.get(key, [])) != 1 or not 1 <= len(values[key][0]) <= 8192:
+                    raise AuthFailure('Google did not return a valid sign-in response. Please start again.')
+            # Fixed origin/path and only the two protocol fields: no user-supplied
+            # request URL, redirect destination, provider ID or identity claim.
+            callback = origin + '/auth/google/finish?' + urlencode({k: values[k][0] for k in ('code', 'state')})
+            cookie = await run_in_threadpool(backend.complete_google, callback, proof)
+            response = session_response(cookie, request)
+        except AuthFailure as error:
+            response = JSONResponse({'error': str(error)}, status_code=error.status)
+        response.delete_cookie(OAUTH, path='/', secure=True, httponly=True, samesite='lax')
+        return response
 
     @app.post('/api/auth/complete')
     async def complete(request: Request):
@@ -157,12 +211,10 @@ def create_app(backend=None, origin=None, store=None, research=None):
         email = email_from(data)
         code = data.get('code')
         if not isinstance(code, str) or not re.fullmatch(r'[A-Za-z0-9_-]{10,1024}', code):
-            raise AuthFailure('This sign-in link is invalid. Request a new link.')
+            raise AuthFailure('This old sign-in link is invalid. Continue with Google from the sign-in page.')
         limiter.claim(email, 'complete')
         cookie = await run_in_threadpool(backend.complete, email, code)
-        response = JSONResponse({'next': '/cli' if request.cookies.get('__Host-wp_cli_pending') else '/app'})
-        response.set_cookie(SESSION, cookie, max_age=5*24*3600, secure=True, httponly=True, samesite='lax', path='/')
-        return response
+        return session_response(cookie, request)
 
     @app.post('/api/auth/logout')
     async def logout(request: Request):
@@ -170,6 +222,7 @@ def create_app(backend=None, origin=None, store=None, research=None):
         response = JSONResponse({'status': 'signed_out'})
         response.delete_cookie(SESSION, path='/', secure=True, httponly=True, samesite='lax')
         response.delete_cookie(CSRF, path='/', secure=True, samesite='lax')
+        response.delete_cookie(OAUTH, path='/', secure=True, httponly=True, samesite='lax')
         return response
 
     @app.get('/app')

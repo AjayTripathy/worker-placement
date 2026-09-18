@@ -61,20 +61,29 @@ def page(title, content, auth_script=False, signed_in=False, local=False):
             '<div><a href="/guides/local">Docs</a><a href="/privacy">Privacy</a><a href="' + REPO_URL + '">GitHub ↗</a></div></footer></body></html>')
 
 
-def render_signup(finish=False, available=True):
-    title = 'Make yourself at home.' if not finish else 'One last step.<br>Then you’re in.'
-    subtitle = 'Start with your email. We’ll send a sign-in link that works for new and returning members.' if not finish else 'Confirm the email address that received this link. You can finish on a different device.'
-    panel_title = 'Get started with email' if not finish else 'Confirm your email'
-    label = 'Send me a sign-in link ↗' if not finish else 'Verify email & continue ↗'
-    mode = 'complete' if finish else 'email'
-    form = ('<form id="auth-form" data-mode="' + mode + '"><label for="email">Email address</label>'
-            '<input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" maxlength="254" required>'
-            '<button class="button primary" type="submit">' + label + '</button></form>' +
-            ('<p><a href="/signup">Request a new sign-in link ↗</a></p>' if finish else '') +
-            '<p class="fine-print">We use your email to sign you in, not to subscribe you to marketing. <a href="/privacy">How we handle your data</a>.</p>') if available else '<div class="notice">Email signup is being configured. Please return shortly, or <a href="/guides/local">start locally</a>.</div>'
-    content = ('<main id="main" class="auth-layout"><div class="auth-copy"><p class="eyebrow">WORKER PLACEMENT · HOSTED EARLY ACCESS</p><h1>' + title + '</h1><p>' + subtitle + '</p><p>Explore the included SignalOS research, or bring your saved local office with ./wp migrate.</p></div>'
-               '<section class="auth-panel"><h2>' + panel_title + '</h2><p>No password. No payment details.</p><div id="auth-error" class="notice error" role="alert" hidden></div>'
+def render_signup(finish=False, available=True, google_finish=False):
+    # The old finish page only completes links issued before the Google cutover.
+    title = 'Make yourself at home.'
+    subtitle = 'Use your Google account to start a hosted office or return to your workspace.'
+    panel_title = 'Continue with Google'
+    if finish:
+        title, subtitle, panel_title = 'Finish your sign-in.', 'This page completes an email link you already received. New sign-ins use Google.', 'Confirm your email'
+        form = ('<form id="auth-form" data-mode="complete"><label for="email">Email address</label>'
+                '<input id="email" name="email" type="email" autocomplete="email" placeholder="you@example.com" maxlength="254" required>'
+                '<button class="button primary" type="submit">Verify email &amp; continue ↗</button></form>'
+                '<p><a href="/signup">Continue with Google instead ↗</a></p>')
+    else:
+        if google_finish:
+            title, subtitle = 'Welcome back.', 'Completing your Google sign-in…'
+        form = ('<button class="button google-signin" id="google-signin" type="button" data-finish="' + ('true' if google_finish else 'false') + '">Continue with Google</button>'
+                '<p class="fine-print">Use the same Google email as your existing hosted account to return to your office.</p>'
+                '<p class="fine-print">We request your basic profile and email only. No access to Gmail or Google Drive. <a href="/privacy">How we handle your data</a>.</p>')
+    if not available:
+        form = '<div class="notice">Google sign-in is being configured. Please return shortly, or <a href="/guides/local">start locally</a>.</div>'
+    content = ('<main id="main" class="auth-layout"><div class="auth-copy"><p class="eyebrow">WORKER PLACEMENT · HOSTED EARLY ACCESS</p><h1>' + title + '</h1><p>' + subtitle + '</p><p>Explore the included SignalOS research, or bring your saved local office from its Host this office page.</p></div>'
+               '<section class="auth-panel"><h2>' + panel_title + '</h2><p>No new password. No payment details.</p><div id="auth-error" class="notice error" role="alert" hidden></div>'
                '<div id="auth-status" class="notice" role="status" aria-live="polite" hidden></div>' + form +
+               '<noscript><p>Enable JavaScript to sign in with Google.</p></noscript>'
                '<div class="auth-note"><p>Prefer to keep your office on your machine?</p><a class="text-link" href="/guides/local">Run locally instead ↗</a></div></section></main>')
     return page(panel_title, content, auth_script=True)
 
@@ -101,11 +110,11 @@ def render_local_guide(local=False):
             '<pre class="code-block"><code>' + escape(CLONE_COMMAND + '\ncd worker-placement\n./start.sh') + '</code></pre></details>'
             '<p>On Windows, use <code>python wp start</code> from the checkout. No environment activation is needed.</p>'
             '<h2>Three commands to remember</h2><ol class="guide-list"><li><code>./start.sh</code> — start your local office at <strong>http://127.0.0.1:8787</strong>.</li>'
-            '<li><code>./wp login</code> — sign in with email in your browser, compare the device code and connect this machine. Login alone uploads nothing.</li>'
+            '<li><code>./wp login</code> — sign in with Google in your browser, compare the device code and connect this machine. Login alone uploads nothing.</li>'
             '<li><code>./wp migrate</code> — upload your saved office and retained research to your verified account. It checks every document before activating the hosted snapshot and keeps your local copy.</li></ol>'
             '<p>Default office folder: <code>./office</code>. For an existing office, use <code>./start.sh --dir /path/to/office</code> and <code>./wp migrate --dir /path/to/office</code>. Choose another port with <code>--port 8790</code>; use <code>--no-browser</code> for terminal-only startup. Stop the server with Ctrl+C.</p>'
             '<h2>Build your first office</h2><p>Import a positions CSV or enter your assets and debts, review the sources, then add goals and commitments. Start with Home and Capital &amp; Commitments. Scenario Planner helps stress-test the plan; strategy proposals bring research and review together.</p>'
-            '<h2>What is hosted today?</h2><p>Private snapshots with balances, goals, retained documents and complete export, plus a shared SignalOS research library for every account. Editing, broker reconnects and cloud research runs are still being built. Continue editing locally; later changes do not sync automatically.</p>'
+            '<h2>What is hosted today?</h2><p>The same office workspace with private saved edits, retained documents and complete export, plus a shared SignalOS research library for every account. Hosted AI keys, broker reconnects and cloud research runs are still being built. Local and hosted copies do not sync automatically.</p>'
             '<p>Migration accepts up to 64 MiB across 1,024 saved office documents. It excludes credentials, generated pages and the Git checkout. A different hosted revision requires its exact current digest via <code>--replace-revision</code>; interrupted uploads can be resumed by rerunning the command.</p>'
             '<h2>Models are optional</h2><p>Manual entry, CSV import and core planning work without a key. Chat, document extraction and courts use your configured model provider. Set provider keys in the environment; <code>models.json</code> stores variable names, never keys.</p>'
             '<h2>Keep your office</h2><p>Back up the office folder as private financial data. The local server binds only to localhost. Use the separate hosted service for internet access.</p>'
@@ -114,5 +123,5 @@ def render_local_guide(local=False):
 
 
 def render_privacy(local=False):
-    body = '''<main id="main" class="subpage"><p class="eyebrow">DATA & PRIVACY · EARLY ACCESS</p><h1>A clear boundary<br>around your data.</h1><h2>Hosted account signup</h2><p>Email signup uses Google Identity Platform. Google processes your email address and authentication information to send sign-in links and verify your account. The service stores the account in Identity Platform and uses essential session and anti-forgery cookies. These cookies are not used for advertising.</p><p>We use your email for authentication. Signup does not enroll you in marketing emails and does not upload your local office. Running <code>./wp migrate</code> explicitly uploads your saved office and retained documents to your verified account. Your local copy is kept.</p><h2>Hosted office storage</h2><p>Private documents are stored in Google Cloud Storage with application-level envelope encryption backed by Cloud KMS. Access is scoped to your verified account. Shared seeded research is stored separately and does not include customer office uploads. Download an office export from its hosted page.</p><h2>Operational records</h2><p>Google Cloud hosts the service and retains operational logs. Application logs exclude email-link codes, session credentials and request bodies. No advertising analytics or tracking pixels are included.</p><h2>Your local office</h2><p>Local records stay in the office folder you choose. Importing documents with an AI model or requesting research sends the relevant inputs to the providers you configure. Core planning and CSV imports do not require a model.</p><h2>Managing your account</h2><p>Sign out to remove the hosted session from this browser. To request deletion of your hosted account, contact the repository owner through the existing channel by which you received early access. Self-service account and office deletion are not yet available. Signing out does not delete your hosted records.</p></main>'''
+    body = '''<main id="main" class="subpage"><p class="eyebrow">DATA & PRIVACY · EARLY ACCESS</p><h1>A clear boundary<br>around your data.</h1><h2>Hosted account signup</h2><p>Google sign-in uses Google Identity Platform. Google processes your basic profile, email address and authentication information to verify your account. We request only identity scopes, with no access to Gmail, Google Drive or your financial accounts. The service stores the account in Identity Platform and uses essential session and anti-forgery cookies. These cookies are not used for advertising.</p><p>We use your email for authentication. Signup does not enroll you in marketing emails and does not upload your local office. Running <code>./wp migrate</code> explicitly uploads your saved office and retained documents to your verified account. Your local copy is kept.</p><h2>Hosted office storage</h2><p>Private documents are stored in Google Cloud Storage with application-level envelope encryption backed by Cloud KMS. Access is scoped to your verified account. Shared seeded research is stored separately and does not include customer office uploads. Download an office export from its hosted page.</p><h2>Operational records</h2><p>Google Cloud hosts the service and retains operational logs. Application logs exclude OAuth codes, email-link codes, session credentials and request bodies. No advertising analytics or tracking pixels are included.</p><h2>Your local office</h2><p>Local records stay in the office folder you choose. Importing documents with an AI model or requesting research sends the relevant inputs to the providers you configure. Core planning and CSV imports do not require a model.</p><h2>Managing your account</h2><p>Sign out to remove the hosted session from this browser. To request deletion of your hosted account, contact the repository owner through the existing channel by which you received early access. Self-service account and office deletion are not yet available. Signing out does not delete your hosted records.</p></main>'''
     return page('Privacy', body, local=local)

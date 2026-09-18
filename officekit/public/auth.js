@@ -9,7 +9,8 @@
   // Keep the one-time code only in this page's memory, never localStorage.
   const code = params.get('oobCode');
   const validLink = params.get('mode') === 'signIn' && !!code;
-  if (location.pathname === '/auth/finish') history.replaceState(null, '', '/auth/finish');
+  const googleQuery = location.pathname === '/auth/google/finish' ? location.search.slice(1) : '';
+  if (location.pathname === '/auth/finish' || location.pathname === '/auth/google/finish') history.replaceState(null, '', location.pathname);
   function showError(text) { errorBox.textContent = text; errorBox.hidden = false; }
   function csrf() {
     const cookie = document.cookie.split('; ').find(v => v.startsWith('__Host-wp_csrf='));
@@ -21,31 +22,38 @@
     if (!response.ok) throw new Error(data.error || 'The request could not be completed. Please try again.');
     return data;
   }
-  if (form) {
-    if (form.dataset.mode === 'complete' && !validLink) {
-      showError('This sign-in link is missing or invalid. Request a new link from the sign-in page.');
-      form.querySelector('button').disabled = true;
-      const link = document.createElement('a'); link.href='/signup'; link.textContent='Request a new sign-in link →'; link.className='text-link'; form.after(link);
+  const google = document.getElementById('google-signin');
+  function openWorkspace(result) { location.replace(result.next === '/cli' ? '/cli' : '/app'); }
+  if (google) {
+    google.addEventListener('click', async () => {
+      google.disabled=true; errorBox.hidden=true; statusBox.hidden=true;
+      google.textContent='Opening Google…';
+      try {
+        const result = await request('/api/auth/google/start', {});
+        const target = new URL(result.url);
+        if (target.origin !== 'https://accounts.google.com') throw new Error('Google sign-in is unavailable. Please try again.');
+        location.assign(target.href);
+      } catch (error) { showError(error.message); google.disabled=false; google.textContent='Continue with Google'; }
+    });
+    if (google.dataset.finish === 'true') {
+      google.disabled=true; statusBox.textContent='Finishing your sign-in…';statusBox.hidden=false;
+      request('/api/auth/google/complete', {query:googleQuery})
+        .then(openWorkspace)
+        .catch(error => { showError(error.message); google.disabled=false; statusBox.hidden=true; });
     }
-    // Explicit confirmation on every device; GET and email scanners do not sign in.
+  }
+  if (form) {
+    if (!validLink) {
+      showError('This old sign-in link is missing or invalid. Continue with Google from the sign-in page.');
+      form.querySelector('button').disabled = true;
+    }
     form.addEventListener('submit', async event => {
       event.preventDefault();
       if (!form.reportValidity()) return;
       const button=form.querySelector('button'), original=button.textContent;
-      button.disabled=true;button.textContent='Please wait…';errorBox.hidden=true;statusBox.hidden=true;
-      try {
-        const email=emailInput.value.trim();
-        if (form.dataset.mode === 'complete') {
-          const result = await request('/api/auth/complete', {email, code});
-          location.replace(result.next === '/cli' ? '/cli' : '/app');
-        } else {
-          await request('/api/auth/email', {email});
-          statusBox.textContent='Check your inbox for your sign-in link. Keep this page open, or finish on another device. If it doesn’t arrive, check your spam folder.';
-          statusBox.hidden=false;
-          button.textContent='Send another link';
-        }
-      } catch (error) { showError(error.message === 'Failed to fetch' ? 'The service could not be reached. Check your connection and try again.' : error.message); }
-      finally {button.disabled=false;if(button.textContent==='Please wait…')button.textContent=original;}
+      button.disabled=true;button.textContent='Please wait…';errorBox.hidden=true;
+      try { openWorkspace(await request('/api/auth/complete', {email:emailInput.value.trim(), code})); }
+      catch (error) { showError(error.message); button.disabled=false;button.textContent=original; }
     });
   }
   const deviceForm = document.getElementById('device-form');

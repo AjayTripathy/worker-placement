@@ -36,7 +36,7 @@ Back up the entire office folder. `answers.json` and `balance_sheet.json` preser
 
 Choose **Host office** in the local app's top bar. The hosting page opens separately so your workspace stays available.
 
-1. **Connect:** choose **Sign in with email**, open the sign-in page, and approve the matching device code. Return to the local hosting page; it updates automatically. Signing in uploads nothing.
+1. **Connect:** choose **Sign in with Google**, open the sign-in page, and approve the matching device code. Return to the local hosting page; it updates automatically. Signing in uploads nothing.
 2. **Review:** choose **Review saved files** to see the signed-in destination, saved balance date, document count, size, and exact file list. Save any form edits first.
 3. **Upload:** choose **Upload my office**. Follow the progress, then choose **Open hosted office**. If a different snapshot already exists, explicitly confirm its replacement first.
 
@@ -50,7 +50,7 @@ The terminal commands below remain available as an alternative.
 ./wp login
 ```
 
-Your browser opens hosted email sign-in. Open the emailed link, confirm the same address, then compare the terminal's device code and select **Connect this device**. On another browser/device, reopen the terminal's connection URL after signing in. Login does not upload an office. The local credential is stored outside the office with owner-only permissions and expires with the verified session (up to five days). Run login again when it expires.
+Your browser opens hosted Google sign-in. Choose your Google account, then compare the terminal's device code and select **Connect this device**. On another browser/device, reopen the terminal's connection URL after signing in. Login does not upload an office. The local credential is stored outside the office with owner-only permissions and expires with the verified session (up to five days). Run login again when it expires.
 
 ## One command to migrate
 
@@ -76,7 +76,7 @@ Every account also receives access to a shared, read-only SignalOS seed library.
 - **Migration interrupted:** rerun the same migration command; verified chunks are reused.
 - **Snapshot changed:** wait for local work to finish and retry. App writers coordinate with the snapshot lock; external editors should be idle.
 - **Credentials detected:** remove secrets from retained documents and keep provider keys in environment variables.
-- **No email:** check spam and the address, then request a new link. Links are single-use.
+- **Google sign-in:** use the same Google email as your existing hosted account. If an embedded browser is rejected by Google, open the sign-in page in your regular browser, then reopen the device connection URL there.
 
 ## Development
 

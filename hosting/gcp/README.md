@@ -4,12 +4,12 @@ Project: `worker-placement-508717` · region: `us-west1` · public service: `wor
 
 Live origin: https://worker-placement-web-653732113303.us-west1.run.app
 
-Read [the hosted service guide](../README.md) first. The deployed scope includes email accounts, CLI migration to private office snapshots, and shared seeded research. `project.json` describes the larger planned tier; Cloud SQL and hosted AI execution are not deployed. Manual editing uses the shared office workspace and encrypted object revisions.
+Read [the hosted service guide](../README.md) first. The deployed scope includes Google accounts, CLI migration to private office snapshots, and shared seeded research. `project.json` describes the larger planned tier; Cloud SQL and hosted AI execution are not deployed. Manual editing uses the shared office workspace and encrypted object revisions.
 
 ## Current resources
 
 - Cloud Run public service, 1 vCPU / 2 GiB, 0 minimum / 2 maximum instances, concurrency 1, request timeout 300 seconds.
-- Identity Platform, email-link sign-in enabled; the Cloud Run host is an authorized domain. Google sends the authentication emails.
+- Identity Platform with the Google provider enabled; one account per email, the Cloud Run host authorized, and a Google OAuth web client with the exact `PUBLIC_ORIGIN/auth/google/finish` redirect. Set `GOOGLE_SIGNIN_ENABLED=true` after configuring the provider.
 - API key `worker-placement-web`, restricted to Identity Toolkit and Secure Token. This is an API identifier, not a service account credential.
 - Runtime identity `wp-web-runtime@worker-placement-508717.iam.gserviceaccount.com`, custom role `workerPlacementWebSessions`: `firebaseauth.users.createSession` and `firebaseauth.users.get`, plus bucket-scoped objectUser for office storage, objectViewer for research, and encrypter/decrypter on the specific office KMS key.
 - Build identity `wp-web-build@worker-placement-508717.iam.gserviceaccount.com`, `roles/run.builder`.
@@ -73,3 +73,20 @@ This targeted correction is not a substitute for a full publication audit of
 unknown identifiers, secrets, images or Git history. The original seed contained
 three text files with brokerage IDs and has been superseded by
 `seed-20260916-accounts`; do not reactivate `seed-20260915`.
+
+### Google OAuth setup
+
+Use Google Auth Platform in this project to configure the Worker Placement app for
+external Google accounts and create a Web application OAuth client. Register only
+`https://worker-placement-web-653732113303.us-west1.run.app/auth/google/finish` as the
+hosted redirect. Configure its client ID/secret in Identity Platform's `google.com`
+provider, then enable `GOOGLE_SIGNIN_ENABLED=true` in the Cloud Run revision.
+The server-side authorization flow does not need JavaScript origins or a browser SDK.
+Request only the standard identity scopes; no Gmail, Drive or financial scopes.
+
+Before traffic promotion, extend `worker-placement-auth-links` to exclude both the
+legacy and Google callback request URLs. Preserve no-access-log in uvicorn. Check
+that `/api/auth/google/start` returns an `accounts.google.com` URL with the exact
+redirect and that the Google account chooser opens without a configuration error.
+A successful real account sign-in must still be checked separately; synthetic
+Firebase/email-link identities cannot demonstrate that OAuth works end to end.

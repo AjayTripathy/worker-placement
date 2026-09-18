@@ -1,3 +1,22 @@
+## Google sign-in — 2026-09-17
+
+Rollout pending: code is staged in Cloud Run revision `worker-placement-web-00013-m4t` with zero traffic. Revision `00012-xlp` continues serving email sign-in. Google Auth Platform branding is prepared but awaits the owner’s approval to accept the Google API Services User Data Policy; a web OAuth client/provider still needs configuration. Do not promote until Google account selection and callback configuration are checked.
+
+Signup now uses Google OAuth through the existing Identity Platform account store.
+`hosting/app/auth.py` starts `createAuthUri` CODE_FLOW and exchanges its callback
+with `signInWithIdp`, bound to an HttpOnly browser session proof. `main.py` protects
+start/completion with Origin and CSRF; callback HTML never reflects codes, and JS
+clears the URL. The final Firebase token must prove Google, verified email, UID and
+recent authentication. Existing office and CLI ownership remain UID-based.
+
+Keep one-account-per-email enabled. Do not manually merge offices by email or trust
+unverified provider claims. Account-linking/MFA requirements fail closed. New email
+link requests return 410; old link completion remains for compatibility. Provider
+secrets belong in Identity Platform only. The Cloud Run flag is
+`GOOGLE_SIGNIN_ENABLED=true`; callback request URLs must be excluded from request
+logs. Test Google account selection and actual sign-in separately from synthetic
+email-link migration tests. Local and CLI device approval is unchanged.
+
 # Shared hosted workspace shipped — 2026-09-17
 
 - The hosted office now uses the local app shell, page renderers and manual mutation handlers through `hosting.app.workspace`. Do not build a separate hosted dashboard or start the local unauthenticated HTTP listener in production.

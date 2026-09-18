@@ -207,3 +207,17 @@ Local and hosted records remain independent after migration. Subsequent transfer
 require explicit replacement of the current hosted digest. Export includes retained
 research and hosted preview/history documents. AI execution, hosted file imports and
 broker reconnects remain separate follow-ups; manual planning does not depend on them.
+
+
+## Google OAuth entry point (2026-09-17)
+
+Hosted signup and local device connection use the same Google authorization-code
+flow through Identity Platform. The browser holds a short-lived HttpOnly session
+proof; Identity Platform binds and verifies OAuth state against it. Callback query
+parameters are cleared before a same-origin CSRF-protected exchange. The server
+verifies the resulting Firebase identity and issues the existing session cookie.
+Office namespaces, migration and the shared workspace continue using the original
+verified provider UID. No second identity database or email-based ownership lookup
+is introduced. Already-issued email links can finish; new email-link sending is
+retired. Google client secrets stay in managed provider configuration. See the
+hosted service guide for deployment, logging exclusions and account-linking limits.
