@@ -25,6 +25,41 @@ class Queue:
         if token != 'worker': raise AuthFailure('Worker authentication required.', 403)
 
 
+def test_natural_language_goals_use_durable_office_scoped_intake(workspace, monkeypatch):
+    client, receipt, folder = workspace
+    queue = Queue(); client.app.state.jobs.queue = queue
+    offices = Offices(client.store)
+    Credentials(offices).update('alice', receipt['office_id'], {
+        'provider': 'anthropic', 'credential_revision': '0', 'ANTHROPIC_API_KEY': 'tenant-key'})
+    calls = []
+    def turn(messages, **kwargs):
+        from officekit_ai.models import resolve_key
+        assert resolve_key() == 'tenant-key' and kwargs['scope'] == 'goals'
+        calls.append(messages)
+        return {'answers': {'goals': [{'kind': 'spending', 'label': 'College', 'amount': 300000, 'date': '2038-01-01'}]}}
+    monkeypatch.setattr('officekit_ai.intake_chat.turn', turn)
+    response = post(client, receipt, '/goals/add', {'back': 'goals', 'nl': 'Save $300k for college by 2038.'})
+    assert response.status_code == 303 and '/jobs/' in response.headers['location']
+    assert calls == []
+    uid, oid, jid = queue.items[0]
+    Jobs(offices, queue).run(uid, oid, jid)
+    Jobs(offices, queue).run(uid, oid, jid)
+    job, _ = client.app.state.jobs.read(uid, oid, jid)
+    assert len(calls) == 1 and job['response']['status'] == 303
+    assert job['response']['headers']['Location'] == '/pages/goals.html'
+    page = client.get(receipt['path'] + '/pages/goals.html')
+    assert 'College' in page.text and receipt['path'] + '/goals/add' in page.text
+    assert 'nonce-' in page.headers['content-security-policy']
+
+
+def test_manual_goal_does_not_need_background_queue(workspace):
+    client, receipt, _ = workspace
+    response = post(client, receipt, '/goals/add', {
+        'back': 'goals', 'gkind': 'spending', 'glabel': 'Car', 'gamt': '50000'})
+    assert response.status_code == 303
+    assert response.headers['location'] == receipt['path'] + '/pages/goals.html'
+
+
 def test_credentials_are_scoped_revisioned_and_never_exported(workspace):
     client, receipt, _ = workspace
     fields = {'provider': 'anthropic', 'credential_revision': '0', 'ANTHROPIC_API_KEY': 'tenant-key'}

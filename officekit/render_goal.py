@@ -135,13 +135,13 @@ def _recs_html(recs, gid="", params_endpoint="/goal/params"):
     return "".join(P)
 
 
-def render_goal(goal, serving, proj, office_href="/pages/office.html",
+def render_goal(goal, serving, proj, office_href="/pages/goals.html",
                 params_endpoint="/goal/params", recommendations=None):
     label = goal.get("label") or goal.get("kind", "Goal")
     P = [f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
          f'<meta name="viewport" content="width=device-width,initial-scale=1">'
          f'<title>{esc(label)} — projection</title><style>{CSS}</style></head><body><div class="wrap">'
-         f'<p class="sub"><a href="{esc(office_href)}">← office</a></p>'
+         f'<p class="sub"><a href="{esc(office_href)}">← Goals</a></p>'
          f'<h1>{esc(label)}</h1>']
 
     if not proj.get("applicable"):

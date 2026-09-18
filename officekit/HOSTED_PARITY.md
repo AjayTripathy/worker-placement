@@ -1,11 +1,15 @@
 # One office UI, local or hosted
 
-Updated 2026-09-17. The same renderers, planning handlers, proposal pipeline,
+Updated 2026-09-18. The same renderers, planning handlers, proposal pipeline,
 Risk Officer and imports drive both runtimes. Google sign-in identifies the hosted
 owner. There is no trading/execution API in either runtime.
 
 ## Use the new controls
 
+- **Goals** has a visible navigation link in both shells. Describe one or several
+  goals in plain language with a connected AI agent, or use the manual fields.
+  Goal projections and strategy coverage use the existing shared planning model.
+  Navigation wraps on small screens; it does not become a dropdown.
 - **Office settings** appears in both shells. Locally, **Hosting & sync** opens
   the Google/device login, reviewed migration and automatic-sync controls.
 - In hosted **Office settings**, connect your Anthropic key to enable chat,

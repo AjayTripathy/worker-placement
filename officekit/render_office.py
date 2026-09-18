@@ -204,7 +204,8 @@ def _implicit_goal_row(g, add_ep, mortgage_ep, chat, assets_ep=None, revision=No
 
 
 def _goals_panel(m, d, assets, sleeves, cash_now, goals_endpoint, chat,
-                 strategies_href="/pages/strategies.html", assets_endpoint=None):
+                 strategies_href="/pages/strategies.html", assets_endpoint=None,
+                 back="office", natural_language=True):
     """The goals panel. Goals ADD-ON-ENTER (each form submits on Enter and
     rebuilds) — no separate Save, and each existing goal carries a × remove, so
     adding never overwrites (the 2026-09-08 fix). An unserved goal links to the
@@ -275,7 +276,7 @@ def _goals_panel(m, d, assets, sleeves, cash_now, goals_endpoint, chat,
         except ValueError:
             _yr = _dt.now().year
         # natural-language add — Enter submits, the server parses + appends + rebuilds
-        if chat:
+        if chat and natural_language:
             P.append(f'<form method="POST" action="{esc(add_ep)}" class="nlbox" style="margin-top:12px">'
                      '<input id="goalnl" name="nl" placeholder="Add a goal in plain words — '
                      'e.g. \'retire in 2050 spending 110k a year\' or \'300k for college in 2035\'" autocomplete="off">'
@@ -297,15 +298,21 @@ def _goals_panel(m, d, assets, sleeves, cash_now, goals_endpoint, chat,
                  ("expense", "Ongoing expense ($/yr)"), ("liquidity_floor", "Liquidity floor ($)")]
         kopts = "".join(f'<option value="{k}">{t}</option>' for k, t in KINDS)
         P.append(f'<form method="POST" action="{esc(add_ep)}" class="grow4">'
-                 f'<select name="gkind">{kopts}</select>'
-                 '<input name="glabel" placeholder="label"><input name="gdate" placeholder="YYYY-MM-DD">'
-                 '<input name="gamt" placeholder="$"></form>'
+                 f'<select name="gkind" aria-label="Goal type">{kopts}</select>'
+                 '<input name="glabel" aria-label="Goal name" placeholder="label"><input name="gdate" aria-label="Target date" placeholder="YYYY-MM-DD">'
+                 '<input name="gamt" aria-label="Target amount" placeholder="$">'
+                 '<button class="gbtn2" type="submit">Add goal</button></form>'
                  '<div class="hint" style="margin-top:6px">Type a goal and hit Enter — it adds and saves '
                  'immediately; the × removes it. Retirement reads the amount as total annual household spending, '
                  'including lifestyle. Its goal page lets you mark separate spending as additional.</div>')
         P.append('</details>')
     P.append('</div>' + _EDITOR_STYLE)
-    return "".join(P)
+    result = "".join(P)
+    if back == "goals":
+        result = result.replace('Your goals &amp; commitments', 'Your goals')
+        # Keep additions/removals in the page where the user started.
+        result = result.replace('</form>', '<input type="hidden" name="back" value="goals"></form>')
+    return result
 
 
 def _contention_panel(m, goal_defs):

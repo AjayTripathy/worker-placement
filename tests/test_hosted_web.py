@@ -128,8 +128,10 @@ def test_invalid_origin_rejected(origin):
     with pytest.raises(ValueError):create_app(Backend(),origin)
 
 def test_source_staging_contains_shared_engine_but_no_customer_data(tmp_path):
+    from pathlib import Path
     from hosting.gcp.stage_web import stage
     target=stage(tmp_path/'source')
+    assert (target/'officekit/INTAKE_AGENT.md').read_text() == (Path(__file__).resolve().parents[1]/'officekit/INTAKE_AGENT.md').read_text()
     assert (target/'officekit/public/landing.html').is_file()
     assert (target/'officekit/serve.py').exists()
     assert (target/'officekit/runtime.py').exists()

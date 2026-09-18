@@ -43,6 +43,8 @@ def test_same_shell_all_pages_and_reads_preserve_saved_facts(workspace):
     response = client.get(receipt['path'])
     assert response.status_code == 200
     assert 'Office workspace' in response.text and 'id="workspace-nav"' in response.text
+    assert '<nav class="workspace-nav"' in response.text and '<select' not in response.text
+    assert 'id="t_goals"' in response.text
     assert 'Host office ↗' not in response.text and 'Office settings' in response.text
     assert receipt['path'] + '/pages/office.html' in response.text
     assert 'nonce-' in response.headers['content-security-policy']
@@ -52,7 +54,7 @@ def test_same_shell_all_pages_and_reads_preserve_saved_facts(workspace):
     assert response.headers['referrer-policy'] == 'same-origin'
     assert 'href="/app"' in response.text
     assert "headers.set('X-CSRF-Token',csrf)" in response.text
-    for page in ('office', 'capital', 'strategies', 'scenarios', 'growth', 'harvest', 'risk', 'imports', 'signals'):
+    for page in ('office', 'goals', 'capital', 'strategies', 'scenarios', 'growth', 'harvest', 'risk', 'imports', 'signals'):
         response = client.get(receipt['path'] + '/pages/' + page + '.html')
         assert response.status_code == 200, (page, response.text)
         assert '<html' in response.text

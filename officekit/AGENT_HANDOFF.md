@@ -1,3 +1,19 @@
+# Goals and visible navigation — 2026-09-18
+
+- `render_goals.py` restores `/pages/goals.html` as a shared core page. The shell
+  uses visible, wrapping links at every width; goal projections keep Goals active
+  and link back there. Existing Home goals remain available.
+- The prominent natural-language composer reuses `/goals/add` and the scoped
+  intake agent. An office AI key is required; manual fields work without it.
+  Missing keys, empty extraction and invalid goals return errors without changing
+  saved facts. New goals always receive server-generated UUIDs.
+- Hosted natural-language submissions use the existing durable job queue and
+  tenant key. Manual add/remove stays synchronous. `back=goals` is an allowlisted
+  return destination. Include `officekit/INTAKE_AGENT.md` in deployed sources;
+  Python modules alone are not sufficient for intake.
+- Verified 80 local goal/editor/regression tests and 29 hosted workspace/job
+  tests, plus browser checks of desktop/mobile navigation and goal drill-down.
+
 # Local / hosted parity — 2026-09-17
 
 Read [HOSTED_PARITY.md](HOSTED_PARITY.md) for the current contract. The changes in

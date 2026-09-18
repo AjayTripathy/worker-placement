@@ -395,29 +395,29 @@ APP = """<!doctype html><html lang="en"><head><meta charset="utf-8">
   cut-off from a bar-height mismatch (2026-09-09) */
 html,body{{height:100%;margin:0;overflow:hidden}}
 body{{display:flex;flex-direction:column}}
-.bar{{flex:0 0 auto}}
+.bar{{flex:0 0 auto;flex-wrap:wrap;gap:10px;padding:10px 20px}}
 #pane{{flex:1 1 auto;width:100%;height:auto;border:0;display:block}}
 .host-office{{color:#42dfb1;border:1px solid #31554a;border-radius:7px;padding:7px 10px;text-decoration:none;white-space:nowrap;font-size:12px}}
-@media(max-width:600px){{.bar .brand{{display:none}}.bar .workspace-nav{{max-width:145px}}}}
-.workspace-nav{{display:none;width:auto;margin:0;max-width:190px;padding:8px 10px;font-size:13px}}
-.bar{{gap:3px}} .tab{{padding:8px 10px;font-size:11px}} .brand{{margin-right:8px}} .reb{{white-space:nowrap}}
+.workspace-nav{{display:flex;flex-wrap:wrap;gap:4px;order:1;flex-basis:100%;min-width:0}}
+.tab{{padding:9px 12px;font-size:11px;white-space:nowrap;text-decoration:none;text-align:center}}
+.tab:focus-visible,.host-office:focus-visible{{outline:2px solid #42dfb1;outline-offset:2px}}
+.brand{{margin-right:auto}} .reb{{white-space:nowrap}}
 #refresh-note{{padding:9px 16px;background:#2c2518;color:#edcc8a;font-size:12px}} #refresh-note button{{font-size:12px;padding:5px 10px;margin-left:10px}}
-@media(max-width:1220px){{.bar .tab{{display:none}} .workspace-nav{{display:block}} .bar{{justify-content:space-between;padding:10px 12px}} .brand{{font-size:12px;margin:0}} .bar .grow{{display:none}}}}
-@media(max-width:420px){{.bar .reb{{display:none}} .workspace-nav{{max-width:170px}}}}
+@media(max-width:600px){{.bar{{padding:10px 12px;gap:8px}} .brand{{font-size:13px}} .tab{{padding:8px 9px;font-size:10px}} .bar .reb{{font-size:11px}}}}
 </style></head><body>
 <div class="bar"><span class="brand">worker<span>placement</span></span>
-  <button class="tab on" id="t_office" onclick="show('office')">OFFICE</button>
-  <button class="tab" id="t_capital" onclick="show('capital')">CAPITAL</button>
-  <button class="tab" id="t_scenarios" onclick="show('scenarios')">SCENARIO PLANNER</button>
-  <button class="tab" id="t_strategies" onclick="show('strategies')">STRATEGIES</button>
-  <button class="tab" id="t_growth" onclick="show('growth')">GROWTH</button>
-  <button class="tab" id="t_harvest" onclick="show('harvest')">HARVEST</button>
-  <button class="tab" id="t_risk" onclick="show('risk')">RISK OFFICER</button>
-  <button class="tab" id="t_signals" onclick="show('signals')">SIGNALS</button>
-  <button class="tab" id="t_imports" onclick="show('imports')">IMPORTS</button>
-  <select class="workspace-nav" id="workspace-nav" aria-label="Workspace" onchange="show(this.value)">
-    <option value="office">Home</option><option value="capital">Capital &amp; Commitments</option><option value="scenarios">Scenario Planner</option><option value="strategies">Strategies</option><option value="growth">Growth</option><option value="harvest">Harvest</option><option value="risk">Risk Officer</option><option value="signals">Signals</option><option value="imports">Imports</option>
-  </select><span class="grow"></span><a class="host-office" href="/settings" target="_blank" rel="noopener">Office settings</a><a class="reb" href="/reset">start over</a></div>
+  <nav class="workspace-nav" id="workspace-nav" aria-label="Workspace">
+  <a class="tab on" id="t_office" href="#view=%2Fpages%2Foffice.html">OFFICE</a>
+  <a class="tab" id="t_goals" href="#view=%2Fpages%2Fgoals.html">GOALS</a>
+  <a class="tab" id="t_capital" href="#view=%2Fpages%2Fcapital.html">CAPITAL</a>
+  <a class="tab" id="t_scenarios" href="#view=%2Fpages%2Fscenarios.html">SCENARIO PLANNER</a>
+  <a class="tab" id="t_strategies" href="#view=%2Fpages%2Fstrategies.html">STRATEGIES</a>
+  <a class="tab" id="t_growth" href="#view=%2Fpages%2Fgrowth.html">GROWTH</a>
+  <a class="tab" id="t_harvest" href="#view=%2Fpages%2Fharvest.html">HARVEST</a>
+  <a class="tab" id="t_risk" href="#view=%2Fpages%2Frisk.html">RISK OFFICER</a>
+  <a class="tab" id="t_signals" href="#view=%2Fpages%2Fsignals.html">SIGNALS</a>
+  <a class="tab" id="t_imports" href="#view=%2Fpages%2Fimports.html">IMPORTS</a>
+  </nav><a class="host-office" href="/settings" target="_blank" rel="noopener">Office settings</a><a class="reb" href="/reset">start over</a></div>
 <div id="refresh-note" role="status" hidden>Updated office data is available. Your unsaved edits are still here.<button type="button" onclick="reloadPane()">Reload page</button></div>
 <iframe title="Office workspace" id="pane" src="/pages/office.html"></iframe>
 <script>
@@ -429,9 +429,8 @@ function navigate(p){{p=(window.officeBase||'')+p;try{{pane.contentWindow.locati
 function show(k){{var p='/pages/'+k+'.html';if(!document.getElementById('t_'+k))return;history.pushState(null,'','#view='+encodeURIComponent(p));navigate(p);}}
 function syncNav(){{
   var path=viewPath(),slug=path.split('/').pop().split('.html')[0];
-  cur=document.getElementById('t_'+slug)?slug:slug.startsWith('goal_')?'office':slug.startsWith('asset_')||slug.startsWith('deck_')||slug.startsWith('thesis_deck_')||slug.startsWith('proposal_')?'strategies':slug.startsWith('capability_')?'signals':slug.startsWith('import_')?'imports':cur;
+  cur=document.getElementById('t_'+slug)?slug:slug.startsWith('goal_')?'goals':slug.startsWith('asset_')||slug.startsWith('deck_')||slug.startsWith('thesis_deck_')||slug.startsWith('proposal_')?'strategies':slug.startsWith('capability_')?'signals':slug.startsWith('import_')?'imports':cur;
   document.querySelectorAll('.tab').forEach(function(t){{var on=t.id==='t_'+cur;t.classList.toggle('on',on);if(on)t.setAttribute('aria-current','page');else t.removeAttribute('aria-current');}});
-  document.getElementById('workspace-nav').value=cur;
   if(validPath(path))history.replaceState(null,'','#view='+encodeURIComponent(path));
 }}
 pane.addEventListener('load',function(){{
@@ -1504,12 +1503,14 @@ def _render_core(answers, data, folder):
     # office (answers/balance_sheet/pages) is left untouched — never a half-built
     # office that traps the user in a broken app shell needing /reset.
     from officekit.render_capital import render_capital
+    from officekit.render_goals import render_goals
     from officekit.render_risk import render_risk
     from officekit.risk_officer import review
     from officekit.commitments import revision
     from officekit.strategy_proposals import list_proposals
     m["_commitment_revision"] = revision(answers)
     core = {
+        "goals.html": render_goals(m, chat=bool(_ai(folder))),
         "capital.html": render_capital(m, answers, chat=bool(_ai(folder))),
         "risk.html": render_risk(m, review(m, answers, personal_context=pc), answers),
         "office.html": render_office(m, goals_endpoint="/goals", assets_endpoint="/assets",
@@ -2395,10 +2396,16 @@ def make_handler(folder):
                     goals = answers.setdefault("goals", [])
                     new = []
                     nl = g("nl")
-                    if nl and _ai(folder):
+                    if nl:
+                        if len(nl) > 8000:
+                            raise ValueError("Describe your goals in 8,000 characters or fewer.")
+                        if not _ai(folder):
+                            raise ValueError("Connect an AI agent in Office settings to describe goals in words, or use the goal fields.")
                         from officekit_ai.intake_chat import turn
                         t = turn([{"role": "user", "content": nl}], folder=folder, scope="goals")
                         new = (t.get("answers") or {}).get("goals") or []
+                        if not new:
+                            raise ValueError(t.get("reply") or "No goal could be added. Include an amount and a target date, or use the goal fields.")
                     elif g("gkind"):
                         kind = g("gkind")
                         goal = {"kind": kind, "label": g("glabel") or kind.replace("_", " ").title()}
@@ -2414,7 +2421,7 @@ def make_handler(folder):
                         new = [goal]
                     ids = []
                     for goal in new:
-                        goal.setdefault("id", str(uuid.uuid4()))
+                        goal["id"] = str(uuid.uuid4())
                         goals.append(goal)
                         ids.append(goal["id"])
                     if ids and answers.get("strategy_decisions"):
@@ -2423,7 +2430,7 @@ def make_handler(folder):
                         build_office(answers, folder)
                 except Exception as e:
                     return self._failure(e)
-                return self._redirect("/pages/office.html")
+                return self._redirect("/pages/goals.html" if g("back") == "goals" else "/pages/office.html")
             if self.path == "/goals/mortgage":
                 # Compatibility for old pages. Name lookup must be unambiguous;
                 # current editors always send a stable commitment ID/revision.
@@ -2450,7 +2457,7 @@ def make_handler(folder):
                     build_office(answers, folder)
                 except Exception as e:
                     return self._failure(e)
-                return self._redirect("/pages/office.html")
+                return self._redirect("/pages/goals.html" if g("back") == "goals" else "/pages/office.html")
             if self.path == "/goal/params":
                 # adjust a goal's own knobs (price, financing, carry, expense) from
                 # its projection page, then re-run and land back on that page.

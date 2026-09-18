@@ -167,10 +167,13 @@ def install(app, offices, research, origin, member, body, csrf_page, limiter, jo
                      'IBKR_FLEX_TOKEN', 'IBKR_FLEX_QUERY_ID', 'OFFICEKIT_CONTACT')}
             await run_in_threadpool(credentials.update, claims['uid'], oid, data)
             return RedirectResponse('/app/offices/' + oid + '/settings', 303)
-        if request.method == 'POST' and path in LONG_PATHS:
+        goal_intake = (request.method == 'POST' and path == '/goals/add'
+                       and ctype.split(';', 1)[0] in {'application/x-www-form-urlencoded', 'multipart/form-data'}
+                       and bool((form.getvalue('nl') or '').strip()))
+        if request.method == 'POST' and (path in LONG_PATHS or goal_intake):
             values, _ = await run_in_threadpool(credentials.read, claims['uid'], oid)
             # Without a key, strategy briefs still save synchronously for later.
-            if not path.startswith('/strategy/') or values.get('ANTHROPIC_API_KEY'):
+            if (not path.startswith('/strategy/') and not goal_intake) or values.get('ANTHROPIC_API_KEY'):
                 jid = await run_in_threadpool(jobs.start, claims['uid'], oid, path, raw, ctype, expected)
                 receipt, _ = await run_in_threadpool(offices.read, claims['uid'], oid)
                 if ctype.split(';', 1)[0] == 'application/json':

@@ -209,6 +209,14 @@ checkpoint, read-only broker and synchronization contracts. Desktop brokers rema
 on the user's machine; saved snapshots can travel through sync. No trade execution
 or automatic paid AI schedule is introduced.
 
+The shared shell exposes Goals at `/pages/goals.html` alongside Home and Capital.
+`render_goals` composes the existing goal editor/evaluations and links to the same
+per-goal projections. Natural-language additions use the scoped intake agent;
+hosted requests with `nl` use durable jobs and tenant credentials, while manual
+forms use the synchronous path. The intake markdown contract is a required
+deployment asset. Both transports use the same visible, wrapping navigation links
+and fragment-based deep links; goal detail pages select the Goals destination.
+
 
 ## Google OAuth entry point (2026-09-17)
 
