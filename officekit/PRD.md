@@ -237,6 +237,12 @@ Open-source posture (discussed, not yet ratified): engines public, knowledge pri
 
 ## 9. Open questions
 
+**Q6 update, 2026-09-18:** the historical resolution below is superseded for public
+exchange by [RESEARCH_CORPUS.md](RESEARCH_CORPUS.md). Shared cases preserve an
+anonymized goal/strategy/investor context and reviewed reasoning. Raw office IDs
+and free-text rationale are not public export fields. The central two-way backend
+exchange is still planned; the implemented pilot uses explicitly reviewed files.
+
 1. **The risk officer's write-power** — **RESOLVED 2026-09-04**: automated mandate sources **queue for adoption, never bind**. Ratified via the first automated source: `agent` is an origin alongside `principal | scenario`, and `mandates.queue_agent_proposal` enforces queue-only semantics in code — an agent path can only file `considering`, never touches an existing status, and every proposal's origin `ref` points at a frozen `agent_call` ledger record. **The `goal` source shipped the same day** (`officekit/goal_mandates.py`): every goal decomposes deterministically — funding requirement → gap posture (the goal engine's own OK/TIGHT/SHORT) → horizon template (floor/<2y → cash mgmt; 2-7y → duration-matched bonds, muni when plane-2 declares a tax state; 7y+ and retirement → core equity) → sized proposal (claim/NW, arithmetic in the note) → queued with origin `{source: "goal", ref: <goal_id>}`, idempotent under rebuilds. All four origin sources now exist; automated ones queue, humans bind.
 2. **Goal kinds** — v1 ships retirement / spending / liquidity_floor; ambition goals ("reach $X by year Y") are wanted for the conflict engine and from user feedback.
 3. **Branding** — publish under SignalOS or a neutral name? Gates the Phase-5 repo split.

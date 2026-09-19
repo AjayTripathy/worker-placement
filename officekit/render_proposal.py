@@ -53,6 +53,8 @@ button{{font-family:inherit;font-size:13px;font-weight:600;background:var(--gree
         seeds = ', '.join(b['candidates']) or 'Provider terms and program design'
         P.append(f'<p class="muted">Starting research candidates: {esc(seeds)}. Selection and sizing follow court and risk review.</p>')
     P.append(bullets((p.get('research') or {}).get('assumptions', [])) + '</section>')
+    from officekit.render_research import reuse_section
+    P.append(reuse_section(p))
     P.append('<section class="slide"><div class="eyebrow">02 / Funding</div><h2>What this office can allocate</h2>')
     if funding:
         P.append('<div class="grid">' + ''.join(f'<div class="metric"><small>{label}</small><b>{money(funding[key])}</b></div>' for label,key in [('Unreserved cash today','current_cash'),('Current proposal ceiling','current_budget'),('Pending proceeds, net of tax','pending_net')]) + '</div>')
@@ -99,11 +101,16 @@ button{{font-family:inherit;font-size:13px;font-weight:600;background:var(--gree
         for name, section in pack['sections'].items():
             url = section.get('url') if isinstance(section, dict) else None
             if url and urlparse(url).scheme == 'https' and urlparse(url).hostname:
-                P.append(f'<p><a href="{esc(url)}" target="_blank" rel="noopener noreferrer">{esc(name)} · primary source</a></p>')
+                label = 'source cited by shared research' if name in pack.get('reuse', {}) else 'primary source'
+                P.append(f'<p><a href="{esc(url)}" target="_blank" rel="noopener noreferrer">{esc(name)} · {label}</a></p>')
+                if name in pack.get('reuse', {}):
+                    origin = pack['reuse'][name]
+                    P.append(f'<p class="muted">Evidence originally collected {esc(origin["retrieved_at"])}; reuse expires {esc(origin["valid_until"])}. Basis: {esc(origin["basis"])}.</p>')
             else:
                 P.append(f'<p>{esc(name)} · retained in the proposal evidence snapshot</p>')
         P.append(bullets(pack.get('errors', [])) + '</details>')
     P.append('<details><summary>Review history</summary>' + bullets([h['at'] + ' · ' + h['stage'] for h in p['history']]) + '</details></section>')
+    P.append('<p><a href="/research">Review or contribute contextual research</a></p>')
     if status in {'ready', 'needs_review'}:
         P.append('<section class="slide decision"><h2>Your decision</h2><p>Record the plan after reviewing the court and Risk Officer conditions.</p><div class="actions">')
         for action,label in [('adopt','Adopt plan'),('decline','Decline proposal')]:

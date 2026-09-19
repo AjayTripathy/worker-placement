@@ -257,7 +257,7 @@ def install(app, offices, research, origin, member, body, csrf_page, limiter, jo
         if 'text/html' in headers.get('Content-Type', ''):
             return workspace_response(request, receipt, data.decode(), status)
         return Response(data, status_code=status, headers={k: v for k, v in headers.items()
-                        if k.lower() in {'content-type', 'x-office-api-error-id', 'x-office-api-error-context', 'x-office-revision'}})
+                        if k.lower() in {'content-type', 'content-disposition', 'x-office-api-error-id', 'x-office-api-error-context', 'x-office-revision'}})
 
     @app.get('/app/offices/{oid}')
     @app.get('/app/offices/{oid}/')

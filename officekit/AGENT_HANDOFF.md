@@ -1,3 +1,35 @@
+# Contextual research first milestone — 2026-09-18
+
+The pilot is implemented; the milestone remains open pending actual model
+comparison and independent source/constraint audit. The first live Anthropic call
+was rejected with HTTP 400 / insufficient API credit. No generated live proposal
+exists from that attempt. Do not substitute deterministic provider fixtures for
+evidence of better model judgment.
+
+- Read [RESEARCH_CORPUS.md](RESEARCH_CORPUS.md) for acceptance gates and commands.
+- `officekit_research.cases` owns private capture, reviewable projections,
+  bounded versioned bundles, contextual retrieval and source reuse permissions.
+  `corpus` is its CLI; `evaluate` runs the bounded live donor/paired pilot.
+- Strategies links to the shared `/research` flow. It supports review preparation,
+  file import and reviewed download in both local and hosted transports. Form
+  revisions are stamped by `mandates.stamp_forms`; hosted CAS/CSRF/ownership gates
+  are unchanged. Test the rendered forms, not only hand-constructed HTTP fields.
+- A proposal keeps initial and per-candidate retrieval snapshots. Source dates
+  must never be reset to the recipient's collection time. Conflicting evidence
+  forces fresh acquisition; book and tape always refresh. Every recipient runs
+  new courts and a Risk Officer. Preserve context differences in model input/UI.
+- A private case separates requested investigation, agent recommendation and
+  recorded adoption/decline. User decision reason remains unrecorded and execution
+  unconfirmed. No model-generated motive may be relabeled as a user statement.
+- The legacy `export_shareable_adjudications()` now returns only reviewed security
+  bundles. Its old raw office-ID/rationale payload was not safe for publication.
+- Synthetic fixture cases must be marked `evaluation_scenario` in exported pilot
+  runs. Normal retrieval excludes that provenance. Never promote a fixture or a
+  paid-model failure into a successful research result.
+- Automatic central publication, Git commits of user research, source licensing
+  automation and multi-record disclosure analysis are not enabled. No household
+  research was published for this development task.
+
 # Connector placement and local-app handoff — 2026-09-18
 
 Shared onboarding, Settings and Imports now offer an install guide for desktop connections. Adapter `runtimes` metadata replaces duplicated hosted allowlists; new connectors default to local. Alpaca/Flex remain hosted-capable. Never probe the server desktop or silently merge a future OAuth feed by label. Read [CONNECTOR_ARCHITECTURE.md](CONNECTOR_ARCHITECTURE.md) before adding authorization paths.

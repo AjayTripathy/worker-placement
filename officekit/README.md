@@ -4,6 +4,12 @@ Your family office workspace for accounts, commitments, scenarios and reviewed i
 
 [Hosted signup](https://worker-placement-web-653732113303.us-west1.run.app/signup) · [Local guide](https://worker-placement-web-653732113303.us-west1.run.app/guides/local)
 
+Contextual research pilot: **Strategies → Shared research** lets you review and
+exchange an anonymized investigation, including the goals and investor context
+behind its court reasoning. Each receiving office runs its own review. See the
+[research guide and evaluation status](RESEARCH_CORPUS.md); automatic public
+contributions and claims of improved model quality are not enabled.
+
 ## One execution to run locally
 
 Paste this into your terminal:

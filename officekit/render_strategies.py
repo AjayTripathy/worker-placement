@@ -280,7 +280,7 @@ h1{{font-size:32px;letter-spacing:-.035em}} .eyebrow{{color:var(--emerald);font-
 </style></head><body><div class="wrap">
   <div class="eyebrow">Capital at work</div><h1>Strategies</h1>
   <p class="sub">See what you hold, what needs a decision, and what you’re exploring.</p>
-  <div class="strategy-toolbar">{toolbar}</div>""")
+  <div class="strategy-toolbar">{toolbar}<a href="/research">Shared research ↗</a></div>""")
 
     # ---- INTUITED strategies: what the balance sheet already implements, whether
     # or not it was ever adopted (the strategy analogue of intuited goals) ----

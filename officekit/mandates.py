@@ -61,11 +61,11 @@ def require_revision(answers, expected):
 
 
 def stamp_forms(body, revision):
-    """Stamp the revision used to render a strategy form; never refresh on submit."""
+    """Stamp strategy/research forms from their rendered snapshot, never on submit."""
     if not revision:
         return body
     from html import escape
-    return re.sub(r'(<form\b[^>]*\baction=[\"\']/strategy/[^\"\']+[\"\'][^>]*>)',
+    return re.sub(r'(<form\b[^>]*\baction=[\"\']/(?:strategy|research)/[^\"\']+[\"\'][^>]*>)',
                   lambda m: m[1] + '<input type="hidden" name="revision" value="' + escape(revision, quote=True) + '">', body)
 
 

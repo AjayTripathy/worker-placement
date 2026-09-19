@@ -69,13 +69,16 @@ def save(folder, proposal):
     temp = p.with_suffix(".tmp")
     temp.write_text(json.dumps(proposal, indent=2, ensure_ascii=False) + "\n")
     temp.replace(p)
+    if proposal.get("research"):
+        from officekit_research.cases import capture_private
+        capture_private(folder, proposal)
     page = pages / f'proposal_{proposal["id"]}.html'
     temp = page.with_suffix(".tmp")
     temp.write_text(render_proposal(proposal))
     temp.replace(page)
 
 
-def create(folder, answers, model, strategy_id, source, ref, *, option=None, title=None, request="", target_pct=None, revision_of=None):
+def create(folder, answers, model, strategy_id, source, ref, *, option=None, title=None, request="", target_pct=None, revision_of=None, research_context=None):
     from officekit.strategy_playbooks import brief
     from officekit.personal_context import load as load_context
     pc = load_context(folder)
@@ -83,7 +86,10 @@ def create(folder, answers, model, strategy_id, source, ref, *, option=None, tit
         raise ValueError("Use a title up to 180 characters and a request up to 8,000 characters")
     from officekit.mandates import validate_target_pct
     target_pct = validate_target_pct(target_pct)
-    key = digest([strategy_id, source, ref, option, title, request, target_pct])
+    if research_context is not None:
+        from officekit_research.cases import validate_context
+        validate_context(research_context)
+    key = digest([strategy_id, source, ref, option, title, request, target_pct] + ([research_context] if research_context is not None else []))
     with locked(folder), _LOCK:
         old = next((p for p in list_proposals(folder) if p["request_key"] == key and p["status"] not in {"declined", "superseded"}), None)
         if revision_of:
@@ -107,6 +113,8 @@ def create(folder, answers, model, strategy_id, source, ref, *, option=None, tit
                     "research": None, "candidates": [], "courts": [], "risk": None, "pitch": None,
                     "errors": [], "basket": []}
         proposal["revision_of"] = revision_of
+        if research_context is not None:
+            proposal["research_context"] = deepcopy(research_context)
         save(folder, proposal)
         return proposal
 

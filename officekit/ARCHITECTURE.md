@@ -149,6 +149,16 @@ receipt, tax allocation and planning-date contracts.
 
 **Strategy creation (2026-09-14):** [STRATEGY_PROPOSALS.md](STRATEGY_PROPOSALS.md) specifies the shared planner/goal/principal proposal workflow: SignalOS research and evidence capabilities, native adversarial courts, an allocation Risk Officer, printable pitch decks, and bounded current/contingent investment baskets. The proposal is distinct from a mandate decision and from an executed position.
 
+**Contextual research (2026-09-18 pilot):** [RESEARCH_CORPUS.md](RESEARCH_CORPUS.md)
+adds private case capture, explicitly reviewed public projections and recipient
+retrieval to that same pipeline. Source dates, conflicting evidence, goals,
+investor circumstances, agent configuration and original court reasoning remain
+inspectable. Each recipient refreshes its own book/tape and runs new courts and
+Risk Officer review. Both transports serve the same `/research` UI. Cases are
+retained JSON bundles; central admission, a query database, signed publisher
+releases and automatic Git contributions remain subsequent phases. Live model
+comparison and independent output audit are still required for milestone completion.
+
 **API failure visibility (2026-09-15):** `api_errors.py` keeps up to 20 active
 failure notices in the office's `api_errors.json`, separate from financial facts.
 The HTTP server injects a shared banner into served HTML, including previously

@@ -1,11 +1,9 @@
 """court — courtkit-lite: the productized adversarial court (I4, Q6-ratified).
 
-Q6 ruling (principal, 2026-09-04): users generate their OWN adjudications —
-a verdict only means something in the context of the strategy that convened
-the court — and connected tenants exchange them two-way with the backend
-(send theirs up, read ours down), building cross-tenant adjudication
-intelligence over all equities. Every shared adjudication carries WHICH
-STRATEGY built it, WHICH office, and WHEN.
+Q6 update (2026-09-18): users generate their OWN contextual adjudications.
+Reviewed projections may be exchanged through officekit_research.cases. Native
+records and office identity stay private; a historical verdict never authorizes
+a recipient's investment. The central exchange remains planned.
 
 The runner composes the shipped court doctrine (officekit_agents court.md,
 plane-2 gated) into three calls through the BYOM slots:
@@ -19,13 +17,11 @@ adjudicator may never be WEAKER than the bench (raises, fail-loud). An
 equal-tier court is allowed but stamped "flat_tier" on the record — honest
 labeling over false precision. Unrankable BYOM models stamp "unranked".
 
-Honest limitation, stamped on every verdict: courtkit-lite benches have NO
-live data connectors — they deliberate from model knowledge plus the strategy
-context, and are instructed to mark every load-bearing number UNVERIFIED
-rather than assert it. Verdicts are labeled LITE; the flagship desk keeps its
-full evidence-pack courts, and grading the lite court against it is the U3
-dogfood diff. Every call freezes an agent_call; the adjudication record is
-contract #11 (adjudications.jsonl).
+Evidence packs may contain fetched primary sources and explicitly permitted
+shared snapshots, alongside the current office's book. Missing evidence stays
+UNVERIFIED. EVIDENCED indicates a pack was supplied, not a source-quality grade;
+otherwise the court is labeled LITE. Every call freezes agent provenance in the
+private learning ledger; adjudications.jsonl retains the original court record.
 """
 from __future__ import annotations
 
@@ -35,6 +31,7 @@ from datetime import date
 from pathlib import Path
 
 from officekit_ai import record_agent_call
+from officekit_ai.provenance import invoke
 
 # rankable capability tiers (anthropic family); BYOM models absent here are unranked
 _TIER = {"haiku": 0, "sonnet": 1, "opus": 2, "fable": 3, "mythos": 3}
@@ -199,7 +196,7 @@ def run_court(symbol, strategy_id, decision, personal_context, folder,
         content = body if body else (
             f"{ctx}{pack_md}\n\nCANDIDATE: {cand}\n\nYou are the {role} bench. {instruction}"
             + (f"\n\nRED BRIEF:\n{json.dumps(red_case, indent=1)}" if red_case else ""))
-        resp = _create(bench_client,
+        resp, run = invoke(bench_client,
             model=bench_model, max_tokens=30000,
             system=doctrine + lite_note,
             messages=[{"role": "user", "content": content}],
@@ -209,18 +206,18 @@ def run_court(symbol, strategy_id, decision, personal_context, folder,
         out = json.loads(next(b.text for b in resp.content if b.type == "text"))
         rec = record_agent_call(ledger, f"court_{role.lower()}", bench_model,
                                {"symbol": symbol, "strategy": strategy_id,
-                                "lean": out["lean"], "n_unverified": len(out["unverified"])},
+                                "lean": out["lean"], "n_unverified": len(out["unverified"]), "run": run},
                                office_id=office_id, today=today)
-        return out, rec["id"]
+        return out, rec["id"], run
 
-    red, red_ref = bench(
+    red, red_ref, red_run = bench(
         "RED", "Attack this candidate: the strongest honest case AGAINST owning it "
         "under this mandate. Hunt disconfirming angles the pitch-frame hides.")
-    blue, blue_ref = bench(
+    blue, blue_ref, blue_run = bench(
         "BLUE", "Defend this candidate under this mandate — conceding every true "
         "red-team point. A defense that concedes nothing is invalid.", red_case=red)
 
-    resp = _create(adj_client,
+    resp, adj_run = invoke(adj_client,
         model=adj_model, max_tokens=30000,
         system=doctrine + lite_note +
         "\n\nYou are the ADJUDICATOR. You never rubber-stamp: weigh both briefs, "
@@ -237,7 +234,7 @@ def run_court(symbol, strategy_id, decision, personal_context, folder,
         red["unverified"] + blue["unverified"] + adj["unverified_items"]))
     adj_rec = record_agent_call(ledger, "court_adjudicate", adj_model,
                                {"symbol": symbol, "strategy": strategy_id,
-                                "verdict": adj["verdict"], "conviction": adj["conviction"]},
+                                "verdict": adj["verdict"], "conviction": adj["conviction"], "run": adj_run},
                                office_id=office_id, today=today)
 
     record = {
@@ -257,6 +254,7 @@ def run_court(symbol, strategy_id, decision, personal_context, folder,
         "tier": tier_label,
         "models": {"bench": bench_model, "adjudicate": adj_model},
         "refs": {"red": red_ref, "blue": blue_ref, "adjudicate": adj_rec["id"]},
+        "runs": {"red": red_run, "blue": blue_run, "adjudicate": adj_run},
     }
     if subject_kind != "security":
         record["subject_kind"] = subject_kind
@@ -283,15 +281,13 @@ def load_adjudications(folder):
     return out
 
 
-# The exchange allowlist (Q6): what a shared adjudication carries — the
-# strategy that built it, the office, and when — NEVER position sizes or
-# dollars. This is a SEPARATE sanctioned channel from the learning ledger
-# (whose allowlist bans tickers); adjudications carry tickers by design.
-_SHAREABLE_FIELDS = ("id", "office_id", "strategy", "symbol", "date",
-                     "verdict", "rationale", "tier")
-
-
 def export_shareable_adjudications(folder):
-    """The only sanctioned exit path for the adjudication exchange."""
-    return [{k: r.get(k) for k in _SHAREABLE_FIELDS}
-            for r in load_adjudications(folder) if r.get("subject_kind", "security") == "security"]
+    """Reviewed contextual bundles only; the old Q6 raw export is retired.
+
+    Field allowlisting did not anonymize rationale text or office identifiers.
+    Legacy native records need an explicit projection/review before exchange.
+    The versioned bundle preserves context, source lineage and review scope.
+    """
+    from officekit_research.cases import load_library
+    bundles, _ = load_library(folder)
+    return [b for b in bundles if b["case"]["subject"]["instrument"] in {"stock", "etf"}]

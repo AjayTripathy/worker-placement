@@ -458,13 +458,13 @@ body{{display:flex;flex-direction:column}}
 <script>
 var cur='office', pane=document.getElementById('pane'), dirty=false;
 function viewPath(){{try{{var p=pane.contentWindow.location.pathname;var base=window.officeBase||'';if(base&&p.startsWith(base+'/'))p=p.slice(base.length);return p+pane.contentWindow.location.hash;}}catch(e){{return '/pages/office.html';}}}}
-function validPath(p){{return /^\/pages\/[a-zA-Z0-9_.-]+\.html(?:#[^<>]*)?$/.test(p);}}
+function validPath(p){{return p==='/research'||/^\/pages\/[a-zA-Z0-9_.-]+\.html(?:#[^<>]*)?$/.test(p);}}
 function fromHash(){{try{{var p=decodeURIComponent(location.hash.replace(/^#view=/,''));return validPath(p)?p:null;}}catch(e){{return null;}}}}
 function navigate(p){{p=(window.officeBase||'')+p;try{{pane.contentWindow.location.replace(p);}}catch(e){{pane.src=p;}}}}
 function show(k){{var p='/pages/'+k+'.html';if(!document.getElementById('t_'+k))return;history.pushState(null,'','#view='+encodeURIComponent(p));navigate(p);}}
 function syncNav(){{
   var path=viewPath(),slug=path.split('/').pop().split('.html')[0];
-  cur=document.getElementById('t_'+slug)?slug:slug.startsWith('goal_')?'goals':slug.startsWith('asset_')||slug.startsWith('deck_')||slug.startsWith('thesis_deck_')||slug.startsWith('proposal_')?'strategies':slug.startsWith('capability_')?'signals':slug.startsWith('import_')?'imports':cur;
+  cur=document.getElementById('t_'+slug)?slug:slug.startsWith('goal_')?'goals':slug==='research'||slug.startsWith('asset_')||slug.startsWith('deck_')||slug.startsWith('thesis_deck_')||slug.startsWith('proposal_')?'strategies':slug.startsWith('capability_')?'signals':slug.startsWith('import_')?'imports':cur;
   document.querySelectorAll('.tab').forEach(function(t){{var on=t.id==='t_'+cur;t.classList.toggle('on',on);if(on)t.setAttribute('aria-current','page');else t.removeAttribute('aria-current');}});
   if(validPath(path))history.replaceState(null,'','#view='+encodeURIComponent(path));
 }}
@@ -1791,7 +1791,7 @@ def make_handler(folder):
     prune_previews(folder, directory="inflow_previews")
 
     class Handler(BaseHTTPRequestHandler):
-        def _send(self, body, code=200, ctype="text/html; charset=utf-8", *, error_context=None, error_href=None, public=False):
+        def _send(self, body, code=200, ctype="text/html; charset=utf-8", *, error_context=None, error_href=None, public=False, download=None):
             from officekit import api_errors
             public = public or getattr(self, '_public_request', False)
             is_notice = public or self.path.split('?', 1)[0].startswith('/api-errors')
@@ -1826,6 +1826,8 @@ def make_handler(folder):
             self._response_started = True
             self.send_response(code)
             self.send_header("Content-Type", ctype)
+            if download == 'research-case.json':
+                self.send_header('Content-Disposition', 'attachment; filename="research-case.json"')
             if self.path == "/hosting" or self.path.startswith("/hosting/"):
                 self.send_header("Cache-Control", "no-store")
                 self.send_header("Referrer-Policy", "no-referrer")
@@ -1957,6 +1959,12 @@ def make_handler(folder):
                                       answers_json=html.escape(json.dumps(answers), quote=True)))
 
         def _get(self):
+            if self.path.split('?', 1)[0] == '/research':
+                from officekit.render_research import library
+                from officekit.commitments import revision
+                if not (folder / 'answers.json').exists():
+                    raise ValueError('Build your office before exchanging research')
+                return self._send(library(folder, revision(json.loads((folder / 'answers.json').read_text()))))
             if self.path == "/settings":
                 from officekit.render_settings import render_settings
                 return self._send(render_settings())
@@ -2282,6 +2290,11 @@ def make_handler(folder):
                     return self._failure(e, context='signal:' + g('name') + ':' + g('symbol').upper(),
                                          href=f"/pages/capability_{g('name')}.html")
                 return self._redirect(f"/pages/capability_{g('name')}.html")
+            from officekit.research_routes import POSTS as _research_paths
+            if self.path in _research_paths:
+                from officekit.research_routes import handle as _research_handle
+                body, ctype = _research_handle(self.path, folder, g)
+                return self._send(body, ctype=ctype, download='research-case.json' if self.path == '/research/approve' else None) if body is not None else self._redirect('/research')
             from officekit.strategy_routes import PATHS as _proposal_paths
             if self.path in _proposal_paths:
                 from officekit.strategy_routes import handle as _proposal_handle

@@ -249,10 +249,9 @@ class TestCourtkit:
         assert kinds == ["court_red", "court_blue", "court_adjudicate"]
         # doctrine + strategy context reached the benches; plane-2 gate enforced
         bench_calls = self._fake_court_clients()  # fresh (calls consumed above)
-        shared = export_shareable_adjudications(tmp_path)[0]
-        assert shared["strategy"] == "japan_value" and shared["symbol"] == "8035.T"
-        for banned in ("unverified_items", "models", "refs", "decisive_points"):
-            assert banned not in shared
+        # A native court contains office identity and contextual free text.
+        # It is private until a contextual projection has been reviewed.
+        assert export_shareable_adjudications(tmp_path) == []
 
     def test_evidenced_court_label_and_pack_injection(self, tmp_path):
         """F1: a prebuilt evidence pack upgrades the court from LITE to

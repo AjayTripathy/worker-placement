@@ -28,7 +28,9 @@ POSTS = {'/assets', '/goals', '/goals/add', '/goals/remove', '/goals/mortgage',
          '/strategy/adopt', '/strategy/new', '/strategy/goal-adopt', '/strategy/propose',
          '/strategy/proposal/retry', '/strategy/proposal/revise', '/strategy/proposal/decide',
          '/api-errors/dismiss', '/import/files', '/import/remove', '/adapter/import', '/chat', '/court', '/docket', '/signals/run', '/commitments/preview'}
-GETS = {'/', '/state', '/api-errors', '/strategy/proposals/status'}
+from officekit.research_routes import POSTS as RESEARCH_POSTS
+POSTS |= RESEARCH_POSTS
+GETS = {'/', '/state', '/api-errors', '/strategy/proposals/status', '/research'}
 ONBOARD_POSTS = {'/draft', '/onboard', '/onboard/confirm', '/import/files', '/import/remove',
                 '/adapter/import', '/chat', '/api-errors/dismiss'}
 EXTRAS = {'api_errors.json', 'commitment_history.jsonl'}

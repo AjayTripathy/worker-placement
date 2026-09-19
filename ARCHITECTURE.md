@@ -5,6 +5,12 @@ framework. The current Worker Placement / OfficeKit operating loop, custody and
 evaluation boundaries are documented in [officekit/OPERATING_CONTRACTS.md](officekit/OPERATING_CONTRACTS.md).
 See [the agent handoff](officekit/AGENT_HANDOFF.md) for migration status and next work.
 
+**Contextual research pilot, 2026-09-18:** [RESEARCH_CORPUS.md](officekit/RESEARCH_CORPUS.md)
+defines reusable evidence, anonymized investment cases, contextual retrieval and
+the paired evaluation gate. It preserves why an investigation served a particular
+goal and investor context. Publication is explicit; live model effectiveness is
+not yet demonstrated.
+
 *The cross-record divergence framework: R, f, M, and the engine that operationalizes them.*
 
 ---

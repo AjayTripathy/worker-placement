@@ -159,6 +159,16 @@ an empty configured exclusion list means no such restriction has been declared.
 
 ## Evaluation and learning
 
+Contextual research uses the explicit exchange contract in
+[RESEARCH_CORPUS.md](RESEARCH_CORPUS.md). `research/private_cases/` is tenant-private;
+`research/shared_cases/` holds explicitly imported reviewed bundles. A bundle's
+hash proves content identity, not truth, anonymity or contributor reputation.
+Raw adjudications cannot leave through the old Q6 allowlist. Recipient court
+verdicts remain separate from prior verdicts, and adoption never implies execution.
+Source reuse permission, freshness, conflict checks and private context checks
+must survive retries and re-export. A call's model/tier label is provenance, not
+an independently measured intelligence grade.
+
 The court now mechanically preserves the union of red, blue and adjudicator
 unverified items. The adjudicator cannot silently drop an unresolved bench item.
 

@@ -41,6 +41,7 @@ def test_css_variables_used_are_defined():
     stylesheet that page ships (its own :root, or the shared signals CSS it wraps
     with). Catches the undefined-var(--violet) class of bug at the source."""
     from officekit.render_signals import CSS as SIGNALS_CSS
+    from officekit.serve import STYLE as OFFICE_CSS
 
     def defined_vars(text):
         return set(re.findall(r"--[a-z0-9-]+(?=\s*:)", text))
@@ -56,5 +57,7 @@ def test_css_variables_used_are_defined():
             continue
         own = defined_vars(src)
         available = own | (signals_vars if path.name in borrow_signals else set())
+        if path.name == 'render_research.py':
+            available |= defined_vars(OFFICE_CSS)
         missing = used - available
         assert not missing, f"{path.name} uses undefined CSS var(s): {sorted(missing)}"
