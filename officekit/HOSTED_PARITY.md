@@ -30,6 +30,8 @@ owner. There is no trading/execution API in either runtime.
   deterministic; PDF/images require an AI key. Original files are retained
   privately, staging keeps provenance, and existing reconciliation rules apply.
 - Desktop gateways (TWS / IB Gateway), Downloads and desk imports run locally.
+  Onboarding, Settings and Imports offer **Install the local app** with a guide
+  for new offices and existing hosted exports. See [connector architecture](CONNECTOR_ARCHITECTURE.md).
   With automatic sync enabled, their saved balance updates reach the hosted copy
   while the local app is running. Cloud workers never scan the server's desktop.
 - Home greetings use the browser's clock in both runtimes.

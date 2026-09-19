@@ -76,15 +76,21 @@ def missing_connectors():
             if importlib.util.find_spec(imp) is None}
 
 
-def adapter(name, label, kind, auto=True):
+def adapter(name, label, kind, auto=True, runtimes=("local",)):
     """auto=False marks an adapter MANUAL-ONLY: the daily loop never auto-pulls it
     (e.g. downloads_csv, which scans ~/Downloads — a stray CSV there must not
     silently enter the book; the user pulls it deliberately). 2026-09-10."""
     def deco(factory):
         ADAPTERS[name] = {"name": name, "label": label, "kind": kind,
-                          "auto": auto, "factory": factory}
+                          "auto": auto, "runtimes": tuple(runtimes), "factory": factory}
         return factory
     return deco
+
+
+def supports_runtime(name, runtime):
+    """Fail closed: new connectors are local unless explicitly reviewed for hosting."""
+    spec = ADAPTERS.get(name)
+    return bool(spec and runtime in spec.get('runtimes', ('local',)))
 
 
 def discover(names=None, ctx=None):
@@ -92,7 +98,7 @@ def discover(names=None, ctx=None):
     Returns [{name, label, kind, found, status, detail, guidance, can_fetch}]."""
     from officekit.runtime import hosted
     if hosted():
-        names = [n for n in (names or ["alpaca", "ibkr_flex"]) if n in {"alpaca", "ibkr_flex"}]
+        names = [n for n in (ADAPTERS if names is None else names) if supports_runtime(n, 'hosted')]
     ctx = ctx or {}
     picked = [a for n, a in ADAPTERS.items() if names is None or n in names]
 
@@ -133,7 +139,7 @@ def fetch_positions(name, ctx=None):
     """Run one adapter's fetcher. Raises on a detect-only adapter or any failure
     (callers surface the error; nothing silent)."""
     from officekit.runtime import hosted
-    if hosted() and name not in {"alpaca", "ibkr_flex"}:
+    if hosted() and not supports_runtime(name, 'hosted'):
         raise ValueError("This broker runs on your local machine. Enable office sync to share its imported balances.")
     a = ADAPTERS.get(name)
     if not a:
@@ -154,7 +160,7 @@ def fetch_snapshot(name, ctx=None):
     """
     from datetime import date
     from officekit.runtime import hosted
-    if hosted() and name not in {"alpaca", "ibkr_flex"}:
+    if hosted() and not supports_runtime(name, 'hosted'):
         raise ValueError("This broker runs on your local machine. Enable office sync to share its imported balances.")
     impl = ADAPTERS[name]["factory"]()
     if impl.get("snapshot"):
@@ -525,7 +531,7 @@ def _ibkr_cp():
 
 # ------------------------------------------------------------------- Alpaca (env keys)
 
-@adapter("alpaca", label="Alpaca", kind="broker")
+@adapter("alpaca", label="Alpaca", kind="broker", runtimes=("local", "hosted"))
 def _alpaca():
     def _keys():
         from officekit.runtime import credential

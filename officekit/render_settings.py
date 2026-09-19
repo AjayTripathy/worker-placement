@@ -33,7 +33,11 @@ def render_settings(*, hosted=False, connections=None, sync=None):
         else:
             out.append('<p>Available through your local connection settings. Set ' + ', '.join('<code>' + name + '</code>' for name, _ in fields) + ' before starting the server.</p>')
         out.append('</section>')
-    out.append('<section class="panel"><h2>Desktop broker connections</h2><p>TWS, IB Gateway and other desktop connections run on your computer. Enable automatic office sync to bring their imported balances online while the local app is running.</p><a href="/pages/imports.html">Open Imports →</a></section>')
+    if hosted:
+        from officekit.render_connections import desktop_connection_help
+        out.append(desktop_connection_help())
+    else:
+        out.append('<section class="panel"><h2>Desktop broker connections</h2><p>Open TWS or IB Gateway on this computer, then import positions from onboarding or Imports. Hosting &amp; sync can send saved updates to your online office while this app is running.</p><a href="/pages/imports.html">Open Imports →</a></section>')
     if hosted:
         out.append('<section class="panel"><h2>Research &amp; documents</h2><a href="/documents">Your saved documents →</a><br><a href="/app/research" target="_top">Shared research library →</a></section><p class="note">Connection secrets are encrypted separately from your office. They are excluded from exports and sync. Disconnect removes the saved credential; revoke it with the provider to invalidate previously issued copies.</p>')
     out.append('</main></body></html>')

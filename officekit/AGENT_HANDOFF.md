@@ -1,3 +1,7 @@
+# Connector placement and local-app handoff — 2026-09-18
+
+Shared onboarding, Settings and Imports now offer an install guide for desktop connections. Adapter `runtimes` metadata replaces duplicated hosted allowlists; new connectors default to local. Alpaca/Flex remain hosted-capable. Never probe the server desktop or silently merge a future OAuth feed by label. Read [CONNECTOR_ARCHITECTURE.md](CONNECTOR_ARCHITECTURE.md) before adding authorization paths.
+
 # Shared onboarding, including “Bring your office” — 2026-09-18
 
 - `/app/import` opens/resumes the shared open-source onboarding directly. It is

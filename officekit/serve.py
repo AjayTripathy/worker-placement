@@ -519,7 +519,7 @@ _DISCOVERY_CACHE = {"ts": 0.0, "results": None}
 def _discover_cached(max_age_s=90):
     if hosted():
         import officekit_adapters
-        return officekit_adapters.discover(names=["alpaca", "ibkr_flex"])
+        return officekit_adapters.discover()
     import time as _t
     if _DISCOVERY_CACHE["results"] is None or _t.time() - _DISCOVERY_CACHE["ts"] > max_age_s:
         try:
@@ -561,8 +561,9 @@ def _adapters_html():
                   '<span class="why" style="color:var(--amber)">needs attaching</span>')
                + '</div>')
     heading = 'Office connections — read-only' if hosted() else 'Detected connections — read-only scan of this machine'
+    from officekit.render_connections import desktop_connection_help
     return ('<div class="panel"><label style="margin-top:0">' + heading + '</label>'
-            + "".join(rows) + key_row + "</div>")
+            + "".join(rows) + key_row + "</div>" + (desktop_connection_help() if hosted() else ''))
 
 
 def detection_summary():
@@ -1026,9 +1027,10 @@ def _import_refresh_html(folder, entry):
         picker to re-upload/replace (a file adapter also keeps a re-scan button)
       * proposed (born of a verdict) -> nothing to refresh."""
     from officekit.render_imports import import_slug
-    if hosted() and entry.get("source_id", "").startswith("adapter:") and entry["source_id"].split(":", 1)[1] not in {"alpaca", "ibkr_flex"}:
-        return '<p class="note">This source runs on your computer. Refresh it in the local app and enable Hosting &amp; sync to share updates.</p><a href="/settings" target="_top">Office settings →</a>' + _remove_button(entry["source_id"])
     import officekit_adapters
+    if hosted() and entry.get("source_id", "").startswith("adapter:") and not officekit_adapters.supports_runtime(entry["source_id"].split(":", 1)[1], 'hosted'):
+        from officekit.render_connections import desktop_connection_help
+        return desktop_connection_help() + _remove_button(entry["source_id"])
     kind, sid = entry.get("kind"), entry.get("source_id", "")
     slug = import_slug(sid)
 

@@ -50,6 +50,7 @@ def test_new_office_uses_shared_onboarding_and_no_fabricated_balances(client, tm
         assert label in html.decode() and label in page.text
     assert receipt['path'] + '/onboard' in page.text
     assert 'read-only scan of this machine' not in page.text
+    assert 'Install the local app' in page.text and 'IBKR Flex reports' in page.text
     assert 'nonce-' in page.headers['content-security-policy']
     assert ' onclick=' not in page.text and "querySelector('.rmrow').addEventListener" in page.text
     assert 'Continue setup' in client.get('/app').text

@@ -137,6 +137,9 @@ def render_imports(discover_results, ledger, merged, overlaps, today=None,
                          '<p class="sub" style="margin:8px 0 0">Providers you can connect but haven\'t yet. '
                          'Open <a href="/settings" target="_top">Office settings</a> to manage your connections; source pages show import details.</p>'
                          + table_head + ''.join(available) + '</table></div></details>')
+    if hosted():
+        from officekit.render_connections import desktop_connection_help
+        integrations += desktop_connection_help()
 
     # 2 — documents: uploads are manual-refresh sources; warnings shown in full
     docs = [r for r in ledger if r["kind"] == "upload"]

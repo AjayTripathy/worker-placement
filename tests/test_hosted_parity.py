@@ -104,6 +104,40 @@ def test_broker_allowlist_applies_to_discovery_and_fetch(tmp_path, monkeypatch):
             with pytest.raises(ValueError): adapters.fetch_snapshot(name)
 
 
+def test_new_connectors_default_to_local_and_never_probe_host_machine(tmp_path, monkeypatch):
+    import officekit_adapters as adapters
+    monkeypatch.setattr(adapters, 'ADAPTERS', dict(adapters.ADAPTERS))
+    @adapters.adapter('desktop_test', label='Example desktop connector', kind='broker')
+    def factory():
+        pytest.fail('Hosted requests must never call a desktop connector factory')
+    assert adapters.supports_runtime('desktop_test', 'local')
+    assert not adapters.supports_runtime('desktop_test', 'hosted')
+    assert not adapters.supports_runtime('unknown', 'hosted')
+    with hosted_office(tmp_path):
+        assert adapters.discover(names=['desktop_test']) == []
+        for method in (adapters.fetch_positions, adapters.fetch_snapshot):
+            with pytest.raises(ValueError, match='local machine'):
+                method('desktop_test')
+
+
+def test_desktop_connector_guidance_is_shared_and_links_out_of_office(workspace):
+    client, receipt, folder = workspace
+    from officekit.serve import _import_refresh_html
+    from officekit.render_landing import hosted_origin, render_local_guide
+    with hosted_office(folder):
+        detail = _import_refresh_html(folder, {'source_id': 'adapter:ibkr_socket'})
+    assert 'Install the local app' in detail and 'Re-pull now' not in detail
+    guide = hosted_origin() + '/guides/local#desktop-connections'
+    for suffix in ('/settings', '/pages/imports.html'):
+        response = client.get(receipt['path'] + suffix)
+        assert response.status_code == 200
+        assert 'Install the local app' in response.text and guide in response.text
+        assert receipt['path'] + '/guides' not in response.text
+        assert 'IBKR Flex reports' in response.text
+    doc = render_local_guide()
+    assert 'id="desktop-connections"' in doc and './start.sh --dir /path/to/exported-office' in doc
+
+
 def test_durable_jobs_survive_restart_reject_writes_and_duplicate_deliveries(workspace, monkeypatch):
     client, receipt, _ = workspace
     offices = Offices(client.store);queue = Queue();jobs = Jobs(offices, queue)

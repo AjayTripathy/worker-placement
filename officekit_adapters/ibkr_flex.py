@@ -209,7 +209,7 @@ def register():
     import; a function so tests can register into a fresh registry)."""
     from officekit_adapters import adapter
 
-    @adapter("ibkr_flex", label="Interactive Brokers — Flex Query (lot-level basis)",
+    @adapter("ibkr_flex", label="Interactive Brokers — Flex Query (lot-level basis)", runtimes=("local", "hosted"),
              kind="broker")
     def _flex():
         def _creds():

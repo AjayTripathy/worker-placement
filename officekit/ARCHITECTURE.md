@@ -35,6 +35,8 @@ transfer, active-office policy and connector reconnect behavior. The first shipp
 
 **The load-bearing design decision:** everything crosses boundaries as versioned data contracts (BalanceSheet, answers JSON, SyncSnapshot, learning records). The local folder and the hosted tenant hold the *same documents*, so graduating a user is a transport problem, not a migration project. The engine is one library used by every tier.
 
+**Connector placement (2026-09-18):** adapters declare supported runtimes. Desktop-only connectors lead to the local open-source app and opt-in office sync; hosted read-only OAuth is a future authorization path subject to provider approval and scopes. See [CONNECTOR_ARCHITECTURE.md](CONNECTOR_ARCHITECTURE.md).
+
 ## 1. The three tiers
 
 ```mermaid
