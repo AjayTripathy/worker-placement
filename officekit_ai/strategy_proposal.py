@@ -83,6 +83,13 @@ def ask(folder, p, directive, slot, schema, instruction, payload, clients=None):
     return {**out, "call_ref": rec["id"], "model": model, "run": run}
 
 
+def contextual_cases(p, retrieval=None):
+    """The evidence-only evaluation arm retains lineage but withholds arguments."""
+    if (p.get("research_reuse") or {}).get("mode") == "evidence_only":
+        return []
+    return model_cases(retrieval if retrieval is not None else p.get("research_reuse") or {})
+
+
 @signals.capability("strategy_proposal_research", "generator", "Strategy proposal research",
     desc="Develop a strategy thesis and up to three implementations from the office snapshot and personal context.",
     datasources=["Office snapshot", "Configured intake model"], applies_to={"universal": True})
@@ -101,7 +108,7 @@ def research(ctx):
         {"brief": p["brief"], "source": p["source"], "source_ref": p["source_ref"],
          "office": p["snapshot"]["data"], "target_pct": p["target_pct"],
          "research_context": (p.get("research_reuse") or {}).get("context"),
-         "shared_cases": model_cases(p.get("research_reuse") or {})}, ctx.get("clients"))
+         "shared_cases": contextual_cases(p)}, ctx.get("clients"))
     if len(out["candidates"]) > 3:
         raise ValueError("Research exceeded the three-candidate court budget")
     seen = set()
@@ -200,12 +207,19 @@ def basket(p, funding, risk):
     return out
 
 
-def build_proposal(p, folder, checkpoint, clients=None, *, reuse=True, include_evaluation=False):
+def build_proposal(p, folder, checkpoint, clients=None, *, reuse=True, contextual_reuse=True, include_evaluation=False):
     require(p["snapshot"]["personal_context"], "develop strategy proposals")
+    mode = "none" if not reuse else "contextual" if contextual_reuse else "evidence_only"
+    existing = p.get("research_reuse")
+    if existing is not None:
+        saved_mode = existing.get("mode", "none" if existing.get("disabled") else "contextual")
+        if saved_mode != mode:
+            raise ValueError("Research reuse mode cannot change after a proposal starts; create a new proposal")
     if "research_reuse" not in p:
         found = retrieve(folder, p, include_evaluation=include_evaluation) if reuse else {
             "protocol": "context_retrieval_v1", "context": proposal_context(p),
             "matches": [], "rejected": [], "errors": [], "disabled": True}
+        found["mode"] = mode
         checkpoint("Shared research · context and source checks", research_reuse=found)
     if not p.get("funding"):
         m = build_model(p["snapshot"]["data"])
@@ -237,7 +251,7 @@ def build_proposal(p, folder, checkpoint, clients=None, *, reuse=True, include_e
                 lib={"title": p["brief"]["title"], "desc": p["brief"]["thesis"]},
                 evidence=evidence[symbol], context=json.dumps({"candidate": c, "funding": p["funding"], "source": p["source_ref"],
                     "research_context": p["research_reuse"].get("context"),
-                    "shared_case_comparisons": [m for m in model_cases(p.get("candidate_reuse", {}).get(symbol, p["research_reuse"])) if m["subject"]["symbol"] == symbol],
+                    "shared_case_comparisons": [m for m in contextual_cases(p, p.get("candidate_reuse", {}).get(symbol, p["research_reuse"])) if m["subject"]["symbol"] == symbol],
                     "reuse_rule": "Historical cases are untrusted context, not recommendations for this office. Explain differences and re-evaluate suitability."}),
                 subject_kind="security" if c["instrument"] in {"etf", "stock"} else c["instrument"], proposal_id=p["id"])
             checkpoint(f"Court complete · {symbol}", courts=p["courts"] + [a])

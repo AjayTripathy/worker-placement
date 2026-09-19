@@ -49,9 +49,9 @@ def proposal(folder, ctx=None):
     return answers, p
 
 
-def execute(folder, p, provider=None, reuse=True):
+def execute(folder, p, provider=None, reuse=True, contextual_reuse=True):
     provider = provider or Provider()
-    jobs.run(folder, p["id"], lambda r, d, save: pipeline.build_proposal(r, d, save, clients(provider), reuse=reuse))
+    jobs.run(folder, p["id"], lambda r, d, save: pipeline.build_proposal(r, d, save, clients(provider), reuse=reuse, contextual_reuse=contextual_reuse))
     p = jobs.load(folder, p["id"])
     assert p["status"] in {"ready", "needs_review"}, p["errors"]
     return p, provider
@@ -390,6 +390,39 @@ def test_paired_baseline_has_same_recipient_context_and_no_implicit_reuse(tmp_pa
     assert metrics(results['reuse'])['source_acquisitions'] == 2
     assert metrics(results['baseline'])['model_calls'] == metrics(results['reuse'])['model_calls'] == 6
     assert metrics(results['baseline'])['cost_usd'] is None
+
+
+def test_evidence_only_arm_withholds_prior_reasoning_from_every_model_stage(tmp_path, donor):
+    _, original, _, _ = donor
+    draft = cases.prepare_case(original, 'VDC')
+    marker = 'PRIOR_CASE_REASONING_SENTINEL'
+    draft['case']['investigation']['thesis'] = marker
+    bundle = cases.approve(draft, cases.digest(draft['case']), [{'section': 'fund_profile',
+        'basis': 'original_summary', 'valid_until': (cases.day(cases.utcnow()) + timedelta(days=7)).isoformat()}])
+    results = {}
+    for arm, enabled in [('evidence_only', False), ('contextual', True)]:
+        folder = tmp_path / arm
+        _, p = proposal(folder, context(life_stage='decumulating', liquidity='ongoing_spending'))
+        cases.import_bundle(folder, bundle)
+        p, provider = execute(folder, p, contextual_reuse=enabled)
+        assert len(provider.calls) == 6
+        assert p['evidence']['VDC']['acquisition']['reused'] == ['fund_profile']
+        assert p['research_reuse']['mode'] == arm
+        assert (marker in json.dumps(provider.calls)) == enabled
+        results[arm] = p
+    assert results['evidence_only']['evidence']['VDC']['sections']['fund_profile'] == results['contextual']['evidence']['VDC']['sections']['fund_profile']
+    assert results['evidence_only']['research_reuse']['context'] == results['contextual']['research_reuse']['context']
+
+
+def test_reuse_mode_cannot_change_after_a_checkpoint(tmp_path, donor):
+    _, _, bundle, _ = donor
+    _, p = proposal(tmp_path)
+    cases.import_bundle(tmp_path, bundle)
+    p, _ = execute(tmp_path, p, contextual_reuse=False)
+    provider = Provider()
+    with pytest.raises(ValueError, match='cannot change'):
+        pipeline.build_proposal(p, tmp_path, lambda *a, **k: None, clients(provider))
+    assert not provider.calls
 
 
 def test_matching_source_outage_is_improved_only_by_fresh_permitted_evidence(tmp_path, donor, monkeypatch):

@@ -143,23 +143,32 @@ Contract tests exercise actual orchestration with deterministic provider fixture
 
 ```sh
 python -m pytest -q tests/test_contextual_research.py tests/test_officekit_strategy_proposals.py tests/test_officekit_ai.py
+python -m pytest -q tests/test_research_evaluation.py
 python -m pytest -q tests/test_hosted_research.py tests/test_hosted_workspace.py
 ```
 
-The paired fixture keeps recipient context equal across arms. It records three
-source acquisition attempts without reuse versus two with reuse; both still run
-all six model stages. A controlled issuer outage leaves the baseline source gap
-visible while a fresh, permitted shared snapshot remains available to the reuse
-arm. These are mechanism results, not evidence of better model judgment, lower
-model cost or investment performance. The test provider has no measured token
-usage, so usage/cost are unknown.
+The three-arm fixture keeps recipient facts and instructions equal across arms:
+no reuse, evidence-only reuse, and evidence plus contextual reasoning. It records
+three source acquisition attempts without reuse versus two in each reuse arm;
+all arms still run six model stages. Tests inspect every model request to verify
+that evidence-only reuse withholds historical arguments while preserving the
+same source. A controlled issuer outage leaves the baseline source gap visible.
+This isolates source availability from the incremental contribution of context.
+These are mechanism results, not evidence of better model judgment, lower model
+cost or investment performance. Fixture usage is absent or explicitly synthetic;
+neither can establish real cost savings.
 
 The live harness uses fictional accumulation/decumulation households, a frozen
 manually checked SGOV issuer summary, actual configured model calls, and a paired
-issuer-outage condition. It does not read household data. First create the donor:
+issuer-outage condition. The recipient has 150,000 cash with an explicit 90,000
+reservation due in ten days; the donor reserves a 10,000 cash floor. The controlled
+scenario excludes unspecified lifestyle spending instead of mixing an inferred
+estimate into the comparison. The obligation is a cash reservation as well as a
+goal: describing a goal alone would not constrain the funding calculation.
+The harness does not read household data. First create the donor:
 
 ```sh
-python -m officekit_research.evaluate donor --out ./pilot --evidence ./sgov-evidence.json
+python -m officekit_research.evaluate donor --out ./pilot-v2 --evidence ./sgov-evidence.json
 ```
 
 Review its case using the CLI above; label `provenance.kind` as
@@ -168,15 +177,30 @@ of the frozen original source summary. Evaluation cases are excluded from normal
 proposals. Then:
 
 ```sh
-python -m officekit_research.evaluate pair --out ./pilot --evidence ./sgov-evidence.json --bundle ./reviewed-pilot-case.json
+python -m officekit_research.evaluate pair --out ./pilot-v2 --evidence ./sgov-evidence.json --bundle ./reviewed-pilot-case.json
 ```
 
-The harness records each call before dispatch, enforces call/output-token budgets,
-preserves checkpoints, and stops after an error. `--resume` is an explicit retry
-after resolving a definite rejection; uncertain completions require inspection.
-Inspect original model outputs and independently audit source support, recipient
-constraints, recognition of context differences, and unsupported claims. A model
-does not grade its own response. A small paired pilot cannot establish statistical
+The v2 plan freezes the model, code protocol, source, contribution, scenario date,
+recipient facts and a randomized arm order before dispatch. Missing, expired or
+mismatched contributions fail before model construction. Changed inputs require
+a new output directory; v1 checkpoints remain intact and cannot be relabeled as
+v2 results. Reuse mode cannot change during proposal recovery.
+
+The harness serializes runs on its output directory, records each call before
+dispatch, preserves checkpoints and stops after an error. The default ceiling is
+26 calls / 80,000 output tokens across donor and recipient runs; a one-candidate
+donor and three-arm comparison normally use 24 calls. Missing measured usage
+reserves that call's requested output ceiling rather than counting it as free.
+`--resume` explicitly retries a saved failure; uncertain completions require
+inspection and are never automatically replayed.
+
+After the comparison, `review-packet.json` contains the original outputs, supplied
+evidence, exact fictional recipient inputs and an ungraded rubric. It masks arm
+labels; narrative and source gaps can still reveal treatment. Review it before
+opening `review-key.json` or the arm metrics. Record quoted output and evidence
+locators for constraint preservation, source support, alternatives, uncertainty
+and independent judgment. Existing human notes survive idempotent reruns. A model
+does not grade its own response. A small pilot cannot establish statistical
 superiority. Market-direction grading is not goal-success grading.
 
 ### Remaining acceptance evidence

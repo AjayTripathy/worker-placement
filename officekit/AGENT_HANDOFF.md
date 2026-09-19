@@ -7,6 +7,13 @@ exists from that attempt. Do not substitute deterministic provider fixtures for
 evidence of better model judgment.
 
 - Read [RESEARCH_CORPUS.md](RESEARCH_CORPUS.md) for acceptance gates and commands.
+- The evaluation is now v2: baseline, evidence-only, and contextual reuse. Never
+  confuse a source-cache benefit with evidence that historical context helps.
+  The plan freezes inputs and exact recipient facts; existing v1 checkpoints
+  require a separate output directory. Explicit reservations constrain the
+  fictional recipient's payment; a goal alone does not reserve cash. Review
+  `review-packet.json` before its arm key. Canned provider tests leave every
+  output-quality grade pending; the live credit rejection remains unresolved.
 - `officekit_research.cases` owns private capture, reviewable projections,
   bounded versioned bundles, contextual retrieval and source reuse permissions.
   `corpus` is its CLI; `evaluate` runs the bounded live donor/paired pilot.

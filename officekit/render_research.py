@@ -42,6 +42,8 @@ def reuse_section(p):
     reused = sum(len(pack.get('reuse', {})) for pack in p.get('evidence', {}).values())
     body = '<section class="slide"><div class="eyebrow">Shared investigation</div><h2>Research reused for this office</h2>'
     body += f'<p>{len(matches)} prior cases considered · {reused} public source sections reused. This office receives a fresh court and Risk Officer review.</p>'
+    if (p.get('research_reuse') or {}).get('mode') == 'evidence_only':
+        body += '<p class="note">Evidence-only evaluation: prior case arguments were withheld from model stages. Source lineage remains available below.</p>'
     if not matches:
         body += '<p class="muted">No applicable shared case was found. Research proceeds from this office and the available sources.</p>'
     for m in matches.values():
