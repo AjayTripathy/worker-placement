@@ -32,7 +32,22 @@ Review imported positions and their sources, enter assets and debts, add goals a
 
 Back up the entire office folder. `answers.json` and `balance_sheet.json` preserve your plan; the folder also retains research, decisions and source history. `models.json` stores provider/model choices and environment-variable names, never API keys. Set the corresponding provider keys in your environment for chat and courts.
 
-## Host your office from the app
+## Bring your office from the website
+
+Sign in and choose **Bring an office** from your workspace (also available at
+[/app/import](https://worker-placement-web-653732113303.us-west1.run.app/app/import)).
+Choose the saved office folder containing `answers.json` and `balance_sheet.json`,
+review the selected documents, then choose **Upload and open office**. You do not
+need to run the local server or use terminal commands. Use a desktop browser with
+folder selection support. Save local edits before selecting the folder.
+
+Selection prepares the review on your computer; the upload starts only when you
+choose it. Existing hosted records require explicit replacement confirmation tied
+to the revision you reviewed. Uploads can resume with the same saved files, and
+hosted connection keys remain in their separate encrypted store. Your local files
+remain available. Connect an AI key in hosted **Office settings** for AI features.
+
+## Host your office from the local app
 
 Choose **Office settings → Hosting & sync** in the local app's top bar. The hosting page opens separately so your workspace stays available.
 
@@ -64,7 +79,7 @@ Migration copies the built office and its retained research, preserving its iden
 
 Included: the saved answers/balance sheet, context, staging, model variable names, decisions/learning/signal records and supported documents under `research/`, `attachments/`, `documents/`, `transcripts/` and `strategy_proposals/`. Supported retained formats: JSON, JSONL, Markdown, text, CSV, PDF, PNG, JPEG and WebP. Limits: 64 MiB and 1,024 files per snapshot. Credentials, symlinks, generated HTML, executable files, other directories and Git history are excluded or refused. Research outside the office folder stays in the repository; move a supported document into `research/` to retain it with your office.
 
-The hosted office reuses the local workspace and supports manual planning edits, private documents and complete export. AI keys/jobs, statement uploads and broker reconnects remain future work. Edit online or locally; the copies do not automatically sync. To replace an existing hosted snapshot, copy its digest from **Migration receipt** and pass `--replace-revision DIGEST`; a stale digest is refused. No automatic overwrite occurs.
+The hosted office reuses the local workspace and supports planning edits, private documents, AI connections, background research, statement imports and complete export. Edit online or locally; automatic sync is opt-in from the local app. To replace an existing hosted snapshot from the CLI, copy its digest from **Migration receipt** and pass `--replace-revision DIGEST`; a stale digest is refused. The website provides a reviewed replacement checkbox.
 
 Every account also receives access to a shared, read-only SignalOS seed library. Version `seed-20260916-accounts` includes 32,412 files from the tracked research at commit `6207310c8`; 64 administrative or credential-shaped files were withheld. This library is separate from private customer uploads and retains original research dates.
 

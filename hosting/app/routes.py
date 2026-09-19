@@ -107,6 +107,43 @@ def install(app, offices, research, origin, member, body, csrf_page, limiter, jo
         claims=await member(request)
         return {'offices':await run_in_threadpool(offices.listing,claims['uid'])}
 
+    @app.get('/app/import')
+    async def bring_office(request: Request):
+        try:
+            claims = await member(request)
+        except AuthFailure as error:
+            if error.status != 401:
+                raise
+            return RedirectResponse('/signup', 303)
+        return csrf_page(views.bring_office(claims['email']), request)
+
+    @app.get('/api/browser-migrations/config')
+    async def browser_migration_config(request: Request):
+        await member(request)
+        from officekit.migration import ROOT_FILES, RETAINED, SUFFIXES, MAX_FILES, MAX_TOTAL, CHUNK, VERSION
+        return {'root_files': sorted(ROOT_FILES), 'retained': sorted(RETAINED), 'suffixes': sorted(SUFFIXES),
+                'max_files': MAX_FILES, 'max_bytes': MAX_TOTAL, 'chunk_bytes': CHUNK, 'version': VERSION}
+
+    # Browser transfers require the same-origin CSRF contract. The CLI endpoints
+    # above deliberately continue to reject ambient browser cookies.
+    @app.post('/api/browser-migrations')
+    async def browser_migration_begin(request: Request):
+        claims = await member(request)
+        data = await body(request, limit=1024*1024)
+        return await run_in_threadpool(offices.begin, claims['uid'], data.get('manifest'))
+
+    @app.post('/api/browser-migrations/{sid}/chunks')
+    async def browser_migration_upload(sid: str, request: Request):
+        claims = await member(request)
+        data = await body(request, limit=1500000)
+        return await run_in_threadpool(offices.upload, claims['uid'], sid, data.get('sha256'), data.get('data'))
+
+    @app.post('/api/browser-migrations/{sid}/activate')
+    async def browser_migration_activate(sid: str, request: Request):
+        claims = await member(request)
+        data = await body(request)
+        return await run_in_threadpool(offices.activate, claims['uid'], sid, data.get('replace_revision'))
+
     from . import workspace
     import secrets
 

@@ -6,6 +6,10 @@ owner. There is no trading/execution API in either runtime.
 
 ## Use the new controls
 
+- The hosted account workspace has **Bring an office**. Choose a saved office
+  folder, review its records and retained research, then upload directly in the
+  browser. A running local server or CLI login is not required. Existing hosted
+  records require explicit replacement review; connection keys stay separate.
 - **Goals** has a visible navigation link in both shells. Describe one or several
   goals in plain language with a connected AI agent, or use the manual fields.
   Goal projections and strategy coverage use the existing shared planning model.

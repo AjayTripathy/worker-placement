@@ -7,9 +7,32 @@ from officekit.render_landing import page
 
 def account(email,offices):
     rows=''.join('<article><h2>'+esc(o['name'])+'</h2><p>Balances as of '+esc(o['as_of'])+'</p><a class="text-link" href="'+esc(o['path'],quote=True)+'">Open hosted office ↗</a></article>' for o in offices)
-    if not rows:rows='<article><h2>Bring your office.</h2><p>In your local app, choose <strong>Host office</strong>. Sign in, review the saved files, then upload your office.</p><p>Your local copy stays available. Prefer the terminal? Use <code>./wp login</code> and <code>./wp migrate --dir /path/to/office</code>.</p></article>'
+    rows='<article class="bring-office-card"><h2>Bring your office.</h2><p>Choose your saved office folder and bring your accounts, goals and retained research online. Your local copy stays available.</p><a class="button primary" href="/app/import">Bring an office ↗</a></article>'+rows
     content='<main id="main" class="subpage"><p class="eyebrow">YOUR WORKSPACE</p><h1>Welcome home.</h1><p>'+esc(email)+'</p><div id="auth-error" role="alert" class="notice error" hidden></div><div class="account-grid">'+rows+'<article><h2>Start with the research.</h2><p>The SignalOS library is included with every account. Explore its datasets, evidence and findings.</p><a class="text-link" href="/app/research">Open research library ↗</a></article></div></main>'
     return page('Your workspace',content,auth_script=True,signed_in=True)
+
+
+def bring_office(email):
+    content = '''<main id="main" class="subpage office-import"><p class="eyebrow">YOUR OFFICE, HOSTED</p>
+<h1>Bring your office.</h1><p>Same accounts, goals and research. Choose your saved office folder, review the files, and open it online.</p>
+<p class="import-account">Uploading to <strong>''' + esc(email) + '''</strong> · <a href="/app">Back to your workspace</a></p>
+<div id="auth-error" class="notice error" role="alert" hidden></div>
+<div id="import-status" class="notice" role="status" aria-live="polite" hidden></div>
+<section class="import-panel" aria-labelledby="choose-title"><p class="eyebrow">01 · CHOOSE</p><h2 id="choose-title">Your saved office folder</h2>
+<p>Choose the folder containing <code>answers.json</code> and <code>balance_sheet.json</code>. This is the data folder used by your local app, usually named <code>office</code>.</p>
+<label for="office-folder">Select a folder on this computer</label><input id="office-folder" type="file" webkitdirectory directory multiple aria-describedby="folder-note">
+<p id="folder-note" class="fine-print">Selecting a folder only prepares a review in your browser. Nothing uploads until you choose Upload and open office. Up to 64 MiB and 1,024 saved documents.</p>
+<p id="folder-unsupported" class="notice" hidden>This browser cannot select folders. Open this page in a desktop browser, or use <a href="http://127.0.0.1:8787/hosting" target="_blank" rel="noopener">Hosting &amp; sync in your local app</a>.</p></section>
+<section class="import-panel" id="import-review" aria-labelledby="review-title" hidden><p class="eyebrow">02 · REVIEW</p><h2 id="review-title">What will come with you</h2>
+<p id="import-summary"></p><p>Includes saved financial records and retained research. Credentials, generated pages and the Git checkout are excluded. Every hosted account also includes the shared SignalOS research library.</p>
+<details><summary>Review selected documents</summary><ul class="document-list" id="import-files"></ul></details>
+<div id="import-replace" class="notice" hidden><p id="replace-summary"></p><a id="replace-current" href="/app" target="_blank" rel="noopener">Review the current hosted office ↗</a><label class="import-check"><input id="replace-confirm" type="checkbox">Replace this hosted office with the selected saved copy.</label><p>Changes made online since this copy was saved will be replaced. Your hosted connection keys are kept.</p></div>
+<div class="import-actions"><button class="button primary" id="upload-office" type="button">Upload and open office ↗</button><button class="button outline" id="cancel-import" type="button" hidden>Stop upload</button></div>
+<progress id="import-progress" max="100" value="0" aria-label="Office upload progress" hidden></progress>
+<p class="fine-print">Your local files stay in place. You can turn on automatic sync later from the local app’s Hosting &amp; sync page.</p></section>
+<noscript><p class="notice">Enable JavaScript to review and upload your office folder.</p></noscript>
+</main><script src="/public/office-import.js" defer></script>'''
+    return page('Bring your office', content, auth_script=True, signed_in=True)
 
 def device(device,code,email=None):
     if email:

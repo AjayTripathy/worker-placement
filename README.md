@@ -4,6 +4,7 @@
 
 - **[Get started with Google](https://worker-placement-web-653732113303.us-west1.run.app/signup)** — private office snapshots and an included SignalOS research library.
 - **[Run locally](officekit/README.md)** — one script installs dependencies, initializes your office and opens the app.
+- **[Bring an office](https://worker-placement-web-653732113303.us-west1.run.app/app/import)** — select your saved office folder, review the files and upload directly from the website.
 - **[Deployment and operations](hosting/README.md)** — authentication, migration, storage and verification.
 
 The public [Worker Placement repository](https://github.com/AjayTripathy/worker-placement) includes the app and SignalOS research on `main`. No GitHub account is required to download it. Start with one command, which clones the full repository including research, installs the app and opens it:

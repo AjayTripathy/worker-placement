@@ -218,6 +218,17 @@ deployment asset. Both transports use the same visible, wrapping navigation link
 and fragment-based deep links; goal detail pages select the Goals destination.
 
 
+## Browser office migration (2026-09-18)
+
+The account workspace offers browser migration through `/app/import`. A folder
+picker constructs the same immutable manifest and 1 MiB chunks as the CLI, using
+selection rules from the shared migration module. Explicit review precedes upload;
+existing hosted data requires confirmation bound to its current digest. Browser
+mutation routes require both Origin and CSRF, while CLI routes remain bearer-only.
+Both use the same tenant-scoped transfer store, server-side document validation
+and atomic revision activation. The upload does not copy connection credentials
+or enroll the local folder in automatic sync.
+
 ## Google OAuth entry point (2026-09-17)
 
 Hosted signup and local device connection use the same Google authorization-code

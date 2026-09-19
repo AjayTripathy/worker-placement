@@ -11,7 +11,7 @@ FILES = [str(p.relative_to(ROOT)) for package in PACKAGES
 FILES += [str(p.relative_to(ROOT)) for p in sorted((ROOT / 'officekit_agents').rglob('*.md'))]
 FILES += ['officekit/INTAKE_AGENT.md']
 FILES += ['officekit/public/' + name for name in
-          ('landing.html', 'site.css', 'site.js', 'auth.js', 'mark.svg', 'install.sh')]
+          ('landing.html', 'site.css', 'site.js', 'auth.js', 'office-import.js', 'mark.svg', 'install.sh')]
 FILES += [str(p.relative_to(ROOT)) for p in sorted((ROOT / 'hosting/app').glob('*.py'))]
 FILES += [str(p.relative_to(ROOT)) for p in sorted((ROOT / 'strategies').rglob('*'))
           if p.is_file() and p.name in {'pack.json', 'DECK.md'}]

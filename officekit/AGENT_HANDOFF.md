@@ -1,3 +1,18 @@
+# Browser office migration — 2026-09-18
+
+- Account pages always link **Bring an office** at `/app/import`. The browser
+  prepares an allowlisted, hashed snapshot from a selected saved-office folder;
+  nothing uploads until the user reviews and submits. Folder selection does not
+  need a running local app. The original local files are retained.
+- `/api/browser-migrations` and its chunk/activation routes enforce verified
+  identity, exact Origin and CSRF. Do not loosen the bearer-only CLI migration
+  routes. Both routes call the same `Offices` validation, encrypted staging,
+  missing-chunk resume and revision compare-and-swap activation.
+- The browser reads selection rules from the shared migration constants. Keep
+  `office-import.js` in the public asset allowlist and Cloud Run staged sources.
+  An existing different office revision requires an explicit checkbox; a newer
+  revision rejects the activation. Provider keys stay outside snapshots/exports.
+
 # Goals and visible navigation — 2026-09-18
 
 - `render_goals.py` restores `/pages/goals.html` as a shared core page. The shell
