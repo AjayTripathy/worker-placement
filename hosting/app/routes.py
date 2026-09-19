@@ -107,8 +107,29 @@ def install(app, offices, research, origin, member, body, csrf_page, limiter, jo
         claims=await member(request)
         return {'offices':await run_in_threadpool(offices.listing,claims['uid'])}
 
+    @app.post('/api/offices/start')
+    async def start_office(request: Request):
+        claims = await member(request)
+        await body(request)
+        from .onboarding import start
+        return await run_in_threadpool(start, offices, claims['uid'])
+
     @app.get('/app/import')
     async def bring_office(request: Request):
+        try:
+            claims = await member(request)
+        except AuthFailure as error:
+            if error.status != 401:
+                raise
+            return RedirectResponse('/signup', 303)
+        # This is the product's onboarding entry, not the saved-folder uploader.
+        # Reopening it resumes the same private draft and never replaces an office.
+        from .onboarding import start
+        receipt = await run_in_threadpool(start, offices, claims['uid'])
+        return RedirectResponse(receipt['path'], 303)
+
+    @app.get('/app/import/saved')
+    async def upload_saved_office(request: Request):
         try:
             claims = await member(request)
         except AuthFailure as error:
@@ -207,10 +228,10 @@ def install(app, offices, research, origin, member, body, csrf_page, limiter, jo
         goal_intake = (request.method == 'POST' and path == '/goals/add'
                        and ctype.split(';', 1)[0] in {'application/x-www-form-urlencoded', 'multipart/form-data'}
                        and bool((form.getvalue('nl') or '').strip()))
-        if request.method == 'POST' and (path in LONG_PATHS or goal_intake):
+        if request.method == 'POST' and (path in LONG_PATHS or goal_intake or path == '/onboard'):
             values, _ = await run_in_threadpool(credentials.read, claims['uid'], oid)
             # Without a key, strategy briefs still save synchronously for later.
-            if (not path.startswith('/strategy/') and not goal_intake) or values.get('ANTHROPIC_API_KEY'):
+            if (not path.startswith('/strategy/') and not goal_intake and path != '/onboard') or values.get('ANTHROPIC_API_KEY'):
                 jid = await run_in_threadpool(jobs.start, claims['uid'], oid, path, raw, ctype, expected)
                 receipt, _ = await run_in_threadpool(offices.read, claims['uid'], oid)
                 if ctype.split(';', 1)[0] == 'application/json':
@@ -236,7 +257,7 @@ def install(app, offices, research, origin, member, body, csrf_page, limiter, jo
         if 'text/html' in headers.get('Content-Type', ''):
             return workspace_response(request, receipt, data.decode(), status)
         return Response(data, status_code=status, headers={k: v for k, v in headers.items()
-                        if k.lower() in {'content-type', 'x-office-api-error-id', 'x-office-api-error-context'}})
+                        if k.lower() in {'content-type', 'x-office-api-error-id', 'x-office-api-error-context', 'x-office-revision'}})
 
     @app.get('/app/offices/{oid}')
     @app.get('/app/offices/{oid}/')
@@ -274,6 +295,8 @@ def install(app, offices, research, origin, member, body, csrf_page, limiter, jo
     async def office_documents(oid: str, request: Request):
         claims = await member(request)
         receipt, record = await run_in_threadpool(offices.read, claims['uid'], oid)
+        if record.get('onboarding'):
+            return RedirectResponse(receipt['path'], 303)
         return csrf_page(views.office(receipt, record), request)
 
     @app.get('/app/offices/{oid}/jobs/{jid}')
@@ -292,8 +315,9 @@ def install(app, offices, research, origin, member, body, csrf_page, limiter, jo
                 return RedirectResponse(receipt['path'] + headers['Location'], 303)
             data = base64.b64decode(result['body'])
             if 'text/html' in headers.get('Content-Type', ''):
-                return workspace_response(request, receipt, data.decode(), result['status'])
-            return Response(data, status_code=result['status'], media_type=headers.get('Content-Type', 'application/json'))
+                return workspace_response(request, job['receipt'], data.decode(), result['status'])
+            return Response(data, status_code=result['status'], media_type=headers.get('Content-Type', 'application/json'),
+                            headers={'X-Office-Revision': job['receipt']['digest']})
         if action:
             raise AuthFailure('Page not found.', 404)
         from .jobs import progress_page

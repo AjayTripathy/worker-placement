@@ -29,6 +29,8 @@ POSTS = {'/assets', '/goals', '/goals/add', '/goals/remove', '/goals/mortgage',
          '/strategy/proposal/retry', '/strategy/proposal/revise', '/strategy/proposal/decide',
          '/api-errors/dismiss', '/import/files', '/import/remove', '/adapter/import', '/chat', '/court', '/docket', '/signals/run', '/commitments/preview'}
 GETS = {'/', '/state', '/api-errors', '/strategy/proposals/status'}
+ONBOARD_POSTS = {'/draft', '/onboard', '/onboard/confirm', '/import/files', '/import/remove',
+                '/adapter/import', '/chat', '/api-errors/dismiss'}
 EXTRAS = {'api_errors.json', 'commitment_history.jsonl'}
 EXTRA_DIRS = {'inflow_previews', 'commitment_previews'}
 DISABLED = {'/key': 'Connect your AI key in Office settings.',
@@ -42,8 +44,12 @@ def extra_path(name):
 
 
 def materialize(folder, record):
-    docs = {name: base64.b64decode(raw, validate=True) for name, raw in record['documents'].items()}
-    validate_documents(record['manifest'], docs)
+    if record.get('onboarding'):
+        from .onboarding import validate
+        docs = validate(record)
+    else:
+        docs = {name: base64.b64decode(raw, validate=True) for name, raw in record['documents'].items()}
+        validate_documents(record['manifest'], docs)
     for name, raw in record.get('workspace', {}).items():
         if not extra_path(name):
             raise ValueError('Unsupported workspace document')
@@ -58,10 +64,17 @@ def materialize(folder, record):
         path.write_bytes(data)
 
 
-def capture(folder):
-    manifest, chunks = snapshot(folder)
-    documents = {f['path']: base64.b64encode(b''.join(chunks[h] for h in f['chunks'])).decode()
-                 for f in manifest['files']}
+def capture(folder, oid=None):
+    if not (folder / 'balance_sheet.json').exists():
+        from .onboarding import capture as capture_draft
+        record = capture_draft(folder, oid)
+    else:
+        manifest, chunks = snapshot(folder)
+        if oid and manifest['office_id'] != oid:
+            raise ValueError('Office identity cannot change during onboarding')
+        documents = {f['path']: base64.b64encode(b''.join(chunks[h] for h in f['chunks'])).decode()
+                     for f in manifest['files']}
+        record = {'manifest': manifest, 'documents': documents}
     extra = {}
     for path in folder.rglob('*'):
         name = path.relative_to(folder).as_posix()
@@ -69,9 +82,9 @@ def capture(folder):
             data = path.read_bytes()
             inspect_document(name, data)
             extra[name] = base64.b64encode(data).decode()
-    if sum(f['size'] for f in manifest['files']) + sum(len(base64.b64decode(b)) for b in extra.values()) > MAX_TOTAL:
+    if sum(len(base64.b64decode(b)) for b in record['documents'].values()) + sum(len(base64.b64decode(b)) for b in extra.values()) > MAX_TOTAL:
         raise ValueError('Office exceeds the workspace size limit')
-    return {'manifest': manifest, 'documents': documents, 'workspace': extra}
+    return dict(record, workspace=extra)
 
 
 def publish(offices, uid, receipt, record, job_id=None):
@@ -87,8 +100,9 @@ def publish(offices, uid, receipt, record, job_id=None):
     except Conflict:
         pass
     answers = json.loads(base64.b64decode(record['documents']['answers.json']))
-    balance = json.loads(base64.b64decode(record['documents']['balance_sheet.json']))
-    updated = dict(current, digest=revision, activated_at=stamp(), as_of=balance['as_of'],
+    balance = json.loads(base64.b64decode(record['documents'].get('balance_sheet.json', 'e30=')))
+    updated = dict(current, digest=revision, activated_at=stamp(), as_of=balance.get('as_of', ''),
+                   status='onboarding' if record.get('onboarding') else 'active',
                    name=str(answers.get('owner') or 'Your office')[:180],
                    documents=len(record['documents']), source='hosted')
     try:
@@ -135,7 +149,8 @@ def dispatch(offices, uid, oid, method, path, raw=b'', content_type='', expected
         raise AuthFailure('The office changed since this page was opened. Reload and review before saving.', 409)
     if method == 'GET' and path == '/state':
         return 200, {'Content-Type': 'application/json'}, json.dumps({'v': receipt['digest']}).encode(), receipt
-    if method == 'POST' and path not in POSTS:
+    allowed_posts = ONBOARD_POSTS if record.get('onboarding') else POSTS
+    if method == 'POST' and path not in allowed_posts:
         raise AuthFailure(DISABLED.get(path, 'This action is not available in the hosted office yet.'), 400)
     if method == 'GET' and path not in GETS and not re.fullmatch(r'/pages/[A-Za-z0-9_.-]+\.html', path):
         raise AuthFailure('Page not found.', 404)
@@ -147,20 +162,24 @@ def dispatch(offices, uid, oid, method, path, raw=b'', content_type='', expected
         pending = []
         def checkpoint():
             nonlocal receipt, record
-            updated = capture(folder)
+            updated = capture(folder, oid)
             receipt = publish(offices, uid, receipt, updated, job_id=job_id)
             record = updated
         with hosted_office(folder, credentials, enqueue=pending.append if job_id else None, checkpoint=checkpoint if job_id else None):
             from officekit.serve import render_saved_office
             if method == 'GET' and (path == '/' or path.startswith('/pages/')):
-                render_saved_office(folder)
+                if not record.get('onboarding'):
+                    render_saved_office(folder)
+                elif path.startswith('/pages/'):
+                    from officekit.serve import write_imports_page
+                    write_imports_page(folder)
             status, headers, data = local_request(folder, method, path, raw, content_type)
             for pid in pending:
                 checkpoint()
                 from officekit.strategy_proposals import run
                 run(folder, pid)
             if method == 'POST' and (status < 400 or job_id):
-                updated = capture(folder)
+                updated = capture(folder, oid)
                 # Rendering and exploratory calculations need no new revision.
                 if updated['documents'] != record['documents'] or updated['workspace'] != record.get('workspace', {}):
                     receipt = publish(offices, uid, receipt, updated, job_id=job_id)
@@ -168,16 +187,22 @@ def dispatch(offices, uid, oid, method, path, raw=b'', content_type='', expected
             from officekit.serve import STYLE
             data = ('<!doctype html><html lang="en"><head><title>Request needs attention</title><style>' + STYLE + '</style></head><body><main class="wrap"><h1>Changes were not saved</h1><p role="alert">' + escape(data.decode()) + '</p><button type="button" onclick="history.back()">Back to your edits</button></main></body></html>').encode()
             headers['Content-Type'] = 'text/html; charset=utf-8'
+        headers['X-Office-Revision'] = receipt['digest']
         return status, headers, data, receipt
 
 
 CLIENT = r'''<script nonce="NONCE">
 window.officeBase=BASE;
 (function(){
- const base=window.officeBase, revision=REVISION, csrf=__WP_CSRF__;
+ const base=window.officeBase, csrf=__WP_CSRF__;
+ let revision=REVISION;
  const resolve=value=>typeof value==='string'&&value.startsWith('/')&&!value.startsWith('//')&&value!=='/app'&&!value.startsWith('/app/')?base+value:value;
  const original=window.fetch.bind(window);
+ let writes=Promise.resolve();
+ window.officeRequestsIdle=()=>writes;
  window.fetch=function(input,options){
+   const mutating=(options?.method||(input instanceof Request?input.method:'GET')).toUpperCase()==='POST';
+   const execute=()=>{
    const url=typeof input==='string'?resolve(input):input;
    const target=new URL(typeof url==='string'?url:url.url,location.href);
    if(target.origin===location.origin&&target.pathname.startsWith(base+'/')){
@@ -185,11 +210,17 @@ window.officeBase=BASE;
      options.headers.set('X-CSRF-Token',csrf);options.headers.set('X-Office-Revision',revision);
    }
    return original(url,options).then(async response=>{
+     if(mutating&&response.ok&&target.origin===location.origin&&target.pathname.startsWith(base+'/')&&target.pathname!==base+'/api-errors/dismiss')revision=response.headers.get('X-Office-Revision')||revision;
      if(response.status!==202||!response.headers.get('content-type')?.includes('application/json'))return response;
      const queued=await response.clone().json();if(!queued.job)return response;
      const job=new URL(queued.job,location.href);if(job.origin!==location.origin||!job.pathname.startsWith(base+'/jobs/'))throw new Error('Invalid job destination');
-     for(;;){await new Promise(r=>setTimeout(r,2000));const r=await original(job.pathname+'/status');const s=await r.json();if(!r.ok||s.error)throw new Error(s.error||'Background work failed');if(s.status==='complete')return original(job.pathname+'/result');}
+     for(;;){await new Promise(r=>setTimeout(r,2000));const r=await original(job.pathname+'/status');const s=await r.json();if(!r.ok||s.error)throw new Error(s.error||'Background work failed');if(s.status==='complete'){const result=await original(job.pathname+'/result');if(result.ok)revision=result.headers.get('X-Office-Revision')||revision;return result;}}
    });
+   };
+   if(mutating){
+     const result=writes.then(execute);writes=result.then(()=>{},()=>{});return result;
+   }
+   return execute();
  };
  document.addEventListener('click',function(event){const a=event.target.closest('a');if(a){const value=a.getAttribute('href');if(value)a.setAttribute('href',resolve(value));}},true);
  document.addEventListener('submit',function(event){

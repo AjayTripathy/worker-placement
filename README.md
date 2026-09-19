@@ -4,7 +4,7 @@
 
 - **[Get started with Google](https://worker-placement-web-653732113303.us-west1.run.app/signup)** — private office snapshots and an included SignalOS research library.
 - **[Run locally](officekit/README.md)** — one script installs dependencies, initializes your office and opens the app.
-- **[Bring an office](https://worker-placement-web-653732113303.us-west1.run.app/app/import)** — select your saved office folder, review the files and upload directly from the website.
+- **[Bring an office](https://worker-placement-web-653732113303.us-west1.run.app/app/import)** — open the same onboarding as the local app: drop statements, add holdings and income, and set goals.
 - **[Deployment and operations](hosting/README.md)** — authentication, migration, storage and verification.
 
 The public [Worker Placement repository](https://github.com/AjayTripathy/worker-placement) includes the app and SignalOS research on `main`. No GitHub account is required to download it. Start with one command, which clones the full repository including research, installs the app and opens it:
@@ -20,7 +20,7 @@ After cloning, **`./start.sh` is the only startup command**. It manages its own 
 ./wp migrate    # Saved office + retained research; keeps the local copy
 ```
 
-Hosted offices use the same workspace and editors. Office settings connects AI keys and supported brokers; Imports accepts statements. Optional automatic sync keeps a local copy, with review when both copies change. See [local/hosted workflows](officekit/HOSTED_PARITY.md). Every hosted account can browse the same seeded research library; private office documents are never added to it. Manual entry and core planning need no API key. AI features use the providers you configure.
+Hosted offices use the same onboarding, workspace and editors. Existing saved folders can be uploaded from the account page’s separate “Upload a saved office” link. Office settings connects AI keys and supported brokers; Imports accepts statements. Optional automatic sync keeps a local copy, with review when both copies change. See [local/hosted workflows](officekit/HOSTED_PARITY.md). Every hosted account can browse the same seeded research library; private office documents are never added to it. Manual entry and core planning need no API key. AI features use the providers you configure.
 
 For product contributors: [architecture](officekit/ARCHITECTURE.md), [operating contracts](officekit/OPERATING_CONTRACTS.md), and [agent handoff](officekit/AGENT_HANDOFF.md).
 

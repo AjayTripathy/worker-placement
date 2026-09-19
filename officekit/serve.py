@@ -104,9 +104,11 @@ ONBOARD = """<!doctype html><html lang="en"><head><meta charset="utf-8">
 <h1>Worker Placement</h1>
 <p class="sub">Put your capital to work — deliberately: every dollar is a worker you place into a strategy. Drop a statement, add what it can't see, set your goals. Nothing is fabricated — unknowns are tagged TBD, and every estimate says so.</p>
 {err}
+{settings_link}
 {adapters}
 {dropzone}
-<form method="POST" action="/onboard" enctype="multipart/form-data">
+{key_form}
+<form id="onboarding-form" method="POST" action="/onboard" enctype="multipart/form-data">
 <h2>1 · Your holdings</h2><div class="panel" id="holdings">
   {import_totals}
   <div class="row"><label>Type</label><label>Ticker or name</label><label>Value ($; debts positive)</label><label>Rate % (debt)</label><label></label></div>
@@ -169,7 +171,8 @@ ONBOARD = """<!doctype html><html lang="en"><head><meta charset="utf-8">
   </div>
 </details>
 <button type="submit" style="margin-top:14px">Build my office →</button>
-<div class="foot">Betas are category priors (first-pass estimates, refined from returns later). Read-only — this app never places orders. Your data stays in a local folder you own.</div>
+<p id="draft-status" class="note" role="status" aria-live="polite"></p>
+<div class="foot">Betas are category priors (first-pass estimates, refined from returns later). Read-only — this app never places orders. {storage_note}</div>
 </form></div>
 <script>
 function addURow(){{
@@ -177,13 +180,14 @@ function addURow(){{
   d.innerHTML='<select name="u_kind"><option value="">—</option>{cat_opts}</select>'+
     '<input name="u_name" placeholder="ticker or name"><input name="u_value" placeholder="$">'+
     '<input name="u_rate" placeholder="">'+
-    '<button type="button" class="rmrow" title="remove row" onclick="removeURow(this)">&times;</button>';
+    '<button type="button" class="rmrow" title="remove row">&times;</button>';
+  d.querySelector('.rmrow').addEventListener('click',function(){{removeURow(this);}});
   var h=document.getElementById('hrows');
   h.appendChild(d);
   document.getElementById('hdet').open=true;
   if(window.recomputeTyped)window.recomputeTyped();
 }}
-function removeURow(btn){{ var r=btn.closest('.row'); if(r)r.remove(); if(window.recomputeTyped)window.recomputeTyped(); }}
+function removeURow(btn){{ var r=btn.closest('.row'); if(r)r.remove(); if(window.recomputeTyped)window.recomputeTyped(); document.getElementById('onboarding-form').dispatchEvent(new Event('input')); }}
 function addGoal(){{
   var d=document.createElement('div'); d.className='row3'; d.style.marginTop='8px';
   d.innerHTML='<input name="goal_label" placeholder="label"><input name="goal_date" placeholder="YYYY-MM-DD">'+
@@ -200,7 +204,7 @@ def _server_draft_blob(folder):
     p = Path(folder) / "draft.json"
     try:
         raw = p.read_text()
-        json.loads(raw)                              # only inject valid JSON
+        raw = json.dumps(json.loads(raw)).replace('<', '\\u003c')
         return f"<script>window.__OFFICEKIT_DRAFT__={raw};</script>"
     except Exception:
         return ""
@@ -214,7 +218,7 @@ def _server_draft_blob(folder):
 _DRAFT_JS = """<script>
 (function(){
   var KEY='officekit_draft_'+location.host+location.pathname;
-  var form=document.querySelector('form[action="/onboard"]'); if(!form)return;
+  var form=document.getElementById('onboarding-form'); if(!form)return;
   var SCALARS=['owner','as_of','account','income_annual','income_years','income_style',
     'wind_amount','wind_eta','wind_character','wind_state','wind_rate','loss_carryforward','ret_date','ret_spend','floor_amount'];
   function typedRows(){
@@ -237,17 +241,28 @@ _DRAFT_JS = """<script>
     var th=document.getElementsByName('goal_taxharvest')[0]; if(th&&th.checked)d.taxharvest=1;
     return d;
   }
-  var _t;
-  function save(){
-    var d;
-    try{ d=collect(); localStorage.setItem(KEY,JSON.stringify(d)); }catch(e){ return; }
-    // write to DISK immediately (debounced) so a reload restores server-side —
-    // localStorage is only a same-browser fallback (2026-09-07)
+  var _t, pending=Promise.resolve(), dirty=false, leaving=false;
+  var status=document.getElementById('draft-status');
+  function persist(){
     clearTimeout(_t);
-    _t=setTimeout(function(){
-      try{ fetch('/draft',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify(d),keepalive:true}); }catch(e){}
-    },400);
+    if(!dirty)return pending;
+    var d=collect(); dirty=false;
+    pending=pending.catch(function(){}).then(async function(){
+      status.textContent='Saving your progress…';
+      try{
+        var r=await fetch('/draft',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d),keepalive:true});
+        if(!r.ok)throw new Error('Your progress could not be saved. Keep this page open; reload and review if another tab changed the office.');
+        status.textContent='Progress saved.';
+      }catch(e){dirty=true;status.textContent=e.message;throw e;}
+    });
+    return pending;
+  }
+  function save(){
+    if(leaving)return;
+    dirty=true;
+    try{localStorage.setItem(KEY,JSON.stringify(collect()));}catch(e){}
+    clearTimeout(_t);
+    _t=setTimeout(function(){persist().catch(function(){});},400);
   }
   function restore(){
     var d=window.__OFFICEKIT_DRAFT__;         // server-side draft (authoritative)
@@ -261,7 +276,7 @@ _DRAFT_JS = """<script>
       r.querySelector('[name=u_value]').value=row[2]||'';
       var rt=r.querySelector('[name=u_rate]'); if(rt)rt.value=row[3]||'';
     });
-    Object.keys(d.scalars||{}).forEach(function(nm){var e=document.getElementsByName(nm)[0]; if(e&&!e.value)e.value=d.scalars[nm];});
+    Object.keys(d.scalars||{}).forEach(function(nm){var e=document.getElementsByName(nm)[0]; if(e&&SCALARS.indexOf(nm)>=0)e.value=d.scalars[nm];});
     (d.goals||[]).forEach(function(g,i){
       var gl=document.getElementsByName('goal_label');
       while(gl.length<=i){ addGoal(); gl=document.getElementsByName('goal_label'); }
@@ -269,13 +284,32 @@ _DRAFT_JS = """<script>
       var gd=document.getElementsByName('goal_date'),ga=document.getElementsByName('goal_amount');
       if(gd[i]&&!gd[i].value)gd[i].value=g[1]||''; if(ga[i]&&!ga[i].value)ga[i].value=g[2]||'';
     });
-    Object.keys(d.profile||{}).forEach(function(nm){var e=document.getElementsByName(nm)[0]; if(e)e.checked=true;});
+    if(d.profile)document.querySelectorAll('[name^=p_]').forEach(function(e){e.checked=!!d.profile[e.name];});
     if(d.taxharvest){var th=document.getElementsByName('goal_taxharvest')[0]; if(th)th.checked=true;}
     if(window.recomputeTyped)window.recomputeTyped();
   }
   restore();
   form.addEventListener('input',save);
-  form.addEventListener('submit',function(){ try{localStorage.removeItem(KEY);}catch(e){} });  // build clears the server draft too
+  window.officeDraftReady=async function(){clearTimeout(_t);await persist();if(window.officeRequestsIdle)await window.officeRequestsIdle();if(dirty)await persist();};
+  // Flush before imports/builds navigate away; the hosted revision advances on
+  // each saved draft. Resume the normal submit after its CSRF/revision update.
+  document.addEventListener('submit',function(event){
+    var target=event.target;
+    if(target.dataset.draftReady==='yes'){leaving=true;clearTimeout(_t);if(target===form){try{localStorage.removeItem(KEY);}catch(e){}}return;}
+    event.preventDefault();event.stopImmediatePropagation();
+    var submitter=event.submitter;
+    window.officeDraftReady().then(function(){
+      target.dataset.draftReady='yes';
+      target.querySelectorAll('button').forEach(function(b){b.disabled=false;});
+      setTimeout(function(){target.requestSubmit(submitter||undefined);},0);
+    }).catch(function(){});
+  },true);
+  document.addEventListener('click',function(event){
+    var link=event.target.closest('a');if(!link||link.target==='_blank'||event.metaKey||event.ctrlKey)return;
+    if(!dirty)return;
+    event.preventDefault();window.officeDraftReady().then(function(){location.assign(link.href);}).catch(function(){});
+  });
+  window.addEventListener('beforeunload',function(event){if(dirty){event.preventDefault();event.returnValue='';}});
 })();
 </script>"""
 
@@ -345,12 +379,13 @@ function fillGoals(a){if(!a)return; var spendIdx=0;
    if(a.incoming.state)setV('wind_state',a.incoming.state);}}
 function chatSend(scope){var inp=document.getElementById('chatin_'+scope);var t=inp.value.trim();if(!t)return;
  inp.value='';chatLine(scope,'you',t);chats[scope].push({role:'user',content:t});
- fetch('/chat',{method:'POST',headers:{'Content-Type':'application/json'},
-   body:JSON.stringify({messages:chats[scope],scope:scope})}).then(function(r){return r.json()})
+ Promise.resolve(window.officeDraftReady&&window.officeDraftReady()).then(function(){return fetch('/chat',{method:'POST',headers:{'Content-Type':'application/json'},
+   body:JSON.stringify({messages:chats[scope],scope:scope})});}).then(function(r){return r.json()})
  .then(function(t){if(t.error){chatLine(scope,'agent','(error: '+t.error+')');return;}
    chats[scope].push({role:'assistant',content:JSON.stringify(t)});
    chatLine(scope,'agent',t.reply||'');
-   if(scope=='goals')fillGoals(t.answers);else fillForm(t.answers);})
+   if(scope=='goals')fillGoals(t.answers);else fillForm(t.answers);
+   var form=document.getElementById('onboarding-form');if(form)form.dispatchEvent(new Event('input'));})
  .catch(function(e){chatLine(scope,'agent','(request failed: '+e+')');});}
 ['assets','goals'].forEach(function(s){var e=document.getElementById('chatin_'+s);
  if(e)e.addEventListener('keydown',function(ev){if(ev.key=='Enter'){ev.preventDefault();chatSend(s);}});});
@@ -508,10 +543,13 @@ def _adapters_html():
             act = (f'<form method="POST" action="/adapter/import" style="margin:0" {_BUSY_ATTR}>'
                    f'<input type="hidden" name="adapter" value="{html.escape(r["name"])}">'
                    f'<button type="submit" style="padding:7px 14px">Import positions</button></form>')
+        elif hosted():
+            act = '<a class="btn btn2" href="/settings">Connect in Office settings</a>'
         elif r.get("guidance"):
             act = f'<span class="why">{html.escape(r["guidance"])}</span>'
+        detail = 'Not connected to this office' if hosted() and not r['found'] else r['detail']
         rows.append('<div class="chk"><div style="flex:1"><b>' + html.escape(r["label"]) + "</b>"
-                    f'<div class="why">{html.escape(r["detail"])}</div></div>{act}</div>')
+                    f'<div class="why">{html.escape(detail)}</div></div>{act}</div>')
     # the AI model key is an integration too — it ALWAYS shows, independent of
     # whether any broker connection was detected (regression fix 2026-09-06:
     # the key display used to vanish whenever the gateway wasn't found)
@@ -522,7 +560,8 @@ def _adapters_html():
                   if ks["attached"] else
                   '<span class="why" style="color:var(--amber)">needs attaching</span>')
                + '</div>')
-    return ('<div class="panel"><label style="margin-top:0">Detected connections — read-only scan of this machine</label>'
+    heading = 'Office connections — read-only' if hosted() else 'Detected connections — read-only scan of this machine'
+    return ('<div class="panel"><label style="margin-top:0">' + heading + '</label>'
             + "".join(rows) + key_row + "</div>")
 
 
@@ -547,6 +586,10 @@ def chat_first_line(notice=None, via=None):
                 + " That look right? Tell me anything the connection can't see — "
                   "other accounts, your home, a mortgage, private holdings.")
     summary = detection_summary()
+    if hosted():
+        return ((f"Your office connections: {summary}. Click “Import positions” above, then " if summary else
+                 "Connect a broker in Office settings, or ") +
+                "drop a statement or describe your holdings. I’ll fill the table for you to review.")
     if summary:
         return (f"I scanned this machine (read-only) and auto-detected: {summary}. "
                 "Click “Import positions” above and I’ll fill the table from it — "
@@ -582,13 +625,12 @@ def _key_ask_html(notice=None, via=None):
             + html.escape(first) + "</div>"
             '<div style="margin-bottom:6px"><b style="color:var(--violet)">agent</b> '
             + html.escape(ask) + "</div></div>"
-            '<form method="POST" action="/key">'
             '<div class="row2"><input type="password" name="api_key" placeholder="sk-ant-…" '
-            'autocomplete="off" required>'
-            '<button type="submit" class="btn2">Enable agents</button></div>'
-            '<div class="chk" style="border:0;padding:6px 0 0"><input type="checkbox" name="remember" value="1">'
+            'form="intake-key" autocomplete="off" required>'
+            '<button type="submit" form="intake-key" class="btn2">Enable agents</button></div>'
+            '<div class="chk" style="border:0;padding:6px 0 0"><input type="checkbox" name="remember" value="1" form="intake-key">'
             '<span class="why">remember on this machine (~/.anthropic_key, chmod 600) — otherwise '
-            'it lives only in this server process</span></div></form>'
+            'it lives only in this server process</span></div>'
             '<p class="note">Everything else — the connection scan, position import, the form, '
             'building your office — works without any key.</p></div>')
 
@@ -1170,6 +1212,11 @@ def answers_from_form(form, folder):
     g = lambda k: (form.getvalue(k) or "").strip() if form.getvalue(k) else ""
     answers = {"owner": g("owner") or None, "as_of": g("as_of") or date.today().isoformat(),
                "sleeves": [], "imports": [], "profile": {}, "goals": []}
+    identity = folder / 'answers.json'
+    if identity.exists():
+        oid = json.loads(identity.read_text()).get('office_id')
+        if oid:
+            answers['office_id'] = oid
     # csv upload
     if "positions_csv" in form:
         item = form["positions_csv"]
@@ -1177,7 +1224,7 @@ def answers_from_form(form, folder):
             folder.mkdir(parents=True, exist_ok=True)   # survive the folder vanishing mid-run
             dest = folder / "positions.csv"
             dest.write_bytes(item.file.read())
-            answers["imports"].append({"kind": "positions_csv", "path": str(dest),
+            answers["imports"].append({"kind": "positions_csv", "path": 'positions.csv' if hosted() else str(dest),
                                        "account": g("account") or "brokerage"})
     # ONE holdings table: ticker rows run the classifier; everything else is a
     # sleeve as typed (principal ruling 2026-09-04: no separate section)
@@ -1308,7 +1355,8 @@ def _sma_constituents(folder):
     equity book into the direct-index SMA vs deliberate single-name picks. None for
     any non-principal office (the split needs the SMA membership list)."""
     if hosted():
-        saved = json.loads((Path(folder) / "balance_sheet.json").read_text())
+        saved_path = Path(folder) / "balance_sheet.json"
+        saved = json.loads(saved_path.read_text()) if saved_path.exists() else {}
         sleeves = [s for s in saved.get("sleeves", []) if s.get("category") == "direct_index"]
         symbols = {h.get("company") for s in sleeves for h in s.get("holdings", []) if h.get("company")}
         return symbols or None, (sleeves[0]["name"].split(" — ", 1)[0] if sleeves else "Direct-index SMA")
@@ -1714,7 +1762,8 @@ def _classify_unknowns(answers, folder, ai):
     rows = list((answers.get("positions") or {}).get("rows") or [])
     for spec in answers.get("imports") or []:
         try:
-            rows += read_positions_csv(spec["path"])
+            from officekit.runtime import import_path
+            rows += read_positions_csv(import_path(spec["path"]))
         except Exception:
             pass
     known = dict(load_learned(folder))
@@ -1876,6 +1925,9 @@ def make_handler(folder):
                              + html.escape(notice) + "</div>")
             ai = _ai(folder)
             self._send(ONBOARD.format(style=STYLE, err=err_html, today=date.today().isoformat(),
+                                      key_form='' if hosted() else '<form id="intake-key" method="POST" action="/key"></form>',
+                                      settings_link='<p><a href="/settings">Office settings</a></p>',
+                                      storage_note=('Your office is saved privately to your account and can be exported.' if hosted() else 'Your data stays in a local folder you own.'),
                                       adapters=_adapters_html(), dropzone=_dropzone_html(folder),
                                       hold_open=('open' if len(prefill or []) <= 12 else ''),
                                       u_rows=_urows_html(prefill=prefill),
@@ -2011,6 +2063,8 @@ def make_handler(folder):
                     n = int(self.headers.get("Content-Length", 0) or 0)
                     raw = self.rfile.read(n).decode("utf-8", "replace") if n else "{}"
                     self._request_json(raw)              # validate before writing
+                    from officekit.migration import inspect_document
+                    inspect_document('draft.json', raw.encode())
                     folder.mkdir(parents=True, exist_ok=True)
                     (folder / "draft.json").write_text(raw)
                     return self._send('', 204, 'application/json')
@@ -2195,6 +2249,8 @@ def make_handler(folder):
             if self.path == "/onboard/confirm":         # AI-1: apply what the human accepted
                 try:
                     answers = self._request_json(g("answers_json"))
+                    if (folder / 'answers.json').exists():
+                        answers['office_id'] = json.loads((folder / 'answers.json').read_text())['office_id']
                     accepted = {}
                     for v in (form.getlist("acc") if form.getvalue("acc") is not None else []):
                         sym, cat, style = v.split(":", 2)

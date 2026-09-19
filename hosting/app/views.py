@@ -6,8 +6,8 @@ from urllib.parse import urlencode
 from officekit.render_landing import page
 
 def account(email,offices):
-    rows=''.join('<article><h2>'+esc(o['name'])+'</h2><p>Balances as of '+esc(o['as_of'])+'</p><a class="text-link" href="'+esc(o['path'],quote=True)+'">Open hosted office ↗</a></article>' for o in offices)
-    rows='<article class="bring-office-card"><h2>Bring your office.</h2><p>Choose your saved office folder and bring your accounts, goals and retained research online. Your local copy stays available.</p><a class="button primary" href="/app/import">Bring an office ↗</a></article>'+rows
+    rows=''.join('<article><h2>'+esc(o['name'])+'</h2><p>'+('Onboarding in progress' if o.get('status')=='onboarding' else 'Balances as of '+esc(o['as_of']))+'</p><a class="text-link" href="'+esc(o['path'],quote=True)+'">'+('Continue setting up your office →' if o.get('status')=='onboarding' else 'Open office ↗')+'</a></article>' for o in offices)
+    rows='<article><h2>Create an office.</h2><p>Drop your statements, add your holdings and income, and set your goals. The same app as the open-source version, saved online.</p><button class="button primary" id="start-office" type="button">'+('Continue setup →' if any(o.get('status')=='onboarding' for o in offices) else 'Create my office →')+'</button></article>'+rows+'<article class="bring-office-card"><h2>Already have a saved office?</h2><p>Bring an existing local office and its retained research online.</p><a class="text-link" href="/app/import/saved">Upload a saved office ↗</a></article>'
     content='<main id="main" class="subpage"><p class="eyebrow">YOUR WORKSPACE</p><h1>Welcome home.</h1><p>'+esc(email)+'</p><div id="auth-error" role="alert" class="notice error" hidden></div><div class="account-grid">'+rows+'<article><h2>Start with the research.</h2><p>The SignalOS library is included with every account. Explore its datasets, evidence and findings.</p><a class="text-link" href="/app/research">Open research library ↗</a></article></div></main>'
     return page('Your workspace',content,auth_script=True,signed_in=True)
 

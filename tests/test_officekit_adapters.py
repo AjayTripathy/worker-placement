@@ -210,7 +210,8 @@ def test_keyless_onboarding_asks_for_key(monkeypatch, tmp_path):
     monkeypatch.setitem(serve._DISCOVERY_CACHE, "ts", time.time())
     h = serve._key_ask_html()
     assert "auto-detected" in h and "127.0.0.1:4001" in h   # detection line is key-free
-    assert 'action="/key"' in h and 'type="password"' in h
+    assert 'form="intake-key"' in h and 'type="password"' in h
+    assert '<form' not in h  # The key controls must not nest a form inside onboarding.
     assert "never in your Worker Placement folder" in h
     assert "works without any key" in h
 

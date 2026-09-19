@@ -57,6 +57,15 @@
     });
   }
   const deviceForm = document.getElementById('device-form');
+  const startOffice = document.getElementById('start-office');
+  if (startOffice) startOffice.addEventListener('click', async () => {
+    startOffice.disabled=true; errorBox.hidden=true;
+    try {
+      const office=await request('/api/offices/start', {});
+      if (!/^\/app\/offices\/[a-f0-9-]{36}$/.test(office.path)) throw new Error('Could not open your office. Please try again.');
+      location.assign(office.path);
+    } catch(error) {showError(error.message); startOffice.disabled=false;}
+  });
   if(deviceForm) deviceForm.addEventListener('submit', async event => {
     event.preventDefault(); const button=deviceForm.querySelector('button');button.disabled=true;errorBox.hidden=true;
     try {

@@ -6,10 +6,11 @@ owner. There is no trading/execution API in either runtime.
 
 ## Use the new controls
 
-- The hosted account workspace has **Bring an office**. Choose a saved office
-  folder, review its records and retained research, then upload directly in the
-  browser. A running local server or CLI login is not required. Existing hosted
-  records require explicit replacement review; connection keys stay separate.
+- **Bring your office** (`/app/import`) opens the shared open-source onboarding
+  directly: statements, holdings, income, natural-language intake and goals, then
+  **Build my office**. Reopening resumes the same private draft. No existing office
+  is replaced. **Upload a saved office** is a separate account-management option
+  at `/app/import/saved` for a saved folder; only that flow needs replacement review.
 - **Goals** has a visible navigation link in both shells. Describe one or several
   goals in plain language with a connected AI agent, or use the manual fields.
   Goal projections and strategy coverage use the existing shared planning model.
@@ -113,3 +114,12 @@ accounts require user-provided credentials and are separate acceptance checks.
 The existing 64 MiB / 1,024-document office limit remains. Office-scoped device
 grants, team membership, self-service deletion and per-account storage/rate quotas
 are still separate work. Do not describe these as shipped.
+
+## UI ownership contract
+
+All office screens and workflows, including onboarding, live in `officekit`.
+The hosted service supplies authentication, encrypted persistence, credentials and
+job execution, and mounts the same HTML under the owned office URL. Landing and
+account-management screens may differ. Do not create a second hosted onboarding
+form or replace onboarding with a migration UI. Desktop-only connections remain
+local capabilities; explain their setup without changing the planning workflow.

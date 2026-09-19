@@ -1,3 +1,23 @@
+# Shared onboarding, including “Bring your office” — 2026-09-18
+
+- `/app/import` opens/resumes the shared open-source onboarding directly. It is
+  not a saved-folder picker. `/app/import/saved` retains the separate backup import.
+- Reuse `officekit.serve` for every office workflow. Only landing and account UI
+  should be transport-specific. `hosting.app.onboarding` adds storage, not screens.
+- Drafts hold a stable office identity, typed fields, staging and originals;
+  no balances exist until Build. Build preserves the same identity and keys.
+- Draft writes use CAS and return `X-Office-Revision`; the browser serializes
+  requests and flushes drafts before uploads/builds. Never bypass stale-tab gates.
+- Chat, extraction and unknown-ticker classification use durable office-scoped
+  jobs. Shared settings connects keys before or after onboarding. Machine keys
+  never flow into new hosted offices.
+- Shared fixes: script-safe draft embedding, CSP-safe dynamic remove buttons,
+  relative retained CSV references, no nested key form, restore scalar/profile
+  fields and persist conversational intake results.
+- Acceptance coverage: `tests/test_hosted_onboarding.py`, existing hosted suites,
+  and browser uploads/builds against synthetic local storage. Do not use the
+  principal's actual balances or goals as test fixtures.
+
 # Browser office migration — 2026-09-18
 
 - Account pages always link **Bring an office** at `/app/import`. The browser

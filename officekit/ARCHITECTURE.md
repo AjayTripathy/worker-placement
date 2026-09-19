@@ -11,7 +11,22 @@ its CLI, dependency and shipped-status descriptions are not a current inventory.
 The distribution is `worker-placement` with `wp` / `worker-placement` commands,
 six packages and default broker-library dependencies. The hosted transport uses the same office UI and manual editing engine; hosted AI execution uses tenant-scoped credentials and durable jobs.
 
-**Hosted onboarding direction (2026-09-15):** the primary local-to-hosted entry is
+**Shared onboarding contract (2026-09-18):** `/app/import` now opens the same
+`officekit.serve.ONBOARD` and handlers as a fresh local office. Website-specific
+UI is limited to landing pages and account management. Migration of an already
+saved folder remains a separate account action at `/app/import/saved`.
+
+Hosted onboarding uses a private, revisioned `onboarding` record with a stable
+UUID and identity-only answers, without a fabricated balance sheet. Drafts,
+statement originals, staging and model results use the existing encrypted office
+store. `Build my office` transitions that identity to an ordinary validated active
+snapshot. Draft autosaves serialize, advance the browser's revision, and flush
+before form submission. Stale tabs still fail CAS. Imports, conversational intake
+and AI classification use the same durable tenant-scoped workers as the workspace.
+Credentials remain separate from drafts and snapshots. Do not duplicate the UI in
+`hosting.app.views`; use the shared handler through `workspace.dispatch`.
+
+**Historical local-to-hosted direction (2026-09-15):** the primary local-to-hosted entry is
 **Host this office → email sign-in → automatic transfer → open hosted office**.
 Read [HOSTED_ONBOARDING.md](HOSTED_ONBOARDING.md) for the customer flow, verified
 transfer, active-office policy and connector reconnect behavior. The first shipped interface uses `curl …/install.sh | sh`, `./wp login`, and `./wp migrate`. Email accounts, encrypted private snapshots, viewing/export and shared seeded research are deployed. The local migration UI and shared hosted workspace now ship. AI keys/jobs, statement uploads and supported broker connections now ship; scoped upload grants remain planned. See [hosted service operations](../hosting/README.md).
@@ -220,7 +235,7 @@ and fragment-based deep links; goal detail pages select the Goals destination.
 
 ## Browser office migration (2026-09-18)
 
-The account workspace offers browser migration through `/app/import`. A folder
+The account workspace offers saved-folder migration through `/app/import/saved`. A folder
 picker constructs the same immutable manifest and 1 MiB chunks as the CLI, using
 selection rules from the shared migration module. Explicit review precedes upload;
 existing hosted data requires confirmation bound to its current digest. Browser

@@ -13,7 +13,7 @@ from test_hosted_migration import client, office, ORIGIN
 
 def browser(client):
     client.cookies.set(SESSION, 'alice')
-    assert client.get('/app/import').status_code == 200
+    assert client.get('/app/import/saved').status_code == 200
 
 
 def post(client, path, data):
@@ -32,14 +32,14 @@ def stage(client, folder):
 
 
 def test_account_and_signed_in_browser_import_page(client):
-    assert client.get('/app/import', follow_redirects=False).headers['location'] == '/signup'
+    assert client.get('/app/import/saved', follow_redirects=False).headers['location'] == '/signup'
     assert client.get('/api/browser-migrations/config').status_code == 401
     browser(client)
-    page = client.get('/app/import')
+    page = client.get('/app/import/saved')
     assert 'webkitdirectory' in page.text and '/public/office-import.js' in page.text
     assert 'Nothing uploads until' in page.text and 'alice@example.com' in page.text
     assert "script-src 'self'" in page.headers['content-security-policy']
-    assert '/app/import' in client.get('/app').text
+    assert '/app/import/saved' in client.get('/app').text
     assert client.get('/public/office-import.js').status_code == 200
     assert client.store.rows == {}
 
