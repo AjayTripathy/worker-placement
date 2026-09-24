@@ -301,7 +301,7 @@ class RealizedLedger:
     def load(cls, path) -> "RealizedLedger":
         p = Path(path)
         if p.exists():
-            d = json.loads(p.read_text())
+            d = json.loads(p.read_text(encoding="utf-8"))
             return cls(lots=d.get("lots", {}))
         return cls()
 
@@ -355,7 +355,7 @@ class RealizedLedger:
 
     def save(self, path, note: str = "") -> dict:
         summ = self.summary(note)
-        Path(path).write_text(json.dumps({"lots": self.lots, "summary": summ}, indent=1))
+        Path(path).write_text(json.dumps({"lots": self.lots, "summary": summ}, indent=1), encoding="utf-8")
         return summ
 
 

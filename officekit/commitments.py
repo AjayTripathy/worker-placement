@@ -94,6 +94,8 @@ def resolve(data, overrides):
     today = date.fromisoformat(data["as_of"])
     indexed = {}
     for c in overrides:
+        if str(c.get('id', '')).startswith('charitable:'):
+            raise ValueError('Edit charitable cash reservations from their giving goal.')
         if not c.get("id") or c["id"] in indexed:
             raise ValueError("Commitments need unique, nonempty IDs")
         indexed[c["id"]] = c
@@ -144,6 +146,12 @@ def resolve(data, overrides):
         if c["cadence"] != "once":
             c["annual_amount"] = c["amount"] * CADENCES[c["cadence"]]
         result.append(c)
+    from officekit.charitable import reservation
+    for goal in data.get('goals', []):
+        if goal.get('kind') == 'charitable':
+            held = reservation(goal)
+            if held:
+                result.append(held)
     return result
 
 
@@ -164,6 +172,8 @@ def edit_values(record):
 
 
 def validate_patch(record, patch):
+    if record.get('goal_id') and record['id'].startswith('charitable:'):
+        raise ValueError('Edit this cash reservation from its charitable goal.')
     if not isinstance(patch, dict) or not patch:
         raise ValueError("Enter at least one change")
     if set(patch) - editable_fields(record):

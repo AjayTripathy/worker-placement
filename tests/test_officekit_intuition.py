@@ -118,7 +118,7 @@ def test_direct_indexing_is_intuited_from_individual_equity():
                     {"category": "cash", "value": 250_000}]}
     strats = {s["id"]: s for s in implicit_strategies(m)}
     di = strats["implicit:strategy:direct_index"]
-    assert di["status"] == "active" and di["href"] == "harvest.html"
+    assert di["status"] == "review" and di["href"] == "beta_programs.html"
     assert "direct index" in di["why"].lower()
     assert "implicit:strategy:cash_mgmt" in strats            # cash management too
 
@@ -136,7 +136,7 @@ def test_strategies_page_renders_intuited_section():
                        {"category": "cash", "name": "Cash", "value": 100_000}]}
     m = build_model(build_from_answers(ans))
     html = render_strategies(m, scenarios_href="scenarios.html")
-    assert "Already running — intuited from your holdings" in html
+    assert "Strategies suggested by your holdings" in html
     assert "Direct indexing / tax-loss harvesting" in html
     assert "To refine, tell the AI" in html
 

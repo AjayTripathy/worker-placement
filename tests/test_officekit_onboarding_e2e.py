@@ -27,7 +27,8 @@ def _post(url, data, json_body=False):
         body, ctype = json.dumps(data).encode(), "application/json"
     else:
         body, ctype = urllib.parse.urlencode(data).encode(), "application/x-www-form-urlencoded"
-    req = urllib.request.Request(url, data=body, headers={"Content-Type": ctype})
+    from local_http import headers
+    req = urllib.request.Request(url, data=body, headers={"Content-Type": ctype, **headers(url)})
     try:
         r = urllib.request.build_opener(_NoRedirect).open(req, timeout=30)
         return r.status, r.headers.get("Location"), r.read().decode()

@@ -53,7 +53,7 @@ def _duration(path):
 def narrate(video, out, cues_path=None, voice=VOICE, rate=RATE):
     video = Path(video)
     cues_path = Path(cues_path) if cues_path else video.with_suffix(".cues.json")
-    cues = json.loads(cues_path.read_text())
+    cues = json.loads(cues_path.read_text(encoding="utf-8"))
     work = video.parent / f".{video.stem}_narration"
     work.mkdir(exist_ok=True)
 

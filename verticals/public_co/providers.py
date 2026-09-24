@@ -10,6 +10,7 @@ the analyst hasn't filled it in yet). API: call Claude.
 from __future__ import annotations
 
 import json
+import hashlib
 import sys
 from pathlib import Path
 from typing import Protocol
@@ -54,6 +55,8 @@ class LocalProvider:
         self.root = root
         self.root.mkdir(exist_ok=True, parents=True)
         self._current_ticker: str | None = None
+        self.score_binding = None
+        self._claims = {}
 
     def _input_path(self, ticker: str) -> Path:
         return self.root / f"{ticker}.input.json"
@@ -63,12 +66,14 @@ class LocalProvider:
 
     def extract_and_pick(self, ticker, cutoff_date, filing_text, hint_ciks):
         self._current_ticker = ticker
+        self.score_binding, self._claims = None, {}
         path = self._input_path(ticker)
         if not path.exists():
             raise FileNotFoundError(
                 f"LocalProvider expects {path}; write claims+queries there first."
             )
-        data = json.loads(path.read_text())
+        data = json.loads(path.read_text(encoding='utf-8'))
+        self.score_binding = binding(ticker, cutoff_date, data, filing_text)
         claims = []
         queries: dict[str, list[MQuery]] = {}
         for c in data["claims"]:
@@ -86,54 +91,38 @@ class LocalProvider:
                 MQuery(source=q["source"], kwargs=q["kwargs"], rationale=q.get("rationale", ""))
                 for q in c.get("queries", [])
             ]
+        self._claims = {c.claim_id: c.claim_text for c in claims}
         return claims, queries
 
     def score(self, claim: Claim, evidence: list[Evidence]) -> Finding:
-        # Use the ticker stashed by extract_and_pick to target the correct
-        # scores.json — claim_text may be paraphrased between input/scores files
-        # so we cannot disambiguate by text alone.
-        candidates = []
-        if self._current_ticker:
-            candidates.append(self._scores_path(self._current_ticker))
-        # Fallback: scan all (slower, with text disambiguation)
-        candidates.extend(self.root.glob("*.scores.json"))
-        seen = set()
-        for path in candidates:
-            if str(path) in seen or not path.exists():
-                continue
-            seen.add(str(path))
+        # An unbound historical score is not evidence for today's input. In
+        # particular, claim IDs such as c1 are not globally unique identities.
+        if self._current_ticker and self._claims.get(claim.claim_id) == claim.claim_text:
             try:
-                data = json.loads(path.read_text())
-            except Exception:
-                continue
-            for s in data.get("scores", []):
-                if s.get("claim_id") != claim.claim_id:
-                    continue
-                # If we know the ticker, accept the first claim_id match in that file
-                if self._current_ticker and path.name.startswith(f"{self._current_ticker}."):
-                    return Finding(
-                        severity=s.get("severity", "UNVERIFIABLE"),
-                        supports=s.get("supports"),
-                        M_check=s.get("M_check", ""),
-                        M_value=s.get("M_value", ""),
-                        interpretation=s.get("interpretation", ""),
-                    )
-                # Fallback path: text-disambiguate
-                if s.get("claim_text", "")[:60] == claim.claim_text[:60] or not s.get("claim_text"):
-                    return Finding(
-                        severity=s.get("severity", "UNVERIFIABLE"),
-                        supports=s.get("supports"),
-                        M_check=s.get("M_check", ""),
-                        M_value=s.get("M_value", ""),
-                        interpretation=s.get("interpretation", ""),
-                    )
+                data = json.loads(self._scores_path(self._current_ticker).read_text(encoding='utf-8'))
+            except (OSError, ValueError):
+                data = {}
+            if isinstance(data, dict) and isinstance(data.get('scores'), list) and data.get('binding') == self.score_binding:
+                matches = [s for s in data.get('scores', []) if isinstance(s, dict) and s.get('claim_id') == claim.claim_id]
+                if len(matches) == 1:
+                    s = matches[0]
+                    if s.get('severity') in {'RED_FLAG_NEGATIVE', 'SEVERE_UNDERDELIVERY', 'MODERATE_UNDERDELIVERY', 'UNVERIFIABLE', 'PASS'} and type(s.get('supports')) in {bool, type(None)}:
+                        return Finding(severity=s['severity'], supports=s.get('supports'),
+                            M_check=s.get('M_check', ''), M_value=s.get('M_value', ''), interpretation=s.get('interpretation', ''))
         return Finding(
             severity="UNVERIFIABLE",
             supports=None,
             M_check="awaiting analyst score",
             M_value="evidence saved; scoring not yet provided",
-            interpretation="LocalProvider has no scores entry for this claim. Write <ticker>.scores.json after reading evidence.",
+            interpretation="No uniquely identified score matches this ticker, claim, cutoff and input/source digest. Review the evidence and save the exact score_binding with the ticker's scores; unbound legacy scores require review.",
         )
+
+
+def binding(ticker, cutoff_date, inputs, filing_text):
+    """Persist this alongside newly reviewed scores; never infer it retroactively."""
+    return {'v': 2, 'ticker': ticker, 'cutoff_date': cutoff_date,
+            'input_sha256': hashlib.sha256(json.dumps(inputs, sort_keys=True, separators=(',', ':'), ensure_ascii=False).encode()).hexdigest(),
+            'source_sha256': hashlib.sha256(filing_text.encode()).hexdigest()}
 
 
 # ============================================================================

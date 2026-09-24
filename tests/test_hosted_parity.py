@@ -30,11 +30,11 @@ def test_natural_language_goals_use_durable_office_scoped_intake(workspace, monk
     queue = Queue(); client.app.state.jobs.queue = queue
     offices = Offices(client.store)
     Credentials(offices).update('alice', receipt['office_id'], {
-        'provider': 'anthropic', 'credential_revision': '0', 'ANTHROPIC_API_KEY': 'tenant-key'})
+        'provider': 'openai', 'credential_revision': '0', 'OPENAI_API_KEY': 'tenant-key'})
     calls = []
     def turn(messages, **kwargs):
         from officekit_ai.models import resolve_key
-        assert resolve_key() == 'tenant-key' and kwargs['scope'] == 'goals'
+        assert resolve_key('OPENAI_API_KEY') == 'tenant-key' and kwargs['scope'] == 'goals'
         calls.append(messages)
         return {'answers': {'goals': [{'kind': 'spending', 'label': 'College', 'amount': 300000, 'date': '2038-01-01'}]}}
     monkeypatch.setattr('officekit_ai.intake_chat.turn', turn)
@@ -210,12 +210,12 @@ def test_proposal_checkpoints_survive_new_worker_and_belong_to_office(workspace,
     client, receipt, folder = workspace
     queue = Queue();client.app.state.jobs.queue = queue
     offices = Offices(client.store);vault=Credentials(offices)
-    vault.update('alice',receipt['office_id'],{'provider':'anthropic','credential_revision':'0','ANTHROPIC_API_KEY':'tenant-key'})
+    vault.update('alice',receipt['office_id'],{'provider':'openai','credential_revision':'0','OPENAI_API_KEY':'tenant-key'})
     monkeypatch.setattr(officekit_ai,'available',lambda *a,**k:True)
     calls=[]
     def build(p, temp, checkpoint):
         from officekit_ai.models import resolve_key
-        assert resolve_key()=='tenant-key'
+        assert resolve_key('OPENAI_API_KEY')=='tenant-key'
         calls.append(p['id'])
         checkpoint('Synthetic research saved', research={'verified': True})
         _, current=offices.read('alice',receipt['office_id'])

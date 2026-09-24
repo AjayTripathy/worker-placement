@@ -20,7 +20,7 @@ OAUTH = '__Host-wp_google'
 CSP = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; form-action 'self'"
 
 
-def create_app(backend=None, origin=None, store=None, research=None, google_enabled=None, queue=None):
+def create_app(backend=None, origin=None, store=None, research=None, google_enabled=None, queue=None, exchange=None):
     app = FastAPI(docs_url=None, redoc_url=None, openapi_url=None)
     if google_enabled is None:
         google_enabled = backend is not None or os.environ.get('GOOGLE_SIGNIN_ENABLED') == 'true'
@@ -42,6 +42,10 @@ def create_app(backend=None, origin=None, store=None, research=None, google_enab
     if research is None and os.environ.get('RESEARCH_BUCKET') and os.environ.get('RESEARCH_VERSION'):
         research = Research(os.environ['RESEARCH_BUCKET'], os.environ['RESEARCH_VERSION'])
     offices = Offices(store)
+    offices.research_library = research
+    from .exchange import configured_exchange
+    app.state.research_exchange = exchange if exchange is not None else configured_exchange(store)
+    offices.research_exchange = app.state.research_exchange
     from .jobs import CloudQueue, Jobs
     if queue is None and os.environ.get("OFFICE_TASK_QUEUE"):
         queue = CloudQueue(origin)
@@ -127,7 +131,11 @@ def create_app(backend=None, origin=None, store=None, research=None, google_enab
     @app.get('/healthz')
     @app.get('/api/health')
     async def health():
-        return {'status': 'ok', 'google_signin_configured': backend is not None and google_enabled, 'office_migration_configured': store is not None, 'research_configured': research is not None, 'office_jobs_configured': queue is not None}
+        from pathlib import Path
+        manifest = Path(__file__).resolve().parents[2] / 'release-manifest.json'
+        release = json.loads(manifest.read_text(encoding='utf-8')) if manifest.is_file() else {}
+        return {'status': 'ok', 'google_signin_configured': backend is not None and google_enabled, 'office_migration_configured': store is not None, 'research_configured': research is not None, 'office_jobs_configured': queue is not None,
+                'source_sha256': release.get('source_sha256')}
 
     @app.get('/signup')
     async def signup(request: Request):

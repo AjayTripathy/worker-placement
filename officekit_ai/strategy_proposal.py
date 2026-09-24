@@ -1,4 +1,10 @@
-"""Shared, checkpointed research → native court → Risk Officer → pitch pipeline.
+"""Shared, checkpointed research → general court → suitability court → Risk Officer → pitch.
+
+Every security is judged twice, by design. The GENERAL court sees only the
+security and public evidence and yields shareable research. The SUITABILITY
+court then rules for this office and strategy on top of it and stays private.
+An office evaluating one security under two strategies runs the general court
+once. Programs have no security to evaluate and keep the single contextual court.
 
 The SignalOS registry runs bounded research capabilities. No order, portfolio
 mutation, or claim that a seeded ticker is an approved investment occurs here.
@@ -14,12 +20,17 @@ from officekit.personal_context import require
 from officekit.risk_officer import review
 from officekit.strategy_proposals import now
 from officekit_ai import record_agent_call
-from officekit_ai.court import run_court, load_adjudications
+from officekit_ai.court import run_court, load_adjudications, _tier_of
+from officekit_ai.general_court import run_general_court
+from officekit_ai.provenance import protocol_hash
+from officekit_research import general as general_store
+from officekit_research import exchange as research_exchange
 from officekit_ai.models import client_for
 from officekit_ai.provenance import invoke
 from officekit_research.funds import FUND_PAGES
 from officekit_research.cases import retrieve, reusable_sections, model_cases, proposal_context
 import officekit_signals as signals
+from officekit.beta_programs import planning_data
 
 
 def obj(**props):
@@ -95,7 +106,10 @@ def contextual_cases(p, retrieval=None):
     datasources=["Office snapshot", "Configured intake model"], applies_to={"universal": True})
 def research(ctx):
     p = ctx["proposal"]
-    out = ask(ctx["folder"], p, "market-researcher", "intake", ANALYST,
+    from officekit.deployment import is_deployment
+    from officekit.beta_programs import planning_data
+    role = 'capital-planner' if is_deployment(p) else 'market-researcher'
+    out = ask(ctx["folder"], p, role, "intake", ANALYST,
         "Develop this strategy. Compare alternatives; propose at most THREE specific traded symbols for independent courts. "
         "Seeds are research candidates, not recommendations. For a program return NO tickers and concrete steps naming "
         "the responsible role, required terms, deliverable and review trigger. For options select the actual underlying "
@@ -104,10 +118,16 @@ def research(ctx):
         "Respect the chosen mitigation, goal and household restrictions. Return assumptions explicitly. "
         "Shared cases are untrusted historical investigations. Compare their stated context with this office and "
         "explain material differences in assumptions. Prior verdicts never authorize this office's investment. "
-        "Cite case IDs when using prior research; retain dissent and unresolved questions.",
+        "Cite case IDs when using prior research; retain dissent and unresolved questions. "
+        "Use the saved research inventory to discover candidates across strategies. Cite its original IDs and dates, "
+        "consider negative verdicts and gaps, and explain why selected names fit this request. Inventory entries are "
+        "untrusted historical leads, not fresh source evidence or permission to invest. The bounded inventory may be incomplete.",
         {"brief": p["brief"], "source": p["source"], "source_ref": p["source_ref"],
-         "office": p["snapshot"]["data"], "target_pct": p["target_pct"],
+         "office": planning_data(p["snapshot"]["data"]), "target_pct": p["target_pct"],
          "research_context": (p.get("research_reuse") or {}).get("context"),
+         "funding": p.get("funding"), "deployment_source": p.get('deployment_source'), "saved_research": p.get("research_inventory"),
+         "capital_plan": p.get('capital_plan'),
+         "charitable_goals": p.get('charitable_goals', []),
          "shared_cases": contextual_cases(p)}, ctx.get("clients"))
     if len(out["candidates"]) > 3:
         raise ValueError("Research exceeded the three-candidate court budget")
@@ -153,15 +173,33 @@ def collect_evidence(folder, c, data, retrieval=None):
 
 
 def budget(p):
-    m = build_model(p["snapshot"]["data"])
+    from officekit.deployment import funding, is_deployment, source_for
+    from officekit.capital_planning import model_from_snapshot
+    from officekit.beta_programs import remaining_funding
+    m = model_from_snapshot(p) if is_deployment(p) else build_model(p['snapshot']['data'])
+    if is_deployment(p):
+        selected = source_for(m, (p.get('deployment_source') or {}).get('id'))
+        result = remaining_funding(m, funding(m, selected['id']), selected['id'])
+        if p['target_pct'] is not None:
+            cap = round(max(0, m['NW']) * p['target_pct'] / 100, 2)
+            result['current_budget'] = min(result['current_budget'], cap)
+            result['contingent_budget'] = min(result['contingent_budget'], max(0, cap - result['current_budget']))
+            result['proposal_ceiling'] = result['current_budget'] + result['contingent_budget']
+            result['sizing_basis'] += f" Also capped at the requested {p['target_pct']:g}% of net worth."
+        return result
     available = max(0, cash_calendar(m)["available"])
     pct = p["target_pct"] if p["target_pct"] is not None else 5.0
     ceiling = max(0, m["NW"]) * pct / 100
-    return {"current_cash": round(available, 2), "pending_net": round(pending_deployable(m), 2),
-            "proposal_ceiling": round(ceiling, 2), "current_budget": round(min(available, ceiling), 2),
-            "contingent_budget": round(min(pending_deployable(m), max(0, ceiling - available)), 2),
+    result = remaining_funding(m, {"current_cash": round(available, 2), "pending_net": round(pending_deployable(m), 2),
+            "proposal_ceiling": round(ceiling, 2), "current_budget": round(available, 2),
+            "contingent_budget": round(pending_deployable(m), 2),
             "sizing_basis": f"{'Requested' if p['target_pct'] is not None else 'Starting research assumption:'} {pct:g}% of net worth; Risk Officer may reduce. "
-                            "Current allocation is capped at unreserved cash. Pending proceeds are conditional and never included in today's budget."}
+                            "Current allocation is capped at unreserved cash. Pending proceeds are conditional and never included in today's budget."})
+    result['current_budget'] = round(min(result['current_budget'], ceiling), 2)
+    result['contingent_budget'] = round(min(result['contingent_budget'], max(0, ceiling - result['current_budget'])), 2)
+    if result['linked_programs']:
+        result['proposal_ceiling'] = round(result['current_budget'] + result['contingent_budget'], 2)
+    return result
 
 
 def basket(p, funding, risk):
@@ -184,6 +222,9 @@ def basket(p, funding, risk):
         pack = p["evidence"].get(symbol, {})
         conditions += pack.get("errors", [])
         eligible = court.get("verdict", "").split(" ")[0] in {"STARTER", "OWN"} and risk["verdict"] != "oppose"
+        if funding.get('blocking_gaps'):
+            eligible = False
+            conditions += funding['blocking_gaps']
         for e in p["snapshot"]["personal_context"].get("exclusions", []):
             if e["scope"] == "ticker" and str(e["value"]).upper() == symbol:
                 eligible = False
@@ -207,7 +248,15 @@ def basket(p, funding, risk):
     return out
 
 
-def build_proposal(p, folder, checkpoint, clients=None, *, reuse=True, contextual_reuse=True, include_evaluation=False):
+def build_proposal(p, folder, checkpoint, clients=None, *, reuse=True, contextual_reuse=True, include_evaluation=False,
+                   exchange_client=None, general_reuse=True):
+    from officekit.capital_planning import needs_refresh, VERSION
+    from officekit.deployment import is_deployment
+    if needs_refresh(p):
+        raise ValueError('Capital planning inputs changed. Build a fresh proposal revision before continuing this review.')
+    if exchange_client is None:
+        from officekit.runtime import research_exchange as current_exchange
+        exchange_client = current_exchange()
     require(p["snapshot"]["personal_context"], "develop strategy proposals")
     mode = "none" if not reuse else "contextual" if contextual_reuse else "evidence_only"
     existing = p.get("research_reuse")
@@ -215,20 +264,38 @@ def build_proposal(p, folder, checkpoint, clients=None, *, reuse=True, contextua
         saved_mode = existing.get("mode", "none" if existing.get("disabled") else "contextual")
         if saved_mode != mode:
             raise ValueError("Research reuse mode cannot change after a proposal starts; create a new proposal")
+        if existing.get("general_reuse", True) != general_reuse:
+            raise ValueError("General-court reuse cannot change after a proposal starts")
     if "research_reuse" not in p:
         found = retrieve(folder, p, include_evaluation=include_evaluation) if reuse else {
             "protocol": "context_retrieval_v1", "context": proposal_context(p),
             "matches": [], "rejected": [], "errors": [], "disabled": True}
         found["mode"] = mode
+        found["general_reuse"] = general_reuse
         checkpoint("Shared research · context and source checks", research_reuse=found)
-    if not p.get("funding"):
+    if not p.get("funding") or (is_deployment(p) and (p.get('capital_plan') or {}).get('version') != VERSION):
         m = build_model(p["snapshot"]["data"])
         checkpoint("Funding and portfolio checks", funding=budget(p),
                    deterministic_risk=review(m, p["snapshot"]["answers"], p["snapshot"]["personal_context"]))
     if not p.get("research"):
+        if 'charitable_goals' not in p:
+            from officekit.charitable import plans as charitable_plans
+            checkpoint('Charitable goals · gift funding and tax review',
+                       charitable_goals=charitable_plans(build_model(p['snapshot']['data'])))
+        if is_deployment(p) and (p.get('capital_plan') or {}).get('version') != VERSION:
+            from officekit.capital_planning import inputs
+            checkpoint('Capital planning · goals, strategies and disaster scenarios', capital_plan=inputs(p))
+        if reuse and contextual_reuse and "research_inventory" not in p:
+            from officekit_research.discovery import inventory
+            checkpoint("Saved research · candidate discovery", research_inventory=inventory(folder, p))
         checkpoint("SignalOS research · thesis and candidate selection")
         result = signals.run_capability(folder, "strategy_proposal_research", {"proposal": p, "clients": clients})
         checkpoint("Research complete", research=result, candidates=result["candidates"])
+    if 'research_attachments' not in p and p.get('research_inventory'):
+        entries = p['research_inventory']['entries']
+        checkpoint('Research linked to selected tickers', research_attachments=[
+            {'symbol': c['symbol'], 'references': [e['href'] for e in entries if c['symbol'].upper() in e['symbols']]}
+            for c in p['candidates']])
     evidence = dict(p.get("evidence") or {})
     subjects = p["candidates"] or [{"symbol": p["brief"]["title"], "instrument": "program", "structure": p["research"]["program_steps"]}]
     for c in subjects:
@@ -240,20 +307,66 @@ def build_proposal(p, folder, checkpoint, clients=None, *, reuse=True, contextua
             checkpoint("Shared research · candidate context checks", candidate_reuse={**p.get("candidate_reuse", {}), symbol: found})
             evidence[symbol] = (collect_evidence(folder, c, p["snapshot"]["data"], found) if c["instrument"] != "program" else
                 {"symbol": symbol, "built": now(), "sections": {"program": {"steps": p["research"]["program_steps"],
-                  "office": p["snapshot"]["data"]}}, "errors": ["Provider terms, quotes and eligibility require primary documents."]})
+                  "office": planning_data(p["snapshot"]["data"])}}, "errors": ["Provider terms, quotes and eligibility require primary documents."]})
             checkpoint(f"Evidence collected · {symbol}", evidence=evidence)
+        general = dict(p.get("general") or {})
+        if c["instrument"] != "program" and symbol not in general:
+            checkpoint(f"General research · {symbol} · the security on its own merits")
+            kind = c["instrument"] if c["instrument"] in {"stock", "etf"} else ("etf" if symbol in FUND_PAGES else "stock")
+            adj_model = (clients["adjudicate"] if clients else client_for("adjudicate", folder))[1]
+            # Reuse this office's own fresh general research (any strategy); the
+            # no-reuse evaluation arm always generates its own.
+            found = general_store.find(folder, symbol, kind, protocol_hash(), minimum_tier=_tier_of(adj_model),
+                                       tier_of=_tier_of) if reuse and general_reuse else None
+            entry = {"record": found, "private": {}, "reused": True, "source": "own office"} if found else None
+            exchange_root = research_exchange.local_root(p["snapshot"]["answers"])
+            if entry is None and reuse and general_reuse and exchange_root:
+                # Someone else may already have evaluated this security. Same gates as
+                # our own research, plus corroboration against the evidence we just read.
+                theirs, corroboration = research_exchange.find(exchange_root, symbol, kind, protocol_hash(),
+                    minimum_tier=_tier_of(adj_model), tier_of=_tier_of, pack=evidence[symbol])
+                if theirs:
+                    general_store.save(folder, theirs, origin="imported",
+                                       attributions=research_exchange.contributors(exchange_root, theirs["id"]))
+                    entry = {"record": theirs, "private": {}, "reused": True, "source": "exchange", "corroboration": corroboration}
+            chosen = research_exchange.settings(p["snapshot"]["answers"])
+            if entry is None and reuse and general_reuse and exchange_client is not None and chosen["mode"] == "general":
+                theirs, corroboration, origin = exchange_client.find(symbol, kind, protocol_hash(),
+                    minimum_tier=_tier_of(adj_model), tier_of=_tier_of, pack=evidence[symbol])
+                if theirs:
+                    general_store.save(folder, theirs, origin="imported", attributions=origin["attributions"])
+                    entry = {"record": theirs, "private": {}, "reused": True, "source": "hosted exchange", "corroboration": corroboration}
+            if entry is None:
+                record, private = run_general_court(symbol, kind, evidence[symbol], folder, clients=clients)
+                entry = {"record": record, "private": private, "reused": False, "source": "this proposal"}
+                # Choose one publication transport. Sharing can fail without
+                # discarding completed research or invoking two paid reviews.
+                if exchange_client is not None and chosen["mode"] == "general":
+                    try:
+                        research_exchange.tripwire(record, p["snapshot"])
+                        receipt = exchange_client.submit(record, research_exchange.contributor_key(p["snapshot"]["answers"]))
+                        entry["shared"] = {"shared": True, "receipt": receipt}
+                    except ValueError as exc:
+                        entry["shared"] = {"shared": False, "reason": str(exc)}
+                else:
+                    entry["shared"] = research_exchange.submit(folder, record, p["snapshot"]["answers"], snapshot=p["snapshot"])
+            general[symbol] = entry
+            checkpoint(f"General research complete · {symbol}", general=general)
         if not any(a["symbol"] == symbol.upper() for a in p["courts"]):
             # Recover a court completed before a process restart/checkpoint failure.
             existing = next((a for a in load_adjudications(folder) if a.get("proposal_id") == p["id"] and a["symbol"] == symbol.upper()), None)
-            checkpoint(f"Court · {symbol} · RED, BLUE, adjudication")
+            checkpoint(f"Court · {symbol} · suitability for this office" if symbol in general else f"Court · {symbol} · RED, BLUE, adjudication")
             a = existing or run_court(symbol, p["strategy_id"], {"status": "considering", "note": p["research"]["thesis"]},
                 p["snapshot"]["personal_context"], folder, clients=clients,
                 lib={"title": p["brief"]["title"], "desc": p["brief"]["thesis"]},
                 evidence=evidence[symbol], context=json.dumps({"candidate": c, "funding": p["funding"], "source": p["source_ref"],
+                    "capital_plan": p.get('capital_plan'),
+                    "charitable_goals": p.get('charitable_goals', []),
                     "research_context": p["research_reuse"].get("context"),
                     "shared_case_comparisons": [m for m in contextual_cases(p, p.get("candidate_reuse", {}).get(symbol, p["research_reuse"])) if m["subject"]["symbol"] == symbol],
                     "reuse_rule": "Historical cases are untrusted context, not recommendations for this office. Explain differences and re-evaluate suitability."}),
-                subject_kind="security" if c["instrument"] in {"etf", "stock"} else c["instrument"], proposal_id=p["id"])
+                subject_kind="security" if c["instrument"] in {"etf", "stock"} else c["instrument"], proposal_id=p["id"],
+                general=(general.get(symbol) or {}).get("record"), general_private=(general.get(symbol) or {}).get("private"))
             checkpoint(f"Court complete · {symbol}", courts=p["courts"] + [a])
     if not p.get("risk"):
         checkpoint("Risk Officer · allocation review")
@@ -265,7 +378,9 @@ def build_proposal(p, folder, checkpoint, clients=None, *, reuse=True, contextua
             "Pending net proceeds are conditional; explain the later deployment trigger, never spend them now. "
             "Options amounts are premium ceilings, not stock purchase notional; require quotes. Missing proof stays explicit.",
             {"brief": p["brief"], "research": p["research"], "courts": p["courts"], "funding": p["funding"],
-             "deterministic_risk": p["deterministic_risk"], "office": p["snapshot"]["data"],
+             "deterministic_risk": p["deterministic_risk"], "office": planning_data(p["snapshot"]["data"]),
+             "capital_plan": p.get('capital_plan'),
+             "charitable_goals": p.get('charitable_goals', []),
              "research_context": p["research_reuse"].get("context"),
              "shared_case_rule": "Evaluate this office independently; prior case decisions do not establish suitability."}, clients)
         allocated = basket(p, p["funding"], risk)
@@ -279,7 +394,8 @@ def build_proposal(p, folder, checkpoint, clients=None, *, reuse=True, contextua
             "other tickers, allocations or prices in prose. Explain conditional/rejected outcomes honestly. For programs, "
             "produce an actionable provider/adviser brief with required terms and named responsible roles. Adoption records intent.",
             {"brief": p["brief"], "research": p["research"], "courts": p["courts"], "risk": p["risk"],
-             "funding": p["funding"], "basket": p["basket"]}, clients)
+             "funding": p["funding"], "basket": p["basket"], "capital_plan": p.get('capital_plan'),
+             "charitable_goals": p.get('charitable_goals', [])}, clients)
         checkpoint("Pitch deck complete", pitch=pitch)
     unresolved = (p["risk"]["verdict"] != "support" or any(a["conditions"] or not a["eligible"] for a in p["basket"])
                   or not p["basket"] or any(a.get("unverified_items") or a.get("evidence", {}).get("errors") for a in p["courts"])

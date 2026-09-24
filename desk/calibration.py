@@ -81,7 +81,7 @@ def ingest() -> int:
         if not cd or pf is None or (t, cd) in have:
             continue
         new.append({"ticker": t, "cat_date": cd, "kind": "directional", "made": today,
-                    "our_p": float(pf), "market_p": None, "direction": (p.get("direction") or "").upper(),
+                    "event_type": p.get("event_type"), "our_p": float(pf), "market_p": None, "direction": (p.get("direction") or "").upper(),
                     "catalyst": (p.get("prediction") or p.get("catalyst") or "")[:180],
                     "px_at_pred": None, "fv": None, "status": "OPEN", "resolution": None})
     # (b) scenario names from the mispricing scanner (favorable = base-or-better)
@@ -101,6 +101,11 @@ def ingest() -> int:
                     "px_at_pred": r.get("px"), "fv": {"bear": r.get("bear"), "base": r.get("base"), "bull": r.get("bull")},
                     "status": "OPEN", "resolution": None})
     if new:
+        from desk.research_contracts import validate_new
+        accepted = list(rows)
+        for candidate in new:
+            validate_new(candidate, accepted)
+            accepted.append(candidate)
         px = _px_many([r["ticker"] for r in new if r["px_at_pred"] is None])
         for r in new:
             if r["px_at_pred"] is None:
@@ -213,9 +218,14 @@ def is_genuine_anchor(r: dict) -> bool:
 
 
 def score() -> dict:
-    rows = _load()
+    from desk.research_contracts import project_calibration
+    rows, audit = project_calibration(_load())
     res = [r for r in rows if r["status"] == "RESOLVED"]
     out = {"n_open": sum(1 for r in rows if r["status"] == "OPEN"), "n_resolved": len(res)}
+    out["contract_audit"] = audit
+    out['by_submitter'] = score_by_actor(rows, 'submitter')
+    out['by_agent'] = score_by_actor(rows, 'agent')
+    out['by_submitter_agent'] = score_by_actor(rows, 'submitter_agent')
     # ---- THE PARTITION (skill classes) + THE GATE (genuine anchors only) ----
     parts = {}
     for r in res:
@@ -245,7 +255,7 @@ def score() -> dict:
     g["status"] = ("EARNED" if g.get("ours_beats_market") and len(gate) >= 20 else
                    ("ON TRACK" if g.get("ours_beats_market") else "NOT EARNED"))
     out["gate"] = g
-    if res:
+    if any(_y(r) is not None for r in res):
         scored_res = [r for r in res if _y(r) is not None]
         briers_ours = [(r["our_p"] - _y(r)) ** 2 for r in scored_res]
         out["brier_ours"] = round(sum(briers_ours) / len(briers_ours), 4)
@@ -278,6 +288,8 @@ def score_by_event_type(records):
     """Per-event-type calibration — taxonomy frozen 2026-07-03 BEFORE any resolutions (no post-hoc
     re-bucketing). Answers 'are we calibrated on politics vs prints vs peer-reads', which the
     aggregate Brier hides. Types with n<5 resolved are reported but flagged small-sample."""
+    from desk.research_contracts import project_calibration
+    records, _ = project_calibration(records)
     by = {}
     for r in records:
         by.setdefault(r.get("event_type", "earnings_print"), []).append(r)
@@ -304,6 +316,29 @@ def score_by_event_type(records):
                 row["small_sample"] = True
         out[et] = row
     return out
+
+
+def score_by_actor(records, dimension):
+    """Binary outcomes only; missing legacy authorship stays unattributed."""
+    groups = {}
+    for row in records:
+        provenance = row.get('attribution') or {}
+        actor = provenance.get(dimension) if dimension != 'submitter_agent' else json.dumps(
+            [provenance.get('submitter'), provenance.get('agent')])
+        group = groups.setdefault(actor or 'unattributed', {'forecasts': 0, 'resolved': 0, 'pending': 0, 'excluded': 0, 'loss': 0.})
+        group['forecasts'] += 1
+        y = _y(row)
+        if row.get('status') == 'RESOLVED' and y in (0., 1.):
+            group['resolved'] += 1
+            group['loss'] += (row['our_p'] - y) ** 2
+        elif row.get('status') == 'OPEN':
+            group['pending'] += 1
+        else:
+            group['excluded'] += 1
+    for group in groups.values():
+        loss = group.pop('loss')
+        group['brier'] = round(loss / group['resolved'], 4) if group['resolved'] else None
+    return groups
 
 
 def main():

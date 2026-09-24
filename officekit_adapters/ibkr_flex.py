@@ -24,6 +24,7 @@ offline against a sample statement — no network, no creds.
 from __future__ import annotations
 
 import os
+import math
 import time
 import urllib.parse
 import urllib.request
@@ -117,11 +118,13 @@ def parse_flex_positions(xml_text, as_of=None, base="USD"):
         ccy = (el.get("currency") or base).upper()
         fx = _num(el.get("fxRateToBase"), 1.0) or 1.0
         qty = _num(el.get("position"))
-        cost = _num(el.get("costBasisMoney")) * fx
+        cost_raw = el.get('costBasisMoney')
+        parsed_cost = _num(cost_raw, None)
+        cost = parsed_cost * fx if parsed_cost is not None and math.isfinite(parsed_cost) else None
         val = _num(el.get("positionValue")) * fx
         # prefer the explicit unrealized field; else derive it
         pnl_raw = el.get("fifoPnlUnrealized")
-        pnl = (_num(pnl_raw) * fx) if pnl_raw not in (None, "") else round(val - cost, 2)
+        pnl = (_num(pnl_raw) * fx) if pnl_raw not in (None, "") else round(val - cost, 2) if cost is not None else None
         open_dt = _parse_dt(el.get("openDateTime") or el.get("holdingPeriodDateTime"))
         term = _term(open_dt, as_of)
         sec = _SEC.get((el.get("assetCategory") or "STK").upper(), "STK")
@@ -143,10 +146,10 @@ def parse_flex_positions(xml_text, as_of=None, base="USD"):
             agg[k] = row
         row["qty"] += qty
         row["value"] = round(row["value"] + val, 2)
-        row["cost_basis"] = round(row["cost_basis"] + cost, 2)
-        row["unrealized_pnl"] = round(row["unrealized_pnl"] + pnl, 2)
-        loss = cost - val
-        lot = {"qty": qty, "cost": round(cost, 2), "value": round(val, 2),
+        row["cost_basis"] = round(row["cost_basis"] + cost, 2) if row['cost_basis'] is not None and cost is not None else None
+        row["unrealized_pnl"] = round(row["unrealized_pnl"] + pnl, 2) if row['unrealized_pnl'] is not None and pnl is not None else None
+        loss = cost - val if cost is not None else 0
+        lot = {"qty": qty, "cost": round(cost, 2) if cost is not None else None, "value": round(val, 2),
                "open": open_dt.isoformat() if open_dt else None, "term": term,
                "loss": round(loss, 2) if loss > 0 else 0.0}
         row["lots"].append(lot)

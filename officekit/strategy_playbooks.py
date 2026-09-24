@@ -5,6 +5,9 @@ Different mitigations keep distinct briefs even when they share a strategy.
 """
 
 PLAYBOOKS = {
+    "new_capital": ("Incoming-capital deployment", "security", [],
+        "Build a ticker-level allocation for the selected inflow after tax and commitments. Separate reconciled received cash from pending proceeds. Compare the office's saved research and strategy packs across sleeves, existing exposures and retaining cash. Explain selection, dollar sizing, sequencing, conditions and cash retained.",
+        "Historical research and prior court rulings require current evidence and this office's suitability review. Preserve taxes and obligations; pending proceeds cannot fund purchases today."),
     "put_index": ("Index downside protection", "options", ["SPY"],
         "Compare a three-to-six-month put about 5% below spot with a put spread; size the protected notional against equity exposure.",
         "Premium bleed, expiry, tax treatment and imperfect tracking; obtain current option quotes before recommending contracts."),
@@ -89,9 +92,9 @@ PLAYBOOKS = {
     "di_convert": ("Direct-index transition", "program", [],
         "Compare keeping index funds with a phased direct-index SMA transition, using tax-lot costs, tracking error, fees and exclusions.",
         "Transition taxes may outweigh harvesting benefits; do not recommend selling without recorded basis."),
-    "daf_gift": ("Appreciated-share gifting", "program", [],
-        "Identify eligible long-held appreciated lots and compare direct gifts with a donor-advised fund, subject to the household's charitable intent.",
-        "Gifts are irrevocable; deduction limits, substantiation and recipient acceptance need confirmation."),
+    "daf_gift": ("Charitable giving and gain planning", "program", [],
+        "Start with the office's charitable goals. Compare cash and eligible long-held appreciated lots, direct gifts and a donor-advised fund, and timing around a large gain. Use actual holdings and reviewed tax assumptions.",
+        "Gifts leave household ownership. A deduction is not a credit; avoided gain belongs only to donated shares. Review annual AGI limits, floors, other gifts, substantiation, recipient acceptance and binding-sale timing. Never promise to erase an already realized gain."),
     "disability_ins": ("Income protection", "program", [],
         "Review existing disability coverage, occupation definition, elimination period, benefit taxation and remaining income gap; prepare a broker brief.",
         "Underwriting and exclusions determine coverage. Do not select a policy without actual terms."),
@@ -102,7 +105,7 @@ PLAYBOOKS = {
 
 STRATEGY_DEFAULT = {"core_equity": ("security", ["VTI", "VXUS"]), "muni": ("security", ["VTEB", "MUB"]),
     "bonds": ("security", ["BND", "VGSH"]), "cash_mgmt": "cash_buffer", "real_estate": "insurance",
-    "human_capital": "disability_ins", "venture": "pace", "deploy_powder": "diversify",
+    "human_capital": "disability_ins", "venture": "pace", "deploy_powder": "new_capital",
     "direct_index": "di_convert", "concentrated": "trim", "index_hedge": "put_index", "tail_vol": "tailfund",
     "trend": "trend", "real_assets": "realasset", "harvest_engine": "harvest_engine", "gifting": "daf_gift",
     "monetization": "exch_fund", "insurance_program": "insurance", "credit_line": "credit_line", "duration_mgmt": "dur_short"}
@@ -123,4 +126,5 @@ def brief(strategy_id, option=None, title=None, request=""):
         thesis = lib.get("desc") or request or "Develop a thesis and investigate suitable implementations."
         risks = "Verify primary evidence, suitability, liquidity, costs and the household's exclusions before recommending investments."
     return {"title": title or name, "kind": kind, "candidates": candidates,
-            "thesis": thesis, "risks": risks, "request": request, "option": option}
+            "thesis": thesis, "risks": risks, "request": request,
+            "option": option or ("new_capital" if default == "new_capital" else None)}

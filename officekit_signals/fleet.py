@@ -91,7 +91,7 @@ _INDEX_ONLY_REASON = {
 def _module_meta(path):
     """Label + one-line description from the module's own docstring, read
     from source (never imported at registration time)."""
-    head = path.read_text()[:2000]
+    head = path.read_text(encoding="utf-8")[:2000]
     m = re.search(r'"""\s*([^\n]+)', head)
     line = (m.group(1) if m else path.stem).strip()
     if "—" in line:

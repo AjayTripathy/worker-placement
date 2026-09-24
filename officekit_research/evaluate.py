@@ -8,6 +8,7 @@ import argparse
 from copy import deepcopy
 from datetime import datetime, timedelta, timezone
 import json
+import os
 from pathlib import Path
 import random
 import time
@@ -25,7 +26,7 @@ from officekit.office_lock import locked
 from officekit_research import SOURCES
 from officekit_research.cases import (canonical, day, digest, import_bundle, read_bundle, reusable_sections, utcnow)
 
-PROTOCOL = 'contextual_reuse_pilot_v2'
+PROTOCOL = 'contextual_reuse_pilot_v4'  # optional hosted exchange; independent evidence-only arm
 ARMS = {'baseline': (False, False), 'evidence_only': (True, False), 'contextual': (True, True)}
 
 
@@ -38,9 +39,10 @@ def write_json(path, value):
 class BudgetClient:
     def __init__(self, client, log, max_calls, output_budget):
         self.client, self.log = client, Path(log)
-        self.provider_client = type(client).__module__ + '.' + type(client).__name__
+        self.provider_client = getattr(client, 'provider_client', type(client).__module__ + '.' + type(client).__name__)
+        self.reasoning_configuration = getattr(client, 'reasoning_configuration', 'provider_default')
         self.max_calls, self.output_budget = max_calls, output_budget
-        self.calls = json.loads(self.log.read_text()) if self.log.exists() else []
+        self.calls = json.loads(self.log.read_text(encoding="utf-8")) if self.log.exists() else []
         if any(c['status'] not in {'complete', 'rejected'} for c in self.calls):
             raise ValueError('An earlier call has uncertain completion. Inspect the ledger before starting another pilot.')
         self.messages = self
@@ -128,13 +130,14 @@ def scenario(folder, recipient=False, *, as_of=None, office_id=None):
 def plan(args, model, evidence, bundle):
     """Freeze all experimental inputs before model construction or dispatch."""
     current = {'protocol': PROTOCOL, 'model': model, 'evidence_sha256': digest(evidence),
+               'hosted_origin': getattr(args, 'hosted_origin', None),
                'bundle_id': bundle['id'] if bundle else None,
                'implementation_sha256': digest({'agents': protocol_hash(),
-                   'evaluate': Path(__file__).read_text(),
-                   'cases': (Path(__file__).parent / 'cases.py').read_text()})}
+                   'evaluate': Path(__file__).read_text(encoding="utf-8"),
+                   'cases': (Path(__file__).parent / 'cases.py').read_text(encoding="utf-8")})}
     path = args.out / (args.phase + '-plan.json')
     if path.exists():
-        saved = json.loads(path.read_text())
+        saved = json.loads(path.read_text(encoding="utf-8"))
         if saved['inputs'] != current:
             raise ValueError('Evaluation inputs changed. Use a new output directory; existing results are retained.')
         return saved
@@ -164,7 +167,7 @@ def validate_inputs(args):
     from officekit_research.cases import validate_evidence
     if args.max_calls < 1 or args.output_token_budget < 2000:
         raise ValueError('Use a positive call limit and at least 2,000 output tokens')
-    evidence = json.loads(args.evidence.read_text())
+    evidence = json.loads(args.evidence.read_text(encoding="utf-8"))
     validate_evidence({'section': 'fund_profile', 'source_url': evidence['url'],
                        'retrieved_at': evidence['fetched_at'], 'data': evidence})
     today = datetime.now(timezone.utc).date()
@@ -253,9 +256,11 @@ def main(argv=None):
     parser.add_argument('--out', required=True, type=Path)
     parser.add_argument('--evidence', required=True, type=Path, help='Frozen, manually checked fund_profile JSON for SGOV')
     parser.add_argument('--bundle', type=Path)
-    parser.add_argument('--max-calls', type=int, default=26)
+    parser.add_argument('--max-calls', type=int, default=30)  # donor + three arms at seven calls each, plus slack
     parser.add_argument('--output-token-budget', type=int, default=80000)
     parser.add_argument('--resume', action='store_true', help='Explicitly retry a saved proposal after resolving a definite provider rejection')
+    parser.add_argument('--hosted-origin', help='Explicit HTTPS exchange origin; donor contributes, contextual arm retrieves')
+    parser.add_argument('--bearer-env', default='RESEARCH_EXCHANGE_BEARER', help='Environment variable containing this office account bearer token')
     args = parser.parse_args(argv)
     args.out.mkdir(parents=True, exist_ok=True)
     # Serialize the budget ledger and resume checks across evaluator processes.
@@ -265,10 +270,23 @@ def main(argv=None):
 
 def run_phase(args):
     evidence, bundle = validate_inputs(args)
+    hosted_client = None
+    if getattr(args, 'hosted_origin', None):
+        from urllib.parse import urlsplit
+        parsed = urlsplit(args.hosted_origin)
+        if parsed.scheme != 'https' or not parsed.hostname or parsed.username or parsed.password or parsed.path not in {'', '/'} or parsed.query or parsed.fragment:
+            raise ValueError('Use an HTTPS exchange origin without credentials or a path')
+        bearer = os.environ.get(args.bearer_env)
+        if not bearer:
+            raise ValueError('Set the named exchange bearer environment variable before starting')
     _, _, model = resolve('intake')
     frozen = plan(args, model, evidence, bundle)
     prepared = {arm: scenario(args.out / arm, recipient=args.phase == 'pair',
                 as_of=frozen['as_of'], office_id=frozen['office_id']) for arm in frozen['arm_order']}
+    if getattr(args, 'hosted_origin', None):
+        for arm, p in prepared.items():
+            p['snapshot']['answers']['research_sharing'] = {'mode': 'general', 'contributor': 'anonymous'}
+            jobs.save(args.out / arm, p)
     fingerprints = {scenario_digest(p) for p in prepared.values()}
     if len(fingerprints) != 1 or (frozen.get('scenario_sha256') and frozen['scenario_sha256'] not in fingerprints):
         raise ValueError('Recipient facts or instructions changed across evaluation arms or since the plan was frozen')
@@ -294,6 +312,10 @@ def run_phase(args):
         source_counts['tape'] += 1
         raise ValueError('Current market quote was not captured in this evaluation; verify before implementation')
     originals = {name: SOURCES[name] for name in ('fund_profile', 'tape')}
+    if getattr(args, 'hosted_origin', None):
+        import httpx
+        from officekit_research.hosted import Client
+        hosted_client = Client(httpx.Client(base_url=args.hosted_origin, timeout=180), bearer)
     SOURCES.update(fund_profile=profile, tape=tape)
     try:
         results, proposals = {}, {}
@@ -308,14 +330,26 @@ def run_phase(args):
             if reuse:
                 import_bundle(folder, bundle)
             print('Starting ' + arm, flush=True)
-            jobs.run(folder, p['id'], lambda record, directory, checkpoint: build_proposal(record, directory, checkpoint, slots, reuse=reuse, contextual_reuse=contextual, include_evaluation=True))
+            jobs.run(folder, p['id'], lambda record, directory, checkpoint: build_proposal(record, directory, checkpoint, slots,
+                reuse=reuse, contextual_reuse=contextual, general_reuse=arm != 'evidence_only', include_evaluation=True,
+                exchange_client=hosted_client if arm in {'donor', 'contextual'} else None))
             p = jobs.load(folder, p['id'])
             proposals[arm] = p
             results[arm] = metrics(p)
-            (args.out / (arm + '-metrics.json')).write_text(json.dumps(results[arm], indent=2) + '\n')
+            (args.out / (arm + '-metrics.json')).write_text(json.dumps(results[arm], indent=2) + '\n', encoding="utf-8")
             if p['status'] == 'error':
                 print(json.dumps({'arm': arm, 'status': 'error', 'errors': p['errors']}), flush=True)
                 return 1
+            if hosted_client:
+                entry = p.get('general', {}).get('SGOV', {})
+                if arm == 'donor' and not entry.get('shared', {}).get('shared'):
+                    write_json(args.out / 'hosted-admission-status.json', {'status': 'blocked', 'sharing': entry.get('shared')})
+                    print('Donor research finished, but hosted claim admission failed. Review the retained publication status.', flush=True)
+                    return 1
+                if arm == 'contextual' and (entry.get('source') != 'hosted exchange' or
+                        entry.get('record', {}).get('id') != bundle['case']['court'].get('general_id')):
+                    write_json(args.out / 'hosted-admission-status.json', {'status': 'blocked', 'reason': 'Recipient did not reuse the frozen donor general court'})
+                    return 1
             print('Completed ' + arm, flush=True)
         (args.out / (args.phase + '-report.json')).write_text(json.dumps({
             'protocol': PROTOCOL, 'population': 'fictional offices; configured provider responses',
@@ -324,7 +358,7 @@ def run_phase(args):
             'source_replay_counts_this_invocation': source_counts, 'arms': results,
             'limitations': ['Small mechanism pilot, not a statistical effectiveness estimate',
                             'Source counts use controlled replay, not live-network benchmarking',
-                            'Independent human source and constraint audit is required', 'No investment-performance claim']}, indent=2) + '\n')
+                            'Independent human source and constraint audit is required', 'No investment-performance claim']}, indent=2) + '\n', encoding="utf-8")
         if args.phase == 'pair':
             packet, key = review_packet(proposals, frozen)
             # Preserve any human review on an idempotent rerun.
@@ -334,6 +368,8 @@ def run_phase(args):
         return 0
     finally:
         SOURCES.update(originals)
+        if hosted_client:
+            hosted_client.http.close()
 
 
 if __name__ == '__main__':

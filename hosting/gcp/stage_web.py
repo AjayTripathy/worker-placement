@@ -2,6 +2,9 @@
 import argparse
 from pathlib import Path
 import shutil
+import hashlib
+import json
+import subprocess
 
 ROOT = Path(__file__).resolve().parents[2]
 # Code packages only: no household folders, datasets, credentials or Git history.
@@ -10,6 +13,7 @@ FILES = [str(p.relative_to(ROOT)) for package in PACKAGES
          for p in sorted((ROOT / package).rglob('*.py')) if not {'__pycache__', 'evals'} & set(p.parts)]
 FILES += [str(p.relative_to(ROOT)) for p in sorted((ROOT / 'officekit_agents').rglob('*.md'))]
 FILES += ['officekit/INTAKE_AGENT.md']
+FILES += ['LICENSE', 'NOTICE', 'DATA_LICENSE.md']
 FILES += ['officekit/public/' + name for name in
           ('landing.html', 'site.css', 'site.js', 'auth.js', 'office-import.js', 'mark.svg', 'install.sh')]
 FILES += [str(p.relative_to(ROOT)) for p in sorted((ROOT / 'hosting/app').glob('*.py'))]
@@ -30,9 +34,16 @@ def stage(destination):
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(src, target)
     (destination / 'hosting/__init__.py').write_text('')
-    for name in ('Dockerfile', 'requirements.txt'):
+    for name in ('Dockerfile', 'requirements.txt', 'requirements.lock'):
         shutil.copy2(ROOT / 'hosting/app' / name, destination / name)
     (destination / '.gcloudignore').write_text('.git\n__pycache__\n*.pyc\n')
+    files = {str(p.relative_to(destination)): hashlib.sha256(p.read_bytes()).hexdigest()
+             for p in sorted(destination.rglob('*')) if p.is_file()}
+    source_digest = hashlib.sha256(json.dumps(files, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
+    manifest = {'schema': 1, 'source_sha256': source_digest, 'files': files,
+                'git_base': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
+                'source_is_clean_commit': not bool(subprocess.check_output(['git', 'status', '--porcelain', '--', *FILES], cwd=ROOT))}
+    (destination / 'release-manifest.json').write_text(json.dumps(manifest, indent=2) + '\n', encoding='utf-8')
     return destination
 
 

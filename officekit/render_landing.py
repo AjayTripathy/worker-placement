@@ -40,7 +40,7 @@ def render_landing(local=False):
               'BRING_OFFICE': (hosted_origin() if local else '') + '/app/import',
               'INSTALL_COMMAND': 'curl -fsSL ' + hosted_origin() + '/install.sh | sh',
               'LOCAL_ACTION': ''}
-    html = (PUBLIC / 'landing.html').read_text()
+    html = (PUBLIC / 'landing.html').read_text(encoding="utf-8")
     for key, value in values.items():
         html = html.replace('{{' + key + '}}', escape(value, quote=True))
     if local:
@@ -101,9 +101,9 @@ def render_account(email):
 def render_local_guide(local=False):
     bootstrap = 'curl -fsSL ' + hosted_origin() + '/install.sh | sh'
     body = ('<main id="main" class="subpage"><p class="eyebrow">THE LOCAL SETUP GUIDE</p><h1>One script.<br>Your whole office.</h1>'
-            '<p>Paste this into your terminal. The script downloads the full repository, installs the app and opens your local office:</p>'
+            '<p>Paste this into your terminal. The script downloads the app, installs it and opens your local office:</p>'
             '<pre class="code-block"><code>' + escape(bootstrap) + '</code></pre>'
-            '<p>Requires Git and Python 3.9 or later (3.11+ recommended). The public repository requires no GitHub login. The download includes the research datasets.</p>'
+            '<p>Requires Git and Python 3.9 or later (3.11+ recommended). The public repository requires no GitHub login. The installer uses a shallow, sparse checkout of the product code.</p>'
             '<p>The script creates its own Python environment, installs connector libraries and prepares your office folder. No separate clone, install or activation commands.</p>'
             '<p>You can <a href="' + escape(hosted_origin()) + '/install.sh">inspect the installer</a> first.</p>'
             '<h2>Next time</h2><p>From the downloaded <code>worker-placement</code> folder, run <code>./start.sh</code>. Your saved office is kept.</p>'

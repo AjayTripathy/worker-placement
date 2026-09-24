@@ -82,7 +82,7 @@ def login(origin=None,timeout=900):
 def credentials():
     p=config_path()
     if not p.exists():raise ValueError('Run ./wp login before migrating your office.')
-    value=json.loads(p.read_text())
+    value=json.loads(p.read_text(encoding="utf-8"))
     if value.get('origin')!=hosted_origin():raise ValueError('The hosted destination changed. Run ./wp login again.')
     if value.get('expires_at',0)<=time.time():raise ValueError('Your login expired. Run ./wp login again.')
     return value
@@ -101,7 +101,7 @@ def upload_snapshot(manifest,chunks,auth,replace_revision=None,progress=None):
     progress=progress or (lambda phase,done,total:None)
     state=request(origin,'/api/migrations',{'manifest':manifest},token)
     if state.get('digest')!=sid or any(h not in chunks for h in state.get('missing',[])):
-        raise ValueError('The hosted upload does not match the reviewed snapshot.')
+        raise ValueError('The hosted upload receipt does not match the reviewed snapshot.')
     progress('uploading',0,len(state.get('missing',[])))
     for i,h in enumerate(state.get('missing',[]),1):
         request(origin,'/api/migrations/'+sid+'/chunks',{'sha256':h,'data':base64.b64encode(chunks[h]).decode()},token)

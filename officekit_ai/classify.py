@@ -105,7 +105,8 @@ def suggest(symbols, client=None, model=None, ledger_path=None, office_id=None,
             client, resolved = client_for("classify", folder)
             model = model or resolved
         model = model or CLASSIFY_MODEL
-        resp = client.messages.create(
+        from officekit_ai.intelligence import generate
+        resp = generate(client,
             model=model, max_tokens=2000,
             messages=[{"role": "user", "content": _PROMPT.format(symbols=listing)}],
             output_config={"format": {"type": "json_schema", "schema": _SCHEMA}})
@@ -138,7 +139,7 @@ def load_learned(folder):
     if not p.exists():
         return {}
     try:
-        return {k.upper(): tuple(v) for k, v in json.loads(p.read_text()).items()}
+        return {k.upper(): tuple(v) for k, v in json.loads(p.read_text(encoding="utf-8")).items()}
     except Exception:
         return {}
 
@@ -151,7 +152,7 @@ def save_confirmed(folder, mappings):
     cur = {k: list(v) for k, v in load_learned(folder).items()}
     for sym, (cat, style) in mappings.items():
         cur[sym.upper()] = [cat, style]
-    learned_path(folder).write_text(json.dumps(cur, indent=1, sort_keys=True) + "\n")
+    learned_path(folder).write_text(json.dumps(cur, indent=1, sort_keys=True) + "\n", encoding="utf-8")
     return cur
 
 

@@ -38,7 +38,7 @@ def load_docket(folder):
     if not p.exists():
         return []
     try:
-        return json.loads(p.read_text()).get("items", [])
+        return json.loads(p.read_text(encoding="utf-8")).get("items", [])
     except Exception:
         return []
 
@@ -46,7 +46,7 @@ def load_docket(folder):
 def _save(folder, items):
     _path(folder).write_text(json.dumps(
         {"updated_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-         "items": items}, indent=1))
+         "items": items}, indent=1), encoding="utf-8")
 
 
 def _adjudicated_pairs(folder):

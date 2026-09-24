@@ -238,12 +238,15 @@ def test_home_and_scenario_deployment_only_use_remaining_proceeds():
     a = receive(office(2250000))
     m = model(a)
     assert pending_deployable(m) == 2100000
-    assert '$2.10M' in _deploy_plan(m) and '$3.50M' not in _deploy_plan(m)
+    from officekit.deployment import sources, funding
+    assert 'deployment_' in _deploy_plan(m)
+    assert funding(m, sources(m)[0]['id'])['contingent_budget'] == 2100000
     html = render_office(m)
     assert '$3.00M gross → $2.10M net' in html
     a = receive(a, gross=3000000, reference="Second")
     m = model(a)
-    assert pending_deployable(m) == 0 and not _deploy_plan(m)
+    assert pending_deployable(m) == 0
+    assert 'deployment_' in _deploy_plan(m)  # received proceeds retain their strategy link
 
 
 def test_reference_is_escaped_on_preview_and_history(server):

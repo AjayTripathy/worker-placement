@@ -169,15 +169,15 @@ def run(answers, out_dir, slug=None):
         "scenarios": out / f"{slug}_scenarios.html",
         "strategies": out / f"{slug}_strategies.html",
     }
-    paths["answers"].write_text(json.dumps(answers, indent=1, ensure_ascii=False) + "\n")
+    paths["answers"].write_text(json.dumps(answers, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
     pc_path = out / f"{slug}_personal_context.json"
     if not pc_path.exists():
         from officekit.personal_context import empty as _pc_empty
-        pc_path.write_text(json.dumps(_pc_empty(data.get("office_id")), indent=1) + "\n")
-    paths["balance_sheet"].write_text(json.dumps(data, indent=1, ensure_ascii=False) + "\n")
-    paths["office"].write_text(render_office(m))
-    paths["scenarios"].write_text(render_scenarios(m, strategies_href=f"{slug}_strategies.html"))
-    paths["strategies"].write_text(render_strategies(m, scenarios_href=f"{slug}_scenarios.html"))
+        pc_path.write_text(json.dumps(_pc_empty(data.get("office_id")), indent=1) + "\n", encoding="utf-8")
+    paths["balance_sheet"].write_text(json.dumps(data, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+    paths["office"].write_text(render_office(m), encoding="utf-8")
+    paths["scenarios"].write_text(render_scenarios(m, strategies_href=f"{slug}_strategies.html"), encoding="utf-8")
+    paths["strategies"].write_text(render_strategies(m, scenarios_href=f"{slug}_scenarios.html"), encoding="utf-8")
     return paths, m
 
 
@@ -188,7 +188,7 @@ def main(argv=None):
     ap.add_argument("--slug", help="output filename slug (default: owner name)")
     args = ap.parse_args(argv)
     if args.answers:
-        answers = json.loads(Path(args.answers).read_text())
+        answers = json.loads(Path(args.answers).read_text(encoding="utf-8"))
     else:
         if not sys.stdin.isatty():
             print("[wizard] no --answers and stdin is not a terminal — nothing to do", file=sys.stderr)

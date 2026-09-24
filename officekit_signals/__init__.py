@@ -106,7 +106,7 @@ def runtime(folder):
     last = {}
     p = _runs_path(folder)
     if p.exists():
-        for line in p.read_text().splitlines():
+        for line in p.read_text(encoding="utf-8").splitlines():
             try:
                 r = json.loads(line)
                 last[r["name"]] = r
@@ -168,7 +168,7 @@ def source_code(name):
     cap = CAPABILITIES[name]
     if cap.get("source_ref"):
         try:
-            return Path(cap["source_ref"]).read_text()
+            return Path(cap["source_ref"]).read_text(encoding="utf-8")
         except Exception:
             pass
     try:
@@ -185,12 +185,12 @@ def _state_path(folder):
 
 def load_state(folder):
     p = _state_path(folder)
-    return json.loads(p.read_text()) if p.exists() else {}
+    return json.loads(p.read_text(encoding="utf-8")) if p.exists() else {}
 
 
 @transaction()
 def save_state(folder, state):
-    _state_path(folder).write_text(json.dumps(state, indent=1))
+    _state_path(folder).write_text(json.dumps(state, indent=1), encoding="utf-8")
 
 
 # ================================================================ flagships ==

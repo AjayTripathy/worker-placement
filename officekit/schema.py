@@ -67,7 +67,7 @@ CATEGORIES = {"direct_index", "public_equity", "single_name_equity", "venture_pr
 PROFILE_FLAGS = ("uses_leverage", "net_buyer", "premium_selling_allowed",
                  "decumulating", "concentrated_low_basis")
 TONES = {"violet", "emerald", "amber", "slate"}
-GOAL_KINDS = {"retirement", "spending", "liquidity_floor", "tax_efficiency", "expense"}
+GOAL_KINDS = {"retirement", "spending", "liquidity_floor", "tax_efficiency", "expense", "charitable"}
 
 
 def validate(data) -> list[str]:
@@ -119,6 +119,9 @@ def validate(data) -> list[str]:
     for i, g in enumerate(data.get("goals") or []):
         tag = f"goals[{i}] ({g.get('label', '?')})"
         kind = g.get("kind")
+        if kind == 'charitable':
+            from officekit.charitable import validate as validate_charitable
+            p.extend(tag + ': ' + error for error in validate_charitable(g))
         if kind not in GOAL_KINDS:
             p.append(f"{tag}: kind must be one of {sorted(GOAL_KINDS)}")
         if kind == "retirement" and not isinstance(g.get("annual_spending"), (int, float)):
@@ -164,6 +167,9 @@ def validate(data) -> list[str]:
                 if o.get("source") not in ("principal", "scenario", "agent", "goal", "holding"):
                     p.append(f"strategy_decisions[{sid}]: origin source must be "
                              "principal|scenario|agent|goal|holding")
+    if data.get('beta_programs') is not None:
+        from officekit.beta_programs import validate as validate_beta
+        p.extend(validate_beta(data['beta_programs']))
     scen = data.get("scenarios") or {}
     for key, patch in (scen.get("replace") or {}).items():
         if not isinstance(patch, dict):
@@ -177,7 +183,7 @@ def validate(data) -> list[str]:
 
 def load_balance_sheet(path, strict=True):
     """Load + validate a BalanceSheet v1 JSON file. strict=True raises on problems."""
-    data = json.loads(Path(path).read_text())
+    data = json.loads(Path(path).read_text(encoding="utf-8"))
     problems = validate(data)
     if problems and strict:
         raise ValueError("invalid balance sheet: " + "; ".join(problems))

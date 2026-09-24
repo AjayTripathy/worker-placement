@@ -33,7 +33,7 @@ def path(folder, pid):
 
 
 def load(folder, pid):
-    return json.loads(path(folder, pid).read_text())
+    return json.loads(path(folder, pid).read_text(encoding="utf-8"))
 
 
 def list_proposals(folder):
@@ -67,18 +67,18 @@ def save(folder, proposal):
     # Per-job lock is held by callers. Replace complete files, never truncate a
     # record while a browser reloads the progress page.
     temp = p.with_suffix(".tmp")
-    temp.write_text(json.dumps(proposal, indent=2, ensure_ascii=False) + "\n")
+    temp.write_text(json.dumps(proposal, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     temp.replace(p)
     if proposal.get("research"):
         from officekit_research.cases import capture_private
         capture_private(folder, proposal)
     page = pages / f'proposal_{proposal["id"]}.html'
     temp = page.with_suffix(".tmp")
-    temp.write_text(render_proposal(proposal))
+    temp.write_text(render_proposal(proposal), encoding="utf-8")
     temp.replace(page)
 
 
-def create(folder, answers, model, strategy_id, source, ref, *, option=None, title=None, request="", target_pct=None, revision_of=None, research_context=None):
+def create(folder, answers, model, strategy_id, source, ref, *, option=None, title=None, request="", target_pct=None, revision_of=None, research_context=None, deployment_source=None):
     from officekit.strategy_playbooks import brief
     from officekit.personal_context import load as load_context
     pc = load_context(folder)
@@ -90,6 +90,11 @@ def create(folder, answers, model, strategy_id, source, ref, *, option=None, tit
         from officekit_research.cases import validate_context
         validate_context(research_context)
     key = digest([strategy_id, source, ref, option, title, request, target_pct] + ([research_context] if research_context is not None else []))
+    if deployment_source is not None:
+        from officekit.deployment import source_for
+        selected = source_for(model, deployment_source['id'])
+        deployment_source = {'id': selected['id'], 'label': selected['label']}
+        key = digest([key, deployment_source['id']])
     with locked(folder), _LOCK:
         old = next((p for p in list_proposals(folder) if p["request_key"] == key and p["status"] not in {"declined", "superseded"}), None)
         if revision_of:
@@ -113,6 +118,8 @@ def create(folder, answers, model, strategy_id, source, ref, *, option=None, tit
                     "research": None, "candidates": [], "courts": [], "risk": None, "pitch": None,
                     "errors": [], "basket": []}
         proposal["revision_of"] = revision_of
+        if deployment_source is not None:
+            proposal['deployment_source'] = deployment_source
         if research_context is not None:
             proposal["research_context"] = deepcopy(research_context)
         save(folder, proposal)
@@ -203,6 +210,9 @@ def decide(folder, answers, pid, action, model=None):
         if action == "adopt" and digest(answers) != p["snapshot_revision"]:
             raise ValueError("The office changed during research. Revise the proposal against current balances before adopting.")
         if action == "adopt":
+            from officekit.capital_planning import needs_refresh
+            if needs_refresh(p):
+                raise ValueError('Capital planning inputs changed. Build a fresh proposal revision before adopting.')
             from officekit.personal_context import load as load_context
             if digest(load_context(folder)) != digest(p["snapshot"]["personal_context"]) or (model is not None and digest(model["d"]) != digest(p["snapshot"]["data"])):
                 raise ValueError("Portfolio evidence or constraints changed. Revise this proposal before adopting.")

@@ -200,11 +200,7 @@ def spending_goal(data, net_worth):
 
 
 def implicit_strategies(m):
-    """Strategies the balance sheet already IMPLEMENTS — surfaced with the same
-    intuition treatment as goals. The flagship: owning individual equity lots IS
-    a direct-indexing / tax-loss-harvesting strategy, whether or not it was ever
-    'adopted'. Each carries a link to where it's managed and a chat starter to
-    refine the parts the office can't see (harvest cadence, wash coordination)."""
+    """Holdings suggest strategies; they do not prove an operating TLH program."""
     sleeves = m.get("assets") or [s for s in m.get("sleeves", []) if s.get("kind") == "asset"]
 
     def _val(cats):
@@ -219,12 +215,12 @@ def implicit_strategies(m):
         lots = _lots(("direct_index", "single_name_equity"))
         lot_txt = f"{lots} individual equity lot(s) worth " if lots else ""
         out.append({
-            "id": "implicit:strategy:direct_index", "implicit": True, "status": "active",
-            "label": "Direct indexing / tax-loss harvesting", "value": round(di_val),
-            "why": (f"You hold {lot_txt}{_fmt(di_val)} as individual positions — that IS direct indexing: "
-                    "each lot can be harvested for losses while tracking the market. Harvesting already "
-                    "runs on these; it isn't a strategy you have to opt into."),
-            "href": "harvest.html", "cta": "Open loss harvesting",
+            "id": "implicit:strategy:direct_index", "implicit": True, "status": "review",
+            "label": "Direct indexing / tax-loss harvesting review", "value": round(di_val),
+            "why": (f"You hold {lot_txt}{_fmt(di_val)} in equity positions. Review direct indexing and "
+                    "tax-loss harvesting against the benchmark, tax lots and account mandate. "
+                    "Holdings alone do not establish an operating program."),
+            "href": "beta_programs.html", "cta": "Review beta/TLH programs",
             "refine": "My direct-index SMA harvests on a __ cadence; watch washes across __ accounts."})
     if _val(("options_overlay",)) != 0:
         out.append({

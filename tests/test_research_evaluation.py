@@ -50,14 +50,14 @@ def test_three_arm_harness_freezes_facts_and_produces_ungraded_review_packet(com
     report = json.loads((root / 'pair-report.json').read_text())
     assert report['protocol'] == evaluate.PROTOCOL
     assert set(report['arms']) == {'baseline', 'evidence_only', 'contextual'}
-    assert len(provider.calls) == 24  # donor + three fresh recipient reviews
+    assert len(provider.calls) == 28  # donor + three fresh recipient reviews, seven calls each
     proposals = {name: jobs.list_proposals(root / name)[0] for name in report['arms']}
     assert len({evaluate.scenario_digest(p) for p in proposals.values()}) == 1
     assert len({json.dumps(p['snapshot']['data'], sort_keys=True) for p in proposals.values()}) == 1
     assert {p['funding']['current_cash'] for p in proposals.values()} == {60000}
     assert {p['funding']['current_budget'] for p in proposals.values()} == {30000}
     assert [report['arms'][k]['source_acquisitions'] for k in ('baseline', 'evidence_only', 'contextual')] == [3, 2, 2]
-    assert {row['model_calls'] for row in report['arms'].values()} == {6}
+    assert {row['model_calls'] for row in report['arms'].values()} == {7}  # every arm pays for its own general + suitability passes
     assert all(row['human_audit'] == 'pending' for row in report['arms'].values())
     packet = json.loads((root / 'review-packet.json').read_text())
     key = json.loads((root / 'review-key.json').read_text())
@@ -69,7 +69,7 @@ def test_three_arm_harness_freezes_facts_and_produces_ungraded_review_packet(com
     packet['reviewer_note'] = 'Independent review has started'
     (root / 'review-packet.json').write_text(json.dumps(packet))
     assert evaluate.main(pair) == 0
-    assert len(provider.calls) == 24
+    assert len(provider.calls) == 28
     assert json.loads((root / 'review-packet.json').read_text())['reviewer_note'] == packet['reviewer_note']
 
 
@@ -90,7 +90,7 @@ def test_changed_frozen_evidence_is_rejected_before_calls(completed_pilot, monke
     monkeypatch.setattr(evaluate, 'client_for', lambda slot: pytest.fail('No client should be constructed'))
     with pytest.raises(ValueError, match='exact frozen source'):
         evaluate.main(pair)
-    assert len(provider.calls) == 24
+    assert len(provider.calls) == 28
 
 
 def test_changed_recipient_facts_are_rejected_before_calls(completed_pilot, monkeypatch):
@@ -125,7 +125,7 @@ def test_budget_reserves_unknown_usage_and_keeps_unknown_model(tmp_path):
     bounded = evaluate.BudgetClient(provider, tmp_path / 'calls.json', 10, 7000)
     from officekit_ai.strategy_proposal import ANALYST
     kw = {'model': 'fixture', 'max_tokens': 6000, 'system': 'Test', 'messages': [],
-          'output_config': {'format': {'schema': ANALYST}}}
+          'output_config': {'format': {'type': 'json_schema', 'schema': ANALYST}}}
     bounded.create(**copy.deepcopy(kw))
     with pytest.raises(ValueError, match='budget reached'):
         bounded.create(**copy.deepcopy(kw))

@@ -20,7 +20,10 @@ ANSWERS shape (all sleeves WITHOUT beta vectors — those come from the priors):
   "positions": {"account"?, "rows": [{"symbol", "value"}, ...]},     # typed holdings —
                # same classifier as the CSV; the honest cold path
   "incoming": {"amount": ..., "eta": "Dec", "character": ltcg|ordinary|return_of_capital,
-               "rate": 0.30, "harvest_losses"?: 0}                   # optional windfall
+               "rate": 0.30, "harvest_losses"?: 0,
+               "cadence"?: once|monthly|quarterly|annual,
+               "planning_period"?: {"start": "YYYY-MM-DD", "end": "YYYY-MM-DD"}}
+               # amount is total gross for the period, never multiplied by cadence
 }
 """
 from __future__ import annotations
@@ -177,7 +180,7 @@ def _tax_model(inc, as_of):
     tm = {
         "as_of": as_of,
         "inflow_id": inc.get("id"),
-        "incoming_gross": round(float(inc["amount"])),
+        "incoming_gross": round(float(inc["amount"]), 2),
         "character": char,
         "state": state or None,
         "rate_assumed": assumed,
@@ -226,6 +229,7 @@ def build_from_answers(answers, sma_symbols=None, sma_label="Direct-index SMA"):
                                     extra_map=fund_map or None, source="entered holdings",
                                     sma_symbols=sma_symbols, sma_label=sma_label):
             s["short"] = s.get("short") or auto_short(s["name"])
+            s.setdefault('meta', {})['position_rows'] = True
             sleeves.append(s)
     tax_model = None
     from officekit.staging import num as _num
@@ -289,8 +293,17 @@ def build_from_answers(answers, sma_symbols=None, sma_label="Direct-index SMA"):
     }
     if tax_model:
         data["tax_model"] = tax_model
+    if answers.get('security_basis_reviews'):
+        from copy import deepcopy
+        data['security_basis_reviews'] = deepcopy(answers['security_basis_reviews'])
+    if answers.get('beta_programs'):
+        from copy import deepcopy
+        data['beta_programs'] = deepcopy(answers['beta_programs'])
     if inc:
         data["inflow"] = inflow
+        data['inflow_terms'] = {'character': inc.get('character', 'ltcg'),
+                                'cadence': inc.get('cadence', 'once'),
+                                'planning_period': inc.get('planning_period')}
     # Intuit the commitments the balance sheet implies (mortgage service,
     # lifestyle spending) alongside the user's own goals. Implicit goals are
     # re-derived every build and never written back to answers.

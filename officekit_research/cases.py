@@ -37,6 +37,52 @@ def digest(value):
     return hashlib.sha256(canonical(value)).hexdigest()
 
 
+# Envelope fields say WHEN/HOW a source was read, not what it said.
+ENVELOPE = {"fetched_at", "retrieved_at"}
+
+# How long a contributor may grant reuse, by what KIND of thing the evidence is.
+# A judgment about a household expires fast; a live web page drifts; a document
+# filed with a regulator never changes (only newer ones appear). One number for
+# all three made the corpus forget facts as quickly as opinions.
+EVIDENCE_TTL_DAYS = {
+    "fund_profile": 30,     # live issuer page — a snapshot that drifts
+    "filings": 30,          # "most recent filings" index — stale when the next one lands
+    "xbrl": 120,            # as-filed facts; one reporting quarter plus slack before a newer period exists
+    "filing_text": 400,     # the text of one dated filing — immutable; covers an annual cycle
+}
+XBRL_KEYS = {"rev", "sbc", "dil_sh", "ocf"}
+XBRL_FORMS = {"10-Q", "10-K", "20-F", "6-K"}
+
+
+def source_of(data):
+    """(url, fetched_at) for a section, wherever that section keeps its locator."""
+    if not isinstance(data, dict):
+        return None, None
+    meta = data.get("_source") if isinstance(data.get("_source"), dict) else data
+    return meta.get("url"), meta.get("fetched_at")
+
+
+def content_sha256(section, data):
+    """Identity of what a source SAID, independent of when it was read.
+
+    `sha256` on an evidence entry covers the whole envelope (integrity of the
+    exact bytes reviewed). Conflict detection must not use it: two contributors
+    reading byte-identical text an hour apart would otherwise "contradict" each
+    other and nobody could reuse either — reuse would collapse as the corpus
+    grew. Whitespace is normalized because fetchers differ in trailing space.
+    """
+    if not isinstance(data, dict):
+        return digest({"section": section, "content": data})
+    def strip(value):
+        if isinstance(value, dict):
+            return {k: (" ".join(v.split()) if k == "text" and isinstance(v, str) else strip(v))
+                    for k, v in value.items() if k not in ENVELOPE}
+        if isinstance(value, list):
+            return [strip(v) for v in value]
+        return value
+    return digest({"section": section, "content": strip(data)})
+
+
 def utcnow():
     return datetime.now(timezone.utc).isoformat()
 
@@ -232,7 +278,7 @@ def prepare_case(p, symbol):
     for section, data in pack.get("sections", {}).items():
         if section not in PUBLIC_SECTIONS:
             continue
-        url = data.get("url") if isinstance(data, dict) else None
+        url, fetched = source_of(data)
         if not url:  # Legacy data without a source locator cannot be shared yet.
             continue
         try:
@@ -240,7 +286,7 @@ def prepare_case(p, symbol):
         except ValueError:
             continue
         original = pack.get("reuse", {}).get(section, {})
-        evidence.append({"section": section, "symbol": symbol, "retrieved_at": original.get("retrieved_at", data.get("fetched_at") or pack["built"]),
+        evidence.append({"section": section, "symbol": symbol, "retrieved_at": original.get("retrieved_at", fetched or pack["built"]),
                          "source_url": url, "data": deepcopy(data), "sha256": digest(data)})
     fields = {k: deepcopy(court.get(k)) for k in ("verdict", "rationale", "decisive_points", "unverified_items", "briefs")}
     fields["models"] = deepcopy(court.get("models") or {})
@@ -262,8 +308,19 @@ def prepare_case(p, symbol):
             "evidence": evidence,
             "privacy": {"policy": POLICY, "transformations": ["Office identity and raw portfolio omitted", "Context bucketed; unknown values retained", "Known private names, identifiers and dollar amounts removed from arguments"],
                         "limitations": ["Free text requires disclosure review", "No analysis of disclosure across a contributor's other cases", "Execution and the user's decision reason are not inferred"]}}
-    for field in ("investigation", "court"):
-        case[field] = _redact(case[field], _identifiers(p))
+    # A security's own ticker is public and is the subject of the case: never
+    # scrub it, even when the office happens to hold a sleeve of that name.
+    identifiers = [t for t in _identifiers(p) if t.upper() != symbol]
+    case["investigation"] = _redact(case["investigation"], identifiers)
+    if court.get("general_id"):
+        # Two-pass court: the briefs came from the GENERAL court, which never saw
+        # this office. Redacting them would only destroy public facts (revenue,
+        # prices, share counts). Only the suitability ruling is office-aware.
+        briefs = case["court"].pop("briefs")
+        case["court"] = {**_redact(case["court"], identifiers), "briefs": briefs,
+                         "general_id": court["general_id"]}
+    else:
+        case["court"] = _redact(case["court"], identifiers)   # legacy single court: everything is office-aware
     # Leave source documents visible in the PRIVATE draft; publication requires
     # a reviewer to remove/replace material they do not have permission to share.
     return {"schema": "research_case_draft_v1", "case": case, "review_required": True}
@@ -297,7 +354,13 @@ def _validate_case(case):
     if not inv["factors"] or not set(inv["factors"]) <= FACTORS:
         raise ValueError("Invalid factor vocabulary")
     court = case["court"]
-    exact(court, "verdict rationale decisive_points unverified_items briefs models", "court")
+    if "general_id" in court:      # optional link to the shareable general evaluation it rules on
+        if not HASH.fullmatch(str(court["general_id"])):
+            raise ValueError("Invalid general research identity")
+        exact({k: v for k, v in court.items() if k != "general_id"},
+              "verdict rationale decisive_points unverified_items briefs models", "court")
+    else:
+        exact(court, "verdict rationale decisive_points unverified_items briefs models", "court")
     for k in ("verdict", "rationale"):
         text(court[k])
     for k in ("decisive_points", "unverified_items"):
@@ -370,13 +433,52 @@ def validate_evidence(e):
         text(d["form"], 80)
         day(d["date"])
         text(d["text"], 300000)
+    elif section == "xbrl":
+        # As-filed SEC facts: public domain and machine-verifiable. Every number
+        # carries the taxonomy tag and accession number it can be checked against.
+        meta = d.get("_source")
+        exact(meta, "cik url fetched_at", "XBRL source")
+        if type(meta["cik"]) is not int or not 0 < meta["cik"] < 10**10:
+            raise ValueError("Invalid XBRL registrant")
+        if meta["url"] != e["source_url"] or meta["url"] != f"https://data.sec.gov/api/xbrl/companyfacts/CIK{meta['cik']:010d}.json":
+            raise ValueError("XBRL facts must cite the registrant's SEC companyfacts document")
+        if day(meta["fetched_at"]) != day(e["retrieved_at"]):
+            raise ValueError("XBRL source and collection date disagree")
+        facts = {k: v for k, v in d.items() if k != "_source"}
+        if not facts or set(facts) - XBRL_KEYS:
+            raise ValueError("Unsupported XBRL fact series")
+        for rows in facts.values():
+            if not isinstance(rows, list) or not 1 <= len(rows) <= 8:
+                raise ValueError("Invalid XBRL fact series")
+            for row in rows:
+                exact(row, "end val form tag accn", "XBRL fact")
+                day(row["end"])
+                if isinstance(row["val"], bool) or not isinstance(row["val"], (int, float)) or not math.isfinite(row["val"]):
+                    raise ValueError("XBRL values must be finite numbers")
+                if row["form"] not in XBRL_FORMS or not re.fullmatch(r"[A-Za-z][A-Za-z0-9]{0,119}", str(row["tag"])):
+                    raise ValueError("Invalid XBRL form or taxonomy tag")
+                if not re.fullmatch(r"\d{10}-\d{2}-\d{6}", str(row["accn"])):
+                    raise ValueError("Each XBRL fact needs the accession number of the filing it came from")
+    elif section == "filings":
+        exact(d, "entity recent cik url fetched_at", "filings index")
+        if type(d["cik"]) is not int or d["url"] != e["source_url"] or d["url"] != f"https://data.sec.gov/submissions/CIK{d['cik']:010d}.json":
+            raise ValueError("A filings index must cite the registrant's SEC submissions document")
+        if day(d["fetched_at"]) != day(e["retrieved_at"]):
+            raise ValueError("Filings source and collection date disagree")
+        text(d["entity"] or "", 300)
+        if not isinstance(d["recent"], list) or len(d["recent"]) > 15:
+            raise ValueError("Invalid filings index")
+        for row in d["recent"]:
+            exact(row, "form date acc", "filing")
+            text(row["form"], 40)
+            day(row["date"])
+            if not re.fullmatch(r"\d{10}-\d{2}-\d{6}", str(row["acc"])):
+                raise ValueError("Invalid accession number")
     else:
-        # The existing filings/XBRL bridge has no public source locator contract.
-        # Do not accept arbitrary dictionaries as machine-verifiable facts.
         raise ValueError("This evidence section needs a source schema before it can be shared")
 
 
-def approve(draft, expected_digest, reuse=(), reviewed_at=None):
+def approve(draft, expected_digest, reuse=(), reviewed_at=None, contributor=None):
     """Explicit review binds the exact edited projection and per-source grants.
 
     reuse: [{section, basis: public_domain|licensed|original_summary, valid_until}]
@@ -389,6 +491,10 @@ def approve(draft, expected_digest, reuse=(), reviewed_at=None):
     body = {"schema": "reviewed_research_case_v1", "case": case,
             "review": {"case_sha256": digest(case), "reviewed_at": reviewed_at or utcnow(),
                        "publication_review": "explicit", "reuse": list(reuse)}}
+    if contributor is not None:
+        # OPT-IN only. A contextual case carries bucketed household context; several
+        # under one pseudonym are a fingerprint. Absent means anonymous, the default.
+        body["review"]["contributor"] = contributor
     bundle = {"id": digest(body), **body}
     validate_bundle(bundle)
     return bundle
@@ -409,7 +515,11 @@ def _validate_bundle(bundle):
         raise ValueError("Research bundle digest mismatch")
     validate_case(bundle["case"])
     r = bundle["review"]
-    exact(r, "case_sha256 reviewed_at publication_review reuse", "publication review")
+    if "contributor" in r:
+        from officekit_research.contributor import KEY
+        if not isinstance(r["contributor"], str) or not KEY.fullmatch(r["contributor"]):
+            raise ValueError("Invalid contributor key")
+    exact({k: v for k, v in r.items() if k != "contributor"}, "case_sha256 reviewed_at publication_review reuse", "publication review")
     if r["case_sha256"] != digest(bundle["case"]) or r["publication_review"] != "explicit":
         raise ValueError("Publication review does not match the case")
     day(r["reviewed_at"])
@@ -424,8 +534,9 @@ def _validate_bundle(bundle):
             raise ValueError("Invalid public evidence reuse permission")
         seen.add(section)
         fetched = day(evidence[section]["retrieved_at"])
-        if not fetched <= day(grant["valid_until"]) <= fetched + timedelta(days=30):
-            raise ValueError("Reusable evidence must expire within 30 days of collection")
+        limit = EVIDENCE_TTL_DAYS[section]
+        if not fetched <= day(grant["valid_until"]) <= fetched + timedelta(days=limit):
+            raise ValueError(f"Reusable {section} evidence must expire within {limit} days of collection")
     return bundle
 
 
@@ -526,7 +637,7 @@ def retrieve(folder, p, today=None, include_evaluation=False):
         for e in b["case"]["evidence"]:
             g = grants.get(e["section"])
             if g and day(e["retrieved_at"]) <= today <= day(g["valid_until"]):
-                claims.setdefault(e["symbol"], {}).setdefault(e["section"], set()).add(e["sha256"])
+                claims.setdefault(e["symbol"], {}).setdefault(e["section"], set()).add(content_sha256(e["section"], e["data"]))
     conflicts = {symbol: sorted(section for section, hashes in sections.items() if len(hashes) > 1)
                  for symbol, sections in claims.items()}
     # Re-reviewing identical case content does not create independent evidence.
@@ -556,11 +667,12 @@ def reusable_sections(retrieval, symbol, today=None):
             by_section.setdefault(e["section"], []).append((e, g, b["id"]))
     reused, conflicts = {}, list(retrieval.get("evidence_conflicts", {}).get(symbol, []))
     for section, entries in by_section.items():
-        if section in conflicts or len({e[0]["sha256"] for e in entries}) != 1:
+        if section in conflicts or len({content_sha256(section, e[0]["data"]) for e in entries}) != 1:
             if section not in conflicts:
                 conflicts.append(section)
             continue
-        e, g, cid = entries[0]
+        # Agreeing contributors corroborate; reuse the most recently read copy.
+        e, g, cid = max(entries, key=lambda row: (row[0]["retrieved_at"], row[2]))
         reused[section] = {"data": deepcopy(e["data"]), "case_ids": sorted({row[2] for row in entries}),
                            "source_url": e["source_url"], "retrieved_at": e["retrieved_at"],
                            "sha256": e["sha256"], "basis": g["basis"], "valid_until": g["valid_until"]}
@@ -597,7 +709,9 @@ def proposal_retrievals(p):
 
 
 def public_runs(p, court):
-    runs = {"analyst": (p.get("research") or {}).get("run"), **court.get("runs", {})}
+    # The general court's own adjudication is identified on the general record.
+    runs = {"analyst": (p.get("research") or {}).get("run"),
+            **{role: run for role, run in court.get("runs", {}).items() if role in {"red", "blue", "adjudicate"}}}
     fields = {"requested_model", "resolved_model", "provider_client", "reasoning_configuration", "protocol_hash"}
     return {role: {k: (json.dumps(v, sort_keys=True) if not isinstance(v, str) else v) for k, v in run.items() if k in fields}
             for role, run in runs.items() if run}

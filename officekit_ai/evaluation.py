@@ -110,4 +110,4 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("cases", type=Path)
     args = parser.parse_args()
-    print(json.dumps(compare(json.loads(args.cases.read_text())), indent=2))
+    print(json.dumps(compare(json.loads(args.cases.read_text(encoding="utf-8"))), indent=2))

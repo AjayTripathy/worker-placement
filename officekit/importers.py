@@ -90,6 +90,12 @@ def _find_columns(header):
             cols["value"] = i
         elif k in ("quantity", "shares", "qty") and "qty" not in cols:
             cols["qty"] = i
+        elif k in ("cost basis", "total cost basis", "cost basis total", "total cost", "cost basis amount"):
+            cols['cost_basis'] = i
+        elif k in ('date acquired', 'acquired', 'acquisition date'):
+            cols['acquired'] = i
+        elif k in ('account', 'account number', 'account name'):
+            cols['account'] = i
     return cols if ("symbol" in cols or "desc" in cols) and "value" in cols else None
 
 
@@ -135,7 +141,15 @@ def read_positions_csv(path):
             val = _money(get("value"))
             if val is None or val == 0:
                 continue
-            rows.append({"symbol": str(get("symbol")).strip(), "desc": str(get("desc")).strip(), "value": val})
+            row = {"symbol": str(get("symbol")).strip(), "desc": str(get("desc")).strip(), "value": val}
+            for key in ('qty', 'cost_basis'):
+                value = _money(get(key))
+                if value is not None:
+                    row[key] = value
+            for key in ('acquired', 'account'):
+                if get(key).strip():
+                    row[key] = get(key).strip()
+            rows.append(row)
     if cols is None:
         raise ValueError(f"{path}: could not find a header row with symbol/description + value columns")
     return rows
@@ -180,8 +194,10 @@ def classify_positions(rows, account="brokerage", source="positions", extra_map=
     holdings is the honest cold path, so it is a first-class input.
     """
     from officekit.staging import num
-    rows = [{"symbol": str(r.get("symbol", "")).strip().upper(),
+    from copy import deepcopy
+    rows = [{**deepcopy(r), "symbol": str(r.get("symbol", "")).strip().upper(),
              "desc": str(r.get("desc", "")).strip(),
+             "account": r.get('account') or account,
              "value": num(r["value"])}                # tolerate "1,234" / "$1,234" typed input
             for r in rows if r.get("value") not in (None, "", 0)]
     if not rows:
@@ -195,10 +211,14 @@ def classify_positions(rows, account="brokerage", source="positions", extra_map=
         if cat == "__stock__":
             stocks.append(r)
             continue
-        b = buckets.setdefault((cat, style), {"value": 0.0, "symbols": []})
+        b = buckets.setdefault((cat, style), {"value": 0.0, "symbols": [], 'rows': []})
+        b['rows'].append(r)
         b["value"] += r["value"]
         if r["symbol"] and r["symbol"] not in b["symbols"]:
             b["symbols"].append(r["symbol"])
+
+    def holding(r):
+        return {**r, 'company': r['symbol'] or r['desc'], 'amount': r['value']}
 
     sleeves = []
     src_note = f"classified by officekit importer from the {account} positions export"
@@ -213,6 +233,7 @@ def classify_positions(rows, account="brokerage", source="positions", extra_map=
         sleeves.append(assign_betas({
             "name": name, "kind": "asset", "category": cat, "value": round(b["value"]),
             "target_pct": None, "_confidence": "known",
+            'holdings': [holding(r) for r in b['rows']],
             "risks": list(CATEGORY_RISKS.get(cat, [])) + [src_note],
         }, style=style))
 
@@ -229,6 +250,7 @@ def classify_positions(rows, account="brokerage", source="positions", extra_map=
                 "name": f"{sym} Concentrated ({account})", "kind": "asset",
                 "category": "single_name_equity", "value": round(r["value"]),
                 "target_pct": None, "_confidence": "known",
+                'holdings': [holding(r)],
                 "risks": list(CATEGORY_RISKS["single_name_equity"]) + [src_note],
             }))
         else:
@@ -248,7 +270,7 @@ def classify_positions(rows, account="brokerage", source="positions", extra_map=
             "name": f"{name} — {syms} ({account})", "kind": "asset", "category": category,
             "value": round(sum(r["value"] for r in items)), "target_pct": None, "_confidence": "known",
             "risks": risks + [src_note],
-            "holdings": [{"company": r["symbol"] or r["desc"], "amount": round(r["value"])} for r in items],
+            "holdings": [holding(r) for r in items],
         })
 
     if sma_pooled:

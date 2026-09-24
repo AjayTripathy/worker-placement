@@ -42,10 +42,20 @@ class Provider:
             out = dict(thesis="Reduce tech exposure with a bounded staples allocation.", alternatives=["Keep cash until review"],
                        candidates=[] if self.program else [dict(symbol="SPY" if self.options else "VDC", instrument="options" if self.options else "etf", rationale="Fits the mandate", structure="Defined-loss put" if self.options else "Consumer staples ETF")],
                        program_steps=["Broker: obtain replacement-cost coverage quotes and review exclusions before renewal."] if self.program else [], assumptions=["Allocation target is a research assumption"])
+        elif 'factor_profile' in props:   # general court adjudication: the security, no investor
+            out = dict(summary="A diversified consumer-staples equity fund.", standing="sound", confidence=7,
+                       factor_profile=[dict(factor="equity", exposure="high", rationale="Fully invested in equities"),
+                                       dict(factor="sector_concentration", exposure="high", rationale="Single sector")],
+                       strengths=["Low cost"], risks=["Sector concentration remains"],
+                       kill_conditions=["Mandate change"], unverified_items=[],
+                       forecasts=[dict(statement="The fund's expense ratio is unchanged at the next annual report.",
+                                       probability=0.9, base_rate=0.85, resolve_by="2027-06-30")])
         elif 'case' in props:
             out = dict(case="Independent argument grounded in the supplied evidence.", key_points=["Sector concentration remains"], unverified=[], lean="own")
         elif 'conviction' in props:
             out = dict(verdict=self.verdict, conviction=7, rationale="Appropriate bounded implementation", decisive_points=["Compare alternatives"], unverified_items=[])
+            if 'fit_for' in props:            # suitability ruling on top of a general evaluation
+                out.update(fit_for=["Matches the mandate"], fit_against=["Adds equity exposure"])
         elif 'budget_pct' in props:
             out = dict(verdict="support", rationale="Fits the funding ceiling", budget_pct=50,
                        allocations=[] if self.program else [dict(symbol="SPY" if self.options else "VDC", weight_pct=100, rationale="One implementation avoids duplicate exposure", conditions=[])], findings=["Keep obligations reserved"], conditions=[], monitoring=["Review on receipt or allocation drift"])
@@ -78,7 +88,7 @@ def test_full_pipeline_native_courts_signals_and_budget(tmp_path, monkeypatch):
     provider = Provider()
     p = execute(tmp_path, p, provider)
     assert p['status'] == 'needs_review'  # pending allocation remains contingent
-    assert len(provider.calls) == 6  # analyst, RED, BLUE, adjudicator, risk, pitch
+    assert len(provider.calls) == 7  # analyst, general RED/BLUE/adjudication, suitability, risk, pitch
     assert p['basket'][0]['symbol'] == 'VDC'
     assert p['basket'][0]['amount'] == 50000
     assert p['basket'][0]['contingent_amount'] > 0
@@ -89,14 +99,14 @@ def test_full_pipeline_native_courts_signals_and_budget(tmp_path, monkeypatch):
     assert {'strategy_proposal_research','evidence_fund_profile','evidence_tape','evidence_book'} <= set(runs)
     courts = [json.loads(s) for s in (tmp_path/'adjudications.jsonl').read_text().splitlines()]
     assert courts[0]['proposal_id'] == p['id']
-    assert len(courts[0]['refs']) == 3
+    assert len(courts[0]['refs']) == 4  # general RED/BLUE/adjudication + this office's suitability ruling
     assert 'Primary fund mandate VDC' in courts[0]['evidence']['md']
     assert p['risk']['call_ref'] and p['pitch']['call_ref']
     html = (tmp_path/'pages'/f'proposal_{p["id"]}.html').read_text()
     assert 'RED bench' in html and 'BLUE bench' in html and '$50,000.00' in html
     assert 'Conditional allocation' in html and 'Print / save pitch deck' in html
     execute(tmp_path, p, provider)
-    assert len(provider.calls) == 6  # completed jobs are idempotent
+    assert len(provider.calls) == 7  # completed jobs are idempotent
 
 
 @pytest.mark.parametrize('verdict', ['KILL','AVOID','WATCH'])
@@ -149,7 +159,7 @@ def test_retry_reuses_completed_research_and_courts(tmp_path,monkeypatch):
     fake.fail_pitch=False
     p=execute(tmp_path,p,fake)
     assert p['pitch'] and not p['errors']
-    assert len(fake.calls)==7
+    assert len(fake.calls)==8
     assert len((tmp_path/'adjudications.jsonl').read_text().splitlines())==1
 
 
@@ -169,7 +179,7 @@ def test_all_planner_options_have_distinct_briefs():
     from officekit.mitigations import OPT
     from officekit.render_strategies import STRATEGY_LIB
     from officekit.strategy_playbooks import STRATEGY_DEFAULT
-    assert set(OPT)==set(PLAYBOOKS)
+    assert set(OPT) | {'new_capital'} == set(PLAYBOOKS)  # Home also has an incoming-capital brief.
     assert set(STRATEGY_LIB) <= set(STRATEGY_DEFAULT)
     assert len({p[0] for p in PLAYBOOKS.values()})==len(PLAYBOOKS)
 

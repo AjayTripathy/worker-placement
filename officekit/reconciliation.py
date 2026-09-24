@@ -85,6 +85,7 @@ def reconcile(answers, rows, sources, attach_lots=None):
             a = {"account": r.get("account") or "?", "source": r.get("source_id") or "?",
                  "value": round(num(r.get("value")), 2)}
             for k in ("sec_type", "cost_basis", "value_is_cost", "as_of", "pulled_utc",
+                      'qty', 'account_type', 'taxable', 'acquired', 'date_acquired', 'long_term', 'restricted', 'pledged',
                       "lots", "loss_lt", "loss_st"):
                 if r.get(k) is not None:
                     a[k] = r[k]

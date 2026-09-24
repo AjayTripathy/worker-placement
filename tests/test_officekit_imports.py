@@ -67,9 +67,9 @@ def test_real_account_number_still_dedupes_across_feeds(tmp_path):
     # The fix must NOT break the intended supersede: a live feed replacing a stale
     # statement of the SAME real custodial account (a unique id) still dedupes.
     _pull(tmp_path, "upload:stmt.pdf", [{"symbol": "AAPL", "value": 100, "sec_type": "STK",
-          "account": "ACCOUNT_ALPHA"}], as_of="2026-09-01")
+          "account": "U24485312"}], as_of="2026-09-01")
     _pull(tmp_path, "adapter:ibkr", [{"symbol": "AAPL", "value": 200, "sec_type": "STK",
-          "account": "ACCOUNT_ALPHA"}], as_of="2026-09-02", kind="adapter", refresh="auto")
+          "account": "U24485312"}], as_of="2026-09-02", kind="adapter", refresh="auto")
     rows, overlaps = staging.merged_rows(tmp_path)
     aapl = [r for r in rows if r["symbol"] == "AAPL"]
     assert len(aapl) == 1 and aapl[0]["value"] == 200      # freshest wins
@@ -79,7 +79,7 @@ def test_real_account_number_still_dedupes_across_feeds(tmp_path):
 def test_specific_account_classifier():
     assert not staging.specific_account("brokerage") and not staging.specific_account("")
     assert not staging.specific_account("Portfolio") and not staging.specific_account("  manual ")
-    assert staging.specific_account("ACCOUNT_ALPHA") and staging.specific_account("A")
+    assert staging.specific_account("U24485312") and staging.specific_account("A")
 
 
 def test_extract_reconciliation_gate():
@@ -216,12 +216,13 @@ def test_imports_page_shows_proposed_section(tmp_path):
 def test_key_status_and_source_classes(monkeypatch, tmp_path):
     from officekit import serve
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     monkeypatch.setattr("pathlib.Path.home", staticmethod(lambda: tmp_path))
     ks = serve._key_status()
-    assert not ks["attached"] and "Attach one" in ks["label"]
-    (tmp_path / ".anthropic_key").write_text("sk-ant-x\n")
+    assert not ks["attached"] and "OPENAI_API_KEY" in ks["label"]
+    (tmp_path / ".openai_key").write_text("test-placeholder\n")
     ks = serve._key_status()
-    assert ks["attached"] and "imported from ~/.anthropic_key" in ks["label"]
+    assert ks["attached"] and "imported from ~/.openai_key" in ks["label"]
     # staged rows map refresh mode -> row class
     rows = [{"symbol": "A", "value": 1, "sec_type": "STK", "refresh": "auto",
              "source_id": "adapter:x", "description": "", "account": "u", "ccy": "USD"},
@@ -252,14 +253,15 @@ def test_imports_page_key_row_and_pull_now(tmp_path):
 def test_dropzone_mentions_screenshots_and_prompts_for_key(monkeypatch, tmp_path):
     from officekit import serve
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     monkeypatch.setattr("pathlib.Path.home", staticmethod(lambda: tmp_path))
     h = serve._dropzone_html()
     assert "screenshots" in h.lower()
     assert "need an agent key first" in h
-    (tmp_path / ".anthropic_key").write_text("sk-ant-x\n")
+    (tmp_path / ".openai_key").write_text("test-placeholder\n")
     h2 = serve._dropzone_html()
     assert "screenshots" in h2.lower() and "need an agent key" not in h2
-    assert "imported from ~/.anthropic_key" in h2
+    assert "imported from ~/.openai_key" in h2
 
 
 def test_dropzone_is_a_single_drag_and_drop_zone_supporting_folders():
@@ -421,7 +423,7 @@ def test_same_source_duplicate_symbols_never_dedupe(tmp_path):
 def test_same_ticker_different_accounts_both_kept(tmp_path):
     # AAPL in a taxable IBKR account AND a Parametric SMA = 2x exposure, not a dup
     _pull(tmp_path, "adapter:ibkr", [{"symbol": "AAPL", "value": 10000, "sec_type": "STK",
-                                      "account": "ACCOUNT_ALPHA"}],
+                                      "account": "U24485312"}],
           as_of="2026-09-05", kind="adapter", refresh="auto")
     _pull(tmp_path, "upload:parametric.csv", [{"symbol": "AAPL", "value": 4000, "sec_type": "STK",
                                                "account": "038CAG"}],
@@ -451,7 +453,7 @@ def test_concurrent_record_pull_no_lost_update(tmp_path):
 
 def test_staging_json_never_torn_under_concurrency(tmp_path):
     # atomic write: a reader mid-storm always parses valid JSON
-    import threading, json as _json
+    from concurrent.futures import ThreadPoolExecutor
     from officekit import staging
     bad = []
 
@@ -463,17 +465,18 @@ def test_staging_json_never_torn_under_concurrency(tmp_path):
     def reader():
         for _ in range(50):
             try:
-                _json.loads((tmp_path / "staging.json").read_text())
+                staging.load(tmp_path)
             except FileNotFoundError:
                 pass
             except Exception as e:
                 bad.append(str(e))
 
-    ts = [threading.Thread(target=writer, args=(i,)) for i in range(8)] + \
-         [threading.Thread(target=reader) for _ in range(4)]
-    for t in ts: t.start()
-    for t in ts: t.join()
+    with ThreadPoolExecutor(max_workers=12) as pool:
+        jobs = [pool.submit(writer, i) for i in range(8)] + [pool.submit(reader) for _ in range(4)]
+        for job in jobs:
+            job.result()  # Writer errors are failures, not lost thread warnings.
     assert not bad, f"torn reads: {bad[:3]}"
+    assert len(staging.load(tmp_path)['sources']) == 8
 
 
 def test_import_totals_block_by_source(tmp_path):
@@ -521,8 +524,8 @@ def test_asset_spanning_multiple_sources_totals_and_breaks_out(tmp_path):
     from officekit import staging
     from officekit.render_imports import render_imports
     staging.record_pull(tmp_path, "adapter:ibkr", "adapter", "IBKR",
-        [{"symbol": "AAPL", "value": 10000, "sec_type": "STK", "account": "ACCOUNT_ALPHA"},
-         {"symbol": "MNDY", "value": 8000, "sec_type": "STK", "account": "ACCOUNT_ALPHA"}],
+        [{"symbol": "AAPL", "value": 10000, "sec_type": "STK", "account": "U24485312"},
+         {"symbol": "MNDY", "value": 8000, "sec_type": "STK", "account": "U24485312"}],
         refresh="auto", as_of="2026-09-06")
     staging.record_pull(tmp_path, "upload:parametric.csv", "upload", "parametric.csv",
         [{"symbol": "AAPL", "value": 4000, "sec_type": "STK", "account": "038CAG"}],
@@ -537,7 +540,7 @@ def test_asset_spanning_multiple_sources_totals_and_breaks_out(tmp_path):
     seg = render_imports([], staging.ledger(tmp_path), rows, overlaps)
     seg = seg[seg.index("Asset source map"):]
     assert "<b>AAPL</b>" in seg and "2 sources" in seg and "14,000" in seg  # combined
-    assert "ACCOUNT_ALPHA" in seg and "038CAG" in seg              # per-account breakout
+    assert "U24485312" in seg and "038CAG" in seg              # per-account breakout
     assert "combined across accounts" in seg
 
 

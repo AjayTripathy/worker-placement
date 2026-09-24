@@ -86,7 +86,8 @@ def test_malformed_client_json_is_validation_error(server, route):
     if route == '/onboard/confirm':
         code, _, _ = _post(base+route, {'answers_json': '{'})
     else:
-        request = urllib.request.Request(base+route, data=b'{', headers={'Content-Type': 'application/json'})
+        from local_http import headers
+        request = urllib.request.Request(base+route, data=b'{', headers={'Content-Type': 'application/json', **headers(base)})
         with pytest.raises(urllib.error.HTTPError) as response:
             urllib.request.urlopen(request)
         code = response.value.code

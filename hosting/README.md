@@ -73,8 +73,52 @@ See [GCP operations](gcp/README.md). Stage only the explicit `stage_web.py` allo
 | `OFFICE_KMS_KEY` | Fully qualified KMS key name |
 | `RESEARCH_BUCKET` | Separate private research seed bucket |
 | `RESEARCH_VERSION` | Published immutable seed prefix |
+| `RESEARCH_REVIEW_MODEL` | Independent publication-review model; must differ from producer models |
+| `RESEARCH_REVIEW_PROVIDER` | Registered intelligence provider; defaults to `openai` |
+| `RESEARCH_REVIEW_REASONING` | OpenAI reviewer effort; defaults to `medium` |
+| `RESEARCH_REVIEW_API_KEY` | Publisher-only review credential; never a tenant research credential |
+| `RESEARCH_CONTACT` | SEC fair-access contact for the publisher's stock evidence resolver |
 
 Use the attached runtime identity; do not ship service-account keys. Keep deployment config outside Git. `WORKER_PLACEMENT_HOSTED_URL` overrides the local destination, and `WORKER_PLACEMENT_CONFIG_DIR` isolates CLI login state for testing.
+
+Research/intake/extraction now default to `gpt-6-astra` through the shared
+intelligence interface and OpenAI Responses API. Existing explicit `models.json`
+choices override those defaults; classification retains its separate inexpensive
+Anthropic slot. Connect `OPENAI_API_KEY` through the office's Settings. Hosted
+credentials are encrypted per office and never fall back to machine environment
+variables or local key files. Publisher review uses its separate configured key.
+
+## General research admission (local implementation, 2026-09-20)
+
+The authenticated `/api/research/general` exchange accepts the existing immutable
+general court record. Tenant jobs bind it to the authenticated office through
+request-scoped runtime context. Sharing starts off and defaults to anonymous when
+enabled. Contextual suitability and account-to-contributor bindings stay private.
+`GET /api/research/general/{symbol}/{id}/provenance` returns public attribution and
+the publication receipt, never account identity or the full reviewer report.
+
+New submissions fail closed with HTTP 503 without publisher evidence/reviewer
+configuration. The configured resolver independently resolves known funds or SEC
+issuers; it never fetches contributor-supplied URLs. Source hashes must match the
+contribution. Claims require full-field coverage, exact quotes and independent
+support judgments. Receipt/report integrity is checked on reads and exports;
+unreviewed legacy rows are withheld. Identical accepted retries do not repeat a
+paid review. Concurrent first submissions may still race to perform a review;
+this is not a distributed billing lease or task scheduler.
+
+The reviewer is fallible: quote and hash checks are deterministic, while factual
+entailment and arithmetic are model judgments. Public file receipts are publisher
+assertions without signatures. A verified contributor means account binding, not
+proof of authorship. Private instruments require explicit release; the default
+resolver refuses them pending an operator-controlled source resolver.
+
+The selected release target is `AjayTripathy/worker-placement/research_exchange/`.
+`hosting/gcp/export_exchange.py` commits only admitted records, attribution and
+receipts under a neutral identity. Run it against a clean public checkout; its
+`--push` is an explicit operator publication, not part of tenant request handling.
+Source snapshots, reviewer reports and private context must not enter that commit.
+No deployment or public research release was performed for this change. See
+[the retained evaluation](../officekit/evals/research_exchange_20260920/README.md).
 
 ## Verify
 

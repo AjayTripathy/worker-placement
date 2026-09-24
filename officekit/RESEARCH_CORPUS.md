@@ -1,9 +1,15 @@
 # Contextual research corpus
 
-Status (2026-09-18): pilot implemented; contract and transport evaluation passing.
-Live-model comparison pending: the first Anthropic request was rejected for
-insufficient API credit before any research was generated. The milestone remains
-open. This document distinguishes implementation from demonstrated effectiveness.
+Status (2026-09-20): attribution and admission hardening implemented locally;
+two-office hosted contract passes with synthetic providers. The live donor's
+first Anthropic request was rejected for insufficient credit before any research
+was generated. No live contribution or public release occurred. The milestone
+remains open; deployment and independent output audit are still required.
+
+The principal selected `AjayTripathy/worker-placement`, under `research_exchange/`,
+as the public release destination. Do not make the private SignalOS repository
+public. Retained evidence and results are in
+[the evaluation folder](evals/research_exchange_20260920/README.md).
 
 ## Milestone and acceptance
 
@@ -51,21 +57,64 @@ provenance, not a measured intelligence score. Source overlap is not independent
 corroboration. Adoption records intent; execution stays unknown without custody
 evidence.
 
-First-milestone exchange is an explicit reviewed JSON bundle, retained and consumed
-by the same Python modules locally and hosted. The shared library can be rebuilt
-from those artifacts. Central contribution admission, independent publisher
-signatures, multi-contributor disclosure analysis, automated Git releases,
-research task allocation and long-horizon outcome grading are subsequent phases.
-Do not silently turn on those features or publish household-derived material.
+Contextual exchange remains an explicit reviewed JSON bundle, consumed by the
+same modules locally and hosted. General court records can separately pass through
+the authenticated hosted exchange and an operator Git export. Sharing starts off;
+when enabled it defaults to anonymous. Household suitability stays private.
+Independent publisher signatures, population-wide disclosure analysis, task
+allocation and long-horizon effectiveness evidence remain future work.
 
 The eventual central index is a query projection of admitted versioned artifacts;
-private contributor mappings remain separate. A dedicated public research
-repository records accepted releases, corrections and retractions. Published
+private contributor mappings remain separate. The worker-placement public library
+will record accepted releases, corrections and retractions. Published
 copies cannot be recalled from other people's clones. Source-specific reuse
 permission must accompany evidence; a repository's code license is insufficient
 metadata for deciding what source material to republish.
 
 ## Implementation and evaluation notes
+
+### Order and admission contract
+
+1. Imported general research retains its original ID and contributor envelopes
+   in a private custody sidecar. Index rebuilds distinguish own, imported and
+   unknown records. Reusing a record never makes the recipient its author.
+2. Connectors default to private. A public declaration and an exact supported
+   field schema are both required. Unknown sections and extra fields are withheld;
+   raw connector exceptions cannot enter public evidence. Private instruments
+   require an explicit release regardless of evidence eligibility.
+3. Each narrative field, including bench briefs and unverified queues, requires
+   independent claim review against publisher-controlled evidence. Every claim
+   names its source digest, exact quote, kind and support reasoning. Missing
+   coverage, changed digests, absent quotes, unsupported findings, self-review and
+   reviewer failure withhold publication. The model checks semantic support and
+   calculations; deterministic checks verify coverage, hashes and quote presence.
+   This is not a proof of entailment or truth. Synthetic reviewer fixtures test
+   enforcement mechanics, not reviewer accuracy.
+4. Hosted admission accepts no caller-supplied approval. Retained review reports
+   are private; record-bound public receipts are publisher assertions, not signed
+   attestations. Identical retries reuse an intact current-policy review. Old
+   unreviewed records stay on disk but disappear from admission-required listings
+   and exports. Publication failure is visible in the proposal.
+5. Prove the existing two-office milestone before decomposing research. General
+   research uses today's immutable court record. The factor/mechanism layer is
+   the existing knowledge graph and promotion pipeline: detector, `APPLIES_TO`
+   contract, dispatch and lineage. Candidate acceptance alone does not demonstrate
+   executable dispatch on another issuer. Do not introduce parallel prose mechanisms.
+6. Schema decomposition, central analytical tables and task allocation follow
+   empirical reuse evidence. Preserve existing `as_of`, `fetched_at`, `resolved_at`,
+   lookahead exclusion and CIK lineage. Reliability estimates should pool sparse
+   groups and stay advisory; do not add early task/domain/horizon gates. The
+   existing 20-resolution reporting threshold is not evidence of skill.
+
+Public source times are coarsened to dates; anonymity is the default for all
+names, including thinly covered ones. Pseudonyms require explicit opt-in. Rotation
+changes an identifier but cannot remove content/timing fingerprints. Full batching
+and disclosure analysis are deferred with decomposition, not claimed as solved.
+Account-bound attribution establishes who submitted under a key, not true
+authorship. `acq_coherence` now returns a nonzero CLI status for total or partial
+model failure, while a genuinely empty acquisition set remains a successful result.
+
+### Existing contextual artifacts
 
 `officekit_research/cases.py` owns versioned cases, private capture, projection,
 validation, content identities, import and retrieval. `corpus.py` is the explicit
@@ -147,7 +196,7 @@ python -m pytest -q tests/test_research_evaluation.py
 python -m pytest -q tests/test_hosted_research.py tests/test_hosted_workspace.py
 ```
 
-The three-arm fixture keeps recipient facts and instructions equal across arms:
+The original file-exchange fixture keeps recipient facts and instructions equal across arms:
 no reuse, evidence-only reuse, and evidence plus contextual reasoning. It records
 three source acquisition attempts without reuse versus two in each reuse arm;
 all arms still run six model stages. Tests inspect every model request to verify
@@ -158,6 +207,12 @@ These are mechanism results, not evidence of better model judgment, lower model
 cost or investment performance. Fixture usage is absent or explicitly synthetic;
 neither can establish real cost savings.
 
+The hosted fixture additionally reuses the general court: recipient model-call
+counts are seven/seven/four for baseline/evidence-only/contextual, with source
+acquisition counts three/two/two. It verifies preserved attribution, a distinct
+recipient suitability ruling and one idempotent Git commit in an isolated test
+repository. These counts exclude publisher review; no synthetic output is pushed.
+
 The live harness uses fictional accumulation/decumulation households, a frozen
 manually checked SGOV issuer summary, actual configured model calls, and a paired
 issuer-outage condition. The recipient has 150,000 cash with an explicit 90,000
@@ -165,10 +220,10 @@ reservation due in ten days; the donor reserves a 10,000 cash floor. The control
 scenario excludes unspecified lifestyle spending instead of mixing an inferred
 estimate into the comparison. The obligation is a cash reservation as well as a
 goal: describing a goal alone would not constrain the funding calculation.
-The harness does not read household data. First create the donor:
+The harness does not read household data. Create the donor in a fresh v4 directory:
 
 ```sh
-python -m officekit_research.evaluate donor --out ./pilot-v2 --evidence ./sgov-evidence.json
+python -m officekit_research.evaluate donor --out ./pilot-v4 --evidence ./sgov-evidence.json
 ```
 
 Review its case using the CLI above; label `provenance.kind` as
@@ -177,19 +232,32 @@ of the frozen original source summary. Evaluation cases are excluded from normal
 proposals. Then:
 
 ```sh
-python -m officekit_research.evaluate pair --out ./pilot-v2 --evidence ./sgov-evidence.json --bundle ./reviewed-pilot-case.json
+python -m officekit_research.evaluate pair --out ./pilot-v4 --evidence ./sgov-evidence.json --bundle ./reviewed-pilot-case.json
 ```
 
-The v2 plan freezes the model, code protocol, source, contribution, scenario date,
+The v4 plan freezes the model, code protocol, source, contribution, scenario date,
 recipient facts and a randomized arm order before dispatch. Missing, expired or
 mismatched contributions fail before model construction. Changed inputs require
-a new output directory; v1 checkpoints remain intact and cannot be relabeled as
-v2 results. Reuse mode cannot change during proposal recovery.
+a new output directory; earlier checkpoints remain intact and cannot be relabeled
+as v4 results. Reuse mode cannot change during proposal recovery.
+
+For hosted contribution/retrieval, add `--hosted-origin https://EXCHANGE_HOST`
+and `--bearer-env DONOR_EXCHANGE_BEARER` for the donor, then the same origin with
+`--bearer-env RECIPIENT_EXCHANGE_BEARER` for the pair. Use distinct verified test
+accounts. Tokens stay in the named environment variables, never in artifacts.
+Hosted admission needs an operator-controlled resolver for the identical frozen
+source summary and a funded reviewer distinct from the producing models. The
+normal live issuer-page loader will correctly reject a different summary digest;
+do not bypass that check or trust a client-supplied snapshot to make the pilot pass.
+The donor phase fails if hosted admission fails; the contextual arm fails unless
+it actually reuses the frozen donor general record from the hosted exchange.
 
 The harness serializes runs on its output directory, records each call before
 dispatch, preserves checkpoints and stops after an error. The default ceiling is
-26 calls / 80,000 output tokens across donor and recipient runs; a one-candidate
-donor and three-arm comparison normally use 24 calls. Missing measured usage
+30 calls / 80,000 output tokens across donor and recipient runs; the hosted fixture
+uses seven donor calls and recipient counts of seven/seven/four. Publisher review
+is a separate service call and is outside this caller budget and these counts;
+retain its usage separately for a live cost comparison. Missing measured usage
 reserves that call's requested output ceiling rather than counting it as free.
 `--resume` explicitly retries a saved failure; uncertain completions require
 inspection and are never automatically replayed.

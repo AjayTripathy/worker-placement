@@ -102,6 +102,32 @@ def install(app, offices, research, origin, member, body, csrf_page, limiter, jo
         claims=await private(request);data=await body(request,require_browser=False)
         return await run_in_threadpool(offices.activate,claims['uid'],sid,data.get('replace_revision'))
 
+    # ---- central research exchange: GENERAL research only --------------------
+    # Contributions come from an office's agent with explicit bearer credentials
+    # (never an ambient cookie). Reading requires a signed-in member.
+    @app.post('/api/research/general')
+    async def research_submit(request:Request):
+        claims=await private(request);data=await body(request,limit=600*1024,require_browser=False)
+        limiter.claim(claims['uid'],'research')
+        return await run_in_threadpool(app.state.research_exchange.submit,claims['uid'],data.get('record'),data.get('contributor'),data.get('release_private') is True)
+
+    @app.get('/api/research/general/{symbol}')
+    async def research_listing(symbol:str,request:Request):
+        await member(request)
+        from .exchange import Exchange
+        return {'research':await run_in_threadpool(Exchange(offices.store).listing,symbol)}
+
+    @app.get('/api/research/general/{symbol}/{rid}')
+    async def research_read(symbol:str,rid:str,request:Request):
+        await member(request)
+        from .exchange import Exchange
+        return await run_in_threadpool(Exchange(offices.store).read,symbol,rid)
+
+    @app.get('/api/research/general/{symbol}/{rid}/provenance')
+    async def research_provenance(symbol:str,rid:str,request:Request):
+        await member(request)
+        return await run_in_threadpool(app.state.research_exchange.provenance,symbol,rid)
+
     @app.get('/api/offices')
     async def listing(request:Request):
         claims=await member(request)
@@ -220,7 +246,7 @@ def install(app, offices, research, origin, member, body, csrf_page, limiter, jo
             if ctype.split(';', 1)[0] != 'application/x-www-form-urlencoded':
                 raise AuthFailure('Use the connection settings form.')
             data = {name: form.getvalue(name) or '' for name in
-                    ('provider', 'credential_revision', 'remove', 'ANTHROPIC_API_KEY',
+                    ('provider', 'credential_revision', 'remove', 'ANTHROPIC_API_KEY', 'OPENAI_API_KEY',
                      'APCA_API_KEY_ID', 'APCA_API_SECRET_KEY', 'APCA_API_BASE_URL',
                      'IBKR_FLEX_TOKEN', 'IBKR_FLEX_QUERY_ID', 'OFFICEKIT_CONTACT')}
             await run_in_threadpool(credentials.update, claims['uid'], oid, data)
@@ -231,7 +257,7 @@ def install(app, offices, research, origin, member, body, csrf_page, limiter, jo
         if request.method == 'POST' and (path in LONG_PATHS or goal_intake or path == '/onboard'):
             values, _ = await run_in_threadpool(credentials.read, claims['uid'], oid)
             # Without a key, strategy briefs still save synchronously for later.
-            if (not path.startswith('/strategy/') and not goal_intake and path != '/onboard') or values.get('ANTHROPIC_API_KEY'):
+            if (not path.startswith('/strategy/') and not goal_intake and path != '/onboard') or values.get('ANTHROPIC_API_KEY') or values.get('OPENAI_API_KEY'):
                 jid = await run_in_threadpool(jobs.start, claims['uid'], oid, path, raw, ctype, expected)
                 receipt, _ = await run_in_threadpool(offices.read, claims['uid'], oid)
                 if ctype.split(';', 1)[0] == 'application/json':
@@ -341,8 +367,9 @@ def install(app, offices, research, origin, member, body, csrf_page, limiter, jo
         area=request.query_params.get('area');query=request.query_params.get('q','')[:200]
         try:offset=max(0,min(50000,int(request.query_params.get('offset','0'))))
         except ValueError:raise AuthFailure('Invalid page offset.') from None
-        entries=await run_in_threadpool(r.entries,area) if area else []
-        return csrf_page(views.research_index(catalog,area,entries,query,offset),request)
+        symbol = request.query_params.get('match') == 'symbol'
+        entries=await run_in_threadpool(r.entries,area) if area else (await run_in_threadpool(r.search,query,symbol) if query else [])
+        return csrf_page(views.research_index(catalog,area,entries,query,offset,symbol=symbol),request)
 
     @app.get('/app/research/document')
     async def research_document(request:Request):

@@ -32,16 +32,21 @@ from pathlib import Path
 from officekit.runtime import hosted, credential
 
 from officekit import (build_from_answers, build_model, render_office, render_scenarios,
-                       render_strategies)
+                       render_strategies, load_balance_sheet)
 
 def _ai(folder=None, slot="intake"):
     """The intelligence plugin, iff installed AND the slot's BYOM provider can
     construct a client (models.json decides provider/model/key env-var;
-    Anthropic + ANTHROPIC_API_KEY is only the zero-config default) — else None
+    credentials are resolved within the current office) — else None
     and every AI affordance simply doesn't render (INTELLIGENCE.md principle 1)."""
     if hosted():
-        from officekit.runtime import credential
-        if not credential("ANTHROPIC_API_KEY"):
+        from officekit_ai.models import resolve
+        try:
+            provider, cfg, _ = resolve(slot, folder)
+        except (RuntimeError, ValueError):
+            return None
+        env = cfg.get("api_key_env", "OPENAI_API_KEY" if provider == "openai" else "ANTHROPIC_API_KEY")
+        if not credential(env):
             return None
     try:
         import officekit_ai
@@ -141,7 +146,7 @@ ONBOARD = """<!doctype html><html lang="en"><head><meta charset="utf-8">
   <div class="row3" style="margin-top:10px"><label>Dated target — label</label><label>— when</label><label>— amount ($)</label></div>
   <div id="goals">
   <div class="row3">
-    <input name="goal_label" placeholder="College fund"><input name="goal_date" placeholder="2040-09-01"><input name="goal_amount" placeholder="250000">
+    <div><select name="goal_kind" aria-label="Goal type"><option value="spending">Dated spending</option><option value="charitable">Charitable giving</option></select><input name="goal_label" placeholder="College fund"><input type="hidden" name="goal_charitable" value=""></div><input name="goal_date" placeholder="2040-09-01"><input name="goal_amount" placeholder="250000">
   </div>
   </div>
   <button type="button" class="btn2" onclick="addGoal()" style="margin-top:8px">+ another dated target</button>
@@ -190,7 +195,7 @@ function addURow(){{
 function removeURow(btn){{ var r=btn.closest('.row'); if(r)r.remove(); if(window.recomputeTyped)window.recomputeTyped(); document.getElementById('onboarding-form').dispatchEvent(new Event('input')); }}
 function addGoal(){{
   var d=document.createElement('div'); d.className='row3'; d.style.marginTop='8px';
-  d.innerHTML='<input name="goal_label" placeholder="label"><input name="goal_date" placeholder="YYYY-MM-DD">'+
+  d.innerHTML='<div><select name="goal_kind" aria-label="Goal type"><option value="spending">Dated spending</option><option value="charitable">Charitable giving</option></select><input name="goal_label" placeholder="label"><input type="hidden" name="goal_charitable" value=""></div><input name="goal_date" placeholder="YYYY-MM-DD">'+
     '<input name="goal_amount" placeholder="$">';
   document.getElementById('goals').appendChild(d);
 }}
@@ -203,7 +208,7 @@ def _server_draft_blob(folder):
     browser, unlike the localStorage-only fallback."""
     p = Path(folder) / "draft.json"
     try:
-        raw = p.read_text()
+        raw = p.read_text(encoding="utf-8")
         raw = json.dumps(json.loads(raw)).replace('<', '\\u003c')
         return f"<script>window.__OFFICEKIT_DRAFT__={raw};</script>"
     except Exception:
@@ -235,8 +240,8 @@ _DRAFT_JS = """<script>
   function collect(){
     var d={rows:typedRows(),scalars:{},goals:[],profile:{}};
     SCALARS.forEach(function(nm){var e=document.getElementsByName(nm)[0]; if(e)d.scalars[nm]=e.value;});
-    var gl=document.getElementsByName('goal_label'),gd=document.getElementsByName('goal_date'),ga=document.getElementsByName('goal_amount');
-    for(var i=0;i<gl.length;i++){ if(gl[i].value||ga[i]&&ga[i].value) d.goals.push([gl[i].value,gd[i]?gd[i].value:'',ga[i]?ga[i].value:'']); }
+    var gl=document.getElementsByName('goal_label'),gd=document.getElementsByName('goal_date'),ga=document.getElementsByName('goal_amount'),gk=document.getElementsByName('goal_kind'),gc=document.getElementsByName('goal_charitable');
+    for(var i=0;i<gl.length;i++){ if(gl[i].value||ga[i]&&ga[i].value) d.goals.push([gl[i].value,gd[i]?gd[i].value:'',ga[i]?ga[i].value:'',gk[i]?gk[i].value:'spending',gc[i]?gc[i].value:'']); }
     document.querySelectorAll('[name^=p_]').forEach(function(e){ if(e.checked)d.profile[e.name]=1; });
     var th=document.getElementsByName('goal_taxharvest')[0]; if(th&&th.checked)d.taxharvest=1;
     return d;
@@ -283,6 +288,8 @@ _DRAFT_JS = """<script>
       if(!gl[i].value)gl[i].value=g[0]||'';
       var gd=document.getElementsByName('goal_date'),ga=document.getElementsByName('goal_amount');
       if(gd[i]&&!gd[i].value)gd[i].value=g[1]||''; if(ga[i]&&!ga[i].value)ga[i].value=g[2]||'';
+      var gk=document.getElementsByName('goal_kind'),gc=document.getElementsByName('goal_charitable');
+      if(gk[i])gk[i].value=g[3]||'spending'; if(gc[i])gc[i].value=g[4]||'';
     });
     if(d.profile)document.querySelectorAll('[name^=p_]').forEach(function(e){e.checked=!!d.profile[e.name];});
     if(d.taxharvest){var th=document.getElementsByName('goal_taxharvest')[0]; if(th)th.checked=true;}
@@ -371,7 +378,9 @@ function fillGoals(a){if(!a)return; var spendIdx=0;
    else if(g.kind=='tax_efficiency'){var c=document.getElementsByName('goal_taxharvest')[0]; if(c)c.checked=true;}
    else{var i=spendIdx++;
      while(document.getElementsByName('goal_label').length<=i)addGoal();
-     fillArr('goal_label',i,g.label);fillArr('goal_date',i,g.date);fillArr('goal_amount',i,g.amount);}});
+     fillArr('goal_label',i,g.label);fillArr('goal_date',i,g.date);fillArr('goal_amount',i,g.amount);
+     fillArr('goal_kind',i,g.kind==='charitable'?'charitable':'spending');
+     fillArr('goal_charitable',i,g.kind==='charitable'?JSON.stringify(g.charitable||{}):'');}});
  // a windfall mentioned in the goals chat is an ASSET — fill the assets-panel
  // windfall fields (2026-09-07 UX ruling: capture it, don't bounce to the other chat)
  if(a.incoming){setV('wind_amount',a.incoming.amount);setV('wind_eta',a.incoming.eta);
@@ -458,13 +467,13 @@ body{{display:flex;flex-direction:column}}
 <script>
 var cur='office', pane=document.getElementById('pane'), dirty=false;
 function viewPath(){{try{{var p=pane.contentWindow.location.pathname;var base=window.officeBase||'';if(base&&p.startsWith(base+'/'))p=p.slice(base.length);return p+pane.contentWindow.location.hash;}}catch(e){{return '/pages/office.html';}}}}
-function validPath(p){{return p==='/research'||/^\/pages\/[a-zA-Z0-9_.-]+\.html(?:#[^<>]*)?$/.test(p);}}
+function validPath(p){{return p==='/research'||p==='/research/scorecard'||/^\/pages\/[a-zA-Z0-9_.-]+\.html(?:#[^<>]*)?$/.test(p);}}
 function fromHash(){{try{{var p=decodeURIComponent(location.hash.replace(/^#view=/,''));return validPath(p)?p:null;}}catch(e){{return null;}}}}
 function navigate(p){{p=(window.officeBase||'')+p;try{{pane.contentWindow.location.replace(p);}}catch(e){{pane.src=p;}}}}
 function show(k){{var p='/pages/'+k+'.html';if(!document.getElementById('t_'+k))return;history.pushState(null,'','#view='+encodeURIComponent(p));navigate(p);}}
 function syncNav(){{
   var path=viewPath(),slug=path.split('/').pop().split('.html')[0];
-  cur=document.getElementById('t_'+slug)?slug:slug.startsWith('goal_')?'goals':slug==='research'||slug.startsWith('asset_')||slug.startsWith('deck_')||slug.startsWith('thesis_deck_')||slug.startsWith('proposal_')?'strategies':slug.startsWith('capability_')?'signals':slug.startsWith('import_')?'imports':cur;
+  cur=document.getElementById('t_'+slug)?slug:slug.startsWith('goal_')?'goals':slug==='research'||slug.startsWith('asset_')||slug.startsWith('deck_')||slug.startsWith('thesis_deck_')||slug.startsWith('proposal_')||slug.startsWith('deployment_')?'strategies':slug.startsWith('capability_')?'signals':slug.startsWith('import_')?'imports':cur;
   document.querySelectorAll('.tab').forEach(function(t){{var on=t.id==='t_'+cur;t.classList.toggle('on',on);if(on)t.setAttribute('aria-current','page');else t.removeAttribute('aria-current');}});
   if(validPath(path))history.replaceState(null,'','#view='+encodeURIComponent(path));
 }}
@@ -611,12 +620,13 @@ def _key_ask_html(notice=None, via=None):
     REQUIRES a key — the deterministic path runs in full, and the agents ASK
     for one). Leads with the same detection/import first line (key-free facts),
     then the ask. The key goes to the process environment — never into the
-    office folder — and to ~/.anthropic_key only if the user opts in."""
+    office folder — and to a provider key file only if the user opts in."""
     if hosted():
         return '<div class="panel"><p>Connect your AI key to enable chat, extraction and courts.</p><a class="btn" href="/settings" target="_top">Office settings</a></div>'
     first = chat_first_line(notice, via)
-    ask = ("To enable the wizard chat and ticker auto-classification, paste an Anthropic "
-           "API key. It stays on this machine — never in your Worker Placement folder.")
+    ask = ("To enable GPT-6 chat and research, connect your OpenAI API key. "
+           "It stays on this machine — never in your Worker Placement folder. "
+           "The separate classification slot can use an Anthropic key from Settings.")
     return ('<div class="panel" id="chatp">'
             '<div style="font-weight:700;font-size:13px;margin-bottom:2px">Or describe your assets '
             '<span style="color:var(--dim);font-weight:400">— the wizard agent fills the table; '
@@ -626,11 +636,12 @@ def _key_ask_html(notice=None, via=None):
             + html.escape(first) + "</div>"
             '<div style="margin-bottom:6px"><b style="color:var(--violet)">agent</b> '
             + html.escape(ask) + "</div></div>"
-            '<div class="row2"><input type="password" name="api_key" placeholder="sk-ant-…" '
+            '<input type="hidden" name="provider" value="openai" form="intake-key">'
+            '<div class="row2"><input type="password" name="api_key" placeholder="OpenAI API key" '
             'form="intake-key" autocomplete="off" required>'
             '<button type="submit" form="intake-key" class="btn2">Enable agents</button></div>'
             '<div class="chk" style="border:0;padding:6px 0 0"><input type="checkbox" name="remember" value="1" form="intake-key">'
-            '<span class="why">remember on this machine (~/.anthropic_key, chmod 600) — otherwise '
+            '<span class="why">remember privately on this machine — otherwise '
             'it lives only in this server process</span></div>'
             '<p class="note">Everything else — the connection scan, position import, the form, '
             'building your office — works without any key.</p></div>')
@@ -644,27 +655,25 @@ _BUSY_ATTR = "onsubmit=\"var b=this.querySelector('button[type=submit]')||this.q
 
 
 def _key_status(folder=None):
-    if hosted():
-        from officekit.runtime import credential
-        attached = bool(credential("ANTHROPIC_API_KEY"))
-        return {"attached": attached, "label": "Connected privately to this office" if attached else "Connect your AI key in Office settings"}
     """The AI key, treated as an INTEGRATION (principal 2026-09-05): tell the
     user where we imported it from, or that one needs attaching and how."""
     try:
-        from officekit_ai.models import key_source
-        src = key_source()
+        from officekit_ai.models import key_source, resolve
+        provider, cfg, _ = resolve("intake", folder)
+        env = cfg.get("api_key_env", "OPENAI_API_KEY" if provider == "openai" else "ANTHROPIC_API_KEY")
+        src = key_source(env)
     except ImportError:
         return {"attached": False, "how": None,
                 "label": "AI plugin not installed (pip install officekit[ai])"}
+    if hosted():
+        return {"attached": bool(src), "label": "Connected privately to this office" if src else "Connect your AI key in Office settings"}
     if src and src.startswith("env:"):
         return {"attached": True, "how": src,
                 "label": f"attached via the {src[4:]} environment variable"}
     if src:
-        return {"attached": True, "how": src, "label": "imported from ~/.anthropic_key"}
+        return {"attached": True, "how": src, "label": "imported from " + src.removeprefix("file:")}
     return {"attached": False, "how": None,
-            "label": ("not attached — agents (chat, classification, extraction, courts) are "
-                      "disabled. Attach one: paste it in the wizard panel below, or write it to "
-                      "~/.anthropic_key, or export ANTHROPIC_API_KEY before launching")}
+            "label": f"not attached — set {env} before launching, or connect your key in Settings"}
 
 
 _DROPZONE_JS = """<script>
@@ -1079,8 +1088,8 @@ def write_imports_page(folder):
         disc, ledger, rows, overlaps,
         key_status=_key_status(folder), pull_endpoint="/adapter/import",
         upload_html=_dropzone_html(folder, back="imports.html"),
-        reconciliation=(json.loads((Path(folder) / "answers.json").read_text()).get("reconciliation")
-                        if (Path(folder) / "answers.json").exists() else None)))
+        reconciliation=(json.loads((Path(folder) / "answers.json").read_text(encoding="utf-8")).get("reconciliation")
+                        if (Path(folder) / "answers.json").exists() else None)), encoding="utf-8")
 
     # detail page per pulled source, plus per fetchable adapter not yet pulled
     st = staging.load(folder)
@@ -1092,7 +1101,7 @@ def write_imports_page(folder):
         label = e.get("ref") or sid
         (pages / f"{import_slug(sid)}.html").write_text(render_import_detail(
             f"{label} — import detail", f"{e.get('kind','')} · {e.get('detail','')[:80]}",
-            e, srows, _import_refresh_html(folder, e)))
+            e, srows, _import_refresh_html(folder, e)), encoding="utf-8")
     for a in disc:
         sid = f"adapter:{a['name']}"
         if sid in seen or not a.get("can_fetch"):
@@ -1101,7 +1110,7 @@ def write_imports_page(folder):
                 "as_of": None, "pulled_utc": None, "warnings": [], "detail": a.get("detail", "")}
         (pages / f"{import_slug(sid)}.html").write_text(render_import_detail(
             f"{a['label']} — import detail", f"adapter · {a.get('detail','')[:80]}",
-            stub, [], _import_refresh_html(folder, stub)))
+            stub, [], _import_refresh_html(folder, stub)), encoding="utf-8")
 
 
 def adapter_prefill(rows):
@@ -1216,7 +1225,7 @@ def answers_from_form(form, folder):
                "sleeves": [], "imports": [], "profile": {}, "goals": []}
     identity = folder / 'answers.json'
     if identity.exists():
-        oid = json.loads(identity.read_text()).get('office_id')
+        oid = json.loads(identity.read_text(encoding="utf-8")).get('office_id')
         if oid:
             answers['office_id'] = oid
     # csv upload
@@ -1279,14 +1288,24 @@ def answers_from_form(form, folder):
     glabels = form.getlist("goal_label") if form.getvalue("goal_label") is not None else []
     gdates = form.getlist("goal_date")
     gamounts = form.getlist("goal_amount")
+    gkinds = form.getlist("goal_kind")
+    gcharitable = form.getlist("goal_charitable")
     for i, label in enumerate(glabels):
         amt = _money(gamounts[i] if i < len(gamounts) else "")
         if not label.strip() or not amt:
             continue
         gd = gdates[i].strip() if i < len(gdates) else ""
-        answers["goals"].append({"kind": "spending", "label": label.strip(),
-                                 **({"date": gd} if gd else {}),
-                                 "amount": amt})
+        kind = gkinds[i] if i < len(gkinds) and gkinds[i] else 'spending'
+        if kind not in {'spending', 'charitable'}:
+            raise ValueError('Choose dated spending or charitable giving for this goal.')
+        goal = {"kind": kind, "label": label.strip(), **({"date": gd} if gd else {}), "amount": amt}
+        if kind == 'charitable':
+            from officekit.charitable import validate as validate_charitable
+            goal['charitable'] = json.loads(gcharitable[i]) if i < len(gcharitable) and gcharitable[i] else {}
+            errors = validate_charitable(goal)
+            if errors:
+                raise ValueError(' '.join(errors))
+        answers["goals"].append(goal)
     if _money(g("floor_amount")):
         answers["goals"].append({"kind": "liquidity_floor", "label": "Liquidity floor",
                                  "amount": _money(g("floor_amount"))})
@@ -1345,7 +1364,7 @@ def sync_office_from_staging(folder):
     from officekit import staging
     from officekit.reconciliation import reconcile
     rows, _ = staging.merged_rows(folder)
-    answers = json.loads((folder / "answers.json").read_text())
+    answers = json.loads((folder / "answers.json").read_text(encoding="utf-8"))
     updated, report = reconcile(answers, rows, staging.load(folder)["sources"], _attach_lots)
     build_office(updated, folder)
     return report
@@ -1358,7 +1377,7 @@ def _sma_constituents(folder):
     any non-principal office (the split needs the SMA membership list)."""
     if hosted():
         saved_path = Path(folder) / "balance_sheet.json"
-        saved = json.loads(saved_path.read_text()) if saved_path.exists() else {}
+        saved = json.loads(saved_path.read_text(encoding="utf-8")) if saved_path.exists() else {}
         sleeves = [s for s in saved.get("sleeves", []) if s.get("category") == "direct_index"]
         symbols = {h.get("company") for s in sleeves for h in s.get("holdings", []) if h.get("company")}
         return symbols or None, (sleeves[0]["name"].split(" — ", 1)[0] if sleeves else "Direct-index SMA")
@@ -1470,12 +1489,12 @@ def build_office(answers, folder):
             _prev = None
             _cardp = folder / "parametric_scorecard.json"
             if _cardp.exists():
-                _prev = json.loads(_cardp.read_text())
+                _prev = json.loads(_cardp.read_text(encoding="utf-8"))
             _syms = {(r.get("symbol") or "").upper()
                      for r in (answers.get("positions") or {}).get("rows", []) if r.get("symbol")}
             _card = _ms0.build_scorecard(our_book=_syms, prev_card=_prev)
             if _card:
-                _cardp.write_text(json.dumps(_card, indent=1))
+                _cardp.write_text(json.dumps(_card, indent=1), encoding="utf-8")
     except Exception:
         pass                                         # generation never blocks a build
     data = build_from_answers(answers, sma_symbols=sma_syms, sma_label=sma_label)
@@ -1508,13 +1527,13 @@ def build_office(answers, folder):
         saved.flush()
         os.fsync(saved.fileno())
     os.replace(saved.name, folder / "answers.json")
-    (folder / "balance_sheet.json").write_text(data_json)
+    (folder / "balance_sheet.json").write_text(data_json, encoding="utf-8")
     pc_path = folder / "personal_context.json"
     if not pc_path.exists():   # empty-but-asserted from day one; never overwrite content
         from officekit.personal_context import empty as _pc_empty
-        pc_path.write_text(json.dumps(_pc_empty(data.get("office_id")), indent=1) + "\n")
+        pc_path.write_text(json.dumps(_pc_empty(data.get("office_id")), indent=1) + "\n", encoding="utf-8")
     for fn, htmlstr in core.items():
-        (pages / fn).write_text(htmlstr)
+        (pages / fn).write_text(htmlstr, encoding="utf-8")
     (folder / "draft.json").unlink(missing_ok=True)   # built into answers now
     try:
         write_imports_page(folder)
@@ -1559,12 +1578,13 @@ def _render_core(answers, data, folder):
     from officekit.commitments import revision
     from officekit.strategy_proposals import list_proposals
     m["_commitment_revision"] = revision(answers)
+    proposals = list_proposals(folder)
     core = {
         "goals.html": render_goals(m, chat=bool(_ai(folder))),
-        "capital.html": render_capital(m, answers, chat=bool(_ai(folder))),
+        "capital.html": render_capital(m, answers, chat=bool(_ai(folder)), proposals=proposals),
         "risk.html": render_risk(m, review(m, answers, personal_context=pc), answers),
         "office.html": render_office(m, goals_endpoint="/goals", assets_endpoint="/assets",
-                                     chat=bool(_ai(folder))),
+                                     chat=bool(_ai(folder)), proposals=proposals),
         "scenarios.html": render_scenarios(m, adopt_endpoint="/strategy/adopt"),
         "strategies.html": render_strategies(
             m, create_endpoint="/strategy/new",
@@ -1573,7 +1593,7 @@ def _render_core(answers, data, folder):
             goal_menu=goal_menu, goal_adopt_endpoint="/strategy/goal-adopt",
             goal_unadopt_endpoint="/strategy/goal-unadopt", docket_items=docket_items,
             desk_theses=_thesis_sleeves(answers, folder),    # office-native + owned snapshot
-            desk_import_endpoint=None if hosted() else "/import/desk-board", proposals=list_proposals(folder)),
+            desk_import_endpoint=None if hosted() else "/import/desk-board", proposals=proposals),
     }
     return core
 
@@ -1591,6 +1611,8 @@ def _render_additional(answers, data, folder):
         from officekit.goal_mandates import goal_coverage
         from officekit.goal_projection import project, recommendations
         from officekit.render_goal import render_goal
+        from officekit.mandates import stamp_forms
+        from officekit.commitments import revision
         cov = goal_coverage(m)["by_goal"]
         for g in data.get("goals") or []:
             gid = g.get("id")
@@ -1599,13 +1621,14 @@ def _render_additional(answers, data, folder):
             serving = cov.get(gid, [])
             proj = project(g, serving, data.get("as_of", ""), m)
             recs = recommendations(g, proj, m)
-            (pages / f"goal_{gid}.html").write_text(render_goal(g, serving, proj, recommendations=recs))
+            (pages / f"goal_{gid}.html").write_text(stamp_forms(
+                render_goal(g, serving, proj, recommendations=recs), revision(answers)), encoding="utf-8")
     except Exception:
         pass                                   # a projection failure never blocks the build
     # the growth calculator + the Risk Officer (whole-portfolio surfaces)
     try:
         from officekit.render_growth import render_growth
-        (pages / "growth.html").write_text(render_growth(m, answers))
+        (pages / "growth.html").write_text(render_growth(m, answers), encoding="utf-8")
     except Exception:
         pass
     try:
@@ -1615,7 +1638,7 @@ def _render_additional(answers, data, folder):
         rate = float((data.get("tax_model") or {}).get("rate_ltcg") or 0.238)
         default_sel = {p["id"] for p in col["positions"] if p["known"] and p["loss"] > 0}
         sim = _hv.simulate(col, default_sel, m, rate, data.get("as_of"))
-        (pages / "harvest.html").write_text(render_harvest(m, col, sim, rate))
+        (pages / "harvest.html").write_text(render_harvest(m, col, sim, rate), encoding="utf-8")
     except Exception:
         pass
     # every adjudication gets its full pitch-deck page (click-through taxonomy)
@@ -1624,16 +1647,16 @@ def _render_additional(answers, data, folder):
     for a in adjudications:
         title = (STRATEGY_LIB.get(a.get("strategy"), {}) or {}).get("title") \
             or (data.get("strategy_decisions", {}).get(a.get("strategy"), {}) or {}).get("title")
-        (pages / deck_filename(a)).write_text(render_deck(a, strategy_title=title))
+        (pages / deck_filename(a)).write_text(render_deck(a, strategy_title=title), encoding="utf-8")
     # contributed strategy-pack decks (DECK.md) -> a deck page per pack
     try:
         from officekit import strategy_packs
         _packs, _pk_probs = strategy_packs.load_packs([folder / "strategies"])
         for p in _packs:
             if p.get("deck_path") and Path(p["deck_path"]).exists():
-                md = Path(p["deck_path"]).read_text()
+                md = Path(p["deck_path"]).read_text(encoding="utf-8")
                 (pages / f"thesis_deck_{p['id']}.html").write_text(
-                    render_markdown_deck(p.get("name") or p["id"], md, author=p.get("author")))
+                    render_markdown_deck(p.get("name") or p["id"], md, author=p.get("author")), encoding="utf-8")
         if _pk_probs:
             print(f"[serve] strategy-pack problems: {_pk_probs}")   # degrade loud
     except Exception as e:
@@ -1645,10 +1668,10 @@ def _render_additional(answers, data, folder):
         from officekit.model import strategy_tags
         from officekit.render_signals import render_asset, render_capability, render_signals_index
         rt = sig.runtime(folder)
-        (pages / "signals.html").write_text(render_signals_index(sig.CAPABILITIES, rt))
+        (pages / "signals.html").write_text(render_signals_index(sig.CAPABILITIES, rt), encoding="utf-8")
         for name, cap in sig.CAPABILITIES.items():
             (pages / f"capability_{name}.html").write_text(
-                render_capability(cap, rt.get(name), sig.source_code(name)))
+                render_capability(cap, rt.get(name), sig.source_code(name)), encoding="utf-8")
         assets = {}
         for s in data.get("sleeves", []):
             for h in s.get("holdings", []):
@@ -1668,7 +1691,7 @@ def _render_additional(answers, data, folder):
                         union.append(c)
             from officekit.render_signals import asset_slug
             (pages / f"asset_{asset_slug(sym)}.html").write_text(
-                render_asset(sym, data, adjudications, union, strats))
+                render_asset(sym, data, adjudications, union, strats), encoding="utf-8")
     except ImportError:
         pass
 
@@ -1676,12 +1699,12 @@ def _render_additional(answers, data, folder):
 def render_saved_office(folder):
     """Render an existing office without rebuilding or publishing its balances."""
     folder = Path(folder)
-    answers = json.loads((folder / "answers.json").read_text())
-    data = json.loads((folder / "balance_sheet.json").read_text())
+    answers = json.loads((folder / "answers.json").read_text(encoding="utf-8"))
+    data = json.loads((folder / "balance_sheet.json").read_text(encoding="utf-8"))
     pages = folder / "pages"
     pages.mkdir(exist_ok=True)
     for name, content in _render_core(answers, data, folder).items():
-        (pages / name).write_text(content)
+        (pages / name).write_text(content, encoding="utf-8")
     write_imports_page(folder)
     _render_additional(answers, data, folder)
 
@@ -1783,6 +1806,8 @@ def make_handler(folder):
     folder = Path(folder)
     from officekit.hosting_ui import Hosting, handle as handle_hosting
     hosting = None if hosted() else Hosting(folder)
+    from officekit.local_security import Boundary, HEADER
+    local_boundary = None if hosted() else Boundary()
     from officekit.commitment_routes import prune_previews
     from officekit.strategy_proposals import recover_interrupted
     if not hosted():
@@ -1822,10 +1847,19 @@ def make_handler(folder):
                     ctype = 'text/html; charset=utf-8'
             if not public and isinstance(body, str) and 'text/html' in ctype:
                 body = api_errors.inject(body)
+            if local_boundary and getattr(self, '_local_authorized', False) and isinstance(body, str) and 'text/html' in ctype:
+                body = local_boundary.inject(body)
             body = body.encode() if isinstance(body, str) else body
             self._response_started = True
             self.send_response(code)
             self.send_header("Content-Type", ctype)
+            if local_boundary:
+                self.send_header('Cache-Control', 'no-store')
+                self.send_header('Referrer-Policy', 'no-referrer')
+                self.send_header('X-Content-Type-Options', 'nosniff')
+                self.send_header('Content-Security-Policy', "frame-ancestors 'self'")
+                if getattr(self, '_local_authorized', False):
+                    self.send_header(HEADER, local_boundary.token)
             if download == 'research-case.json':
                 self.send_header('Content-Disposition', 'attachment; filename="research-case.json"')
             if self.path == "/hosting" or self.path.startswith("/hosting/"):
@@ -1867,7 +1901,15 @@ def make_handler(folder):
         def _guard(self, action):
             self._response_started = False
             self._public_request = False
+            self._local_authorized = False
             try:
+                if local_boundary:
+                    problem = local_boundary.check(self)
+                    if problem:
+                        return self._send(json.dumps({'error': problem}), 403, 'application/json', public=True)
+                    self._local_authorized = True
+                    if self.command == 'GET' and self.path == '/local-session':
+                        return self._send('{}', ctype='application/json', public=True)
                 return action()
             except (BrokenPipeError, ConnectionResetError):
                 return
@@ -1879,11 +1921,14 @@ def make_handler(folder):
             return self._guard(self._get)
 
         def do_POST(self):
+            return self._guard(self._locked_post)
+
+        def _locked_post(self):
             if self.path.startswith("/hosting/"):
-                return self._guard(self._post)
+                return self._post()
             from officekit.office_lock import locked
             with locked(folder):
-                return self._guard(self._post)
+                return self._post()
 
         def _redirect(self, to):
             if self.command == 'POST':
@@ -1901,14 +1946,14 @@ def make_handler(folder):
             if err:
                 raise err if isinstance(err, BaseException) else ValueError(err)
             try:
-                (folder / ".flash.json").write_text(json.dumps({"notice": notice, "err": ""}))
+                (folder / ".flash.json").write_text(json.dumps({"notice": notice, "err": ""}), encoding="utf-8")
             except OSError:
                 pass
 
         def _pop_flash(self):
             p = folder / ".flash.json"
             try:
-                d = json.loads(p.read_text())
+                d = json.loads(p.read_text(encoding="utf-8"))
                 p.unlink(missing_ok=True)
                 return d.get("notice", ""), d.get("err", "")
             except Exception:
@@ -1959,12 +2004,16 @@ def make_handler(folder):
                                       answers_json=html.escape(json.dumps(answers), quote=True)))
 
         def _get(self):
+            if self.path.split('?', 1)[0] == '/research/scorecard':
+                from officekit.render_scorecard import render
+                from officekit.commitments import revision
+                return self._send(render(folder, revision(json.loads((folder / 'answers.json').read_text(encoding='utf-8')))))
             if self.path.split('?', 1)[0] == '/research':
                 from officekit.render_research import library
                 from officekit.commitments import revision
                 if not (folder / 'answers.json').exists():
                     raise ValueError('Build your office before exchanging research')
-                return self._send(library(folder, revision(json.loads((folder / 'answers.json').read_text()))))
+                return self._send(library(folder, revision(json.loads((folder / 'answers.json').read_text(encoding="utf-8")))))
             if self.path == "/settings":
                 from officekit.render_settings import render_settings
                 return self._send(render_settings())
@@ -2008,17 +2057,48 @@ def make_handler(folder):
                 except OSError:
                     v = 0
                 return self._send(json.dumps({"v": v}), ctype="application/json")
+            if self.path == '/pages/beta_programs.html':
+                from officekit.render_beta import page
+                answers = json.loads((folder / 'answers.json').read_text(encoding="utf-8"))
+                return self._send(page(answers, _capital_model(answers, folder)))
             if self.path.startswith("/pages/proposal_") and self.path.endswith(".html"):
                 from officekit import strategy_proposals
                 from officekit.commitments import revision
                 from officekit.render_proposal import render_proposal
                 proposal = strategy_proposals.load(folder, self.path[len('/pages/proposal_'):-5])
-                answers = json.loads((folder / 'answers.json').read_text())
+                answers = json.loads((folder / 'answers.json').read_text(encoding="utf-8"))
                 return self._send(render_proposal(proposal, revision=revision(answers)))
+            if self.path.startswith('/pages/deployment_') and self.path.endswith('.html'):
+                from officekit.deployment import source_for
+                from officekit.render_deployment import page
+                from officekit.strategy_proposals import list_proposals
+                from officekit.commitments import revision
+                answers = json.loads((folder / 'answers.json').read_text(encoding="utf-8"))
+                model = _capital_model(answers, folder)
+                try:
+                    source = source_for(model, key=self.path[len('/pages/deployment_'):-5])
+                except ValueError:
+                    return self._send('Incoming-money source not found.', 404)
+                from officekit_research.discovery import catalog
+                return self._send(page(model, source, list_proposals(folder), revision(answers), research=catalog(folder, answers)))
+            if self.path.startswith('/pages/research_') and self.path.endswith('.html'):
+                from officekit.render_saved_research import page
+                key = self.path[len('/pages/research_'):-5]
+                answers = json.loads((folder / 'answers.json').read_text(encoding="utf-8"))
+                try:
+                    return self._send(page(folder, answers, None if key == 'catalog' else key))
+                except ValueError:
+                    return self._send('Saved research not found in this office.', 404)
             if self.path.startswith("/pages/"):
+                if self.path in {'/pages/office.html', '/pages/capital.html'} and (folder / 'answers.json').exists():
+                    # Proposal checkpoints change without a financial mutation.
+                    # Home must read them afresh, including errors and final tickers.
+                    answers = json.loads((folder / 'answers.json').read_text(encoding="utf-8"))
+                    data = json.loads((folder / 'balance_sheet.json').read_text(encoding="utf-8"))
+                    return self._send(_render_core(answers, data, folder)[Path(self.path).name])
                 p = folder / "pages" / Path(self.path).name
                 if p.exists():
-                    return self._send(p.read_text())
+                    return self._send(p.read_text(encoding="utf-8"))
                 # a stale app shell (tab open from before a /reset) requesting a
                 # now-deleted page: bust the whole tab back to / rather than
                 # showing a bare "not found" inside the iframe (self-heal, not
@@ -2031,7 +2111,7 @@ def make_handler(folder):
                 # could wipe the office). Show a confirm page that POSTs.
                 return self._send(_RESET_CONFIRM.format(style=STYLE))
             if (folder / "balance_sheet.json").exists():
-                owner = json.loads((folder / "balance_sheet.json").read_text()).get(
+                owner = json.loads((folder / "balance_sheet.json").read_text(encoding="utf-8")).get(
                     "owner", {}).get("first_name", "your")
                 return self._send(APP.format(style=STYLE, owner=html.escape(owner)))
             notice, err = self._pop_flash()           # PRG: show the last POST's result
@@ -2076,7 +2156,7 @@ def make_handler(folder):
                     from officekit.migration import inspect_document
                     inspect_document('draft.json', raw.encode())
                     folder.mkdir(parents=True, exist_ok=True)
-                    (folder / "draft.json").write_text(raw)
+                    (folder / "draft.json").write_text(raw, encoding="utf-8")
                     return self._send('', 204, 'application/json')
                 except Exception as e:
                     self._failure(e, json_response=True)
@@ -2111,18 +2191,24 @@ def make_handler(folder):
             form = formdata.parse(self.rfile, self.headers)
             g = lambda k: (form.getvalue(k) or "").strip()
             if self.path == "/key":
-                # the agents' key intake: process env now, ~/.anthropic_key only
+                # The agents' key intake: process env now, a private key file only
                 # on explicit opt-in. Never logged, never echoed, never in the
                 # office folder (models.json stays env-var-names-only).
                 import os as _os
                 k = (form.getvalue("api_key") or "").strip()
                 if not k:
                     return self._onboard(err="no key provided")
-                _os.environ["ANTHROPIC_API_KEY"] = k
+                provider = (form.getvalue("provider") or "anthropic").strip()
+                key_config = {"openai": ("OPENAI_API_KEY", ".openai_key"),
+                              "anthropic": ("ANTHROPIC_API_KEY", ".anthropic_key")}.get(provider)
+                if key_config is None:
+                    return self._onboard(err="unsupported model provider")
+                env, filename = key_config
+                _os.environ[env] = k
                 if (form.getvalue("remember") or "").strip():
                     try:
-                        kp = Path.home() / ".anthropic_key"
-                        kp.write_text(k + "\n")
+                        kp = Path.home() / filename
+                        kp.write_text(k + "\n", encoding="utf-8")
                         kp.chmod(0o600)
                     except OSError as e:
                         return self._failure(e)
@@ -2139,7 +2225,7 @@ def make_handler(folder):
                 # thesis sleeves (answers['desk_theses']). The only desk read, and it's
                 # explicit — after this the office assembles theses from its own data.
                 try:
-                    answers = json.loads((folder / "answers.json").read_text())
+                    answers = json.loads((folder / "answers.json").read_text(encoding="utf-8"))
                     imported = _import_desk_board(folder)
                     if imported:
                         answers["desk_theses"] = imported
@@ -2260,7 +2346,7 @@ def make_handler(folder):
                 try:
                     answers = self._request_json(g("answers_json"))
                     if (folder / 'answers.json').exists():
-                        answers['office_id'] = json.loads((folder / 'answers.json').read_text())['office_id']
+                        answers['office_id'] = json.loads((folder / 'answers.json').read_text(encoding="utf-8"))['office_id']
                     accepted = {}
                     for v in (form.getlist("acc") if form.getvalue("acc") is not None else []):
                         sym, cat, style = v.split(":", 2)
@@ -2277,8 +2363,8 @@ def make_handler(folder):
                 try:
                     import os
                     import officekit_signals as sig
-                    answers = json.loads((folder / "answers.json").read_text())
-                    data = json.loads((folder / "balance_sheet.json").read_text())
+                    answers = json.loads((folder / "answers.json").read_text(encoding="utf-8"))
+                    data = json.loads((folder / "balance_sheet.json").read_text(encoding="utf-8"))
                     ctx = {"office_data": data, "contact": credential("OFFICEKIT_CONTACT")}
                     if g("symbol"):
                         ctx["symbol"] = g("symbol").upper()
@@ -2295,6 +2381,14 @@ def make_handler(folder):
                 from officekit.research_routes import handle as _research_handle
                 body, ctype = _research_handle(self.path, folder, g)
                 return self._send(body, ctype=ctype, download='research-case.json' if self.path == '/research/approve' else None) if body is not None else self._redirect('/research')
+            if self.path == '/beta/program':
+                try:
+                    from officekit.beta_routes import handle
+                    with _OFFICE_WRITE_LOCK:
+                        pid = handle(folder, g, build_office, _capital_model)
+                except Exception as e:
+                    return self._failure(e)
+                return self._redirect('/pages/beta_programs.html#program-' + pid)
             from officekit.strategy_routes import PATHS as _proposal_paths
             if self.path in _proposal_paths:
                 from officekit.strategy_routes import handle as _proposal_handle
@@ -2323,7 +2417,7 @@ def make_handler(folder):
                 # remove the decision entirely (a held/implemented one stays).
                 try:
                     with _OFFICE_WRITE_LOCK:
-                        answers = json.loads((folder / "answers.json").read_text())
+                        answers = json.loads((folder / "answers.json").read_text(encoding="utf-8"))
                         from officekit.mandates import require_revision
                         require_revision(answers, g('revision'))
                         gid, sid = g("gid"), g("sid")
@@ -2344,7 +2438,7 @@ def make_handler(folder):
                     from officekit.personal_context import load as _pc_load, require
                     from officekit.render_strategies import STRATEGY_LIB
                     from officekit_ai import docket
-                    answers = json.loads((folder / "answers.json").read_text())
+                    answers = json.loads((folder / "answers.json").read_text(encoding="utf-8"))
                     sid = g("sid")
                     if g("action") == "queue":
                         docket.enqueue(folder, g("symbol"), sid, source="ui/strategy-form")
@@ -2358,7 +2452,7 @@ def make_handler(folder):
                         docket.drain(folder, pc,
                                      decisions=answers.get("strategy_decisions") or {},
                                      lib=STRATEGY_LIB,
-                                     office_data=json.loads((folder / "balance_sheet.json").read_text()),
+                                     office_data=json.loads((folder / "balance_sheet.json").read_text(encoding="utf-8")),
                                      contact=credential("OFFICEKIT_CONTACT"))
                     build_office(answers, folder)
                 except Exception as e:
@@ -2372,7 +2466,7 @@ def make_handler(folder):
                     from officekit.personal_context import load as _pc_load, require
                     from officekit.render_strategies import STRATEGY_LIB
                     from officekit_ai.court import run_court
-                    answers = json.loads((folder / "answers.json").read_text())
+                    answers = json.loads((folder / "answers.json").read_text(encoding="utf-8"))
                     pc = require(_pc_load(folder), "convene a court")
                     if answers.get("office_id") and not pc.get("office_id"):
                         pc = {**pc, "office_id": answers["office_id"]}
@@ -2380,7 +2474,7 @@ def make_handler(folder):
                     dec = (answers.get("strategy_decisions") or {}).get(sid, {})
                     import os
                     run_court(g("symbol"), sid, dec, pc, folder, lib=STRATEGY_LIB.get(sid),
-                              office_data=json.loads((folder / "balance_sheet.json").read_text()),
+                              office_data=json.loads((folder / "balance_sheet.json").read_text(encoding="utf-8")),
                               contact=credential("OFFICEKIT_CONTACT"))
                     build_office(answers, folder)      # re-render with the verdict on the card
                 except Exception as e:
@@ -2389,7 +2483,7 @@ def make_handler(folder):
             if self.path == "/holdings":
                 try:
                     from officekit_ai.court import load_adjudications
-                    answers = json.loads((folder / "answers.json").read_text())
+                    answers = json.loads((folder / "answers.json").read_text(encoding="utf-8"))
                     adjs = [a for a in load_adjudications(folder) if a.get("subject_kind", "security") == "security"]
                     sid, sym = g("sid"), g("symbol").upper().strip()
                     record_purchase(answers, sid, sym, _money(g("amount")), adjs)
@@ -2444,7 +2538,7 @@ def make_handler(folder):
                     return self._failure(e)
             if self.path == "/goals":
                 try:
-                    answers = json.loads((folder / "answers.json").read_text())
+                    answers = json.loads((folder / "answers.json").read_text(encoding="utf-8"))
                     # PRESERVE goals the row-editor can't represent (tax_efficiency
                     # and any amount-less kind) — else a bulk save silently drops
                     # them (the overwrite bug, 2026-09-08).
@@ -2463,7 +2557,7 @@ def make_handler(folder):
                 # rebuild. 2026-09-08.
                 try:
                     import uuid
-                    answers = json.loads((folder / "answers.json").read_text())
+                    answers = json.loads((folder / "answers.json").read_text(encoding="utf-8"))
                     goals = answers.setdefault("goals", [])
                     new = []
                     nl = g("nl")
@@ -2508,7 +2602,7 @@ def make_handler(folder):
                 try:
                     from officekit.commitments import apply_edit, revision
                     with _OFFICE_WRITE_LOCK:
-                        answers = json.loads((folder / "answers.json").read_text())
+                        answers = json.loads((folder / "answers.json").read_text(encoding="utf-8"))
                         data = build_from_answers(answers)
                         matches = [c for c in data["commitments"] if c["source"] == "mortgage"
                                    and (not g("sleeve") or c.get("sleeve") == g("sleeve"))]
@@ -2522,22 +2616,43 @@ def make_handler(folder):
                 return self._redirect("/pages/office.html")
             if self.path == "/goals/remove":
                 try:
-                    answers = json.loads((folder / "answers.json").read_text())
+                    answers = json.loads((folder / "answers.json").read_text(encoding="utf-8"))
                     gid = g("gid")
                     answers["goals"] = [x for x in (answers.get("goals") or []) if x.get("id") != gid]
                     build_office(answers, folder)
                 except Exception as e:
                     return self._failure(e)
                 return self._redirect("/pages/goals.html" if g("back") == "goals" else "/pages/office.html")
+            if self.path == '/goal/security-review':
+                try:
+                    from officekit.mandates import require_revision
+                    from officekit.donation_securities import record_review
+                    answers = json.loads((folder / 'answers.json').read_text(encoding="utf-8"))
+                    require_revision(answers, g('revision'))
+                    goal = next((x for x in answers.get('goals', []) if x.get('id') == g('gid')), None)
+                    if not goal or goal.get('kind') != 'charitable':
+                        raise ValueError('Choose a charitable goal before reviewing donation securities.')
+                    updated = record_review(answers, _capital_model(answers, folder), g('security_id'), g('fingerprint'),
+                                            {k: g(k) for k in ('cost_basis', 'long_term', 'taxable', 'reference')})
+                    build_office(updated, folder)
+                except Exception as e:
+                    return self._failure(e)
+                return self._redirect('/pages/goal_' + goal['id'] + '.html#donation-securities')
             if self.path == "/goal/params":
                 # adjust a goal's own knobs (price, financing, carry, expense) from
                 # its projection page, then re-run and land back on that page.
                 try:
-                    answers = json.loads((folder / "answers.json").read_text())
+                    answers = json.loads((folder / "answers.json").read_text(encoding="utf-8"))
                     gid = g("gid")
                     for goal in answers.get("goals") or []:
                         if goal.get("id") != gid:
                             continue
+                        if g('charitable_form') == 'yes':
+                            if goal.get('kind') != 'charitable':
+                                raise ValueError('Choose a charitable goal before editing giving details.')
+                            from officekit.charitable import update as update_charitable
+                            goal.update(update_charitable(goal, g))
+                            break
                         if g("spending_basis") and goal.get("kind") == "retirement":
                             if g("spending_basis") not in {"household_total", "additional"}:
                                 raise ValueError("Choose household total or additional spending")
@@ -2560,7 +2675,7 @@ def make_handler(folder):
             if self.path == "/growth":
                 # save the target stock/bond mix (steers the growth calc + risk officer)
                 try:
-                    answers = json.loads((folder / "answers.json").read_text())
+                    answers = json.loads((folder / "answers.json").read_text(encoding="utf-8"))
                     from officekit.portfolio_mix import validate_mix
                     answers["target_mix"] = validate_mix(g("stocks_pct"), g("bonds_pct"))
                     build_office(answers, folder)
@@ -2589,7 +2704,7 @@ def make_handler(folder):
                 # rows may be typed OR filled by the natural-language box via
                 # /chat). APPENDS to answers, dedupes tickers by symbol, rebuilds.
                 try:
-                    answers = json.loads((folder / "answers.json").read_text())
+                    answers = json.loads((folder / "answers.json").read_text(encoding="utf-8"))
                     kinds = form.getlist("u_kind") if form.getvalue("u_kind") is not None else []
                     names = form.getlist("u_name")
                     values = form.getlist("u_value")

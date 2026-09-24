@@ -44,7 +44,7 @@ def _read(ledger_path):
     if not p.exists():
         return []
     out = []
-    for line in p.read_text().splitlines():
+    for line in p.read_text(encoding="utf-8").splitlines():
         try:
             out.append(json.loads(line))
         except Exception:

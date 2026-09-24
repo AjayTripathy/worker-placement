@@ -18,7 +18,7 @@ LOG = logging.getLogger(__name__)
 LONG_PATHS = {'/import/files', '/adapter/import', '/chat', '/court', '/docket',
               '/signals/run', '/commitments/preview', '/strategy/new', '/strategy/propose',
               '/strategy/adopt', '/strategy/goal-adopt', '/strategy/proposal/retry',
-              '/strategy/proposal/revise'}
+              '/strategy/proposal/revise', '/strategy/deploy'}
 TTL = 1800
 
 

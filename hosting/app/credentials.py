@@ -4,6 +4,7 @@ from .auth import AuthFailure
 from .store import Conflict
 
 GROUPS = {
+    'openai': ('OPENAI_API_KEY',),
     'anthropic': ('ANTHROPIC_API_KEY',),
     'alpaca': ('APCA_API_KEY_ID', 'APCA_API_SECRET_KEY', 'APCA_API_BASE_URL'),
     'ibkr_flex': ('IBKR_FLEX_TOKEN', 'IBKR_FLEX_QUERY_ID'),

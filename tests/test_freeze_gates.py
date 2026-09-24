@@ -2,6 +2,7 @@
 deviation rule, Mode-B disconfirm on narrative conviction, base-effect guard).
 LEDGER is monkeypatched to tmp; implied_binary network calls are stubbed."""
 import json
+from datetime import date, timedelta
 import pytest
 
 import desk.freeze_call as fc
@@ -31,7 +32,7 @@ def no_network(monkeypatch):
 
 
 def _freeze(**over):
-    kw = dict(ticker="TEST", cat_date="2026-08-20", our_p=0.55, direction="UP",
+    kw = dict(ticker="TEST", cat_date=(date.today() + timedelta(days=30)).isoformat(), our_p=0.55, direction="UP",
               catalyst="test catalyst", reasoning="r" * 50, plain=dict(GOOD_PLAIN),
               event_type="earnings_print", frame=dict(GOOD_FRAME))
     kw.update(over)

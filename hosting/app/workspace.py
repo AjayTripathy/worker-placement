@@ -30,7 +30,10 @@ POSTS = {'/assets', '/goals', '/goals/add', '/goals/remove', '/goals/mortgage',
          '/api-errors/dismiss', '/import/files', '/import/remove', '/adapter/import', '/chat', '/court', '/docket', '/signals/run', '/commitments/preview'}
 from officekit.research_routes import POSTS as RESEARCH_POSTS
 POSTS |= RESEARCH_POSTS
-GETS = {'/', '/state', '/api-errors', '/strategy/proposals/status', '/research'}
+POSTS.add('/strategy/deploy')
+POSTS.add('/goal/security-review')
+POSTS.add('/beta/program')
+GETS = {'/', '/state', '/api-errors', '/strategy/proposals/status', '/research', '/research/scorecard'}
 ONBOARD_POSTS = {'/draft', '/onboard', '/onboard/confirm', '/import/files', '/import/remove',
                 '/adapter/import', '/chat', '/api-errors/dismiss'}
 EXTRAS = {'api_errors.json', 'commitment_history.jsonl'}
@@ -157,7 +160,9 @@ def dispatch(offices, uid, oid, method, path, raw=b'', content_type='', expected
     if method == 'GET' and path not in GETS and not re.fullmatch(r'/pages/[A-Za-z0-9_.-]+\.html', path):
         raise AuthFailure('Page not found.', 404)
     with tempfile.TemporaryDirectory(prefix='wp-office-') as directory:
-        folder = Path(directory)
+        # Resolve the system-created temp root (e.g. macOS /var -> /private/var).
+        # Tenant document paths still pass validation and cannot supply symlinks.
+        folder = Path(directory).resolve()
         materialize(folder, record)
         from .credentials import Credentials
         credentials, _ = Credentials(offices).read(uid, oid)
@@ -167,11 +172,19 @@ def dispatch(offices, uid, oid, method, path, raw=b'', content_type='', expected
             updated = capture(folder, oid)
             receipt = publish(offices, uid, receipt, updated, job_id=job_id)
             record = updated
-        with hosted_office(folder, credentials, enqueue=pending.append if job_id else None, checkpoint=checkpoint if job_id else None):
+        from .exchange import BoundExchange
+        service = getattr(offices, 'research_exchange', None)
+        with hosted_office(folder, credentials, enqueue=pending.append if job_id else None, checkpoint=checkpoint if job_id else None,
+                           research_exchange=BoundExchange(service, uid) if service else None,
+                           research_library=getattr(offices, 'research_library', None)):
             from officekit.serve import render_saved_office
             if method == 'GET' and (path == '/' or path.startswith('/pages/')):
                 if not record.get('onboarding'):
-                    render_saved_office(folder)
+                    # Deployment renders from current answers, proposals and the
+                    # research catalog in the local handler. Rendering every
+                    # unrelated office page first makes this simple link slow.
+                    if path != '/pages/beta_programs.html' and not re.fullmatch(r'/pages/deployment_[a-f0-9]{24}\.html', path):
+                        render_saved_office(folder)
                 elif path.startswith('/pages/'):
                     from officekit.serve import write_imports_page
                     write_imports_page(folder)
@@ -225,6 +238,20 @@ window.officeBase=BASE;
    return execute();
  };
  document.addEventListener('click',function(event){const a=event.target.closest('a');if(a){const value=a.getAttribute('href');if(value)a.setAttribute('href',resolve(value));}},true);
+ const opening=new Map();
+ document.addEventListener('click',function(event){
+   if(event.defaultPrevented||event.button!==0||event.metaKey||event.ctrlKey||event.shiftKey||event.altKey)return;
+   const a=event.target.closest('a[href]');
+   if(!a||a.hasAttribute('download')||(a.target&&a.target!=='_self'))return;
+   const url=new URL(a.href,location.href);
+   if(url.origin!==location.origin||!url.pathname.startsWith(base+'/pages/deployment_')||!/^deployment_[a-f0-9]{24}\.html$/.test(url.pathname.split('/').pop()))return;
+   if(!opening.has(a))opening.set(a,{text:a.textContent,busy:a.getAttribute('aria-busy')});
+   a.textContent='Opening deployment strategy…';a.setAttribute('aria-busy','true');
+ });
+ window.addEventListener('pageshow',function(){
+   for(const [a,saved] of opening){a.textContent=saved.text;if(saved.busy===null)a.removeAttribute('aria-busy');else a.setAttribute('aria-busy',saved.busy);}
+   opening.clear();
+ });
  document.addEventListener('submit',function(event){
    const form=event.target;form.action=resolve(form.getAttribute('action')||location.pathname);
    if(new URL(form.action).pathname.startsWith(base+'/')){

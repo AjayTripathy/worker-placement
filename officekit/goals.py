@@ -10,11 +10,12 @@ flat safe-withdrawal rate on post-shock investable net worth. The Quant Desk's
 Simulation slot (path/Monte-Carlo) replaces this math later; the statuses here
 are a floor, not a forecast.
 
-Goal kinds (v1 — labels carry the semantics, so education/home/philanthropy are
-`spending` goals with their own labels):
+Goal kinds (education/home remain labeled spending goals; charitable giving
+has its own funding and tax-planning contract):
   retirement       {label, date, annual_spending}
   spending         {label, date?, amount}          # one-time dated target
   liquidity_floor  {label, amount}                 # never dip below this liquid
+  charitable       {label, amount, date?, charitable?} # giving intent, not a tax credit
 """
 from __future__ import annotations
 
@@ -23,8 +24,7 @@ from datetime import datetime
 from officekit.fmt import fmt_usd as _fmt
 
 # Sample goals — quick-adds for the goals editor. Every sample maps to an
-# existing kind (labels carry the meaning, per the ratified ruling: education,
-# philanthropy, a sabbatical are all `spending` with a label). Amounts and
+# supported kind (charitable intent is explicitly distinct from consumption). Amounts and
 # horizons are STARTING POINTS the user edits, never data — a goal only exists
 # once the user commits it in their own words.
 GOAL_LIB = [
@@ -37,7 +37,7 @@ GOAL_LIB = [
     {"kind": "spending",        "label": "Sabbatical year",       "hint": "a year of spending, unpaid",       "amount": 120000, "years_out": 5},
     {"kind": "spending",        "label": "Parents' care reserve", "hint": "eldercare / long-term-care bridge", "amount": 200000, "years_out": 8},
     {"kind": "spending",        "label": "New car",               "hint": "bought in cash",                   "amount": 55000,  "years_out": 3},
-    {"kind": "spending",        "label": "Philanthropy — giving fund", "hint": "a DAF seed or pledged gift",  "amount": 100000, "years_out": 5},
+    {"kind": "charitable",      "label": "Charitable giving", "hint": "compare direct gifts, a DAF, cash and appreciated securities", "amount": 100000},
     {"kind": "spending",        "label": "Start a business",      "hint": "runway you could lose entirely",   "amount": 150000, "years_out": 4},
     {"kind": "spending",        "label": "Second home",           "hint": "down payment + first-year carry",  "amount": 350000, "years_out": 7},
     {"kind": "spending",        "label": "Health reserve",        "hint": "deductibles / uncovered care",     "amount": 40000},
@@ -48,7 +48,7 @@ SWR = 0.04            # flat safe-withdrawal heuristic until Simulation lands
 OK, TIGHT, SHORT = "OK", "TIGHT", "SHORT"
 STATUS_TONE = {OK: "emerald", TIGHT: "amber", SHORT: "coral"}
 
-GOAL_KINDS = {"retirement", "spending", "liquidity_floor"}
+GOAL_KINDS = {"retirement", "spending", "liquidity_floor", "charitable"}
 
 
 def _status(ratio, tight_at=1.0, short_at=0.8):
@@ -81,6 +81,14 @@ def evaluate(goal, nw_inv, liquid, as_of, model=None):
     """
     kind = goal["kind"]
     label = goal.get("label") or kind
+    if kind == 'charitable' and model is not None:
+        from officekit.charitable import assessment
+        a = assessment(goal, model)
+        return {'label': label, 'kind': kind, 'ratio': a['funding_ratio'],
+                'status': _status(a['funding_ratio'], tight_at=1.25, short_at=1),
+                'target_txt': _fmt(goal['amount']) + ' charitable gift',
+                'detail': _fmt(a['available_today']) + ' available from the selected funding source; tax review is separate.',
+                'assessment': {'mode': 'charitable', **a}}
     if model is not None:
         from officekit.goal_projection import is_financed_purchase, project
         if is_financed_purchase(goal) or kind == "expense":
@@ -121,7 +129,7 @@ def evaluate(goal, nw_inv, liquid, as_of, model=None):
                 "status": _status(ratio, tight_at=1.25, short_at=1.0),
                 "target_txt": f"{_fmt(amt)} liquid",
                 "detail": f"{_fmt(liquid)} raisable vs the {_fmt(amt)} floor"}
-    if kind == "spending":
+    if kind in {"spending", "charitable"}:
         amt = float(goal["amount"])
         ratio = liquid / amt if amt else 0.0
         yrs = _years_until(goal.get("date", ""), as_of)
@@ -161,7 +169,9 @@ def evaluate_in_model(goal, model, sleeve_pnls=None, effective_goals=None):
     state = model
     if sleeve_pnls is not None:
         state = dict(model)
-        state["sleeves"] = [{**s, "value": s["value"] + pnl} for s, pnl in sleeve_pnls]
+        state["sleeves"] = [{**s, "value": s["value"] + pnl,
+                             '_goal_shock_scale': max(0, (s['value'] + pnl) / s['value']) if s['value'] else 0}
+                            for s, pnl in sleeve_pnls]
         state["assets"] = [s for s in state["sleeves"] if s.get("kind") == "asset"]
     if effective_goals is not None:
         state = dict(state)

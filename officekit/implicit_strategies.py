@@ -47,37 +47,18 @@ def derive(data) -> dict:
 
 
 def harvest_evidence(data, folder=None):
-    """Evidence that direct indexing / a tax-loss-harvest engine is ALREADY running.
-    The core insight (principal 2026-09-10): ANY equity held as INDIVIDUAL LOTS —
-    not a pooled fund — IS direct-indexed, i.e. lot-level tax-loss-harvestable. So
-    a sleeve of individual holdings is itself the implicit strategy, alongside a
-    labeled direct-index sleeve, realized harvest activity, or the principal's
-    Parametric bridge. Returns a short evidence string, or None."""
-    for s in data.get("sleeves", []):
-        if s.get("kind") != "asset":
-            continue
-        cat = s.get("category")
-        if cat == "direct_index":
-            return s.get("name") or "direct-index SMA"
-        # individually-held equities (line-item holdings, not a fund ticker) are
-        # direct-indexed by construction — you own the lots, so you can harvest them
-        if cat in ("public_equity", "single_name_equity") and (s.get("holdings")):
-            n = len(s["holdings"])
-            return (s.get("name") or "individually-held equities") + f" ({n} lots — lot-level TLH)"
-    tm = data.get("tax_model") or {}
-    try:
-        if float(tm.get("realized_losses_ytd") or tm.get("harvest_losses_2026") or 0) > 0:
-            return "realized tax-loss harvest activity"
-    except (TypeError, ValueError):
-        pass
-    try:
-        from officekit import harvest as _hv
-        if folder and _hv._is_principal_office(folder):
-            pb = _hv._parametric_bridge(folder)
-            if pb:
-                return pb.get("label") or "Parametric direct-index SMA"
-    except Exception:
-        pass
+    """Only a reconciled operating program proves an active harvesting overlay.
+
+    Stocks, a direct-index account label, and realized losses alone establish
+    neither a benchmark mandate nor a currently operating harvesting process.
+    """
+    from officekit.beta_programs import programs, view
+    if programs(data):
+        from officekit import build_model
+        model = build_model(data)
+        for p in programs(data).values():
+            if view(p, model)['state'] == 'operating':
+                return p['label']
     return None
 
 
@@ -90,6 +71,16 @@ def register(answers, data, pc=None, today=None, folder=None) -> bool:
     implied = derive(data)
     decs = answers.setdefault("strategy_decisions", {})
     changed = False
+
+    # Repair only the former automatic inference. Explicit principal/agent
+    # decisions and actual direct-index sleeves retain their own evidence.
+    for sid in ('direct_index', 'harvest_engine'):
+        dec = decs.get(sid) or {}
+        origins = dec.get('origins') or []
+        automatic = origins and all(o.get('source') in {'holding', 'goal'} for o in origins)
+        if dec.get('status') == 'implemented' and automatic and sid not in implied and not harvest_evidence(data, folder):
+            dec.update(status='considering', note='Holdings or realized losses alone do not establish an operating beta/TLH program. Review the program lifecycle.')
+            changed = True
 
     # a direct-index SMA / harvest engine that runs via the Harvest bridge (not a
     # plain sleeve) is IMPLEMENTED — intuit it so it never reads "not implemented".

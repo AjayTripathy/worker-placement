@@ -138,9 +138,10 @@ def _recs_html(recs, gid="", params_endpoint="/goal/params"):
 def render_goal(goal, serving, proj, office_href="/pages/goals.html",
                 params_endpoint="/goal/params", recommendations=None):
     label = goal.get("label") or goal.get("kind", "Goal")
+    page_kind = 'giving plan' if goal.get('kind') == 'charitable' else 'projection'
     P = [f'<!doctype html><html lang="en"><head><meta charset="utf-8">'
          f'<meta name="viewport" content="width=device-width,initial-scale=1">'
-         f'<title>{esc(label)} — projection</title><style>{CSS}</style></head><body><div class="wrap">'
+         f'<title>{esc(label)} — {page_kind}</title><style>{CSS}</style></head><body><div class="wrap">'
          f'<p class="sub"><a href="{esc(office_href)}">← Goals</a></p>'
          f'<h1>{esc(label)}</h1>']
 
@@ -154,6 +155,11 @@ def render_goal(goal, serving, proj, office_href="/pages/goals.html",
 
     mode = proj.get("mode")
     gid = esc(str(goal.get("id") or ""))
+    if mode == 'charitable':
+        from officekit.render_charitable import body
+        P.append(body(goal, proj['giving'], params_endpoint))
+        P.append(_serving_table(serving, show_return=False) + '</div></body></html>')
+        return ''.join(P)
     if goal.get("kind") == "retirement":
         basis = goal.get("spending_basis", "household_total")
         P.append('<p class="sub">Household retirement spending includes lifestyle. The shared budget counts '
@@ -211,11 +217,11 @@ _NOTE = ('<p class="note">Every figure is a first-pass house estimate (nominal, 
          'each tail. Adjust the assumptions above and hit Enter to re-run.</p>')
 
 
-def _serving_table(serving):
+def _serving_table(serving, show_return=True):
     P = ['<h2>Strategies serving this goal</h2>']
     if serving:
         P.append('<table><tr><th>Strategy</th><th>Status</th><th class="n">Held now</th>'
-                 '<th class="n">% of NW</th><th class="n">Assumed return</th></tr>')
+                 '<th class="n">% of NW</th>' + ('<th class="n">Assumed return</th>' if show_return else '') + '</tr>')
         for e in sorted(serving, key=lambda x: -(x.get("cur_val") or 0)):
             er = EXPECTED_RETURN.get(e.get("sid"), DEFAULT_RETURN)
             st = (e.get("status") or "").replace("_", " ")
@@ -223,7 +229,7 @@ def _serving_table(serving):
                      f'<td><span class="k k-{esc(e.get("status") or "")}">{esc(st.upper())}</span></td>'
                      f'<td class="n">{_fmt(e.get("cur_val") or 0)}</td>'
                      f'<td class="n">{(e.get("cur_pct") or 0):.1f}%</td>'
-                     f'<td class="n">{er*100:.1f}%</td></tr>')
+                     + (f'<td class="n">{er*100:.1f}%</td>' if show_return else '') + '</tr>')
         P.append('</table>')
     else:
         P.append('<div class="panel">No strategy is serving this goal yet — attach one on the '

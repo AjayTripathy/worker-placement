@@ -48,7 +48,7 @@ def _system(scope=None):
     scope="assets": assets/debts/income only — the holdings table sits ABOVE
     the chat and goals are off-limits. scope="goals": life goals only — the
     goal fields sit ABOVE the chat and assets are off-limits."""
-    contract = (Path(__file__).resolve().parent.parent / "officekit" / "INTAKE_AGENT.md").read_text()
+    contract = (Path(__file__).resolve().parent.parent / "officekit" / "INTAKE_AGENT.md").read_text(encoding="utf-8")
     scope_block = ""
     if scope == "assets":
         scope_block = """
@@ -76,9 +76,18 @@ capture the rate as `rate_pct` when given. """
 
 This chat captures LIFE GOALS. Kinds: retirement (date + annual spending),
 dated spending targets (label + date + amount), a liquidity floor (amount),
+charitable giving (`kind: charitable`, label + total gift amount + date if known),
 and `tax_efficiency` — an ONGOING objective like harvesting losses / tax
 efficiency (a label, no amount/date needed; it offers a lot-level-harvesting
 strategy). Goals come ONLY from the user's own words.
+Giving is a charitable goal, not a generic spending label or a tax credit.
+Capture only stated `charitable` details: vehicle direct|daf|undecided, funding
+cash|appreciated_securities|undecided, recipient, symbol, basis for the gift
+portion (`cost_basis`), long_term, before_sale, recipient_qualified. Tax fields
+deductible_amount, deduction_tax_rate, capital_gain_tax_rate and
+tax_review_reference must come from an explicit user-provided tax review.
+Never infer a usable deduction, completed gift, reserved cash or tax savings.
+Set reserve_cash only when the user explicitly asks to earmark a dated cash gift.
 
 CAPTURE, DON'T INTERROGATE. Fill what the user gives and STOP — do not ask a
 pile of clarifying questions (timing, floor, retirement date) they didn't
@@ -148,7 +157,8 @@ def turn(messages, client=None, model=None, folder=None, scope=None, context=Non
                    "\nDo not ask the user to type holdings a detected connection can import — "
                    "point them at the Import button instead, and focus your questions on what "
                    "no connection can see (other institutions, real estate, private holdings, debts).")
-    resp = client.messages.create(
+    from officekit_ai.intelligence import generate
+    resp = generate(client,
         model=model, max_tokens=8000, system=system, messages=messages,
         output_config={"format": {"type": "json_schema", "schema": _TURN_SCHEMA}})
     text = next(b.text for b in resp.content if b.type == "text")

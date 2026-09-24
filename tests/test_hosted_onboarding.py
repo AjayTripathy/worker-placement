@@ -159,10 +159,14 @@ def test_natural_language_intake_and_classification_use_tenant_jobs(client, monk
     queue = Queue(); client.app.state.jobs.queue = queue
     Credentials(Offices(client.store)).update('alice', receipt['office_id'], {
         'provider': 'anthropic', 'credential_revision': '0', 'ANTHROPIC_API_KEY': 'tenant-key'})
+    vault = Credentials(Offices(client.store))
+    vault.update('alice', receipt['office_id'], {
+        'provider': 'openai', 'credential_revision': vault.status('alice', receipt['office_id'])['revision'],
+        'OPENAI_API_KEY': 'tenant-openai-key'})
     monkeypatch.setenv('ANTHROPIC_API_KEY', 'machine-key')
     def turn(messages, **kwargs):
         from officekit_ai.models import resolve_key
-        assert resolve_key() == 'tenant-key'
+        assert resolve_key('OPENAI_API_KEY') == 'tenant-openai-key'
         return {'reply': 'Review the goal fields.', 'answers': {'goals': [{'kind': 'liquidity_floor', 'amount': 50000}]}}
     monkeypatch.setattr('officekit_ai.intake_chat.turn', turn)
     page = client.get(receipt['path'])

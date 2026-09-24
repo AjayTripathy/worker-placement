@@ -141,13 +141,15 @@ def test_loopback_origin_and_page_token_protect_http_bridge(bridge, office):
             assert response.headers['Cache-Control']=='no-store'
             assert response.headers['Content-Security-Policy']=="frame-ancestors 'self'"
         csrf=json.loads(re.search(r'const token=("[^"]+")',html).group(1))
+        from local_http import headers as session_headers
+        local_token = session_headers(base)['X-Office-Local-CSRF']
         def req(path, payload=None, **headers):
             request=urllib.request.Request(base+path,data=None if payload is None else json.dumps(payload).encode(),headers=headers)
             try:
                 with urllib.request.urlopen(request) as r:return r.status,json.load(r)
             except urllib.error.HTTPError as e:return e.code,json.load(e)
         assert req('/hosting/status')[0]==403
-        good={'X-Office-Hosting':csrf,'Content-Type':'application/json','Origin':base}
+        good={'X-Office-Hosting':csrf,'X-Office-Local-CSRF':local_token,'Content-Type':'application/json','Origin':base}
         assert req('/hosting/status',**good)[0]==200
         assert req('/hosting/review',{},**{**good,'Origin':'https://evil.example'})[0]==403
         assert req('/hosting/review',{},**{**good,'Host':'evil.example'})[0]==403

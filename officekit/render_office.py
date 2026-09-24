@@ -307,7 +307,7 @@ def _goals_panel(m, d, assets, sleeves, cash_now, goals_endpoint, chat,
         P.append('<div style="display:flex;flex-wrap:wrap;gap:6px;margin:10px 0">' + "".join(chip_forms) + '</div>')
         # precise manual add — Enter on any field submits
         KINDS = [("spending", "Dated target ($)"), ("retirement", "Retirement (spend/yr)"),
-                 ("expense", "Ongoing expense ($/yr)"), ("liquidity_floor", "Liquidity floor ($)")]
+                 ("expense", "Ongoing expense ($/yr)"), ("liquidity_floor", "Liquidity floor ($)"), ("charitable", "Charitable giving ($)")]
         kopts = "".join(f'<option value="{k}">{t}</option>' for k, t in KINDS)
         P.append(f'<form method="POST" action="{esc(add_ep)}" class="grow4">'
                  f'<select name="gkind" aria-label="Goal type">{kopts}</select>'
@@ -405,14 +405,21 @@ def _decision_brief(m):
     pending_tax = tax_funding(m)["pending"]
     pending = sum(s["value"] for s in m["assets"] if s["category"] == "cash_pending")
     if pending > 0:
-        deployable = pending_deployable(m)
-        net_txt = (f"{_fmt(deployable)} net after an est. {_fmt(pending_tax)} tax reserve"
-                   if pending > 0 and pending_tax > 0 else _fmt(deployable))
-        P.append(f'<a class="decision" href="#deploy-plan"><span class="decision-priority">Decide first</span>'
+        from officekit.deployment import funding, sources as deployment_sources, href as deployment_href
+        choices = deployment_sources(m)
+        selected = choices[0] if choices else None
+        pending = selected['pending'] if selected else pending
+        deployment = funding(m, selected['id'] if selected else None)
+        pending_tax = deployment['pending_tax']
+        deployable = deployment['contingent_budget']
+        net_txt = (f"{_fmt(deployable)} after tax and unfunded commitments" if deployment['commitment_reserve'] else
+                   f"{_fmt(deployable)} net after an est. {_fmt(pending_tax)} tax reserve" if pending_tax > 0 else _fmt(deployable))
+        destination = deployment_href(selected['id']) if selected else '/pages/capital.html#inflows'
+        P.append(f'<a class="decision" href="{esc(destination)}"><span class="decision-priority">Decide first</span>'
                  f'<strong>Deploy the incoming {_fmt(pending)}</strong>'
                  f'<span class="decision-copy">{net_txt} to place — the largest allocation decision on the '
                  f'board. New capital is the cheapest rebalancing lever.</span>'
-                 f'<span class="decision-link">Compare the allocation →</span></a>')
+                 f'<span class="decision-link">Build the investment plan →</span></a>')
 
     findings = review(m)
     items = findings.get("findings", []) if isinstance(findings, dict) else findings
@@ -441,74 +448,12 @@ def _decision_brief(m):
     return ''.join(P)
 
 
-def _deploy_plan(m):
-    """A concrete allocation comparison for the incoming powder: the book now,
-    versus after the inflow lands, its tax is reserved, and the net is deployed
-    into the marketable sleeves. No target weights required — it shows what
-    placing the cash actually does to the mix, and points to the Growth
-    calculator to steer it deliberately."""
-    assets, tax = m["assets"], m["tax"]
-    A, NW = m["A"], m["NW"]
-    pending = sum(s["value"] for s in assets if s["category"] == "cash_pending")
-    if pending <= 0:
-        return ""
-    eta = m["eta"]
-    net_tax = tax_funding(m)["pending"]
-    deployable = pending_deployable(m)
-    cash_now = sum(s["value"] for s in assets if s["category"] == "cash")
-    cash_now = max(cash_now, 0)                          # a settled debit isn't dry powder
-    MK = ("public_equity", "direct_index", "single_name_equity",
-          "municipal_credit", "fixed_income", "alpha_market_neutral")
-    marketable = sum(s["value"] for s in assets if s["category"] in MK)
-    marketable_after = marketable + deployable
-    # dry-cash share of the investable pool — falls as the powder is placed; stays
-    # 0–100% (net worth as a denominator can exceed 100% once debt nets out).
-    investable_now = cash_now + pending + marketable
-    investable_after = cash_now + marketable_after
-    dry_now = (cash_now + pending) / investable_now * 100 if investable_now else 0
-    dry_after = cash_now / investable_after * 100 if investable_after else 0
-
-    def row(label, now, after, coral=False, strong=False):
-        nb = f'<b>{_fmt(now)}</b>' if strong else (_fmt(now) if now else "—")
-        col = 'color:var(--coral)' if coral else ''
-        ab = f'<b style="{col}">{_fmt(after)}</b>'
-        return (f'<div class="cmprow"><span class="g">{esc(label)}</span>'
-                f'<span class="cnow">{nb}</span><span class="arw">→</span>'
-                f'<span class="caft">{ab}</span></div>')
-
-    tax_note = (f' The inflow reserves {_fmt(net_tax)} for tax ({tax["char"].upper()} @ '
-                f'{tax["rate"]*100:.1f}%, less {_fmt(tax["offset"])} harvested) before anything is placed.'
-                if net_tax > 0 else "")
-    P = ['<details class="explore" id="deploy-plan"><summary>Deploy plan — place the incoming '
-         f'{_fmt(pending)}</summary>',
-         '<div class="deploycmp">',
-         '<style>.deploycmp .cmprow{display:grid;grid-template-columns:1fr auto 18px auto;align-items:baseline;'
-         'gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:13px}'
-         '.deploycmp .cnow,.deploycmp .caft{font-family:ui-monospace,Menlo,monospace;text-align:right;min-width:88px}'
-         '.deploycmp .cnow{color:var(--dim)} .deploycmp .arw{color:var(--dim);text-align:center}'
-         '.deploycmp .cmphd{display:grid;grid-template-columns:1fr auto 18px auto;gap:10px;font-size:10.5px;'
-         'text-transform:uppercase;letter-spacing:.07em;color:var(--dim);padding-bottom:4px}'
-         '.deploycmp .cmphd .r{text-align:right;min-width:88px}</style>',
-         f'<p class="mnote">What placing the {eta} inflow does to the book — the cash lands, its tax is '
-         f'reserved, and the {_fmt(deployable)} net is invested. Shares are of net worth.{tax_note}</p>',
-         '<div class="cmphd"><span>Line</span><span class="r">Now</span><span></span><span class="r">Deployed</span></div>',
-         row(f"Incoming cash ({eta})", pending, 0.0),
-         (row("less: tax reserve", 0.0, -net_tax, coral=True) if net_tax > 0 else ""),
-         row("Cash available now", cash_now, cash_now),
-         row("Marketable, invested", marketable, marketable_after, strong=True),
-         f'<div class="cmprow"><span class="g"><b>Dry cash, share of investable assets</b></span>'
-         f'<span class="cnow">{dry_now:.0f}%</span><span class="arw">→</span>'
-         f'<span class="caft"><b>{dry_after:.0f}%</b></span></div>',
-         '</div>',
-         '<p class="note">This holds your current mix (pro-rata into what you already own). To place it '
-         'to a deliberate target instead — more bonds, an index hedge, a new sleeve — '
-         '<a href="/pages/growth.html">steer the mix in the Growth calculator →</a> or set sleeve targets '
-         'below, then the plan rebalances toward them.</p>',
-         '</details>']
-    return "".join(p for p in P if p)
+def _deploy_plan(m, proposals=(), revision=None):
+    from officekit.render_deployment import render
+    return render(m, proposals, revision)
 
 
-def render_office(m, now=None, goals_endpoint=None, assets_endpoint=None, chat=False):
+def render_office(m, now=None, goals_endpoint=None, assets_endpoint=None, chat=False, proposals=()):
     d, factors, sleeves = m["d"], m["factors"], m["sleeves"]
     assets, liabs = m["assets"], m["liabs"]
     A, L, NW, agg = m["A"], m["L"], m["NW"], m["agg"]
@@ -567,7 +512,7 @@ def render_office(m, now=None, goals_endpoint=None, assets_endpoint=None, chat=F
                     if d.get("opportunities") else '')
     goals_panel_html = _goals_panel(m, d, assets, sleeves, cash_now, goals_endpoint, chat,
                                     assets_endpoint=assets_endpoint)
-    deploy_plan_html = _deploy_plan(m)
+    deploy_plan_html = _deploy_plan(m, proposals, m.get("_commitment_revision"))
     assets_panel_html = _assets_panel(assets_endpoint, chat)
     donut_panel_html = (f'<div class="panel"><div class="ph"><h3>Asset Allocation</h3>'
                         f'<span class="hint">of {_fmt(A)} gross · a rough shape, not the driver</span></div>'

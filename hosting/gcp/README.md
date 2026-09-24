@@ -4,7 +4,7 @@ Project: `worker-placement-508717` · region: `us-west1` · public service: `wor
 
 Live origin: https://worker-placement-web-653732113303.us-west1.run.app
 
-Read [the hosted service guide](../README.md) first. The deployed scope includes Google accounts, CLI migration to private office snapshots, and shared seeded research. `project.json` describes the larger planned tier; Cloud SQL and hosted AI execution are not deployed. Manual editing uses the shared office workspace and encrypted object revisions.
+Read [the hosted service guide](../README.md) first. The deployed scope includes Google accounts, private office migration, the shared office workspace, durable jobs and a published research library. `project.json` also describes planned resources; Cloud SQL is not deployed.
 
 ## Current resources
 
@@ -39,7 +39,7 @@ gcloud run deploy worker-placement-web \
   --min=0 --max=2 --memory=2Gi --cpu=1 --concurrency=1 --timeout=300
 ```
 
-The service is public because its landing and signup endpoints must be reachable; `/app` and `/api/me` enforce verified sessions in application code. **Never start the `officekit.serve` HTTP listener in this service or use `--source .` at the monorepo root.**
+The service is public because its landing and signup endpoints must be reachable; `/app` and `/api/me` enforce verified sessions in application code. **Never run the standalone localhost listener in this service or use `--source .` at the monorepo root.** The authenticated hosted transport imports shared office handlers internally; it does not start their HTTP server.
 
 Check `/api/health`, public pages, anonymous `/api/me` (401), and private office access, CLI migration, and a seeded research document. `/healthz` is intercepted by Google's frontend, so use `/api/health` for external checks. Run the synthetic authentication workflow in the parent README after auth changes.
 

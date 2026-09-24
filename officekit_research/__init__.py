@@ -30,11 +30,15 @@ import re
 import urllib.request
 
 SOURCES = {}
+SOURCE_CLASSES = {}
 
 
-def evidence_source(name):
+def evidence_source(name, *, visibility="private"):
+    if visibility not in {"private", "public_document", "public_market"}:
+        raise ValueError("Unknown evidence visibility")
     def deco(fn):
         SOURCES[name] = fn
+        SOURCE_CLASSES[name] = visibility
         return fn
     return deco
 
@@ -54,6 +58,10 @@ def _get_json(url, contact):
         return json.loads(r.read().decode())
 
 
+def _utcnow():
+    return datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
+
+
 def _cik(symbol, contact):
     d = _get_json("https://www.sec.gov/files/company_tickers.json", contact)
     for v in d.values():
@@ -62,7 +70,7 @@ def _cik(symbol, contact):
     return None
 
 
-@evidence_source("filings")
+@evidence_source("filings", visibility="public_document")
 def src_filings(symbol, ctx):
     cik = ctx.get("cik")
     if not cik:
@@ -72,10 +80,12 @@ def src_filings(symbol, ctx):
     rows = [{"form": f, "date": d, "acc": a}
             for f, d, a in list(zip(r.get("form", []), r.get("filingDate", []),
                                     r.get("accessionNumber", [])))[:15]]
-    return {"entity": sub.get("name"), "recent": rows}
+    # Locator + read time make this index verifiable by (and shareable with) another office.
+    return {"entity": sub.get("name"), "recent": rows, "cik": int(cik),
+            "url": f"https://data.sec.gov/submissions/CIK{cik:010d}.json", "fetched_at": _utcnow()}
 
 
-@evidence_source("xbrl")
+@evidence_source("xbrl", visibility="public_document")
 def src_xbrl(symbol, ctx):
     cik = ctx.get("cik")
     if not cik:
@@ -96,13 +106,19 @@ def src_xbrl(symbol, ctx):
         rows = [u for units in d.get("units", {}).values() for u in units
                 if u.get("form") in ("10-Q", "10-K", "20-F", "6-K")]
         rows.sort(key=lambda u: u.get("end", ""), reverse=True)
-        out[key] = [{"end": u["end"], "val": u["val"], "form": u.get("form")} for u in rows[:8]]
+        # Each fact carries its own locator (taxonomy tag + accession number) so a
+        # recipient can verify any single number against the filing it came from.
+        out[key] = [{"end": u["end"], "val": u["val"], "form": u.get("form"), "tag": tag, "accn": u.get("accn")}
+                    for u in rows[:8]]
     if not out:
         raise RuntimeError("no XBRL facts found")
+    # Reserved metadata key: fact keys stay top-level for existing readers.
+    out["_source"] = {"cik": int(cik), "fetched_at": _utcnow(),
+                      "url": f"https://data.sec.gov/api/xbrl/companyfacts/CIK{cik:010d}.json"}
     return out
 
 
-@evidence_source("tape")
+@evidence_source("tape", visibility="public_market")
 def src_tape(symbol, ctx):
     """Free keyless daily closes (Nasdaq historical endpoint — connector-atlas
     doctrine: full browser headers required). A broker plugin can replace this
@@ -152,7 +168,7 @@ def src_book(symbol, ctx):
     return {"held": bool(hits), "positions": hits}
 
 
-@evidence_source("filing_text")
+@evidence_source("filing_text", visibility="public_document")
 def src_filing_text(symbol, ctx):
     """Plain text of the latest periodic filing (10-Q/10-K/20-F/6-K primary
     doc) — the desk postmortems' lesson that decisive language (comp
@@ -244,7 +260,13 @@ def render_pack(pack):
         L += [f"- {r['form']} {r['date']}" for r in s["filings"]["recent"][:10]]
     if "xbrl" in s:
         L.append("\n### XBRL (last quarters, most recent first)")
+        src = s["xbrl"].get("_source") or {}
+        if src:
+            L.append(f"As filed with the SEC (CIK {src.get('cik')}; read {src.get('fetched_at')}). Filed facts do not "
+                     "change, but NEWER periods may exist — check the latest filing date before relying on recency.")
         for key, rows in s["xbrl"].items():
+            if key.startswith("_"):
+                continue
             vals = ", ".join(f"{r['end']}: {r['val']:,}" for r in rows[:4])
             L.append(f"- {key}: {vals}")
     if "tape" in s:
@@ -267,4 +289,4 @@ def render_pack(pack):
 
 
 from officekit_research.funds import fund_profile
-evidence_source("fund_profile")(fund_profile)
+evidence_source("fund_profile", visibility="public_document")(fund_profile)

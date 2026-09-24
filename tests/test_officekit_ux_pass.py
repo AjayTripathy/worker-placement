@@ -30,20 +30,19 @@ def _model_with_pending(pending=5_000_000):
     if pending:
         assets.insert(0, {"id": "incoming", "category": "cash_pending", "value": pending})
     A = sum(a["value"] for a in assets)
-    return {"assets": assets, "A": A, "NW": A, "eta": "2026-09", "d": {},
+    return {"assets": assets, "A": A, "NW": A, "eta": "2026-09", "d": {"as_of": "2026-09-21"},
             "sleeves": assets + [{"category": "tax_reserve", "value": -1_670_000,
                                    "meta": {"inflow_id": "incoming"}}],
             "tax": {"net_tax": 1_670_000, "deployable": 3_330_000,
                     "char": "ltcg", "rate": 0.238, "offset": 100_000}}
 
 
-def test_deploy_plan_shows_net_after_tax_and_before_after():
+def test_deploy_plan_links_to_its_dedicated_strategy():
     html = _deploy_plan(_model_with_pending())
-    assert "Deploy plan" in html and 'id="deploy-plan"' in html
-    assert "Dry cash, share of investable assets" in html
-    assert "$3.33M" in html            # net deployable after the tax reserve
-    assert "$5.00M" in html            # gross incoming
-    assert "/pages/growth.html" in html  # steer-the-mix link
+    assert "Deployment strategies" in html and 'id="deploy-plan"' in html
+    assert 'href="/pages/deployment_' in html
+    assert "$5,000,000.00" in html
+    assert "Open deployment strategy" in html
 
 
 def test_deploy_plan_empty_without_pending_cash():

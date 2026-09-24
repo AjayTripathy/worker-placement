@@ -9,7 +9,7 @@ tenant #1, not the package.
     python3 officekit_dist/assemble.py --no-wheel # stage only
 
 PUBLISH IS A SEPARATE, PRINCIPAL-GATED STEP: the public repo gets fresh git
-history, and the license is chosen at publish time.
+history. Code is Apache-2.0; third-party data permissions remain separate.
 """
 from __future__ import annotations
 
@@ -26,10 +26,10 @@ PACKAGES = ["officekit", "officekit_ai", "officekit_agents", "officekit_adapters
 # The DESIGN references ship with the OSS (PRD, ARCHITECTURE, SCHEMAS,
 # OPERATING_CONTRACTS) — contributors need them. Only genuinely internal docs stay
 # out: the roadmap/intelligence doc (has private household + employer context), the
-# LLM intake-agent prompt, and the agent-to-agent handoff (commit hashes, machine
+# agent-to-agent handoff (commit hashes, machine
 # specifics). Private data has been scrubbed from the shipped docs (2026-09-13).
 EXCLUDE = shutil.ignore_patterns("__pycache__", "*.pyc", "evals", "demo_recorder.py",
-                                 "INTELLIGENCE.md", "INTAKE_AGENT.md", "AGENT_HANDOFF.md")
+                                 "INTELLIGENCE.md", "AGENT_HANDOFF.md")
 
 
 def stage(build_dir=None):
@@ -48,6 +48,8 @@ def stage(build_dir=None):
         shutil.copytree(ROOT / "strategies" / pack, bundled / pack)
     for f in ("pyproject.toml", "setup.cfg", "README.md"):
         shutil.copy2(HERE / f, build / f)
+    for f in ('LICENSE', 'NOTICE', 'DATA_LICENSE.md'):
+        shutil.copy2(ROOT / f, build / f)
     n = sum(1 for _ in build.rglob("*.py"))
     print(f"[assemble] staged {len(PACKAGES)} packages ({n} .py files) -> {build}")
     return build

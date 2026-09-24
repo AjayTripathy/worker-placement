@@ -279,6 +279,9 @@ def _lump_sum(goal, serving, as_of):
 
 def project(goal, serving, as_of, m=None):
     kind = goal.get("kind")
+    if kind == 'charitable' and m:
+        from officekit.charitable import assessment
+        return {'applicable': True, 'mode': 'charitable', 'giving': assessment(goal, m)}
     if kind == "tax_efficiency":
         return {"applicable": False, "reason": "ongoing objective — no funding target", "mode": "none"}
     if kind == "expense":

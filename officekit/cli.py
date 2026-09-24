@@ -24,7 +24,7 @@ def _cmd_init(args):
     if not models.exists():
         try:
             from officekit_ai.models import DEFAULTS
-            models.write_text(json.dumps(DEFAULTS, indent=1) + "\n")
+            models.write_text(json.dumps(DEFAULTS, indent=1) + "\n", encoding="utf-8")
             print(f"[init] wrote {models} (BYOM slots — edit provider/model/api_key_env per slot; "
                   f"secrets NEVER go in this file, only env-var NAMES)")
         except ImportError:
@@ -51,7 +51,7 @@ def _cmd_render(args):
               file=sys.stderr)
         return 2
     from officekit.serve import build_office
-    build_office(json.loads(answers.read_text()), folder)
+    build_office(json.loads(answers.read_text(encoding="utf-8")), folder)
     print(f"[render] pages rebuilt -> {folder / 'pages'}")
     return 0
 

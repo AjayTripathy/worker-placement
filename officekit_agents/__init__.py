@@ -34,6 +34,7 @@ DIR = Path(__file__).resolve().parent / "directives"
 
 # directive -> the models.json slots it exercises (contract #10)
 SLOTS = {
+    "capital-planner": ("intake",),
     "court": ("bench", "adjudicate"),
     "diligence": ("bench", "verify"),
     "watch": ("classify", "verify"),
@@ -71,7 +72,7 @@ def load(name):
     p = DIR / f"{name}.md"
     if not p.exists():
         raise KeyError(f"officekit_agents: no directive {name!r} (have: {', '.join(list_directives())})")
-    return p.read_text()
+    return p.read_text(encoding="utf-8")
 
 
 def slots_for(name):

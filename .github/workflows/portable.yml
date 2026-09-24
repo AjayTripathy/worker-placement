@@ -1,0 +1,40 @@
+name: Portable product and research contracts
+on: [push, pull_request]
+jobs:
+  portable:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ['3.11', '3.12']
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install --require-hashes -r hosting/app/requirements.lock
+      - run: python -m pip install --require-hashes -r officekit_dist/requirements.lock
+      - run: python -m ruff check --select F821 officekit officekit_ai officekit_research officekit_adapters officekit_agents officekit_signals desk/order_sentinel.py verticals/public_co/providers.py
+      - run: python -m pytest --offline -q tests/test_officekit_portable.py tests/test_local_security.py tests/test_officekit_imports.py tests/test_officekit_oss_docs.py tests/test_prediction_scorecard.py tests/test_review_repairs.py tests/test_research_index.py tests/test_research_exchange.py
+  hosted:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --require-hashes -r hosting/app/requirements.lock
+      - run: python -m pip install --require-hashes -r officekit_dist/requirements.lock
+      - run: python -m pytest --offline -q tests/test_hosted_workspace.py tests/test_hosted_migration.py tests/test_hosted_research.py tests/test_hosted_research_milestone.py tests/test_hosted_scorecard.py
+  root-cli:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install --require-hashes -r requirements.lock -r officekit_dist/requirements.lock
+      - run: python -m pip install . --no-deps --no-build-isolation
+      - run: signalos --help
+        working-directory: ${{ runner.temp }}

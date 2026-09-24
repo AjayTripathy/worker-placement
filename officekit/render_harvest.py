@@ -215,5 +215,7 @@ def render_harvest(m, collected, sim, tax_rate, endpoint="/harvest",
     P.append('<p class="note">Estimates, not tax advice. A capital loss offsets capital gains (and up to '
              '$3,000 of ordinary income/yr); the rest carries forward. Long-term losses offset long-term '
              'gains first. Confirm timing and wash-sale substitutes with your preparer.</p>')
+    from officekit.render_beta import section
+    P.append(section(m['d'], m))
     P.append('</div></body></html>')
     return "".join(P)

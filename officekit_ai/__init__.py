@@ -4,7 +4,7 @@ Ratified (principal, 2026-09-04): `agent` is the third mandate-origin source,
 queue-for-adoption. This package is the only place agent behavior lives —
 officekit core keeps its zero-dependency, offline, never-phones-home guarantee,
 and every affordance here degrades to graceful absence when the plugin can't
-run (no `anthropic` SDK installed, or no API key). No key -> the deterministic
+run (no configured provider SDK or API key). No key -> the deterministic
 paths keep working unchanged and pages render byte-identically.
 
 Contract (INTELLIGENCE.md, principles 2-4):
@@ -19,21 +19,21 @@ Contract (INTELLIGENCE.md, principles 2-4):
     model providers; it never purchases or reserves cash.
 
 Ships in-monorepo today; publish-time split target is `officekit[ai]` with the
-`anthropic` SDK as its only dependency (user-supplied key in Tier 0).
+OpenAI and Anthropic SDK adapters (user-supplied credentials).
 """
 from __future__ import annotations
 
 
-# INTELLIGENCE.md cost tiering: Opus for reasoning-grade work, Haiku for
-# strict-schema classification.
-DEFAULT_MODEL = "claude-opus-5"
+# Research uses the requested GPT-6 provider; classification retains its
+# inexpensive, separately configurable slot rather than a flagship-only router.
+DEFAULT_MODEL = "gpt-6-astra"
 CLASSIFY_MODEL = "claude-haiku-4-5"
 
 
 def available(folder=None, slot="intake"):
     """True iff a slot's provider can actually construct a client (BYOM: the
     slot's models.json config decides which provider and which key env-var —
-    Anthropic + ANTHROPIC_API_KEY is only the zero-config default). Callers
+    defaults use OpenAI for reasoning and Anthropic for classification). Callers
     gate every AI affordance on this — False means the affordance simply
     doesn't render, never an error."""
     from officekit_ai.models import slot_available

@@ -27,7 +27,7 @@ def _positions_value(folder):
     """symbol -> market value, from the office's OWN positions (answers.json)."""
     out = {}
     try:
-        ans = json.loads((Path(folder) / "answers.json").read_text())
+        ans = json.loads((Path(folder) / "answers.json").read_text(encoding="utf-8"))
         for r in (ans.get("positions") or {}).get("rows", []):
             s = (r.get("symbol") or "").upper()
             if s:
@@ -91,7 +91,7 @@ def import_desk_board(board_path):
     shape (to be stored office-owned in answers['desk_theses']). This is the ONLY
     desk read, and it's an explicit import — not a per-build live dependency."""
     try:
-        board = json.loads(Path(board_path).read_text())
+        board = json.loads(Path(board_path).read_text(encoding="utf-8"))
     except Exception:
         return []
     groups = defaultdict(lambda: {"mv": 0.0, "positions": [], "meta": {}})

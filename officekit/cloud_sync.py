@@ -31,7 +31,7 @@ def hashes(docs):
 
 def read(folder):
     path = Path(folder) / STATE
-    return json.loads(path.read_text()) if path.exists() else {'enabled': False, 'status': 'off'}
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {'enabled': False, 'status': 'off'}
 
 
 def write(folder, value):
@@ -117,7 +117,7 @@ def recover(folder):
     transaction = Path(folder) / JOURNAL
     if not transaction.exists():
         return
-    journal = json.loads(transaction.read_text())
+    journal = json.loads(transaction.read_text(encoding="utf-8"))
     old = {name: base64.b64decode(raw, validate=True) for name, raw in journal['before'].items()}
     restore(folder, old, journal['after_names'])
     restore_pages(folder, journal.get('pages', {}))

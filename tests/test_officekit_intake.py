@@ -63,7 +63,7 @@ def test_csv_importer_classifies_and_splits():
     conc = by_cat["single_name_equity"]
     assert len(conc) == 1 and "NVDA" in conc[0]["name"] and conc[0]["value"] == 185500
     # AAPL + SBUX pooled with a holdings list
-    pooled = [s for s in by_cat["public_equity"] if s.get("holdings")]
+    pooled = [s for s in by_cat["public_equity"] if s['name'].startswith('Individual stocks')]
     assert len(pooled) == 1 and len(pooled[0]["holdings"]) == 2 and pooled[0]["value"] == 42210
     # VTI + unknown mutual fund (FSXLX) share the plain US-equity bucket
     us = [s for s in by_cat["public_equity"] if "VTI" in s["name"]]

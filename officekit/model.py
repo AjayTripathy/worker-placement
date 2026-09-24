@@ -195,10 +195,10 @@ def build_model(data, harvest=None, today=None):
     tax = tax_reserve(tm) if tm else None
     # Withholding is already absent from received cash. Reduce the liability
     # once, and preserve any excess as a non-cash tax credit pending review.
-    unpaid = max(0, round(tax["net_tax"]) - float(tm.get("withheld") or 0)) if tax else 0
+    unpaid = max(0, round(tax["net_tax"], 2) - float(tm.get("withheld") or 0)) if tax else 0
     if tax and unpaid > 0:
         received_fraction = min(1, float(tm.get("received_gross") or 0) / tm["incoming_gross"]) if tm["incoming_gross"] else 0
-        current_tax = max(0, round(tax["net_tax"]) * received_fraction - float(tm.get("withheld") or 0))
+        current_tax = max(0, round(tax["net_tax"], 2) * received_fraction - float(tm.get("withheld") or 0))
         sleeves.append({
             "name": "Tax Reserve — 2026 incoming cash (less harvest)",
             "kind": "liability", "category": "tax_reserve", "value": -round(unpaid, 2),
@@ -212,12 +212,12 @@ def build_model(data, harvest=None, today=None):
             "meta": {"inflow_id": tm.get("inflow_id"),
                      "pending_tax": round(max(0, unpaid - current_tax), 2),
                      "withheld": float(tm.get("withheld") or 0),
-                     "gross_tax": round(tax["gross_tax"]), "offset": round(tax["offset"]), "net_tax": round(tax["net_tax"]),
+                     "gross_tax": round(tax["gross_tax"], 2), "offset": round(tax["offset"], 2), "net_tax": round(tax["net_tax"], 2),
                      "realized_ytd": round(tax["realized"]), "projected_future": round(tax["proj_future"]),
                      "full_year_harvest": round(tax["harvest_losses"]),
                      "harvest_auto": bool(harvest_live), "harvest_asof": harvest_live["asof"] if harvest_live else None},
         })
-    credit = max(0, float(tm.get("withheld") or 0) - round(tax["net_tax"])) if tax else 0
+    credit = max(0, float(tm.get("withheld") or 0) - round(tax["net_tax"], 2)) if tax else 0
     if credit:
         sleeves.append({"name": "Tax withholding above modeled liability", "kind": "asset",
                         "category": "tax_asset", "value": round(credit, 2), "short": "Tax credit",

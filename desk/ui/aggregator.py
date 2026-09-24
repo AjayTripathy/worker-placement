@@ -703,25 +703,16 @@ def entry_candidates() -> dict:
         except Exception:
             return None, None, None, False
         has_explainer = bool(rec.get("edge_explainer"))
-        # position-shaped %-mentions ONLY ("2-3% starter", "1% position", "cap 2% of book") — a bare
-        # first-% rule grabs dividend yields out of prose (BBD's 6.6% carry) and mis-sizes
-        pos_pat = r"(\d+(?:\.\d+)?)(?:\s*[-\u2013]\s*(\d+(?:\.\d+)?))?\s*%\s*(?:starter|position|slot|of (?:the )?(?:deployed )?book|cap|sleeve)"
-        srcs = [json.dumps(rec.get("sizing") or ""), str(rec.get("entry_band") or ""),
-                json.dumps((rec.get("position") or {}).get("action") or ""),
-                str(rec.get("verdict") or ""), ledger_conviction]
-        lo = hi = None
-        for txt in srcs:
-            m = _re.search(pos_pat, txt, _re.I)
-            if m:
-                lo = float(m.group(1)); hi = float(m.group(2)) if m.group(2) else lo
-                break
-        if lo is None:
-            m = _re.search(r"(\d+(?:\.\d+)?)(?:\s*[-\u2013]\s*(\d+(?:\.\d+)?))?\s*%", json.dumps(rec.get("sizing") or ""))
-            if m:
-                lo = float(m.group(1)); hi = float(m.group(2)) if m.group(2) else lo
+        sizing = rec.get('sizing') or {}
+        lo = sizing.get('pct_lo') if isinstance(sizing, dict) else None
+        hi = sizing.get('pct_hi') if isinstance(sizing, dict) else None
+        from desk.research_contracts import routing_issues
+        issues = routing_issues({'verdict': rec.get('verdict_state'), 'state': rec.get('verdict_state')}, rec)
+        if issues:
+            lo = hi = None
         return lo, hi, str(rec.get("entry_band") or "")[:120], has_explainer
     plan_tickers = {o["ticker"] for o in plan.get("orders", [])}
-    live_rows, drift = [], []
+    live_rows, drift, pending_review = [], [], []
     try:
         led_names = json.loads((ROOT / "desk" / "data" / "research_ledger.json").read_text()).get("names", [])
     except Exception:
@@ -742,6 +733,14 @@ def entry_candidates() -> dict:
                "plan_snippet": (n.get("conviction") or "")[:150],
                "in_staged_plan": t in plan_tickers,
                "needs_sizing": lo is None}
+        from desk.research_contracts import routing_issues
+        record = json.loads((EC_DIR / f'{t}.json').read_text(encoding='utf-8'))
+        issues = routing_issues(n, record)
+        if issues:
+            row['review_issues'] = issues
+            pending_review.append(row)
+            drift.append(f"{t}: excluded from ready deployment — " + '; '.join(issues))
+            continue
         live_rows.append(row)
         if t not in plan_tickers:
             drift.append(f"{t}: approved ({v}) but NOT in the staged entry plan")
@@ -757,7 +756,7 @@ def entry_candidates() -> dict:
             "total_est_usd": round(tot_cost), "approved_est_usd": round(tot_appr),
             "approved_over_cash": (bool(cash) and tot_appr > cash),
             "total_weight_pct": (round(tot_cost / nlv * 100, 1) if nlv else None),
-            "live": live_rows, "drift": drift}
+            "live": live_rows, "pending_review": pending_review, "drift": drift}
 
 
 def _our_tickers() -> set:
@@ -1149,6 +1148,13 @@ def alerts() -> dict:
         for n in led_names:
             t = n["ticker"]
             if t in surfaced or (n.get("verdict") or "").upper() not in ("OWNABLE", "STARTER"):
+                continue
+            from desk.research_contracts import routing_issues
+            try:
+                candidate = json.loads((EC_DIR / f'{t}.json').read_text(encoding='utf-8'))
+            except (OSError, ValueError):
+                continue
+            if routing_issues(n, candidate):
                 continue
             _ex = _explainer_for(t)
             if not _ex:

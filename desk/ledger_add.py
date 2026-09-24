@@ -40,6 +40,9 @@ def upsert(entry: dict) -> str:
     """Add or update a ledger name by ticker. Returns 'added' or 'updated'. Defaults yf=ticker."""
     assert entry.get("ticker"), "ticker required"
     assert entry.get("verdict") in VERDICTS, f"verdict must be one of {sorted(VERDICTS)}"
+    from desk.verdicts import STAGES
+    if entry.get("stage") not in STAGES:
+        raise ValueError("Unrecognized research stage")
     es = entry.get("edge_source")
     if es is not None and es not in EDGE_SOURCES:
         raise AssertionError(f"edge_source must be one of {sorted(EDGE_SOURCES)}")
@@ -53,12 +56,12 @@ def upsert(entry: dict) -> str:
         if n["ticker"] == entry["ticker"]:
             merged = {**n, **entry}                       # merge-update
             if not explicit_stage:                        # PRESERVE the existing stage on update (don't downgrade
-                merged["stage"] = n.get("stage", "SCREENED")  # an ADJUDICATED name to SCREENED on a re-score)
+                merged["stage"] = n.get("stage", "TRAP_SCREENED")  # an ADJUDICATED name to SCREENED on a re-score)
             d["names"][i] = merged
             LEDGER.write_text(json.dumps(d, indent=2, ensure_ascii=False))
             _regen()
             return "updated"
-    entry.setdefault("stage", "SCREENED")      # NEW name: truthful default — only ADJUDICATED once DD/court is done
+    entry.setdefault("stage", "TRAP_SCREENED")      # NEW name: truthful default — only ADJUDICATED once DD/court is done
     d["names"].append(entry)
     LEDGER.write_text(json.dumps(d, indent=2, ensure_ascii=False))
     _regen()

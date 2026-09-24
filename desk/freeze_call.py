@@ -54,7 +54,9 @@ def freeze(ticker: str, cat_date: str, our_p: float, direction: str, catalyst: s
            reasoning: str, plain: dict, event_type: str, frame: dict, px_at_pred: float | None = None,
            priced_in: str | None = None, kind: str = "scenario", market_p: float | None = None,
            detectors: list | None = None, mechanism: str | None = None, reaction_driver: str | None = None,
-           disconfirm: str | None = None, base_comp: dict | None = None) -> dict:
+           disconfirm: str | None = None, base_comp: dict | None = None,
+           submitter: str | None = None, agent: str | None = None,
+           model: str | None = None, protocol: str | None = None) -> dict:
     from desk.events import EVENT_TYPES, coverage
     assert event_type in EVENT_TYPES, f"event_type '{event_type}' not in the closed enum — extend desk/events.py deliberately or pick the right type"
     assert reasoning and len(reasoning) > 40, "reasoning required (which premises, FOR and AGAINST)"
@@ -72,6 +74,7 @@ def freeze(ticker: str, cat_date: str, our_p: float, direction: str, catalyst: s
            "event_type": event_type, "status": "OPEN", "resolution": None,
            "px_at_pred": px_at_pred, "direction": direction, "catalyst": catalyst,
            "reasoning": reasoning, "plain": plain, "frame": frame, "detectors": detectors or []}
+    rec['attribution'] = {'submitter': submitter, 'agent': agent, 'model': model, 'protocol': protocol}
     if priced_in:
         rec["priced_in"] = priced_in
     # the mandatory crowd check for coverable types
@@ -171,8 +174,13 @@ def freeze(ticker: str, cat_date: str, our_p: float, direction: str, catalyst: s
                 f"BASE-EFFECT FLAG: prior {base_comp['prior_growth_pct']}% >= 2x the claimed " \
                 f"{base_comp['claimed_growth_pct']}% — extreme bases mean-revert; our_p {our_p} > 0.55 " \
                 f"needs a mechanism or a haircut toward the coin"
-    with LEDGER.open("a") as f:
-        f.write("\n" + json.dumps(rec))
+    from officekit.office_lock import locked
+    from desk.research_contracts import validate_new
+    with locked(LEDGER.parent):
+        existing = [json.loads(line) for line in LEDGER.read_text(encoding='utf-8').splitlines() if line.strip()] if LEDGER.exists() else []
+        validate_new(rec, existing)
+        with LEDGER.open("a", encoding='utf-8') as f:
+            f.write("\n" + json.dumps(rec))
     days = None
     try:
         days = (datetime.date.fromisoformat(cat_date) - datetime.date.today()).days

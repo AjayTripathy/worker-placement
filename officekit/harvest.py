@@ -99,7 +99,7 @@ def _read_scorecard(folder=None):
               Path.home() / "exalted" / "signalos" / "desk" / "data" / "parametric_scorecard.json"]
     for p in paths:
         try:
-            return json.loads(p.read_text())
+            return json.loads(p.read_text(encoding="utf-8"))
         except Exception:
             continue
     return None
@@ -154,7 +154,16 @@ def collect(m, folder=None):
         positions.append(pb)
         bridged_categories.add("direct_index")
 
+    position_rows_available = False
+    if folder:
+        try:
+            position_rows_available = bool(json.loads((Path(folder) / 'answers.json').read_text(encoding="utf-8")).get('positions', {}).get('rows'))
+        except (OSError, ValueError):
+            pass
+
     for s in m["assets"]:
+        if position_rows_available and (s.get('meta') or {}).get('position_rows'):
+            continue  # these exact holdings are counted by the position/lot path below
         if s["category"] in ("cash", "cash_pending", "tax_reserve", "tax_asset"):
             continue
         L = _sleeve_loss(s)
@@ -175,7 +184,7 @@ def collect(m, folder=None):
     if folder:
         try:
             from officekit.staging import num
-            ans = json.loads((Path(folder) / "answers.json").read_text())
+            ans = json.loads((Path(folder) / "answers.json").read_text(encoding="utf-8"))
             for r in (ans.get("positions") or {}).get("rows", []):
                 sym = r.get("symbol") or "position"
                 # LOT-LEVEL (Flex): real LT/ST split, harvest losing lots only
@@ -253,7 +262,7 @@ def wash_risk(positions, m, folder=None):
         # the owner is recoverable from owned data (not just live staging). Deduped
         # against staging by the (account, source) sets below.
         try:
-            ans = json.loads((Path(folder) / "answers.json").read_text())
+            ans = json.loads((Path(folder) / "answers.json").read_text(encoding="utf-8"))
             for r in (ans.get("positions") or {}).get("rows", []):
                 sym = (r.get("symbol") or "").upper()
                 for acc in (r.get("accounts") or []):

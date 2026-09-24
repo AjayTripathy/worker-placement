@@ -18,7 +18,7 @@ backfill the gap and distract investors).
 WHAT THIS DOES
 For each named acquisition by the parent (typically surfaced via
 sec_filings.list_filings_by_form on 8-K Item 2.01), the connector
-asks Haiku to score "does the acquired entity's stated technology
+asks the configured intelligence provider to score "does the acquired entity's stated technology
 cohere with the parent's claimed core thesis?" A 0-1 score per
 acquisition; aggregate signal across all acquisitions in a window.
 
@@ -38,7 +38,7 @@ The connector returns per-acquisition coherence scores + an aggregate
   NO_ACQUISITIONS      — no acquisitions in window
 
 INPUTS WHEN LLM UNAVAILABLE
-If no Anthropic SDK / key is configured, returns
+If no configured model SDK / key is available, returns
 signal=LLM_UNAVAILABLE so downstream knows to treat as UNVERIFIABLE
 rather than producing a false signal.
 """
@@ -59,26 +59,16 @@ import json
 import os
 import re
 import sys
-import time
 from pathlib import Path
 from typing import Any, Optional
 
 
-_MODEL = os.environ.get("ACQ_COHERENCE_MODEL", "claude-haiku-4-5-20251001")
-_KEY_FILE = Path("~/.anthropic_api_key").expanduser()
-_SDK_CLIENT = None
-_SDK_ERROR: Optional[str] = None
-
-if _KEY_FILE.exists():
-    try:
-        from anthropic import Anthropic
-        _key = _KEY_FILE.read_text().strip()
-        if _key.startswith("sk-ant-"):
-            _SDK_CLIENT = Anthropic(api_key=_key)
-    except Exception as e:
-        _SDK_ERROR = f"SDK init failed: {e}"
-else:
-    _SDK_ERROR = f"no API key file at {_KEY_FILE}"
+_SCHEMA = {"type": "object", "properties": {
+    "coherence_score": {"type": "number", "minimum": 0, "maximum": 1},
+    "category": {"type": "string"}, "reasoning": {"type": "string"},
+    "is_revenue_synthetic": {"type": "boolean"}},
+    "required": ["coherence_score", "category", "reasoning", "is_revenue_synthetic"],
+    "additionalProperties": False}
 
 
 _SYSTEM_PROMPT = """You are scoring technology coherence between a parent company's stated core thesis and a recent acquisition target.
@@ -117,12 +107,9 @@ def _parse_llm_json(response: str):
         raise
 
 
-def _score_one_acquisition(parent_thesis: str, acq: dict) -> dict:
+def _score_one_acquisition(parent_thesis: str, acq: dict, *, client, model) -> dict:
     """LLM-score one acquisition. Returns {coherence_score, category, reasoning,
     is_revenue_synthetic, error}."""
-    if _SDK_CLIENT is None:
-        return {"error": _SDK_ERROR or "LLM not configured"}
-
     user = (f"PARENT THESIS (from parent's 10-K Item 1 or S-1):\n"
             f"{parent_thesis}\n\n"
             f"ACQUISITION:\n"
@@ -132,39 +119,28 @@ def _score_one_acquisition(parent_thesis: str, acq: dict) -> dict:
             f"- Announcement date: {acq.get('announcement_date','(not specified)')}\n\n"
             f"Score per the schema.")
 
-    backoffs = [0, 2, 5]
-    last_err = None
-    for delay in backoffs:
-        if delay:
-            time.sleep(delay)
-        try:
-            resp = _SDK_CLIENT.messages.create(
-                model=_MODEL,
-                max_tokens=400,
-                system=_SYSTEM_PROMPT,
-                messages=[{"role": "user", "content": user}],
-            )
-            text = "".join(b.text for b in resp.content
-                            if getattr(b, "type", None) == "text").strip()
-            j = _parse_llm_json(text)
-            return {
-                "coherence_score":       float(j.get("coherence_score", 0.5)),
-                "category":              j.get("category", "medium_coherence"),
-                "reasoning":             j.get("reasoning", "")[:400],
-                "is_revenue_synthetic":  bool(j.get("is_revenue_synthetic", False)),
-            }
-        except Exception as e:
-            last_err = str(e)
-            msg = last_err.lower()
-            if not any(t in msg for t in ("529", "overload", "rate_limit", "timeout")):
-                return {"error": last_err}
-    return {"error": f"LLM failed after retries: {last_err}"}
+    try:
+        from officekit_ai.intelligence import generate
+        resp = generate(client, model=model, max_tokens=4000, system=_SYSTEM_PROMPT,
+                        messages=[{"role": "user", "content": user}],
+                        output_config={"format": {"type": "json_schema", "schema": _SCHEMA}})
+        if resp.stop_reason == "max_tokens":
+            raise ValueError("Acquisition score was truncated")
+        result = _parse_llm_json("".join(b.text for b in resp.content if b.type == "text"))
+        score = result["coherence_score"]
+        if type(score) not in {int, float} or not 0 <= score <= 1 or type(result["is_revenue_synthetic"]) is not bool:
+            raise ValueError("Invalid acquisition score")
+        return {"coherence_score": float(score), "category": result["category"],
+                "reasoning": result["reasoning"][:400], "is_revenue_synthetic": result["is_revenue_synthetic"]}
+    except Exception as exc:
+        return {"error": "Intelligence call failed: " + type(exc).__name__}
 
 
 def score_acquisition_coherence(
     parent_thesis: str,
     acquisitions: list[dict],
     cutoff_date: Optional[str] = None,
+    *, client=None, model=None, folder=None,
 ) -> dict[str, Any]:
     """Score the technology coherence of a parent's recent acquisitions.
 
@@ -193,14 +169,6 @@ def score_acquisition_coherence(
         "cutoff_date":                echo,
       }
     """
-    if _SDK_CLIENT is None:
-        return {
-            "error":                     _SDK_ERROR or "LLM not configured",
-            "signal":                    "LLM_UNAVAILABLE",
-            "n_acquisitions_scored":     0,
-            "per_acquisition":           [],
-        }
-
     # Filter by cutoff_date
     if cutoff_date:
         cd = str(cutoff_date)[:10]
@@ -220,9 +188,21 @@ def score_acquisition_coherence(
             "n_revenue_synthetic":       0,
             "total_low_coherence_value": 0.0,
             "signal":                    "NO_ACQUISITIONS",
-            "llm_model":                 _MODEL,
+            "status":                    "complete",
+            "llm_model":                 None,
             "cutoff_date":               cutoff_date,
         }
+
+    try:
+        from officekit_ai.models import client_for
+        if client is None:
+            client, configured = client_for("intake", folder)
+            model = model or os.environ.get("ACQ_COHERENCE_MODEL") or configured
+        if not model:
+            raise ValueError("Injected intelligence needs a model identity")
+    except (RuntimeError, ValueError) as exc:
+        return {"error": "Intelligence unavailable: " + type(exc).__name__, "status": "error",
+                "signal": "LLM_UNAVAILABLE", "n_acquisitions_scored": 0, "per_acquisition": []}
 
     scored: list[dict] = []
     n_low = 0
@@ -231,7 +211,7 @@ def score_acquisition_coherence(
     sum_coherence = 0.0
     n_ok = 0
     for acq in filtered:
-        r = _score_one_acquisition(parent_thesis, acq)
+        r = _score_one_acquisition(parent_thesis, acq, client=client, model=model)
         if "error" in r:
             scored.append({**acq, "error": r["error"]})
             continue
@@ -261,6 +241,9 @@ def score_acquisition_coherence(
         signal = "COHERENT_ROLLUP"
 
     return {
+        "status":                    "error" if not n_ok else "partial" if n_ok < len(filtered) else "complete",
+        "n_acquisitions_attempted":   len(filtered),
+        "n_acquisitions_failed":      len(filtered) - n_ok,
         "parent_thesis":             parent_thesis[:300],
         "n_acquisitions_scored":     n_ok,
         "per_acquisition":           scored,
@@ -269,37 +252,23 @@ def score_acquisition_coherence(
         "n_revenue_synthetic":       n_synth,
         "total_low_coherence_value": low_value,
         "signal":                    signal,
-        "llm_model":                 _MODEL,
+        "llm_model":                 model,
         "cutoff_date":               cutoff_date,
     }
 
 
+def main():
+    from verticals.cli import load_json, selftest_or_input
+    a = selftest_or_input("Do the issuer's acquisitions cohere with the thesis it sells?",
+                          inputs=[("case", 'JSON: {"parent_thesis": str, "acquisitions": [...], "cutoff_date"?: str} '
+                                           '(worked example in verticals/public_co/examples/)')])
+    case = load_json(a.case)
+    result = score_acquisition_coherence(case["parent_thesis"], case["acquisitions"], case.get("cutoff_date"))
+    print(json.dumps(result, indent=2, default=str))
+    # A partial panel is not a successful full run. Preserve successful rows,
+    # but make schedulers and callers surface the missing coverage.
+    return 1 if result["status"] in {"error", "partial"} else 0
+
+
 if __name__ == "__main__":
-    # Demo: IONQ's known acquisitions vs its quantum-computing thesis
-    parent = ("IonQ is a leader in trapped-ion quantum computing. Its core "
-              "technology generates qubits by trapping ytterbium ions in "
-              "electromagnetic fields and manipulating them with lasers.")
-    acqs = [
-        {"acquired_name": "Capella Space",
-         "target_business": "Synthetic Aperture Radar satellite imaging company; uses radar from low-Earth orbit to image any location in any weather. Revenue ~$11M/quarter from US government customers.",
-         "deal_value_usd": 425_000_000,
-         "announcement_date": "2025-07-11"},
-        {"acquired_name": "Vector Atomics",
-         "target_business": "Atomic clock manufacturer. Measures time based on atomic vibrations; sells to defense and metrology customers.",
-         "deal_value_usd": None,
-         "announcement_date": "2025-08-01"},
-        {"acquired_name": "ID Quantique (IDQ)",
-         "target_business": "Quantum Key Distribution (QKD) company. Uses quantum physics to generate cryptographic keys; Pentagon recently directed agencies NOT to use QKD in favor of Post-Quantum Cryptography (PQC).",
-         "deal_value_usd": None,
-         "announcement_date": "2025-05-01"},
-        {"acquired_name": "Oxford Ionics",
-         "target_business": "Trapped-ion quantum computing company. Same technology vertical as IonQ; received $5M DARPA Stage B award.",
-         "deal_value_usd": 1_596_000_000,
-         "announcement_date": "2025-09-01"},
-        {"acquired_name": "SkyWater Technologies (SKYT, proposed)",
-         "target_business": "Pure-play semiconductor foundry. Manufactures custom chips for defense and commercial customers. Revenue $346M TTM, $3.1M operating income.",
-         "deal_value_usd": None,
-         "announcement_date": "2025-12-01"},
-    ]
-    r = score_acquisition_coherence(parent, acqs)
-    print(json.dumps(r, indent=2, default=str))
+    raise SystemExit(main())

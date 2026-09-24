@@ -48,6 +48,9 @@ sys.path.insert(0, sys.argv[1])
 import officekit
 import officekit.serve as serve
 from officekit.render_landing import render_landing
+from officekit_ai.intake_chat import _system
+assert 'ASSETS ONLY' in _system('assets')
+assert 'GOALS ONLY' in _system('goals')
 assert "Give every<br>dollar" in render_landing()
 from officekit.strategy_packs import load_packs
 from officekit_signals import CAPABILITIES, runtime, run_capability

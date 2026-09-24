@@ -59,6 +59,8 @@ class CompanyAnalysis:
     evidence_per_claim: dict[str, list[Evidence]] = field(default_factory=dict)
     findings_by_claim: dict[str, Finding] = field(default_factory=dict)
 
+    score_binding: dict | None = None
+
     def severity_score(self) -> float:
         weights = {
             "RED_FLAG_NEGATIVE": 4.0,
@@ -91,6 +93,7 @@ class CompanyAnalysis:
             "outcome_detail": self.outcome_detail,
             "filing": self.filing,
             "provider": self.provider,
+            "score_binding": self.score_binding,
             "n_claims": len(self.claims),
             "n_contradicted": self.n_contradicted(),
             "severity_score": round(self.severity_score(), 1),

@@ -78,6 +78,26 @@ def _runner_alive() -> bool:
     return out.returncode == 0
 
 
+def option_age_findings(orders, now):
+    """Pure warning rule; malformed timestamps stay visible and never hide bugs."""
+    findings = []
+    for o in orders:
+        sec = str(o.get('secondary_description', '')) + str(o.get('primary_description', ''))
+        if (' Put' not in sec and ' Call' not in sec) or not o.get('order_time'):
+            continue
+        try:
+            opened = dt.datetime.fromisoformat(str(o['order_time']).replace('Z', '+00:00'))
+            if opened.tzinfo is None:
+                raise ValueError('timezone missing')
+            age = (now - opened).days
+        except (ValueError, TypeError):
+            findings.append(('WARN', f"OPTION-GTC-AGE: invalid order time for {o.get('symbol', '?')}; age could not be checked"))
+            continue
+        if age > 7:
+            findings.append(('WARN', f"OPTION-GTC-AGE: {o.get('primary_description')} resting {age}d (> 7d rail) — re-check the vol regime or pull it"))
+    return findings
+
+
 def run(dry: bool = False) -> int:
     intents = _load(INTENTS, {"expected_cancelled": [], "expected_resting": []})
     state = _load(STATE, {"gateway_strikes": 0, "pending_cancel_first_seen": {}})
@@ -126,19 +146,7 @@ def run(dry: bool = False) -> int:
         # 3.7 OPTION-GTC-AGE (principal preference 2026-09-04: no long-resting option GTCs -
         # stale quotes + vol-regime drift make unwatched option orders accidental positions).
         # Warn-only; pulls remain principal/court actions.
-        try:
-            import datetime as _dt
-            for o in orders:
-                sec = str(o.get("secondary_description", "")) + str(o.get("primary_description", ""))
-                if (" Put" in sec or " Call" in sec) and o.get("order_time"):
-                    age = (_dt.datetime.now(_dt.timezone.utc) -
-                           _dt.datetime.fromisoformat(str(o["order_time"]).replace("Z", "+00:00"))).days
-                    if age > 7:
-                        warns.append((f"OPTION-GTC-AGE: {o.get('primary_description')} resting {age}d "
-                                      f"(> 7d rail, principal 2026-09-04) — re-check the vol regime "
-                                      f"or pull it"))
-        except Exception:
-            pass
+        findings.extend(option_age_findings(orders, now))
         # 3. expected resting: presence + cancel-by enforcement
         for spec in intents.get("expected_resting", []):
             hits = [o for o in orders if _match(o, spec)]

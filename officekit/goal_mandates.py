@@ -49,6 +49,9 @@ def _menu(goal, yrs, pc):
     horizon/kind arithmetic; the tenant's tax state reorders, never hides."""
     kind = goal.get("kind")
     taxed = bool(((pc or {}).get("jurisdictions") or {}).get("tax_state"))
+    if kind == 'charitable':
+        return [('gifting', 'compare direct gifts and a donor-advised fund, cash versus actual appreciated lots, deduction limits and timing before a large gain'),
+                ('cash_mgmt', 'keep a cash gift liquid until the intended donation date')]
     if kind == "tax_efficiency":
         opts = [("direct_index", "own the index as individual lots so losers can be harvested to offset gains"),
                 ("core_equity", "the same market exposure without lot-level harvesting")]

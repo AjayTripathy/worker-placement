@@ -151,7 +151,8 @@ class TestModelSlots:
         name, pcfg, model = resolve("classify")
         assert name == "anthropic" and model == "claude-haiku-4-5"
         assert pcfg["api_key_env"] == "ANTHROPIC_API_KEY"
-        assert resolve("intake")[2] == "claude-opus-5"
+        assert resolve("intake")[0] == "openai"
+        assert resolve("intake")[2] == "gpt-6-astra"
 
     def test_secrets_never_enter_the_document(self, tmp_path):
         import pytest as _pytest
@@ -179,7 +180,7 @@ class TestModelSlots:
             assert made["base_url"] == "http://localhost:8000"
             # unconfigured slots keep the defaults
             from officekit_ai.models import resolve
-            assert resolve("intake", tmp_path)[0] == "anthropic"
+            assert resolve("intake", tmp_path)[0] == "openai"
         finally:
             PROVIDERS.pop("local", None)
 

@@ -57,13 +57,13 @@ def reuse_section(p):
     return body + '<p><a href="/research">Manage shared research</a></p></section>'
 
 
-def page(body, revision):
+def page(body, revision, title='Shared research'):
     from officekit.serve import STYLE
     from officekit.mandates import stamp_forms
     html = ('<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'
-            '<title>Contextual research · Worker Placement</title><style>' + STYLE +
+            '<title>' + esc(title) + ' · Worker Placement</title><style>' + STYLE +
             'a{color:var(--emerald)}textarea{width:100%;font:13px/1.5 monospace}details{margin:20px 0;padding:16px;border:1px solid #33404c;border-radius:8px}summary{cursor:pointer}dl{display:grid;grid-template-columns:140px minmax(0,1fr);gap:8px 16px}dt{color:var(--dim);font-size:12px;text-transform:capitalize}dd{margin:0}code{overflow-wrap:anywhere}button{margin-top:8px}@media(max-width:500px){dl{grid-template-columns:110px minmax(0,1fr)}} </style></head>'
-            '<body><main class="wrap"><p><a href="/pages/strategies.html">← Strategies</a></p><h1>Shared research</h1>' + body + '</main></body></html>')
+            '<body><main class="wrap"><p><a href="/pages/strategies.html">← Strategies</a></p><h1>' + esc(title) + '</h1>' + body + '</main></body></html>')
     return stamp_forms(html, revision)
 
 
@@ -72,6 +72,8 @@ def library(folder, revision):
     from officekit.strategy_proposals import list_proposals
     bundles, errors = load_library(folder)
     body = '<p>Reuse an investigation while preserving its original goals, investor context, arguments and source dates. Your office makes its own decision.</p>'
+    body += '<p><a href="/pages/research_catalog.html">Browse all saved ticker research →</a></p>'
+    body += '<p><a href="/research/scorecard">Research calibration by submitter and agent →</a></p>'
     body += '<p class="note">Pilot exchange uses reviewed JSON files. These controls do not publish anything online.</p>'
     body += '<h2>Available cases</h2>' + (''.join(case_details(b) for b in bundles) or '<p>No shared cases imported yet.</p>')
     if errors:

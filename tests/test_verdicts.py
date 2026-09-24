@@ -6,6 +6,22 @@ import pytest
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 
 
+@pytest.fixture
+def isolated_verdicts(tmp_path, monkeypatch):
+    import desk.verdicts as verdicts
+    import desk.ledger_add as ledger_add
+    ledger = tmp_path / 'research_ledger.json'
+    ledger.write_text(json.dumps({'names': [dict(ticker=t, verdict='OWNABLE', state='OWNABLE', stage='ADJUDICATED', conviction='Synthetic test', thesis='Synthetic') for t in ('IBEX', 'FNF')]}))
+    ec = tmp_path / 'classifications'
+    ec.mkdir()
+    monkeypatch.setattr(verdicts, 'LEDGER', ledger)
+    monkeypatch.setattr(verdicts, 'EC', ec)
+    monkeypatch.setattr(verdicts, 'AUDIT', tmp_path / 'audit.jsonl')
+    monkeypatch.setattr(ledger_add, 'LEDGER', ledger)
+    monkeypatch.setattr(ledger_add, '_regen', lambda: None)
+    return ledger
+
+
 def test_states_are_closed_enum():
     from desk.verdicts import set_verdict, InvalidVerdict
     with pytest.raises(InvalidVerdict):
@@ -14,13 +30,13 @@ def test_states_are_closed_enum():
         set_verdict("IBEX", "OWNABLE", stage="VIBING")
 
 
-def test_unknown_ticker_rejected():
+def test_unknown_ticker_rejected(isolated_verdicts):
     from desk.verdicts import set_verdict, InvalidVerdict
     with pytest.raises(InvalidVerdict):
         set_verdict("ZZZNOTREAL", "WATCH")
 
 
-def test_set_and_get_roundtrip_with_audit():
+def test_set_and_get_roundtrip_with_audit(isolated_verdicts):
     from desk.verdicts import set_verdict, get_verdict, AUDIT
     before = AUDIT.read_text().count("\n") if AUDIT.exists() else 0
     v0 = get_verdict("IBEX")
@@ -33,6 +49,7 @@ def test_set_and_get_roundtrip_with_audit():
     assert last["source"] == "test-roundtrip" and last["ticker"] == "IBEX"
 
 
+@pytest.mark.corpus
 def test_every_ledger_name_has_valid_state():
     from desk.verdicts import STATES
     led = json.loads((ROOT / "desk" / "data" / "research_ledger.json").read_text())["names"]
@@ -40,6 +57,7 @@ def test_every_ledger_name_has_valid_state():
     assert not bad, f"ledger names with non-enum verdicts: {bad}"
 
 
+@pytest.mark.corpus
 def test_every_record_has_verdict_state():
     from desk.verdicts import STATES
     ec = ROOT / "desk" / "data" / "edge_classifications"
@@ -70,14 +88,13 @@ def test_api_endpoints_exist():
     assert "/api/verdicts" in routes and "/api/verdict/{sym}" in routes
 
 
-def test_upsert_syncs_structured_state():
+def test_upsert_syncs_structured_state(isolated_verdicts):
     """FNF stale-state bug: upsert updated 'verdict' but left 'state' stale — the validator read WATCH
     while the verdict said OWNABLE."""
     import json, pathlib
     from desk.ledger_add import upsert
     from desk.verdicts import get_verdict
-    root = pathlib.Path(__file__).resolve().parents[1]
-    led = json.loads((root / "desk" / "data" / "research_ledger.json").read_text())
+    led = json.loads(isolated_verdicts.read_text())
     probe = next(n for n in led["names"] if n["ticker"] == "FNF")
     orig = probe.get("verdict")
     upsert({"ticker": "FNF", "verdict": "WATCH", "conviction": probe.get("conviction"), "thesis": probe.get("thesis")})

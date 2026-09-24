@@ -29,13 +29,43 @@ def main(argv=None):
     query = sub.add_parser("query")
     query.add_argument("--office", required=True, type=Path)
     query.add_argument("--proposal", required=True)
+    idx = sub.add_parser("index", help="Rebuild the derived research index and list research on a subject")
+    idx.add_argument("--office", required=True, type=Path)
+    idx.add_argument("--symbol")
+    idx.add_argument("--strategy")
+    idx.add_argument("--min-tier", type=int, help="Only research adjudicated at this capability tier or stronger")
+    res = sub.add_parser("resolve", help="Record how a forecast resolved (append-only; needs a public source)")
+    res.add_argument("--office", required=True, type=Path)
+    res.add_argument("--forecast", required=True, help="<general research id>:<n>")
+    res.add_argument("--outcome", required=True, choices=["true", "false"])
+    res.add_argument("--source", required=True, help="Public HTTPS locator that settles it")
+    res.add_argument("--note", default="")
+    predict = sub.add_parser('predict', help='Register an immutable private binary prediction from JSON')
+    predict.add_argument('--office', required=True, type=Path)
+    predict.add_argument('file', type=Path)
+    board = sub.add_parser("scoreboard", help="Calibration (Brier vs base rate) grouped by any research key")
+    board.add_argument("--office", required=True, type=Path)
+    board.add_argument("--by", default="adjudicate_model")
     args = parser.parse_args(argv)
+    if args.command == 'predict':
+        from officekit_research.predictions import record
+        print(json.dumps(record(args.office, **parse_json(args.file.read_bytes())), indent=2))
+        return 0
+    if args.command in {"index", "resolve", "scoreboard"}:
+        from officekit_research import index
+        if args.command == "index":
+            print(json.dumps(index.query(args.office, args.symbol, args.strategy, args.min_tier), indent=2))
+        elif args.command == "resolve":
+            print(json.dumps(index.resolve(args.office, args.forecast, args.outcome == "true", args.source, args.note), indent=2))
+        else:
+            print(json.dumps(index.scoreboard(args.office, args.by), indent=2))
+        return 0
     if args.command in {"prepare", "query"}:
         from officekit.strategy_proposals import load
         proposal = load(args.office, args.proposal)
     if args.command == "prepare":
         record = prepare_case(proposal, args.symbol)
-        args.out.write_text(json.dumps(record, indent=2, ensure_ascii=False, allow_nan=False) + "\n")
+        args.out.write_text(json.dumps(record, indent=2, ensure_ascii=False, allow_nan=False) + "\n", encoding="utf-8")
         print("Private draft written. Review all narrative and source content before approving.")
         print("Current projection SHA256: " + digest(record["case"]))
     elif args.command == "approve":
@@ -44,7 +74,7 @@ def main(argv=None):
         draft = parse_json(args.draft.read_bytes())
         grants = parse_json(args.reuse_grants.read_bytes()) if args.reuse_grants else []
         record = approve(draft, args.reviewed_sha256, grants)
-        args.out.write_text(json.dumps(record, indent=2, ensure_ascii=False, allow_nan=False) + "\n")
+        args.out.write_text(json.dumps(record, indent=2, ensure_ascii=False, allow_nan=False) + "\n", encoding="utf-8")
         print("Reviewed bundle written: " + record["id"] + ". Nothing has been published.")
     elif args.command == "import":
         print("Imported for consideration: " + import_bundle(args.office, read_bundle(args.bundle)))

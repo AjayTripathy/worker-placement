@@ -26,6 +26,9 @@ from officekit.goal_projection import (_afford_for_price, _existing_debt_service
 def claims(goal, m):
     """{capital, carry, reserve} — what this goal draws from the shared pools."""
     kind = goal.get("kind")
+    if kind == 'charitable':
+        return {'capital': float(goal['amount']), 'carry': 0.0, 'reserve': False,
+                'how': 'gift leaves the household; tax scenarios do not replenish the shared budget'}
     if kind == "tax_efficiency":
         return {"capital": 0.0, "carry": 0.0, "reserve": False, "how": "ongoing objective — no claim"}
     if kind == "liquidity_floor":

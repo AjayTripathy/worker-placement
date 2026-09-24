@@ -22,6 +22,8 @@
    v9 (2026-09-13): Home daily brief and Strategies lifecycle workspace;
    editors / alternate groupings disclose on demand, all mandate and holding
    forms retained, tenant-authored notes retained, no execution actions added.
+   v10 (2026-09-21): Home incoming-capital plan starts ticker research and shows
+   reserved funding, replacing the pro-rata before/after illustration.
    Regenerate goldens only on an intentional, audited output change.
 2. DE-PERSONALIZATION: a generic client's balance sheet renders both pages with
    no account-specific strings leaking from the package.

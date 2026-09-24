@@ -16,6 +16,8 @@ def bullets(items):
 
 
 def render_proposal(p, revision=None):
+    from officekit.capital_planning import needs_refresh
+    outdated = needs_refresh(p)
     b, status = p["brief"], p["status"]
     busy = status in {"queued", "running"}
     refresh = '<meta http-equiv="refresh" content="8">' if busy else ''
@@ -36,6 +38,11 @@ button{{font-family:inherit;font-size:13px;font-weight:600;background:var(--gree
 <p class="lead">{esc(pitch.get('headline') or b['thesis'])}</p><span class="badge">{esc(status.replace('_',' '))}</span>
 <p class="muted">Source: {esc(p['source_ref'])} · Office snapshot {esc(p['snapshot']['data'].get('as_of',''))} · Created {esc(p['created_at'][:10])}</p></header>''']
     P.append('<div class="steps"><span>1 · SignalOS research</span><span>2 · RED / BLUE court</span><span>3 · Risk Officer</span><span>4 · Pitch & implementation</span></div>')
+    if outdated:
+        P.append('<p class="warning">This saved proposal predates the current capital-planning inputs. Its allocations are historical; build a fresh revision before adopting.</p>')
+    if p.get('deployment_source'):
+        from officekit.deployment import href
+        P.append('<p><a href="' + href(p['deployment_source']['id']) + '">← Deployment strategy for ' + esc(p['deployment_source']['label']) + '</a></p>')
     if status == 'awaiting_key':
         P.append('<section class="slide progress"><h2>Ready for an AI agent key</h2><p>Your strategy brief is saved. SignalOS research, the courts, and the AI Risk Officer can run once an agent key is connected. No research has been billed or investments selected.</p></section>')
     if busy or p.get('errors'):
@@ -53,12 +60,66 @@ button{{font-family:inherit;font-size:13px;font-weight:600;background:var(--gree
         seeds = ', '.join(b['candidates']) or 'Provider terms and program design'
         P.append(f'<p class="muted">Starting research candidates: {esc(seeds)}. Selection and sizing follow court and risk review.</p>')
     P.append(bullets((p.get('research') or {}).get('assumptions', [])) + '</section>')
+    plan = p.get('capital_plan') or {}
+    if plan:
+        P.append('<section class="slide"><h2>Capital Planner · inputs behind this plan</h2><p>Saved as of ' + esc(plan['as_of']) +
+                 '. Goals, strategy decisions and disaster assumptions are reviewed with the same ticker research catalog used by new strategies.</p>')
+        P.append('<h3>Goals</h3>' + bullets([g['goal'].get('label', g['goal']['kind']) + ' · ' + g['baseline']['status'] for g in plan['goals']]))
+        from officekit.render_strategies import STRATEGY_LIB
+        P.append('<h3>Existing strategies</h3>' + bullets([(d.get('title') or STRATEGY_LIB.get(sid, {}).get('title') or sid.replace('_', ' ').title()) +
+                 ' · ' + d.get('status', 'unrecorded') for sid, d in plan['strategies'].items()]))
+        P.append('<h3>Disaster planning</h3>')
+        for sc in plan['disasters']:
+            P.append('<details><summary>' + esc(sc['name']) + '</summary><p>' + esc(sc.get('description') or '') +
+                     '</p><p>Existing portfolio net worth after this modeled scenario: ' + money(sc['estimated_net_worth_after']) +
+                     '.</p>' + bullets(sc['tripwires']) + '</details>')
+        P.append(bullets(plan['limitations']) + '</section>')
+    if p.get('charitable_goals'):
+        from officekit.charitable import VEHICLES, FUNDING
+        P.append('<section class="slide"><h2>Charitable goals behind this strategy</h2><p>Giving commitments and reviewed tax scenarios from this proposal’s office snapshot.</p>')
+        for giving in p['charitable_goals']:
+            P.append('<h3><a href="/pages/goal_' + esc(giving['goal_id']) + '.html">' + esc(giving['label']) + '</a></h3><p>' +
+                     money(giving['amount']) + ' · ' + esc(giving.get('date') or 'Date to decide') + ' · ' +
+                     esc(VEHICLES[giving['vehicle']]) + ' · ' + esc(FUNDING[giving['funding']]) + '</p>')
+            P.append('<p>Cash reservation: ' + ('included in commitments' if giving['cash_reserved'] else 'not requested') + '.</p>')
+            for key, label in [('deduction_tax_benefit', 'Modeled deduction tax benefit'), ('avoided_gain_tax', 'Modeled tax avoided on donated-share gain')]:
+                P.append('<p>' + label + ': ' + (money(giving[key]) if giving[key] is not None else 'needs reviewed inputs') + '.</p>')
+            P.append(bullets(giving['gaps']))
+            from officekit.render_charitable import securities_section
+            P.append(securities_section(giving['goal_id'], giving.get('securities') or {}, editable=False))
+        P.append('<p class="warning">These scenarios do not release tax reserves or add deployment cash. Review all gifts together for annual deduction limits.</p></section>')
     from officekit.render_research import reuse_section
     P.append(reuse_section(p))
+    inventory = p.get('research_inventory') or {}
+    if inventory:
+        from officekit_research.taxonomy import label as research_label
+        P.append('<section class="slide"><h2>Saved research used for candidate selection</h2><p>' + esc(inventory['use']) + '</p>')
+        for attached in p.get('research_attachments', []):
+            P.append('<p><b>' + esc(attached['symbol']) + '</b> · ' + str(len(attached['references'])) + ' matching saved research records; links below. This is research lineage, not proof that a prior verdict applies.</p>')
+        for entry in inventory['entries']:
+            if entry.get('href', '').startswith('/pages/research_'):
+                P.append('<p><a href="' + esc(entry['href']) + '">Open saved research for ' + esc(', '.join(entry['symbols'])) + ' →</a></p>')
+            P.append('<details><summary>' + esc(', '.join(entry['symbols'])) + ' · ' + esc(research_label(entry['kind'])) +
+                     ' · ' + esc(entry.get('as_of') or 'Date unrecorded') + '</summary><p>' + esc(entry['summary']) + '</p>' +
+                     '<p>Original ID: ' + esc(entry['id']) + ' · ' + esc(entry.get('verdict') or entry.get('standing') or 'Candidate thesis') + '</p>' +
+                     ('<p>Contributor: ' + esc(entry['author']) + ' · ' + esc(entry.get('source', '')) + '</p>' if entry.get('author') else '') +
+                     bullets(entry.get('risks', [])) + bullets(entry.get('gaps', [])) + '</details>')
+        if inventory['omitted']:
+            P.append('<p>' + str(inventory['omitted']) + ' further entries were outside this proposal’s discovery limit.</p>')
+        P.append(bullets(inventory['warnings']) + '</section>')
     P.append('<section class="slide"><div class="eyebrow">02 / Funding</div><h2>What this office can allocate</h2>')
     if funding:
         P.append('<div class="grid">' + ''.join(f'<div class="metric"><small>{label}</small><b>{money(funding[key])}</b></div>' for label,key in [('Unreserved cash today','current_cash'),('Current proposal ceiling','current_budget'),('Pending proceeds, net of tax','pending_net')]) + '</div>')
         P.append(f'<p class="muted">{esc(funding["sizing_basis"])}</p>')
+        P.append(bullets(funding.get('blocking_gaps', [])))
+        if funding.get('liquidity_floor') or funding.get('income_expenses'):
+            P.append('<p>Cash floor protected: ' + money(funding.get('liquidity_floor', 0)) +
+                     '; income-period bills: ' + money(funding.get('income_expenses', 0)) + '.</p>')
+        if funding.get('income_expense_shortfall'):
+            P.append('<p>Income-period bills exceed deployable proceeds by ' + money(funding['income_expense_shortfall']) + '.</p>')
+        if 'commitment_reserve' in funding:
+            P.append('<p>Tax reserved: ' + money(funding['pending_tax']) + '; unfunded commitments reserved: ' +
+                     money(funding['commitment_reserve']) + '; available after receipt: ' + money(funding['contingent_budget']) + '.</p>')
     else:
         P.append('<p>Funding is checked against the saved office snapshot before the courts and allocation review.</p>')
     P.append('</section><section class="slide"><div class="eyebrow">03 / Implementation</div><h2>Proposed investments and actions</h2>')
@@ -68,6 +129,9 @@ button{{font-family:inherit;font-size:13px;font-weight:600;background:var(--gree
             label = 'Options on ' if a['instrument'] == 'options' else ''
             P.append(f'<tr><td><b>{label}{esc(a["symbol"])}</b><div>{esc(a["structure"])}</div></td><td>{money(a["amount"])}<div class="muted">{esc(a["amount_label"])}</div></td><td>{money(a.get("contingent_amount", 0))}<div class="muted">Conditional allocation</div></td><td>{esc(a["rationale"])}{bullets(a["conditions"])}</td></tr>')
         P.append('</table></div>')
+        if 'commitment_reserve' in funding:
+            remaining = max(0, funding['contingent_budget'] - sum(a.get('contingent_amount', 0) for a in p['basket']))
+            P.append('<p><b>Cash retained after reserves: ' + money(remaining) + '</b></p>')
     elif p.get('research'):
         P.append(bullets(p['research'].get('program_steps', [])))
         if p['candidates']:
@@ -96,6 +160,15 @@ button{{font-family:inherit;font-size:13px;font-weight:600;background:var(--gree
     P.append(bullets(pitch.get('downside', [])) + bullets(pitch.get('alternatives') or (p.get('research') or {}).get('alternatives', [])))
     P.append('<h3>Monitoring and next decisions</h3>' + bullets(pitch.get('monitoring') or risk.get('monitoring', [])) + '</section>')
     P.append('<section class="slide sources"><div class="eyebrow">07 / Evidence & audit trail</div><h2>Sources behind the proposal</h2>')
+    for symbol, entry in (p.get('general') or {}).items():
+        P.append('<p>' + esc(symbol) + ' · general court: ' + esc(entry.get('source', 'unknown')) +
+                 ' · <code>' + esc((entry.get('record') or {}).get('id', '')) + '</code></p>')
+        sharing = entry.get('shared') or {}
+        if sharing and sharing.get('shared') is False and sharing.get('reason') != 'Research sharing is off for this office':
+            P.append('<p class="warning">Research publication needs attention: ' + esc(sharing.get('reason', 'Contribution failed')) + '</p>')
+        elif sharing.get('shared'):
+            P.append('<p class="muted">' + ('Private research held for explicit release.' if sharing.get('held') else
+                     'General research contributed; this office’s suitability ruling remains private.') + '</p>')
     for symbol, pack in (p.get('evidence') or {}).items():
         P.append(f'<details><summary>{esc(symbol)} · collected {esc(pack["built"])}</summary>')
         for name, section in pack['sections'].items():
@@ -114,6 +187,8 @@ button{{font-family:inherit;font-size:13px;font-weight:600;background:var(--gree
     if status in {'ready', 'needs_review'}:
         P.append('<section class="slide decision"><h2>Your decision</h2><p>Record the plan after reviewing the court and Risk Officer conditions.</p><div class="actions">')
         for action,label in [('adopt','Adopt plan'),('decline','Decline proposal')]:
+            if outdated and action == 'adopt':
+                continue
             P.append(f'<form action="/strategy/proposal/decide" method="POST"><input type="hidden" name="pid" value="{esc(p["id"])}"><input type="hidden" name="action" value="{action}"><button class="{ "secondary" if action == "decline" else ""}">{label}</button></form>')
         P.append('</div></section>')
     if status not in {'queued','running','superseded'}:

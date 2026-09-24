@@ -89,8 +89,8 @@ STRATEGY_LIB = {
                       "desc": "Systematically manufactures losses to offset realized gains — the tax-bomb's antidote.",
                       "subassets": ["direct-index SMA harvesting", "lot-level TLH on liquid sleeves"]},
     "gifting":       {"ic": "🎁", "title": "Charitable gifting", "category": None,
-                      "desc": "Appreciated shares out, FMV deduction in — the gain never realizes.",
-                      "subassets": ["donor-advised fund", "appreciated-share gifts"]},
+                      "desc": "Connect giving goals to direct gifts or a donor-advised fund; compare cash, actual appreciated lots and reviewed tax benefits around large gains.",
+                      "subassets": ["direct gifts", "donor-advised fund", "cash gifts", "appreciated-share gifts"]},
     "monetization":  {"ic": "🔄", "title": "Concentration monetization", "category": None,
                       "desc": "Diversify or raise cash against a low-basis block without a taxable sale.",
                       "subassets": ["exchange fund (7-yr lock)", "prepaid variable forward"]},
@@ -287,15 +287,14 @@ h1{{font-size:32px;letter-spacing:-.035em}} .eyebrow{{color:var(--emerald);font-
     from officekit.intuition import implicit_strategies
     istrats = implicit_strategies(m)
     if istrats:
-        P.append('<h2>Already running — intuited from your holdings</h2>')
-        P.append('<p class="sub">Strategies your positions already implement — you didn\'t opt in, your '
-                 'balance sheet did. Manage or refine each where it lives.</p>')
+        P.append('<h2>Strategies suggested by your holdings</h2>')
+        P.append('<p class="sub">Review each strategy’s recorded mandate and operating evidence.</p>')
         for s in istrats:
             P.append(
                 f'<div class="intu">'
                 f'<div style="display:flex;gap:10px;align-items:baseline;justify-content:space-between">'
                 f'<div class="scnm">{esc(s["label"])} <span class="intuited">Intuited</span> '
-                f'<span class="st st-emerald">Active</span></div><b>{_fmt(s["value"])}</b></div>'
+                f'<span class="st st-emerald">{esc(s["status"].title())}</span></div><b>{_fmt(s["value"])}</b></div>'
                 f'<div class="ds" style="margin-top:6px">{esc(s["why"])}</div>'
                 f'<div class="tlab" style="margin-top:8px">'
                 f'<a href="{esc(s["href"])}">{esc(s["cta"])} &rarr;</a>'
@@ -530,6 +529,8 @@ h1{{font-size:32px;letter-spacing:-.035em}} .eyebrow{{color:var(--emerald);font-
 
     if goal_menu:
         P.append('</details>')
+    from officekit.render_beta import section as beta_section
+    P.append(beta_section(d, m))
     P.append('<details class="workspace-section" id="strategy-library"><summary>Strategy library &amp; mandates<span>Current sleeves, available approaches, and recorded decisions</span></summary>')
     cur = [r for r in rows if r["sleeves"] or r["holds"]]
     rest = [r for r in rows if not (r["sleeves"] or r["holds"])]
@@ -665,6 +666,8 @@ h1{{font-size:32px;letter-spacing:-.035em}} .eyebrow{{color:var(--emerald);font-
         P.append('''<script>(function(){async function update(){try{const r=await fetch('/strategy/proposals/status');if(!r.ok)return;for(const p of await r.json()){const e=document.querySelector('[data-proposal-status="'+p.id+'"]');if(e)e.textContent=p.status.replaceAll('_',' ')+' · '+p.stage;}}catch(e){}}update();setInterval(update,10000);})();</script>''')
 
     if create_endpoint:
+        from officekit_research.taxonomy import render as research_taxonomy
+        P.append('<section class="workspace-section"><h2>Research behind new strategies</h2><p>Every new strategy searches the same saved research catalog, compares relevant theses and prior verdicts, then runs evidence, court and allocation reviews for this office.</p><p><a href="/pages/research_catalog.html">Browse the research catalog →</a></p>' + research_taxonomy() + '</section>')
         P.append(f'''<details class="workspace-section" id="create-strategy"><summary>Create a strategy<span>Research, court review, Risk Officer sizing and a pitch deck</span></summary>
 <form method="POST" action="{esc(create_endpoint)}" style="background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px">
   <div class="create-grid" style="display:grid;grid-template-columns:1.4fr .6fr;gap:10px">

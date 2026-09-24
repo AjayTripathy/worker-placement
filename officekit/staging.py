@@ -25,6 +25,7 @@ import math
 import os
 import tempfile
 import threading
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -33,7 +34,7 @@ from pathlib import Path
 # a lock the last writer clobbers the other's source (the lost-update race,
 # 2026-09-06 — adding a folder and IBKR together dropped the folder). Every
 # mutation takes this lock and writes atomically (temp file + os.replace).
-_LOCK = threading.Lock()
+_LOCK = threading.RLock()
 
 
 def _path(folder):
@@ -45,9 +46,16 @@ def _atomic_write(folder, st):
     p.parent.mkdir(parents=True, exist_ok=True)
     fd, tmp = tempfile.mkstemp(dir=str(p.parent), suffix=".tmp")
     try:
-        with os.fdopen(fd, "w") as f:
+        with os.fdopen(fd, "w", encoding='utf-8') as f:
             f.write(json.dumps(st, indent=1))
-        os.replace(tmp, p)                            # atomic swap; no torn reads
+        for attempt in range(6):
+            try:
+                os.replace(tmp, p)                    # atomic swap; no torn reads
+                break
+            except PermissionError as error:
+                if getattr(error, 'winerror', None) not in {5, 32, 33} or attempt == 5:
+                    raise
+                time.sleep(.01 * 2 ** attempt)
     finally:
         if os.path.exists(tmp):
             os.unlink(tmp)
@@ -86,12 +94,11 @@ def ownership_key(row):
 
 def load(folder):
     p = _path(folder)
-    if not p.exists():
-        return {"sources": {}}
-    try:
-        return json.loads(p.read_text())
-    except Exception:
-        return {"sources": {}}
+    with _LOCK:
+        try:
+            return json.loads(p.read_text(encoding='utf-8'))
+        except FileNotFoundError:
+            return {"sources": {}}
 
 
 def _now():

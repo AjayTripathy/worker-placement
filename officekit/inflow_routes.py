@@ -13,7 +13,7 @@ def handle(path, form, folder, build, model_for_answers):
     def get(key):
         return (form.getvalue(key) or "").strip()
     prune_previews(folder, directory="inflow_previews")
-    answers = json.loads((folder / "answers.json").read_text())
+    answers = json.loads((folder / "answers.json").read_text(encoding="utf-8"))
     previews = folder / "inflow_previews"
     if path == "/inflows/preview":
         fields = {k: get(k) for k in ("inflow_id", "action", "gross", "withheld", "date", "account_id",
@@ -26,7 +26,7 @@ def handle(path, form, folder, build, model_for_answers):
         previews.mkdir(exist_ok=True)
         (previews / f"{token}.json").write_text(json.dumps({"fields": fields, "revision": get("revision"),
             "model_revision": revision(before["d"]),
-            "created_at": datetime.now(timezone.utc).isoformat()}, indent=2) + "\n")
+            "created_at": datetime.now(timezone.utc).isoformat()}, indent=2) + "\n", encoding="utf-8")
         prune_previews(folder, directory="inflow_previews")
         return {"html": html}
     token = str(uuid.UUID(get("token")))
@@ -34,7 +34,7 @@ def handle(path, form, folder, build, model_for_answers):
     if any(e["id"] == token for e in answers.get("inflow_events", [])):
         return {"redirect": "/pages/capital.html#inflows"}
     try:
-        proposal = json.loads((previews / f"{token}.json").read_text())
+        proposal = json.loads((previews / f"{token}.json").read_text(encoding="utf-8"))
     except FileNotFoundError:
         raise ValueError("This preview expired or is no longer available. Review the receipt again.") from None
     updated = propose(answers, proposal["fields"], proposal["revision"], event_id=token)
@@ -42,5 +42,5 @@ def handle(path, form, folder, build, model_for_answers):
         raise ValueError("The account sources or tax model changed. Review the receipt again.")
     build(updated, folder)
     proposal["applied_at"] = datetime.now(timezone.utc).isoformat()
-    (previews / f"{token}.json").write_text(json.dumps(proposal, indent=2) + "\n")
+    (previews / f"{token}.json").write_text(json.dumps(proposal, indent=2) + "\n", encoding="utf-8")
     return {"redirect": "/pages/capital.html#inflows"}

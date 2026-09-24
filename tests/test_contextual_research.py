@@ -81,7 +81,7 @@ def test_two_offices_reuse_evidence_but_run_independent_courts(tmp_path, donor):
     cases.import_bundle(folder, bundle)
     p, provider = execute(folder, p)
     assert counts == {"fund_profile": 1, "book": 2, "tape": 2}
-    assert len(provider.calls) == 6
+    assert len(provider.calls) == 7
     assert p["snapshot"] == before
     assert p["courts"][0]["id"] != original["courts"][0]["id"]
     assert p["courts"][0]["refs"] != original["courts"][0]["refs"]
@@ -388,7 +388,7 @@ def test_paired_baseline_has_same_recipient_context_and_no_implicit_reuse(tmp_pa
     assert results['baseline']['research_reuse']['context'] == results['reuse']['research_reuse']['context']
     assert metrics(results['baseline'])['source_acquisitions'] == 3
     assert metrics(results['reuse'])['source_acquisitions'] == 2
-    assert metrics(results['baseline'])['model_calls'] == metrics(results['reuse'])['model_calls'] == 6
+    assert metrics(results['baseline'])['model_calls'] == metrics(results['reuse'])['model_calls'] == 7
     assert metrics(results['baseline'])['cost_usd'] is None
 
 
@@ -405,7 +405,7 @@ def test_evidence_only_arm_withholds_prior_reasoning_from_every_model_stage(tmp_
         _, p = proposal(folder, context(life_stage='decumulating', liquidity='ongoing_spending'))
         cases.import_bundle(folder, bundle)
         p, provider = execute(folder, p, contextual_reuse=enabled)
-        assert len(provider.calls) == 6
+        assert len(provider.calls) == 7
         assert p['evidence']['VDC']['acquisition']['reused'] == ['fund_profile']
         assert p['research_reuse']['mode'] == arm
         assert (marker in json.dumps(provider.calls)) == enabled

@@ -128,6 +128,7 @@ def test_invalid_origin_rejected(origin):
     with pytest.raises(ValueError):create_app(Backend(),origin)
 
 def test_source_staging_contains_shared_engine_but_no_customer_data(tmp_path):
+    import json
     from pathlib import Path
     from hosting.gcp.stage_web import stage
     target=stage(tmp_path/'source')
@@ -139,6 +140,10 @@ def test_source_staging_contains_shared_engine_but_no_customer_data(tmp_path):
     assert not (target/'officekit/evals').exists()
     assert not (target/'officekit/answers.json').exists()
     assert not list(target.rglob('.git'))
+    manifest = json.loads((target/'release-manifest.json').read_text(encoding='utf-8'))
+    import hashlib
+    assert all(hashlib.sha256((target/name).read_bytes()).hexdigest() == digest for name, digest in manifest['files'].items())
+    assert (target/'requirements.lock').is_file() and (target/'LICENSE').is_file()
     with pytest.raises(ValueError):stage(target)
 
 

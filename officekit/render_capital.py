@@ -93,7 +93,9 @@ def commitment_card(c, rev=None, chat=False, back="capital"):
     elif c["source"] == "property_tax":
         p.append(f'<p class="sub">Home value: {money(c.get("facts", {}).get("home_value", 0))}'
                  + (' (inferred)' if c.get("facts", {}).get("inferred_value") else '') + '.</p>')
-    if rev:
+    if c.get('goal_id') and c['id'].startswith('charitable:'):
+        p.append('<p><a href="/pages/goal_' + esc(c['goal_id']) + '.html">Edit charitable goal and reservation →</a></p>')
+    elif rev:
         hidden = (f'<input type="hidden" name="cid" value="{esc(c["id"])}">'
                   f'<input type="hidden" name="revision" value="{rev}">'
                   f'<input type="hidden" name="back" value="{back}">')
@@ -118,7 +120,7 @@ def commitment_card(c, rev=None, chat=False, back="capital"):
     return ''.join(p)
 
 
-def render_capital(m, answers=None, chat=False):
+def render_capital(m, answers=None, chat=False, proposals=()):
     cal = cash_calendar(m)
     rev = revision(answers) if answers is not None else None
     inflow_jump = '<a href="#inflows">Incoming money</a>' if (answers or {}).get("incoming") else ''
@@ -151,7 +153,9 @@ def render_capital(m, answers=None, chat=False):
             f'{esc(c["label"])} · {money(c["amount"])} · {esc(c["next_due"])}' for c in cal["outside"]) + '.</p>')
     if answers is not None:
         from officekit.render_inflows import inflow_card
-        p.append(inflow_card(m, answers, rev))
+        p.append(inflow_card(m, answers, rev, proposals))
+    from officekit.render_deployment import render as deployment_links
+    p.append(deployment_links(m, proposals, rev, exclude=[((answers or {}).get('incoming') or {}).get('id')]))
     p.append('<h2 id="calendar">Cash calendar</h2><div class="calendar"><table><thead><tr><th>Month</th>'
              '<th>Payments and reservations</th><th class="amount">From portfolio</th>'
              '<th class="amount">Unreserved cash left</th></tr></thead><tbody>')

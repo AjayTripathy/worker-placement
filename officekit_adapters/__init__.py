@@ -186,6 +186,7 @@ def _norm_row(r):
     for k in ("local_value", "fx", "right", "strike", "multiplier", "expiry", "expiration",
               "lastTradeDateOrContractMonth", "conid", "conId", "isin", "cusip",
               "cost_basis", "unrealized_pnl", "value_is_cost",   # basis for harvest
+              'account_type', 'taxable', 'acquired', 'date_acquired', 'long_term', 'restricted', 'pledged',
               "lots", "loss_lt", "loss_st"):                     # lot-level (Flex) harvest
         if r.get(k) is not None:                     # conversion provenance + option terms + basis
             out[k] = r[k]
@@ -297,6 +298,14 @@ def convert_to_base(rows, fx, base="USD"):
             r["value"] = val * rate
             for k in ("cost_basis", "unrealized_pnl", "loss_lt", "loss_st"):  # same ccy as value
                 if r.get(k) is not None:
+                    if k == 'cost_basis':
+                        import math
+                        try:
+                            basis = float(str(r[k]).replace(',', '').replace('$', '').strip())
+                        except (ValueError, TypeError):
+                            basis = float('nan')
+                        r[k] = round(basis * rate, 2) if math.isfinite(basis) else None
+                        continue
                     r[k] = round(num(r[k]) * rate, 2)
             r["ccy"] = base          # IDEMPOTENT: value is now base-currency, so a
             #                          second convert_to_base is a no-op (rate 1.0),

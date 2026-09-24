@@ -65,18 +65,16 @@ def test_holding_origin_passes_schema():
     assert validate(data) == []
 
 
-def test_direct_index_intuited_implemented_from_harvest_evidence():
-    """A direct-index/harvest engine that runs via realized activity (not a plain
-    sleeve) must read IMPLEMENTED, not 'not implemented' (2026-09-10)."""
+def test_realized_losses_do_not_prove_an_operating_harvest_program():
     from officekit import implicit_strategies as IS
     # no direct_index sleeve, but realized harvest activity in the tax model
     data = {"sleeves": [{"kind": "asset", "category": "public_equity", "name": "Eq", "value": 1_000_000}],
             "tax_model": {"realized_losses_ytd": 494000}, "goals": []}
     answers = {}
-    assert IS.harvest_evidence(data) == "realized tax-loss harvest activity"
+    assert IS.harvest_evidence(data) is None
     IS.register(answers, data)
     for sid in ("direct_index", "harvest_engine"):
-        assert answers["strategy_decisions"][sid]["status"] == "implemented"
+        assert sid not in answers["strategy_decisions"]
 
 
 def test_no_harvest_evidence_leaves_direct_index_undecided():
@@ -89,20 +87,26 @@ def test_no_harvest_evidence_leaves_direct_index_undecided():
     assert "direct_index" not in answers.get("strategy_decisions", {})
 
 
-def test_individually_held_equities_are_direct_indexed():
-    """Owning equities as individual LOTS (not a fund) is direct indexing — the
-    strategy is implicit in the holdings (principal 2026-09-10)."""
+def test_individual_equities_do_not_prove_direct_indexing_or_harvest_operation():
     from officekit import implicit_strategies as IS
     data = {"sleeves": [{"kind": "asset", "category": "public_equity",
                          "name": "Individual stocks", "value": 5_000_000,
                          "holdings": [{"company": "NVDA", "amount": 1e6},
                                       {"company": "AAPL", "amount": 1e6}]}],
             "tax_model": {}, "goals": []}
-    assert "lot-level TLH" in (IS.harvest_evidence(data) or "")
+    assert IS.harvest_evidence(data) is None
     answers = {}
     IS.register(answers, data)
-    assert answers["strategy_decisions"]["direct_index"]["status"] == "implemented"
-    assert answers["strategy_decisions"]["harvest_engine"]["status"] == "implemented"
+    assert 'direct_index' not in answers['strategy_decisions']
+    assert 'harvest_engine' not in answers['strategy_decisions']
+
+
+def test_legacy_auto_status_repaired_without_overwriting_explicit_approval():
+    a = {'strategy_decisions': {'direct_index': {'status': 'implemented', 'origins': [{'source': 'holding', 'ref': 'old lots inference'}]},
+                                'harvest_engine': {'status': 'implemented', 'origins': [{'source': 'principal', 'ref': 'reviewed program'}]}}}
+    I.register(a, DATA)
+    assert a['strategy_decisions']['direct_index']['status'] == 'considering'
+    assert a['strategy_decisions']['harvest_engine']['status'] == 'implemented'
 
 
 def test_fund_only_equity_sleeve_is_not_direct_indexed():

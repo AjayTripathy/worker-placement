@@ -36,9 +36,10 @@ class _NoRedirect(urllib.request.HTTPRedirectHandler):
 
 
 def _post(url, fields):
+    from local_http import headers
     body = urllib.parse.urlencode(fields).encode()
     req = urllib.request.Request(url, data=body,
-                                 headers={"Content-Type": "application/x-www-form-urlencoded"})
+                                 headers={"Content-Type": "application/x-www-form-urlencoded", **headers(url)})
     try:
         urllib.request.build_opener(_NoRedirect).open(req, timeout=60).read()
     except urllib.error.HTTPError:

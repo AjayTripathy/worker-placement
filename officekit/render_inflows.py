@@ -4,7 +4,7 @@ from officekit.inflows import active_receipts, cash_accounts, progress
 from datetime import date
 
 
-def inflow_card(m, answers, rev):
+def inflow_card(m, answers, rev, proposals=()):
     from officekit.render_capital import money
     inc = answers.get("incoming") or {}
     if not inc.get("id") or not inc.get("amount"):
@@ -21,6 +21,9 @@ def inflow_card(m, answers, rev):
          f'<div><span>Total expected</span><b>{money(state["gross"])}</b></div>'
          f'<div><span>Received, before withholding</span><b>{money(state["received"])}</b></div>'
          f'<div><span>Still pending</span><b>{money(state["pending"])}</b></div></div>']
+    from officekit.deployment import source_for, href
+    from officekit.render_deployment import link
+    p.append(link(source_for(m, inc['id']), proposals, rev))
     if state["withheld"]:
         p.append(f'<p class="sub">{money(state["cash_received"])} deposited · {money(state["withheld"])} '
                  'tax withheld. Withholding reduces the outstanding tax reserve once.</p>')
@@ -62,6 +65,7 @@ def inflow_card(m, answers, rev):
                  f'{esc(evidence["account"])} · {esc(evidence["source"])}<br>Reference: {esc(e["reference"])}<br>'
                  f'Balance at confirmation: {money(evidence["balance"])} as of {esc(evidence["as_of"])}.</p>')
         if e["id"] in active and rev:
+            p.append('<p><a href="' + href(inc['id']) + '">Open deployment strategy for these proceeds →</a></p>')
             p.append('<details><summary>Correct this receipt</summary><p class="sub">Reverse an incorrect attribution, '
                      'then record its replacement. This restores the pending proceeds and tax allocation; account cash stays unchanged.</p>'
                      f'<form method="POST" action="/inflows/preview"><input type="hidden" name="revision" value="{rev}">'

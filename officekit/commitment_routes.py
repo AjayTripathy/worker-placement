@@ -29,7 +29,7 @@ def prune_previews(folder, now=None, directory="commitment_previews"):
             uuid.UUID(path.stem)  # only our token files, never neighboring documents
             modified = datetime.fromtimestamp(path.stat().st_mtime, timezone.utc)
             try:
-                record = json.loads(path.read_text())
+                record = json.loads(path.read_text(encoding="utf-8"))
                 if not isinstance(record, dict):
                     record = {}
             except (ValueError, OSError):
@@ -52,13 +52,13 @@ def handle(path, form, folder, build, ai_available=False):
         return (form.getvalue(key) or "").strip()
 
     prune_previews(folder)
-    answers = json.loads((folder / "answers.json").read_text())
+    answers = json.loads((folder / "answers.json").read_text(encoding="utf-8"))
     expected = get("revision")
     cid = get("cid")
     if path == "/commitments/apply":
         token = str(uuid.UUID(get("token")))
         try:
-            proposal = json.loads((folder / "commitment_previews" / f"{token}.json").read_text())
+            proposal = json.loads((folder / "commitment_previews" / f"{token}.json").read_text(encoding="utf-8"))
         except FileNotFoundError:
             raise ValueError("This preview has expired or is no longer available. Create a fresh preview.") from None
         if proposal.get("applied_at"):
@@ -95,7 +95,7 @@ def handle(path, form, folder, build, ai_available=False):
         previews.mkdir(exist_ok=True)
         (previews / f"{token}.json").write_text(json.dumps({"cid": cid, "revision": expected,
             "patch": patch, "before": edit_values(before), "model": result.get("model"),
-            "note": result.get("note"), "created_at": datetime.now(timezone.utc).isoformat()}, indent=2) + "\n")
+            "note": result.get("note"), "created_at": datetime.now(timezone.utc).isoformat()}, indent=2) + "\n", encoding="utf-8")
         prune_previews(folder)
         return {"html": render_preview(before, patch, token, result.get("note", ""))}
     if path == "/commitments/add":
@@ -106,7 +106,7 @@ def handle(path, form, folder, build, ai_available=False):
     built = build(updated, folder)
     if path == "/commitments/apply":
         proposal["applied_at"] = datetime.now(timezone.utc).isoformat()
-        (folder / "commitment_previews" / f"{token}.json").write_text(json.dumps(proposal, indent=2) + "\n")
+        (folder / "commitment_previews" / f"{token}.json").write_text(json.dumps(proposal, indent=2) + "\n", encoding="utf-8")
     after = next((c for c in built["commitments"] if c["id"] == cid), None)
     with (folder / "commitment_history.jsonl").open("a") as ledger:
         ledger.write(json.dumps({"at": datetime.now(timezone.utc).isoformat(), "id": cid,

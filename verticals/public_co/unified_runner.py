@@ -93,6 +93,7 @@ def analyze_company(
         outcome_detail=outcome_detail,
         filing=filing_name,
         provider=provider.name,
+        score_binding=getattr(provider, 'score_binding', None),
         claims=claims,
         queries_per_claim=queries_per_claim,
         evidence_per_claim=evidence_per_claim,
@@ -130,6 +131,7 @@ def stage_extract_only(
     ev_path.write_text(json.dumps({
         "ticker": ticker,
         "cutoff_date": cutoff_date,
+        "score_binding": getattr(provider, 'score_binding', None),
         "evidence": evidence_per_claim,
     }, indent=2, default=str))
     return out_dir / f"{ticker}.input.json", ev_path

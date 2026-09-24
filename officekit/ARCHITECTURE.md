@@ -5,8 +5,8 @@ Companion to [PRD v1.2](PRD.md) · v1.1 · 2026-09-03 · status: proposed, Tier-
 **Current implementation supplement (2026-09-13):** read
 [OPERATING_CONTRACTS.md](OPERATING_CONTRACTS.md) for scoped custody reconciliation,
 the native court/holdings/outcome loop, strategy-pack trust, modeled stress and the
-installed-package boundary, and the daily brief / strategy workspace UX contracts. [AGENT_HANDOFF.md](AGENT_HANDOFF.md) records verification
-and remaining migration work. The tier design below is historical design context;
+installed-package boundary, and the daily brief / strategy workspace UX contracts.
+[REVIEW_REPAIRS.md](REVIEW_REPAIRS.md) records the current engineering repairs and verification scope. The tier design below is historical design context;
 its CLI, dependency and shipped-status descriptions are not a current inventory.
 The distribution is `worker-placement` with `wp` / `worker-placement` commands,
 six packages and default broker-library dependencies. The hosted transport uses the same office UI and manual editing engine; hosted AI execution uses tenant-scoped credentials and durable jobs.
@@ -155,9 +155,12 @@ retrieval to that same pipeline. Source dates, conflicting evidence, goals,
 investor circumstances, agent configuration and original court reasoning remain
 inspectable. Each recipient refreshes its own book/tape and runs new courts and
 Risk Officer review. Both transports serve the same `/research` UI. Cases are
-retained JSON bundles; central admission, a query database, signed publisher
-releases and automatic Git contributions remain subsequent phases. Live model
-comparison and independent output audit are still required for milestone completion.
+retained JSON bundles. The 2026-09-20 local implementation adds default-deny
+evidence schemas, independent claim admission, hosted general-court reuse and an
+operator Git export. Imported attribution survives local indexing. Decomposition,
+the central analytical database, signed publisher attestations and task allocation
+remain subsequent phases. Live comparison and independent output audit are still
+required; the hosted contract fixture does not establish research quality.
 
 **API failure visibility (2026-09-15):** `api_errors.py` keeps up to 20 active
 failure notices in the office's `api_errors.json`, separate from financial facts.

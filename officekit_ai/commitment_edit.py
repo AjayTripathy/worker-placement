@@ -11,7 +11,8 @@ def propose(record, instruction, folder=None, client=None, model=None):
     schema = {"type": "object", "properties": {
         "note": {"type": "string"}, "patch_json": {"type": "string"}},
         "required": ["note", "patch_json"], "additionalProperties": False}
-    response = client.messages.create(
+    from officekit_ai.intelligence import generate
+    response = generate(client,
         model=model, max_tokens=1800,
         system=("You edit one family-office commitment. Return a JSON object encoded in patch_json containing "
                 "only explicitly requested changes from the allowed fields. No invented facts, investment advice, "

@@ -7,8 +7,8 @@ from pathlib import Path
 import officekit_dist.assemble as assemble
 
 ROOT = Path(__file__).resolve().parents[1]
-SHIP = ["PRD.md", "ARCHITECTURE.md", "SCHEMAS.md", "OPERATING_CONTRACTS.md"]
-KEEP_OUT = ["INTELLIGENCE.md", "INTAKE_AGENT.md", "AGENT_HANDOFF.md"]
+SHIP = ["PRD.md", "ARCHITECTURE.md", "SCHEMAS.md", "OPERATING_CONTRACTS.md", "INTAKE_AGENT.md"]
+KEEP_OUT = ["INTELLIGENCE.md", "AGENT_HANDOFF.md"]
 
 
 def _ignored(name):

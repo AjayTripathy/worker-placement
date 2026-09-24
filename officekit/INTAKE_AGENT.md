@@ -65,6 +65,14 @@ Categories: `cash`, `cash_pending` (via `incoming`), `public_equity` (styles:
    spending targets, and liquidity floors are life-planning statements; documents
    don't contain them. Ask; if unanswered, omit the goal (no goals section is
    honest — a guessed goal is not).
+7c. **Charitable giving is first class.** Use `kind: charitable`, `amount` as
+   the total proposed gift, and a date when stated. Optional `charitable` details
+   describe vehicle (`direct`, `daf`, `undecided`), funding (`cash`,
+   `appreciated_securities`, `undecided`), recipient, ticker, gift-portion basis,
+   holding period and transfer timing. Do not reclassify prior labeled spending
+   goals automatically. A usable deduction and tax benefit need an explicit tax
+   review; they never automatically reduce the incoming-gain reserve. Reserve
+   cash only on an explicit request for a dated cash gift.
 8. **De-dup across documents** (the same account on two statements counts once;
    use the newer date).
 

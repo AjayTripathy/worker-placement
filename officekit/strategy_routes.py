@@ -4,7 +4,7 @@ import json
 
 from officekit import strategy_proposals as proposals
 
-PATHS = {"/strategy/adopt", "/strategy/new", "/strategy/goal-adopt", "/strategy/propose",
+PATHS = {"/strategy/adopt", "/strategy/new", "/strategy/goal-adopt", "/strategy/propose", "/strategy/deploy",
          "/strategy/proposal/retry", "/strategy/proposal/revise", "/strategy/proposal/decide"}
 
 
@@ -12,7 +12,7 @@ def handle(route, folder, get, build, model_for_answers):
     from officekit.mandates import require_revision
     if not (folder / "answers.json").exists():
         raise ValueError("Build your office before creating a strategy")
-    answers = json.loads((folder / "answers.json").read_text())
+    answers = json.loads((folder / "answers.json").read_text(encoding="utf-8"))
     # Exact successful decision replay can repair a derived page after publication.
     # New decisions, including decline, always require the page's office revision.
     if route == "/strategy/proposal/decide":
@@ -36,9 +36,28 @@ def handle(route, folder, get, build, model_for_answers):
         return p["id"], False
     else:
         from officekit.render_strategies import STRATEGY_LIB
-        option, title, target = None, None, None
+        option, title, target, deployment_source = None, None, None, None
         request = get("note") or ""
-        if route == "/strategy/adopt":
+        if route == "/strategy/deploy":
+            from officekit.deployment import source_for, latest
+            deployment_source = source_for(model, get('inflow_id') or None)
+            from officekit.beta_programs import remaining_funding
+            from officekit.deployment import funding
+            remaining = remaining_funding(model, funding(model, deployment_source['id']), deployment_source['id'])
+            if remaining['linked_programs'] and remaining['proposal_ceiling'] <= 0:
+                raise ValueError('This source is assigned to a beta program. Open its linked basket, or reduce its funding share before proposing additional purchases.')
+            sid, source, ref = "deploy_powder", "principal", "inflow:" + deployment_source['id']
+            option, title = "new_capital", ("Deploy " + deployment_source['label'])[:180]
+            request = "Build an actual plan with tickers and dollar allocations from existing research. Account for the full incoming proceeds: tax, unfunded commitments, proposed purchases and cash retained. Compare alternatives and concentration against this office."
+            previous = latest(proposals.list_proposals(folder), deployment_source)
+            from officekit.capital_planning import needs_refresh
+            if previous and previous['status'] in {'queued', 'running'}:
+                return previous['id'], True
+            if previous and (previous['snapshot_revision'] != proposals.digest(answers) or needs_refresh(previous)):
+                old = previous
+            elif previous:
+                return previous['id'], previous['status'] in {'queued', 'running'}
+        elif route == "/strategy/adopt":
             from officekit.mitigations import OPT_STRATEGY
             from officekit.strategy_playbooks import PLAYBOOKS
             from officekit.render_scenarios import applicable_scenarios
@@ -67,6 +86,7 @@ def handle(route, folder, get, build, model_for_answers):
                 raise ValueError("Finish or resume the current review before revising")
             sid, source, ref = old["strategy_id"], old["source"], old["source_ref"]
             option, title, target = old["brief"]["option"], old["brief"]["title"], old["target_pct"]
+            deployment_source = old.get('deployment_source')
             request = old["brief"]["request"]
             if get("request"):
                 request += "\nRevision: " + get("request")
@@ -93,7 +113,8 @@ def handle(route, folder, get, build, model_for_answers):
                 request += "\nCandidates to compare: " + get("subassets")
         updated = deepcopy(answers)
         p = proposals.create(folder, updated, model, sid, source, ref, option=option, title=title,
-                             request=request, target_pct=target, revision_of=old["id"] if old else None)
+                             request=request, target_pct=target, revision_of=old["id"] if old else None,
+                             deployment_source=deployment_source)
         if p["status"] == "queued" and updated != answers:
             try:
                 build(updated, folder)

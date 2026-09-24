@@ -68,20 +68,9 @@ EXTRACT_TIMEOUT_S = 90                                # one document must never 
 
 
 def _create(client, timeout, **kw):
-    """Stream when the client supports it (a 16k-max_tokens image/PDF read is
-    exactly the long request the SDK warns will time out non-streamed), with a
-    hard per-document timeout so one slow/huge file can't stall a folder import.
-    Test fakes without .stream fall back to create()."""
-    msgs = getattr(client, "messages", None)
-    stream_fn = getattr(msgs, "stream", None)
-    if stream_fn is None:
-        create = getattr(msgs, "create", None)
-        try:
-            return create(timeout=timeout, **kw)
-        except TypeError:
-            return create(**kw)                      # minimal fakes ignore timeout
-    with stream_fn(timeout=timeout, **kw) as s:
-        return s.get_final_message()
+    """Keep the document timeout across any intelligence provider."""
+    from officekit_ai.intelligence import generate
+    return generate(client, timeout=timeout, **kw)
 
 
 def extract_file(filename, data, client=None, model=None, folder=None, timeout=EXTRACT_TIMEOUT_S):

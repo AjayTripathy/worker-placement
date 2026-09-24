@@ -60,7 +60,7 @@ def _path(folder):
 def active(folder):
     with _LOCK:
         try:
-            data = json.loads(_path(folder).read_text())
+            data = json.loads(_path(folder).read_text(encoding="utf-8"))
             if not isinstance(data, list):
                 return []
             return [e for e in data if isinstance(e, dict) and all(isinstance(e.get(k), str) for k in ('id', 'context', 'title', 'message'))][-LIMIT:]

@@ -46,13 +46,9 @@ def _tier_of(model):
 
 
 def _create(client, **kw):
-    """Streaming for real clients (long courts exceed the non-streaming
-    limit), plain create for test fakes."""
-    stream_fn = getattr(getattr(client, "messages", None), "stream", None)
-    if stream_fn is None:
-        return client.messages.create(**kw)
-    with stream_fn(**kw) as s:
-        return s.get_final_message()
+    """Compatibility entry point; SDK behavior belongs to intelligence adapters."""
+    from officekit_ai.intelligence import generate
+    return generate(client, **kw)
 
 
 def check_tier_order(bench_model, adjudicate_model):
@@ -97,6 +93,21 @@ _ADJ_SCHEMA = {
 }
 
 
+# The contextual ruling: suitability for ONE office under ONE strategy, on top
+# of a general evaluation of the security. One adjudicator call; the argument
+# for and against FIT is demanded explicitly so the ruling cannot rubber-stamp.
+_SUIT_SCHEMA = {
+    "type": "object",
+    "properties": {**_ADJ_SCHEMA["properties"],
+                   "fit_for": {"type": "array", "items": {"type": "string"},
+                               "description": "why this security suits THIS office under THIS mandate"},
+                   "fit_against": {"type": "array", "items": {"type": "string"},
+                                   "description": "why it does not; must not be empty unless nothing weighs against"}},
+    "required": _ADJ_SCHEMA["required"] + ["fit_for", "fit_against"],
+    "additionalProperties": False,
+}
+
+
 def _strategy_ctx(strategy_id, decision, lib=None):
     lib = lib or {}
     return (f"STRATEGY CONTEXT (the court is convened BY this strategy — judge fit "
@@ -117,7 +128,8 @@ _LITE_NOTE = ("\n\nCOURTKIT-LITE LIMITATION (binding): you have NO live data con
 
 def run_court(symbol, strategy_id, decision, personal_context, folder,
               lib=None, clients=None, today=None, context=None,
-              evidence="auto", office_data=None, contact=None, subject_kind="security", proposal_id=None):
+              evidence="auto", office_data=None, contact=None, subject_kind="security", proposal_id=None,
+              general=None, general_private=None):
     """Convene a lite court on one candidate inside one strategy. Returns the
     adjudication record (contract #11), already appended to the office's
     adjudications.jsonl and frozen call-by-call to the learning ledger.
@@ -181,7 +193,7 @@ def run_court(symbol, strategy_id, decision, personal_context, folder,
         body = None
         try:
             tpl_path = Path(agents.__file__).parent / "templates" / f"court_{role.lower()}.md"
-            tpl = tpl_path.read_text()
+            tpl = tpl_path.read_text(encoding="utf-8")
             body = (tpl.replace("{TICKER}", symbol)
                     .replace("{THESIS}", f"{ctx}\n\nCANDIDATE: {cand}")
                     .replace("{EVIDENCE_PACK}", pack_md.strip() if evidenced else
@@ -209,6 +221,11 @@ def run_court(symbol, strategy_id, decision, personal_context, folder,
                                 "lean": out["lean"], "n_unverified": len(out["unverified"]), "run": run},
                                office_id=office_id, today=today)
         return out, rec["id"], run
+
+    if general is not None:
+        return _suitability(general, general_private or {}, symbol, strategy_id, ctx, cand, pack, pack_md, evidenced,
+                            pack_errors, label, doctrine, lite_note, adj_client, adj_model, folder, ledger,
+                            office_id, today, subject_kind, proposal_id)
 
     red, red_ref, red_run = bench(
         "RED", "Attack this candidate: the strongest honest case AGAINST owning it "
@@ -268,12 +285,78 @@ def run_court(symbol, strategy_id, decision, personal_context, folder,
     return record
 
 
+def _suitability(general, general_private, symbol, strategy_id, ctx, cand, pack, pack_md, evidenced, pack_errors,
+                 label, doctrine, lite_note, adj_client, adj_model, folder, ledger, office_id, today,
+                 subject_kind, proposal_id):
+    """Second pass: the private ruling. The general record is evidence about
+    the SECURITY; everything about the household enters only here."""
+    from officekit_research.general import validate as validate_general
+    general = validate_general(general)
+    if general["subject"]["symbol"] != symbol.upper():
+        raise ValueError("The general evaluation is for a different security")
+    # U2 across passes: the office's adjudicator may not be weaker than the
+    # bench that produced the research it is ruling on.
+    tier_label = check_tier_order(general["models"]["bench"], adj_model)
+    resp, adj_run = invoke(adj_client,
+        model=adj_model, max_tokens=30000,
+        system=doctrine + lite_note +
+        "\n\nYou are the ADJUDICATOR of SUITABILITY. A general evaluation of the security (below) was produced "
+        "without any knowledge of this office. Do not re-litigate what the security is; rule on whether it fits THIS "
+        "office under THIS mandate — goals, horizon, liquidity, tax, concentration, exclusions and funding. You never "
+        "rubber-stamp: a 'sound' security can be wrong for this household, and an 'impaired' one is never rescued by "
+        "fit. State the case for and against fit explicitly. Carry the general evaluation's unverified items forward "
+        "and add any that are specific to this office.",
+        messages=[{"role": "user", "content":
+                   f"{ctx}{pack_md}\n\nCANDIDATE: {cand}\n\nGENERAL EVALUATION (id {general['id']}, "
+                   f"{general['label']}, as of {general['as_of']}):\n"
+                   f"{json.dumps({'assessment': general['assessment'], 'briefs': general['briefs']}, indent=1)}"
+                   "\n\nRule on suitability."}],
+        output_config={"format": {"type": "json_schema", "schema": _SUIT_SCHEMA}})
+    if resp.stop_reason == "max_tokens":
+        raise RuntimeError("court suitability ruling truncated at max_tokens — raise the cap")
+    adj = json.loads(next(b.text for b in resp.content if b.type == "text"))
+    adj["unverified_items"] = list(dict.fromkeys(general["assessment"]["unverified_items"] + adj["unverified_items"]))
+    adj_rec = record_agent_call(ledger, "court_suitability", adj_model,
+                               {"symbol": symbol, "strategy": strategy_id, "general_id": general["id"],
+                                "verdict": adj["verdict"], "conviction": adj["conviction"], "run": adj_run},
+                               office_id=office_id, today=today)
+    record = {
+        "id": str(uuid.uuid4()), "office_id": office_id, "strategy": strategy_id, "symbol": symbol.upper(),
+        "date": (today or date.today()).isoformat(),
+        "verdict": f"{adj['verdict']} {adj['conviction']}/10 ({label})",
+        "rationale": adj["rationale"], "decisive_points": adj["decisive_points"],
+        "unverified_items": adj["unverified_items"],
+        "suitability": {"for": adj["fit_for"], "against": adj["fit_against"]},
+        "general_id": general["id"],                   # the shareable research this ruling stands on
+        "general_standing": general["assessment"]["standing"],
+        "briefs": general["briefs"],                   # general by construction: no office data
+        "evidence": ({"built": pack["built"], "sections": sorted(pack["sections"]),
+                      "errors": pack.get("errors", []), "md": pack_md.strip()}
+                     if evidenced else {"errors": pack_errors or ["no evidence pack (LITE court)"]}),
+        "tier": tier_label,
+        "models": {"bench": general["models"]["bench"], "adjudicate": adj_model},
+        # Calls THIS office made for this ruling. Reused general research cost
+        # nothing here, so it contributes no refs and no measured runs.
+        "refs": {**general_private.get("refs", {}), "adjudicate": adj_rec["id"]},
+        "runs": {**general_private.get("runs", {}), "adjudicate": adj_run},
+    }
+    if subject_kind != "security":
+        record["subject_kind"] = subject_kind
+    if proposal_id:
+        record["proposal_id"] = proposal_id
+    from officekit.office_lock import locked
+    with locked(folder):
+        with open(Path(folder) / "adjudications.jsonl", "a") as f:
+            f.write(json.dumps(record) + "\n")
+    return record
+
+
 def load_adjudications(folder):
     path = Path(folder) / "adjudications.jsonl"
     if not path.exists():
         return []
     out = []
-    for line in path.read_text().splitlines():
+    for line in path.read_text(encoding="utf-8").splitlines():
         try:
             out.append(json.loads(line))
         except Exception:

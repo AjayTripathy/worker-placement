@@ -100,7 +100,7 @@ def load_packs(extra_dirs=None, include_defaults=True):
             if not mf.exists():
                 continue
             try:
-                m = json.loads(mf.read_text())
+                m = json.loads(mf.read_text(encoding="utf-8"))
             except Exception as e:
                 problems.append({"pack": sub.name, "dir": str(sub), "problems": [f"pack.json unreadable: {e}"]})
                 continue

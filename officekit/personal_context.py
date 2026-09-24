@@ -77,7 +77,7 @@ def load(folder):
     path = Path(folder) / "personal_context.json"
     if not path.exists():
         return None
-    pc = json.loads(path.read_text())
+    pc = json.loads(path.read_text(encoding="utf-8"))
     probs = validate(pc)
     if probs:
         raise ValueError("personal_context.json invalid: " + "; ".join(probs))

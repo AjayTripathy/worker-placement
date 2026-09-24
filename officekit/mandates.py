@@ -65,7 +65,7 @@ def stamp_forms(body, revision):
     if not revision:
         return body
     from html import escape
-    return re.sub(r'(<form\b[^>]*\baction=[\"\']/(?:strategy|research)/[^\"\']+[\"\'][^>]*>)',
+    return re.sub(r'(<form\b[^>]*\baction=[\"\']/(?:strategy/[^\"\']+|research/[^\"\']+|goal/security-review|beta/program)[\"\'][^>]*>)',
                   lambda m: m[1] + '<input type="hidden" name="revision" value="' + escape(revision, quote=True) + '">', body)
 
 
