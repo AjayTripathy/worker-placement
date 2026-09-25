@@ -68,6 +68,21 @@ def test_unexpected_error_generic_500_with_full_traceback(server, monkeypatch, c
     assert '/Users/private/office/answers.json' in caplog.text
 
 
+def test_streamed_credit_failure_returns_actionable_http_notice(server, monkeypatch):
+    import httpx
+    import openai
+    base, folder = server
+    monkeypatch.setattr('officekit.serve._ai', lambda *a, **kw: True)
+    def fail(*args, **kwargs):
+        raise openai.APIError('Provider rejected the request',
+                              request=httpx.Request('POST', 'https://api.openai.com/v1/responses'),
+                              body={'code': 'credit_balance_exhausted'})
+    monkeypatch.setattr('officekit_ai.intake_chat.turn', fail)
+    code, _, body = _post(base+'/chat', {'messages': []}, json_body=True)
+    assert code == 502 and json.loads(body)['error'] == api_errors.CREDIT_EXHAUSTED
+    assert api_errors.active(folder)[0]['message'] == api_errors.CREDIT_EXHAUSTED
+
+
 def test_validation_error_400_redacts_paths_and_does_not_log_traceback(server, monkeypatch, caplog):
     base, folder = server
     def fail(*args, **kwargs):

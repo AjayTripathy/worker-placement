@@ -13,10 +13,31 @@ _LOCK = threading.RLock()
 LIMIT = 20
 LOGGER = logging.getLogger(__name__)
 UNEXPECTED = 'Something went wrong. Your request could not be completed. Try again; details are in the server log.'
+CREDIT_EXHAUSTED = 'The configured model provider has insufficient API credit. Add credit with that provider, then retry or resume the review. Completed reviews are retained.'
+
+
+def _credit_exhausted(error):
+    # Streaming SDK errors can carry their code only in the structured body.
+    # Inspect known fields, but never display the provider's raw payload.
+    codes = [getattr(error, 'code', None)]
+    body = getattr(error, 'body', None)
+    if isinstance(body, dict):
+        codes.append(body.get('code'))
+        nested = body.get('error')
+        if isinstance(nested, dict):
+            codes.append(nested.get('code'))
+    if any(code in ('credit_balance_exhausted', 'insufficient_quota') for code in codes):
+        return True
+    text = str(error).lower().replace('_', ' ')
+    return any(term in text for term in (
+        'credit balance', 'insufficient quota', 'insufficient api credit',
+        'no credits remaining'))
 
 
 def classify(error):
     """Classify before formatting; unexpected implementation details stay local."""
+    if _credit_exhausted(error):
+        return 502, CREDIT_EXHAUSTED
     if isinstance(error, ValueError) and not isinstance(error, json.JSONDecodeError):
         return 400, message(str(error))
     friendly = message(str(error))
@@ -37,8 +58,8 @@ def message(error):
         return classify(error)[1]
     detail = str(error)
     low = detail.lower()
-    if 'credit balance' in low or 'insufficient_quota' in low or 'insufficient api credit' in low:
-        return 'The configured model provider has insufficient API credit. Add credit with that provider, then retry or resume the review. Completed reviews are retained.'
+    if _credit_exhausted(error):
+        return CREDIT_EXHAUSTED
     if any(s in low for s in ('api_key', 'authentication', 'unauthorized', 'invalid api key')):
         return "The API could not authenticate. Check this office's provider credentials, then try again."
     if any(s in low for s in ('rate_limit', 'rate limit', 'too many requests')):
