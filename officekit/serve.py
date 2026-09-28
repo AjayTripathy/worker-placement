@@ -1579,13 +1579,14 @@ def _render_core(answers, data, folder):
     from officekit.strategy_proposals import list_proposals
     m["_commitment_revision"] = revision(answers)
     proposals = list_proposals(folder)
+    from officekit import render_risk_planning
     core = {
         "goals.html": render_goals(m, chat=bool(_ai(folder))),
         "capital.html": render_capital(m, answers, chat=bool(_ai(folder)), proposals=proposals),
-        "risk.html": render_risk(m, review(m, answers, personal_context=pc), answers),
+        "risk.html": render_risk_planning.overview(m, answers, review(m, answers, personal_context=pc), folder),
         "office.html": render_office(m, goals_endpoint="/goals", assets_endpoint="/assets",
                                      chat=bool(_ai(folder)), proposals=proposals),
-        "scenarios.html": render_scenarios(m, adopt_endpoint="/strategy/adopt"),
+        "scenarios.html": render_risk_planning.scenarios(m, answers, folder),
         "strategies.html": render_strategies(
             m, create_endpoint="/strategy/new",
             court_endpoint="/court" if _ai(folder, slot="bench") else None,
@@ -2004,6 +2005,13 @@ def make_handler(folder):
                                       answers_json=html.escape(json.dumps(answers), quote=True)))
 
         def _get(self):
+            if self.path.split('?', 1)[0] == '/pages/scenario_research.html':
+                from officekit import render_risk_planning
+                from officekit.commitments import revision
+                answers = json.loads((folder / 'answers.json').read_text(encoding='utf-8'))
+                model = _capital_model(answers, folder)
+                model['_commitment_revision'] = revision(answers)
+                return self._send(render_risk_planning.research(model, answers, folder))
             if self.path.split('?', 1)[0] == '/research/scorecard':
                 from officekit.render_scorecard import render
                 from officekit.commitments import revision
@@ -2376,6 +2384,15 @@ def make_handler(folder):
                     return self._failure(e, context='signal:' + g('name') + ':' + g('symbol').upper(),
                                          href=f"/pages/capability_{g('name')}.html")
                 return self._redirect(f"/pages/capability_{g('name')}.html")
+            from officekit.risk_routes import POSTS as _risk_paths
+            if self.path in _risk_paths:
+                try:
+                    from officekit.risk_routes import handle
+                    with _OFFICE_WRITE_LOCK:
+                        destination = handle(self.path, folder, g, build_office)
+                except Exception as e:
+                    return self._failure(e, context='risk-planning', href='/pages/scenario_research.html')
+                return self._redirect(destination)
             from officekit.research_routes import POSTS as _research_paths
             if self.path in _research_paths:
                 from officekit.research_routes import handle as _research_handle

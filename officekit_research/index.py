@@ -122,6 +122,8 @@ def resolve(folder, forecast_id, outcome, source_url, note="", resolved_at=None)
         raise ValueError('Resolution time must include a timezone and cannot be in the future')
     if day(when) < day(made) or prediction and instant < datetime.fromisoformat(made):
         raise ValueError("A forecast cannot resolve before it was made")
+    if prediction and prediction.get('scenario') and not outcome and day(when) < day(prediction['resolve_by']):
+        raise ValueError('Wait until the event deadline before resolving a scenario false')
     row = {"forecast_id": forecast_id, "outcome": bool(outcome), "resolved_at": when,
            "source_url": source_url, "note": note, "recorded_at": datetime.now(timezone.utc).isoformat()}
     with locked(folder):
@@ -129,10 +131,23 @@ def resolve(folder, forecast_id, outcome, source_url, note="", resolved_at=None)
         if path.is_symlink() or any(p.is_symlink() for p in path.parents):
             raise ValueError("Research storage cannot follow symbolic links")
         path.parent.mkdir(parents=True, exist_ok=True)
-        previous = load_outcomes(folder).get(forecast_id)
-        row['supersedes'] = hashlib.sha256(json.dumps(previous, sort_keys=True).encode()).hexdigest() if previous else None
+        outcomes = load_outcomes(folder)
+        ids = [forecast_id]
+        if prediction and prediction.get('scenario'):
+            for other in predictions.load(folder):
+                if other['id'] == gid or (other['submitter'], other['agent'], other['event_key']) != (prediction['submitter'], prediction['agent'], prediction['event_key']):
+                    continue
+                if datetime.fromisoformat(other['recorded_at']) > instant:
+                    raise ValueError('Outcome predates a recorded revision; reconcile its known time first')
+                ids.append(other['id'] + ':0')
+        updates = []
+        for fid in ids:
+            prior = outcomes.get(fid)
+            updates.append(dict(row, forecast_id=fid,
+                           supersedes=hashlib.sha256(json.dumps(prior, sort_keys=True).encode()).hexdigest() if prior else None))
         with open(path, "a", encoding='utf-8') as f:
-            f.write(json.dumps(row, ensure_ascii=False) + "\n")
+            f.write(''.join(json.dumps(update, ensure_ascii=False) + "\n" for update in updates))
+        row = updates[0]
     return row
 
 
@@ -226,18 +241,23 @@ def build(folder):
 
 
 @transaction()
-def forecast_rows(folder):
+def forecast_rows(folder, include_revisions=False):
     """One row per prediction and original submitter. Imported identity is retained."""
     db = sqlite3.connect(build(folder))
     db.row_factory = sqlite3.Row
     try:
-        return [dict(r) for r in db.execute(
+        result = [dict(r) for r in db.execute(
             "SELECT f.*, r.kind, r.symbol, r.as_of, r.strategy, r.label, r.protocol_hash, "
             "r.adjudicate_model, r.adjudicate_tier, r.bench_model, r.tier_label, g.agent, "
             "COALESCE(a.contributor,r.contributor) AS contributor, COALESCE(a.status, r.origin) AS attribution "
             "FROM forecast f JOIN research r ON r.id=f.research_id "
             "JOIN forecasting_agent g ON g.research_id=r.id "
             "LEFT JOIN attribution a ON a.research_id=r.id ORDER BY f.resolve_by,f.id")]
+        if not include_revisions:
+            from officekit_research.predictions import load
+            updates = {r["id"] for r in load(folder) if r.get("supersedes")}
+            result = [r for r in result if r["research_id"] not in updates]
+        return result
     finally:
         db.close()
 

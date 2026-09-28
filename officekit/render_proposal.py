@@ -74,6 +74,9 @@ button{{font-family:inherit;font-size:13px;font-weight:600;background:var(--gree
                      '</p><p>Existing portfolio net worth after this modeled scenario: ' + money(sc['estimated_net_worth_after']) +
                      '.</p>' + bullets(sc['tripwires']) + '</details>')
         P.append(bullets(plan['limitations']) + '</section>')
+    from officekit.render_risk_planning import comparisons
+    from officekit.risk_planning import proposal_comparisons
+    P.append(comparisons(p.get('risk_comparisons') if 'risk_comparisons' in p else proposal_comparisons(p)))
     if p.get('charitable_goals'):
         from officekit.charitable import VEHICLES, FUNDING
         P.append('<section class="slide"><h2>Charitable goals behind this strategy</h2><p>Giving commitments and reviewed tax scenarios from this proposal’s office snapshot.</p>')

@@ -317,6 +317,11 @@ def build_from_answers(answers, sma_symbols=None, sma_label="Direct-index SMA"):
                          for c in commitments if c.get("annual_amount") is not None]
     if merged:
         data["goals"] = merged
+    if answers.get("risk_policy"):
+        from officekit.risk_planning import validate as validate_risk
+        data["risk_policy"] = validate_risk(answers["risk_policy"])
+    if answers.get("scenario_research"):
+        data["scenario_research"] = answers["scenario_research"]
     if answers.get("scenarios"):
         data["scenarios"] = answers["scenarios"]     # life-event / custom scenario overlay
     if answers.get("strategy_decisions"):

@@ -1,7 +1,7 @@
 """Frozen planning inputs from the same goals, cash and disaster models as the UI."""
 from copy import deepcopy
 
-VERSION = 4
+VERSION = 5
 
 
 def needs_refresh(proposal):
@@ -31,6 +31,8 @@ def inputs(proposal):
     from officekit.charitable import plans as charitable_plans
     from officekit.beta_programs import summaries as beta_summaries
 
+    from officekit.risk_planning import capacity, stress
+    from officekit.short_exposure import inventory
     snapshot = proposal['snapshot']
     model = model_from_snapshot(proposal)
     bound = proposal.get('deployment_source')
@@ -40,10 +42,13 @@ def inputs(proposal):
     disasters = []
     for r in results:
         sc = r['sc']
+        flow = stress(model, sc)
         disasters.append({'id': sc['key'], 'name': sc['name'], 'description': sc.get('desc'),
-                          'estimated_loss': round(r['dd'], 2), 'estimated_net_worth_after': round(r['nw_after'], 2),
+                          'estimated_loss': flow['portfolio_mark_change'], 'estimated_net_worth_after': round(model['NW'] + flow['portfolio_mark_change'], 2),
                           'cash_today': round(r['cash_now'], 2), 'marketable_after_haircut': round(r['mkt'], 2),
                           'pending_proceeds': round(r['sept'], 2),
+                          'funding_stress': flow, 'enabled': sc.get('enabled', True),
+                          'probability_mode': sc.get('probability_mode', 'stress'),
                           'factor_shocks': sc.get('shocks', {}), 'tripwires': sc.get('tripwires', []),
                           'response_options': sc.get('opts', []),
                           'goals_after': apply_goal_ov(goals, sc.get('goal_ov', {})),
@@ -55,6 +60,7 @@ def inputs(proposal):
                      'allocation_targets': [{'id': s.get('id'), 'category': s['category'], 'target_pct': s.get('target_pct')}
                                             for s in model['sleeves'] if s.get('target_pct') is not None],
                      'cash_calendar': cash_calendar(model), 'disasters': disasters,
+                     'loss_capacity': capacity(model), 'short_exposure': inventory(model),
                      'charitable_goals': charitable_plans(model),
                      'beta_programs': beta_summaries(snapshot['answers'], model, selected['id']),
                      'limitations': ['Scenario estimates describe the existing portfolio, not the proposed basket.',

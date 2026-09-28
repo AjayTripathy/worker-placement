@@ -30,13 +30,20 @@ def catalog(folder, answers):
 
     def add(kind, identity, symbols, as_of, summary, **meta):
         symbols = [s.upper() for s in symbols if isinstance(s, str) and re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9.^-]{0,14}', s)]
-        if not identity or (not symbols and kind != 'office_program') or (as_of and str(as_of)[:10] > today):
+        if not identity or (not symbols and kind not in {'office_program', 'scenario_forecast'}) or (as_of and str(as_of)[:10] > today):
             return
         key = reference_key(kind, identity, meta.get('manifest_sha256'))
         entries.append({'kind': kind, 'id': str(identity), 'symbols': symbols[:30],
                         'as_of': as_of or None, 'summary': str(summary)[:1400],
                         'href': '/pages/research_' + key + '.html', **meta})
 
+    from officekit_research.scenario_forecasts import records
+    for r in records(folder):
+        meta = r['scenario']
+        add('scenario_forecast', r['id'], meta['symbols'], r['recorded_at'], meta['summary'],
+            title=r['statement'], author=r['submitter'], agent=r['agent'],
+            verdict=f"{r['probability']:.1%} by {r['resolve_by']}", gaps=meta['gaps'],
+            scenario_key=meta['scenario_key'], event_key=r['event_key'])
     for r in general.load_all(folder):
         if r['subject']['instrument'] not in {'stock', 'etf'}:
             continue

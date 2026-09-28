@@ -30,6 +30,8 @@ POSTS = {'/assets', '/goals', '/goals/add', '/goals/remove', '/goals/mortgage',
          '/api-errors/dismiss', '/import/files', '/import/remove', '/adapter/import', '/chat', '/court', '/docket', '/signals/run', '/commitments/preview'}
 from officekit.research_routes import POSTS as RESEARCH_POSTS
 POSTS |= RESEARCH_POSTS
+from officekit.risk_routes import POSTS as RISK_POSTS
+POSTS |= RISK_POSTS
 POSTS.add('/strategy/deploy')
 POSTS.add('/goal/security-review')
 POSTS.add('/beta/program')

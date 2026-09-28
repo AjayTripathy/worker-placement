@@ -34,6 +34,7 @@ DIR = Path(__file__).resolve().parent / "directives"
 
 # directive -> the models.json slots it exercises (contract #10)
 SLOTS = {
+    "scenario-forecaster": ("adjudicate",),
     "capital-planner": ("intake",),
     "court": ("bench", "adjudicate"),
     "diligence": ("bench", "verify"),

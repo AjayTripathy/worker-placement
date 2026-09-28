@@ -123,6 +123,10 @@ def funding(model, source_id=None):
         reservations = _apportion(nets, calendar['shortfall'] * 100)
         floor = round(sum(max(0, float(g.get('amount') or 0)) for g in model['d'].get('goals', [])
                           if g.get('kind') == 'liquidity_floor'), 2)
+        if model['d'].get('risk_policy'):
+            from officekit.risk_planning import inputs as risk_inputs
+            policy = risk_inputs(model)['values']
+            floor = max(floor, round(policy['annual_spending'] / 12 * policy['reserve_months'], 2))
         floor_reservations = _apportion({sid: cents - reservations[sid] for sid, cents in nets.items()},
                                        max(0, floor - calendar['available']) * 100)
         sid = selected['id']

@@ -113,6 +113,9 @@ def page(answers, model):
         out.append(form('refresh', p['id'], '', 'Refresh public benchmark and rebuild basket'))
         out.append('<details><summary>Import a dated benchmark snapshot</summary>' + form('snapshot', p['id'],
             '<label>Portable benchmark JSON<textarea name="snapshot_json" required></textarea></label>', 'Import benchmark') + '</details>')
+        from officekit.risk_planning import beta_comparisons
+        from officekit.render_risk_planning import comparisons
+        out.append(comparisons(beta_comparisons(model, v)))
         active = v['basket']['active_share']
         out.append('<details><summary>Constituents and dollar allocations (' + str(len(v['basket']['rows'])) + ')</summary><p>' + esc(v['method']) + '</p>')
         if active is not None:

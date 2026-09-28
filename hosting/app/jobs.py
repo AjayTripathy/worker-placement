@@ -15,7 +15,7 @@ from .auth import AuthFailure
 from .store import Conflict
 
 LOG = logging.getLogger(__name__)
-LONG_PATHS = {'/import/files', '/adapter/import', '/chat', '/court', '/docket',
+LONG_PATHS = {'/risk/forecast', '/import/files', '/adapter/import', '/chat', '/court', '/docket',
               '/signals/run', '/commitments/preview', '/strategy/new', '/strategy/propose',
               '/strategy/adopt', '/strategy/goal-adopt', '/strategy/proposal/retry',
               '/strategy/proposal/revise', '/strategy/deploy'}
@@ -136,8 +136,10 @@ class Jobs:
             from .workspace import dispatch
             status, headers, data, receipt = dispatch(self.offices, uid, oid, 'POST', job['path'],
                 base64.b64decode(job['raw']), job['content_type'], job['expected'], job_id=jid)
-            job.update(status='complete', response={'status': status, 'headers': headers,
+            job.update(status='error' if status >= 400 else 'complete', response={'status': status, 'headers': headers,
                        'body': base64.b64encode(data).decode()}, receipt=receipt)
+            if status >= 400:
+                job['error'] = 'Background request failed (HTTP ' + str(status) + '). Open the office for the saved error, correct its cause, then retry.'
         except Exception as error:
             LOG.exception('Office job failed: %s', jid)
             job.update(status='error', error=str(error) if isinstance(error, AuthFailure) else 'Background work failed. Saved checkpoints are retained. Review them before retrying.')

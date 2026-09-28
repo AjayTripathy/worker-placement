@@ -55,7 +55,7 @@ def review(m, answers=None, personal_context=None):
         F.append({"severity": "medium",
                   "title": f"Stock-heavy mix — {cur['stocks_pct']:.0f}% equities",
                   "detail": f"~{st['vol']*100:.0f}% volatility; about -{st['drawdown_1in20']*100:.0f}% "
-                            f"({_fmt(cur['total']*st['drawdown_1in20'])}) in a 1-in-20 year.",
+                            f"({_fmt(cur['total']*st['drawdown_1in20'])}) in an illustrative severe-year model. This is not a calibrated event probability.",
                   "advice": "if any goal is near-term, shift toward bonds to shorten the funding gap.",
                   "action": _GROWTH})
 
@@ -118,12 +118,22 @@ def review(m, answers=None, personal_context=None):
                   "advice": "raise cash or hold a T-bill ladder maturing into the claim.",
                   "action": None})
 
-    # 6) leverage / shorts (the 131/31 extension carries a real short book)
-    shorts = sum(s["value"] for s in m["sleeves"] if s.get("kind") == "asset" and s["value"] < 0)
-    if shorts < -0.05 * NW and NW:
-        F.append({"severity": "medium", "title": f"Leverage — {_fmt(-shorts)} short book",
-                  "detail": "a long/short extension adds financing cost and a borrow/short-squeeze tail.",
-                  "advice": "confirm the extension's financing drag is covered by its alpha.", "action": None})
+    # Position-level look-through includes shorts hidden inside positive-NAV SMAs.
+    from officekit.short_exposure import inventory
+    book = inventory(m)
+    if book['known_gross'] or book['gaps']:
+        F.append({'severity': 'medium', 'title': 'Short exposure and manager look-through',
+                  'detail': f"{_fmt(book['known_gross'])} identified gross shorts; {len(book['gaps'])} manager coverage gaps.",
+                  'advice': 'Review the actual tickers, strategy memberships, borrowing costs and account collateral terms.',
+                  'action': {'href': '/pages/risk.html#shorts', 'label': 'Review short positions'}})
+    if d.get('risk_policy'):
+        from officekit.risk_planning import capacity
+        cap = capacity(m)
+        if cap['funding_gap']:
+            F.append({'severity': 'high', 'title': 'Protected spending exceeds modeled resources',
+                      'detail': f"{_fmt(cap['funding_gap'])} gap over the selected horizon; additional loss capacity is zero.",
+                      'advice': 'Review spending, reliable income, goal priorities and the planning horizon.',
+                      'action': {'href': '/pages/risk.html#inputs', 'label': 'Review loss budget'}})
 
     # 7) tax reserve (a risk the Officer flags; harvesting it is its own app)
     tax = m.get("tax") or {}

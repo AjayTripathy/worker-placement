@@ -1,5 +1,7 @@
 """Human-facing names for existing research contracts, not a second store."""
 KINDS = {
+    'scenario_forecast': ('Scenario forecasts', 'A defined event, resolution date, evidence, probability and immutable agent attribution.',
+                         'Compare compatible unconditional events and horizons, review source dependence, then attach to a scenario. Score explicit outcomes; editable stress weights are not predictions.'),
     'office_program': ('Office programs', 'A private portfolio mandate, funding sources, basket, approval and operating record.',
                        'Reuse the existing program after checking current readiness. Approval, funding and operation are distinct states; private terms are not published.'),
     'general': ('Security research', 'What is true about a stock or fund, independent of an investor.',

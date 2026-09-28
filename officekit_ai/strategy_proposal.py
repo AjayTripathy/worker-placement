@@ -385,6 +385,9 @@ def build_proposal(p, folder, checkpoint, clients=None, *, reuse=True, contextua
              "shared_case_rule": "Evaluate this office independently; prior case decisions do not establish suitability."}, clients)
         allocated = basket(p, p["funding"], risk)
         checkpoint("Risk Officer complete", risk=risk, basket=allocated)
+    if 'risk_comparisons' not in p:
+        from officekit.risk_planning import proposal_comparisons
+        checkpoint('Deployment stress comparison', risk_comparisons=proposal_comparisons(p))
     if not p.get("pitch"):
         checkpoint("Pitch deck · investment case and implementation")
         pitch = ask(folder, p, "pitch-builder", "intake", PITCH,
@@ -394,10 +397,13 @@ def build_proposal(p, folder, checkpoint, clients=None, *, reuse=True, contextua
             "other tickers, allocations or prices in prose. Explain conditional/rejected outcomes honestly. For programs, "
             "produce an actionable provider/adviser brief with required terms and named responsible roles. Adoption records intent.",
             {"brief": p["brief"], "research": p["research"], "courts": p["courts"], "risk": p["risk"],
-             "funding": p["funding"], "basket": p["basket"], "capital_plan": p.get('capital_plan'),
+             "funding": p["funding"], "basket": p["basket"], "risk_comparisons": p.get("risk_comparisons"), "capital_plan": p.get('capital_plan'),
              "charitable_goals": p.get('charitable_goals', [])}, clients)
         checkpoint("Pitch deck complete", pitch=pitch)
     unresolved = (p["risk"]["verdict"] != "support" or any(a["conditions"] or not a["eligible"] for a in p["basket"])
                   or not p["basket"] or any(a.get("unverified_items") or a.get("evidence", {}).get("errors") for a in p["courts"])
                   or any(f["severity"] == "high" for f in p["deterministic_risk"]))
+    unresolved = unresolved or any(c.get('error') or c.get('after', {}).get('funding_gap') or
+        any(r['exceeds_loss_budget'] or r['after']['worst_gap'] for r in c.get('scenarios', []))
+        for c in p.get('risk_comparisons', []))
     checkpoint("Ready for your review", status="needs_review" if unresolved else "ready", errors=[])

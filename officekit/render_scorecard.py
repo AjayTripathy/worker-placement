@@ -6,7 +6,8 @@ from officekit_research.cases import digest
 
 def ledger_revision(folder):
     from officekit_research.predictions import load
-    return digest({'predictions': load(folder), 'outcomes': index.load_outcomes(folder),
+    reviews = folder / 'research' / 'scenario_reviews.json'
+    return digest({'scenario_reviews': reviews.read_text() if reviews.exists() else '', 'predictions': load(folder), 'outcomes': index.load_outcomes(folder),
                    'research': [(r['id'], r['as_of']) for r in index.query(folder, kind='general')]})
 
 

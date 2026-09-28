@@ -317,7 +317,7 @@ def pending_deployable(m):
     return max(0, pending - tax_funding(m)["pending"])
 
 
-def cash_calendar(m):
+def cash_calendar(m, months=12):
     """Upcoming payments only; no presumed income, sales, returns or pending cash.
 
     Undated current tax and out-of-window obligations remain ring-fenced.
@@ -326,8 +326,8 @@ def cash_calendar(m):
     """
     today = date.fromisoformat(m["d"]["as_of"])
     start = today.replace(day=1)
-    stop = add_months(start, 12)
-    rows = [{"month": add_months(start, i).isoformat()[:7], "payments": [], "outflow": 0.0} for i in range(12)]
+    stop = add_months(start, months)
+    rows = [{"month": add_months(start, i).isoformat()[:7], "payments": [], "outflow": 0.0} for i in range(months)]
     by_month = {r["month"]: r for r in rows}
     cash = sum(float(s.get("value") or 0) for s in m["assets"] if s.get("category") == "cash")
     funding = tax_funding(m)

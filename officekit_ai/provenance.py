@@ -9,12 +9,14 @@ def protocol_hash():
     import officekit_agents
     root = Path(officekit_agents.__file__).parent
     documents = {str(p.relative_to(root)): p.read_text(encoding="utf-8") for pattern in ('directives/*.md', 'templates/court_*.md') for p in sorted(root.glob(pattern))}
-    for name in ('court.py', 'general_court.py', 'strategy_proposal.py', 'intelligence.py'):
+    for name in ('court.py', 'general_court.py', 'strategy_proposal.py', 'intelligence.py', 'scenario_forecast.py'):
         documents['officekit_ai/' + name] = (Path(__file__).parent / name).read_text(encoding="utf-8")
     from officekit_research import discovery
     from officekit import deployment, capital_planning, charitable, donation_securities
     documents['research_discovery'] = Path(discovery.__file__).read_text(encoding="utf-8")
     documents['deployment_funding'] = Path(deployment.__file__).read_text(encoding="utf-8")
+    from officekit import risk_planning
+    documents['risk_planning'] = Path(risk_planning.__file__).read_text(encoding='utf-8')
     documents['capital_planning_inputs'] = Path(capital_planning.__file__).read_text(encoding="utf-8")
     documents['charitable_planning'] = Path(charitable.__file__).read_text(encoding="utf-8")
     documents['donation_securities'] = Path(donation_securities.__file__).read_text(encoding="utf-8")

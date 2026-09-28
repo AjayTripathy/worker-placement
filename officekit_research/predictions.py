@@ -21,9 +21,11 @@ def validate(row):
     fields = {'id', 'schema', 'recorded_at', 'symbol', 'statement', 'resolution_criteria',
               'resolve_by', 'probability', 'base_rate', 'submitter', 'agent', 'model',
               'protocol', 'strategy', 'event_key'}
-    if not isinstance(row, dict) or set(row) != fields or row['schema'] != 1:
+    if isinstance(row, dict) and row.get('schema') == 2:
+        fields |= {'supersedes', 'scenario'}
+    if not isinstance(row, dict) or set(row) != fields or row['schema'] not in {1, 2}:
         raise ValueError('Invalid prediction schema')
-    for key in fields - {'id', 'schema', 'probability', 'base_rate'}:
+    for key in fields - {'id', 'schema', 'probability', 'base_rate', 'supersedes', 'scenario'}:
         text(row[key], 1200 if key in {'statement', 'resolution_criteria'} else 200)
         if not row[key].strip() and key != 'strategy':
             raise ValueError('Prediction requires ' + key)
@@ -38,6 +40,13 @@ def validate(row):
     expected = hashlib.sha256(canonical({k: v for k, v in row.items() if k != 'id'})).hexdigest()
     if row['id'] != expected:
         raise ValueError('Prediction integrity check failed')
+    if row['schema'] == 2:
+        from officekit_research.scenario_forecasts import validate_metadata
+        validate_metadata(row['scenario'])
+        if row['scenario']['event_start'] and day(row['scenario']['event_start']) > day(row['resolve_by']):
+            raise ValueError('Event window must start before the deadline')
+        if row['supersedes'] is not None and not __import__('re').fullmatch('[a-f0-9]{64}', str(row['supersedes'])):
+            raise ValueError('Invalid forecast revision')
     return row
 
 
@@ -48,28 +57,66 @@ def load(folder):
     if not p.exists():
         return []
     rows = [validate(parse_json(line)) for line in p.read_bytes().splitlines() if line.strip()]
-    keys = [(r['submitter'], r['agent'], r['event_key']) for r in rows]
-    if len(keys) != len(set(keys)):
-        raise ValueError('Duplicate prediction identity; reconcile without deleting history')
+    _validate_history(rows)
     return rows
 
 
-def record(folder, *, symbol, statement, resolution_criteria, resolve_by, probability,
-           base_rate, submitter, agent, model, protocol, event_key, strategy=''):
+def _validate_history(rows):
+    latest = {}
+    for r in rows:
+        key = (r['submitter'], r['agent'], r['event_key'])
+        prior = latest.get(key)
+        if prior:
+            if r.get('supersedes') != prior['id']:
+                raise ValueError('Duplicate prediction identity; reconcile without deleting history')
+            if any(r[k] != prior[k] for k in ('symbol', 'statement', 'resolution_criteria', 'resolve_by')):
+                raise ValueError('Forecast revisions cannot change the event or deadline')
+            if r.get('scenario') and any(r['scenario'][k] != prior.get('scenario', {}).get(k) for k in ('scenario_key', 'event_start', 'condition')):
+                raise ValueError('Forecast revisions cannot change the event window or conditions')
+            if r['recorded_at'] <= prior['recorded_at']:
+                raise ValueError('Forecast update must follow the prior version')
+        elif r.get('supersedes'):
+            raise ValueError('Forecast revision is missing its original')
+        latest[key] = r
+
+
+def _make(*, symbol, statement, resolution_criteria, resolve_by, probability,
+           base_rate, submitter, agent, model, protocol, event_key, strategy='', scenario=None, supersedes=None):
     row = dict(schema=1, recorded_at=datetime.now(timezone.utc).isoformat(), symbol=symbol.upper(),
                statement=statement, resolution_criteria=resolution_criteria, resolve_by=resolve_by,
                probability=probability, base_rate=base_rate, submitter=submitter, agent=agent,
                model=model, protocol=protocol, strategy=strategy, event_key=event_key)
+    if scenario is not None:
+        row.update(schema=2, scenario=scenario, supersedes=supersedes)
     row['id'] = hashlib.sha256(canonical(row)).hexdigest()
     validate(row)
+    return row
+
+
+def record_many(folder, entries):
+    """Validate a whole research run before one append; no partial successful bench."""
+    rows = [_make(**fields) for fields in entries]
     with locked(folder):
-        if any((r['submitter'], r['agent'], r['event_key']) == (submitter, agent, event_key) for r in load(folder)):
-            raise ValueError('This submitter and agent already registered that event; forecasts are immutable')
+        existing = load(folder)
+        from officekit_research.index import load_outcomes
+        outcomes = load_outcomes(folder)
+        for row in rows:
+            previous = [r for r in existing if (r['submitter'], r['agent'], r['event_key']) ==
+                        (row['submitter'], row['agent'], row['event_key'])]
+            if previous and not row.get('supersedes'):
+                raise ValueError('This submitter and agent already registered that event; forecasts are immutable')
+            if any(r['id'] + ':0' in outcomes for r in previous):
+                raise ValueError('A resolved event cannot receive another forecast')
+        _validate_history(existing + rows)
         p = path(folder)
         p.parent.mkdir(parents=True, exist_ok=True)
         with p.open('a', encoding='utf-8') as stream:
-            stream.write(json.dumps(row, ensure_ascii=False, allow_nan=False) + '\n')
-    return row
+            stream.write(''.join(json.dumps(row, ensure_ascii=False, allow_nan=False) + '\n' for row in rows))
+    return rows
+
+
+def record(folder, **fields):
+    return record_many(folder, [fields])[0]
 
 
 def agent_identity(record):

@@ -62,7 +62,11 @@ def page(folder, answers, key=None):
     if source.startswith('/app/research/document?'):
         body += '<p><a target="_top" href="' + escape(source, quote=True) + '">Open original published research →</a></p>'
         return wrap(body, revision(answers))
-    if e['kind'] == 'general':
+    if e['kind'] == 'scenario_forecast':
+        from officekit_research.predictions import load
+        record = next(r for r in load(folder) if r['id'] == e['id'])
+        body += '<p><a href="/pages/scenario_research.html#forecast-' + e['id'] + '">Review forecast, evidence and aggregation</a></p>'
+    elif e['kind'] == 'general':
         from officekit_research.general import load
         record = load(folder, e['id'])
     elif e['kind'] == 'office_court':
