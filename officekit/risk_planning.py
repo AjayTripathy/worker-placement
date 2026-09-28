@@ -84,15 +84,16 @@ def inputs(m):
 
 
 def accessible(s):
+    from officekit.donation_securities import RETIREMENT
+    def restricted(row):
+        account = str(row.get('account_type', '')).lower().replace('_', ' ')
+        return (any(row.get(k) for k in ('restricted', 'pledged', 'nontransferable'))
+                or account in {'daf', 'charitable', 'trust restricted'} or bool(RETIREMENT.search(account)))
     meta = s.get('meta') or {}
-    # A restriction never disappears because the asset happens to be cash.
-    nested = s.get('holdings', [])
-    accounts = [a for h in nested for a in h.get('accounts', [])]
-    for child in nested + accounts:
-        if any(child.get(k) for k in ('restricted', 'pledged', 'nontransferable')) or str(child.get('account_type', '')).lower() in {'daf', 'charitable', 'trust_restricted', 'retirement', 'ira', '401k'}:
-            return False  # mixed pools require a split before household access is assumed
-    return not any(s.get(k) or meta.get(k) for k in ('restricted', 'pledged', 'nontransferable')) and not (
-        str(meta.get('account_type', '')).lower() in {'daf', 'charitable', 'trust_restricted', 'retirement', 'ira', '401k'})
+    holdings = s.get('holdings', [])
+    accounts = [a for h in holdings for a in h.get('accounts', [])]
+    # A mixed restricted pool needs a split before household access is assumed.
+    return not any(restricted(row) for row in [s, meta] + holdings + accounts)
 
 
 def resources(m):

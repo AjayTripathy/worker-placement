@@ -58,6 +58,13 @@ def test_home_pending_and_restricted_balances_cannot_fund_capacity():
     assert capacity(model(a))['resources']['total'] == baseline
 
 
+@pytest.mark.parametrize('restriction', [{'restricted': True}, {'pledged': True}, {'account_type': 'roth_ira'}, {'account_type': '401(k)'}])
+def test_restrictions_survive_normalization(restriction):
+    a = household()
+    a['sleeves'][0].update(restriction)
+    assert capacity(model(a))['resources']['cash'] == 0
+
+
 def test_goals_count_together_with_reservations_once_and_flexible_excluded():
     a = household()
     a['goals'] = [{'id': 'school', 'kind': 'spending', 'label': 'School', 'amount': 50000, 'date': (date.today()+timedelta(days=30)).isoformat()},

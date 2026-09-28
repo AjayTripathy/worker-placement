@@ -139,7 +139,7 @@ def _normalize_sleeve(raw):
     if raw.get("eta"):
         s["eta"] = raw["eta"]
     meta = dict(raw.get("meta") or {})
-    for field in ("rate_pct", "term_years", "terms_as_of", "property_tax_id"):
+    for field in ("rate_pct", "term_years", "terms_as_of", "property_tax_id", "restricted", "pledged", "nontransferable", "account_type"):
         if raw.get(field) is not None:
             meta[field] = raw[field]
     if meta:

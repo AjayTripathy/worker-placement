@@ -187,19 +187,26 @@ def research(m, answers, folder):
     token = ledger_revision(folder)
     body = '<div class="eyebrow">Shared research taxonomy · scenario forecasts</div><h1>Forecast research library</h1><p>Event probability, portfolio severity and household suitability are separate. Research and imported forecasts join the existing catalog and calibration ledger. Your office inputs stay private.</p><p><a href="/research/scorecard">Brier scores by submitter and agent</a> · <a href="/pages/research_catalog.html">All research</a></p>'
     body += '<p class="muted">Original calls remain immutable. Updates do not create extra scored trials; the first registered call per submitter, agent and event is the primary Brier observation. Imported identities are claims. Publication requires the existing evidence and release checks; saving here does not publish.</p>'
-    for sc in applicable_scenarios(m):
+    scenario_list = applicable_scenarios(m)
+    known = {sc['key'] for sc in scenario_list}
+    scenario_list += [dict(key=key, name='Imported scenario: ' + key, imported_only=True)
+                      for key in sorted({r['scenario']['scenario_key'] for r in rows} - known)]
+    for sc in scenario_list:
         key = sc['key']; definition = answers.get('scenario_research', {}).get(key, {})
         body += '<section id="' + esc(key) + '"><h2>' + esc(sc['name']) + '</h2>'
         for group in aggregate([r for r in rows if r['scenario']['scenario_key'] == key]):
             body += '<p><b>' + f"{group['probability']:.1%}" + '</b> by ' + group['resolve_by'] + ' · ' + esc(group['statement']) + '</p><p class="muted">' + esc(group['method']) + f" {group['submissions']} submissions, {group['source_families']} declared source families; range {group['range'][0]:.1%}–{group['range'][1]:.1%}." + '</p>'
-        body += '<details><summary>Define an event and run evidence-led research</summary><p>Three calls: reference class, independent mechanism analysis, and adjudication. Uses your configured intelligence provider and retrieved public evidence. An event such as “AI trouble” needs a measurable definition before it can be scored.</p><form method="POST" action="/risk/forecast"><input type="hidden" name="scenario_key" value="' + esc(key) + '"><input type="hidden" name="ledger_revision" value="' + token + '">'
-        for name, label in [('event_key', 'Stable event name (keep it for future updates)'), ('statement', 'What exactly will happen?'), ('resolution_criteria', 'Which observable facts and source will settle yes or no?'), ('symbols', 'Relevant tickers, separated by commas (optional)')]:
-            value = definition.get(name, '')
-            if isinstance(value, list): value = ', '.join(value)
-            body += field(name, label, value, kind='text', required=name != 'symbols')
-        body += field('event_start', 'Event window starts', definition.get('event_start', date.today().isoformat()), kind='date', required=True)
-        body += field('resolve_by', 'Resolution deadline', definition.get('resolve_by', (date.today()+timedelta(days=365)).isoformat()), kind='date', required=True)
-        body += '<button type="submit">Research probability</button></form></details>'
+        if sc.get('imported_only'):
+            body += '<p class="muted">This research is in the catalog. It is not yet attached to an office stress scenario.</p>'
+        else:
+            body += '<details><summary>Define an event and run evidence-led research</summary><p>Three calls: reference class, independent mechanism analysis, and adjudication. Uses your configured intelligence provider and retrieved public evidence. An event such as “AI trouble” needs a measurable definition before it can be scored.</p><form method="POST" action="/risk/forecast"><input type="hidden" name="scenario_key" value="' + esc(key) + '"><input type="hidden" name="ledger_revision" value="' + token + '">'
+            for name, label in [('event_key', 'Stable event name (keep it for future updates)'), ('statement', 'What exactly will happen?'), ('resolution_criteria', 'Which observable facts and source will settle yes or no?'), ('symbols', 'Relevant tickers, separated by commas (optional)')]:
+                value = definition.get(name, '')
+                if isinstance(value, list): value = ', '.join(value)
+                body += field(name, label, value, kind='text', required=name != 'symbols')
+            body += field('event_start', 'Event window starts', definition.get('event_start', date.today().isoformat()), kind='date', required=True)
+            body += field('resolve_by', 'Resolution deadline', definition.get('resolve_by', (date.today()+timedelta(days=365)).isoformat()), kind='date', required=True)
+            body += '<button type="submit">Research probability</button></form></details>'
         matching = [r for r in rows if r['scenario']['scenario_key'] == key]
         for r in reversed(matching):
             meta = r['scenario']
