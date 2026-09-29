@@ -103,6 +103,15 @@ def install(app, offices, research, origin, member, body, csrf_page, limiter, jo
         return await run_in_threadpool(offices.activate,claims['uid'],sid,data.get('replace_revision'))
 
     # ---- central research exchange: GENERAL research only --------------------
+    @app.post('/api/offices/{oid}/research/packs')
+    async def office_research_import(oid: str, request: Request):
+        claims = await private(request)
+        data = await body(request, limit=600*1024, require_browser=False)
+        limiter.claim(claims['uid'], 'research')
+        from .research_import import import_pack
+        return await run_in_threadpool(import_pack, offices, claims['uid'], oid,
+                                      data.get('bundle'), data.get('revision'), data.get('proposal_id'))
+
     # Contributions come from an office's agent with explicit bearer credentials
     # (never an ambient cookie). Reading requires a signed-in member.
     @app.post('/api/research/general')

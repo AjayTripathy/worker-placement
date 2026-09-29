@@ -83,6 +83,20 @@ def _md_inline(s):
     s = _re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", s)
     s = _re.sub(r"(?<!\*)\*(?!\*)(.+?)(?<!\*)\*(?!\*)", r"<i>\1</i>", s)   # *italic*
     s = _re.sub(r"`(.+?)`", r"<code>\1</code>", s)
+    # Only explicit HTTPS citations become links. Markup and attributes are
+    # escaped above; contributed javascript/data URLs remain plain text.
+    def link(match):
+        from html import unescape
+        from urllib.parse import urlsplit
+        label, url = match.groups()
+        try:
+            parsed = urlsplit(unescape(url))
+            if not parsed.hostname or parsed.username or parsed.password:
+                return match.group(0)
+        except ValueError:
+            return match.group(0)
+        return '<a href="' + url + '" target="_blank" rel="noopener noreferrer">' + label + '</a>'
+    s = _re.sub(r'\[([^\[\]]+)\]\((https://[^\s<>\(\)]+)\)', link, s)
     return s
 
 

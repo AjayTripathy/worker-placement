@@ -83,6 +83,10 @@ def validate(manifest, folder=None):
                 probs.append("deck must stay inside the strategy pack")
             elif not target.is_file():
                 probs.append(f"deck file not found: {deck}")
+            elif manifest.get('deck_sha256'):
+                import hashlib
+                if target.is_symlink() or hashlib.sha256(target.read_bytes()).hexdigest() != manifest['deck_sha256']:
+                    probs.append('deck digest does not match the retained research version')
     return probs
 
 

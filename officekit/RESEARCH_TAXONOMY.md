@@ -6,6 +6,11 @@ It reads the existing durable contracts. It is not a parallel research store.
 Human-facing names live in `officekit_research.taxonomy` and appear in the
 Strategies creation flow and the catalog.
 
+Local agents can now [export and upload strategy packs](LOCAL_RESEARCH.md) into
+an office's catalog, optionally refreshing an unfinished proposal. Uploaded
+decks remain dated, attributed research leads; completed court and suitability
+records retain their original inputs.
+
 | Type | Existing record | Meaning and use |
 | --- | --- | --- |
 | Security research | General court | Stock/fund findings independent of an office. Eligible evidence and per-claim admission govern exchange contributions. Reuse additionally checks freshness, protocol, intelligence tier and corroboration. |

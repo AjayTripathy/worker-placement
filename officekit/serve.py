@@ -2421,7 +2421,10 @@ def make_handler(folder):
             if self.path in _research_paths:
                 from officekit.research_routes import handle as _research_handle
                 body, ctype = _research_handle(self.path, folder, g)
-                return self._send(body, ctype=ctype, download='research-case.json' if self.path == '/research/approve' else None) if body is not None else self._redirect('/research')
+                destination = '/research'
+                if self.path in {'/research/import-pack', '/research/refresh-proposal'}:
+                    destination = '/pages/proposal_' + g('pid') + '.html' if g('pid') else '/pages/research_catalog.html'
+                return self._send(body, ctype=ctype, download='research-case.json' if self.path == '/research/approve' else None) if body is not None else self._redirect(destination)
             if self.path == '/beta/program':
                 try:
                     from officekit.beta_routes import handle

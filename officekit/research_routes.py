@@ -6,7 +6,7 @@ from officekit.commitments import revision
 from officekit.office_lock import locked
 from officekit_research.cases import MAX_BYTES, approve, digest, import_bundle, prepare_case
 
-POSTS = {'/research/import', '/research/prepare', '/research/approve', '/research/predict', '/research/resolve'}
+POSTS = {'/research/import', '/research/import-pack', '/research/refresh-proposal', '/research/prepare', '/research/approve', '/research/predict', '/research/resolve'}
 
 
 def handle(route, folder, get):
@@ -15,6 +15,10 @@ def handle(route, folder, get):
     with locked(folder):
         answers = json.loads((folder / 'answers.json').read_text(encoding="utf-8"))
         require_revision(answers, get('revision'))
+        if route == '/research/refresh-proposal':
+            from officekit_research.discovery import refresh_proposal_inventory
+            refresh_proposal_inventory(folder, load(folder, get('pid')))
+            return None, None
         if route in {'/research/predict', '/research/resolve'}:
             from officekit.render_scorecard import ledger_revision, render
             from officekit_research import index, predictions
@@ -61,5 +65,9 @@ def handle(route, folder, get):
                 raise ValueError('Choose a UTF-8 research case JSON file') from None
         if len(raw.encode()) > MAX_BYTES:
             raise ValueError('Research case exceeds its size limit')
-        import_bundle(folder, parse_json(raw))
+        if route == '/research/import-pack':
+            from officekit_research.pack_transfer import install
+            install(folder, parse_json(raw), get('pid') or None)
+        else:
+            import_bundle(folder, parse_json(raw))
         return None, None

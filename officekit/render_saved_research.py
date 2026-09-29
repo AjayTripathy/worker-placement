@@ -13,6 +13,7 @@ def section(found, limit=None):
     entries = sorted(found['entries'], key=lambda e: (e.get('as_of') or '', e['id']), reverse=True)
     visible = entries if limit is None else entries[:limit]
     out = ['<section id="saved-research"><h2>Existing research and tickers</h2>',
+           '<p><a href="/research">Upload locally built research →</a></p>',
            '<p>Available now, without a new AI run. Original dates and prior verdicts are preserved; '
            'research alone does not approve or size an investment. Linked program pages show their own approvals and funding.</p>']
     if not entries:
@@ -82,7 +83,8 @@ def page(folder, answers, key=None):
     elif e['kind'] == 'strategy_pack':
         from officekit.strategy_packs import load_packs
         from officekit.render_deck import render_markdown_deck
-        pack = next((p for p in load_packs([Path(folder) / 'strategies'])[0]
+        from officekit_research.pack_transfer import roots
+        pack = next((p for p in load_packs([Path(folder) / 'strategies', *roots(folder)])[0]
                      if p['id'] == e['id'] and manifest_digest(p) == e['manifest_sha256']), None)
         if pack and pack.get('deck_path'):
             return render_markdown_deck(pack['name'], Path(pack['deck_path']).read_text(encoding="utf-8"), author=pack['author'])

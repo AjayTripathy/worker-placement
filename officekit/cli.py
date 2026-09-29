@@ -159,9 +159,45 @@ def _cmd_migrate(args):
     return migrate(args.dir, replace_revision=args.replace_revision, open_browser=not args.no_browser)
 
 
+def _cmd_research_export(args):
+    from officekit_research.pack_transfer import export
+    from officekit.cloud import save_private
+    from pathlib import Path
+    bundle = export(args.pack)
+    save_private(Path(args.output), bundle)
+    print('Exported research pack ' + bundle['id'] + ' to ' + args.output)
+
+
+def _cmd_research_upload(args):
+    from officekit_research.pack_transfer import export
+    from officekit.cloud import credentials, request
+    import uuid
+    oid = str(uuid.UUID(args.office))
+    bundle = export(args.pack)
+    auth = credentials()
+    path = '/api/offices/' + oid
+    current = request(auth['origin'], path + '/revision', token=auth['token'])
+    receipt = request(auth['origin'], path + '/research/packs',
+                      {'bundle': bundle, 'revision': current['digest'], 'proposal_id': args.proposal}, auth['token'])
+    if receipt.get('id') != bundle['id'] or receipt.get('office_id') != oid:
+        raise ValueError('Research upload receipt did not match the requested office and pack.')
+    print('Saved privately in your office: ' + auth['origin'] + receipt['href'])
+    if receipt.get('proposal_href'):
+        print('Research ready for review: ' + auth['origin'] + receipt['proposal_href'])
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="worker-placement", description=__doc__.splitlines()[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
+    export = sub.add_parser('research-export', help='Export a local strategy pack as portable research')
+    export.add_argument('--pack', required=True, help='folder containing pack.json and DECK.md')
+    export.add_argument('--output', required=True, help='destination JSON file')
+    export.set_defaults(fn=_cmd_research_export)
+    upload = sub.add_parser('research-upload', help='Upload research into a private hosted office')
+    upload.add_argument('--pack', required=True, help='folder containing pack.json and DECK.md')
+    upload.add_argument('--office', required=True, help='destination office UUID')
+    upload.add_argument('--proposal', help='unfinished proposal UUID whose research catalog should be refreshed')
+    upload.set_defaults(fn=_cmd_research_upload)
     for name, fn, extra in (
             ("start", _cmd_start, {"port": True}),
             ("login", _cmd_login, {}),

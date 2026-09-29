@@ -98,9 +98,11 @@ button{{font-family:inherit;font-size:13px;font-weight:600;background:var(--gree
     from officekit.render_research import reuse_section
     P.append(reuse_section(p))
     inventory = p.get('research_inventory') or {}
+    if not p.get('research') and status in {'error', 'awaiting_key'}:
+        P.append('<section class="slide"><h2>Research from your local agent</h2><p><a href="/research">Upload a local research pack</a> or refresh this proposal from the saved catalog. These actions make no AI calls.</p><form method="POST" action="/research/refresh-proposal"><input type="hidden" name="pid" value="' + esc(p['id']) + '"><button class="secondary">Refresh saved research</button></form></section>')
     if inventory:
         from officekit_research.taxonomy import label as research_label
-        P.append('<section class="slide"><h2>Saved research used for candidate selection</h2><p>' + esc(inventory['use']) + '</p>')
+        P.append('<section class="slide"><h2>' + ('Saved research used for candidate selection' if p.get('research') else 'Saved research ready for candidate selection') + '</h2><p>' + esc(inventory['use']) + '</p>')
         for attached in p.get('research_attachments', []):
             P.append('<p><b>' + esc(attached['symbol']) + '</b> · ' + str(len(attached['references'])) + ' matching saved research records; links below. This is research lineage, not proof that a prior verdict applies.</p>')
         for entry in inventory['entries']:

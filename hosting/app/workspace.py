@@ -192,7 +192,7 @@ def dispatch(offices, uid, oid, method, path, raw=b'', content_type='', expected
                     # latency unrelated to the page being requested.
                     if path not in {'/', '/pages/beta_programs.html', '/pages/risk.html',
                                     '/pages/scenarios.html', '/pages/scenario_research.html',
-                                    '/pages/strategies.html'} and not re.fullmatch(r'/pages/(?:deployment_[a-f0-9]{24}|proposal_[a-f0-9-]{36})\.html', path):
+                                    '/pages/strategies.html', '/pages/research_catalog.html'} and not re.fullmatch(r'/pages/(?:deployment_[a-f0-9]{24}|proposal_[a-f0-9-]{36}|research_[a-f0-9]{64})\.html', path):
                         render_saved_office(folder)
                 elif path.startswith('/pages/'):
                     from officekit.serve import write_imports_page

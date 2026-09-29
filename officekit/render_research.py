@@ -75,6 +75,12 @@ def library(folder, revision):
     body += '<p><a href="/pages/research_catalog.html">Browse all saved ticker research →</a></p>'
     body += '<p><a href="/research/scorecard">Research calibration by submitter and agent →</a></p>'
     body += '<p class="note">Pilot exchange uses reviewed JSON files. These controls do not publish anything online.</p>'
+    body += '<h2>Bring locally built research</h2><p>Export a strategy pack with <code>wp research-export --pack PATH --output research.json</code>, then upload it here. It enters the same catalog used by new strategies as an attributed research lead. This saves it privately in your office without starting AI calls.</p>'
+    body += '<form method="POST" action="/research/import-pack" enctype="multipart/form-data"><label for="pack_file">Local research pack</label><input required id="pack_file" name="bundle_file" type="file" accept=".json,application/json"><label for="pack_proposal">Also refresh research for</label><select id="pack_proposal" name="pid"><option value="">Catalog only</option>'
+    for p in list_proposals(folder):
+        if not p.get('research') and p['status'] in {'error', 'awaiting_key'}:
+            body += '<option value="' + esc(p['id']) + '">' + esc(p['brief']['title']) + '</option>'
+    body += '</select><p><button>Import local research</button></p></form>'
     body += '<h2>Available cases</h2>' + (''.join(case_details(b) for b in bundles) or '<p>No shared cases imported yet.</p>')
     if errors:
         body += '<p role="alert">' + str(len(errors)) + ' invalid case files were excluded.</p>'

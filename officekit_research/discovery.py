@@ -76,7 +76,8 @@ def catalog(folder, answers):
         add('imported_thesis', r.get('sid'), [p.get('symbol') for p in r.get('positions', [])],
             r.get('court_date'), r.get('thesis', ''), verdict=r.get('verdict'), strategy=r.get('sid'),
             title=r.get('label') or str(r.get('sid', '')).replace('_', ' '))
-    packs, problems = load_packs([Path(folder) / 'strategies'])
+    from officekit_research.pack_transfer import roots
+    packs, problems = load_packs([Path(folder) / 'strategies', *roots(folder)])
     if problems:
         warnings.append(f'{len(problems)} invalid strategy packs excluded.')
     library = research_library()
@@ -89,6 +90,8 @@ def catalog(folder, answers):
         add('strategy_pack', p['id'], p.get('positions', []), p.get('as_of'), p['thesis'],
             title=p.get('name') or p['id'].replace('_', ' '),
             author=p['author'], bucket=p['bucket'], source=p.get('source', 'Installed or office strategy pack'),
+            agent=p.get('agent', 'Unrecorded'), model=p.get('model', 'Unrecorded'),
+            intelligence_level=p.get('intelligence_level', 'Unrated'), gaps=p.get('gaps', []),
             source_href=p.get('source_href'),
             manifest_sha256=manifest_digest(p),
             source_sha256=p.get('source_sha256') or digest({k: v for k, v in p.items() if k not in {'deck_path', 'pack_dir'}}))
@@ -119,8 +122,18 @@ def inventory(folder, proposal):
                                e.get('strategy') == proposal['strategy_id'],
                                len(terms.intersection(words(e['summary'] + ' ' + e['id']))),
                                e['as_of'] or '', e['id']), reverse=True)
+    from officekit.strategy_packs import load_packs
+    from officekit_research.pack_transfer import roots
+    packs = {manifest_digest(p): p for p in load_packs([Path(folder) / 'strategies', *roots(folder)])[0]}
     selected, seen, used = [], set(), 0
     for e in entries:
+        e = dict(e)
+        pack = packs.get(e.get('manifest_sha256'))
+        if pack and e['kind'] == 'strategy_pack':
+            notes = Path(pack['deck_path']).read_text(encoding='utf-8')
+            e['research_notes'] = notes[:6000]
+            e['research_notes_truncated'] = len(notes) > 6000
+            e['sources'] = pack.get('sources', [])
         key = e['href']
         size = len(str(e))
         if key in seen or len(selected) >= 32 or used + size > 30000:
@@ -131,3 +144,16 @@ def inventory(folder, proposal):
     return {'captured_at': now(), 'entries': selected, 'sha256': digest(selected),
             'available': len(entries), 'omitted': len(entries) - len(selected), 'warnings': warnings,
             'use': 'Historical candidate leads, not current evidence or an approval. Refresh sources and run suitability.'}
+
+
+def refresh_proposal_inventory(folder, proposal):
+    """Explicit discovery without a model call; completed decisions remain frozen."""
+    from officekit.strategy_proposals import save
+    if proposal.get('research') or proposal['status'] not in {'error', 'awaiting_key'}:
+        raise ValueError('Refresh an unfinished, idle proposal; completed research needs a fresh revision.')
+    found = inventory(folder, proposal)
+    if (proposal.get('research_inventory') or {}).get('sha256') != found['sha256']:
+        proposal['research_inventory'] = found
+        proposal.setdefault('history', []).append({'at': now(), 'stage': 'Saved research catalog refreshed; AI review remains pending'})
+        save(folder, proposal)
+    return found
