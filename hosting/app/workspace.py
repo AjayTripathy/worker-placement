@@ -148,14 +148,19 @@ def local_request(folder, method, path, raw, content_type):
 
 
 def dispatch(offices, uid, oid, method, path, raw=b'', content_type='', expected=None, job_id=None):
+    if method == 'GET' and path == '/state':
+        # Poll only the tenant-scoped revision marker, not the full encrypted
+        # research/holdings snapshot on every four-second refresh check.
+        receipt, _ = offices.db().get(offices.prefix(uid, oid) + 'active')
+        if receipt is None:
+            raise AuthFailure('Office not found.', 404)
+        return 200, {'Content-Type': 'application/json'}, json.dumps({'v': receipt['digest']}).encode(), receipt
     receipt, record = offices.read(uid, oid)
     if method == 'POST':
         from .jobs import writable
         writable(receipt, job_id)
     if method == 'POST' and path != '/api-errors/dismiss' and expected != receipt['digest']:
         raise AuthFailure('The office changed since this page was opened. Reload and review before saving.', 409)
-    if method == 'GET' and path == '/state':
-        return 200, {'Content-Type': 'application/json'}, json.dumps({'v': receipt['digest']}).encode(), receipt
     allowed_posts = ONBOARD_POSTS if record.get('onboarding') else POSTS
     if method == 'POST' and path not in allowed_posts:
         raise AuthFailure(DISABLED.get(path, 'This action is not available in the hosted office yet.'), 400)
@@ -182,10 +187,11 @@ def dispatch(offices, uid, oid, method, path, raw=b'', content_type='', expected
             from officekit.serve import render_saved_office
             if method == 'GET' and (path == '/' or path.startswith('/pages/')):
                 if not record.get('onboarding'):
-                    # Deployment renders from current answers, proposals and the
-                    # research catalog in the local handler. Rendering every
-                    # unrelated office page first makes this simple link slow.
-                    if path != '/pages/beta_programs.html' and not re.fullmatch(r'/pages/deployment_[a-f0-9]{24}\.html', path):
+                    # The shell and these live pages render in the handler.
+                    # Rebuilding every goal, deck and ticker page first adds
+                    # latency unrelated to the page being requested.
+                    if path not in {'/', '/pages/beta_programs.html', '/pages/risk.html',
+                                    '/pages/scenarios.html', '/pages/scenario_research.html'} and not re.fullmatch(r'/pages/deployment_[a-f0-9]{24}\.html', path):
                         render_saved_office(folder)
                 elif path.startswith('/pages/'):
                     from officekit.serve import write_imports_page

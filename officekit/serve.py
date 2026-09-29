@@ -463,7 +463,7 @@ body{{display:flex;flex-direction:column}}
   <a class="tab" id="t_imports" href="#view=%2Fpages%2Fimports.html">IMPORTS</a>
   </nav><a class="host-office" href="/settings" target="_blank" rel="noopener">Office settings</a><a class="reb" href="/reset">start over</a></div>
 <div id="refresh-note" role="status" hidden>Updated office data is available. Your unsaved edits are still here.<button type="button" onclick="reloadPane()">Reload page</button></div>
-<iframe title="Office workspace" id="pane" src="/pages/office.html"></iframe>
+<iframe title="Office workspace" id="pane"></iframe>
 <script>
 var cur='office', pane=document.getElementById('pane'), dirty=false;
 function viewPath(){{try{{var p=pane.contentWindow.location.pathname;var base=window.officeBase||'';if(base&&p.startsWith(base+'/'))p=p.slice(base.length);return p+pane.contentWindow.location.hash;}}catch(e){{return '/pages/office.html';}}}}
@@ -483,7 +483,9 @@ pane.addEventListener('load',function(){{
 }});
 window.addEventListener('popstate',function(){{navigate(fromHash()||'/pages/office.html');}});
 window.addEventListener('hashchange',function(){{var p=fromHash();if(p&&p!==viewPath())navigate(p);}});
-var initial=fromHash();if(initial)navigate(initial);
+// Choose the requested page before sending an iframe request. A default src
+// would start rebuilding Home even when the URL opens a different workspace.
+navigate(fromHash()||'/pages/office.html');
 function reloadPane(){{dirty=false;document.getElementById('refresh-note').hidden=true;var path=viewPath(),parts=path.split('#');navigate(parts[0]+'?v='+encodeURIComponent(_v)+(parts[1]?'#'+parts.slice(1).join('#'):''));}}
 var _v=null;
 setInterval(function(){{fetch('/state').then(r=>r.json()).then(function(s){{
@@ -2005,6 +2007,28 @@ def make_handler(folder):
                                       answers_json=html.escape(json.dumps(answers), quote=True)))
 
         def _get(self):
+            if (self.path.split('?', 1)[0] in {'/pages/risk.html', '/pages/scenarios.html'}
+                    and (folder / 'balance_sheet.json').exists()):
+                # These pages depend on the saved model and forecast ledger,
+                # not on the other generated office/deck/ticker pages. Render
+                # on demand so hosted GETs do not regenerate the whole office
+                # and local forecast reviews appear without a financial rebuild.
+                from officekit import render_risk_planning
+                from officekit.commitments import revision
+                answers = json.loads((folder / 'answers.json').read_text(encoding='utf-8'))
+                data = json.loads((folder / 'balance_sheet.json').read_text(encoding='utf-8'))
+                model = build_model(data)
+                model['_commitment_revision'] = revision(answers)
+                if self.path.split('?', 1)[0] == '/pages/scenarios.html':
+                    return self._send(render_risk_planning.scenarios(model, answers, folder))
+                from officekit.personal_context import load as load_context
+                from officekit.risk_officer import review
+                try:
+                    context = load_context(folder)
+                except ValueError:
+                    context = None
+                return self._send(render_risk_planning.overview(
+                    model, answers, review(model, answers, personal_context=context), folder))
             if self.path.split('?', 1)[0] == '/pages/scenario_research.html':
                 from officekit import render_risk_planning
                 from officekit.commitments import revision

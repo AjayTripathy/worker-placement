@@ -1,6 +1,9 @@
 """Hosted policy writes and queued research use the same private office model."""
 import base64
 import json
+from copy import deepcopy
+
+from bs4 import BeautifulSoup
 
 from test_hosted_workspace import workspace, post  # noqa: F401
 from test_hosted_migration import office  # noqa: F401
@@ -11,6 +14,48 @@ from hosting.app.offices import Offices
 from hosting.app.jobs import Jobs
 from hosting.app.main import SESSION
 from officekit_ai import scenario_forecast
+
+
+def test_live_planning_reads_skip_unrelated_generation_without_changing_results(workspace, monkeypatch):
+    from officekit import serve
+    from hosting.app.workspace import dispatch
+    client, receipt, folder = workspace
+    serve.render_saved_office(folder)
+    expected = {name: BeautifulSoup((folder/'pages'/name).read_text(), 'html.parser').find('main').decode()
+                for name in ('risk.html', 'scenarios.html')}
+    before = deepcopy(client.store.rows)
+
+    def unrelated(*args, **kwargs):
+        raise AssertionError('A live planning page must not regenerate the entire office')
+
+    monkeypatch.setattr(serve, 'render_saved_office', unrelated)
+    monkeypatch.setattr(serve, '_render_core', unrelated)
+    monkeypatch.setattr(serve, '_render_additional', unrelated)
+    for name, main in expected.items():
+        status, headers, body, current = dispatch(Offices(client.store), 'alice', receipt['office_id'], 'GET', '/pages/'+name)
+        assert status == 200
+        assert BeautifulSoup(body, 'html.parser').find('main').decode() == main
+        assert headers['X-Office-Revision'] == receipt['digest']
+    for path, title in [('', 'Office workspace'), ('/pages/scenario_research.html', 'Forecast research library')]:
+        response = client.get(receipt['path']+path)
+        assert response.status_code == 200 and title in response.text
+    assert client.store.rows == before
+
+
+def test_revision_poll_does_not_load_snapshot_and_remains_owner_scoped(workspace, monkeypatch):
+    client, receipt, _ = workspace
+    original = client.store.get
+    reads = []
+    def read(name):
+        reads.append(name)
+        assert '/revisions/' not in name, 'A revision poll must not download the entire office'
+        return original(name)
+    monkeypatch.setattr(client.store, 'get', read)
+    response = client.get(receipt['path']+'/state')
+    assert response.status_code == 200 and response.json() == {'v': receipt['digest']}
+    assert reads == [Offices(client.store).prefix('alice', receipt['office_id'])+'active']
+    client.cookies.set(SESSION, 'bob')
+    assert client.get(receipt['path']+'/state').status_code == 404
 
 
 def test_hosted_policy_durable_and_private(workspace):

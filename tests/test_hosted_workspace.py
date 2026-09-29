@@ -46,7 +46,8 @@ def test_same_shell_all_pages_and_reads_preserve_saved_facts(workspace):
     assert '<nav class="workspace-nav"' in response.text and '<select' not in response.text
     assert 'id="t_goals"' in response.text
     assert 'Host office ↗' not in response.text and 'Office settings' in response.text
-    assert receipt['path'] + '/pages/office.html' in response.text
+    assert 'navigate(fromHash()' in response.text
+    assert '<iframe title="Office workspace" id="pane"></iframe>' in response.text
     assert 'nonce-' in response.headers['content-security-policy']
     assert "script-src 'self' 'unsafe-inline'" not in response.headers['content-security-policy']
     assert ' onclick=' not in response.text and 'addEventListener("click"' in response.text
