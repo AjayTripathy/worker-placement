@@ -282,6 +282,24 @@ h1{{font-size:32px;letter-spacing:-.035em}} .eyebrow{{color:var(--emerald);font-
   <p class="sub">See what you hold, what needs a decision, and what you’re exploring.</p>
   <div class="strategy-toolbar">{toolbar}<a href="/research">Shared research ↗</a></div>""")
 
+    if proposals:
+        P.append('<section class="workspace-section" id="proposals"><h2>Saved strategies and proposals</h2><p class="sub">Open saved work without restarting research. Partial results and errors stay with their proposal.</p>')
+        from officekit.strategy_proposals import progress
+        for i, proposal in enumerate(proposals):
+            if i == 10:
+                P.append('<details><summary>Older saved proposals</summary>')
+            saved = progress(proposal)
+            P.append(f'<p><a href="/pages/proposal_{esc(proposal["id"])}.html">{esc(proposal["brief"]["title"])}</a> · '
+                     f'<span data-proposal-status="{esc(proposal["id"])}">{esc(proposal["status"].replace("_", " "))} · {esc(proposal["stage"])}</span></p>')
+            P.append('<p class="sub">Saved: ' + esc(' · '.join(saved['saved'])) + '</p>')
+            if saved['error']:
+                P.append('<p class="note">' + esc(saved['error']) + '</p>')
+        if len(proposals) > 10:
+            P.append('</details>')
+        P.append('</section>')
+        P.append('''<script>(function(){async function update(){try{const r=await fetch('/strategy/proposals/status');if(!r.ok)return;for(const p of await r.json()){const e=document.querySelector('[data-proposal-status="'+p.id+'"]');if(e)e.textContent=p.status.replaceAll('_',' ')+' · '+p.stage;}}catch(e){}}update();setInterval(update,10000);})();</script>''')
+
+
     # ---- INTUITED strategies: what the balance sheet already implements, whether
     # or not it was ever adopted (the strategy analogue of intuited goals) ----
     from officekit.intuition import implicit_strategies
@@ -657,13 +675,6 @@ h1{{font-size:32px;letter-spacing:-.035em}} .eyebrow{{color:var(--emerald);font-
 
     P.append('</details>')
 
-    if proposals:
-        P.append('<section class="workspace-section" id="proposals"><h2>Strategy proposals</h2>')
-        for proposal in proposals[:30]:
-            P.append(f'<p><a href="/pages/proposal_{esc(proposal["id"])}.html">{esc(proposal["brief"]["title"])}</a> · '
-                     f'<span data-proposal-status="{esc(proposal["id"])}">{esc(proposal["status"].replace("_", " "))} · {esc(proposal["stage"])}</span></p>')
-        P.append('</section>')
-        P.append('''<script>(function(){async function update(){try{const r=await fetch('/strategy/proposals/status');if(!r.ok)return;for(const p of await r.json()){const e=document.querySelector('[data-proposal-status="'+p.id+'"]');if(e)e.textContent=p.status.replaceAll('_',' ')+' · '+p.stage;}}catch(e){}}update();setInterval(update,10000);})();</script>''')
 
     if create_endpoint:
         from officekit_research.taxonomy import render as research_taxonomy

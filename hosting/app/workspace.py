@@ -191,15 +191,19 @@ def dispatch(offices, uid, oid, method, path, raw=b'', content_type='', expected
                     # Rebuilding every goal, deck and ticker page first adds
                     # latency unrelated to the page being requested.
                     if path not in {'/', '/pages/beta_programs.html', '/pages/risk.html',
-                                    '/pages/scenarios.html', '/pages/scenario_research.html'} and not re.fullmatch(r'/pages/deployment_[a-f0-9]{24}\.html', path):
+                                    '/pages/scenarios.html', '/pages/scenario_research.html',
+                                    '/pages/strategies.html'} and not re.fullmatch(r'/pages/(?:deployment_[a-f0-9]{24}|proposal_[a-f0-9-]{36})\.html', path):
                         render_saved_office(folder)
                 elif path.startswith('/pages/'):
                     from officekit.serve import write_imports_page
                     write_imports_page(folder)
             status, headers, data = local_request(folder, method, path, raw, content_type)
             for pid in pending:
+                from officekit.strategy_proposals import load, save, run
+                proposal = load(folder, pid)
+                proposal['job_id'] = job_id
+                save(folder, proposal)
                 checkpoint()
-                from officekit.strategy_proposals import run
                 run(folder, pid)
             if method == 'POST' and (status < 400 or job_id):
                 updated = capture(folder, oid)

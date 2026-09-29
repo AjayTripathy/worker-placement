@@ -242,3 +242,23 @@ def test_policy_and_scenario_forms_roundtrip_and_stale_revision(server):
     html=_get(base+'/pages/scenarios.html')
     assert '25.0% assumption' in html
     assert 'Forecast research library' in _get(base+'/pages/scenario_research.html')
+
+
+def test_scenario_opens_saved_proposal_instead_of_submitting_another_job(tmp_path):
+    from bs4 import BeautifulSoup
+    from officekit.render_risk_planning import scenarios
+    import uuid
+    a = household(); m = model(a)
+    pid = str(uuid.uuid4())
+    saved = {'id': pid, 'source': 'scenario', 'source_ref': 'crash/put_index',
+             'created_at': '2026-09-29T00:00:00Z', 'status': 'error', 'stage': 'Needs attention'}
+    path = tmp_path/'strategy_proposals'/(pid+'.json')
+    path.parent.mkdir()
+    path.write_text(json.dumps(saved))
+    page = BeautifulSoup(scenarios(m, a, tmp_path), 'html.parser')
+    card = page.select_one('#scenario-crash')
+    assert card.select_one('a[href="/pages/proposal_'+pid+'.html"]')
+    assert card.select_one('input[name="opt"][value="put_index"]') is None
+    saved['status'] = 'superseded'; path.write_text(json.dumps(saved))
+    card = BeautifulSoup(scenarios(m, a, tmp_path), 'html.parser').select_one('#scenario-crash')
+    assert card.select_one('input[name="opt"][value="put_index"]')

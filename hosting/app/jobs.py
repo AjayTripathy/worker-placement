@@ -11,6 +11,7 @@ import os
 import re
 import time
 import uuid
+from html import escape
 from .auth import AuthFailure
 from .store import Conflict
 
@@ -70,7 +71,9 @@ class Jobs:
         return 'office-jobs/' + self.offices.prefix(uid, oid).removeprefix('offices/') + jid
 
     def read(self, uid, oid, jid):
-        self.offices.read(uid, oid)
+        receipt, _ = self.offices.db().get(self.offices.prefix(uid, oid) + 'active')
+        if receipt is None:
+            raise AuthFailure('Office not found.', 404)
         value, generation = self.offices.db().get(self.key(uid, oid, jid))
         if not value:
             raise AuthFailure('Job not found.', 404)
@@ -140,6 +143,12 @@ class Jobs:
                        'body': base64.b64encode(data).decode()}, receipt=receipt)
             if status >= 400:
                 job['error'] = 'Background request failed (HTTP ' + str(status) + '). Open the office for the saved error, correct its cause, then retry.'
+            # A handler may redirect successfully after the research pipeline
+            # saved an error. Transport success is not a completed review.
+            _, record = self.offices.read(uid, oid)
+            state = public_state(job, record)
+            if state['status'] == 'error':
+                job.update(status='error', error=state['error'])
         except Exception as error:
             LOG.exception('Office job failed: %s', jid)
             job.update(status='error', error=str(error) if isinstance(error, AuthFailure) else 'Background work failed. Saved checkpoints are retained. Review them before retrying.')
@@ -149,8 +158,61 @@ class Jobs:
         self.release(uid, oid, jid)
 
 
-def progress_page(jid):
+def public_state(job, record):
+    """Expose only persisted progress and safe links within this owned office."""
+    from officekit.strategy_proposals import progress
+    destination = (job.get('response') or {}).get('headers', {}).get('Location', '')
+    linked = re.fullmatch(r'/pages/proposal_([a-f0-9-]{36})\.html', destination)
+    proposals = []
+    for name, encoded in record.get('documents', {}).items():
+        match = re.fullmatch(r'strategy_proposals/([a-f0-9-]{36})\.json', name)
+        if not match:
+            continue
+        p = json.loads(base64.b64decode(encoded))
+        if p.get('job_id') == job['id'] or (linked and match[1] == linked[1]):
+            proposals.append(progress(p))
+    failed = next((p for p in proposals if p['status'] == 'error'), None)
+    status = job['status']
+    error = job.get('error')
+    if failed and status in {'running', 'complete', 'error'}:
+        status, error = 'error', failed['error'] or 'The saved proposal needs attention.'
+    return {'status': status, 'error': error, 'proposals': proposals,
+            'stage': proposals[-1]['stage'] if proposals else ('Waiting for a worker' if status == 'queued' else 'Preparing office inputs'),
+            'elapsed_seconds': max(0, int(job.get('finished', time.time()) - job['created'])),
+            'title': 'Strategy review' if job['path'].startswith('/strategy/') else 'Office task'}
+
+
+def progress_page(jid, state=None):
     from officekit.serve import STYLE
-    return '''<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Office working</title><style>''' + STYLE + '''</style></head><body><main class="wrap"><h1>Working on your office</h1><p id="job-status" role="status">Queued securely. You can leave this page and return from Office settings.</p><p>Saved pages stay available while this work runs. Editing resumes when it finishes.</p><a href="/" target="_top">Open office</a><script>
-(async function poll(){try{const r=await fetch('/jobs/''' + jid + '''/status'),s=await r.json();if(!r.ok)throw new Error(s.error||'Could not load status');if(s.status==='complete'){location.replace((window.officeBase||'')+'/jobs/''' + jid + '''/result');return;}if(s.error){document.getElementById('job-status').textContent=s.error;return;}document.getElementById('job-status').textContent=s.status==='running'?'Running. Progress and completed research are saved as checkpoints.':'Queued securely…';}catch(e){document.getElementById('job-status').textContent=e.message;}setTimeout(poll,2500);})();
-</script></main></body></html>'''
+    state = state or {'status': 'queued', 'stage': 'Waiting for a worker', 'proposals': [], 'title': 'Office task'}
+    initial = json.dumps(state).replace('<', '\\u003c')
+    return '''<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Review progress</title><style>''' + STYLE + '''</style></head><body><main class="wrap">
+<h1 id="job-title">''' + escape(state['title']) + '''</h1>
+<p id="job-status" role="status" aria-live="polite">''' + escape(state.get('error') or state['stage']) + '''</p>
+<p id="job-time"></p><div id="saved-work"></div>
+<p>Your saved work remains available if you leave this page. Reopening it does not restart research. A resume reuses completed steps; a fresh revision reviews changed inputs.</p>
+<p><a href="/pages/strategies.html#proposals">Saved strategies and proposals</a> · <a href="/" target="_top">Open office</a></p>
+<script>
+(function(){
+ const initial=INITIAL_STATE, terminal=new Set(['complete','error','interrupted']);
+ function render(s){
+  document.getElementById('job-title').textContent=s.status==='error'?'Review needs attention':s.status==='interrupted'?'Review interrupted':s.status==='complete'?'Work saved':s.title;
+  document.getElementById('job-status').textContent=s.error||s.stage;
+  const seconds=s.elapsed_seconds||0;document.getElementById('job-time').textContent='Elapsed: '+Math.floor(seconds/60)+'m '+seconds%60+'s';
+  const host=document.getElementById('saved-work');host.replaceChildren();
+  for(const p of s.proposals||[]){
+   const section=document.createElement('section');section.className='panel';
+   const heading=document.createElement('h2');heading.textContent=p.title;section.append(heading);
+   if(/^\/pages\/proposal_[a-f0-9-]{36}\.html$/.test(p.href)){const a=document.createElement('a');a.href=(window.officeBase||'')+p.href;a.textContent='Open saved proposal and completed results →';section.append(a);}
+   const updated=document.createElement('p');updated.textContent='Last saved: '+p.updated_at+' · '+p.stage;section.append(updated);
+   const label=document.createElement('h3');label.textContent='Saved so far';section.append(label);
+   const saved=document.createElement('ul');for(const item of p.saved){const li=document.createElement('li');li.textContent=item;saved.append(li);}section.append(saved);
+   const history=document.createElement('details'), summary=document.createElement('summary');summary.textContent='Recent checkpoints';history.append(summary);
+   const list=document.createElement('ol');for(const item of p.history){const li=document.createElement('li');li.textContent=item.at+' · '+item.stage;list.append(li);}history.append(list);section.append(history);host.append(section);
+  }
+ }
+ function done(s){if(s.status==='complete'){location.replace((window.officeBase||'')+'/jobs/JOB_ID/result');return true;}return terminal.has(s.status);}
+ render(initial);if(done(initial))return;
+ (async function poll(){try{const r=await fetch('/jobs/JOB_ID/status'),s=await r.json();if(!r.ok)throw new Error(s.error||'Could not load saved progress');render(s);if(done(s))return;}catch(e){document.getElementById('job-status').textContent=e.message+' — retrying the progress check.';}setTimeout(poll,2500);})();
+})();
+</script></main></body></html>'''.replace('JOB_ID', jid).replace('INITIAL_STATE', initial)

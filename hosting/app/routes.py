@@ -330,10 +330,15 @@ def install(app, offices, research, origin, member, body, csrf_page, limiter, jo
     async def office_job(oid: str, jid: str, request: Request, action: str = ''):
         claims = await member(request)
         job, _ = await run_in_threadpool(jobs.read, claims['uid'], oid, jid)
-        receipt, _ = await run_in_threadpool(offices.read, claims['uid'], oid)
+        receipt, record = await run_in_threadpool(offices.read, claims['uid'], oid)
         if action == 'status':
-            return {'status': job['status'], 'error': job.get('error')}
+            from .jobs import public_state
+            return public_state(job, record)
         if action == 'result':
+            location = (job.get('response') or {}).get('headers', {}).get('Location', '')
+            saved_proposal = re.fullmatch(r'/pages/proposal_([a-f0-9-]{36})\.html', location)
+            if job['status'] == 'error' and saved_proposal and 'strategy_proposals/' + saved_proposal[1] + '.json' in record['documents']:
+                return RedirectResponse(receipt['path'] + location, 303)
             if job['status'] != 'complete':
                 raise AuthFailure(job.get('error') or 'Work is still running.', 409)
             result = job['response'];headers = result['headers']
@@ -346,8 +351,8 @@ def install(app, offices, research, origin, member, body, csrf_page, limiter, jo
                             headers={'X-Office-Revision': job['receipt']['digest']})
         if action:
             raise AuthFailure('Page not found.', 404)
-        from .jobs import progress_page
-        return workspace_response(request, receipt, progress_page(jid))
+        from .jobs import progress_page, public_state
+        return workspace_response(request, receipt, progress_page(jid, public_state(job, record)))
 
     @app.api_route('/app/offices/{oid}/{path:path}', methods=['GET', 'POST'])
     async def office_action(oid: str, path: str, request: Request):

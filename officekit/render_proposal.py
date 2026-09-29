@@ -38,6 +38,10 @@ button{{font-family:inherit;font-size:13px;font-weight:600;background:var(--gree
 <p class="lead">{esc(pitch.get('headline') or b['thesis'])}</p><span class="badge">{esc(status.replace('_',' '))}</span>
 <p class="muted">Source: {esc(p['source_ref'])} · Office snapshot {esc(p['snapshot']['data'].get('as_of',''))} · Created {esc(p['created_at'][:10])}</p></header>''']
     P.append('<div class="steps"><span>1 · SignalOS research</span><span>2 · RED / BLUE court</span><span>3 · Risk Officer</span><span>4 · Pitch & implementation</span></div>')
+    from officekit.strategy_proposals import progress
+    saved = progress(p)
+    P.append('<section class="slide"><h2>Saved in your office</h2><p>Last saved: ' + esc(saved['updated_at']) +
+             '. Opening this proposal does not run research again.</p>' + bullets(saved['saved']) + '</section>')
     if outdated:
         P.append('<p class="warning">This saved proposal predates the current capital-planning inputs. Its allocations are historical; build a fresh revision before adopting.</p>')
     if p.get('deployment_source'):

@@ -141,9 +141,11 @@ def timeline(result):
 def scenarios(m, answers, folder=None):
     from officekit.render_scenarios import compute_results
     from officekit_research.scenario_forecasts import records, aggregate
+    from officekit.strategy_proposals import list_proposals
     _, _, results = compute_results(m)
     cap = capacity(m)
     forecasts = records(folder) if folder else []
+    proposals = list_proposals(folder) if folder else []
     body = '<div class="eyebrow">Scenario planner</div><h1>See what a shock changes</h1><p>Edit market severity and cash-flow interruptions independently of the probability. Scenarios can overlap; their probabilities are not added or normalized.</p><p>Recommended loss limit: <b>' + money(cap['recommended_loss']) + '</b> · <a href="/pages/risk.html#inputs">Review goals and inputs</a>.</p>'
     for r in results:
         sc = r['sc']; key = sc['key']
@@ -173,7 +175,13 @@ def scenarios(m, answers, folder=None):
         body += '<details><summary>Responses to investigate</summary><p>These open the shared strategy research and review workflow.</p>'
         for option in sc.get('opts', []):
             if option in OPT and option in OPT_STRATEGY:
-                body += '<form method="POST" action="/strategy/adopt"><input type="hidden" name="opt" value="' + esc(option) + '"><input type="hidden" name="scenario" value="' + esc(key) + '"><button type="submit">Investigate ' + esc(OPT[option][0]) + '</button></form>'
+                saved = next((p for p in proposals if p.get('source') == 'scenario'
+                              and p.get('source_ref') == key + '/' + option
+                              and p['status'] not in {'declined', 'superseded'}), None)
+                if saved:
+                    body += '<p><a href="/pages/proposal_' + esc(saved['id']) + '.html">Open saved ' + esc(OPT[option][0]) + '</a> · ' + esc(saved['stage']) + '</p>'
+                else:
+                    body += '<form method="POST" action="/strategy/adopt"><input type="hidden" name="opt" value="' + esc(option) + '"><input type="hidden" name="scenario" value="' + esc(key) + '"><button type="submit">Investigate ' + esc(OPT[option][0]) + '</button></form>'
         body += '</details>'
         body += '<div class="actions"><a href="/pages/scenario_research.html#' + esc(key) + '">Research or update its probability →</a><a href="/pages/strategies.html">Compare mitigation strategies</a></div></section>'
     return wrap('Scenario planning', body, m.get('_commitment_revision', ''))

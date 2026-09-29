@@ -467,7 +467,7 @@ body{{display:flex;flex-direction:column}}
 <script>
 var cur='office', pane=document.getElementById('pane'), dirty=false;
 function viewPath(){{try{{var p=pane.contentWindow.location.pathname;var base=window.officeBase||'';if(base&&p.startsWith(base+'/'))p=p.slice(base.length);return p+pane.contentWindow.location.hash;}}catch(e){{return '/pages/office.html';}}}}
-function validPath(p){{return p==='/research'||p==='/research/scorecard'||/^\/pages\/[a-zA-Z0-9_.-]+\.html(?:#[^<>]*)?$/.test(p);}}
+function validPath(p){{return p==='/research'||p==='/research/scorecard'||/^\/jobs\/[a-f0-9-]{{36}}$/.test(p)||/^\/pages\/[a-zA-Z0-9_.-]+\.html(?:#[^<>]*)?$/.test(p);}}
 function fromHash(){{try{{var p=decodeURIComponent(location.hash.replace(/^#view=/,''));return validPath(p)?p:null;}}catch(e){{return null;}}}}
 function navigate(p){{p=(window.officeBase||'')+p;try{{pane.contentWindow.location.replace(p);}}catch(e){{pane.src=p;}}}}
 function show(k){{var p='/pages/'+k+'.html';if(!document.getElementById('t_'+k))return;history.pushState(null,'','#view='+encodeURIComponent(p));navigate(p);}}
@@ -486,7 +486,7 @@ window.addEventListener('hashchange',function(){{var p=fromHash();if(p&&p!==view
 // Choose the requested page before sending an iframe request. A default src
 // would start rebuilding Home even when the URL opens a different workspace.
 navigate(fromHash()||'/pages/office.html');
-function reloadPane(){{dirty=false;document.getElementById('refresh-note').hidden=true;var path=viewPath(),parts=path.split('#');navigate(parts[0]+'?v='+encodeURIComponent(_v)+(parts[1]?'#'+parts.slice(1).join('#'):''));}}
+function reloadPane(){{var path=viewPath();if(!validPath(path)||path.startsWith('/jobs/'))return;dirty=false;document.getElementById('refresh-note').hidden=true;var parts=path.split('#');navigate(parts[0]+'?v='+encodeURIComponent(_v)+(parts[1]?'#'+parts.slice(1).join('#'):''));}}
 var _v=null;
 setInterval(function(){{fetch('/state').then(r=>r.json()).then(function(s){{
   if(_v===null){{_v=s.v;return;}}if(s.v!==_v){{_v=s.v;if(dirty)document.getElementById('refresh-note').hidden=false;else reloadPane();}}
@@ -1545,7 +1545,7 @@ def build_office(answers, folder):
     return data
 
 
-def _render_core(answers, data, folder):
+def _render_core(answers, data, folder, only=None):
     """Same decision pages in both transports, rendered from saved financial facts."""
     m = build_model(data)
     # UX ruling 2026-09-04: goals OFFER a strategy menu; nothing auto-queues.
@@ -1583,13 +1583,13 @@ def _render_core(answers, data, folder):
     proposals = list_proposals(folder)
     from officekit import render_risk_planning
     core = {
-        "goals.html": render_goals(m, chat=bool(_ai(folder))),
-        "capital.html": render_capital(m, answers, chat=bool(_ai(folder)), proposals=proposals),
-        "risk.html": render_risk_planning.overview(m, answers, review(m, answers, personal_context=pc), folder),
-        "office.html": render_office(m, goals_endpoint="/goals", assets_endpoint="/assets",
+        "goals.html": lambda: render_goals(m, chat=bool(_ai(folder))),
+        "capital.html": lambda: render_capital(m, answers, chat=bool(_ai(folder)), proposals=proposals),
+        "risk.html": lambda: render_risk_planning.overview(m, answers, review(m, answers, personal_context=pc), folder),
+        "office.html": lambda: render_office(m, goals_endpoint="/goals", assets_endpoint="/assets",
                                      chat=bool(_ai(folder)), proposals=proposals),
-        "scenarios.html": render_risk_planning.scenarios(m, answers, folder),
-        "strategies.html": render_strategies(
+        "scenarios.html": lambda: render_risk_planning.scenarios(m, answers, folder),
+        "strategies.html": lambda: render_strategies(
             m, create_endpoint="/strategy/new",
             court_endpoint="/court" if _ai(folder, slot="bench") else None,
             holdings_endpoint="/holdings", adjudications=adjudications,
@@ -1598,7 +1598,7 @@ def _render_core(answers, data, folder):
             desk_theses=_thesis_sleeves(answers, folder),    # office-native + owned snapshot
             desk_import_endpoint=None if hosted() else "/import/desk-board", proposals=proposals),
     }
-    return core
+    return {name: render() for name, render in core.items() if only is None or name == only}
 
 
 def _render_additional(answers, data, folder):
@@ -2122,12 +2122,12 @@ def make_handler(folder):
                 except ValueError:
                     return self._send('Saved research not found in this office.', 404)
             if self.path.startswith("/pages/"):
-                if self.path in {'/pages/office.html', '/pages/capital.html'} and (folder / 'answers.json').exists():
+                if self.path in {'/pages/office.html', '/pages/capital.html', '/pages/strategies.html'} and (folder / 'answers.json').exists():
                     # Proposal checkpoints change without a financial mutation.
                     # Home must read them afresh, including errors and final tickers.
                     answers = json.loads((folder / 'answers.json').read_text(encoding="utf-8"))
                     data = json.loads((folder / 'balance_sheet.json').read_text(encoding="utf-8"))
-                    return self._send(_render_core(answers, data, folder)[Path(self.path).name])
+                    return self._send(_render_core(answers, data, folder, only=Path(self.path).name)[Path(self.path).name])
                 p = folder / "pages" / Path(self.path).name
                 if p.exists():
                     return self._send(p.read_text(encoding="utf-8"))

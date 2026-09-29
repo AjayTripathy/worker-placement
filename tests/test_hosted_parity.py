@@ -221,6 +221,13 @@ def test_proposal_checkpoints_survive_new_worker_and_belong_to_office(workspace,
         _, current=offices.read('alice',receipt['office_id'])
         value=json.loads(base64.b64decode(current['documents']['strategy_proposals/'+p['id']+'.json']))
         assert value['research']=={'verified': True}
+        jid = queue.items[0][2]
+        state = client.get(receipt['path'] + '/jobs/' + jid + '/status').json()
+        assert state['status'] == 'running' and state['stage'] == 'Synthetic research saved'
+        assert state['proposals'][0]['id'] == p['id']
+        assert 'Research synthesis' in state['proposals'][0]['saved']
+        assert state['proposals'][0]['history'][-1]['stage'] == 'Synthetic research saved'
+        assert 'tenant-key' not in json.dumps(state) and 'raw' not in state
         checkpoint('Ready for review',status='needs_review')
     monkeypatch.setattr(pipeline,'build_proposal',build)
     answers=json.loads((folder/'answers.json').read_text())
@@ -234,6 +241,80 @@ def test_proposal_checkpoints_survive_new_worker_and_belong_to_office(workspace,
     assert len(calls)==1
     Jobs(offices,queue).run(uid,oid,jid)
     assert len(calls)==1
+
+
+def test_failed_strategy_keeps_visible_results_and_resume_reuses_them(workspace, monkeypatch):
+    from officekit.commitments import revision
+    import officekit_ai.strategy_proposal as pipeline
+    from officekit import serve
+    client, receipt, folder = workspace
+    queue = Queue(); client.app.state.jobs.queue = queue
+    offices = Offices(client.store)
+    Credentials(offices).update('alice', receipt['office_id'], {
+        'provider': 'openai', 'credential_revision': '0', 'OPENAI_API_KEY': 'tenant-key'})
+    calls = []
+    def build(p, temp, checkpoint):
+        if not p.get('research'):
+            calls.append('research')
+            checkpoint('Research saved', research={'verified': True})
+        calls.append('review')
+        if calls.count('review') == 1:
+            raise RuntimeError('no credits remaining')
+        checkpoint('Ready for review', status='needs_review', errors=[])
+    monkeypatch.setattr(pipeline, 'build_proposal', build)
+    answers = json.loads((folder/'answers.json').read_text())
+    response = post(client, receipt, '/strategy/new', {'revision': revision(answers), 'title': 'Saved hedge review'})
+    uid, oid, jid = queue.items[0]
+    assert client.get(response.headers['location']+'/status').json()['status'] == 'queued'
+    Jobs(offices, queue).run(uid, oid, jid)
+    job, _ = client.app.state.jobs.read(uid, oid, jid)
+    assert job['status'] == 'error' and 'credit' in job['error'].lower()
+    state = client.get(response.headers['location']+'/status').json()
+    assert state['status'] == 'error' and len(state['proposals']) == 1
+    assert 'Research synthesis' in state['proposals'][0]['saved']
+    pid = state['proposals'][0]['id']
+    page = client.get(response.headers['location'])
+    assert 'Saved strategies and proposals' in page.text and 'no credits' not in page.text
+    assert 'insufficient API credit' in page.text
+    result = client.get(response.headers['location']+'/result', follow_redirects=False)
+    assert result.status_code == 303 and result.headers['location'].endswith('/pages/proposal_'+pid+'.html')
+    # Reopening saved pages must not render unrelated pages or call a provider.
+    with monkeypatch.context() as reads:
+        reads.setattr(serve, 'render_saved_office', lambda *a: pytest.fail('Unrelated full render'))
+        reads.setattr(pipeline, 'build_proposal', lambda *a: pytest.fail('Read must not run research'))
+        detail = client.get(result.headers['location'])
+        assert detail.status_code == 200 and 'Saved in your office' in detail.text
+        listing = client.get(receipt['path']+'/pages/strategies.html')
+        assert listing.status_code == 200 and 'Saved hedge review' in listing.text
+        assert listing.text.index('id="proposals"') < listing.text.index('id="create-strategy"')
+    current, saved = offices.read(uid, oid)
+    current_answers = json.loads(base64.b64decode(saved['documents']['answers.json']))
+    retry = post(client, current, '/strategy/proposal/retry', {'revision': revision(current_answers), 'pid': pid})
+    Jobs(Offices(client.store), queue).run(*queue.items[-1])
+    assert calls == ['research', 'review', 'review']
+    assert client.get(retry.headers['location']+'/status').json()['status'] == 'complete'
+    client.cookies.set(SESSION, 'bob')
+    for suffix in ('', '/status', '/result'):
+        assert client.get(response.headers['location']+suffix).status_code == 404
+
+
+def test_progress_supports_old_jobs_and_escapes_inline_state():
+    from hosting.app.jobs import progress_page, public_state
+    import uuid
+    pid, jid = str(uuid.uuid4()), str(uuid.uuid4())
+    p = {'id': pid, 'brief': {'title': '</script><script>alert(1)</script>'},
+         'status': 'error', 'stage': 'Needs attention', 'created_at': '2026-09-29T00:00:00Z',
+         'errors': ['Provider credit exhausted'], 'history': []}
+    record = {'documents': {'strategy_proposals/'+pid+'.json': base64.b64encode(json.dumps(p).encode()).decode()}}
+    job = {'id': jid, 'status': 'complete', 'path': '/strategy/adopt', 'created': time.time(),
+           'response': {'headers': {'Location': '/pages/proposal_'+pid+'.html'}}}
+    state = public_state(job, record)
+    assert state['status'] == 'error' and state['proposals'][0]['id'] == pid
+    html = progress_page(jid, state)
+    assert p['brief']['title'] not in html and '\\u003c/script>' in html
+    assert 'INITIAL_STATE' not in html and 'JOB_ID' not in html
+    job['response']['headers']['Location'] = '/pages/proposal_'+str(uuid.uuid4())+'.html'
+    assert public_state(job, record)['proposals'] == []
 
 
 def test_flex_rejects_untrusted_report_destination(monkeypatch):

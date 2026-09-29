@@ -46,6 +46,33 @@ def list_proposals(folder):
     return sorted(records, key=lambda p: p["created_at"], reverse=True)
 
 
+def progress(proposal):
+    """A small, read-only view of persisted work, never an estimated percent."""
+    p = proposal
+    saved = ['Strategy brief and office snapshot']
+    if p.get('funding'):
+        saved.append('Funding and portfolio checks')
+    inventory = p.get('research_inventory')
+    if inventory is not None:
+        saved.append(str(len(inventory.get('entries', []))) + ' research catalog references')
+    if p.get('research'):
+        saved.append('Research synthesis')
+    for key, label in [('evidence', 'evidence packs'), ('general', 'general courts'),
+                       ('courts', 'office suitability reviews'), ('basket', 'proposed investments')]:
+        if p.get(key):
+            saved.append(str(len(p[key])) + ' ' + label)
+    if p.get('risk'):
+        saved.append('Risk Officer review')
+    if 'risk_comparisons' in p:
+        saved.append('Deployment stress comparison')
+    if p.get('pitch'):
+        saved.append('Pitch and implementation plan')
+    return {'id': p['id'], 'title': p['brief']['title'], 'status': p['status'],
+            'stage': p['stage'], 'updated_at': p.get('updated_at', p['created_at']),
+            'href': '/pages/proposal_' + p['id'] + '.html', 'saved': saved,
+            'history': p.get('history', [])[-8:], 'error': (p.get('errors') or [None])[-1]}
+
+
 def recover_interrupted(folder):
     """A restart never silently re-bills research; retain checkpoints for Retry."""
     with locked(folder), _LOCK:
