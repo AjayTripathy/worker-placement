@@ -118,7 +118,13 @@ def inventory(folder, proposal):
     found = catalog(folder, proposal['snapshot']['answers'])
     entries, warnings = found['entries'], found['warnings']
 
-    seeds = set(proposal['brief']['candidates'])
+    seeds = {s.upper() for s in proposal['brief']['candidates']}
+    # Older custom briefs stored the ticker field only in this request line.
+    # Retain their discovery on refresh/revision without guessing prose as symbols.
+    for line in proposal['brief'].get('request', '').splitlines():
+        if line.startswith('Candidates to compare: '):
+            seeds.update(s.upper() for s in re.split(r'[,;\s]+', line.partition(': ')[2])
+                         if re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9.^-]{0,14}', s))
     words = lambda s: set(re.findall(r'[a-z][a-z0-9]{2,}', str(s).lower())) - {'the', 'and', 'for', 'with', 'this', 'that', 'from', 'research', 'strategy', 'office'}
     terms = words(' '.join(str(proposal['brief'].get(k, '')) for k in ('title', 'thesis', 'request')))
     entries.sort(key=lambda e: (bool(seeds.intersection(e['symbols'])),

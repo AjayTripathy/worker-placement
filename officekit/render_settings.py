@@ -2,7 +2,7 @@
 from html import escape as esc
 
 
-def render_settings(*, hosted=False, connections=None, sync=None):
+def render_settings(*, hosted=False, connections=None, sync=None, folder=None):
     from officekit.serve import STYLE
     connections = connections or {'revision': '0', 'connected': {}}
     connected = connections['connected']
@@ -11,8 +11,15 @@ def render_settings(*, hosted=False, connections=None, sync=None):
         out.append('<section class="panel"><h2>Saved online</h2><p>Changes belong to your signed-in account. To keep a local copy in step, enable automatic sync in the local app’s <b>Hosting &amp; sync</b> page.</p><a class="btn btn2" href="/export">Export office</a> <a class="reb" href="/app" target="_top">Account</a></section>')
     else:
         out.append('<section class="panel"><h2>Saved on this computer</h2><p>Work offline or connect this office to your hosted account. Review conflicts before replacing either copy.</p><a class="btn" href="/hosting" target="_top">Hosting &amp; sync</a></section>')
-    groups = [('openai', 'OpenAI intelligence', 'GPT-6 Astra powers chat, document extraction, strategy research, courts and pitch decks by default. Calls use your provider account and may incur charges.', [('OPENAI_API_KEY', 'OpenAI API key')]),
-              ('anthropic', 'Anthropic intelligence', 'Used for the classification slot and any roles you explicitly configure for Anthropic.', [('ANTHROPIC_API_KEY', 'Anthropic API key')]),
+        from officekit.serve import _key_status
+        from officekit_ai.models import load
+        status = _key_status(folder)
+        cfg = load(folder)
+        rows = ''.join('<tr><td>' + esc(slot) + '</td><td>' + esc(value['provider']) + '</td><td>' + esc(value['model']) + '</td></tr>' for slot, value in cfg['slots'].items())
+        out.append('<section class="panel"><h2>Local intelligence</h2><p><b>' + esc(status['label']) + '</b></p><p>New local offices use signed-in Codex with ChatGPT. Usage counts against that account’s limits. Research stays in this office; model requests go to the signed-in provider.</p><table><thead><tr><th>Role</th><th>Provider</th><th>Model</th></tr></thead><tbody>' + rows + '</tbody></table><p class="note">Explicit choices in models.json take precedence. Use models.local.json for machine-only overrides; it is excluded from sync and exports. SaaS uses the office’s API connections.</p><p>To connect locally, install Codex and run <code>codex login</code> with ChatGPT. No API key fallback is used.</p></section>')
+    api_explanation = ('GPT-6 Astra powers chat, document extraction, strategy research, courts and pitch decks by default. Calls use your provider account and may incur charges.' if hosted else 'Optional for roles explicitly configured with the openai provider. A saved API key does not switch local Codex to API billing. SaaS connections are configured separately in the hosted office.')
+    groups = [('openai', 'OpenAI API intelligence', api_explanation, [('OPENAI_API_KEY', 'OpenAI API key')]),
+              ('anthropic', 'Anthropic intelligence', ('Used for the classification slot and any roles you explicitly configure for Anthropic.' if hosted else 'Optional for roles explicitly configured with the anthropic provider.'), [('ANTHROPIC_API_KEY', 'Anthropic API key')]),
               ('alpaca', 'Alpaca', 'Import positions using your API credentials. Worker Placement only reads positions; it never sends orders.', [('APCA_API_KEY_ID', 'API key ID'), ('APCA_API_SECRET_KEY', 'API secret')]),
               ('ibkr_flex', 'Interactive Brokers Flex', 'Use a Flex Web Service token and an Activity query with Open Positions / Lots in XML format. Re-pull from Imports when a new report is ready.', [('IBKR_FLEX_TOKEN', 'Flex token'), ('IBKR_FLEX_QUERY_ID', 'Query ID')]),
               ('research', 'Public research contact', 'Some public sources, including SEC filings, require a contact email on data requests.', [('OFFICEKIT_CONTACT', 'Contact email')])]

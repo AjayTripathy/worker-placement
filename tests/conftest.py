@@ -52,6 +52,14 @@ def root():
     return ROOT
 
 
+@pytest.fixture(autouse=True)
+def no_implicit_local_model_calls(request, monkeypatch):
+    """A developer's ChatGPT sign-in must never make unit tests bill live work."""
+    if not request.node.get_closest_marker('integration'):
+        from officekit_ai import local_agent
+        monkeypatch.setattr(local_agent, 'signed_in', lambda *_: False)
+
+
 @pytest.fixture()
 def tmp_record(root):
     """Context helper: temporarily mutate an edge_classifications record, restore after."""

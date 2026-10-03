@@ -3,6 +3,7 @@ from copy import deepcopy
 from datetime import datetime, timezone
 import hashlib
 import json
+import re
 from pathlib import Path
 import threading
 import uuid
@@ -105,7 +106,7 @@ def save(folder, proposal):
     temp.replace(page)
 
 
-def create(folder, answers, model, strategy_id, source, ref, *, option=None, title=None, request="", target_pct=None, revision_of=None, research_context=None, deployment_source=None):
+def create(folder, answers, model, strategy_id, source, ref, *, option=None, title=None, request="", target_pct=None, revision_of=None, research_context=None, deployment_source=None, candidates=None):
     from officekit.strategy_playbooks import brief
     from officekit.personal_context import load as load_context
     pc = load_context(folder)
@@ -113,10 +114,17 @@ def create(folder, answers, model, strategy_id, source, ref, *, option=None, tit
         raise ValueError("Use a title up to 180 characters and a request up to 8,000 characters")
     from officekit.mandates import validate_target_pct
     target_pct = validate_target_pct(target_pct)
+    if candidates is not None:
+        if (not isinstance(candidates, list) or len(candidates) > 30 or
+                any(not isinstance(s, str) or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9.^-]{0,14}', s) for s in candidates)):
+            raise ValueError('Enter up to 30 ticker symbols, separated by commas or spaces')
+        candidates = list(dict.fromkeys(s.upper() for s in candidates))
     if research_context is not None:
         from officekit_research.cases import validate_context
         validate_context(research_context)
     key = digest([strategy_id, source, ref, option, title, request, target_pct] + ([research_context] if research_context is not None else []))
+    if candidates is not None:
+        key = digest([key, candidates])
     if deployment_source is not None:
         from officekit.deployment import source_for
         selected = source_for(model, deployment_source['id'])
@@ -145,6 +153,8 @@ def create(folder, answers, model, strategy_id, source, ref, *, option=None, tit
                     "research": None, "candidates": [], "courts": [], "risk": None, "pitch": None,
                     "errors": [], "basket": []}
         proposal["revision_of"] = revision_of
+        if candidates is not None:
+            proposal['brief']['candidates'] = candidates
         if deployment_source is not None:
             proposal['deployment_source'] = deployment_source
         if research_context is not None:

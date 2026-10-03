@@ -36,6 +36,11 @@ def _credit_exhausted(error):
 
 def classify(error):
     """Classify before formatting; unexpected implementation details stay local."""
+    from officekit_ai.local_agent import LocalAgentError
+    if isinstance(error, LocalAgentError):
+        return 502, str(error)
+    if str(error).startswith('evidence: SEC fair-access needs a contact'):
+        return 400, 'Fresh SEC filings need a research contact. Open Settings → Public research contact and add an email address, then run a fresh review. Signed-in model access is separate from source access.'
     if _credit_exhausted(error):
         return 502, CREDIT_EXHAUSTED
     if isinstance(error, ValueError) and not isinstance(error, json.JSONDecodeError):

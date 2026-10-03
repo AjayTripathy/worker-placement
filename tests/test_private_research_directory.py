@@ -100,13 +100,20 @@ def test_344_decks_use_directory_only_until_opened(client, office, monkeypatch, 
         assert restarted.get(receipt['path'] + '/research/files/' + digest(PDF)).status_code == 404
     gets.clear()
     proposal = {'snapshot': {'answers': {}}, 'strategy_id': 'custom',
-                'brief': {'candidates': ['X343'], 'title': 'X343', 'thesis': 'Research X343'}}
+                'brief': {'candidates': [], 'title': 'Custom review', 'thesis': 'Original dated evidence',
+                          'request': 'Research one name only.\nCandidates to compare: x343'}}
     with hosted_office(folder, private_research=PrivateResearch(service, 'alice', receipt['office_id'])):
         found = inventory(folder, proposal)
     assert found['entries'][0]['id'] == 'court_x343'
     assert found['entries'][0]['research_notes'] == values[-1]['deck'][:6000]
     assert 1 <= len(gets) <= 4
     assert len(gets) < found['available']
+    # New briefs carry structured candidates, including when their title/thesis
+    # are less textually similar than hundreds of unrelated directory entries.
+    proposal['brief'].update(candidates=['X342'], request='')
+    with hosted_office(folder, private_research=PrivateResearch(service, 'alice', receipt['office_id'])):
+        structured = inventory(folder, proposal)
+    assert structured['entries'][0]['id'] == 'court_x342'
 
 
 def test_metadata_revisions_old_links_resume_and_export(client, office, tmp_path):

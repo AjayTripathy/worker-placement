@@ -123,7 +123,7 @@ def test_home_form_runs_research_and_shows_saved_tickers(server, monkeypatch):
 def test_discovery_uses_hosted_manifest_context_and_keeps_negative_verdicts(tmp_path, monkeypatch):
     from officekit_research.discovery import inventory
     from officekit.runtime import hosted_office, research_library
-    monkeypatch.setattr('officekit.strategy_packs.load_packs', lambda *a: ([], []))
+    monkeypatch.setattr('officekit.strategy_packs.load_packs', lambda *a, **kw: ([], []))
     class Library:
         def strategy_packs(self):
             return [{'id': 'shared', 'positions': ['VGSH'], 'thesis': 'Short Treasury comparison',

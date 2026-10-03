@@ -215,6 +215,8 @@ def test_imports_page_shows_proposed_section(tmp_path):
 
 def test_key_status_and_source_classes(monkeypatch, tmp_path):
     from officekit import serve
+    # Exercise the explicitly configured API path; local defaults use Codex.
+    monkeypatch.setattr("officekit_ai.models.resolve", lambda *a: ("openai", {"api_key_env": "OPENAI_API_KEY"}, "gpt-6-astra"))
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     monkeypatch.setattr("pathlib.Path.home", staticmethod(lambda: tmp_path))
@@ -250,18 +252,21 @@ def test_imports_page_key_row_and_pull_now(tmp_path):
     assert "attached" in h2 and "Pull now" not in h2   # no endpoint, no button
 
 
-def test_dropzone_mentions_screenshots_and_prompts_for_key(monkeypatch, tmp_path):
+def test_dropzone_mentions_screenshots_and_local_signin(monkeypatch, tmp_path):
     from officekit import serve
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
     monkeypatch.setattr("pathlib.Path.home", staticmethod(lambda: tmp_path))
     h = serve._dropzone_html()
     assert "screenshots" in h.lower()
-    assert "need an agent key first" in h
+    assert "intelligence provider first" in h and "codex login" in h
     (tmp_path / ".openai_key").write_text("test-placeholder\n")
+    assert "intelligence provider first" in serve._dropzone_html()  # Key doesn't change transport.
+    monkeypatch.setattr("officekit_ai.local_agent.executable", lambda: "/test/codex")
+    monkeypatch.setattr("officekit_ai.local_agent.signed_in", lambda *_: True)
     h2 = serve._dropzone_html()
-    assert "screenshots" in h2.lower() and "need an agent key" not in h2
-    assert "imported from ~/.openai_key" in h2
+    assert "screenshots" in h2.lower() and "intelligence provider first" not in h2
+    assert "Signed-in local Codex" in h2
 
 
 def test_dropzone_is_a_single_drag_and_drop_zone_supporting_folders():
@@ -332,7 +337,7 @@ def test_adapters_panel_and_key_always_show_even_with_no_connection(monkeypatch)
     monkeypatch.setitem(serve._DISCOVERY_CACHE, "ts", 9e18)
     monkeypatch.setitem(serve._DISCOVERY_CACHE, "results", [])   # nothing detected
     h = serve._adapters_html()
-    assert "Detected connections" in h and "AI model key" in h
+    assert "Detected connections" in h and "AI intelligence" in h
     assert "Import positions" not in h
     # a near-miss (needs_key) surfaces its guidance without a fake import button
     monkeypatch.setitem(serve._DISCOVERY_CACHE, "results", [
@@ -340,7 +345,7 @@ def test_adapters_panel_and_key_always_show_even_with_no_connection(monkeypatch)
          "status": "needs_key", "detail": "no keys", "guidance": "export Alpaca keys",
          "can_fetch": True}])
     h2 = serve._adapters_html()
-    assert "Alpaca" in h2 and "export Alpaca keys" in h2 and "AI model key" in h2
+    assert "Alpaca" in h2 and "export Alpaca keys" in h2 and "AI intelligence" in h2
     assert "Import positions" not in h2
 
 

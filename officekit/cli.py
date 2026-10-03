@@ -22,14 +22,11 @@ def _cmd_init(args):
     folder.mkdir(parents=True, exist_ok=True)
     models = folder / "models.json"
     if not models.exists():
-        try:
-            from officekit_ai.models import DEFAULTS
-            models.write_text(json.dumps(DEFAULTS, indent=1) + "\n", encoding="utf-8")
-            print(f"[init] wrote {models} (BYOM slots — edit provider/model/api_key_env per slot; "
-                  f"secrets NEVER go in this file, only env-var NAMES)")
-        except ImportError:
-            print("[init] officekit_ai not installed — no model slots written (the office "
-                  "works fully without AI; install the plugin to add courts and onboarding chat)")
+        # Empty slots retain runtime defaults: signed-in Codex locally,
+        # office-scoped API providers in SaaS. Never sync a local override.
+        models.write_text(json.dumps({"v": 1, "providers": {}, "slots": {}}, indent=1) + "\n", encoding="utf-8")
+        print(f"[init] wrote {models} (BYOM slots — edit provider/model/api_key_env per slot; "
+              f"secrets NEVER go in this file, only env-var NAMES)")
     print(f"[init] office folder ready: {folder.resolve()}")
     print(f"[init] next: wp start --dir {args.dir}   (onboard in the browser)")
     return 0

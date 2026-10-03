@@ -109,6 +109,21 @@ def test_full_pipeline_native_courts_signals_and_budget(tmp_path, monkeypatch):
     assert len(provider.calls) == 7  # completed jobs are idempotent
 
 
+def test_requested_tickers_are_part_of_durable_job_identity(tmp_path):
+    a, p = seed(tmp_path)
+    model = build_model(p['snapshot']['data'])
+    def create(candidates):
+        return jobs.create(tmp_path, a, model, 'custom', 'principal', 'Ticker review', candidates=candidates)
+    first = create(['wix', 'WIX'])
+    assert first['brief']['candidates'] == ['WIX']
+    assert create(['WIX'])['id'] == first['id']
+    assert create(['VDC'])['id'] != first['id']
+    before = len(jobs.list_proposals(tmp_path))
+    with pytest.raises(ValueError, match='ticker symbols'):
+        create(['not a ticker'])
+    assert len(jobs.list_proposals(tmp_path)) == before
+
+
 @pytest.mark.parametrize('verdict', ['KILL','AVOID','WATCH'])
 def test_rejected_court_cannot_be_overridden_by_sizing(tmp_path, monkeypatch, verdict):
     fake_sources(monkeypatch)
@@ -230,9 +245,11 @@ def test_routes_all_creation_doors_open_proposal(server,monkeypatch):
     a,_=seed(folder)
     from officekit.serve import build_office
     build_office(a,folder)
-    code,loc,_=_post(base+'/strategy/new',{'revision':current_revision(folder),'title':'Custom rotation','status':'implemented','note':'Compare staples with short Treasuries'})
+    code,loc,_=_post(base+'/strategy/new',{'revision':current_revision(folder),'title':'Custom rotation','status':'implemented','note':'Compare staples with short Treasuries','subassets':'vdc, VGSH vdc'})
     assert code==303 and '/pages/proposal_' in loc
     assert 'Compare staples' in _get(base+loc)
+    pid=loc.split('proposal_')[1].split('.')[0]
+    assert jobs.load(folder,pid)['brief']['candidates']==['VDC','VGSH']
     saved=json.loads((folder/'answers.json').read_text())
     assert saved['strategy_decisions']['custom_rotation']['status']=='considering'
     code,loc,_=_post(base+'/strategy/propose',{'revision':current_revision(folder),'sid':'core_equity'})
@@ -279,7 +296,7 @@ def test_revision_and_adoption_route_keep_evidence_lineage(server,monkeypatch):
     a,_=seed(folder)
     from officekit.serve import build_office
     build_office(a,folder)
-    code,loc,_=_post(base+'/strategy/new',{'revision':current_revision(folder),'title':'Defensive program','note':'Compare VDC'})
+    code,loc,_=_post(base+'/strategy/new',{'revision':current_revision(folder),'title':'Defensive program','note':'Compare VDC','subassets':'VDC'})
     pid=loc.split('proposal_')[1].split('.')[0]
     p=execute(folder,jobs.load(folder,pid),Provider())
     code,_,body=_post(base+'/strategy/proposal/decide',{'revision':current_revision(folder),'pid':pid,'action':'adopt'})
@@ -290,6 +307,7 @@ def test_revision_and_adoption_route_keep_evidence_lineage(server,monkeypatch):
     newid=loc.split('proposal_')[1].split('.')[0]
     assert newid!=pid
     assert jobs.load(folder,newid)['revision_of']==pid
+    assert jobs.load(folder,newid)['brief']['candidates']==['VDC']
     assert jobs.load(folder,pid)['superseded_by']==newid
     assert jobs.load(folder,pid)['courts']  # old evidence survives
 

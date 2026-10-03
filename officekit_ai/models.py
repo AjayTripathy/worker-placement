@@ -17,8 +17,9 @@ Rules:
     environment-variable NAME (`api_key_env`); a models.json carrying an
     actual key material field is rejected loudly. This is what keeps the
     document uploadable at `officekit link` like every other contract.
-  - Research, intake and extraction default to OpenAI GPT-6 Astra. The existing
-    inexpensive classification slot remains separately configurable.
+  - Local defaults use signed-in Codex; SaaS defaults use office API keys.
+    Explicit models.json choices still win. models.local.json overrides only
+    this machine and is excluded from snapshots, exports and hosted execution.
   - Providers implement intelligence.Intelligence.complete(Request). OpenAI
     Responses and Anthropic adapters ship built in; legacy messages.create
     plugins remain supported at the compatibility boundary.
@@ -41,6 +42,9 @@ DEFAULTS = {
               "bench": {"provider": "openai", "model": "gpt-6-astra"},
               "adjudicate": {"provider": "openai", "model": "gpt-6-astra"}},
 }
+
+LOCAL_DEFAULTS = {"v": 1, "providers": {"codex": {"reasoning_effort": "medium"}},
+                  "slots": {slot: {"provider": "codex", "model": "gpt-6-astra"} for slot in SLOTS}}
 
 # Fields that look like key material — never allowed in the document.
 _SECRET_FIELDS = ("api_key", "key", "secret", "token", "password")
@@ -129,6 +133,13 @@ def _openai(cfg):
                            reasoning_effort=cfg.get("reasoning_effort", "medium"))
 
 
+@provider("codex")
+def _codex(cfg):
+    from officekit_ai.local_agent import CodexLocal
+    return CodexLocal(reasoning_effort=cfg.get("reasoning_effort", "medium"),
+                      timeout=cfg.get("timeout", 300))
+
+
 def validate(cfg):
     """Return problems (empty = valid). The secrets rule is the load-bearing one."""
     p = []
@@ -153,18 +164,23 @@ def load(folder=None):
     """The effective config: models.json overlaid on the defaults (unnamed
     slots/providers fall back). Raises on an invalid document — a malformed
     model config must never be silently ignored."""
+    from officekit.runtime import hosted
     cfg = {"v": 1,
            "providers": dict(DEFAULTS["providers"]),
            "slots": {k: dict(v) for k, v in DEFAULTS["slots"].items()}}
+    if not hosted():
+        cfg["providers"].update(LOCAL_DEFAULTS["providers"])
+        cfg["slots"].update({k: dict(v) for k, v in LOCAL_DEFAULTS["slots"].items()})
     if folder is not None:
-        path = Path(folder) / "models.json"
-        if path.exists():
-            user = json.loads(path.read_text(encoding="utf-8"))
-            probs = validate(user)
-            if probs:
-                raise ValueError("models.json invalid: " + "; ".join(probs))
-            cfg["providers"].update(user.get("providers") or {})
-            cfg["slots"].update(user.get("slots") or {})
+        for name in (["models.json"] if hosted() else ["models.json", "models.local.json"]):
+            path = Path(folder) / name
+            if path.exists():
+                user = json.loads(path.read_text(encoding="utf-8"))
+                probs = validate(user)
+                if probs:
+                    raise ValueError(name + " invalid: " + "; ".join(probs))
+                cfg["providers"].update(user.get("providers") or {})
+                cfg["slots"].update(user.get("slots") or {})
     return cfg
 
 

@@ -35,3 +35,13 @@ def test_unrelated_sdk_errors_remain_generic():
                            request=httpx.Request('POST', 'https://api.openai.com/v1/responses'),
                            body={'code': 'unexpected_failure'})
     assert api_errors.classify(error) == (500, api_errors.UNEXPECTED)
+
+
+def test_missing_sec_contact_names_the_settings_fix(monkeypatch):
+    from officekit_research import _contact
+    monkeypatch.setattr('officekit.runtime.credential', lambda name: None)
+    with pytest.raises(RuntimeError) as missing:
+        _contact()
+    status, message = api_errors.classify(missing.value)
+    assert status == 400 and 'Settings → Public research contact' in message
+    assert 'Signed-in model access is separate from source access' in message

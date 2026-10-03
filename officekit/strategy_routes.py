@@ -1,6 +1,7 @@
 """Every strategy creation door opens the same durable proposal workflow."""
 from copy import deepcopy
 import json
+import re
 
 from officekit import strategy_proposals as proposals
 
@@ -37,6 +38,7 @@ def handle(route, folder, get, build, model_for_answers):
     else:
         from officekit.render_strategies import STRATEGY_LIB
         option, title, target, deployment_source = None, None, None, None
+        candidates = None
         request = get("note") or ""
         if route == "/strategy/deploy":
             from officekit.deployment import source_for, latest
@@ -88,6 +90,7 @@ def handle(route, folder, get, build, model_for_answers):
             option, title, target = old["brief"]["option"], old["brief"]["title"], old["target_pct"]
             deployment_source = old.get('deployment_source')
             request = old["brief"]["request"]
+            candidates = old['brief'].get('candidates') or None
             if get("request"):
                 request += "\nRevision: " + get("request")
         elif route == "/strategy/propose":
@@ -111,10 +114,11 @@ def handle(route, folder, get, build, model_for_answers):
             target = get("target_pct") or None
             if get("subassets"):
                 request += "\nCandidates to compare: " + get("subassets")
+                candidates = [s for s in re.split(r'[,;\s]+', get('subassets').strip()) if s]
         updated = deepcopy(answers)
         p = proposals.create(folder, updated, model, sid, source, ref, option=option, title=title,
                              request=request, target_pct=target, revision_of=old["id"] if old else None,
-                             deployment_source=deployment_source)
+                             deployment_source=deployment_source, candidates=candidates)
         if p["status"] == "queued" and updated != answers:
             try:
                 build(updated, folder)

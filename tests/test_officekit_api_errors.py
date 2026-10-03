@@ -5,6 +5,7 @@ import urllib.error
 import urllib.request
 
 from officekit import api_errors as errors
+from local_http import headers
 from test_officekit_onboarding_e2e import server, _post, _get
 
 
@@ -49,7 +50,7 @@ def test_chat_provider_failure_returns_502_and_creates_notice(server,monkeypatch
     events=json.loads(_get(base+'/api-errors'))
     assert len(events)==1 and events[0]['context']=='request:/chat'
     # The browser can dismiss immediately, before its next background poll.
-    req=urllib.request.Request(base+'/chat',data=b'{"messages":[],"scope":"goals"}',headers={'Content-Type':'application/json'})
+    req=urllib.request.Request(base+'/chat',data=b'{"messages":[],"scope":"goals"}',headers={'Content-Type':'application/json',**headers(base)})
     with pytest.raises(urllib.error.HTTPError) as caught:
         urllib.request.urlopen(req)
     assert caught.value.headers['X-Office-API-Error-Id']==events[0]['id']
@@ -65,7 +66,7 @@ def test_chat_provider_failure_returns_502_and_creates_notice(server,monkeypatch
 
 def test_failed_html_form_response_keeps_navigation_and_banner(server):
     base,folder=server
-    req=urllib.request.Request(base+'/strategy/new',data=b'title=Test',headers={'Accept':'text/html','Content-Type':'application/x-www-form-urlencoded'})
+    req=urllib.request.Request(base+'/strategy/new',data=b'title=Test',headers={'Accept':'text/html','Content-Type':'application/x-www-form-urlencoded',**headers(base)})
     try:
         urllib.request.urlopen(req)
         assert False,'Missing office should fail'

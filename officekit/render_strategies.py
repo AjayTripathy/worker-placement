@@ -681,21 +681,41 @@ h1{{font-size:32px;letter-spacing:-.035em}} .eyebrow{{color:var(--emerald);font-
         from officekit_research.taxonomy import render as research_taxonomy
         P.append('<section class="workspace-section"><h2>Research behind new strategies</h2><p>Every new strategy searches the same saved research catalog, compares relevant theses and prior verdicts, then runs evidence, court and allocation reviews for this office.</p><p><a href="/pages/research_catalog.html">Browse the research catalog →</a></p>' + research_taxonomy() + '</section>')
         P.append(f'''<details class="workspace-section" id="create-strategy"><summary>Create a strategy<span>Research, court review, Risk Officer sizing and a pitch deck</span></summary>
-<form method="POST" action="{esc(create_endpoint)}" style="background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px">
+<form method="POST" action="{esc(create_endpoint)}" data-proposal-submit style="background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px">
   <div class="create-grid" style="display:grid;grid-template-columns:1.4fr .6fr;gap:10px">
     <input name="title" aria-label="Strategy name" placeholder="strategy name (e.g. Japan value)" required style="background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px 11px">
-    <input name="target_pct" aria-label="Target allocation as percent of net worth" placeholder="target %" style="background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px 11px">
+    <input type="number" min="0.000001" max="100" step="any" name="target_pct" aria-label="Target allocation as percent of net worth" placeholder="target % (optional)" style="background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px 11px">
   </div>
   <input name="subassets" aria-label="Candidate tickers to investigate" placeholder="candidate tickers to investigate (optional)" style="width:100%;margin-top:8px;background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px 11px">
   <input name="note" aria-label="Investment thesis and constraints" placeholder="investment thesis, constraints and what you want to achieve" style="width:100%;margin-top:8px;background:var(--panel2);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px 11px">
   <button type="submit" style="margin-top:10px;background:var(--emerald);color:#08110d;border:0;border-radius:9px;padding:10px 18px;font-weight:700;cursor:pointer">Build proposal →</button>
-  <div class="ds" style="margin-top:8px">A name matching a library strategy attaches the decision there; anything else defines a custom strategy. The proposal researches specific implementations, convenes courts, and produces a Risk Officer review and pitch deck. Model usage is billed through your configured providers.</div>
+  <p role="status" data-proposal-status aria-live="polite"></p>
+  <div class="ds" style="margin-top:8px">A name matching a library strategy attaches the decision there; anything else defines a custom strategy. The proposal researches specific implementations, convenes courts, and produces a Risk Officer review and pitch deck. Uses your configured intelligence provider; its usage limits and charges apply.</div>
 </form></details>''')
     P.append('<div class="foot">Statuses come from your recorded decisions (strategy_decisions) or the sleeves you actually hold — never inferred. '
              'Sample subassets are examples of typical expression, not recommendations of specific securities. '
              'Records decisions and holdings; never places orders.</div>')
     P.append("""<script>
 (function(){
+  document.querySelectorAll('form[data-proposal-submit]').forEach(function(form){
+    form.addEventListener('submit',async function(event){
+      event.preventDefault();
+      var button=form.querySelector('button[type="submit"]'), status=form.querySelector('[data-proposal-status]');
+      if(button.disabled)return;
+      var data=new FormData(form);
+      button.disabled=true;button.textContent='Saving strategy…';status.textContent='Saving your brief and preparing the research job…';
+      try{
+        var response=await fetch(form.action,{method:'POST',body:data,credentials:'same-origin',headers:{Accept:'text/html'}});
+        var next=new URL(response.url,location.href);
+        if(!response.ok||!response.redirected||next.origin!==location.origin)throw new Error('save');
+        status.textContent='Strategy saved. Opening research progress…';
+        location.assign(next.href);
+      }catch(error){
+        status.textContent='Could not save the strategy. Review the error notice above and retry. Your brief is still here.';
+        button.disabled=false;button.textContent='Build proposal →';
+      }
+    });
+  });
   var search=document.getElementById('strategy-search'), buttons=Array.from(document.querySelectorAll('[data-filter]'));
   var cards=Array.from(document.querySelectorAll('.thesis-card'));
   var active=buttons.find(b=>b.getAttribute('aria-pressed')==='true');

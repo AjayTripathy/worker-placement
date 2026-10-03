@@ -1,3 +1,24 @@
+# Local signed-in intelligence — 2026-10-03
+
+Local runtime defaults now use `CodexLocal` through the existing completion
+interface; hosted offices retain tenant API providers. Explicit `models.json`
+choices still win. `models.local.json` is a machine-only override, excluded from
+migration/export and ignored in hosted contexts. New `wp init` files retain
+runtime defaults rather than pinning an API provider.
+
+The native CLI owns ChatGPT authentication. Calls are ephemeral and read-only,
+with provider keys, tools, plugins, hooks and memories disabled. Never copy local
+OAuth credentials to SaaS or add an implicit paid-API fallback. Record measured
+usage and requested model; resolved model stays unknown when CLI events omit it.
+PDF extraction uses the optional `local-agent` extra. See README for limits.
+
+Custom strategy ticker inputs now persist as structured candidate seeds, survive
+revisions, and participate in job identity. Legacy candidate request lines remain
+readable. Discovery ranks exact seeds before loading bounded deck excerpts;
+proposal attachments retain catalog links. The create form reports saving and
+opens saved progress. SEC source contact configuration remains separate from
+model authentication and failures name the Settings field to fix.
+
 # Contextual research first milestone — 2026-09-18
 
 The pilot is implemented; the milestone remains open pending actual model

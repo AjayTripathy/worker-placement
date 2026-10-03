@@ -565,7 +565,7 @@ def _adapters_html():
     # whether any broker connection was detected (regression fix 2026-09-06:
     # the key display used to vanish whenever the gateway wasn't found)
     ks = _key_status()
-    key_row = ('<div class="chk"><div style="flex:1"><b>AI model key</b>'
+    key_row = ('<div class="chk"><div style="flex:1"><b>AI intelligence</b>'
                f'<div class="why">{html.escape(ks["label"])}</div></div>'
                + ('<span class="why" style="color:var(--emerald)">attached ✓</span>'
                   if ks["attached"] else
@@ -626,31 +626,25 @@ def _key_ask_html(notice=None, via=None):
     if hosted():
         return '<div class="panel"><p>Connect your AI key to enable chat, extraction and courts.</p><a class="btn" href="/settings" target="_top">Office settings</a></div>'
     first = chat_first_line(notice, via)
-    ask = ("To enable GPT-6 chat and research, connect your OpenAI API key. "
-           "It stays on this machine — never in your Worker Placement folder. "
-           "The separate classification slot can use an Anthropic key from Settings.")
+    ask = ("Local chat and research default to signed-in Codex with ChatGPT. "
+           "Install Codex and run `codex login`, then reload. "
+           "Office settings shows the active provider for each role and any explicit API overrides.")
     return ('<div class="panel" id="chatp">'
             '<div style="font-weight:700;font-size:13px;margin-bottom:2px">Or describe your assets '
             '<span style="color:var(--dim);font-weight:400">— the wizard agent fills the table; '
-            'it runs on your own model key.</span></div>'
+            'it runs through your configured intelligence provider.</span></div>'
             '<div style="max-height:220px;overflow-y:auto;font-size:13px;line-height:1.5;margin:8px 0">'
             '<div style="margin-bottom:6px"><b style="color:var(--violet)">agent</b> '
             + html.escape(first) + "</div>"
             '<div style="margin-bottom:6px"><b style="color:var(--violet)">agent</b> '
             + html.escape(ask) + "</div></div>"
-            '<input type="hidden" name="provider" value="openai" form="intake-key">'
-            '<div class="row2"><input type="password" name="api_key" placeholder="OpenAI API key" '
-            'form="intake-key" autocomplete="off" required>'
-            '<button type="submit" form="intake-key" class="btn2">Enable agents</button></div>'
-            '<div class="chk" style="border:0;padding:6px 0 0"><input type="checkbox" name="remember" value="1" form="intake-key">'
-            '<span class="why">remember privately on this machine — otherwise '
-            'it lives only in this server process</span></div>'
+            '<a class="btn btn2" href="/settings" target="_top">Office settings</a>'
             '<p class="note">Everything else — the connection scan, position import, the form, '
             'building your office — works without any key.</p></div>')
 
 
 GOALS_KEYLESS_NOTE = ('<div class="panel"><p class="note" style="margin:0">The goals chat unlocks '
-                      'with the model key above — the goal fields here work without it.</p></div>')
+                      'when your intelligence provider is connected — the goal fields here work without it.</p></div>')
 
 
 _BUSY_ATTR = "onsubmit=\"var b=this.querySelector('button[type=submit]')||this.querySelector('button');b.dataset.t=b.textContent;b.textContent='\u23f3 working\u2026';setTimeout(function(){b.disabled=true},0)\""
@@ -662,6 +656,14 @@ def _key_status(folder=None):
     try:
         from officekit_ai.models import key_source, resolve
         provider, cfg, _ = resolve("intake", folder)
+        if provider == "codex":
+            from officekit_ai.local_agent import executable, signed_in, LocalAgentError
+            try:
+                attached = signed_in(executable())
+                label = "Signed-in local Codex · ChatGPT" if attached else "Sign in to local Codex with `codex login`"
+            except LocalAgentError as error:
+                attached, label = False, str(error)
+            return {"attached": attached, "how": "local:codex" if attached else None, "label": label}
         env = cfg.get("api_key_env", "OPENAI_API_KEY" if provider == "openai" else "ANTHROPIC_API_KEY")
         src = key_source(env)
     except ImportError:
@@ -734,11 +736,11 @@ def _dropzone_html(folder=None, back=None):
     ks = _key_status(folder)
     if ks["attached"]:
         note = ("CSVs are parsed exactly; <b>screenshots</b> and PDFs go to your extraction model "
-                "(AI key " + html.escape(ks["label"]) + "), which must also read the document's own "
+                "(" + html.escape(ks["label"]) + "), which must also read the document's own "
                 "printed total — rows that don't reconcile are flagged, never smoothed.")
     else:
-        note = ("CSVs are parsed exactly and work right now. <b>Screenshots and PDFs need an agent "
-                "key first</b> — " + html.escape(ks["label"]) + ".")
+        note = ("CSVs are parsed exactly and work right now. <b>Screenshots and PDFs need a connected "
+                "intelligence provider first</b> — " + html.escape(ks["label"]) + ".")
     saved_note = ("Uploads are saved privately. Reconciled position data updates this office; review source warnings below."
                   if folder and (Path(folder) / "balance_sheet.json").exists() else
                   "Files are retained in this office for review. Build the office to apply the staged positions.")
@@ -2071,7 +2073,7 @@ def make_handler(folder):
                 return self._send(library(folder, revision(json.loads((folder / 'answers.json').read_text(encoding="utf-8")))))
             if self.path == "/settings":
                 from officekit.render_settings import render_settings
-                return self._send(render_settings())
+                return self._send(render_settings(folder=folder))
             self.path = self.path.split("?", 1)[0]       # strip query (cache-busters, ?v=)
             if self.path == "/hosting" or self.path.startswith("/hosting/"):
                 return handle_hosting(self, hosting)
