@@ -180,10 +180,12 @@ def dispatch(offices, uid, oid, method, path, raw=b'', content_type='', expected
             receipt = publish(offices, uid, receipt, updated, job_id=job_id)
             record = updated
         from .exchange import BoundExchange
+        from .private_research import PrivateResearch
         service = getattr(offices, 'research_exchange', None)
         with hosted_office(folder, credentials, enqueue=pending.append if job_id else None, checkpoint=checkpoint if job_id else None,
                            research_exchange=BoundExchange(service, uid) if service else None,
-                           research_library=getattr(offices, 'research_library', None)):
+                           research_library=getattr(offices, 'research_library', None),
+                           private_research=PrivateResearch(offices, uid, oid)):
             from officekit.serve import render_saved_office
             if method == 'GET' and (path == '/' or path.startswith('/pages/')):
                 if not record.get('onboarding'):

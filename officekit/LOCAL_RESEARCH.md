@@ -80,3 +80,46 @@ truncation and omission recorded. An import is not guaranteed a place if more
 relevant research fills that limit. Full decks remain available through catalog
 links. No research-import action makes model calls, adopts a strategy or places
 an order.
+
+## Private research directories and lazy content
+
+Large private libraries use `research/pack_directory.json`. Each entry retains the
+manifest, symbols, summary, as-of date, attribution, historical ruling, reopen gates,
+content hashes and court revision. Hosted office reads and catalog browsing load
+this directory, not the decks. Opening a research page fetches that one immutable
+bundle; strategy discovery ranks metadata first and fetches only selected notes
+within its existing prompt budget. PDF companions download on demand through an
+owner-authenticated route. The content is encrypted under the owning tenant and
+office, separate from its active snapshot. This is not public-exchange admission.
+
+An agent can create a validated `strategy_pack_transfer_v1` bundle, then call
+`officekit_research.pack_directory.cache(office_folder, bundle, pdf_bytes)` to retain
+it locally. The private cache is `.research-content/`. Upload the directory with:
+
+```sh
+./wp research-sync --dir ~/office --office HOSTED_OFFICE_UUID
+```
+
+Uploads contain at most 25 versions and approximately 8 MiB per batch. Each batch
+merges against the current hosted revision, preserving holdings, goals, proposals
+and other research. An interruption, expired login or revision conflict fails
+visibly. Rerun after resolving it: the uploader checks hosted immutable IDs and
+sends only missing versions. A historical court revision must name its predecessor;
+metadata-only changes are versions too. The current catalog selects the latest
+court version, while older content-addressed links remain readable. Historical
+rulings remain research leads, never current suitability approvals.
+
+The normal synced snapshot contains the directory only. An explicit hosted office
+ZIP export hydrates all referenced bundles and PDFs into `.research-content/` so
+the archive also works offline. When moving a directory to a different hosted
+office, transfer its content with `research-sync` as well; copying the directory
+alone cannot grant access to another office's private blobs.
+
+Optional `forecasts` use the immutable private prediction schema, with original
+capture timestamp, submitter, agent, model, protocol, probability, declared base
+rate and explicit resolution criteria. Optional `outcomes` must refer to those
+forecasts and contain a binary result, source URL and resolution time. The receiving
+office records when it learned an outcome and labels attribution `claimed_import`.
+Brier scores group by the original submitter and agent. Conviction ratings, legacy
+rows missing their forecast contract, and inferred model identities are never
+converted into attributed scores. Missing historical identity remains unknown.

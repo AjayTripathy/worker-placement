@@ -51,7 +51,7 @@ def page(folder, answers, key=None):
     from officekit.commitments import revision
     def wrap(body, revision):
         return research_page('<p><a href="/research/scorecard">Research calibration by submitter and agent →</a></p>' + body, revision, title='Saved research' if key else 'Research catalog')
-    found = catalog(folder, answers)
+    found = catalog(folder, answers, history=key is not None)
     if key is None:
         from officekit_research.taxonomy import render
         return wrap(render() + section(found), revision(answers))
@@ -83,11 +83,22 @@ def page(folder, answers, key=None):
     elif e['kind'] == 'strategy_pack':
         from officekit.strategy_packs import load_packs
         from officekit.render_deck import render_markdown_deck
-        from officekit_research.pack_transfer import roots
-        pack = next((p for p in load_packs([Path(folder) / 'strategies', *roots(folder)])[0]
+        from officekit_research.pack_directory import all_packs, deck
+        pack = next((p for p in all_packs(folder)[0]
                      if p['id'] == e['id'] and manifest_digest(p) == e['manifest_sha256']), None)
-        if pack and pack.get('deck_path'):
-            return render_markdown_deck(pack['name'], Path(pack['deck_path']).read_text(encoding="utf-8"), author=pack['author'])
+        if pack:
+            details = '<p>Historical research lead; a saved ruling does not authorize an investment.</p>'
+            details += '<p>Agent: ' + escape(pack.get('agent', 'unknown')) + ' · Model: ' + escape(pack.get('model', 'unknown')) + '</p>'
+            if pack.get('attachment'):
+                details += '<p><a target="_top" href="/research/files/' + pack['attachment']['sha256'] + '">Download original PDF</a></p>'
+            court = pack.get('private_court')
+            if court:
+                details += '<details><summary>Court lineage and recorded provenance</summary><pre style="white-space:pre-wrap">' + escape(json.dumps(court, indent=2, ensure_ascii=False)) + '</pre></details>'
+            try:
+                rendered = render_markdown_deck(pack['name'], deck(folder, pack), author=pack['author'])
+            except (ValueError, OSError):
+                return wrap(body + '<p role="alert">This research body is unavailable. Retry the upload or open its hosted office.</p>', revision(answers))
+            return rendered.replace('</body>', details + '</body>')
         record = e
     else:
         record = next(r for r in answers.get('desk_theses', []) if r['sid'] == e['id'])

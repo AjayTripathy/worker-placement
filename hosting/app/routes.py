@@ -102,6 +102,36 @@ def install(app, offices, research, origin, member, body, csrf_page, limiter, jo
         claims=await private(request);data=await body(request,require_browser=False)
         return await run_in_threadpool(offices.activate,claims['uid'],sid,data.get('replace_revision'))
 
+    # Private research directory and lazy content (never the public exchange).
+    @app.post('/api/offices/{oid}/research/batch')
+    async def office_research_batch(oid: str, request: Request):
+        claims = await private(request)
+        data = await body(request, limit=24*1024*1024, require_browser=False)
+        limiter.claim(claims['uid'], 'research')
+        from .private_research import import_batch
+        return await run_in_threadpool(import_batch, offices, claims['uid'], oid,
+                                      data.get('bundles'), data.get('files', {}), data.get('revision'))
+
+    @app.get('/api/offices/{oid}/research/directory')
+    async def office_research_directory(oid: str, request: Request):
+        claims = await private(request)
+        receipt, record = await run_in_threadpool(offices.read, claims['uid'], oid)
+        directory = json.loads(base64.b64decode(record['documents'].get('research/pack_directory.json', 'e30=')))
+        return {'office_id': oid, 'revision': receipt['digest'], 'ids': list(directory)}
+
+    @app.get('/app/offices/{oid}/research/files/{sha}')
+    async def office_research_file(oid: str, sha: str, request: Request):
+        claims = await member(request)
+        _, record = await run_in_threadpool(offices.read, claims['uid'], oid)
+        directory = json.loads(base64.b64decode(record['documents'].get('research/pack_directory.json', 'e30=')))
+        if not any(m.get('attachment', {}).get('sha256') == sha for m in directory.values()):
+            raise AuthFailure('Research file not found.', 404)
+        from .private_research import PrivateResearch
+        raw = await run_in_threadpool(PrivateResearch(offices, claims['uid'], oid).pdf, sha)
+        return Response(raw, media_type='application/pdf', headers={
+            'Content-Disposition': 'attachment; filename="DECK.pdf"', 'X-Content-Type-Options': 'nosniff',
+            'Cache-Control': 'private, no-store'})
+
     # ---- central research exchange: GENERAL research only --------------------
     @app.post('/api/offices/{oid}/research/packs')
     async def office_research_import(oid: str, request: Request):
@@ -314,6 +344,17 @@ def install(app, offices, research, origin, member, body, csrf_page, limiter, jo
             output=io.BytesIO()
             with zipfile.ZipFile(output,'w',compression=zipfile.ZIP_DEFLATED) as z:
                 for path,encoded in {**record['documents'], **record.get('workspace', {})}.items():z.writestr(path,base64.b64decode(encoded))
+                # Explicit export hydrates external content; normal office reads do not.
+                from .private_research import PrivateResearch
+                content = PrivateResearch(offices, claims['uid'], oid)
+                directory = json.loads(base64.b64decode(record['documents'].get('research/pack_directory.json', 'e30=')))
+                exported = set()
+                for bid, manifest in directory.items():
+                    z.writestr('.research-content/' + bid + '.json', json.dumps(content.bundle(bid), ensure_ascii=False))
+                    attachment = manifest.get('attachment')
+                    if attachment and attachment['sha256'] not in exported:
+                        exported.add(attachment['sha256'])
+                        z.writestr('.research-content/' + attachment['sha256'] + '.pdf', content.pdf(attachment['sha256']))
                 z.writestr('migration-receipt.json',json.dumps(receipt,indent=2))
             return output.getvalue()
         return Response(await run_in_threadpool(build),media_type='application/zip',headers={'Content-Disposition':'attachment; filename="worker-placement-office.zip"'})

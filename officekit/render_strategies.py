@@ -447,7 +447,8 @@ h1{{font-size:32px;letter-spacing:-.035em}} .eyebrow{{color:var(--emerald);font-
             # full thesis deck (contributed pack DECK.md, or a courted pitch deck)
             if t.get("deck"):
                 auth = f' <span class="g">· by {esc(t.get("author",""))}</span>' if t.get("author") else ""
-                P.append(f'<div class="ds"><a href="thesis_deck_{esc(t["sid"])}.html">full thesis deck &rarr;</a>{auth}</div>')
+                deck_href = t.get('deck_href') or f'thesis_deck_{t["sid"]}.html'
+                P.append(f'<div class="ds"><a href="{esc(deck_href)}">full thesis deck &rarr;</a>{auth}</div>')
             if t.get("edge"):
                 ed = t["edge"]
                 et = ed.get("edge_type") if isinstance(ed, dict) else ed        # edge may be a rich dict

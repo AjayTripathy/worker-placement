@@ -90,7 +90,7 @@ def validate(manifest, folder=None):
     return probs
 
 
-def load_packs(extra_dirs=None, include_defaults=True):
+def load_packs(extra_dirs=None, include_defaults=True, superseded=()):
     """Discover + validate every strategy pack. Returns (packs, problems):
     packs are valid manifests enriched with `deck_path` + `pack_dir`; problems is
     [{pack, dir, problems[]}] for anything malformed (surfaced, never silently
@@ -107,6 +107,8 @@ def load_packs(extra_dirs=None, include_defaults=True):
                 m = json.loads(mf.read_text(encoding="utf-8"))
             except Exception as e:
                 problems.append({"pack": sub.name, "dir": str(sub), "problems": [f"pack.json unreadable: {e}"]})
+                continue
+            if isinstance(m, dict) and (m.get('author'), m.get('id')) in superseded:
                 continue
             probs = validate(m, folder=sub)
             if isinstance(m, dict) and m.get("id") and m["id"] != sub.name:
@@ -125,6 +127,7 @@ def as_theses(packs):
     the taxonomy beside desk/court theses). Value is 0 unless the pack states
     positions with values — a pack is a THESIS + DECK, not a live position."""
     out = []
+    from officekit_research.discovery import reference_key, manifest_digest
     for p in packs:
         out.append({
             "sid": p["id"], "label": p.get("name") or p["id"], "value": 0,
@@ -133,6 +136,7 @@ def as_theses(packs):
             "edge": p.get("edge", ""), "next_date": "",
             "positions": [{"symbol": str(s).upper(), "mv": 0} for s in (p.get("positions") or [])],
             "bucket": p.get("bucket"), "author": p.get("author"),
-            "deck": Path(p["deck_path"]).name if p.get("deck_path") else None,
+            "deck": p.get('deck', 'DECK.md'),
+            "deck_href": '/pages/research_' + reference_key('strategy_pack', p['id'], manifest_digest(p)) + '.html',
             "pack": True, "review_status": "schema_valid"})
     return out

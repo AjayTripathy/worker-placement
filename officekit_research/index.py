@@ -180,12 +180,15 @@ def build(folder):
             forecasts.append((fid, r["id"], f["statement"], float(f["probability"]), float(f["base_rate"]), f["resolve_by"],
                               None if o is None else int(o["outcome"]), o and o["resolved_at"], o and o["source_url"]))
 
+    imports_path = Path(folder) / 'research' / 'prediction_imports.json'
+    prediction_imports = json.loads(imports_path.read_text()) if imports_path.exists() else {}
     for r in predictions.load(folder):
         rid = r['id']
-        rows.append((rid, 'prediction', 'own', r['submitter'], r['symbol'], None, r['recorded_at'],
+        imported = rid in prediction_imports
+        rows.append((rid, 'prediction', 'imported' if imported else 'own', r['submitter'], r['symbol'], None, r['recorded_at'],
                      r['strategy'] or None, None, None, None, None, None, r['model'], None, _tier(r['model']),
                      None, None, r['protocol'], None, None, None, None))
-        attributions.append((rid, r['submitter'], 'claimed'))
+        attributions.append((rid, r['submitter'], 'claimed_import' if imported else 'claimed'))
         agents.append((rid, r['agent'] + ' / ' + r['model'] + ' / ' + r['protocol']))
         o = outcomes.get(rid + ':0')
         if o and datetime.fromisoformat(o['resolved_at']) < datetime.fromisoformat(r['recorded_at']):

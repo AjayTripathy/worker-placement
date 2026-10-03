@@ -15,9 +15,10 @@ from officekit.strategy_packs import validate as validate_manifest
 
 SCHEMA = 'strategy_pack_transfer_v1'
 MAX_BYTES = 512 * 1024
+MAX_PACKS = 2000
 FIELDS = {'id', 'name', 'bucket', 'thesis', 'author', 'deck', 'edge', 'as_of',
           'positions', 'goal_kinds', 'betas', 'agent', 'model', 'intelligence_level',
-          'sources', 'gaps', 'deck_sha256'}
+          'sources', 'gaps', 'deck_sha256', 'private_court', 'attachment', 'forecasts', 'outcomes'}
 
 
 def validate(bundle):
@@ -38,10 +39,17 @@ def _validate(bundle):
     if bundle['id'] != digest(canonical(body)):
         raise ValueError('Research pack digest mismatch.')
     m, deck = bundle['manifest'], bundle['deck']
-    if not isinstance(m, dict) or set(m) - FIELDS or validate_manifest(m):
-        raise ValueError('Invalid strategy pack manifest or unsupported fields.')
+    validate_descriptor(m)
     if not isinstance(deck, str) or not deck.strip() or m.get('deck') != 'DECK.md' or m.get('deck_sha256') != digest(deck.encode()):
         raise ValueError('Research deck does not match its manifest.')
+    return bundle
+
+
+def validate_descriptor(m):
+    if not isinstance(m, dict) or set(m) - FIELDS or validate_manifest(m):
+        raise ValueError('Invalid strategy pack manifest or unsupported fields.')
+    if m.get('deck') != 'DECK.md' or not re.fullmatch('[a-f0-9]{64}', str(m.get('deck_sha256'))):
+        raise ValueError('Research needs a retained deck digest.')
     try:
         as_of = date.fromisoformat(m.get('as_of', ''))
     except (ValueError, TypeError):
@@ -60,7 +68,7 @@ def _validate(bundle):
     if not isinstance(gaps, list) or len(gaps) > 20 or any(not isinstance(g, str) or len(g) > 1000 for g in gaps):
         raise ValueError('List the unresolved research gaps.')
     sources = m.get('sources')
-    if not isinstance(sources, list) or not 1 <= len(sources) <= 20:
+    if not isinstance(sources, list) or not (0 if 'private_court' in m else 1) <= len(sources) <= 20:
         raise ValueError('Research needs 1–20 source references.')
     from officekit_research.cases import safe_url, day
     for source in sources:
@@ -77,7 +85,9 @@ def _validate(bundle):
         import math
         if not isinstance(m['betas'], dict) or any(type(v) not in {int, float} or not math.isfinite(v) for v in m['betas'].values()):
             raise ValueError('Factor betas must be finite numbers.')
-    return bundle
+    from officekit_research.private_packs import validate_metadata
+    validate_metadata(m)
+    return m
 
 
 def export(pack):
@@ -104,6 +114,8 @@ def install(folder, bundle, proposal_id=None):
     from officekit_research.discovery import refresh_proposal_inventory, reference_key, manifest_digest
     validate(bundle)
     with locked(folder):
+        from officekit_research.private_packs import import_forecasts
+        import_forecasts(folder, bundle, dry_run=True)
         if proposal_id:
             try:
                 p = load(folder, proposal_id)
@@ -123,7 +135,7 @@ def install(folder, bundle, proposal_id=None):
             if existing != bundle:
                 raise ValueError('The saved research version failed its integrity check.')
         else:
-            if len(roots(folder)) >= 200:
+            if len(roots(folder)) >= MAX_PACKS:
                 raise ValueError('This office has reached its imported strategy pack limit.')
             # Publish the two files together; interrupted writes remain hidden.
             with tempfile.TemporaryDirectory(prefix='.import-', dir=base) as temporary:
@@ -133,6 +145,8 @@ def install(folder, bundle, proposal_id=None):
                 (pack / 'pack.json').write_bytes(canonical(bundle['manifest']))
                 (pack / 'DECK.md').write_text(bundle['deck'], encoding='utf-8')
                 root.rename(destination)
+        from officekit_research.private_packs import import_forecasts
+        import_forecasts(folder, bundle)
         if proposal_id:
             refresh_proposal_inventory(folder, p)
         key = reference_key('strategy_pack', bundle['manifest']['id'], manifest_digest(bundle['manifest']))

@@ -16,10 +16,10 @@ def reference_key(kind, identity, variant=None):
 
 def manifest_digest(pack):
     return digest({k: v for k, v in pack.items() if k not in
-                   {'deck_path', 'pack_dir', 'source', 'source_sha256', 'source_href'}})
+                   {'deck_path', 'pack_dir', 'source', 'source_sha256', 'source_href', 'bundle_id'}})
 
 
-def catalog(folder, answers):
+def catalog(folder, answers, history=False):
     """One derived catalog for browsing and AI discovery; no model calls or writes."""
     from officekit_research import general
     from officekit_ai.court import load_adjudications
@@ -76,8 +76,9 @@ def catalog(folder, answers):
         add('imported_thesis', r.get('sid'), [p.get('symbol') for p in r.get('positions', [])],
             r.get('court_date'), r.get('thesis', ''), verdict=r.get('verdict'), strategy=r.get('sid'),
             title=r.get('label') or str(r.get('sid', '')).replace('_', ' '))
-    from officekit_research.pack_transfer import roots
-    packs, problems = load_packs([Path(folder) / 'strategies', *roots(folder)])
+    from officekit_research.pack_directory import all_packs
+    from officekit_research.private_packs import latest
+    packs, problems = all_packs(folder)
     if problems:
         warnings.append(f'{len(problems)} invalid strategy packs excluded.')
     library = research_library()
@@ -86,12 +87,14 @@ def catalog(folder, answers):
             packs += library.strategy_packs()
         except Exception:
             warnings.append('The hosted research library could not be loaded; inspect it before relying on coverage.')
-    for p in packs:
+    for p in (packs if history else latest(packs)):
         add('strategy_pack', p['id'], p.get('positions', []), p.get('as_of'), p['thesis'],
             title=p.get('name') or p['id'].replace('_', ' '),
             author=p['author'], bucket=p['bucket'], source=p.get('source', 'Installed or office strategy pack'),
             agent=p.get('agent', 'Unrecorded'), model=p.get('model', 'Unrecorded'),
             intelligence_level=p.get('intelligence_level', 'Unrated'), gaps=p.get('gaps', []),
+            verdict=p.get('private_court', {}).get('ruling'),
+            private_court=p.get('private_court'), bundle_id=p.get('bundle_id'),
             source_href=p.get('source_href'),
             manifest_sha256=manifest_digest(p),
             source_sha256=p.get('source_sha256') or digest({k: v for k, v in p.items() if k not in {'deck_path', 'pack_dir'}}))
@@ -123,14 +126,21 @@ def inventory(folder, proposal):
                                len(terms.intersection(words(e['summary'] + ' ' + e['id']))),
                                e['as_of'] or '', e['id']), reverse=True)
     from officekit.strategy_packs import load_packs
-    from officekit_research.pack_transfer import roots
-    packs = {manifest_digest(p): p for p in load_packs([Path(folder) / 'strategies', *roots(folder)])[0]}
+    from officekit_research.pack_directory import all_packs, deck
+    packs = {manifest_digest(p): p for p in all_packs(folder)[0]}
     selected, seen, used = [], set(), 0
     for e in entries:
         e = dict(e)
+        # Select from directory metadata before requesting any research body.
+        if len(selected) >= 32 or used + len(str(e)) + 6500 > 30000:
+            continue
         pack = packs.get(e.get('manifest_sha256'))
         if pack and e['kind'] == 'strategy_pack':
-            notes = Path(pack['deck_path']).read_text(encoding='utf-8')
+            try:
+                notes = deck(folder, pack)
+            except (ValueError, OSError) as error:
+                warnings.append('Selected research content unavailable: ' + e['id'])
+                continue
             e['research_notes'] = notes[:6000]
             e['research_notes_truncated'] = len(notes) > 6000
             e['sources'] = pack.get('sources', [])

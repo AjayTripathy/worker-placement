@@ -319,7 +319,7 @@ def merge(owned, native):
         sid = t["sid"]
         if sid in by_sid and t.get("pack"):
             base = by_sid[sid]
-            fields = ("thesis", "deck", "author", "bucket", "pack", "review_status")
+            fields = ("thesis", "deck", "deck_href", "author", "bucket", "pack", "review_status")
             for k in fields:
                 if t.get(k):
                     base[k] = t[k]

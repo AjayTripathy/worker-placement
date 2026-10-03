@@ -1428,7 +1428,10 @@ def _thesis_sleeves(answers, folder):
     AND contributed STRATEGY PACKS (strategies/<id>/pack.json + DECK.md, incl. any
     in the office folder). No desk read: assembled from owned + contributed data."""
     from officekit import thesis_board, strategy_packs
-    packs, _probs = strategy_packs.load_packs([Path(folder) / "strategies"])
+    from officekit_research.pack_directory import all_packs
+    from officekit_research.private_packs import latest
+    packs, _probs = all_packs(folder)
+    packs = latest(packs)
     return thesis_board.merge(
         thesis_board.merge(answers.get("desk_theses") or [],
                            thesis_board.from_adjudications(folder)),
@@ -1654,7 +1657,8 @@ def _render_additional(answers, data, folder):
     # contributed strategy-pack decks (DECK.md) -> a deck page per pack
     try:
         from officekit import strategy_packs
-        _packs, _pk_probs = strategy_packs.load_packs([folder / "strategies"])
+        from officekit_research.pack_directory import all_packs
+        _packs, _pk_probs = all_packs(folder)
         for p in _packs:
             if p.get("deck_path") and Path(p["deck_path"]).exists():
                 md = Path(p["deck_path"]).read_text(encoding="utf-8")
@@ -2007,6 +2011,25 @@ def make_handler(folder):
                                       answers_json=html.escape(json.dumps(answers), quote=True)))
 
         def _get(self):
+            if self.path.startswith('/research/files/'):
+                from officekit_research.pack_directory import read
+                from officekit_research.private_packs import HASH
+                from officekit.migration import digest
+                sha = self.path[len('/research/files/'):]
+                if not HASH.fullmatch(sha) or not any(m.get('attachment', {}).get('sha256') == sha for m in read(folder).values()):
+                    return self._send('Research file not found.', 404)
+                target = folder / '.research-content' / (sha + '.pdf')
+                if not target.is_file() or target.is_symlink():
+                    return self._send('Research PDF is not cached locally.', 404)
+                raw = target.read_bytes()
+                if digest(raw) != sha:
+                    return self._send('Research PDF integrity check failed.', 409)
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/pdf')
+                self.send_header('Content-Disposition', 'attachment; filename="DECK.pdf"')
+                self.send_header('X-Content-Type-Options', 'nosniff')
+                self.end_headers()
+                return self.wfile.write(raw)
             if (self.path.split('?', 1)[0] in {'/pages/risk.html', '/pages/scenarios.html'}
                     and (folder / 'balance_sheet.json').exists()):
                 # These pages depend on the saved model and forecast ledger,

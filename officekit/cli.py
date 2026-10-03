@@ -186,9 +186,21 @@ def _cmd_research_upload(args):
         print('Research ready for review: ' + auth['origin'] + receipt['proposal_href'])
 
 
+def _cmd_research_sync(args):
+    from officekit_research.pack_directory import upload
+    import uuid
+    result = upload(args.dir, str(uuid.UUID(args.office)),
+                    progress=lambda done, total: print(f'Private research uploaded: {done}/{total}', flush=True))
+    print(f"Verified {result['retained_versions']} private research versions; uploaded {result['uploaded']}.")
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="worker-placement", description=__doc__.splitlines()[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
+    directory = sub.add_parser('research-sync', help='Upload missing private research versions from a local directory')
+    directory.add_argument('--dir', required=True, help='local office folder')
+    directory.add_argument('--office', required=True, help='destination hosted office UUID')
+    directory.set_defaults(fn=_cmd_research_sync)
     export = sub.add_parser('research-export', help='Export a local strategy pack as portable research')
     export.add_argument('--pack', required=True, help='folder containing pack.json and DECK.md')
     export.add_argument('--output', required=True, help='destination JSON file')
