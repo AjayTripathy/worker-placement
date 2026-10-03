@@ -50,10 +50,16 @@ def validate_metadata(m):
     if not isinstance(forecasts, list) or len(forecasts) > 100 or not isinstance(outcomes, list) or len(outcomes) > 100:
         raise ValueError('Too many forecast records in one pack.')
     ids = {validate(r)['id'] + ':0' for r in forecasts}
+    if len(ids) != len(forecasts):
+        raise ValueError('Duplicate forecasts in research pack.')
+    resolved = set()
     from officekit_research.cases import safe_url
     for r in outcomes:
         if not isinstance(r, dict) or set(r) != {'forecast_id', 'outcome', 'source_url', 'resolved_at', 'note'} or r['forecast_id'] not in ids or type(r['outcome']) is not bool:
             raise ValueError('Outcomes must resolve an explicit forecast in this pack.')
+        if r['forecast_id'] in resolved:
+            raise ValueError('A research pack may resolve each forecast only once.')
+        resolved.add(r['forecast_id'])
         safe_url(r['source_url'])
         when = datetime.fromisoformat(r['resolved_at'])
         prediction = next(p for p in forecasts if p['id'] + ':0' == r['forecast_id'])

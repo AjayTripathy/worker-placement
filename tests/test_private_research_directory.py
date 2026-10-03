@@ -202,3 +202,13 @@ def test_local_upload_resumes_after_partial_failure(client, office, tmp_path, mo
     result = directory.upload(local, receipt['office_id'])
     assert result['uploaded'] == 5 and result['retained_versions'] == 30
     assert directory.upload(local, receipt['office_id'])['uploaded'] == 0
+
+
+def test_duplicate_forecasts_and_conflicting_resolutions_are_rejected():
+    p = prediction()
+    with pytest.raises(ValueError, match='Duplicate forecasts'):
+        bundle(forecasts=[p, p])
+    r = dict(forecast_id=p['id'] + ':0', outcome=True, source_url='https://example.com/release',
+             resolved_at='2026-09-01T12:00:00+00:00', note='Result')
+    with pytest.raises(ValueError, match='only once'):
+        bundle(forecasts=[p], outcomes=[r, {**r, 'outcome': False}])
