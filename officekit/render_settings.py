@@ -35,6 +35,15 @@ def render_settings(*, hosted=False, connections=None, sync=None, folder=None):
             out.append('<button type="submit">' + ('Replace connection' if connected.get(group) else 'Connect') + '</button></form>')
             if connected.get(group):
                 out.append('<form method="POST" action="/settings/credentials">' + hidden + '<input type="hidden" name="remove" value="1"><button class="btn2" type="submit">Disconnect</button></form>')
+        elif group == 'research':
+            from officekit.runtime import credential
+            contact = credential('OFFICEKIT_CONTACT')
+            out.append('<p>' + ('Contact configured on this computer.' if contact else 'No research contact configured.') + '</p>'
+                       '<form method="POST" action="/settings/research-contact"><label>Contact email'
+                       '<input type="email" name="contact" autocomplete="email" required maxlength="254"></label>'
+                       '<p class="note">Saved privately on this computer and sent to public research sources such as the SEC. '
+                       'An OFFICEKIT_CONTACT environment setting takes precedence. Existing reviews keep their original evidence; run a fresh review after connecting.</p>'
+                       '<button type="submit">Save research contact</button></form>')
         elif group in {'anthropic', 'openai'}:
             from officekit_ai.models import key_source
             out.append('<p>' + ('Key available on this computer.' if key_source(fields[0][0]) else 'No key connected.') + '</p><form method="POST" action="/key"><input type="hidden" name="provider" value="' + group + '"><label>' + fields[0][1] + '<input type="password" name="api_key" autocomplete="off" required></label><label class="chk"><input type="checkbox" name="remember" value="1">Remember securely on this computer</label><button type="submit">Connect</button></form>')

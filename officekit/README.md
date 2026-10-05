@@ -42,6 +42,8 @@ Back up the entire office folder. `answers.json` and `balance_sheet.json` preser
 
 The local adapter requires a Codex version with `exec --ignore-user-config`, `--ephemeral` and `--output-schema`. It starts an isolated read-only completion session with tools, plugins, hooks and memories disabled; the application supplies the research evidence. Install `worker-placement[local-agent]` for local PDF extraction (up to 30 pages per request). Text and image requests need no Python API SDK. Calls have a 300-second default deadline (600 maximum); the CLI does not enforce a hard output-token cap. Saved provenance records measured token usage and the requested model; the resolved model remains unknown because CLI events do not report it. Failed calls retain completed proposal checkpoints and display a local-agent error.
 
+Public SEC sources also need an operator contact, separately from model access. In local **Settings → Public research contact**, save a contact email. It is kept outside the office in the machine configuration directory with owner-only permissions; `OFFICEKIT_CONTACT` in the environment takes precedence. Hosted offices continue to use their own connection settings. After connecting, retry the failed source request or run a fresh review; saved research retains its original evidence.
+
 ## Bring your office from the website
 
 Sign in and choose **Bring an office** from your workspace (also available at

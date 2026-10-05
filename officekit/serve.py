@@ -2247,6 +2247,18 @@ def make_handler(folder):
             from officekit import formdata
             form = formdata.parse(self.rfile, self.headers)
             g = lambda k: (form.getvalue(k) or "").strip()
+            if self.path == '/settings/research-contact':
+                from officekit.local_settings import save_research_contact
+                save_research_contact(g('contact'))
+                from officekit import api_errors
+                for event in api_errors.active(folder):
+                    parts = event['context'].split(':')
+                    if (event['message'] == api_errors.RESEARCH_CONTACT_REQUIRED and len(parts) == 3
+                            and parts[0] == 'signal' and parts[1] in {'evidence_filings', 'evidence_xbrl', 'evidence_filing_text'}):
+                        api_errors.report(folder, event['context'], 'Research retry needed',
+                            'Research contact saved. Retry this filing-data request to fetch current evidence. Existing reviews keep their original evidence.',
+                            href='/pages/capability_' + parts[1] + '.html')
+                return self._redirect('/settings')
             if self.path == "/key":
                 # The agents' key intake: process env now, a private key file only
                 # on explicit opt-in. Never logged, never echoed, never in the

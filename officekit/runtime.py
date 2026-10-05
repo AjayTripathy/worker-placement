@@ -27,6 +27,9 @@ def credential(name):
     if hosted():
         return _credentials.get().get(name)
     import os
+    if name == 'OFFICEKIT_CONTACT' and not os.environ.get(name):
+        from officekit.local_settings import research_contact
+        return research_contact()
     return os.environ.get(name)
 
 

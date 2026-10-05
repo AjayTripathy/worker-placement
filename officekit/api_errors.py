@@ -14,6 +14,7 @@ LIMIT = 20
 LOGGER = logging.getLogger(__name__)
 UNEXPECTED = 'Something went wrong. Your request could not be completed. Try again; details are in the server log.'
 CREDIT_EXHAUSTED = 'The configured model provider has insufficient API credit. Add credit with that provider, then retry or resume the review. Completed reviews are retained.'
+RESEARCH_CONTACT_REQUIRED = 'Fresh SEC filings need a research contact. Open Settings → Public research contact and add an email address, then run a fresh review. Signed-in model access is separate from source access.'
 
 
 def _credit_exhausted(error):
@@ -40,7 +41,7 @@ def classify(error):
     if isinstance(error, LocalAgentError):
         return 502, str(error)
     if str(error).startswith('evidence: SEC fair-access needs a contact'):
-        return 400, 'Fresh SEC filings need a research contact. Open Settings → Public research contact and add an email address, then run a fresh review. Signed-in model access is separate from source access.'
+        return 400, RESEARCH_CONTACT_REQUIRED
     if _credit_exhausted(error):
         return 502, CREDIT_EXHAUSTED
     if isinstance(error, ValueError) and not isinstance(error, json.JSONDecodeError):
@@ -113,11 +114,13 @@ def report(folder, context, title, error, href=None):
         with _LOCK:
             rows = active(folder)
             msg = message(error)
+            if msg == RESEARCH_CONTACT_REQUIRED:
+                title, href = 'Research contact needed', '/settings'
             old = next((e for e in rows if e['context'] == context and e['message'] == msg), None)
             event = {'id': old['id'] if old else str(uuid.uuid4()), 'context': context,
                      'title': str(title)[:120], 'message': msg,
                      'at': datetime.now(timezone.utc).isoformat(),
-                     'href': href if href and re.fullmatch(r'/pages/[A-Za-z0-9_.-]+\.html(?:#[A-Za-z0-9_-]+)?', href) else None}
+                     'href': href if href and re.fullmatch(r'(?:/settings|/pages/[A-Za-z0-9_.-]+\.html(?:#[A-Za-z0-9_-]+)?)', href) else None}
             _save(folder, [e for e in rows if e['context'] != context] + [event])
             return event
     except OSError:
@@ -159,8 +162,8 @@ SCRIPT = r'''<script data-office-api-errors>
   bar.querySelector('strong').textContent=e.title;
   bar.querySelector('.api-error-message').textContent=e.message;
   bar.querySelector('.api-error-count').textContent=items.length>1?items.length+' API issues':'';
-  const link=bar.querySelector('a');link.hidden=!/^\/pages\/[a-zA-Z0-9_.-]+\.html(?:#[a-zA-Z0-9_-]+)?$/.test(e.href||'');
-  if(!link.hidden){link.href=(window.officeBase||'')+e.href;link.onclick=function(ev){const pane=document.getElementById('pane');if(pane){ev.preventDefault();pane.src=(window.officeBase||'')+e.href;}};}
+  const link=bar.querySelector('a');link.hidden=!/^(?:\/settings|\/pages\/[a-zA-Z0-9_.-]+\.html(?:#[a-zA-Z0-9_-]+)?)$/.test(e.href||'');
+  if(!link.hidden){link.href=(window.officeBase||'')+e.href;link.onclick=function(ev){const pane=document.getElementById('pane');if(pane&&e.href!=='/settings'){ev.preventDefault();pane.src=(window.officeBase||'')+e.href;}};}
   bar.querySelector('button').onclick=async function(){
    if(e.id.startsWith('local:')){local.delete(e.context);render();return;}
    try{const r=await originalFetch('/api-errors/dismiss',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:e.id})});if(!r.ok)throw Error();
