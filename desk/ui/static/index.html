@@ -195,14 +195,28 @@ function row(tb,cells){const tr=el("tr");cells.forEach(c=>{const td=el("td");if(
 // ---- ENTRY (highest-conviction orders to place today) ----
 const CCY_SYM={USD:"$",EUR:"€",GBP:"p",PLN:"zł ",CHF:"CHF ",KRW:"₩"};
 const LIQ_CLS={deep:"grn",work:"amb",THIN:"red"};
+function routingReview(m, rows){
+  if(!rows.length)return;
+  const box=el("details");
+  box.append(el("summary",null,"Pending research review ("+rows.length+")"));
+  rows.forEach(r=>{const item=el("div","sub");item.textContent=r.ticker+": "+(r.review_issues||[]).join("; ");box.append(item);});
+  m.append(box);
+}
+function routingWarnings(container,r){
+  if(!r.legacy_fallback)return;
+  const note=el("div","amb");
+  note.textContent=r.ticker+": "+(r.routing?.warnings||[]).join(" ");
+  container.append(note);
+}
 function vEntry(m){
   const EN=DATA.entry||{};
+  routingReview(m,EN.pending_review||[]);
   if((EN.drift||[]).length){
     const w=el("div","exbox exr");
     w.innerHTML='<div class=exh>⚠️ Plan drift — staged file vs live adjudications</div>'+EN.drift.map(d=>`<div class=mdli>${d}</div>`).join('');
     m.append(w);}
   if((EN.live||[]).length){
-    m.append(el("h2","sec","🟩 LIVE — approved entries from the ledger + records ("+EN.live.length+")"));
+    m.append(el("h2","sec","🟩 Entry candidates from the ledger + records ("+EN.live.length+")"));
     const tb=table(["Name","Verdict","Size","Est $ (of $1mm)","Entry band","Dip alert","Approve"]);
     EN.live.forEach(r=>{
       const sz=r.sizing_pct_lo!=null?(r.sizing_pct_lo===r.sizing_pct_hi?r.sizing_pct_lo+"%":r.sizing_pct_lo+"-"+r.sizing_pct_hi+"%"):'<span class=red>NEEDS SIZING</span>';
@@ -215,8 +229,9 @@ function vEntry(m){
           else{btn.textContent="failed";}
         }catch(e){btn.textContent="failed";}
         btn.disabled=false;};
-      row(tb._b,[`<span class=tk>${r.ticker}</span>`,r.verdict,sz,usd,(r.entry_band||"").slice(0,45),r.alert_below??"",btn]);});
-    m.append(tb);}
+      row(tb._b,[`<span class=tk>${r.ticker}</span>`,r.verdict,sz+(r.legacy_fallback?'<div class=amb>Legacy estimate · review</div>':''),usd,(r.entry_band||"").slice(0,45),r.alert_below??"",btn]);});
+    m.append(tb);
+    EN.live.filter(r=>r.legacy_fallback).forEach(r=>routingWarnings(m,r));}
 
   const E=DATA.entry;
   if(!E||!E.orders||!E.orders.length){m.append(el("div","sub","No entry plan staged."));return;}
@@ -565,13 +580,14 @@ function vAlerts(m){
   };
   if((a.go||[]).length){ m.append(el("h2","sec","🟢 GO ("+a.go.length+") — buy now · click for the evidence trail")); a.go.forEach(r=>m.append(rowDetail(r,true))); }
   if((a.no_go||[]).length){ m.append(el("h2","sec","🔴 NO-GO ("+a.no_go.length+") — in band, but not a buy")); a.no_go.forEach(r=>m.append(rowDetail(r,false))); }
+  routingReview(m,a.pending_review||[]);
   const rd=(a.ready||[]);
-  if(rd.length){ m.append(el("h2","sec","🟩 READY — approved starters, enter per plan ("+rd.length+")"));
+  if(rd.length){ m.append(el("h2","sec","🟩 Research candidates — review the entry plan ("+rd.length+")"));
     rd.forEach(r=>{
       const d=el("details");
       const tf2=r.tax_fit?` · <span class="${r.tax_fit.fit==='STRONG'?'grn':(r.tax_fit.fit==='WEAK'?'red':'mut')}">${r.tax_fit.fit} ${r.tax_fit.tax_option_pct}%</span>`:'';
-      const sm=el("summary",null,`<span class="pill grn">READY</span> <span class=tk>${r.ticker}</span> ${r.px??''} <span class=sub>(dip-alert ≤${r.alert_below??'—'})</span>${tf2}`);
-      sm.style.cursor="pointer"; d.append(sm);
+      const sm=el("summary",null,`<span class="pill ${r.legacy_fallback?'amb':'grn'}">${r.legacy_fallback?'LEGACY · REVIEW':'READY'}</span> <span class=tk>${r.ticker}</span> ${r.px??''} <span class=sub>(dip-alert ≤${r.alert_below??'—'})</span>${tf2}`);
+      sm.style.cursor="pointer"; d.append(sm); routingWarnings(d,r);
       const bd=el("div","sub",r.plan||""); bd.style.cssText="padding:6px 16px 2px"; d.append(bd);
       if(r.edge_explainer){const EX=r.edge_explainer; const g=el("div","exgrid");
         g.innerHTML='<div class=exbox><div class=exh>📉 Market believes</div>'+(EX.market_believes||'')+'</div>'

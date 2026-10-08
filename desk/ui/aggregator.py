@@ -644,9 +644,7 @@ def set_order_approval(ticker: str, approved: bool) -> dict:
 
 
 def entry_candidates() -> dict:
-    if not ENTRY_PLAN.exists():
-        return {"asof": None, "orders": [], "target_nlv": None, "approved_count": 0}
-    plan = json.loads(ENTRY_PLAN.read_text())
+    plan = json.loads(ENTRY_PLAN.read_text()) if ENTRY_PLAN.exists() else {}
     nlv = plan.get("target_nlv") or plan.get("book_nlv")
     cash = plan.get("deployable_cash")
     approved = _approved_set()
@@ -693,24 +691,6 @@ def entry_candidates() -> dict:
     # ---- LIVE sync (2026-07-03): the staged file goes stale the moment an adjudication lands, so the
     # page now ALSO derives the actionable set from the SAME stores as the alerts page — ledger verdicts
     # (OWNABLE/STARTER) + per-record sizing/entry text — and flags drift in both directions.
-    import re as _re
-    def _sizing_from_record(t, ledger_conviction=""):
-        f = EC_DIR / f"{t}.json"
-        if not f.exists():
-            return None, None, None, False
-        try:
-            rec = json.loads(f.read_text())
-        except Exception:
-            return None, None, None, False
-        has_explainer = bool(rec.get("edge_explainer"))
-        sizing = rec.get('sizing') or {}
-        lo = sizing.get('pct_lo') if isinstance(sizing, dict) else None
-        hi = sizing.get('pct_hi') if isinstance(sizing, dict) else None
-        from desk.research_contracts import routing_issues
-        issues = routing_issues({'verdict': rec.get('verdict_state'), 'state': rec.get('verdict_state')}, rec)
-        if issues:
-            lo = hi = None
-        return lo, hi, str(rec.get("entry_band") or "")[:120], has_explainer
     plan_tickers = {o["ticker"] for o in plan.get("orders", [])}
     live_rows, drift, pending_review = [], [], []
     try:
@@ -723,9 +703,18 @@ def entry_candidates() -> dict:
         if v not in ("OWNABLE", "STARTER"):
             continue
         t = n["ticker"]
-        lo, hi, band, has_exp = _sizing_from_record(t, n.get("conviction") or "")
-        if not has_exp:
-            continue          # pipeline-complete only — same membership rule as the READY bucket
+        try:
+            record = json.loads((EC_DIR / f'{t}.json').read_text(encoding='utf-8'))
+        except (OSError, ValueError):
+            pending_review.append({'ticker': t, 'review_issues': ['Classification record missing or unreadable']})
+            continue
+        if not record.get('edge_explainer'):
+            continue  # Pipeline-complete only, matching the READY bucket.
+        from desk.research_contracts import routing_projection
+        route = routing_projection(n, record)
+        size = route.get('sizing') or {}
+        lo, hi = size.get('pct_lo'), size.get('pct_hi')
+        band = str(record.get('entry_band') or '')[:120]
         row = {"ticker": t, "verdict": v, "approved": t in approved, "sizing_pct_lo": lo, "sizing_pct_hi": hi,
                "est_usd_lo": (round(lo / 100 * nlv_eff) if lo else None),
                "est_usd_hi": (round(hi / 100 * nlv_eff) if hi else None),
@@ -733,13 +722,11 @@ def entry_candidates() -> dict:
                "plan_snippet": (n.get("conviction") or "")[:150],
                "in_staged_plan": t in plan_tickers,
                "needs_sizing": lo is None}
-        from desk.research_contracts import routing_issues
-        record = json.loads((EC_DIR / f'{t}.json').read_text(encoding='utf-8'))
-        issues = routing_issues(n, record)
-        if issues:
-            row['review_issues'] = issues
+        row.update(routing=route, legacy_fallback=route['legacy_fallback'], needs_review=bool(route['warnings']))
+        if route['issues']:
+            row['review_issues'] = route['issues']
             pending_review.append(row)
-            drift.append(f"{t}: excluded from ready deployment — " + '; '.join(issues))
+            drift.append(f"{t}: excluded from ready deployment — " + '; '.join(route['issues']))
             continue
         live_rows.append(row)
         if t not in plan_tickers:
@@ -1139,7 +1126,7 @@ def alerts() -> dict:
     # READY: approved starters (OWNABLE/STARTER verdicts) not otherwise surfaced — a DD-approved
     # at-market plan is decision-relevant NOW, not only when a dip-alert trips (8750.T/IVN lesson 2026-07-02)
     surfaced = {r["ticker"] for r in go + no_go + in_book}
-    ready = []
+    ready, pending_review = [], []
     try:
         led_names = json.loads((ROOT / "desk" / "data" / "research_ledger.json").read_text()).get("names", [])
         yf_syms = {n["ticker"]: (n.get("yf") or "") for n in led_names}
@@ -1149,12 +1136,15 @@ def alerts() -> dict:
             t = n["ticker"]
             if t in surfaced or (n.get("verdict") or "").upper() not in ("OWNABLE", "STARTER"):
                 continue
-            from desk.research_contracts import routing_issues
+            from desk.research_contracts import routing_projection
             try:
                 candidate = json.loads((EC_DIR / f'{t}.json').read_text(encoding='utf-8'))
             except (OSError, ValueError):
+                pending_review.append({'ticker': t, 'review_issues': ['Classification record missing or unreadable']})
                 continue
-            if routing_issues(n, candidate):
+            route = routing_projection(n, candidate)
+            if route['issues']:
+                pending_review.append({'ticker': t, 'review_issues': route['issues'], 'routing': route})
                 continue
             _ex = _explainer_for(t)
             if not _ex:
@@ -1172,7 +1162,8 @@ def alerts() -> dict:
             if _px is not None:
                 import math as _m
                 _px = None if (_m.isnan(_px) or _m.isinf(_px)) else _px
-            ready.append({"ticker": t, "px": _px, "alert_below": n.get("alert_below"),
+            ready.append({"ticker": t, "px": _px, "routing": route, "legacy_fallback": route["legacy_fallback"],
+                          "needs_review": bool(route["warnings"]), "alert_below": n.get("alert_below"),
                           "plan": (n.get("conviction") or "")[:170], "tax_fit": tf,
                           "edge_explainer": _ex, "frozen_calls": _frozen_calls(t)})
     except Exception:
@@ -1193,10 +1184,10 @@ def alerts() -> dict:
     edge_moves.sort(key=lambda x: -abs(x["edge_delta"]))
     imminent.sort(key=lambda x: x["days"])
     review = [r["ticker"] for r in go + no_go if r["needs_review"]]
-    return {"asof": cm.get("asof"), "cm_asof": cm.get("asof"), "go": go, "no_go": no_go, "in_book": in_book, "ready": ready,
+    return {"asof": cm.get("asof"), "cm_asof": cm.get("asof"), "go": go, "no_go": no_go, "in_book": in_book, "ready": ready, "pending_review": pending_review,
             "edge_moves": edge_moves, "imminent": imminent, "review_needed": review,
             "counts": {"go": len(go), "no_go": len(no_go), "in_book": len(in_book), "edge": len(edge_moves),
-                       "imminent": len(imminent), "review": len(review), "total": len(go)}}
+                       "imminent": len(imminent), "review": len(review), "pending_review": len(pending_review), "ready": len(ready), "total": len(go)}}
 
 
 def methodology() -> dict:

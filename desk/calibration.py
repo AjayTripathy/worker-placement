@@ -66,52 +66,75 @@ def _px_many(tickers) -> dict:
 
 
 def ingest() -> int:
-    """Freeze any dated prediction not yet in the ledger. Keyed (ticker, cat_date); NEVER overwrites."""
+    """Freeze valid new calls individually; quarantine bad rows without blocking the batch."""
+    from desk.research_contracts import identity, key, validate_new
     rows = _load()
-    have = {(r["ticker"], r["cat_date"]) for r in rows}
+    have = {key(r) for r in rows}
     today = datetime.date.today().isoformat()
-    new = []
+    new, rejected = [], []
+    skipped = 0
+
+    def admit(source, ticker, raw, kind):
+        nonlocal skipped
+        try:
+            if not isinstance(raw, dict):
+                raise ValueError('prediction must be an object')
+            cd = raw.get('date' if kind == 'directional' else 'cat_date')
+            event = raw.get('event_type')
+            if (ticker, cd, event) in have:
+                skipped += 1
+                return
+            candidate = {"ticker": ticker, "cat_date": cd, "kind": kind, "made": today,
+                         "event_type": event, "status": "OPEN", "resolution": None,
+                         "px_at_pred": None, "fv": None, "market_p": None}
+            if kind == 'directional':
+                if isinstance(raw.get('p_favorable'), bool):
+                    raise ValueError('invalid forecast probability')
+                candidate.update(our_p=float(raw['p_favorable']), direction=(raw.get('direction') or '').upper(),
+                                 catalyst=(raw.get('prediction') or raw.get('catalyst') or '')[:180])
+            else:
+                candidate.update(our_p=round(raw['p_base'] + raw['p_bull'], 3),
+                                 market_p=round(max(0., min(1., raw['mkt_p_base'] + raw['p_bull'])), 3)
+                                 if raw.get('mkt_p_base') is not None else None,
+                                 direction='FAVORABLE=BASE_OR_BETTER', catalyst=(raw.get('catalyst') or '')[:180],
+                                 px_at_pred=raw.get('px'), fv={k: raw.get(k) for k in ('bear', 'base', 'bull')})
+            if isinstance(raw.get('attribution'), dict):
+                candidate['attribution'] = dict(raw['attribution'])
+            validate_new(candidate, rows + new)
+        except (ValueError, TypeError, KeyError, AttributeError, OverflowError) as exc:
+            rejected.append({'source': source, 'ticker': ticker, 'record_sha256': identity(raw),
+                             'issues': [str(exc)]})
+            return
+        new.append(candidate)
+        have.add(key(candidate))
+
     # (a) directional calls
     try:
         preds = json.loads(PRED.read_text()).get("predictions", {})
     except Exception:
         preds = {}
     for t, p in preds.items():
-        cd, pf = p.get("date"), p.get("p_favorable")
-        if not cd or pf is None or (t, cd) in have:
-            continue
-        new.append({"ticker": t, "cat_date": cd, "kind": "directional", "made": today,
-                    "event_type": p.get("event_type"), "our_p": float(pf), "market_p": None, "direction": (p.get("direction") or "").upper(),
-                    "catalyst": (p.get("prediction") or p.get("catalyst") or "")[:180],
-                    "px_at_pred": None, "fv": None, "status": "OPEN", "resolution": None})
+        admit(PRED.name, t, p, 'directional')
     # (b) scenario names from the mispricing scanner (favorable = base-or-better)
     try:
         scored = json.loads(CATMIS.read_text()).get("scored", [])
     except Exception:
         scored = []
     for r in scored:
-        t, cd = r["ticker"], r.get("cat_date")
-        if not cd or (t, cd) in have or r.get("p_base") is None or r.get("p_bull") is None:
-            continue
-        mp = r.get("mkt_p_base")
-        mp_fav = (max(0.0, min(1.0, mp + r["p_bull"])) if mp is not None else None)
-        new.append({"ticker": t, "cat_date": cd, "kind": "scenario", "made": today,
-                    "our_p": round(min(1.0, r["p_base"] + r["p_bull"]), 3), "market_p": (round(mp_fav, 3) if mp_fav is not None else None),
-                    "direction": "FAVORABLE=BASE_OR_BETTER", "catalyst": (r.get("catalyst") or "")[:180],
-                    "px_at_pred": r.get("px"), "fv": {"bear": r.get("bear"), "base": r.get("base"), "bull": r.get("bull")},
-                    "status": "OPEN", "resolution": None})
+        admit(CATMIS.name, r.get('ticker') if isinstance(r, dict) else None, r, 'scenario')
     if new:
-        from desk.research_contracts import validate_new
-        accepted = list(rows)
-        for candidate in new:
-            validate_new(candidate, accepted)
-            accepted.append(candidate)
         px = _px_many([r["ticker"] for r in new if r["px_at_pred"] is None])
         for r in new:
             if r["px_at_pred"] is None:
                 r["px_at_pred"] = px.get(r["ticker"])
         rows.extend(new)
         _write(rows)
+    report = {'asof': datetime.datetime.now(datetime.timezone.utc).isoformat(),
+              'accepted': len(new), 'already_frozen': skipped, 'rejected': len(rejected), 'records': rejected}
+    LEDGER.with_name('calibration_ingest_report.json').write_text(json.dumps(report, indent=2) + '\n')
+    print(f"[calibration ingest] accepted={len(new)} already_frozen={skipped} rejected={len(rejected)}")
+    for r in rejected:
+        print(f"  rejected {r['source']} {r['ticker']}: {'; '.join(r['issues'])}")
     return len(new)
 
 

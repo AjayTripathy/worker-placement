@@ -1,8 +1,10 @@
 """Version 1 validation and non-destructive projection of legacy research.
 
-Never infer an outcome, size, actor or event taxonomy from prose. Historical
+Never infer an outcome, actor or event taxonomy from prose. Historical
 ambiguities remain in the ledger and are excluded from performance/routing
 with their content digest and reasons available for explicit adjudication.
+Dashboard-only legacy sizing projection is explicit and flagged; strict write
+validation remains unchanged and projections never rewrite source records.
 """
 from collections import Counter
 from copy import deepcopy
@@ -10,6 +12,7 @@ from datetime import date
 import hashlib
 import json
 import math
+import re
 
 VERSION = 1
 STATUSES = {'OPEN', 'RESOLVED', 'VOIDED', 'EXCLUDED_LOOKAHEAD'}
@@ -82,3 +85,43 @@ def routing_issues(ledger, record):
     elif not 0 < sizing['pct_lo'] <= sizing['pct_hi'] <= 100:
         issues.append('invalid structured sizing bounds')
     return issues
+
+
+def routing_projection(ledger, record, *, allow_legacy=True):
+    """Compatibility for dashboard display, not order authorization or a data migration.
+
+    Only missing legacy fields may fall back. Explicit structured contradictions
+    and invalid structured sizing still block. Keep the digest and source field
+    so a later backfill can replace this projection with reviewed metadata.
+    """
+    from desk.verdicts import STATES
+    projected_ledger, projected = deepcopy(ledger), deepcopy(record)
+    warnings, source = [], 'structured'
+    verdict = ledger.get('verdict')
+    if allow_legacy and verdict in STATES:
+        if ledger.get('state') not in STATES:
+            projected_ledger['state'] = verdict
+            warnings.append('Legacy ledger state: using the explicit ledger verdict; review metadata.')
+        if record.get('verdict_state') is None:
+            projected['verdict_state'] = verdict
+            warnings.append('Missing verdict mirror: using the explicit ledger verdict; backfill required.')
+    sizing = record.get('sizing')
+    if allow_legacy and not isinstance(sizing, dict):
+        position = record.get('position')
+        sources = [('sizing', sizing), ('entry_band', record.get('entry_band')),
+                   ('position.action', position.get('action') if isinstance(position, dict) else None),
+                   ('verdict', record.get('verdict')), ('ledger.conviction', ledger.get('conviction'))]
+        # Position-shaped mentions only: never reinterpret yields/growth as size.
+        pattern = r'(?<![\d.\-])(?P<lo>\d+(?:\.\d+)?)(?:\s*[-–]\s*(?P<hi>\d+(?:\.\d+)?))?\s*%\s*(?:starter|position|slot|of (?:the )?(?:deployed )?book|cap|sleeve)\b'
+        for field, value in sources:
+            match = re.search(pattern, value, re.I) if isinstance(value, str) else None
+            if match:
+                projected['sizing'] = {'pct_lo': float(match['lo']), 'pct_hi': float(match['hi'] or match['lo'])}
+                source = field
+                warnings.append('Legacy sizing parsed from ' + field + '; confirm the amount and entry conditions before approval.')
+                break
+    issues = routing_issues(projected_ledger, projected)
+    return {'issues': issues, 'warnings': warnings, 'legacy_fallback': bool(warnings),
+            'sizing': projected.get('sizing') if not issues else None,
+            'sizing_source': source, 'record_sha256': identity(record),
+            'ledger_sha256': identity(ledger)}
