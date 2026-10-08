@@ -12,11 +12,86 @@ Check actual manifests and preflight results rather than assuming this README
 describes the currently running process. Read the invariants below before
 changing capture, accounting, or execution.
 
-For research design, coverage gaps and the matched text/no-text trial, start with
-[EXPERIMENT.md](EXPERIMENT.md). For another agent's operational entry point,
-module boundaries and sharing checklist, see [AGENT_HANDOFF.md](AGENT_HANDOFF.md).
-The additive evaluation runs with `python -m desk.odte.edge_trial`; it does not
-change the original frozen arms or place orders.
+## Hypothesis to experiment
+
+**Research question: can an LLM's reading of morning information improve which
+0DTE risks we accept, after costs, beyond what prices and a calendar already tell
+us?** No measured edge has been established. The experiment concerns selection
+of a defined trade; it does not assume the model can outprice market makers.
+
+The proposed mechanism is that written information identifies some dangerous
+sessions before our numerical filters do. Avoiding their losses must pay for
+the winning trades also skipped and the research expense. Predicting a calmer
+day, producing persuasive reasons, or making money in a rising sample is not
+enough to establish that mechanism's economic value.
+
+The baseline trade is a one-contract XSP condor with fixed selection and exit
+rules. **T1** is mechanical; **T2** adds calendar and opening-range/VIX gates;
+**T3** adds only calendar blackouts to T1. T2 can enter later at different strikes,
+so its raw P&L versus T3 does not isolate the value of a filter. The controlled
+experiments below instead take or skip the **same first eligible T3 candidate**.
+
+| Claim | Experiment and control | Readout | What would count against it / what remains untested |
+|---|---|---|---|
+| **H1 — Supplied text adds useful information.** | [`edge_trial.py`](edge_trial.py): fresh calls to the same model with identical premarket prices, features, calendar, prompt and cutoff; only one receives the frozen source excerpts. A prior-only numerical learner is another control. | Primary: text minus no-text net paper P&L on matched resolved dates. Stop/severe-loss Brier scores diagnose forecasting quality; lower is better. | No useful lift in fresh validation, or an apparent benefit consumed by costs. Better Brier scores without better economics support forecasting skill, not a trading edge. |
+| **H2 — Specific entry filters improve selection.** | [`arms.py`](arms.py): all 16 subsets of news, IV/realized volatility, path efficiency and spread/credit gates, plus CASH, on one candidate per session. Compare combinations differing by one filter. | `factor_effects` averages paired additions/removals within each session; per-arm returns are compared with T3. | A filter repeatedly adds no net value. An attractive best arm alone is insufficient: combinations are correlated and any newly chosen policy needs future validation. These are descriptive filter effects, not causal estimates. |
+| **H3 — The selected risk pays enough, rather than merely looking safe.** | [`edge_trial.policy`](edge_trial.py) maps each sealed return/risk forecast to the same frozen cost and risk gates. Compare with T3 and a uniform control taking the same number of trades. | Paired net P&L, `equal_participation_controls`, return-forecast error, all-attempt costs and $7.20/$12/$20 trading-cost sensitivity. | Skipping losses also skips enough winners to erase the benefit, or costs consume it. The return forecast concerns a future selection policy; exact-strike fair value and rare-tail pricing are untested. |
+| **H4 — Small size and patience create an advantage.** | Abstention and the equal-participation control test the patience component. | Net selection benefit after paying for research. | **Partly tested.** There is no size/depth/capacity experiment or actual-fill comparison, so one-contract paper results cannot establish a small-account execution advantage. |
+| **H5 — Automation improves execution and behavioral discipline.** | Synthetic execution/recovery tests check caps, reconciliation, duplicate prevention and fee accounting. | Software invariants and recorded operational failures. | **Infrastructure only.** No controlled operator-behavior or implementation-shortfall study measures an economic benefit. Passing tests is not measured alpha. |
+| **H6 — Cheaper research produces better decisions.** | Frozen trials, retained failed attempts, usage/time records and a later validation phase make experiments auditable. | Operational cost/coverage records and replication of a fixed policy. | **Partly instrumented.** Actual total research/engineering cost and improvement per research dollar are not measured; assumed model charges are not measured bills. |
+
+There is **no institutional-versus-retail experiment** here. Those participant
+labels supply neither a controlled benchmark nor evidence of positive net
+expectancy. H1–H3 are the directly instrumented research claims; H4–H6 need the
+additional studies identified above. The paper selector observes all available
+arm outcomes, so it is a full-information experts simulation, not a bandit.
+
+### How a claim becomes evidence
+
+1. **Register before observing results.** Freeze the hypotheses' implementation,
+   gates, model settings, prompts, cost assumptions and future start date in
+   `manifest.json`. A changed policy requires a new prospective registration.
+2. **Forecast from a shared cutoff.** Prepare the morning source job, retain its
+   timestamped corpus, then run text/no-text/numeric comparisons. Premarket
+   predictions must finish before 09:15 Eastern. The numerical control uses only
+   prior resolved outcomes; original model predictions are not inputs to the
+   fresh matched calls.
+3. **Apply the forecast to the same opportunity.** At the first eligible T3 entry
+   between 10:00 and 10:20, bind forecasts and arm decisions to its actual legs,
+   quotes and maximum risk. Each policy takes or skips that candidate under the
+   frozen exits. No T3 candidate on a blackout day means no arm trial that day.
+4. **Score after the path is observed.** Link forecasts → decisions → outcomes
+   by identity and hash. Score accepted forecasts even when their policy skips.
+   Keep unknown paths unresolved and failed forecasts unavailable; report failed
+   attempt costs separately from matched returns.
+5. **Review fresh validation.** The matched trial uses 60 source decision
+   sessions for discovery, then 60 for validation of the same fixed policies.
+   Missing forecasts/outcomes do not move those boundaries. Later dates are
+   extension, not extra chances to select a flattering validation window.
+
+### Where to inspect the result
+
+Run `python -m desk.odte.arms --report` for H2's combinations and factor effects;
+run `python -m desk.odte.edge_trial --report` for H1/H3's controlled comparisons.
+The latter writes `report.json` and `report.html` under the trial's private root.
+Start with `comparisons.validation.text_minus_no_text`, then inspect
+`equal_participation_controls`, `calibration_by_submitter_agent`, `operational`
+and session lineage. Calibration retains submitter, agent, provider, model,
+protocol and phase so a new model or registration does not inherit old credit.
+
+The matched manifest declares **$1 mean net improvement per matched session**
+as the minimum useful lift. This differs from its **$1 forecast net-profit gate**
+for taking a trade. The report displays the lift threshold and approximate
+intervals; it does **not** implement an automatic statistical pass/fail rule or
+capital promotion. Intervals need at least 20 paired sessions. A wide interval,
+thin coverage or many unresolved paths is inconclusive; no useful validation
+lift counts against the selection claim. A favorable discovery result is a
+reason to examine fresh validation, not a winner declaration. Sixty sessions
+is a review checkpoint, not demonstrated statistical power or tail coverage.
+
+[EXPERIMENT.md](EXPERIMENT.md) supplies the detailed controls, statistical
+limitations and missing studies. [ODTE.md](../../ODTE.md) gives the commands to
+run the sequence. The research reports never route orders or enable live mode.
 
 ## Execution and grading invariants
 
@@ -320,7 +395,7 @@ simulated fills prevent treating a highest-ranked arm as validated alpha.
 Example registration and reporting:
 
 ```sh
-python -m desk.odte.arms --init --start-date 2026-10-08 \
+python -m desk.odte.arms --init --start-date YYYY-MM-DD \
   --forecast-root desk/data/odte/text_overlay \
   --page ~/office/pages/odte_arms.html
 python -m desk.odte.arms --report

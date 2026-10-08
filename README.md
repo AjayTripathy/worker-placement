@@ -26,6 +26,12 @@ For product contributors: [architecture](officekit/ARCHITECTURE.md), [operating 
 
 ## Run only the 0DTE research module
 
+The research question is whether morning text improves 0DTE trade selection
+beyond prices and a calendar, after costs. The
+[hypothesis-to-experiment map](desk/odte/README.md#hypothesis-to-experiment)
+connects each proposed edge to its controlled comparison, measurements and
+disconfirming evidence, and identifies the claims still awaiting experiments.
+
 Follow **[ODTE.md](ODTE.md)** to install its minimal dependencies and run
 `python -m desk.odte...` from this checkout without starting the office web app.
 The guide covers offline tests, paper capture, registration, morning forecasts
