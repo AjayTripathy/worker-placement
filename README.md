@@ -13,7 +13,7 @@ The public [Worker Placement repository](https://github.com/AjayTripathy/worker-
 curl -fsSL https://worker-placement-web-653732113303.us-west1.run.app/install.sh | sh
 ```
 
-After cloning, **`./start.sh` is the only startup command**. It manages its own `.venv-worker-placement` environment; no activation or separate install is needed. Requires Git and Python 3.9+ (3.11+ recommended). Windows: `python wp start`. Use `--dir /path/to/office` for an existing office or `--port 8790` for another port. Default: `./office` at `http://127.0.0.1:8787`.
+After cloning, **`./start.sh` starts the full office app**. It manages its own `.venv-worker-placement` environment; no activation or separate install is needed. Requires Git and Python 3.9+ (3.11+ recommended). Windows: `python wp start`. Use `--dir /path/to/office` for an existing office or `--port 8790` for another port. Default: `./office` at `http://127.0.0.1:8787`.
 
 ```sh
 ./wp login      # Google sign-in and device approval; uploads nothing
@@ -23,6 +23,16 @@ After cloning, **`./start.sh` is the only startup command**. It manages its own 
 Hosted offices use the same onboarding, workspace and editors. Existing saved folders can be uploaded from the account page’s separate “Upload a saved office” link. Office settings connects AI keys and supported brokers; Imports accepts statements. Optional automatic sync keeps a local copy, with review when both copies change. See [local/hosted workflows](officekit/HOSTED_PARITY.md). Every hosted account can browse the same seeded research library; private office documents are never added to it. Manual entry and core planning need no API key. AI features use the providers you configure.
 
 For product contributors: [architecture](officekit/ARCHITECTURE.md), [operating contracts](officekit/OPERATING_CONTRACTS.md), and [agent handoff](officekit/AGENT_HANDOFF.md).
+
+## Run only the 0DTE research module
+
+Follow **[ODTE.md](ODTE.md)** to install its minimal dependencies and run
+`python -m desk.odte...` from this checkout without starting the office web app.
+The guide covers offline tests, paper capture, registration, morning forecasts
+and HTML/JSON reports. It is a source-tree module, not yet a standalone pip package.
+
+For another LLM continuing the project, start with the
+[module README](desk/odte/README.md) and [agent handoff](desk/odte/AGENT_HANDOFF.md).
 
 ## SignalOS research framework
 

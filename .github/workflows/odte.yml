@@ -1,0 +1,38 @@
+name: 0DTE research module
+on:
+  push:
+    paths:
+      - 'desk/odte/**'
+      - 'officekit_ai/**'
+      - 'officekit/runtime.py'
+      - 'tests/test_odte*.py'
+      - 'tests/conftest.py'
+      - '.github/workflows/odte.yml'
+  pull_request:
+    paths:
+      - 'desk/odte/**'
+      - 'officekit_ai/**'
+      - 'officekit/runtime.py'
+      - 'tests/test_odte*.py'
+      - 'tests/conftest.py'
+      - '.github/workflows/odte.yml'
+permissions:
+  contents: read
+jobs:
+  offline:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ['3.11', '3.12']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install -r desk/odte/requirements.txt
+      - run: python -m desk.odte.runner --help
+      - run: python -m desk.odte.forecast_worker --help
+      - run: python -m desk.odte.edge_trial --help
+      - name: Synthetic research and execution regressions
+        run: python -m pytest --offline -q tests/test_odte*.py
