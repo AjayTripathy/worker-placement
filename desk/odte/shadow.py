@@ -121,6 +121,43 @@ def _row(name: str, st: dict, ts: dict, snap: dict, pnl, reason: str) -> dict:
             "recorded_utc": dt.datetime.utcnow().isoformat(timespec="seconds") + "Z"}
 
 
+def finalize_stale(today: str) -> list[dict]:
+    """Startup sweep: a PRIOR session whose state was never finalized (collector died before the
+    exit / settlement tick — 2026-10-07: Gateway dropped at 15:45) gets its OPEN templates recorded
+    UNRESOLVED (pnl None, skip_kind data_unavailable) and its NONE templates NO_ENTRY. A stopped
+    collector yields an unresolved path, never a reconstructed fill."""
+    out = []
+    for p in sorted(DATA.glob("shadow_state_*.json")):
+        d = p.stem.replace("shadow_state_", "")
+        if d >= today:
+            continue
+        try:
+            st = json.loads(p.read_text())
+        except Exception:
+            continue
+        if st.get("finalized"):
+            continue
+        for name, ts in st["templates"].items():
+            if ts["status"] == "OPEN":
+                ts.update({"status": "UNRESOLVED", "exit_reason": "UNRESOLVED", "skip_reason": "collector gap: no exit quote or settlement tick",
+                           "exit_ts": None, "exit_cost": None})
+                ts["entry_data_gap"] = True
+                out.append(_row(name, st, ts, {"ts": "stale"}, pnl=None, reason="UNRESOLVED"))
+            elif ts["status"] == "NONE":
+                # A known skip on an earlier tick does not establish abstention
+                # over the rest of the entry window after collection stopped.
+                ts.update(status="SKIPPED", entry_data_gap=True,
+                          skip_reason="collector gap: entry window not fully observed")
+                out.append(_row(name, st, ts, {"ts": "stale"}, pnl=None, reason="NO_ENTRY"))
+        for r in out:
+            if r["date"] == d:
+                r["skip_kind"] = "data_unavailable" if r["reason"] == "UNRESOLVED" else r.get("skip_kind")
+                append_ledger(r)
+        st["finalized"] = True; st["finalized_by"] = "finalize_stale"
+        save_state(st)
+    return out
+
+
 def finalize_day(st: dict) -> list[dict]:
     """After the close: any template still OPEN with no settle quote is settled on xsp_last; any
     NONE that never entered is recorded NO_ENTRY. Returns the rows written."""

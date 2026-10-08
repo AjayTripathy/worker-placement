@@ -1,6 +1,6 @@
 # 0DTE module handoff
 
-Last updated 2026-10-07. Start with [EXPERIMENT.md](EXPERIMENT.md) for the hypotheses
+Last updated 2026-10-08. Start with [EXPERIMENT.md](EXPERIMENT.md) for the hypotheses
 and [README.md](README.md) for execution/accounting invariants. Local manifests,
 not this dated note, determine the active protocol and operating state.
 
@@ -60,6 +60,11 @@ Default private roots under `desk/data/odte/`:
 - `research_archives/`: prior registrations retained intact.
 - `chains/`, shadow/live ledgers: source market/execution observations. The
   entire `desk/data/odte/` tree is ignored; never force-stage runtime data.
+
+Operational paths may be symlinks into a new, dated `research_trials/` directory
+after a reviewed code change. Resolve those paths and read the active manifests.
+The previous registrations and their source snapshot belong in `research_archives/`;
+do not mix observations across them or infer routing from a historical date in prose.
 
 Read `arm_experiment/manifest.json` to discover the actual source directories and
 date routing. Read `edge_trial/manifest.json` for its source identity and start.

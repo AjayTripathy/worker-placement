@@ -70,6 +70,23 @@ def build_condor(rows: list[dict], short_delta: float, wing: float) -> dict:
     return out
 
 
+def mid_credit(legs: dict, rows: list[dict] | None = None) -> float | None:
+    """The condor's credit at the MID of each leg (what a patient maker posts). Uses the legs'
+    own bid/ask unless fresh rows are supplied."""
+    q = {}
+    for k, leg in legs.items():
+        r = row_at(rows, leg["right"], leg["strike"]) if rows is not None else leg
+        if not _ok_quote(r):
+            return None
+        q[k] = _mid(r)
+    return round((q["sp"] - q["lp"]) + (q["sc"] - q["lc"]), 2)
+
+
+def mid_debit(legs: dict, rows: list[dict]) -> float | None:
+    """What a patient maker posts to close: buy the shorts at mid, sell the wings at mid."""
+    return mid_credit(legs, rows)
+
+
 def cost_to_close(legs: dict, rows: list[dict]) -> float | None:
     """What it costs NOW to buy back the condor at the touch (buy shorts at ask, sell wings at bid)."""
     sp = row_at(rows, "P", legs["sp"]["strike"]); lp = row_at(rows, "P", legs["lp"]["strike"])

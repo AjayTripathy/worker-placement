@@ -93,7 +93,8 @@ def build() -> dict:
     ls = stats(live)
     out["live"] = {**ls, "pnl_basis": "net_after_reported_commissions",
                    "pending_accounting": sum(r.get("accounting_status", "").startswith("pending") for r in live), "shadow_twin": stats(by.get((LIVE_TEMPLATE, template_hash(LIVE_TEMPLATE)), [])),
-                   "slippage_vs_shadow_usd": _slippage(live, by.get((LIVE_TEMPLATE, template_hash(LIVE_TEMPLATE)), []))}
+                   "slippage_vs_shadow_usd": _slippage(live, by.get((LIVE_TEMPLATE, template_hash(LIVE_TEMPLATE)), [])),
+                   "execution": execution_stats(live, by.get((LIVE_TEMPLATE, template_hash(LIVE_TEMPLATE)), []))}
     from desk.odte import doctrine, text_overlay
     try:
         out["text_overlay"] = text_overlay.report(doctrine.DATA / "text_overlay", shadow_rows=shadow)
@@ -111,6 +112,27 @@ def _slippage(live: list[dict], twin: list[dict]) -> float | None:
     t = {r["date"]: float(r["pnl_usd"]) for r in _traded(twin)}
     d = [float(r["pnl_usd"]) - t[r["date"]] for r in _traded(live) if r["date"] in t]
     return round(st.mean(d), 2) if d else None
+
+
+def execution_stats(live: list[dict], twin: list[dict]) -> dict:
+    """The maker experiment's own numbers: how often the posted order filled, what it earned over
+    the touch, and the live credit against the shadow twin's touch credit on the same date."""
+    posted = [r for r in live if (r.get("maker") or {}).get("attempt")]
+    filled = [r for r in posted if r.get("credit") is not None and r.get("reason") not in ("NO_FILL", "NO_ENTRY")]
+    edges = [float(r["maker_edge"]) for r in filled if r.get("maker_edge") is not None]
+    twin_credit = {r["date"]: float(r["credit"]) for r in twin if r.get("credit") is not None}
+    vs_twin = [float(r["credit"]) - twin_credit[r["date"]] for r in filled if r["date"] in twin_credit]
+    stood_down = [r for r in live if r.get("reason") == "NO_ENTRY" and ((r.get("policy") or {}).get("decision") or {}).get("arm")]
+    by_arm = {}
+    for r in live:
+        a = ((r.get("policy") or {}).get("decision") or {}).get("arm")
+        if a:
+            by_arm.setdefault(a, {"sessions": 0, "takes": 0}); by_arm[a]["sessions"] += 1
+            by_arm[a]["takes"] += int(((r.get("policy") or {}).get("decision") or {}).get("take", False))
+    return {"maker_posts": len(posted), "maker_fills": len(filled), "fill_rate": round(len(filled) / len(posted), 3) if posted else None,
+            "mean_maker_edge_vs_touch_usd": round(st.mean(edges) * 100, 2) if edges else None,
+            "mean_live_credit_minus_twin_touch_usd": round(st.mean(vs_twin) * 100, 2) if vs_twin else None,
+            "selector_stand_downs": len(stood_down), "followed_arms": by_arm}
 
 
 def digest(out: dict) -> str:

@@ -371,5 +371,7 @@ def test_research_error_never_preempts_broker_management(lab, monkeypatch):
         raise ValueError("research ledger unavailable")
     monkeypatch.setattr(E, "observe", unavailable)
     session.tick(START.replace(hour=9, minute=50))
-    assert calls == ["broker_management", "research"]
+    # 2026-10-08: research observation runs first (the live rail mirrors the decision it seals);
+    # a research failure is persisted and broker management still runs on the same tick.
+    assert calls == ["research", "broker_management"]
     assert "research ledger unavailable" in S.load_state(DATE)["text_overlay_error"]

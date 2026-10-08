@@ -161,6 +161,9 @@ def isolation(tmp_path, monkeypatch):
     monkeypatch.setattr(R.cal, 'calendar_verified_for', lambda date: True)
     monkeypatch.setattr(R, '_envelope', lambda: {'status': 'ARMED', 'origin': 'signalos_desk+principal', 'expires': '2026-12-31'})
     monkeypatch.setattr('desk.account_registry.require_alpha', lambda ib: 'FAKE')
+    # These suites test the RAIL mechanics on an unconditional T3 taker entry. The 2026-10-08 live
+    # policy (follow the sealed arm decision, maker execution) has its own suite: test_odte_live_policy.
+    monkeypatch.setattr(R, 'LIVE_POLICY', {'follow': 'template', 'fallback': 'stand_down', 'execution': 'taker'})
 
 
 def rail(ib):

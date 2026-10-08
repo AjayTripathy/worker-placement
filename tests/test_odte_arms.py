@@ -262,7 +262,9 @@ def test_duplicate_snapshot_idempotent_but_conflicting_snapshot_rejected(lab):
         A.observe(lab.root, lab.st, snap, {}, now=ENTRY)
 
 
-def test_observer_error_is_persisted_after_broker_management(lab, monkeypatch):
+def test_observer_runs_before_broker_management_and_error_is_persisted(lab, monkeypatch):
+    # 2026-10-08 live policy: the live rail mirrors the arm decision the observer seals from the
+    # same snapshot, so research observation runs FIRST; its failure still never blocks management.
     from desk.odte import runner as R
     from test_odte_execution import Broker, session
     events = []
@@ -272,5 +274,5 @@ def test_observer_error_is_persisted_after_broker_management(lab, monkeypatch):
     monkeypatch.setattr(A, "observe", broken)
     runner = session(Broker())
     runner.tick(ENTRY)
-    assert events == ["managed", "research"]
+    assert events == ["research", "managed"]
     assert "fixture unavailable" in runner.st["arm_experiment_error"]

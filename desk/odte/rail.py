@@ -125,6 +125,59 @@ class LiveRail:
         _audit("OPEN", rec)
         return rec
 
+    def post_open(self, legs: dict, credit: float) -> dict:
+        """Submit a resting opening order (BUY the short-condor bag at -credit) and return at once.
+        The runner's maker state machine owns patience, cancel and re-post across ticks so the
+        patience spans ticks instead of blocking for its whole duration."""
+        if not self.margin_checked:
+            return {"status": "REFUSED", "why": "whatIf not passed this session"}
+        tr = self._submit(bag_for(legs), self._order("BUY", combo_limit("BUY", credit)))
+        self.ib.sleep(1)
+        rec = {"ref": tr.order.orderRef, "order_id": tr.order.orderId, "status": tr.orderStatus.status,
+               "credit_posted": credit, "ts": dt.datetime.utcnow().isoformat(timespec="seconds") + "Z"}
+        _audit("POST_OPEN", rec)
+        return rec
+
+    def cancel_ref(self, ref: str, wait_s: float = 10.0) -> bool:
+        """Cancel our resting order by reference; True only on a TERMINAL acknowledgement."""
+        tr = next((t for t in self.ib.openTrades() if t.order.orderRef == ref), None)
+        if tr is None:
+            return True                           # nothing resting under that ref (filled or already gone)
+        ok = self._cancel(tr) if hasattr(self, "_cancel") else False
+        _audit("CANCEL_REF", {"ref": ref, "status": tr.orderStatus.status, "terminal": ok})
+        return ok
+
+    def open_condor_maker(self, legs: dict, credit_touch: float, credit_mid: float | None,
+                          patience_s: float = 120.0, step: float = 0.01, retries: int = 1,
+                          min_improvement: float = 0.01) -> dict:
+        """MAKER open: post at the mid and wait; re-post `retries` times `step` lower; then stand
+        down. Never crosses the touch on its own — a day without a maker fill is NO_FILL, which is
+        itself the measurement (2026-10-08 live policy)."""
+        if not self.margin_checked:
+            return {"status": "REFUSED", "why": "whatIf not passed this session"}
+        if credit_mid is None or credit_mid - credit_touch < min_improvement:
+            post = credit_touch; mode = "touch (no mid improvement available)"
+        else:
+            post = round(credit_mid, 2); mode = "mid"
+        ladder = [round(post - i * step, 2) for i in range(retries + 1)]
+        ladder = [p for p in ladder if p >= credit_touch] or [credit_touch]
+        last = None
+        for i, px in enumerate(ladder):
+            tr = self._submit(bag_for(legs), self._order("BUY", combo_limit("BUY", px)))
+            self._wait(tr, patience_s)
+            self._cancel(tr)
+            rec = self._result(tr, legs)
+            rec.update(credit_touch=credit_touch, credit_mid=credit_mid, credit_posted=px, post_mode=mode, attempt=i + 1,
+                       patience_s=patience_s)
+            if rec["filled"]:
+                rec["credit_filled"] = abs(rec["avg_fill"])
+                rec["maker_edge"] = round(rec["credit_filled"] - credit_touch, 2)
+                _audit("OPEN_MAKER", rec); return rec
+            if not rec["terminal"]:
+                _audit("OPEN_MAKER", rec); return rec        # unresolved cancel: never stack a second order
+            last = rec; _audit("OPEN_MAKER", rec)
+        last["status"] = "NO_FILL_MAKER"; return last
+
     def close_condor(self, legs: dict, debit: float, wait_s: float = 45.0,
                      chase: float = 0.10, quantity: float = CONTRACTS) -> dict:
         """Replace only after terminal acknowledgement; sell only the remainder."""

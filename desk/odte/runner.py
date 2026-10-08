@@ -28,11 +28,12 @@ from zoneinfo import ZoneInfo
 
 from desk.odte import calendar as cal
 from desk.odte.doctrine import (DATA, HALT_FILE, LOCK_FILE, ENVELOPE, LIVE_TEMPLATE, TEMPLATES, CONTRACTS, RTH_OPEN_ET,
-                                CANCEL_ALL_ET, SETTLE_ET, freeze)
+                                CANCEL_ALL_ET, SETTLE_ET, LIVE_POLICY, MAKER_PATIENCE_S, MAKER_STEP, MAKER_RETRIES,
+                                MIN_MAKER_IMPROVEMENT, freeze)
 from desk.odte import shadow as S
 from desk.odte import risk as R
 from desk.odte.capture import ChainCapture, ET
-from desk.odte.templates import build_condor, manage, settle
+from desk.odte.templates import build_condor, manage, settle, mid_credit, cost_to_close
 from desk.odte.rail import LiveRail, append_live, read_live, live_pnl_usd
 
 RECONCILE_IDLE_S = 300        # before any order exists, poll the broker every 5 min, not every tick
@@ -120,6 +121,8 @@ class Session:
         self.st = S.load_state(date); self.is_event = cal.is_event_day(date)
         self.rail = None; self.lv = self.st.setdefault("live", {"status": "NONE"})
         self._last_recon = 0.0; self._last_prior_sweep = 0.0; self._prior_unresolved = 0
+        for r in S.finalize_stale(date):
+            print(f"[odte] prior shadow session {r['date']} {r['template']} -> {r['reason']} ({r.get('skip_reason')})")
         if live:
             from desk.account_registry import require_alpha
             self.rail = LiveRail(ib, require_alpha(ib), date=date, checkpoint=self._journal_order)
@@ -229,6 +232,10 @@ class Session:
         closed = S.step(self.st, snap, hm, self.is_event)
         for r in closed:
             S.append_ledger(r); print(f"[odte] shadow {r['template']} {r['reason']} pnl={r['pnl_usd']}")
+        # Research observers run BEFORE the live rail (2026-10-08 live policy): the live contract
+        # mirrors the arm decision the observer SEALS from this same snapshot, so the decision must
+        # exist before any order. Local file IO only; inference is a separate broker-free worker.
+        self._research_tick(snap)
         if self.live and self.rail:
             try:
                 if self._prior_unresolved and (time.time() - self._last_prior_sweep) >= RECONCILE_IDLE_S:
@@ -244,8 +251,14 @@ class Session:
             self.rail.cancel_all_ours(); self.cancelled = True
         if self.rail and hm >= SETTLE_ET:
             self._finish_live(snap)
-        # Research runs after broker management. Only local observation IO is
-        # allowed here; inference runs in a separate, broker-free worker.
+        if hm >= SETTLE_ET and not self.st.get("finalized"):
+            for r in S.finalize_day(self.st):
+                print(f"[odte] shadow {r['template']} {r['reason']} pnl={r['pnl_usd']}")
+            if not self.mailed:
+                self._mail_card(); self.mailed = True; self.st["mailed"] = True
+        S.save_state(self.st)
+
+    def _research_tick(self, snap: dict) -> None:
         if (S.DATA / "text_overlay" / "manifest.json").exists():
             try:
                 from desk.odte.text_overlay import observe
@@ -280,12 +293,142 @@ class Session:
                 if self.st.get("arm_experiment_error") != error:
                     print(f"[odte] ARM RESEARCH UNAVAILABLE: {error}")
                 self.st["arm_experiment_error"] = error
-        if hm >= SETTLE_ET and not self.st.get("finalized"):
-            for r in S.finalize_day(self.st):
-                print(f"[odte] shadow {r['template']} {r['reason']} pnl={r['pnl_usd']}")
-            if not self.mailed:
-                self._mail_card(); self.mailed = True; self.st["mailed"] = True
-        S.save_state(self.st)
+
+    # ---- live policy: follow the sealed arm decision, execute as a maker ----------------------
+    def _arm_decision(self, c: dict, snap: dict) -> dict:
+        """The live contract trades only what the SEALED arm decision for today says the selected
+        arm does on the SAME candidate. Anything missing or mismatched = stand down (recorded)."""
+        root = S.DATA / "arm_experiment"; dp = root / "decisions" / (self.date + ".json")
+        try:
+            from desk.odte import arms
+            m = arms.protocol(root)
+            if not m:
+                return {"take": False, "arm": None, "why": "no registered arm experiment (fallback stand_down)"}
+            if not dp.exists():
+                return {"take": False, "arm": None, "why": "no sealed arm decision for today (fallback stand_down)"}
+            d = arms.checked(dp)
+            if d.get("protocol") != m["protocol"] or d.get("date") != self.date:
+                return {"take": False, "arm": None, "why": "sealed decision belongs to another protocol/date"}
+            mine = {k: int(v["conId"]) for k, v in c["legs"].items()}
+            theirs = {k: int(v["conId"]) for k, v in d["candidate"]["legs"].items()}
+            if mine != theirs:
+                return {"take": False, "arm": None, "why": f"live candidate {mine} != sealed candidate {theirs}", "decision_id": d["id"]}
+            # Matching contracts alone does not preserve the opportunity or its gates.
+            candidate = {k: c[k] for k in ("legs", "credit", "max_loss_usd")}
+            if (d.get("entry_at") != snap["ts"] or d.get("snapshot_digest") != arms.E.digest(snap)
+                    or arms.E.digest(candidate) != arms.E.digest(d["candidate"])):
+                return {"take": False, "arm": None, "why": "sealed decision does not match the current entry snapshot/candidate",
+                        "decision_id": d["id"]}
+            sel = d["allocation"]["selected_arm"]; verdict = d["arms"][sel]["decision"]
+            return {"take": verdict == "take", "arm": sel, "label": m["arms"].get(sel, {}).get("label"),
+                    "verdict": verdict, "why": f"selected arm {sel} ({m['arms'].get(sel, {}).get('label')}): {verdict}",
+                    "decision_id": d["id"], "selected_probability": d["allocation"].get("selected_probability"),
+                    "allocation_status": d["allocation"].get("status"),
+                    "forecast": (d.get("forecast") or {}).get("forecast"), "gates": {k: v.get("pass") for k, v in d.get("gates", {}).items()}}
+        except Exception as e:
+            return {"take": False, "arm": None, "why": f"arm decision unreadable: {type(e).__name__}: {e}"[:200]}
+
+    def _maker_ladder(self, touch: float, mid: float | None) -> tuple[list[float], str]:
+        if mid is None or mid - touch < MIN_MAKER_IMPROVEMENT:
+            return [round(touch, 2)], "touch (no mid improvement available)"
+        ladder = [round(mid - i * MAKER_STEP, 2) for i in range(MAKER_RETRIES + 1)]
+        return [p for p in ladder if p >= touch] or [round(touch, 2)], "mid"
+
+    def _maker_post(self, snap: dict) -> None:
+        mk = self.lv["maker"]; px = mk["ladder"][mk["attempt"]]
+        # A reconnect creates a fresh rail with no whatIf approval.
+        if not self.rail.margin_checked:
+            w = self.rail.what_if(self.lv["legs"], px, self.lv["max_loss_usd"])
+            if not w["ok"]:
+                mk.update(finished=True, stop_reason="maker whatIf refused after reconnect")
+                self.lv["why"] = mk["stop_reason"]; self._record_live(); return
+        hm = _hm(dt.datetime.fromisoformat(snap["ts"]).astimezone(ET))
+        if not self._reconcile_live(force=True):
+            return
+        if self.lv["status"] == "OPEN":
+            self._manage_open(snap, hm); return
+        if self.lv["status"] not in {"NONE", "NO_FILL"}:
+            return
+        if not self._maker_permission(snap, hm):
+            mk.update(finished=True, stop_reason=self.lv["last_why"])
+            self.lv.update(status="NO_FILL", why=mk["stop_reason"])
+            self._record_live(); return
+        # _journal_order adds the generated reference and persists this metadata
+        # together with the intent BEFORE placeOrder. No broker reply is needed
+        # to recover the patience timer or identify the outstanding post.
+        mk.update(attempt=mk["attempt"] + 1, posted=px, posted_at=snap["ts"])
+        o = self.rail.post_open(self.lv["legs"], px)
+        if o.get("status") == "REFUSED":
+            mk.update(finished=True, stop_reason=o["why"])
+            self.lv["why"] = o["why"]; self._record_live(); return
+        mk["last_order"] = o
+        print(f"[odte] LIVE maker post #{mk['attempt']} at {px} (touch {mk['touch']}, mid {mk['mid']})")
+
+    def _maker_permission(self, snap: dict, hm) -> bool:
+        """Recheck entry permission for the existing, reconciled structure."""
+        t = TEMPLATES[LIVE_TEMPLATE]
+        if not (tuple(t["entry_et"]) <= hm <= tuple(t["entry_close_et"])):
+            self.lv["last_why"] = "maker entry window closed"; return False
+        rows = [r for r in snap.get("rows", []) if r.get("live_eligible")]
+        fresh_ids = {r.get("conId") for r in rows}
+        if (not snap.get("indices_live") or not all(v["conId"] in fresh_ids for v in self.lv["legs"].values())
+                or cost_to_close(self.lv["legs"], rows) is None):
+            self.lv["last_why"] = "maker entry requires fresh live index and leg quotes"; return False
+        return self._entry_risk_ok(snap, hm, continuing=True)
+
+    def _maker_tick(self, snap: dict, hm) -> None:
+        """OPENING with a resting maker order: wait MAKER_PATIENCE_S per post, re-post down the
+        ladder, then stand down. Patience spans ticks; broker waits remain bounded."""
+        mk = self.lv.get("maker")
+        if not mk or not self._reconcile_live(force=True):
+            return
+        if self.lv["status"] == "OPEN":
+            self._manage_open(snap, hm)
+            return
+        if self.lv["status"] not in {"OPENING", "NO_FILL"} or mk.get("finished"):
+            return
+        buys = [o for o in self.lv.get("orders", []) if o["action"] == "BUY"]
+        if not buys:
+            mk.update(finished=True, stop_reason="maker checkpoint has no durable entry intent")
+            self.lv["why"] = mk["stop_reason"]; self._record_live(); return
+        latest = buys[-1]
+        if ((mk.get("last_order") or {}).get("ref") != latest["ref"]
+                or mk.get("attempt") != len(buys) or not mk.get("posted_at")):
+            # Pre-fix checkpoints may name the previous post, or have no reply
+            # at all. Recover the reference from the intent, cancel, and never
+            # invent a timer or submit another order from incomplete metadata.
+            mk.update(last_order={"ref": latest["ref"], "order_id": latest["order_id"]},
+                      attempt=len(buys), stop_reason="incomplete maker checkpoint; cancel and stand down")
+        if not self._maker_permission(snap, hm):
+            mk.setdefault("stop_reason", self.lv["last_why"])
+        if mk.get("stop_reason"):
+            S.save_state(self.st)  # retain the cancellation obligation across reconnects
+        try:
+            elapsed = (dt.datetime.fromisoformat(snap["ts"]) - dt.datetime.fromisoformat(mk["posted_at"])).total_seconds()
+        except Exception:
+            mk.setdefault("stop_reason", "invalid maker patience timestamp; cancel and stand down")
+            S.save_state(self.st)
+            elapsed = MAKER_PATIENCE_S
+        if elapsed < MAKER_PATIENCE_S and not mk.get("stop_reason"):
+            return
+        if self.lv["status"] == "OPENING":
+            if not self.rail.cancel_ref(mk["last_order"]["ref"]):
+                self.lv["last_why"] = "maker cancel not yet acknowledged"; return
+        if not self._reconcile_live(force=True):
+            return
+        if self.lv["status"] == "OPEN":
+            self._manage_open(snap, hm)  # a cancellation race can fill; manage on this tick
+            return
+        if self.lv["status"] == "NO_FILL":
+            # Cancellation/reconciliation can surface changed caps or a HALT.
+            if not self._maker_permission(snap, hm):
+                mk.setdefault("stop_reason", self.lv["last_why"])
+            if not mk.get("stop_reason") and mk["attempt"] < len(mk["ladder"]):
+                self._maker_post(snap)              # journal -> OPENING again
+                return
+            mk["finished"] = True
+            self.lv["why"] = mk.get("stop_reason") or f"no maker fill after {mk['attempt']} post(s) at {mk['ladder'][:mk['attempt']]} (touch {mk['touch']})"
+            self._record_live()
 
     # ---- live ------------------------------------------------------------------------------
     def _ctx(self, snap: dict, hm) -> dict:
@@ -298,6 +441,8 @@ class Session:
     def _journal_order(self, order: dict) -> None:
         self.lv.setdefault("orders", []).append(order)
         self.lv["status"] = "OPENING" if order["action"] == "BUY" else "CLOSING"
+        if order["action"] == "BUY" and self.lv.get("maker"):
+            self.lv["maker"]["last_order"] = {"ref": order["ref"], "order_id": order["order_id"], "status": "INTENT"}
         # This survives a crash before the next tick, including a restart on a
         # later trading date whose session uses a different checkpoint file.
         # Both checkpoint and ledger must succeed before broker submission.
@@ -373,8 +518,14 @@ class Session:
                    accounting_status=status, settlement=self.lv.get("settlement"), manual_resolution=self.lv.get("manual_resolution"))
         self._persist_live_row(row)
 
-    def _entry_risk_ok(self, snap: dict, hm) -> bool:
-        ok, reasons, pause = R.live_gates(_envelope(), read_live(), self._ctx(snap, hm))
+    def _entry_risk_ok(self, snap: dict, hm, *, continuing: bool = False) -> bool:
+        ledger = read_live(); ctx = self._ctx(snap, hm)
+        if continuing:
+            # This is another post for the SAME reconciled structure, not a new
+            # daily allowance. Keep every other session's accounting/caps.
+            ledger = [r for r in ledger if not (r.get("date") == self.date and r.get("template") == LIVE_TEMPLATE)]
+            ctx["structures_today"] = 0
+        ok, reasons, pause = R.live_gates(_envelope(), ledger, ctx)
         if pause:
             _set_envelope(status="PAUSED", paused=f"{self.date}: {pause}")
             _mail(f"ODTE envelope PAUSED — {pause}", "Re-ratify in chat to re-arm.")
@@ -414,26 +565,50 @@ class Session:
                 self.lv["last_why"] = self.lv.get("reconciliation_error") or f"state {self.lv['status']} at entry"; return
             if not self._entry_risk_ok(snap, hm):
                 return
+            policy = {"follow": LIVE_POLICY["follow"], "execution": LIVE_POLICY["execution"]}
+            if LIVE_POLICY["follow"] == "arm_selector":
+                decision = self._arm_decision(c, snap); policy["decision"] = decision
+                if not decision["take"]:
+                    self.lv.update(status="SKIPPED", why=decision["why"], policy=policy)
+                    print(f"[odte] LIVE stands down: {decision['why']}")
+                    self._record_live(); return
             self.lv.update(legs=c["legs"], credit_asked=c["credit"], entry_ts=snap["ts"],
-                           max_loss_usd=c["max_loss_usd"], max_cost=c["credit"])
+                           max_loss_usd=c["max_loss_usd"], max_cost=c["credit"], policy=policy)
+            if LIVE_POLICY["execution"] == "maker":
+                mid = mid_credit(c["legs"], rows); ladder, mode = self._maker_ladder(c["credit"], mid)
+                self.lv["maker"] = {"touch": c["credit"], "mid": mid, "ladder": ladder, "mode": mode, "attempt": 0}
+                self._maker_post(snap)
+                return
             self.lv["open_order"] = self.rail.open_condor(c["legs"], c["credit"])
             self._reconcile_live(force=True)
+        elif self.lv["status"] in {"OPENING", "NO_FILL"} and self.lv.get("maker"):
+            self._maker_tick(snap, hm)
         elif self.lv["status"] == "OPEN":
-            kill = R.flatten_now(ctx)
-            m = manage({"credit": self.lv["credit"], "legs": self.lv["legs"]}, rows, hm,
-                       t["stop_mult"], tuple(t["time_exit_et"]))
-            if m.get("cost") is not None:
-                self.lv["max_cost"] = max(self.lv.get("max_cost", 0.), m["cost"])
-            if kill or m["action"] in ("CLOSE_STOP", "CLOSE_TIME"):
-                if hm >= SETTLE_ET:
-                    self.lv["last_why"] = "awaiting broker settlement reconciliation"; return
-                if m.get("cost") is None and not kill:
-                    self.lv["last_why"] = "no fresh live quotes for exit"; return
-                self.lv.update(exit_ts=snap["ts"], exit_reason=("KILL:" + kill) if kill else m["action"])
-                self.lv["close_order"] = self.rail.close_condor(
-                    self.lv["legs"], m["cost"] if m.get("cost") is not None else .05,
-                    quantity=self.lv["remaining"])
-                self._reconcile_live()
+            self._manage_open(snap, hm)
+
+    def _manage_open(self, snap: dict, hm) -> None:
+        t = TEMPLATES[LIVE_TEMPLATE]; ctx = self._ctx(snap, hm)
+        rows = [r for r in snap.get("rows", []) if r.get("live_eligible")]
+        mk = self.lv.get("maker")
+        if mk and self.lv.get("maker_edge") is None and self.lv.get("credit") is not None:
+            # the resting post filled between ticks: book the maker edge before managing
+            self.lv["maker_edge"] = round(float(self.lv["credit"]) - mk["touch"], 2)
+            print(f"[odte] LIVE OPEN (maker) credit {self.lv['credit']} vs touch {mk['touch']} edge {self.lv['maker_edge']:+.2f}")
+        kill = R.flatten_now(ctx)
+        m = manage({"credit": self.lv["credit"], "legs": self.lv["legs"]}, rows, hm,
+                   t["stop_mult"], tuple(t["time_exit_et"]))
+        if m.get("cost") is not None:
+            self.lv["max_cost"] = max(self.lv.get("max_cost", 0.), m["cost"])
+        if kill or m["action"] in ("CLOSE_STOP", "CLOSE_TIME"):
+            if hm >= SETTLE_ET:
+                self.lv["last_why"] = "awaiting broker settlement reconciliation"; return
+            if m.get("cost") is None and not kill:
+                self.lv["last_why"] = "no fresh live quotes for exit"; return
+            self.lv.update(exit_ts=snap["ts"], exit_reason=("KILL:" + kill) if kill else m["action"])
+            self.lv["close_order"] = self.rail.close_condor(
+                self.lv["legs"], m["cost"] if m.get("cost") is not None else .05,
+                quantity=self.lv["remaining"])
+            self._reconcile_live()
 
     def _finish_live(self, snap: dict) -> None:
         # A last market quote is not an execution or broker cash settlement.
@@ -450,6 +625,8 @@ class Session:
                 "pnl_usd": pnl, "reason": reason, "why": self.lv.get("reconciliation_error") or self.lv.get("why") or self.lv.get("last_why"),
                 "legs": self.lv.get("legs"), "entry_ts": self.lv.get("entry_ts"), "exit_ts": self.lv.get("exit_ts"),
                 "first30_range": sess.get("first30_range"), "vix1d_open": sess.get("vix1d_open"),
+                "policy": self.lv.get("policy"), "maker": {k: v for k, v in (self.lv.get("maker") or {}).items() if k != "last_order"} or None,
+                "maker_edge": self.lv.get("maker_edge"),
                 "recorded_utc": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds")}
 
     def _mail_card(self) -> None:

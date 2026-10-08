@@ -87,6 +87,22 @@ TEMPLATES = {
 LIVE_TEMPLATE = "T3_BLACKOUT"
 BENCHMARK_TEMPLATE = "T1_MECH"
 
+# Optional live execution follows a sealed research selection; --live remains explicit.
+# The initial order must match the decision's date, protocol, entry timestamp,
+# snapshot digest, legs, quotes, credit and maximum risk. Missing/skip/mismatched
+# decisions stand down. Calibration is tracked; predictive skill is not assumed.
+# Maker entry posts at mid, waits MAKER_PATIENCE_S, then allows one lower post
+# after confirmed cancellation and fresh entry-risk checks. Never retry an
+# unacknowledged intent. Stops and time exits use the existing marketable ladder.
+# Actual fills versus touch are descriptive execution observations, not an
+# arm promotion or evidence of positive expectancy.
+LIVE_POLICY = {"follow": "arm_selector", "fallback": "stand_down", "execution": "maker"}
+MAKER_PATIENCE_S = 120
+MAKER_STEP = 0.01
+MAKER_RETRIES = 1
+MAKER_EXIT_PATIENCE_S = 30
+MIN_MAKER_IMPROVEMENT = 0.01   # if mid - touch < this there is nothing to earn: post at the touch
+
 
 def template_hash(name: str) -> str:
     return hashlib.sha256(json.dumps(TEMPLATES[name], sort_keys=True, default=str).encode()).hexdigest()[:16]

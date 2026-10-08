@@ -93,13 +93,25 @@ is a review checkpoint, not demonstrated statistical power or tail coverage.
 limitations and missing studies. [ODTE.md](../../ODTE.md) gives the commands to
 run the sequence. The research reports never route orders or enable live mode.
 
+## Additional theses: implementation boundary
+
+| Thesis | Implemented machinery | What must run / what is missing |
+|---|---|---|
+| Patient XSP maker entry | Optional live maker state machine: mid entry, 120-second patience, at most one repost, durable recovery, fresh risk checks, fill rate and credit versus touch/shadow. | A shadow-only daemon cannot observe actual maker fills. Live execution needs its own explicit authorization and launch. Quote improvement alone is not a net-return or adverse-selection study. |
+| Pre-print single-stock catalyst options | Existing desk calls freeze event probabilities and may record an implied-probability anchor. | **Not an implemented options trade experiment.** It still needs a prospective selection/entry/exit protocol, dated option contracts and executable quotes, a defined-risk payoff and cost model, preserved skips/missing quotes, and matched outcome grading. XSP arm tests do not cover it. |
+| Avoid index tail sessions with text | News-factor arms plus a matched premarket text/no-text/numerical trial, sealed decisions, stop/severe-loss labels, Brier and paired economic scoring. | Registered sources, the scheduled forecast worker before its deadline, and a complete candidate/exit quote path. Missing or late work stays unavailable. |
+
+The README describes available code, not which mode a particular machine is
+running. Inspect the daemon command, active manifests and scheduler to determine
+whether any of these studies will actually collect data.
+
 ## Execution and grading invariants
 
 The live runner must be launched explicitly by the principal. Unit tests do not
 connect to a Gateway or submit orders. Run the regression suite with:
 
 ```sh
-python -m pytest --offline -q tests/test_odte.py tests/test_odte_execution.py tests/test_odte_data_quality.py tests/test_odte_fixes.py tests/test_odte_text_overlay.py tests/test_odte_arms.py tests/test_odte_research_health.py tests/test_odte_edge_trial.py
+python -m pytest --offline -q tests/test_odte*.py
 ```
 
 Use the same interpreter for validation and the runner. Python 3.12 is the
@@ -223,6 +235,49 @@ pending with the reserve until reconciled from an available source. The overnigh
 tests use a fresh connection with empty local caches and the midnight cutoff.
 Tests requiring a wider TWS history or a completed-order reply declare it explicitly.
 
+## Optional live policy and review safeguards
+
+Live mode requires its own explicit launch and authorization. When enabled,
+`LIVE_POLICY` follows the sealed arm selection and uses a maker entry. Paper
+registrations and reports never enable live mode or promote an arm.
+
+The initial live candidate must match the sealed decision's protocol, date,
+entry timestamp, snapshot digest, legs, quotes, credit and maximum risk.
+Missing, unavailable, skipped or mismatched decisions stand down. Matching
+contract IDs alone cannot authorize a later opportunity. The selector is
+uniform during warmup; following it does not establish a profitable strategy.
+
+Maker entries post at the leg mids when available, wait `MAKER_PATIENCE_S`, and
+allow at most one lower post after terminal cancellation acknowledgement.
+Every resting-order tick and each repost recheck HALT, envelope status, loss
+caps, volatility, the entry window and live quote eligibility. Failed permission
+cancels the entry and latches a stand-down across restarts. A fill racing the
+cancellation is reconciled and managed on the same tick. Broker reconciliation
+and cancellation waits are bounded but can delay capture.
+
+Attempt count, posted price/time and order reference are checkpointed with the
+order intent before submission. Recovery does not require the broker call to
+have returned. Legacy incomplete maker checkpoints recover the reference from
+the durable intent, cancel and stand down. An unacknowledged intent is never
+assumed unsubmitted and never blindly resent. A reconnected rail repeats its
+what-if margin check before any replacement.
+
+`live.execution` reports maker fill rate, filled credit versus entry touch and
+shadow credit, selected arms and stand-downs. These observations are descriptive;
+missed fills, fees and adverse selection still matter. Stops and time exits use
+the existing marketable exit ladder.
+
+On a stale-session sweep, an open shadow trade stays `UNRESOLVED`. An unfinished
+entry window is `data_unavailable`, even if an earlier tick deliberately skipped:
+that skip cannot prove the strategy would have stayed in cash through the window.
+Historical finalized records are not rewritten by this fix.
+
+`test_odte_live_policy.py` and `test_odte_live_policy_regressions.py` cover the
+selector, resting-order gates, cancellation races, crash recovery, opportunity
+lineage and collector gaps with synthetic brokers and quotes. Source changes to
+frozen dependencies require an unused directory and a new future registration;
+retain old manifests, observations and their source snapshot intact.
+
 ## Research comparison
 
 Observed, deliberate blackout/regime abstentions carry `skip_kind=strategy_cash`.
@@ -235,8 +290,9 @@ a gross simulation, not a forecast of after-fee performance.
 
 ## Prospective LLM forecast experiment
 
-`text_overlay` is a separate, opt-in, paper-only experiment. Its observer runs
-after ordinary broker management, records local data, and cannot place orders.
+`text_overlay` is a separate, opt-in, paper-only experiment. Research observers
+run before optional live entry so that the decision is sealed first. They record
+local data and cannot place orders; observer failures do not block management.
 The forecast worker uses the existing intelligence interface. Local offices
 default to signed-in Codex; hosted offices use their configured API provider.
 Provider, requested model, reasoning level, prompt, rules, costs, code hash and
